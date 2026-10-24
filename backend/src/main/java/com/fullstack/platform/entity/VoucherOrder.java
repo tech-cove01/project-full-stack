@@ -42,10 +42,28 @@ public class VoucherOrder implements Serializable {
      */
     private Long voucherId;
 
+    /** Shop snapshot; merchant access is checked against this value. */
+    private Long shopId;
+
     /**
      * 支付方式 1：余额支付；2：支付宝；3：微信
      */
     private Integer payType;
+
+    /** Purchase price snapshot in cents; never read from the client. */
+    private Long payAmount;
+
+    /** Redemption window and payment deadline snapshots. */
+    private LocalDateTime redeemBeginTime;
+    private LocalDateTime redeemEndTime;
+    private LocalDateTime payDeadlineAt;
+
+    private LocalDateTime cancelTime;
+    private String cancelReason;
+    private String redeemToken;
+
+    /** Incremented once per successful business transition. */
+    private Integer version;
 
     /**
      * 订单状态，1：未支付；2：已支付；3：已核销；4：已取消；5：退款中；6：已退款

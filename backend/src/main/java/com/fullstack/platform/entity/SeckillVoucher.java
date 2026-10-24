@@ -32,10 +32,30 @@ public class SeckillVoucher implements Serializable {
     @TableId(value = "voucher_id", type = IdType.INPUT)
     private Long voucherId;
 
+    /** Snapshot of the owning merchant, used for publish idempotency. */
+    private Long merchantId;
+
     /**
      * 库存
      */
     private Integer stock;
+
+    /** Initial total stock; stock never exceeds this value. */
+    private Integer totalStock;
+
+    /** INITIALIZING / ACTIVE / OFFLINE. */
+    private String publishStatus;
+
+    /** Monotonic version used by the Redis admission gate. */
+    private Integer publishVersion;
+
+    /** Redemption window snapshot; independent from the sale window. */
+    private LocalDateTime redeemBeginTime;
+    private LocalDateTime redeemEndTime;
+
+    /** Client idempotency key and canonical request hash. */
+    private String publishRequestKey;
+    private String publishRequestHash;
 
     /**
      * 创建时间

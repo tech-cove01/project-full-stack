@@ -60,6 +60,7 @@ onBeforeUnmount(() => {
             >探索附近</RouterLink
           >
           <RouterLink to="/merchant" active-class="active">商家工作台</RouterLink>
+          <RouterLink v-if="auth.loggedIn" to="/orders" active-class="active">我的订单</RouterLink>
           <RouterLink
             v-if="lastOrder && auth.loggedIn"
             :to="`/orders/${lastOrder}`"

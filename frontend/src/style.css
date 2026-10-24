@@ -696,3 +696,90 @@ nav a.active {
     border-radius: 12px;
   }
 }
+/* P1 merchant and order pages */
+.status-symbol.paid {
+  background: #e2f1e7;
+  color: #388160;
+}
+.status-symbol.processing {
+  background: #f6ebd8;
+  color: #ba8a34;
+}
+.order-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px 22px;
+  margin: 18px 0;
+  color: #52685f;
+  font-size: 14px;
+}
+.redeem-token {
+  margin: 22px auto;
+  padding: 20px;
+  max-width: 520px;
+  border: 1px dashed #9fc0b8;
+  border-radius: 12px;
+  background: #f3f8f6;
+  text-align: left;
+}
+.redeem-token .eyebrow {
+  display: block;
+  margin-bottom: 8px;
+}
+.redeem-token code {
+  display: block;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.redeem-token p {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+.merchant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.merchant-actions .el-button {
+  margin-left: auto;
+}
+.merchant-actions .text-link + .text-link {
+  margin-left: 4px;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 16px;
+}
+.redeem-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .merchant-actions .el-button {
+    margin-left: 0;
+  }
+}

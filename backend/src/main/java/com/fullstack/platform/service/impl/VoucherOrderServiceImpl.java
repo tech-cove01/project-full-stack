@@ -172,8 +172,10 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             return true;
         } catch (OrderRejectedException rejected) {
             redis.execute(REJECT_SCRIPT, List.of(key, "seckill:stock:" + order.getVoucherId(),
-                            "seckill:order:" + order.getVoucherId()),
-                    order.getUserId().toString(), rejected.getMessage(), rejected.keepPurchaseMarker() ? "1" : "0");
+                            "seckill:order:" + order.getVoucherId(),
+                            "seckill:accepted:" + order.getVoucherId()),
+                    order.getUserId().toString(), rejected.getMessage(),
+                    rejected.keepPurchaseMarker() ? "1" : "0", order.getId().toString());
             acknowledge(record);
             return true;
         } catch (Exception retryable) {
@@ -228,26 +230,50 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         if (voucher == null || voucher.getBeginTime() == null || voucher.getEndTime() == null) {
             return Result.fail("活动不存在或时间配置不完整");
         }
+        if (!"ACTIVE".equals(voucher.getPublishStatus())) {
+            return Result.fail("活动尚未发布或已下架");
+        }
         LocalDateTime now = LocalDateTime.now(BUSINESS_ZONE);
         if (now.isBefore(voucher.getBeginTime())) return Result.fail("活动尚未开始");
         if (!now.isBefore(voucher.getEndTime())) return Result.fail("活动已经结束");
 
         Long userId = UserHolder.getUser().getId();
         String orderId = Long.toString(redisIdWorker.nextId("order"));
-        Long result = redis.execute(SECKILL_SCRIPT, Collections.emptyList(), voucherId.toString(),
+        int publishVersion = voucher.getPublishVersion() == null ? 0 : voucher.getPublishVersion();
+        List<String> keys = List.of(
+                "seckill:gate:" + voucherId,
+                "seckill:stock:" + voucherId,
+                "seckill:begin:" + voucherId,
+                "seckill:end:" + voucherId,
+                "seckill:order:" + voucherId,
+                RESERVATION_PREFIX + orderId,
+                "seckill:accepted:" + voucherId,
+                STREAM);
+        Long result = redis.execute(SECKILL_SCRIPT, keys, voucherId.toString(),
                 userId.toString(), orderId, Long.toString(System.currentTimeMillis()),
                 Long.toString(voucher.getBeginTime().atZone(BUSINESS_ZONE).toInstant().toEpochMilli()),
-                Long.toString(voucher.getEndTime().atZone(BUSINESS_ZONE).toInstant().toEpochMilli()));
+                Long.toString(voucher.getEndTime().atZone(BUSINESS_ZONE).toInstant().toEpochMilli()),
+                Integer.toString(publishVersion));
         if (result == null) return Result.fail("系统繁忙，请稍后再试");
         return switch (result.intValue()) {
             case 0 -> Result.ok(orderId);
             case 1 -> Result.fail("库存不足");
-            case 2 -> Result.fail("不能重复下单");
+            case 2, 8 -> acceptedOrder(userId, voucherId);
             case 3 -> Result.fail("活动库存尚未就绪");
             case 4 -> Result.fail("活动尚未开始");
             case 5 -> Result.fail("活动已经结束");
+            case 7 -> Result.fail("活动尚未就绪或已下架");
             default -> Result.fail("系统繁忙，请稍后再试");
         };
+    }
+
+    /** A retry of an accepted request returns the original order ID, never a second reservation. */
+    private Result acceptedOrder(Long userId, Long voucherId) {
+        Object accepted = redis.opsForHash().get("seckill:accepted:" + voucherId, userId.toString());
+        if (accepted != null) {
+            return Result.ok(accepted.toString());
+        }
+        return Result.fail("不能重复下单");
     }
 
     @Override

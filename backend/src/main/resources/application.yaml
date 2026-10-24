@@ -42,6 +42,7 @@ management:
     health:
       show-details: never
 app:
+  pay-timeout-minutes: ${PAY_TIMEOUT_MINUTES:15}
   upload-dir: ${UPLOAD_DIR:./uploads}
   cache:
     shop-max-size: ${SHOP_CACHE_MAX_SIZE:10000}

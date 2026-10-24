@@ -1,4 +1,14 @@
-import type { MerchantWorkspace, OrderStatus, Result, Shop, User, Voucher } from './types'
+import type {
+  Activity,
+  AuditLog,
+  MerchantOrder,
+  MerchantWorkspace,
+  OrderStatus,
+  Result,
+  Shop,
+  User,
+  Voucher,
+} from './types'
 
 export const TOKEN_KEY = 'cityloop.token'
 export const LAST_ORDER_KEY = 'cityloop.last-order'
@@ -41,10 +51,14 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<Resu
       throw new ApiError('登录已失效，请重新登录。', 401)
     }
     if (!response.ok) {
-      throw new ApiError(
-        `服务暂时无法处理请求（${response.status}），请稍后重试。`,
-        response.status,
-      )
+      let message = `服务暂时无法处理请求（${response.status}），请稍后重试。`
+      try {
+        const body = (await response.json()) as Result<unknown>
+        if (body.errorMsg) message = body.errorMsg
+      } catch {
+        /* ignore non-JSON error bodies */
+      }
+      throw new ApiError(message, response.status)
     }
     const result = (await response.json()) as Result<T>
     if (!result.success) throw new ApiError(result.errorMsg || '操作未完成，请稍后重试。')
@@ -86,8 +100,60 @@ export const api = {
     request<string>(`/voucher-order/seckill/${encodeURIComponent(voucherId)}`, { method: 'POST' }),
   order: (id: string, signal?: AbortSignal) =>
     request<OrderStatus>(`/voucher-order/${encodeURIComponent(id)}`, { signal }),
+  myOrders: (current: number, pageSize: number, signal?: AbortSignal) =>
+    request<OrderStatus[]>(`/voucher-order?current=${current}&pageSize=${pageSize}`, { signal }),
+  payOrder: (id: string) =>
+    request<OrderStatus>(`/voucher-order/${encodeURIComponent(id)}/pay`, { method: 'POST' }),
+  cancelOrder: (id: string, reason = 'USER_CANCEL') =>
+    request<OrderStatus>(
+      `/voucher-order/${encodeURIComponent(id)}/cancel?reason=${encodeURIComponent(reason)}`,
+      { method: 'POST' },
+    ),
   workspace: (signal?: AbortSignal) =>
     request<MerchantWorkspace>('/merchant/workspace', { signal }),
+  activities: (current: number, pageSize: number, signal?: AbortSignal) =>
+    request<Activity[]>(
+      `/merchant/activities?current=${current}&pageSize=${pageSize}`,
+      { signal },
+    ),
+  createActivity: (body: unknown, idempotencyKey: string) =>
+    request<Activity>('/merchant/activities', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'Idempotency-Key': idempotencyKey },
+    }),
+  retryActivity: (id: string) =>
+    request<Activity>(`/merchant/activities/${encodeURIComponent(id)}/retry-publication`, {
+      method: 'POST',
+    }),
+  offlineActivity: (id: string) =>
+    request<Activity>(`/merchant/activities/${encodeURIComponent(id)}/offline`, {
+      method: 'POST',
+    }),
+  merchantOrders: (
+    params: { current: number; pageSize: number; shopId?: string; status?: string },
+    signal?: AbortSignal,
+  ) => {
+    const query = new URLSearchParams({
+      current: String(params.current),
+      pageSize: String(params.pageSize),
+    })
+    if (params.shopId) query.set('shopId', params.shopId)
+    if (params.status) query.set('status', params.status)
+    return request<MerchantOrder[]>(`/merchant/orders?${query.toString()}`, { signal })
+  },
+  redeem: (shopId: string, token: string) =>
+    request<{ order: MerchantOrder; alreadyRedeemed: boolean }>('/merchant/orders/redeem', {
+      method: 'POST',
+      body: JSON.stringify({ shopId, token }),
+    }),
+  refundOrder: (orderId: string, reason: string) =>
+    request<MerchantOrder>(`/merchant/orders/${encodeURIComponent(orderId)}/refund`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
+    }),
+  audits: (current: number, pageSize: number, signal?: AbortSignal) =>
+    request<AuditLog[]>(`/merchant/audits?current=${current}&pageSize=${pageSize}`, { signal }),
 }
 
 export function money(cents: number | string | null | undefined): string {

@@ -13,9 +13,10 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.ZoneId;
+import java.util.Map;
 
-import static com.fullstack.platform.utils.RedisConstants.SECKILL_STOCK_KEY;
-import static com.fullstack.platform.utils.RedisConstants.SHOP_GEO_KEY;
+import static com.fullstack.platform.utils.RedisConstants.*;
+
 
 /** Seeds Redis from the local demo database without resetting live reservations. */
 @Component
@@ -39,10 +40,19 @@ public class DevDataInitializer implements ApplicationRunner {
         for (SeckillVoucher voucher : vouchers.list()) {
             String id = voucher.getVoucherId().toString();
             redis.opsForValue().setIfAbsent(SECKILL_STOCK_KEY + id, voucher.getStock().toString());
-            redis.opsForValue().setIfAbsent("seckill:begin:" + id,
+            redis.opsForValue().setIfAbsent(SECKILL_BEGIN_KEY + id,
                     Long.toString(voucher.getBeginTime().atZone(BUSINESS_ZONE).toInstant().toEpochMilli()));
-            redis.opsForValue().setIfAbsent("seckill:end:" + id,
+            redis.opsForValue().setIfAbsent(SECKILL_END_KEY + id,
                     Long.toString(voucher.getEndTime().atZone(BUSINESS_ZONE).toInstant().toEpochMilli()));
+            // Existing ACTIVE activities need a gate after a Redis flush; never reopen a closed one.
+            if ("ACTIVE".equals(voucher.getPublishStatus())) {
+                String gateKey = SECKILL_GATE_KEY + id;
+                if (Boolean.FALSE.equals(redis.hasKey(gateKey))) {
+                    int version = voucher.getPublishVersion() == null ? 1 : voucher.getPublishVersion();
+                    redis.opsForHash().putAll(gateKey, Map.of("state", "OPEN",
+                            "version", Integer.toString(version)));
+                }
+            }
         }
     }
 }

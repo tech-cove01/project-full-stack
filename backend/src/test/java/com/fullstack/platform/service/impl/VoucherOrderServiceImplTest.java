@@ -68,7 +68,7 @@ class VoucherOrderServiceImplTest {
     void futureActivityCannotEnqueueAnOrder() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Shanghai"));
         when(vouchers.getById(20L)).thenReturn(new SeckillVoucher().setBeginTime(now.plusHours(1))
-                .setEndTime(now.plusHours(2)));
+                .setEndTime(now.plusHours(2)).setPublishStatus("ACTIVE").setPublishVersion(1));
         assertEquals("活动尚未开始", service.seckillVoucher(20L).getErrorMsg());
         verifyNoInteractions(ids, redis);
     }
@@ -77,7 +77,7 @@ class VoucherOrderServiceImplTest {
     void completedActivityCannotEnqueueAnOrder() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Shanghai"));
         when(vouchers.getById(20L)).thenReturn(new SeckillVoucher().setBeginTime(now.minusHours(2))
-                .setEndTime(now.minusHours(1)));
+                .setEndTime(now.minusHours(1)).setPublishStatus("ACTIVE").setPublishVersion(1));
         assertEquals("活动已经结束", service.seckillVoucher(20L).getErrorMsg());
         verifyNoInteractions(ids, redis);
     }
@@ -86,7 +86,7 @@ class VoucherOrderServiceImplTest {
     void acceptedOrderReturnsStringIdWithoutClaimingDatabaseCreation() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Shanghai"));
         when(vouchers.getById(20L)).thenReturn(new SeckillVoucher().setBeginTime(now.minusHours(1))
-                .setEndTime(now.plusHours(1)));
+                .setEndTime(now.plusHours(1)).setPublishStatus("ACTIVE").setPublishVersion(1));
         when(ids.nextId("order")).thenReturn(9_007_199_254_740_993L);
         when(redis.execute(any(RedisScript.class), anyList(), any(Object[].class))).thenReturn(0L);
         Result result = service.seckillVoucher(20L);

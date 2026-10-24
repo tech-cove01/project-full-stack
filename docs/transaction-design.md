@@ -12,10 +12,12 @@
 
 ## 2. 固定领域规则
 
+> 2026-10-24 规则变更：原“每用户每活动终身限购”改为“同时限购”。未支付取消/超时后可重新购买；已支付退款后仍占用资格、不可重买。数据库以 `UNIQUE(user_id, voucher_id, active_flag)` 兜底，详见下文。
+
 | 项目 | 首版决策 |
 | --- | --- |
 | 购买单位 | 一单一张券，不接受客户端数量或金额 |
-| 限购 | 每用户每活动终身最多一张已创建的 DB 订单；取消、退款后仍不能重买 |
+| 限购 | 每用户每活动同时最多一张有效订单（orderStatus 1/2/3）；未支付取消后可重新购买，已支付退款后不可重买 |
 | 预约失败 | 只有 Redis 受理、确定 DB 无订单且落单明确失败时，可退预约库存并释放资格；结果未知时不释放 |
 | 金额 | 以分为单位；`pay_value/payValue` 是购买价格，`actual_value/actualValue` 是抵扣面值，订单 `pay_amount` 快照购买价格，不使用前端价格 |
 | 支付期限 | 默认落单后 15 分钟，可由配置调整；写入订单快照，配置变动不改变旧单期限 |
@@ -24,7 +26,7 @@
 | 支付截止 | `pay_deadline_at = min(DB 落单时间 + 配置期限, redeem_end_time)`；截止时刻开始拒绝支付并允许关单 |
 | 退款 | 已支付、未核销且当前时间早于核销结束时间，OWNER/MANAGER 可执行整单模拟退款；不等待核销期开始 |
 | 过期 | 已支付订单过期不自动改为退款，也不再核销或退款；需后续售后规则时另开范围 |
-| 库存回补 | 取消、退款均只恢复一次 DB 库存和对应 Redis 库存；保留已创建订单的购买资格标记 |
+| 库存回补 | 取消、退款均只恢复一次 DB 库存和对应 Redis 库存；取消释放资格标记，退款保留资格标记 |
 | 不可售库存 | 活动结束、下架后发生补偿，只恢复账面剩余量，不能重新变成可售活动 |
 | 活动变更 | 发布请求确定后不修改库存、售价、门店和各时间；下架后不恢复 |
 
@@ -81,13 +83,13 @@ DB 会话、Java 时间转换与 API 序列化统一使用 `Asia/Shanghai`；Red
 | 表 | 新增或调整 |
 | --- | --- |
 | `tb_seckill_voucher` | `total_stock` 初始总量；`publish_status` 为 `INITIALIZING/ACTIVE/OFFLINE`；`publish_version` 单调版本；独立核销起止时间；`publish_request_key` 和请求摘要用于发布重试；保留现有销售起止时间及剩余 `stock` |
-| `tb_voucher_order` | `shop_id`、`pay_amount`、核销起止时间快照、`pay_deadline_at`、`cancel_time`、`cancel_reason`、`redeem_token VARCHAR(64)`、`version`；保留既有支付/核销/退款时间与唯一限购约束 |
+| `tb_voucher_order` | `shop_id`、`pay_amount`、核销起止时间快照、`pay_deadline_at`、`cancel_time`、`cancel_reason`、`redeem_token VARCHAR(64)`、`version`、`active_flag` 生成列；保留既有支付/核销/退款时间 |
 | `tb_audit_log` | 增加 `operator_type` 区分 USER/MERCHANT/SYSTEM；成功动作同事务写入；系统关单使用明确系统身份，不能伪造普通用户 |
 | `tb_outbox` | `id` 自增主键、`event_id` 唯一事件标识、资源类型/ID/版本、事件类型、JSON 载荷、投递状态、尝试次数、下次重试时间、租约到期时间、最近错误、创建/完成时间 |
 
 必要索引与约束：
 
-- 保留 `UNIQUE(user_id, voucher_id)`；`UNIQUE(redeem_token)`，未支付单允许 NULL。
+- 用 `UNIQUE(user_id, voucher_id, active_flag)` 替代原 `UNIQUE(user_id, voucher_id)`：`active_flag` 为存储生成列，`status=4`（CANCELLED）时为 NULL，其余为 1。这样同一用户同一活动同时只有一笔有效订单，取消后可重购；退款（status=6）仍占用资格。`UNIQUE(redeem_token)`，未支付单允许 NULL。
 - 订单增加 `(status, pay_deadline_at, id)`，以及 `(shop_id, create_time, id)`；本人列表使用既有用户时间索引并以 ID 作稳定次序。
 - 发布请求键按商家唯一。若放在活动表，增加商家 ID 快照并设 `UNIQUE(merchant_id, publish_request_key)`，门店与商家归属由服务端校验；相同键不同摘要报冲突。
 - outbox 使用唯一事件 ID，并以 `(aggregate_type, aggregate_id, aggregate_version, event_type)` 防止同一转换重复生成事件；增加 `(delivery_status, next_attempt_at, id)` 索引。
@@ -219,9 +221,9 @@ Compose 初始化 SQL 只在空卷运行。已有卷使用明确的版本化迁�
 | 动作 | 变更条件与同事务效果 |
 | --- | --- |
 | 模拟支付 | 本人、`status=1` 且 DB 当前时间小于支付截止；改 2、写 pay_time、生成 token、审计、outbox |
-| 主动取消/自动关单 | 本人取消，或 SYSTEM 且已到期；`status=1` 改 4、写原因/时间、DB 库存 +1、审计、outbox |
+| 主动取消/自动关单 | 本人取消，或 SYSTEM 且已到期；`status=1` 改 4、写原因/时间、DB 库存 +1、审计、outbox（释放资格标记） |
 | 核销 | 授权门店、匹配 token、`status=2` 且核销期内；改 3、写 use_time、审计、outbox |
-| 模拟退款 | OWNER/MANAGER、所属门店、`status=2` 且未到核销结束时间；改 6、写 refund_time、DB 库存 +1、审计、outbox |
+| 模拟退款 | OWNER/MANAGER、所属门店、`status=2` 且未到核销结束时间；改 6、写 refund_time、DB 库存 +1、审计、outbox（保留资格标记） |
 
 订单版本在每次成功转换时递增；每次转换只创建一个唯一业务事件。状态变化成功而审计或 outbox 插入失败时，整笔事务回滚。审计操作人由登录上下文或可信系统任务上下文确定，不能从请求体接收。
 
@@ -229,7 +231,7 @@ Compose 初始化 SQL 只在空卷运行。已有卷使用明确的版本化迁�
 
 ### 8.3 outbox relay
 
-每个 `ORDER_CHANGED` 事件携带事件 ID、订单 ID/版本、活动与门店、目标状态、库存回补量（取消/退款为 1，其余为 0）及必要追踪信息，不包含完整核销 token。
+每个 `ORDER_CHANGED` 事件携带事件 ID、订单 ID/版本、活动与门店、目标状态、库存回补量（取消/退款为 1，其余为 0）、是否释放 Redis 资格标记（取消为 true，退款为 false）及必要追踪信息，不包含完整核销 token。
 
 1. 短 DB 事务用 `FOR UPDATE SKIP LOCKED` 领取到期事件并记录租约；网络调用放在事务外。租约到期可被其他实例接管。
 2. Redis 效果使用 Lua 按事件 ID 去重；先验证键类型、活动代次和库存键存在，再完成回补及去重记录。重复投递返回已处理；事件存在于 DB，不能因 Redis 超时就丢弃。
@@ -258,7 +260,7 @@ DB 定时兜底查询 `status=1 AND pay_deadline_at<=DB当前时间`，按截止
 | 旧开放事件晚于下架事件 | 版本检查拒绝，不重新开闸 |
 | 库存/gate/代次缺失 | 拒绝新预约，输出差异并进入核对；不自动 SET DB 剩余量后开放 |
 
-静止且已处理完所有预约/补偿的活动应满足：`初始总库存 = DB剩余库存 + 状态1/2/3订单数`，且 Redis 剩余量与 DB 剩余量一致。活动关闭后 Redis 键若已归档，应单独标记无在线库存，不能假装数值一致。
+静止且已处理完所有预约/补偿的活动应满足：`初始总库存 = DB剩余库存 + 状态1/2/3订单数`，且 Redis 剩余量与 DB 剩余量一致；购买资格标记集合等于 orderStatus 1/2/3/6 的用户集合（4 在取消补偿完成后移除）。活动关闭后 Redis 键若已归档，应单独标记无在线库存，不能假装数值一致。
 
 只有相关异常和事件清单已枚举完整、且已确认各记录是否占用库存时，才能使用瞬时差异公式：`Redis剩余量 = DB剩余量 - DB无订单且Redis仍扣占的未释放预约数 - DB已回补但Redis尚未执行的数量`。未释放预约同时包括待落单预约和“已明确失败但补偿尚未执行”的预约，不能只统计正常 PROCESSING。核对必须列出预约、已创建订单、明确失败、待确认和补偿事件；未知提交结果、Redis 数据缺失或脚本局部写入不能完整分类时，单列未知差异并停止给出库存正确的结论，不能硬套公式。
 

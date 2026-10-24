@@ -64,3 +64,16 @@ P2 代码提交 `cf65fd2`；完整报告见 [P2 报告](evidence/2026-10-24-cf65
 - pending 接管：活动 `1022` 将 1 条消息投递给不 ACK 的假消费者（pending 1、DB 0），重启后新消费者 claim 并创建订单，库存 2、pending 0。
 - 负载模型发现：200 个 VU 同时建连时 100 个请求在 TCP 层被拒绝，未作为业务结果；后续改用 20 VU × 10 轮。具体限制层未定位。
 - 未执行：MySQL 短暂不可用、DB 提交结果未知、死信自动重放/对账页面、系统 CPU/内存/连接池指标、多实例、AI 验收。
+
+## P1-D AI 助手 MVP（Stub，2026-10-24 21:40）
+
+AI 后端提交 `803b9f6`、`6a59da6`，前端 `cbeef75`；完整报告见 [AI 证据](evidence/2026-10-24-cbeef75/ai/report.md)。
+
+- AI-01 PASS：`AI_ENABLED=false` 启动，capabilities 返回 `enabled=false/mode=disabled`；真实 MySQL/Redis 交易冒烟 PASS，AI 未阻塞交易。
+- AI-03/04 PASS（stub）：有据问题返回正确来源与引用；无据问题拒答且不发送 sources；A1/A2 门店规则按服务端门店过滤。
+- AI-05/06 PASS（部分）：本人订单工具返回实时状态且不含 token；手机号输入 400，他人会话 404，不存在订单不泄露信息。
+- AI-07 PASS（部分）：同会话并发 409；同消息 ID 同内容返回 cached、不同内容 409；TTL/预算未用可控时钟验证。
+- AI-08/09/10 PASS（有限）：草稿不可检索、发布后可检索、停用后不可检索；STAFF 只读已发布、跨店 403；注入未导致泄露或写操作。
+- AI-12 PASS（stub 页面）：商家创建→发布→助手检索来源→打开公开来源；助手“我的订单”显示实时卡片；截图见 AI 报告。
+- 真实 provider（AI-11/13/14）未执行：没有 Key；没有 30 问评测、Recall@K、真实 usage/费用、真实 429/超时/取消。
+- 与设计的已知差距：未引入 LangChain4j（自实现 OpenAI-compatible provider）、未使用 `InMemoryEmbeddingStore`（进程内精确扫描）、发布为请求内同步嵌入而非后台 worker。

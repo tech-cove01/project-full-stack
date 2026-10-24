@@ -19,7 +19,9 @@ $env:MYSQL_PORT = '3307'
 node scripts/migrate.mjs
 ```
 
-默认数据库名为 `project_full_stack`，用户 `fullstack`，密码为 `.env.example` 中的本地开发值。后端使用 `MYSQL_HOST/PORT/DATABASE/USER/PASSWORD`、`REDIS_HOST/PORT/PASSWORD/DATABASE` 环境变量。根目录 `.env` 仅由 Compose 自动读取，后端进程不会自动读取它。
+默认数据库名为 `project_full_stack`，用户 `fullstack`，密码为 `.env.example` 中的本地开发值。
+
+AI 助手默认关闭；关闭时交易不受影响。配置 `AI_ENABLED=true` 和 `AI_PROVIDER=stub` 可用确定性组件验证知识发布、检索、工具和 SSE；配置 `AI_PROVIDER=openai-compatible` 与 `AI_API_KEY/AI_BASE_URL/AI_CHAT_MODEL/AI_EMBEDDING_MODEL/AI_EMBEDDING_DIMENSIONS` 才调用真实模型。Key 只放在后端环境，不写入前端或仓库。后端使用 `MYSQL_HOST/PORT/DATABASE/USER/PASSWORD`、`REDIS_HOST/PORT/PASSWORD/DATABASE` 环境变量。根目录 `.env` 仅由 Compose 自动读取，后端进程不会自动读取它。
 
 应用默认使用 `dev`：返回模拟验证码并从演示数据库预热 Redis 活动库存与 GEO。预热使用 SETNX，不覆盖已有预约库存。部署时显式设置 `SPRING_PROFILES_ACTIVE=prod`、自己的连接参数和服务地址；真实短信服务尚未接入。
 
@@ -51,6 +53,13 @@ Docker 未运行时，可以进行后端单元测试和前端构建，真实 API
 | POST | `/merchant/orders/redeem` | 店员/店主凭 `{shopId, token}` 核销 |
 | POST | `/merchant/orders/{id}/refund` | 店主/管理者模拟退款 |
 | GET | `/merchant/audits` | 店主/管理者查看操作审计 |
+| GET | `/ai/capabilities` | AI 开关、provider 模式与就绪原因，不返回 Key |
+| POST | `/ai/conversations` | 新建本人会话 |
+| GET/DELETE | `/ai/conversations/{id}` | 本人历史/删除；他人 404 |
+| POST | `/ai/conversations/{id}/messages` | 携带 authorization 的 POST，返回 SSE 阶段事件 |
+| GET | `/ai/knowledge/{id}?version=` | 当前已发布公开来源 |
+| GET/POST | `/merchant/knowledge?shopId=` | 门店公开 FAQ 列表/新建草稿 |
+| PUT/POST | `/merchant/knowledge/{id}` 及 publish/disable/rebuild | 店主/管理者维护公开知识 |
 | GET | `/actuator/health` | 健康状态 |
 
 统一响应为 `{success,errorMsg?,data?,total?}`。`authorization` 请求头携带登录 Token；业务失败应读取 `success`，不能只判断 HTTP 200。订单 `state` 取 PROCESSING、CREATED 或 FAILED，业务订单状态另由 `orderStatus` 表示；数据库物理列仍为 `status`。

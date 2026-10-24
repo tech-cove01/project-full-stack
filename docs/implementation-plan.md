@@ -123,6 +123,8 @@ P0—P2 不新增 Kafka、RabbitMQ、Canal、OpenResty、Kubernetes、分库分�
 
 这是首版必需能力，排在交易与商家履约闭环之后；知识种子、页面和固定评测集可以提前并行准备。设计见 [AI 方案](ai-design.md)，逐项验收见 [AI 验收](ai-acceptance.md)。
 
+> 2026-10-24 状态：知识库、发布/停用、RAG、只读工具、Redis 会话、SSE 和前端页面已用 stub 完成确定性验证；真实 provider、LangChain4j 适配、后台索引 worker 和 30 问评测未完成。证据见 [AI 证据](evidence/2026-10-24-cbeef75/ai/report.md)。
+
 - [ ] P1D-01 保持现有 Java/Boot 版本，新增可开关的 LangChain4j 模块和模型适配。默认关闭 AI 仍能运行交易；真实模型参数/密钥只由后端配置。
 - [ ] P1D-02 准备平台 FAQ、门店公开规则种子；按最新业务契约生成取消/退款/核销说明，不把整本学习资料导入产品知识库。
 - [ ] P1D-03 实现清洗、分块、Embedding、带元数据检索与来源卡片；知识版本和向量持久化到 MySQL，重启可恢复；初期最多 2000 个片段。

@@ -94,6 +94,20 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         // Keep the consumer's unacknowledged messages reclaimable after a restart.
     }
 
+    /** Dev fault switch: stop reading new Stream messages without killing the API. */
+    public void pauseConsumer() {
+        running = false;
+        log.warn("Order consumer paused by dev switch");
+    }
+
+    /** Restart the consumer in the same JVM; pending messages are reclaimed by the normal path. */
+    public synchronized void resumeConsumer() {
+        if (running) return;
+        running = true;
+        executor.submit(this::consume);
+        log.warn("Order consumer resumed by dev switch");
+    }
+
     private void consume() {
         boolean initialized = false;
         long nextRecovery = 0;

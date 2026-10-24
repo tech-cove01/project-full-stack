@@ -1,6 +1,7 @@
 package com.fullstack.platform.config;
 
 import com.fullstack.platform.dto.Result;
+import com.fullstack.platform.ratelimit.RateLimitException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -10,6 +11,11 @@ import org.springframework.http.ResponseEntity;
 @Slf4j
 @RestControllerAdvice
 public class WebExceptionAdvice {
+
+    @ExceptionHandler(RateLimitException.class)
+    public ResponseEntity<Result> handleRateLimit(RateLimitException exception) {
+        return ResponseEntity.status(429).body(Result.fail(exception.getMessage()));
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Result> handleStatus(ResponseStatusException exception) {

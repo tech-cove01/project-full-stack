@@ -43,6 +43,9 @@ management:
       show-details: never
 app:
   pay-timeout-minutes: ${PAY_TIMEOUT_MINUTES:15}
+  rate-limit:
+    seckill-per-second: ${SECKILL_RATE_LIMIT:5}
+    redeem-per-second: ${REDEEM_RATE_LIMIT:10}
   upload-dir: ${UPLOAD_DIR:./uploads}
   cache:
     shop-max-size: ${SHOP_CACHE_MAX_SIZE:10000}

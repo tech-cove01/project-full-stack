@@ -1,6 +1,10 @@
 package com.fullstack.platform.merchant;
 
 import com.fullstack.platform.dto.Result;
+import com.fullstack.platform.ratelimit.RateLimitException;
+import com.fullstack.platform.ratelimit.RateLimitService;
+import com.fullstack.platform.utils.UserHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,9 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/merchant")
 public class MerchantOrderController {
     private final MerchantOrderService service;
+    private final RateLimitService rateLimit;
 
-    public MerchantOrderController(MerchantOrderService service) {
+    @Value("${app.rate-limit.redeem-per-second:10}")
+    private int redeemLimit = 10;
+
+    public MerchantOrderController(MerchantOrderService service, RateLimitService rateLimit) {
         this.service = service;
+        this.rateLimit = rateLimit;
     }
 
     @GetMapping("/orders")
@@ -31,6 +40,9 @@ public class MerchantOrderController {
 
     @PostMapping("/orders/redeem")
     public Result redeem(@RequestBody RedeemRequest request) {
+        if (!rateLimit.allow("redeem", UserHolder.getUser().getId(), redeemLimit)) {
+            throw new RateLimitException("核销请求过于频繁，请稍后再试");
+        }
         return Result.ok(service.redeem(request.shopId(), request.token()));
     }
 

@@ -4,8 +4,11 @@ import com.fullstack.platform.dto.OrderStatusDTO;
 import com.fullstack.platform.dto.Result;
 import com.fullstack.platform.order.OrderLifecycleService;
 import com.fullstack.platform.order.OrderQueryService;
+import com.fullstack.platform.ratelimit.RateLimitException;
+import com.fullstack.platform.ratelimit.RateLimitService;
 import com.fullstack.platform.service.IVoucherOrderService;
 import com.fullstack.platform.utils.UserHolder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,8 +31,17 @@ public class VoucherOrderController {
     @Resource
     private OrderLifecycleService lifecycle;
 
+    @Resource
+    private RateLimitService rateLimit;
+
+    @Value("${app.rate-limit.seckill-per-second:5}")
+    private int seckillLimit = 5;
+
     @PostMapping("seckill/{id}")
     public Result seckillVoucher(@PathVariable("id") Long voucherId) {
+        if (!rateLimit.allow("seckill", UserHolder.getUser().getId(), seckillLimit)) {
+            throw new RateLimitException("抢购请求过于频繁，请稍后再试");
+        }
         return voucherOrderService.seckillVoucher(voucherId);
     }
 

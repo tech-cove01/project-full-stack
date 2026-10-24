@@ -30,9 +30,13 @@
 
 采用模块化单体和单个前端工程，用户区与商家工作台共享基础设施。技术决策、改造顺序和验收标准见[开发方案](docs/implementation-plan.md)。
 
+实现任务见[交接说明](docs/agent-handoff.md)，业务规则见[交易设计](docs/transaction-design.md)，完成条件见[验收标准](docs/acceptance.md)。
+
 ## 快速开始
 
 需要 JDK 21 或兼容版本、Maven、Node.js 24，以及已启动的 Docker。
+
+Windows 的完整启动步骤见 [Windows 开发说明](docs/windows-development.md)。本机原有 MySQL 占用 3306，运行以下命令前，在启动 Compose 和后端的各个 PowerShell 窗口中设置 `$env:MYSQL_PORT = '3307'`。
 
 在仓库根目录启动 MySQL 和 Redis，首次创建数据库卷时会导入表结构与演示数据：
 

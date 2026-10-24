@@ -1,5 +1,7 @@
 # 运行与验证
 
+Windows 本机的具体端口、环境检查和三个 PowerShell 终端启动步骤见 [Windows 开发说明](windows-development.md)。后续改造任务见 [分阶段方案](implementation-plan.md)，交接入口见 [agent-handoff.md](agent-handoff.md)，目标验收见 [acceptance.md](acceptance.md)。本文接口表描述当前基线，不代表规划接口已经实现。
+
 ## 环境与启动
 
 - JDK 21 是编译目标；兼容的较新 JDK 也可以通过 `--release 21` 构建。
@@ -7,6 +9,8 @@
 - Maven 3.6.3+；Docker Compose v2。
 
 先运行 `docker compose up -d mysql redis`，等 `docker compose ps` 显示两个服务 healthy 后，再运行 `mvn -f backend/pom.xml spring-boot:run`。
+
+本机原有 MySQL 已占用 3306；在启动 Compose 和后端的各个 PowerShell 窗口中都先执行 `$env:MYSQL_PORT = '3307'`，使项目容器映射与后端连接保持一致。仓库默认值仍是 3306；这个环境变量是本机端口覆盖，不会更改原有 MySQL 服务。
 
 首次初始化将读取 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`。已有数据库卷不会再次执行这些脚本；修改表结构后应编写迁移并显式应用，不能靠重启自动更新。
 
@@ -29,11 +33,11 @@ Docker 未运行时，可以进行后端单元测试和前端构建，真实 API
 | GET | `/shop/{id}` | 店铺详情 |
 | GET | `/voucher/list/{shopId}` | 门店活动 |
 | POST | `/voucher-order/seckill/{id}` | 受理抢购，返回字符串订单 ID |
-| GET | `/voucher-order/{id}` | 本人订单状态 `{id,state,message,status?}` |
+| GET | `/voucher-order/{id}` | 本人订单状态 `{id,state,message,orderStatus?}` |
 | GET | `/merchant/workspace` | 当前用户商家角色与授权门店 |
 | GET | `/actuator/health` | 健康状态 |
 
-统一响应为 `{success,errorMsg?,data?,total?}`。`authorization` 请求头携带登录 Token；业务失败应读取 `success`，不能只判断 HTTP 200。订单 `state` 取 PROCESSING、CREATED 或 FAILED，业务订单状态另由 `status` 表示。
+统一响应为 `{success,errorMsg?,data?,total?}`。`authorization` 请求头携带登录 Token；业务失败应读取 `success`，不能只判断 HTTP 200。订单 `state` 取 PROCESSING、CREATED 或 FAILED，业务订单状态另由 `orderStatus` 表示；数据库物理列仍为 `status`。
 
 ## 自动化验证
 

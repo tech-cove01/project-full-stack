@@ -1,4 +1,8 @@
+SET NAMES utf8mb4;
+
 -- Synthetic local demo data. No external SMS or payment is used.
+-- Keep SET NAMES at the top: the container entrypoint starts a new mysql client
+-- per init file, so a POSIX locale would otherwise read UTF-8 seed text as latin1.
 INSERT IGNORE INTO tb_user (id, phone, nick_name) VALUES
     (1, '13800000000', '演示店主'),
     (2, '13900000000', '演示店员');

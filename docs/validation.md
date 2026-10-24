@@ -75,6 +75,6 @@ AI 后端提交 `803b9f6`、`6a59da6`，前端 `cbeef75`；完整报告见 [AI �
 - AI-07 PASS（部分）：同会话并发 409；同消息 ID 同内容返回 cached、不同内容 409；TTL/预算未用可控时钟验证。
 - AI-08/09/10 PASS（有限）：草稿不可检索、发布后可检索、停用后不可检索；STAFF 只读已发布、跨店 403；注入未导致泄露或写操作。
 - AI-12 PASS（stub 页面）：商家创建→发布→助手检索来源→打开公开来源；助手“我的订单”显示实时卡片；截图见 AI 报告。
-- 真实 provider（AI-11/13/14）未执行：没有 Key；没有 30 问评测、Recall@K、真实 usage/费用、真实 429/超时/取消。
+- 真实 provider（AI-11/13/14）部分执行：SiliconFlow Chat `Qwen/Qwen2.5-7B-Instruct` + Embedding `Qwen/Qwen3-Embedding-0.6B`（1024 维）可用；真实 UI 通过；31 题固定集知识 11/12、无据拒答 6/6、工具 7/7、多轮 6/6，K07 出现一次有证据但模型误拒。未测黄金 chunk Recall@K、真实 usage/费用、429/abort/预算耗尽。Key 只在进程环境使用，未写入仓库；因曾在聊天中出现，建议轮换。
 - 与设计的已知差距：未引入 LangChain4j（自实现 OpenAI-compatible provider）、未使用 `InMemoryEmbeddingStore`（进程内精确扫描）、发布为请求内同步嵌入而非后台 worker。
 - 嵌入模型隔离：`49db35c` 记录每个 provider 的 embedding model，索引加载时跳过不同模型/维度；切换 provider 时种子文档自动重建。该分支尚未用真实 provider 演练。

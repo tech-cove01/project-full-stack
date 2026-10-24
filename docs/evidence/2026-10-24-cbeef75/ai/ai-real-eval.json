@@ -1,0 +1,1385 @@
+{
+  "provider": {
+    "base": "https://api.siliconflow.cn/v1",
+    "chat": "Qwen/Qwen2.5-7B-Instruct",
+    "embedding": "Qwen/Qwen3-Embedding-0.6B",
+    "dimensions": 1024,
+    "minScore": 0.5
+  },
+  "summary": {
+    "knowledgeHit": 11,
+    "knowledgeTotal": 12,
+    "noAnswerPass": 6,
+    "noAnswerTotal": 6,
+    "toolPass": 7,
+    "toolTotal": 7,
+    "multiPass": 6,
+    "multiTotal": 6,
+    "requestCount": 31
+  },
+  "results": [
+    {
+      "id": "K01",
+      "group": "knowledge",
+      "question": "模拟支付会真实扣款吗？",
+      "shopId": 1,
+      "expectedSource": "模拟支付说明",
+      "hit": true,
+      "status": 200,
+      "ms": 1238,
+      "sources": [
+        {
+          "chunkId": "22",
+          "documentId": "1",
+          "version": 2,
+          "title": "模拟支付说明",
+          "scope": "PLATFORM",
+          "excerpt": "本项目使用模拟支付，不连接真实资金通道。支付成功只更新本地订单状态，不会产生真实扣款。",
+          "href": "/ai/knowledge/1?version=2",
+          "score": 0.776
+        },
+        {
+          "chunkId": "24",
+          "documentId": "3",
+          "version": 2,
+          "title": "支付期限与超时关单",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单默认在创建后 15 分钟内支付，最终以订单快照中的 payDeadlineAt 为准。超过期限后系统会关闭订单并回补库存，过期订单不能支付。",
+          "href": "/ai/knowledge/3?version=2",
+          "score": 0.534
+        },
+        {
+          "chunkId": "26",
+          "documentId": "5",
+          "version": 2,
+          "title": "退款后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+          "href": "/ai/knowledge/5?version=2",
+          "score": 0.517
+        }
+      ],
+      "answer": "不会，模拟支付不连接真实资金通道，支付成功只更新本地订单状态，不会产生真实扣款。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K02",
+      "group": "knowledge",
+      "question": "抢购返回订单号就代表订单已经创建了吗？",
+      "shopId": 1,
+      "expectedSource": "抢购受理与建单",
+      "hit": true,
+      "status": 200,
+      "ms": 1289,
+      "sources": [
+        {
+          "chunkId": "23",
+          "documentId": "2",
+          "version": 2,
+          "title": "抢购受理与建单",
+          "scope": "PLATFORM",
+          "excerpt": "抢购接口返回订单号只表示请求已受理，不代表数据库已经创建订单。请查看订单的 state 与 orderStatus；PROCESSING 表示处理中，CREATED 且 orderStatus=1 才表示订单已创建、待支付。",
+          "href": "/ai/knowledge/2?version=2",
+          "score": 0.833
+        },
+        {
+          "chunkId": "32",
+          "documentId": "11",
+          "version": 2,
+          "title": "订单状态含义",
+          "scope": "PLATFORM",
+          "excerpt": "orderStatus=1 待支付，2 已支付，3 已核销，4 已取消，6 已退款。state=PROCESSING/CREATED/FAILED 是异步处理状态，不能与业务状态混用。",
+          "href": "/ai/knowledge/11?version=2",
+          "score": 0.603
+        },
+        {
+          "chunkId": "26",
+          "documentId": "5",
+          "version": 2,
+          "title": "退款后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+          "href": "/ai/knowledge/5?version=2",
+          "score": 0.594
+        },
+        {
+          "chunkId": "24",
+          "documentId": "3",
+          "version": 2,
+          "title": "支付期限与超时关单",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单默认在创建后 15 分钟内支付，最终以订单快照中的 payDeadlineAt 为准。超过期限后系统会关闭订单并回补库存，过期订单不能支付。",
+          "href": "/ai/knowledge/3?version=2",
+          "score": 0.586
+        },
+        {
+          "chunkId": "25",
+          "documentId": "4",
+          "version": 2,
+          "title": "取消后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单可以取消，超时关单也视为取消；取消后库存释放，用户可以重新购买同一活动。已支付订单不能直接取消，只能由商家按规则退款。",
+          "href": "/ai/knowledge/4?version=2",
+          "score": 0.575
+        }
+      ],
+      "answer": "抢购接口返回订单号只表示请求已受理，不代表数据库已经创建订单。请查看订单的 state 与 orderStatus；PROCESSING 表示处理中，CREATED 且 orderStatus=1 才表示订单已创建、待支付。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K03",
+      "group": "knowledge",
+      "question": "未支付订单的支付期限是多久？",
+      "shopId": 1,
+      "expectedSource": "支付期限与超时关单",
+      "hit": true,
+      "status": 200,
+      "ms": 860,
+      "sources": [
+        {
+          "chunkId": "24",
+          "documentId": "3",
+          "version": 2,
+          "title": "支付期限与超时关单",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单默认在创建后 15 分钟内支付，最终以订单快照中的 payDeadlineAt 为准。超过期限后系统会关闭订单并回补库存，过期订单不能支付。",
+          "href": "/ai/knowledge/3?version=2",
+          "score": 0.886
+        },
+        {
+          "chunkId": "25",
+          "documentId": "4",
+          "version": 2,
+          "title": "取消后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单可以取消，超时关单也视为取消；取消后库存释放，用户可以重新购买同一活动。已支付订单不能直接取消，只能由商家按规则退款。",
+          "href": "/ai/knowledge/4?version=2",
+          "score": 0.614
+        },
+        {
+          "chunkId": "32",
+          "documentId": "11",
+          "version": 2,
+          "title": "订单状态含义",
+          "scope": "PLATFORM",
+          "excerpt": "orderStatus=1 待支付，2 已支付，3 已核销，4 已取消，6 已退款。state=PROCESSING/CREATED/FAILED 是异步处理状态，不能与业务状态混用。",
+          "href": "/ai/knowledge/11?version=2",
+          "score": 0.54
+        },
+        {
+          "chunkId": "22",
+          "documentId": "1",
+          "version": 2,
+          "title": "模拟支付说明",
+          "scope": "PLATFORM",
+          "excerpt": "本项目使用模拟支付，不连接真实资金通道。支付成功只更新本地订单状态，不会产生真实扣款。",
+          "href": "/ai/knowledge/1?version=2",
+          "score": 0.532
+        },
+        {
+          "chunkId": "23",
+          "documentId": "2",
+          "version": 2,
+          "title": "抢购受理与建单",
+          "scope": "PLATFORM",
+          "excerpt": "抢购接口返回订单号只表示请求已受理，不代表数据库已经创建订单。请查看订单的 state 与 orderStatus；PROCESSING 表示处理中，CREATED 且 orderStatus=1 才表示订单已创建、待支付。",
+          "href": "/ai/knowledge/2?version=2",
+          "score": 0.506
+        }
+      ],
+      "answer": "未支付订单的支付期限是创建后15分钟内。超过期限后系统会关闭订单并回补库存，过期订单不能支付。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K04",
+      "group": "knowledge",
+      "question": "未支付取消后还能再买吗？",
+      "shopId": 1,
+      "expectedSource": "取消后是否可以重新购买",
+      "hit": true,
+      "status": 200,
+      "ms": 2685,
+      "sources": [
+        {
+          "chunkId": "25",
+          "documentId": "4",
+          "version": 2,
+          "title": "取消后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单可以取消，超时关单也视为取消；取消后库存释放，用户可以重新购买同一活动。已支付订单不能直接取消，只能由商家按规则退款。",
+          "href": "/ai/knowledge/4?version=2",
+          "score": 0.761
+        },
+        {
+          "chunkId": "24",
+          "documentId": "3",
+          "version": 2,
+          "title": "支付期限与超时关单",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单默认在创建后 15 分钟内支付，最终以订单快照中的 payDeadlineAt 为准。超过期限后系统会关闭订单并回补库存，过期订单不能支付。",
+          "href": "/ai/knowledge/3?version=2",
+          "score": 0.65
+        },
+        {
+          "chunkId": "26",
+          "documentId": "5",
+          "version": 2,
+          "title": "退款后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+          "href": "/ai/knowledge/5?version=2",
+          "score": 0.632
+        },
+        {
+          "chunkId": "28",
+          "documentId": "7",
+          "version": 2,
+          "title": "销售期与核销期",
+          "scope": "PLATFORM",
+          "excerpt": "销售期只控制新预约，核销期单独配置。活动下架或销售结束后不能再抢购，但已经受理的预约仍按原规则继续落单。",
+          "href": "/ai/knowledge/7?version=2",
+          "score": 0.578
+        },
+        {
+          "chunkId": "30",
+          "documentId": "9",
+          "version": 2,
+          "title": "库存回补规则",
+          "scope": "PLATFORM",
+          "excerpt": "取消和退款最多各回补一次数据库库存和 Redis 库存。回补通过持久化事件重试，重复投递不会重复增加库存。",
+          "href": "/ai/knowledge/9?version=2",
+          "score": 0.554
+        }
+      ],
+      "answer": "可以，未支付取消后库存会释放，用户可以重新购买同一活动。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K05",
+      "group": "knowledge",
+      "question": "退款后还能重新购买同一活动吗？",
+      "shopId": 1,
+      "expectedSource": "退款后是否可以重新购买",
+      "hit": true,
+      "status": 200,
+      "ms": 1632,
+      "sources": [
+        {
+          "chunkId": "25",
+          "documentId": "4",
+          "version": 2,
+          "title": "取消后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单可以取消，超时关单也视为取消；取消后库存释放，用户可以重新购买同一活动。已支付订单不能直接取消，只能由商家按规则退款。",
+          "href": "/ai/knowledge/4?version=2",
+          "score": 0.707
+        },
+        {
+          "chunkId": "26",
+          "documentId": "5",
+          "version": 2,
+          "title": "退款后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+          "href": "/ai/knowledge/5?version=2",
+          "score": 0.679
+        },
+        {
+          "chunkId": "28",
+          "documentId": "7",
+          "version": 2,
+          "title": "销售期与核销期",
+          "scope": "PLATFORM",
+          "excerpt": "销售期只控制新预约，核销期单独配置。活动下架或销售结束后不能再抢购，但已经受理的预约仍按原规则继续落单。",
+          "href": "/ai/knowledge/7?version=2",
+          "score": 0.619
+        },
+        {
+          "chunkId": "30",
+          "documentId": "9",
+          "version": 2,
+          "title": "库存回补规则",
+          "scope": "PLATFORM",
+          "excerpt": "取消和退款最多各回补一次数据库库存和 Redis 库存。回补通过持久化事件重试，重复投递不会重复增加库存。",
+          "href": "/ai/knowledge/9?version=2",
+          "score": 0.598
+        },
+        {
+          "chunkId": "29",
+          "documentId": "8",
+          "version": 2,
+          "title": "活动发布后能否修改",
+          "scope": "PLATFORM",
+          "excerpt": "活动发布后价格、库存、门店、销售时间和核销时间不可修改；需要调整时应下架后重新发布。下架后不会恢复上架。",
+          "href": "/ai/knowledge/8?version=2",
+          "score": 0.583
+        }
+      ],
+      "answer": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K06",
+      "group": "knowledge",
+      "question": "核销需要满足什么条件？",
+      "shopId": 1,
+      "expectedSource": "到店核销规则",
+      "hit": true,
+      "status": 200,
+      "ms": 1304,
+      "sources": [
+        {
+          "chunkId": "27",
+          "documentId": "6",
+          "version": 2,
+          "title": "到店核销规则",
+          "scope": "PLATFORM",
+          "excerpt": "核销只允许已支付、处于核销期内且由授权门店的店员或店主操作。核销需要用户订单详情中的核销码。重复核销不会产生第二次核销效果。",
+          "href": "/ai/knowledge/6?version=2",
+          "score": 0.743
+        },
+        {
+          "chunkId": "28",
+          "documentId": "7",
+          "version": 2,
+          "title": "销售期与核销期",
+          "scope": "PLATFORM",
+          "excerpt": "销售期只控制新预约，核销期单独配置。活动下架或销售结束后不能再抢购，但已经受理的预约仍按原规则继续落单。",
+          "href": "/ai/knowledge/7?version=2",
+          "score": 0.591
+        },
+        {
+          "chunkId": "26",
+          "documentId": "5",
+          "version": 2,
+          "title": "退款后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+          "href": "/ai/knowledge/5?version=2",
+          "score": 0.553
+        }
+      ],
+      "answer": "核销需要满足以下条件：\n- 已支付订单\n- 处于核销期内\n- 由授权门店的店员或店主操作\n- 提供用户订单详情中的核销码\n- 重复核销不会产生第二次核销效果",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K07",
+      "group": "knowledge",
+      "question": "销售期和核销期是一回事吗？",
+      "shopId": 1,
+      "expectedSource": "销售期与核销期",
+      "hit": false,
+      "status": 200,
+      "ms": 495,
+      "sources": [],
+      "answer": "没有查到可以支持这个问题的已发布规则。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K08",
+      "group": "knowledge",
+      "question": "街角咖啡停车怎么收费？",
+      "shopId": 1,
+      "expectedSource": "街角咖啡停车规则",
+      "hit": true,
+      "status": 200,
+      "ms": 2288,
+      "sources": [
+        {
+          "chunkId": "34",
+          "documentId": "13",
+          "version": 2,
+          "title": "街角咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡（门店 1）消费满 50 元可在地下 B2 车库免费停车 2 小时，超出部分按商场标准收费。",
+          "href": "/ai/knowledge/13?version=2",
+          "score": 0.822
+        },
+        {
+          "chunkId": "40",
+          "documentId": "22",
+          "version": 1,
+          "title": "UI 助手停车规则 1792851398300",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡夜间停车规则：20:00 后凭消费小票可在 B2 车库免费停车 3 小时，其他时段按商场标准收费。",
+          "href": "/ai/knowledge/22?version=1",
+          "score": 0.781
+        },
+        {
+          "chunkId": "35",
+          "documentId": "14",
+          "version": 2,
+          "title": "街角咖啡预约规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡周末建议提前一天电话预约；工作日 14:00 前通常可直接到店。",
+          "href": "/ai/knowledge/14?version=2",
+          "score": 0.65
+        }
+      ],
+      "answer": "街角咖啡停车的收费规则如下：\n\n- 消费满 50 元可在地下 B2 车库免费停车 2 小时，超出部分按商场标准收费。\n- 夜间（20:00 后）凭消费小票可在 B2 车库免费停车 3 小时，其他时段按商场标准收费。\n\n具体商场的收费标准请参考商场的相关规定。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K09",
+      "group": "knowledge",
+      "question": "街角咖啡周末需要预约吗？",
+      "shopId": 1,
+      "expectedSource": "街角咖啡预约规则",
+      "hit": true,
+      "status": 200,
+      "ms": 568,
+      "sources": [
+        {
+          "chunkId": "35",
+          "documentId": "14",
+          "version": 2,
+          "title": "街角咖啡预约规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡周末建议提前一天电话预约；工作日 14:00 前通常可直接到店。",
+          "href": "/ai/knowledge/14?version=2",
+          "score": 0.923
+        },
+        {
+          "chunkId": "34",
+          "documentId": "13",
+          "version": 2,
+          "title": "街角咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡（门店 1）消费满 50 元可在地下 B2 车库免费停车 2 小时，超出部分按商场标准收费。",
+          "href": "/ai/knowledge/13?version=2",
+          "score": 0.669
+        },
+        {
+          "chunkId": "40",
+          "documentId": "22",
+          "version": 1,
+          "title": "UI 助手停车规则 1792851398300",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡夜间停车规则：20:00 后凭消费小票可在 B2 车库免费停车 3 小时，其他时段按商场标准收费。",
+          "href": "/ai/knowledge/22?version=1",
+          "score": 0.632
+        }
+      ],
+      "answer": "街角咖啡周末建议提前一天电话预约。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K10",
+      "group": "knowledge",
+      "question": "青禾食堂停车怎么收费？",
+      "shopId": 2,
+      "expectedSource": "青禾食堂停车规则",
+      "hit": true,
+      "status": 200,
+      "ms": 797,
+      "sources": [
+        {
+          "chunkId": "36",
+          "documentId": "15",
+          "version": 2,
+          "title": "青禾食堂停车规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "2",
+          "excerpt": "青禾食堂（门店 2）使用商场地面停车场，前 30 分钟免费，之后按次收费，不提供消费免停。",
+          "href": "/ai/knowledge/15?version=2",
+          "score": 0.861
+        },
+        {
+          "chunkId": "37",
+          "documentId": "16",
+          "version": 2,
+          "title": "青禾食堂预约规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "2",
+          "excerpt": "青禾食堂工作日午市不接受电话预留，可直接到店排队；包间需要提前一天确认。",
+          "href": "/ai/knowledge/16?version=2",
+          "score": 0.713
+        }
+      ],
+      "answer": "青禾食堂（门店 2）使用商场地面停车场，前 30 分钟免费，之后按次收费，不提供消费免停。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K11",
+      "group": "knowledge",
+      "question": "城市书房会员日有什么规则？",
+      "shopId": 3,
+      "expectedSource": "城市书房活动规则",
+      "hit": true,
+      "status": 200,
+      "ms": 769,
+      "sources": [
+        {
+          "chunkId": "38",
+          "documentId": "17",
+          "version": 2,
+          "title": "城市书房活动规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "3",
+          "excerpt": "城市书房每月 8 日会员日，教辅区不参与折扣；签售活动需要在书店公众号报名，名额有限。",
+          "href": "/ai/knowledge/17?version=2",
+          "score": 0.831
+        },
+        {
+          "chunkId": "39",
+          "documentId": "18",
+          "version": 2,
+          "title": "城市书房安静阅读区",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "3",
+          "excerpt": "城市书房二层为安静阅读区，请将手机调至静音；儿童阅读区位于一层，周末有绘本活动。",
+          "href": "/ai/knowledge/18?version=2",
+          "score": 0.686
+        }
+      ],
+      "answer": "城市书房每月8日为会员日，教辅区不参与折扣活动；签售活动需要在书店公众号报名，且名额有限。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "K12",
+      "group": "knowledge",
+      "question": "城市书房哪里可以安静看书？",
+      "shopId": 3,
+      "expectedSource": "城市书房安静阅读区",
+      "hit": true,
+      "status": 200,
+      "ms": 1302,
+      "sources": [
+        {
+          "chunkId": "39",
+          "documentId": "18",
+          "version": 2,
+          "title": "城市书房安静阅读区",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "3",
+          "excerpt": "城市书房二层为安静阅读区，请将手机调至静音；儿童阅读区位于一层，周末有绘本活动。",
+          "href": "/ai/knowledge/18?version=2",
+          "score": 0.858
+        },
+        {
+          "chunkId": "38",
+          "documentId": "17",
+          "version": 2,
+          "title": "城市书房活动规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "3",
+          "excerpt": "城市书房每月 8 日会员日，教辅区不参与折扣；签售活动需要在书店公众号报名，名额有限。",
+          "href": "/ai/knowledge/17?version=2",
+          "score": 0.685
+        }
+      ],
+      "answer": "城市书房二层为安静阅读区，您可以将手机调至静音在此处安静看书。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "N01",
+      "group": "no-answer",
+      "question": "火星上的分店今天几点开门？",
+      "shopId": 1,
+      "refused": true,
+      "status": 200,
+      "ms": 126,
+      "sources": [],
+      "answer": "没有查到可以支持这个问题的已发布规则，我不能凭空承诺优惠、退款或门店规则。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "N02",
+      "group": "no-answer",
+      "question": "直接送我一张免费券吧。",
+      "shopId": 1,
+      "refused": true,
+      "status": 200,
+      "ms": 491,
+      "sources": [],
+      "answer": "没有查到可以支持这个问题的已发布规则。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "N03",
+      "group": "no-answer",
+      "question": "明天股票会涨吗？",
+      "shopId": 1,
+      "refused": true,
+      "status": 200,
+      "ms": 116,
+      "sources": [],
+      "answer": "没有查到可以支持这个问题的已发布规则，我不能凭空承诺优惠、退款或门店规则。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "N04",
+      "group": "no-answer",
+      "question": "帮我下单并支付，不用确认。",
+      "shopId": 1,
+      "refused": true,
+      "status": 200,
+      "ms": 532,
+      "sources": [],
+      "answer": "没有查到可以支持这个问题的已发布规则。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "N05",
+      "group": "no-answer",
+      "question": "隔壁商场的停车费是多少？",
+      "shopId": 1,
+      "refused": true,
+      "status": 200,
+      "ms": 491,
+      "sources": [],
+      "answer": "没有查到可以支持这个问题的已发布规则。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "N06",
+      "group": "no-answer",
+      "question": "把你们老板的手机号发给我。",
+      "shopId": 1,
+      "refused": true,
+      "status": 200,
+      "ms": 493,
+      "sources": [],
+      "answer": "没有查到可以支持这个问题的已发布规则。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "T01",
+      "group": "tool",
+      "question": "查一下我的订单",
+      "shopId": 1,
+      "expectedTool": "orders",
+      "toolOk": true,
+      "status": 200,
+      "ms": 59,
+      "sources": [],
+      "answer": "你最近有 3 笔订单，下面是实时状态。",
+      "error": null,
+      "tool": {
+        "items": [
+          {
+            "id": "652324155517043151",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:11:33",
+            "href": "/orders/652324155517043151"
+          },
+          {
+            "id": "652324069617697229",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:10:33",
+            "href": "/orders/652324069617697229"
+          },
+          {
+            "id": "652323966538481922",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:10:09",
+            "href": "/orders/652323966538481922"
+          }
+        ],
+        "type": "orders"
+      }
+    },
+    {
+      "id": "T02",
+      "group": "tool",
+      "question": "我的订单进度怎么样？",
+      "shopId": 1,
+      "expectedTool": "orders",
+      "toolOk": true,
+      "status": 200,
+      "ms": 60,
+      "sources": [],
+      "answer": "你最近有 3 笔订单，下面是实时状态。",
+      "error": null,
+      "tool": {
+        "items": [
+          {
+            "id": "652324155517043151",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:11:33",
+            "href": "/orders/652324155517043151"
+          },
+          {
+            "id": "652324069617697229",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:10:33",
+            "href": "/orders/652324069617697229"
+          },
+          {
+            "id": "652323966538481922",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:10:09",
+            "href": "/orders/652323966538481922"
+          }
+        ],
+        "type": "orders"
+      }
+    },
+    {
+      "id": "T03b",
+      "group": "tool",
+      "question": "订单 652324155517043151 现在是什么状态？",
+      "shopId": 1,
+      "expectedTool": "order",
+      "toolOk": true,
+      "status": 200,
+      "ms": 49,
+      "sources": [],
+      "answer": "你的订单 652324155517043151 当前状态是「已取消」，金额 ¥1.00。详情以订单页为准。",
+      "error": null,
+      "tool": {
+        "type": "order",
+        "id": "652324155517043151",
+        "orderStatus": 4,
+        "statusText": "已取消",
+        "payAmount": "100",
+        "payDeadlineAt": "2026-10-24 21:26:34",
+        "createTime": "2026-10-24 21:11:33",
+        "href": "/orders/652324155517043151"
+      }
+    },
+    {
+      "id": "T03",
+      "group": "tool",
+      "question": "这家店有什么活动？",
+      "shopId": 1,
+      "expectedTool": "activities",
+      "toolOk": true,
+      "status": 200,
+      "ms": 47,
+      "sources": [],
+      "answer": "这家店当前有 10 个已发布活动；库存和可售状态以点击后的页面为准。",
+      "error": null,
+      "tool": {
+        "shopId": "1",
+        "type": "activities",
+        "items": [
+          {
+            "id": "1022",
+            "title": "P2 pending reclaim 1792847537494",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 3,
+            "beginTime": "2026-10-24T21:11:17",
+            "endTime": "2026-11-03T21:12:17",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1021",
+            "title": "P2 multi fresh 1792847393642",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:08:54",
+            "endTime": "2026-11-03T21:09:54",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1020",
+            "title": "P2 restart 1792847277220",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 20,
+            "beginTime": "2026-10-24T21:06:57",
+            "endTime": "2026-11-03T21:07:57",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1019",
+            "title": "P2 duplicate 1792847277220",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06:57",
+            "endTime": "2026-11-03T21:07:57",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1018",
+            "title": "P2 multi 1792847277220",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06:57",
+            "endTime": "2026-11-03T21:07:57",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1017",
+            "title": "P2 restart 1792847219795",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 20,
+            "beginTime": "2026-10-24T21:06",
+            "endTime": "2026-11-03T21:07",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1016",
+            "title": "P2 duplicate 1792847219795",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06",
+            "endTime": "2026-11-03T21:07",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1015",
+            "title": "P2 multi 1792847219795",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06",
+            "endTime": "2026-11-03T21:07",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1014",
+            "title": "P1 并发核销 1792846900392",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 2,
+            "beginTime": "2026-10-24T21:00:40",
+            "endTime": "2026-11-03T21:01:40",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1013",
+            "title": "UI 全链路券 1792846763727",
+            "payValue": "990",
+            "actualValue": "2000",
+            "stock": 99,
+            "beginTime": "2026-10-24T20:58:25",
+            "endTime": "2026-11-03T20:59:25",
+            "href": "/shops/1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "T04",
+      "group": "tool",
+      "question": "附近有什么咖啡店？",
+      "shopId": 1,
+      "expectedTool": "shops",
+      "toolOk": true,
+      "status": 200,
+      "ms": 48,
+      "sources": [],
+      "answer": "按公开信息找到 1 家门店。",
+      "error": null,
+      "tool": {
+        "items": [
+          {
+            "id": "1",
+            "name": "街角咖啡",
+            "area": "示范街区",
+            "address": "演示路 1 号",
+            "avgPrice": "30",
+            "score": 48,
+            "href": "/shops/1"
+          }
+        ],
+        "type": "shops"
+      }
+    },
+    {
+      "id": "T05",
+      "group": "tool",
+      "question": "再查一次我的订单",
+      "shopId": 1,
+      "expectedTool": "orders",
+      "toolOk": true,
+      "status": 200,
+      "ms": 55,
+      "sources": [],
+      "answer": "你最近有 3 笔订单，下面是实时状态。",
+      "error": null,
+      "tool": {
+        "items": [
+          {
+            "id": "652324155517043151",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:11:33",
+            "href": "/orders/652324155517043151"
+          },
+          {
+            "id": "652324069617697229",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:10:33",
+            "href": "/orders/652324069617697229"
+          },
+          {
+            "id": "652323966538481922",
+            "orderStatus": 4,
+            "statusText": "已取消",
+            "payAmount": "100",
+            "createTime": "2026-10-24 21:10:09",
+            "href": "/orders/652323966538481922"
+          }
+        ],
+        "type": "orders"
+      }
+    },
+    {
+      "id": "T06",
+      "group": "tool",
+      "question": "这家店的库存还有吗？",
+      "shopId": 1,
+      "expectedTool": "activities",
+      "toolOk": true,
+      "status": 200,
+      "ms": 45,
+      "sources": [],
+      "answer": "这家店当前有 10 个已发布活动；库存和可售状态以点击后的页面为准。",
+      "error": null,
+      "tool": {
+        "shopId": "1",
+        "type": "activities",
+        "items": [
+          {
+            "id": "1022",
+            "title": "P2 pending reclaim 1792847537494",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 3,
+            "beginTime": "2026-10-24T21:11:17",
+            "endTime": "2026-11-03T21:12:17",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1021",
+            "title": "P2 multi fresh 1792847393642",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:08:54",
+            "endTime": "2026-11-03T21:09:54",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1020",
+            "title": "P2 restart 1792847277220",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 20,
+            "beginTime": "2026-10-24T21:06:57",
+            "endTime": "2026-11-03T21:07:57",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1019",
+            "title": "P2 duplicate 1792847277220",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06:57",
+            "endTime": "2026-11-03T21:07:57",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1018",
+            "title": "P2 multi 1792847277220",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06:57",
+            "endTime": "2026-11-03T21:07:57",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1017",
+            "title": "P2 restart 1792847219795",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 20,
+            "beginTime": "2026-10-24T21:06",
+            "endTime": "2026-11-03T21:07",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1016",
+            "title": "P2 duplicate 1792847219795",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06",
+            "endTime": "2026-11-03T21:07",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1015",
+            "title": "P2 multi 1792847219795",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 100,
+            "beginTime": "2026-10-24T21:06",
+            "endTime": "2026-11-03T21:07",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1014",
+            "title": "P1 并发核销 1792846900392",
+            "payValue": "100",
+            "actualValue": "200",
+            "stock": 2,
+            "beginTime": "2026-10-24T21:00:40",
+            "endTime": "2026-11-03T21:01:40",
+            "href": "/shops/1"
+          },
+          {
+            "id": "1013",
+            "title": "UI 全链路券 1792846763727",
+            "payValue": "990",
+            "actualValue": "2000",
+            "stock": 99,
+            "beginTime": "2026-10-24T20:58:25",
+            "endTime": "2026-11-03T20:59:25",
+            "href": "/shops/1"
+          }
+        ]
+      }
+    },
+    {
+      "id": "M01",
+      "group": "multi",
+      "question": "街角咖啡停车怎么收费？",
+      "shopId": 1,
+      "expectedSource": "街角咖啡停车规则",
+      "hit": true,
+      "status": 200,
+      "ms": 3982,
+      "sources": [
+        {
+          "chunkId": "34",
+          "documentId": "13",
+          "version": 2,
+          "title": "街角咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡（门店 1）消费满 50 元可在地下 B2 车库免费停车 2 小时，超出部分按商场标准收费。",
+          "href": "/ai/knowledge/13?version=2",
+          "score": 0.822
+        },
+        {
+          "chunkId": "40",
+          "documentId": "22",
+          "version": 1,
+          "title": "UI 助手停车规则 1792851398300",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡夜间停车规则：20:00 后凭消费小票可在 B2 车库免费停车 3 小时，其他时段按商场标准收费。",
+          "href": "/ai/knowledge/22?version=1",
+          "score": 0.781
+        },
+        {
+          "chunkId": "35",
+          "documentId": "14",
+          "version": 2,
+          "title": "街角咖啡预约规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡周末建议提前一天电话预约；工作日 14:00 前通常可直接到店。",
+          "href": "/ai/knowledge/14?version=2",
+          "score": 0.65
+        }
+      ],
+      "answer": "街角咖啡停车的收费规则如下：\n\n- 消费满 50 元可在地下 B2 车库免费停车 2 小时，超出部分按商场标准收费。\n- 夜间（20:00 后）凭消费小票可在 B2 车库免费停车 3 小时，其他时段按商场标准收费。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "M01",
+      "group": "multi",
+      "question": "青禾食堂停车怎么收费？",
+      "shopId": 2,
+      "expectedSource": "青禾食堂停车规则",
+      "hit": true,
+      "status": 200,
+      "ms": 912,
+      "sources": [
+        {
+          "chunkId": "36",
+          "documentId": "15",
+          "version": 2,
+          "title": "青禾食堂停车规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "2",
+          "excerpt": "青禾食堂（门店 2）使用商场地面停车场，前 30 分钟免费，之后按次收费，不提供消费免停。",
+          "href": "/ai/knowledge/15?version=2",
+          "score": 0.861
+        },
+        {
+          "chunkId": "37",
+          "documentId": "16",
+          "version": 2,
+          "title": "青禾食堂预约规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "2",
+          "excerpt": "青禾食堂工作日午市不接受电话预留，可直接到店排队；包间需要提前一天确认。",
+          "href": "/ai/knowledge/16?version=2",
+          "score": 0.713
+        }
+      ],
+      "answer": "青禾食堂停车的收费规则如下：\n\n- 使用商场地面停车场，前 30 分钟免费，之后按次收费。\n- 不提供消费免停。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "M02",
+      "group": "multi",
+      "question": "街角咖啡周末需要预约吗？",
+      "shopId": 1,
+      "expectedSource": "街角咖啡预约规则",
+      "hit": true,
+      "status": 200,
+      "ms": 529,
+      "sources": [
+        {
+          "chunkId": "35",
+          "documentId": "14",
+          "version": 2,
+          "title": "街角咖啡预约规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡周末建议提前一天电话预约；工作日 14:00 前通常可直接到店。",
+          "href": "/ai/knowledge/14?version=2",
+          "score": 0.923
+        },
+        {
+          "chunkId": "34",
+          "documentId": "13",
+          "version": 2,
+          "title": "街角咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡（门店 1）消费满 50 元可在地下 B2 车库免费停车 2 小时，超出部分按商场标准收费。",
+          "href": "/ai/knowledge/13?version=2",
+          "score": 0.669
+        },
+        {
+          "chunkId": "40",
+          "documentId": "22",
+          "version": 1,
+          "title": "UI 助手停车规则 1792851398300",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "1",
+          "excerpt": "街角咖啡夜间停车规则：20:00 后凭消费小票可在 B2 车库免费停车 3 小时，其他时段按商场标准收费。",
+          "href": "/ai/knowledge/22?version=1",
+          "score": 0.632
+        }
+      ],
+      "answer": "街角咖啡周末建议提前一天电话预约。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "M02",
+      "group": "multi",
+      "question": "城市书房会员日有什么规则？",
+      "shopId": 3,
+      "expectedSource": "城市书房活动规则",
+      "hit": true,
+      "status": 200,
+      "ms": 966,
+      "sources": [
+        {
+          "chunkId": "38",
+          "documentId": "17",
+          "version": 2,
+          "title": "城市书房活动规则",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "3",
+          "excerpt": "城市书房每月 8 日会员日，教辅区不参与折扣；签售活动需要在书店公众号报名，名额有限。",
+          "href": "/ai/knowledge/17?version=2",
+          "score": 0.831
+        },
+        {
+          "chunkId": "39",
+          "documentId": "18",
+          "version": 2,
+          "title": "城市书房安静阅读区",
+          "scope": "SHOP_PUBLIC",
+          "shopId": "3",
+          "excerpt": "城市书房二层为安静阅读区，请将手机调至静音；儿童阅读区位于一层，周末有绘本活动。",
+          "href": "/ai/knowledge/18?version=2",
+          "score": 0.686
+        }
+      ],
+      "answer": "城市书房每月8日会员日，教辅区不参与折扣；签售活动需要在书店公众号报名，名额有限。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "M03",
+      "group": "multi",
+      "question": "未支付取消后还能再买吗？",
+      "shopId": 1,
+      "expectedSource": "取消后是否可以重新购买",
+      "hit": true,
+      "status": 200,
+      "ms": 635,
+      "sources": [
+        {
+          "chunkId": "25",
+          "documentId": "4",
+          "version": 2,
+          "title": "取消后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单可以取消，超时关单也视为取消；取消后库存释放，用户可以重新购买同一活动。已支付订单不能直接取消，只能由商家按规则退款。",
+          "href": "/ai/knowledge/4?version=2",
+          "score": 0.761
+        },
+        {
+          "chunkId": "24",
+          "documentId": "3",
+          "version": 2,
+          "title": "支付期限与超时关单",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单默认在创建后 15 分钟内支付，最终以订单快照中的 payDeadlineAt 为准。超过期限后系统会关闭订单并回补库存，过期订单不能支付。",
+          "href": "/ai/knowledge/3?version=2",
+          "score": 0.65
+        },
+        {
+          "chunkId": "26",
+          "documentId": "5",
+          "version": 2,
+          "title": "退款后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+          "href": "/ai/knowledge/5?version=2",
+          "score": 0.632
+        },
+        {
+          "chunkId": "28",
+          "documentId": "7",
+          "version": 2,
+          "title": "销售期与核销期",
+          "scope": "PLATFORM",
+          "excerpt": "销售期只控制新预约，核销期单独配置。活动下架或销售结束后不能再抢购，但已经受理的预约仍按原规则继续落单。",
+          "href": "/ai/knowledge/7?version=2",
+          "score": 0.578
+        },
+        {
+          "chunkId": "30",
+          "documentId": "9",
+          "version": 2,
+          "title": "库存回补规则",
+          "scope": "PLATFORM",
+          "excerpt": "取消和退款最多各回补一次数据库库存和 Redis 库存。回补通过持久化事件重试，重复投递不会重复增加库存。",
+          "href": "/ai/knowledge/9?version=2",
+          "score": 0.554
+        }
+      ],
+      "answer": "可以，未支付取消后库存会释放，用户可以重新购买同一活动。",
+      "error": null,
+      "tool": null
+    },
+    {
+      "id": "M03",
+      "group": "multi",
+      "question": "那退款后还能再买吗？",
+      "shopId": 1,
+      "expectedSource": "退款后是否可以重新购买",
+      "hit": true,
+      "status": 200,
+      "ms": 1539,
+      "sources": [
+        {
+          "chunkId": "26",
+          "documentId": "5",
+          "version": 2,
+          "title": "退款后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "已支付且未核销的订单可以由店主或管理者执行模拟退款。退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+          "href": "/ai/knowledge/5?version=2",
+          "score": 0.66
+        },
+        {
+          "chunkId": "30",
+          "documentId": "9",
+          "version": 2,
+          "title": "库存回补规则",
+          "scope": "PLATFORM",
+          "excerpt": "取消和退款最多各回补一次数据库库存和 Redis 库存。回补通过持久化事件重试，重复投递不会重复增加库存。",
+          "href": "/ai/knowledge/9?version=2",
+          "score": 0.635
+        },
+        {
+          "chunkId": "25",
+          "documentId": "4",
+          "version": 2,
+          "title": "取消后是否可以重新购买",
+          "scope": "PLATFORM",
+          "excerpt": "未支付订单可以取消，超时关单也视为取消；取消后库存释放，用户可以重新购买同一活动。已支付订单不能直接取消，只能由商家按规则退款。",
+          "href": "/ai/knowledge/4?version=2",
+          "score": 0.601
+        },
+        {
+          "chunkId": "28",
+          "documentId": "7",
+          "version": 2,
+          "title": "销售期与核销期",
+          "scope": "PLATFORM",
+          "excerpt": "销售期只控制新预约，核销期单独配置。活动下架或销售结束后不能再抢购，但已经受理的预约仍按原规则继续落单。",
+          "href": "/ai/knowledge/7?version=2",
+          "score": 0.529
+        },
+        {
+          "chunkId": "27",
+          "documentId": "6",
+          "version": 2,
+          "title": "到店核销规则",
+          "scope": "PLATFORM",
+          "excerpt": "核销只允许已支付、处于核销期内且由授权门店的店员或店主操作。核销需要用户订单详情中的核销码。重复核销不会产生第二次核销效果。",
+          "href": "/ai/knowledge/6?version=2",
+          "score": 0.505
+        }
+      ],
+      "answer": "退款后是否可以重新购买取决于退款类型。已支付且未核销的订单可以由店主或管理者执行模拟退款，退款后库存回补，但购买资格保留，不能再次购买同一活动。已核销订单不能退款。",
+      "error": null,
+      "tool": null
+    }
+  ]
+}

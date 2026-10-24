@@ -12,7 +12,12 @@ Windows 本机的具体端口、环境检查和三个 PowerShell 终端启动步
 
 本机原有 MySQL 已占用 3306；在启动 Compose 和后端的各个 PowerShell 窗口中都先执行 `$env:MYSQL_PORT = '3307'`，使项目容器映射与后端连接保持一致。仓库默认值仍是 3306；这个环境变量是本机端口覆盖，不会更改原有 MySQL 服务。
 
-首次初始化将读取 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`。已有数据库卷不会再次执行这些脚本；修改表结构后应编写迁移并显式应用，不能靠重启自动更新。
+首次初始化将读取 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`。已有数据库卷不会再次执行这些脚本；新增表结构通过 `infra/mysql/migrations/` 下的版本化 SQL 和 `scripts/migrate.mjs` 显式应用。迁移脚本会在 `tb_schema_migration` 记录版本与校验和，重复执行会跳过已应用版本。
+
+```sh
+$env:MYSQL_PORT = '3307'
+node scripts/migrate.mjs
+```
 
 默认数据库名为 `project_full_stack`，用户 `fullstack`，密码为 `.env.example` 中的本地开发值。后端使用 `MYSQL_HOST/PORT/DATABASE/USER/PASSWORD`、`REDIS_HOST/PORT/PASSWORD/DATABASE` 环境变量。根目录 `.env` 仅由 Compose 自动读取，后端进程不会自动读取它。
 
@@ -32,9 +37,20 @@ Docker 未运行时，可以进行后端单元测试和前端构建，真实 API
 | GET | `/shop/of/name?current=1` | 分页店铺列表 |
 | GET | `/shop/{id}` | 店铺详情 |
 | GET | `/voucher/list/{shopId}` | 门店活动 |
-| POST | `/voucher-order/seckill/{id}` | 受理抢购，返回字符串订单 ID |
-| GET | `/voucher-order/{id}` | 本人订单状态 `{id,state,message,orderStatus?}` |
+| POST | `/voucher-order/seckill/{id}` | 受理抢购，返回字符串订单 ID；同用户重试返回原 ID |
+| GET | `/voucher-order/{id}` | 本人订单详情，含 `orderStatus`、金额、期限；已支付单返回核销 token |
+| GET | `/voucher-order?current=1` | 本人订单分页 |
+| POST | `/voucher-order/{id}/pay` | 本人模拟支付；幂等 |
+| POST | `/voucher-order/{id}/cancel` | 本人取消未支付单；取消后可重购 |
 | GET | `/merchant/workspace` | 当前用户商家角色与授权门店 |
+| POST | `/merchant/activities` | 店主发布活动，需 `Idempotency-Key` |
+| GET | `/merchant/activities` | 授权范围活动分页与准备状态 |
+| POST | `/merchant/activities/{id}/retry-publication` | 重试 Redis 准备/开闸 |
+| POST | `/merchant/activities/{id}/offline` | 同步关闸并下架 |
+| GET | `/merchant/orders` | 授权门店订单分页，不返回核销 token |
+| POST | `/merchant/orders/redeem` | 店员/店主凭 `{shopId, token}` 核销 |
+| POST | `/merchant/orders/{id}/refund` | 店主/管理者模拟退款 |
+| GET | `/merchant/audits` | 店主/管理者查看操作审计 |
 | GET | `/actuator/health` | 健康状态 |
 
 统一响应为 `{success,errorMsg?,data?,total?}`。`authorization` 请求头携带登录 Token；业务失败应读取 `success`，不能只判断 HTTP 200。订单 `state` 取 PROCESSING、CREATED 或 FAILED，业务订单状态另由 `orderStatus` 表示；数据库物理列仍为 `status`。

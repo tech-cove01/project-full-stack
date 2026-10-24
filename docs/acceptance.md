@@ -13,6 +13,7 @@
 | --- | --- | --- |
 | P0 真实联调 | 真实 MySQL + Redis + 后端 + 前端；基线初始化可复现 | P0 验收通过，实际端到端数据可追溯 |
 | P1 交易与 B 端闭环 | 活动发布、模拟支付、取消、超时关单、核销、退款、权限、审计及补偿事件 | 完整业务演示及竞争/越权验证通过 |
+| P1-D 业务 AI | 规则 RAG、实时只读工具、隔离记忆、商家公开 FAQ 维护 | [AI 验收](ai-acceptance.md) 的必需项通过，真实提供商与 Stub 结果分开 |
 | P2 可靠性/并发证据 | 故障命中、死信/对账/重放、限流、多账号并发与性能基线 | 原始证据支持结论，未决事项明确列出 |
 | P3 可选扩展 | ES 搜索等可独立关闭的扩展 | 不阻塞 P0–P2；只有通过扩展验收才写入已完成功能 |
 
@@ -104,7 +105,7 @@ P0-3 可以复用 `scripts/smoke.py`，但应补充实际 SQL/Redis 核验和浏
 ```text
 数据库剩余库存 = S0 - C
 Redis 剩余库存 = 数据库剩余库存
-同一 user_id + voucher_id 的 active 订单数 <= 1（active = orderStatus 1/2/3）
+同一 user_id + voucher_id 的资格占用订单数 <= 1（orderStatus 1/2/3/6；取消历史单 4 不占资格）
 购买资格标记：orderStatus 1/2/3/6 保留；4 在取消补偿完成后移除
 每个唯一受理 orderId = 已创建 / 确定失败 / 明确列出的未决，三者之一
 ```
@@ -126,7 +127,7 @@ FROM tb_voucher_order WHERE voucher_id = @accept_voucher_id
 GROUP BY status;
 
 SELECT user_id, voucher_id, COUNT(*) AS orders
-FROM tb_voucher_order WHERE voucher_id = @accept_voucher_id
+FROM tb_voucher_order WHERE voucher_id = @accept_voucher_id AND status IN (1, 2, 3, 6)
 GROUP BY user_id, voucher_id HAVING COUNT(*) > 1;
 
 SELECT 100 - COUNT(*) AS expected_remaining
@@ -165,6 +166,8 @@ HTTP 200 也要解析业务结果。429、售罄和重复请求在对应场景�
 Redis 当前基线使用 AOF `appendfsync everysec`，灾难情况下存在最近约 1 秒写入丢失风险，单实例也不提供故障切换保证。正常重启实验不代表断电或磁盘损坏实验；详见 [Redis 持久化文档](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/)。
 
 ## P3：可选扩展
+
+AI 最小版属于 P1-D 必需交付，P2 同步完成其评测与故障证据。API、权限和验收详见 [AI 设计](ai-design.md) 及 [AI 验收](ai-acceptance.md)，不以新增模型名称或一段聊天截图代替完成。
 
 ES 使用独立 profile，主业务不依赖其启动。至少验证：中文搜索/过滤结果、数据库与 outbox 同事务、重复及乱序投递不覆盖较新文档、写入至“可被搜索”的延迟、停写并追平后的同条件 DB/索引对账，以及 ES 不可用时真实降级行为。异步索引不能承诺实时聚合与数据库完全一致。
 

@@ -77,3 +77,4 @@ AI 后端提交 `803b9f6`、`6a59da6`，前端 `cbeef75`；完整报告见 [AI �
 - AI-12 PASS（stub 页面）：商家创建→发布→助手检索来源→打开公开来源；助手“我的订单”显示实时卡片；截图见 AI 报告。
 - 真实 provider（AI-11/13/14）未执行：没有 Key；没有 30 问评测、Recall@K、真实 usage/费用、真实 429/超时/取消。
 - 与设计的已知差距：未引入 LangChain4j（自实现 OpenAI-compatible provider）、未使用 `InMemoryEmbeddingStore`（进程内精确扫描）、发布为请求内同步嵌入而非后台 worker。
+- 嵌入模型隔离：`49db35c` 记录每个 provider 的 embedding model，索引加载时跳过不同模型/维度；切换 provider 时种子文档自动重建。该分支尚未用真实 provider 演练。

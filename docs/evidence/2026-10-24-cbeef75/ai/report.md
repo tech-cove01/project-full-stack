@@ -4,7 +4,7 @@
 
 ## 提交与配置
 
-- 后端 AI 知识与 Provider：`803b9f6`；会话/工具/SSE：`6a59da6`；前端助手与商家知识页：`cbeef75`。
+- 后端 AI 知识与 Provider：`803b9f6`；会话/工具/SSE：`6a59da6`；前端助手与商家知识页：`cbeef75`；嵌入模型隔离修复：`49db35c`。
 - AI 默认关闭：`AI_ENABLED=false`。关闭时应用启动、交易冒烟和全部 P0-P2 链路不依赖 AI。
 - 本次协议/权限/RAG 验证使用显式 `AI_ENABLED=true`、`AI_PROVIDER=stub`。**没有真实模型 Key，AI-11/AI-14 真实 provider 项未执行。**
 - Stub 配置：embedding 1024 维、chunk 400 字/overlap 50、topK 5、阈值 0.18、单实例精确扫描。
@@ -26,7 +26,7 @@
 | 编号 | 结果 | 证据 |
 | --- | --- | --- |
 | AI-01 | PASS | `AI_ENABLED=false` 启动，capabilities 返回 `enabled=false, mode=disabled`；`scripts/smoke.py` 真实交易冒烟 PASS |
-| AI-02 | 部分 | 18 条种子发布后索引加载；重启后仍从 DB 读取 READY 版本，未重新调用 embedding；未记录调用计数，未验证模型/维度切换拒绝 |
+| AI-02 | 部分 | 18 条种子发布后索引加载；重启后仍从 DB 读取 READY 版本，未重新调用 embedding；未记录调用计数。已实现“不同 embedding_model/维度不进入索引”，种子启动时若模型变更会重新发布；尚未用真实 provider 演练 |
 | AI-03 | PASS（stub） | “未支付取消后还能再买吗”返回“取消后是否可以重新购买”等来源；来源含 chunk/document/version/href；A1 停车问题不混入 A2 来源 |
 | AI-04 | PASS | “火星分店几点开门”返回无依据拒答，且不发送 sources 事件 |
 | AI-05 | 部分 | “查一下我的订单”返回本人 3 笔实时订单卡片，无 token；未在同一会话中先改事实再追问 |

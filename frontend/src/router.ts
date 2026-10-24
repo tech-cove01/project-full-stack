@@ -38,6 +38,24 @@ const router = createRouter({
       component: () => import('./views/MerchantOrdersView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/merchant/knowledge',
+      name: 'merchant-knowledge',
+      component: () => import('./views/MerchantKnowledgeView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/assistant',
+      name: 'assistant',
+      component: () => import('./views/AssistantView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/ai/knowledge/:id',
+      name: 'ai-knowledge',
+      component: () => import('./views/PublicKnowledgeView.vue'),
+      meta: { requiresAuth: true },
+    },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

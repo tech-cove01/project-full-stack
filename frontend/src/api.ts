@@ -1,9 +1,13 @@
 import type {
   Activity,
+  AiCapabilities,
+  AiConversation,
+  AiKnowledgeDoc,
   AuditLog,
   MerchantOrder,
   MerchantWorkspace,
   OrderStatus,
+  PublicKnowledge,
   Result,
   Shop,
   User,
@@ -13,6 +17,8 @@ import type {
 export const TOKEN_KEY = 'cityloop.token'
 export const LAST_ORDER_KEY = 'cityloop.last-order'
 const baseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
+
+export const apiBase = baseUrl
 
 export class ApiError extends Error {
   constructor(
@@ -154,6 +160,39 @@ export const api = {
     }),
   audits: (current: number, pageSize: number, signal?: AbortSignal) =>
     request<AuditLog[]>(`/merchant/audits?current=${current}&pageSize=${pageSize}`, { signal }),
+  aiCapabilities: () => request<AiCapabilities>('/ai/capabilities'),
+  createConversation: (shopId?: string) =>
+    request<AiConversation>('/ai/conversations', {
+      method: 'POST',
+      body: JSON.stringify(shopId ? { shopId } : {}),
+    }),
+  conversation: (id: string, signal?: AbortSignal) =>
+    request<AiConversation>(`/ai/conversations/${encodeURIComponent(id)}`, { signal }),
+  deleteConversation: (id: string) =>
+    request<null>(`/ai/conversations/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  publicKnowledge: (id: string, version?: number, signal?: AbortSignal) =>
+    request<PublicKnowledge>(
+      `/ai/knowledge/${encodeURIComponent(id)}${version ? `?version=${version}` : ''}`,
+      { signal },
+    ),
+  merchantKnowledge: (shopId: string, signal?: AbortSignal) =>
+    request<AiKnowledgeDoc[]>(`/merchant/knowledge?shopId=${encodeURIComponent(shopId)}`, { signal }),
+  createKnowledge: (shopId: string, title: string, body: string) =>
+    request<AiKnowledgeDoc>('/merchant/knowledge', {
+      method: 'POST',
+      body: JSON.stringify({ shopId, title, body }),
+    }),
+  updateKnowledge: (id: string, title: string, body: string) =>
+    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      body: JSON.stringify({ title, body }),
+    }),
+  publishKnowledge: (id: string) =>
+    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/publish`, { method: 'POST' }),
+  disableKnowledge: (id: string) =>
+    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/disable`, { method: 'POST' }),
+  rebuildKnowledge: (id: string) =>
+    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/rebuild`, { method: 'POST' }),
 }
 
 export function money(cents: number | string | null | undefined): string {

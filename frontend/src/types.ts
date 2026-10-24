@@ -120,3 +120,71 @@ export interface AuditLog {
   detail?: string
   createTime: string
 }
+
+export interface AiCapabilities {
+  enabled: boolean
+  ready: boolean
+  mode: string
+  reason: string
+  chatModel: string
+  embeddingModel: string
+  embeddingDimensions: number
+}
+
+export interface AiSource {
+  chunkId: string
+  documentId: string
+  version: number
+  title: string
+  scope: string
+  shopId?: string
+  excerpt: string
+  href: string
+}
+
+export interface AiToolCard {
+  type: 'order' | 'orders' | 'activities' | 'shops'
+  items?: Record<string, unknown>[]
+  [key: string]: unknown
+}
+
+export interface AiMessageView {
+  role: 'user' | 'assistant'
+  text: string
+  time: string
+  citationIds: string[]
+}
+
+export interface AiConversation {
+  id: string
+  shopId?: string
+  createdAt?: string
+  messages: AiMessageView[]
+}
+
+export interface AiKnowledgeDoc {
+  id: string
+  seedKey?: string
+  scope: string
+  shopId?: string
+  title: string
+  body: string
+  status: string
+  publishedVersion?: number
+  epoch: number
+  disabled: boolean
+  latestVersion?: number
+  latestStatus?: string
+  latestError?: string
+  updateTime?: string
+}
+
+export interface PublicKnowledge {
+  documentId: string
+  version: number
+  scope: string
+  shopId?: string
+  title: string
+  body: string
+  epoch: number
+}

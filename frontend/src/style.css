@@ -1,0 +1,698 @@
+:root {
+  font-family:
+    'Noto Sans SC',
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+  color: #193436;
+  background: #f7f8f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  --el-color-primary: #176a5d;
+  --el-color-primary-light-3: #55978d;
+  --el-color-primary-light-5: #89b6af;
+  --el-color-primary-light-7: #bad4cf;
+  --el-color-primary-light-8: #d1e3df;
+  --el-color-primary-light-9: #e8f2ef;
+  --el-color-primary-dark-2: #115347;
+  --el-border-radius-base: 8px;
+  --el-font-family: inherit;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input {
+  font: inherit;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+h1 {
+  font-size: 44px;
+  letter-spacing: -1.8px;
+  line-height: 1.35;
+  margin-bottom: 20px;
+}
+h2 {
+  font-size: 25px;
+  letter-spacing: -0.8px;
+  margin-bottom: 12px;
+}
+h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+p {
+  line-height: 1.85;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #9ccbbc;
+  outline-offset: 4px;
+}
+.app-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.site-header {
+  background: #fff;
+  border-bottom: 1px solid #e8ede7;
+}
+.header-inner {
+  max-width: 1200px;
+  min-height: 88px;
+  margin: auto;
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  gap: 44px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  white-space: nowrap;
+}
+.brand small {
+  display: block;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: #788985;
+  margin-top: 1px;
+}
+.brand-mark {
+  width: 39px;
+  height: 43px;
+  border-radius: 13px 13px 13px 3px;
+  display: grid;
+  place-items: center;
+  background: #176a5d;
+  color: white;
+  font-size: 29px;
+}
+nav {
+  display: flex;
+  gap: 27px;
+  font-size: 14px;
+}
+nav a {
+  padding: 10px 0;
+  color: #73817d;
+  white-space: nowrap;
+}
+nav a.active {
+  color: #176a5d;
+  border-bottom: 2px solid #176a5d;
+}
+.account-actions {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nickname {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+.main-content {
+  max-width: 1200px;
+  width: 100%;
+  margin: auto;
+  padding: 38px 32px 70px;
+  flex: 1;
+}
+.site-footer {
+  max-width: 1136px;
+  width: calc(100% - 64px);
+  margin: auto;
+  border-top: 1px solid #e2e8e1;
+  padding: 25px 0;
+  display: flex;
+  justify-content: space-between;
+  color: #8c9892;
+  font-size: 12px;
+}
+.eyebrow {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 2.2px;
+  font-weight: 600;
+  color: #58877b;
+  margin-bottom: 17px;
+}
+.hero {
+  border-radius: 20px;
+  background: #e5eee5;
+  min-height: 310px;
+  padding: 46px;
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  align-items: center;
+  gap: 50px;
+}
+.hero p,
+.login-intro p,
+.merchant-header p {
+  color: #6a8176;
+  font-size: 14px;
+}
+.hero h1 {
+  margin-bottom: 15px;
+}
+.search-box {
+  padding: 27px;
+  background: #fff;
+  border-radius: 13px;
+  box-shadow: 0 12px 40px #315c4110;
+}
+.search-box label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 16px;
+  font-size: 16px;
+}
+.search-row {
+  display: flex;
+  gap: 10px;
+}
+.search-row .el-input {
+  min-width: 0;
+}
+.search-box > span {
+  display: block;
+  color: #9ba59f;
+  font-size: 11px;
+  margin-top: 14px;
+}
+.section-block {
+  margin-top: 42px;
+}
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+  margin-bottom: 22px;
+}
+.section-heading .eyebrow {
+  margin-bottom: 8px;
+}
+.section-heading h2 {
+  margin: 0;
+}
+.muted {
+  color: #819089;
+  font-size: 13px;
+}
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 23px;
+}
+.shop-card {
+  border: 1px solid #e4e9e1;
+  border-radius: 13px;
+  overflow: hidden;
+  background: #fff;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+.shop-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px #254d3710;
+}
+.shop-cover {
+  height: 170px;
+  width: 100%;
+  display: block;
+}
+.image-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #e0e9df, #f3eee2);
+  color: #8aab91;
+  letter-spacing: 3px;
+  font-size: 22px;
+}
+.shop-card-body {
+  padding: 20px;
+}
+.shop-title-row {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  justify-content: space-between;
+}
+.shop-title-row h3 {
+  font-size: 16px;
+  line-height: 1.6;
+}
+.score {
+  color: #b97822;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 600;
+}
+.shop-card-body p {
+  font-size: 12px;
+  color: #8b968f;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin-bottom: 18px;
+}
+.shop-meta {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid #eef1ea;
+  padding-top: 14px;
+  color: #718078;
+  font-size: 12px;
+}
+.load-more {
+  text-align: center;
+  margin-top: 30px;
+}
+.panel {
+  border: 1px solid #e3e9e0;
+  border-radius: 16px;
+  background: #fff;
+  padding: 32px;
+}
+.text-link {
+  font-size: 13px;
+  color: #176a5d;
+}
+.login-layout {
+  display: grid;
+  grid-template-columns: 1fr 440px;
+  gap: 70px;
+  align-items: center;
+  max-width: 960px;
+  margin: 44px auto;
+}
+.login-intro h1 {
+  font-size: 50px;
+}
+.login-intro .text-link {
+  display: inline-block;
+  margin-top: 30px;
+}
+.login-panel {
+  padding: 36px;
+}
+.login-panel .el-form {
+  margin-top: 28px;
+}
+.login-panel .el-alert {
+  margin-top: 18px;
+}
+.code-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.code-row .el-input {
+  min-width: 0;
+}
+.full-width {
+  width: 100%;
+}
+.dev-note {
+  font-size: 11px;
+  color: #8a978e;
+  margin: 24px 0 0;
+  padding-top: 20px;
+  border-top: 1px solid #edf0e8;
+}
+.page-top {
+  margin-bottom: 22px;
+}
+.shop-detail-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 35px;
+  overflow: hidden;
+  padding: 36px;
+}
+.shop-info {
+  align-self: center;
+}
+.shop-info h1 {
+  font-size: 34px;
+}
+.shop-info p {
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+.detail-cover {
+  width: 320px;
+  min-width: 240px;
+  height: 230px;
+  border-radius: 10px;
+}
+.voucher-list {
+  display: grid;
+  gap: 15px;
+}
+.voucher-card {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  border: 1px solid #e5e9e0;
+  border-radius: 13px;
+  padding: 25px;
+  background: #fff;
+}
+.voucher-value {
+  width: 155px;
+  min-width: 155px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  color: #c27743;
+  border-right: 1px dashed #e5dfd0;
+  padding-right: 20px;
+}
+.voucher-value strong {
+  font-size: 31px;
+  letter-spacing: -1px;
+  margin-left: 3px;
+}
+.voucher-value small {
+  font-size: 11px;
+  color: #a2988c;
+}
+.voucher-copy {
+  flex: 1;
+}
+.voucher-copy h3 {
+  margin: 8px 0;
+}
+.voucher-copy p {
+  margin-bottom: 7px;
+  font-size: 12px;
+}
+.rules {
+  white-space: pre-line;
+}
+.space-bottom {
+  margin-bottom: 20px;
+}
+.order-layout {
+  max-width: 680px;
+  margin: 45px auto;
+  text-align: center;
+  padding: 48px;
+}
+.order-layout h1 {
+  font-size: 27px;
+  letter-spacing: -0.8px;
+}
+.status-symbol {
+  height: 72px;
+  width: 72px;
+  margin: 25px auto;
+  border-radius: 50%;
+  background: #f6ebd8;
+  color: #ba8a34;
+  display: grid;
+  place-items: center;
+  font-size: 45px;
+  font-weight: 500;
+}
+.status-symbol.created {
+  background: #e2f1e7;
+  color: #388160;
+}
+.status-symbol.failed {
+  background: #f9e7df;
+  color: #b67355;
+}
+.order-id {
+  font-size: 12px;
+  color: #667d72;
+  overflow-wrap: anywhere;
+}
+.order-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+.order-layout .el-alert {
+  text-align: left;
+  margin-top: 25px;
+}
+.merchant-header {
+  padding: 25px 0 38px;
+}
+.merchant-header h1 {
+  font-size: 44px;
+}
+.merchant-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+}
+.merchant-workspace {
+  margin-bottom: 25px;
+}
+.merchant-workspace .section-heading {
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.merchant-workspace .section-heading .el-tag {
+  flex-shrink: 0;
+}
+.merchant-workspace .section-heading p {
+  margin-bottom: 0;
+}
+.merchant-scope {
+  margin: 20px 0 0;
+}
+.merchant-grid p,
+.merchant-note p {
+  font-size: 13px;
+  color: #7b8981;
+}
+.step-number {
+  display: block;
+  font-size: 12px;
+  color: #a8baac;
+  margin-bottom: 28px;
+}
+.merchant-note {
+  margin-top: 25px;
+}
+.merchant-note p:last-of-type {
+  font-size: 12px;
+}
+@media (max-width: 950px) {
+  .header-inner {
+    gap: 26px;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  nav {
+    gap: 16px;
+  }
+  .main-content {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+  .hero {
+    padding: 30px;
+    gap: 28px;
+  }
+  h1 {
+    font-size: 36px;
+  }
+  .shop-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .login-layout {
+    gap: 35px;
+    grid-template-columns: 1fr 400px;
+  }
+  .login-intro h1 {
+    font-size: 40px;
+  }
+  .detail-cover {
+    width: 260px;
+  }
+  .merchant-grid {
+    gap: 15px;
+  }
+  .merchant-grid .panel {
+    padding: 24px;
+  }
+}
+@media (max-width: 680px) {
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 16px 20px;
+  }
+  .brand {
+    font-size: 22px;
+  }
+  .brand small {
+    display: none;
+  }
+  .account-actions {
+    margin-left: auto;
+  }
+  .nickname {
+    max-width: 80px;
+  }
+  nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    border-top: 1px solid #f0f2ed;
+    padding-top: 3px;
+    font-size: 12px;
+    gap: 32px;
+  }
+  .main-content {
+    padding: 24px 18px 45px;
+  }
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 27px;
+    gap: 15px;
+  }
+  .hero h1 {
+    font-size: 34px;
+  }
+  .hero p {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .search-box {
+    padding: 20px;
+  }
+  .shop-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+  .shop-cover {
+    height: 190px;
+  }
+  .section-heading {
+    align-items: center;
+  }
+  .section-heading > .muted {
+    font-size: 10px;
+  }
+  .section-heading h2 {
+    font-size: 22px;
+  }
+  .section-block {
+    margin-top: 32px;
+  }
+  .eyebrow {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+  }
+  .login-layout {
+    grid-template-columns: 1fr;
+    margin: 12px auto;
+    gap: 25px;
+  }
+  .login-intro h1 {
+    font-size: 33px;
+  }
+  .login-intro h1 br {
+    display: none;
+  }
+  .login-intro .text-link {
+    margin-top: 0;
+  }
+  .login-panel {
+    padding: 25px;
+  }
+  .shop-detail-hero {
+    flex-direction: column-reverse;
+    padding: 24px;
+    gap: 24px;
+  }
+  .detail-cover {
+    width: 100%;
+    height: 200px;
+  }
+  .shop-info h1 {
+    font-size: 28px;
+  }
+  .voucher-card {
+    flex-wrap: wrap;
+    gap: 17px;
+    padding: 21px;
+  }
+  .voucher-value {
+    width: 115px;
+    min-width: 115px;
+  }
+  .voucher-value strong {
+    font-size: 25px;
+  }
+  .voucher-copy {
+    min-width: 120px;
+  }
+  .voucher-card > .el-button {
+    width: 100%;
+    margin: 0;
+  }
+  .order-layout {
+    margin: 10px auto;
+    padding: 30px 22px;
+  }
+  .order-layout h1 {
+    font-size: 23px;
+  }
+  .merchant-header h1 {
+    font-size: 34px;
+  }
+  .merchant-grid {
+    grid-template-columns: 1fr;
+  }
+  .merchant-grid .panel {
+    padding: 25px;
+  }
+  .step-number {
+    margin-bottom: 15px;
+  }
+  .site-footer {
+    width: calc(100% - 36px);
+    font-size: 10px;
+  }
+  .panel {
+    border-radius: 12px;
+  }
+}

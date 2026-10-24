@@ -5,6 +5,8 @@ public interface AiProvider {
     boolean ready();
     String mode();
     String reason();
+    /** Identifies the vectors written by this provider; incompatible vectors must not be mixed. */
+    String embeddingModel();
     float[] embed(String text);
     String chat(String systemPrompt, String userPrompt);
 }

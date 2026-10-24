@@ -8,6 +8,7 @@ public class DisabledAiProvider implements AiProvider {
     @Override public boolean ready() { return false; }
     @Override public String mode() { return "disabled"; }
     @Override public String reason() { return reason; }
+    @Override public String embeddingModel() { return "none"; }
     @Override public float[] embed(String text) { throw new AiProviderException(reason); }
     @Override public String chat(String systemPrompt, String userPrompt) { throw new AiProviderException(reason); }
 }

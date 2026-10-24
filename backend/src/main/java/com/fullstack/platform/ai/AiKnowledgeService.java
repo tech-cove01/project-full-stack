@@ -95,7 +95,7 @@ public class AiKnowledgeService {
             throw new ResponseStatusException(HttpStatus.CONFLICT,
                     "知识块超过 " + MAX_CHUNKS + " 上限，拒绝发布");
         }
-        String model = "stub".equals(provider.mode()) ? "stub-lexical" : properties.getEmbeddingModel();
+        String model = provider.embeddingModel();
         int dimension = properties.getEmbeddingDimensions();
         String hash = hash(document.body());
         try {
@@ -238,7 +238,25 @@ public class AiKnowledgeService {
 
     public void publishSeedIfReady(long documentId) {
         Document document = requireDocument(documentId);
-        if (!provider.ready() || document.disabled() || document.publishedVersion() != null) return;
+        if (!provider.ready() || document.disabled()) return;
+        if (document.publishedVersion() == null) {
+            publishSeed(documentId);
+            return;
+        }
+        try {
+            String model = jdbc.queryForObject("""
+                    SELECT embedding_model FROM tb_ai_document_version
+                    WHERE document_id = ? AND version = ?
+                    """, String.class, documentId, document.publishedVersion());
+            if (!provider.embeddingModel().equals(model)) {
+                publishSeed(documentId);
+            }
+        } catch (RuntimeException e) {
+            // A missing/old version will be republished on the next start; keep the old pointer.
+        }
+    }
+
+    private void publishSeed(long documentId) {
         try {
             publish(documentId, 0L, "SYSTEM");
         } catch (RuntimeException e) {

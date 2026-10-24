@@ -16,6 +16,7 @@ public class StubAiProvider implements AiProvider {
     @Override public boolean ready() { return true; }
     @Override public String mode() { return "stub"; }
     @Override public String reason() { return "deterministic stub provider; real model not configured"; }
+    @Override public String embeddingModel() { return "stub-lexical"; }
 
     @Override
     public float[] embed(String text) {

@@ -20,12 +20,15 @@ public class AiIndexService {
     private final JdbcTemplate jdbc;
     private final ObjectMapper objectMapper;
     private final AiProperties properties;
+    private final AiProvider provider;
     private volatile List<IndexedChunk> chunks = List.of();
 
-    public AiIndexService(JdbcTemplate jdbc, ObjectMapper objectMapper, AiProperties properties) {
+    public AiIndexService(JdbcTemplate jdbc, ObjectMapper objectMapper, AiProperties properties,
+                          AiProvider provider) {
         this.jdbc = jdbc;
         this.objectMapper = objectMapper;
         this.properties = properties;
+        this.provider = provider;
     }
 
     @PostConstruct
@@ -34,7 +37,7 @@ public class AiIndexService {
             List<IndexedChunk> loaded = new ArrayList<>();
             jdbc.query("""
                     SELECT c.id, c.document_id, c.version, c.epoch, c.content, c.embedding,
-                           d.title, d.scope, d.shop_id
+                           c.embedding_model, d.title, d.scope, d.shop_id
                     FROM tb_ai_chunk c
                     JOIN tb_ai_document d ON d.id = c.document_id
                     JOIN tb_ai_document_version v ON v.document_id = c.document_id AND v.version = c.version
@@ -43,6 +46,11 @@ public class AiIndexService {
                 float[] embedding = readVector(rs.getString("embedding"));
                 if (embedding.length != properties.getEmbeddingDimensions()) {
                     log.warn("Skip AI chunk {} with dimension {}", rs.getLong("id"), embedding.length);
+                    return;
+                }
+                if (!provider.embeddingModel().equals(rs.getString("embedding_model"))) {
+                    log.warn("Skip AI chunk {} with embedding model {}", rs.getLong("id"),
+                            rs.getString("embedding_model"));
                     return;
                 }
                 loaded.add(new IndexedChunk(

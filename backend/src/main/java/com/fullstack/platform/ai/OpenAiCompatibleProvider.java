@@ -33,6 +33,7 @@ public class OpenAiCompatibleProvider implements AiProvider {
 
     @Override public boolean ready() { return !properties.getApiKey().isBlank(); }
     @Override public String mode() { return "openai-compatible"; }
+    @Override public String embeddingModel() { return properties.getEmbeddingModel(); }
 
     @Override public String reason() {
         return ready() ? "configured" : "AI_API_KEY is not configured";

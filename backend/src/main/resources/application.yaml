@@ -41,6 +41,19 @@ management:
   endpoint:
     health:
       show-details: never
+ai:
+  enabled: ${AI_ENABLED:false}
+  provider: ${AI_PROVIDER:stub}
+  api-key: ${AI_API_KEY:}
+  base-url: ${AI_BASE_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+  chat-model: ${AI_CHAT_MODEL:qwen-plus}
+  embedding-model: ${AI_EMBEDDING_MODEL:text-embedding-v4}
+  embedding-dimensions: ${AI_EMBEDDING_DIMENSIONS:1024}
+  top-k: ${AI_TOP_K:5}
+  min-score: ${AI_MIN_SCORE:0.18}
+  max-input-chars: ${AI_MAX_INPUT_CHARS:2000}
+  max-concurrent: ${AI_MAX_CONCURRENT:4}
+  max-per-minute: ${AI_MAX_PER_MINUTE:20}
 app:
   pay-timeout-minutes: ${PAY_TIMEOUT_MINUTES:15}
   rate-limit:

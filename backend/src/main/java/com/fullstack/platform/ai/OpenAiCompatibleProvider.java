@@ -21,7 +21,7 @@ public class OpenAiCompatibleProvider implements AiProvider {
         this.objectMapper = objectMapper;
         SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
         factory.setConnectTimeout(10_000);
-        factory.setReadTimeout(30_000);
+        factory.setReadTimeout(Math.max(10, properties.getChatTimeoutSeconds()) * 1000);
         RestClient.Builder builder = RestClient.builder()
                 .baseUrl(properties.getBaseUrl())
                 .requestFactory(factory);

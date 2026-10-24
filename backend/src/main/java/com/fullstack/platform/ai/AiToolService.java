@@ -36,7 +36,8 @@ public class AiToolService {
                 || text.contains("订单状态怎么样") || text.contains("订单进度"))) {
             return recentOrders(userId);
         }
-        if ((text.contains("活动") || text.contains("优惠券") || text.contains("库存") || text.contains("价格")
+        if ((text.contains("有什么活动") || text.contains("活动库存") || text.contains("活动价格")
+                || text.contains("优惠券") || text.contains("库存") || text.contains("价格")
                 || text.contains("优惠"))
                 && shopId != null) {
             return activities(shopId);

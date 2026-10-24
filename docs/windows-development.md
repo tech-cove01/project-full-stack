@@ -22,7 +22,7 @@
 | Windows 原有 MySQL | `mysqld` 正在监听 3306 | 保留该服务，本项目 MySQL 建议改映射到 3307 |
 | 3307 / 6379 / 8081 / 5173 | 检查时未发现监听 | 只是当时状态，启动前仍需复查 |
 | WSL 状态命令 | 受限执行上下文返回 `E_ACCESSDENIED` | 属于读取限制；Docker Server 的 WSL 2 内核信息已经读取成功，不能据此断言 WSL 未安装或损坏 |
-| k6 | PATH 中未发现 | 进行负载实验时再安装 Windows 稳定版即可 |
+| k6 | 已安装 2.2.0（`C:\Program Files\k6\k6.exe`） | 新开终端若仍找不到命令，使用完整路径或重开 PowerShell |
 | 真实服务联调 / 性能 / 故障恢复 | 尚未验收 | 健康检查、冒烟和压测需按下文执行并记录结果 |
 
 依赖版本分别由 `backend/pom.xml`、`frontend/package-lock.json` 和 `compose.yaml` 管理。MySQL `8.4`、Redis `7.4-alpine` 是版本系列标签，重拉可能获得更新补丁；压测报告应记录实际镜像版本或 digest。

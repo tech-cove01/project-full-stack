@@ -90,8 +90,23 @@ export const api = {
     request<MerchantWorkspace>('/merchant/workspace', { signal }),
 }
 
-export function money(cents: number | undefined): string {
-  return ((cents ?? 0) / 100).toFixed(2)
+export function money(cents: number | string | null | undefined): string {
+  if (cents == null) return '0.00'
+
+  let value: bigint
+  if (typeof cents === 'number') {
+    if (!Number.isSafeInteger(cents)) return '—'
+    value = BigInt(cents)
+  } else {
+    const text = cents.trim()
+    if (!text) return '0.00'
+    if (!/^-?\d+$/.test(text)) return '—'
+    value = BigInt(text)
+  }
+
+  const negative = value < 0n
+  const absolute = negative ? -value : value
+  return `${negative ? '-' : ''}${absolute / 100n}.${(absolute % 100n).toString().padStart(2, '0')}`
 }
 
 // Store returned IDs as strings so Java Long values never lose precision in the browser.

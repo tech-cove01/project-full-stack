@@ -10,6 +10,7 @@
 | Chrome + Mock API | 9 项场景通过 | 浏览、开发验证码、登录跳转、单次抢购提交、异步完成、大整数 ID、刷新恢复、商家门店、401；不等于真实后端联调 |
 | Docker Compose 配置检查 | 通过 | `docker compose config --quiet`；未实际创建服务 |
 | 文档链接和迁移环境检查 | 通过 | 本地链接有效；未导入原课程环境地址和凭证；构建产物/本地环境文件已忽略 |
+| GitHub Actions 干净环境构建 | 前后端通过 | Java 21 / Node.js 24；[首批基线运行记录](https://github.com/tech-cove01/project-full-stack/actions/runs/40091125874) |
 | MySQL + Redis HTTP 联调 | 未执行 | 本机 Docker Desktop 引擎不可用；提供 `scripts/smoke.py` 供环境就绪后运行 |
 | k6 / 并发与故障实验 | 未执行 | 已提供店铺查询负载脚本，尚无性能结果 |
 

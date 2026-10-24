@@ -17,7 +17,7 @@ export interface Shop {
   images?: string
   area?: string
   address?: string
-  avgPrice?: number
+  avgPrice?: number | string
   sold?: number
   comments?: number
   score?: number
@@ -30,8 +30,8 @@ export interface Voucher {
   title: string
   subTitle?: string
   rules?: string
-  payValue: number
-  actualValue: number
+  payValue: number | string
+  actualValue: number | string
   type: number
   stock?: number
   beginTime?: string

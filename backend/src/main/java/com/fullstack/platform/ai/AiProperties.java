@@ -16,6 +16,7 @@ public class AiProperties {
     private int maxInputChars = 2000;
     private int maxConcurrent = 4;
     private int maxPerMinute = 20;
+    private int maxOutputTokens = 600;
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -41,4 +42,6 @@ public class AiProperties {
     public void setMaxConcurrent(int maxConcurrent) { this.maxConcurrent = maxConcurrent; }
     public int getMaxPerMinute() { return maxPerMinute; }
     public void setMaxPerMinute(int maxPerMinute) { this.maxPerMinute = maxPerMinute; }
+    public int getMaxOutputTokens() { return maxOutputTokens; }
+    public void setMaxOutputTokens(int maxOutputTokens) { this.maxOutputTokens = maxOutputTokens; }
 }

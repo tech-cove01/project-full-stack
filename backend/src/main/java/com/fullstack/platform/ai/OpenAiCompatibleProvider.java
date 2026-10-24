@@ -71,6 +71,7 @@ public class OpenAiCompatibleProvider implements AiProvider {
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("model", properties.getChatModel());
         body.put("temperature", 0.1);
+        body.put("max_tokens", properties.getMaxOutputTokens());
         body.put("messages", List.of(
                 Map.of("role", "system", "content", systemPrompt),
                 Map.of("role", "user", "content", userPrompt)));

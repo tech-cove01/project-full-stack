@@ -140,6 +140,7 @@ export interface AiSource {
   shopId?: string
   excerpt: string
   href: string
+  score?: number
 }
 
 export interface AiToolCard {

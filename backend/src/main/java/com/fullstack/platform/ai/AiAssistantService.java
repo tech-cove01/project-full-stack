@@ -182,6 +182,7 @@ public class AiAssistantService {
                 source.put("shopId", chunk.shopId() == null ? null : chunk.shopId().toString());
                 source.put("excerpt", excerpt(chunk.content()));
                 source.put("href", "/ai/knowledge/" + chunk.documentId() + "?version=" + chunk.version());
+                source.put("score", Math.round(hit.score() * 1000.0) / 1000.0);
                 sources.add(source);
                 citationIds.add(citationId);
                 evidence.append("[").append(ordinal++).append("] ").append(chunk.title())

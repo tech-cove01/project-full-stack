@@ -7,6 +7,7 @@ Requires the localhost dev environment and MYSQL_PORT=3307 for this workstation.
 """
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import argparse
 import json
 import time
 import uuid
@@ -23,7 +24,7 @@ def load_helpers():
     return namespace
 
 
-def main():
+def main(output_path=None):
     helpers = load_helpers()
     api, request, db = (helpers[name] for name in ('api', 'request', 'db'))
     db('SELECT 1')
@@ -83,10 +84,13 @@ def main():
                 cleanup()
             except Exception as error:
                 evidence['cleanupErrors'].append(f'{label}: {error}')
-        out = Path(__file__).resolve().parents[1] / 'reconcile-processing-f6c96ac.json'
+        out = (Path(output_path) if output_path else Path(__file__).resolve().parents[1]
+               / f'reconcile-processing-{int(time.time())}.json')
         out.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         print(json.dumps(evidence, ensure_ascii=False))
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', help='New result file; use a SHA-specific path to preserve prior evidence')
+    main(parser.parse_args().output)

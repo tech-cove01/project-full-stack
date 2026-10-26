@@ -1,0 +1,15 @@
+{
+  "activityId": "1051",
+  "eventId": "review-snapshot-6628b1cd3e39",
+  "expected": "409 when an event commits before the activity row lock is acquired",
+  "cleanupErrors": [],
+  "versionBefore": 1,
+  "isolation": "REPEATABLE-READ",
+  "holderExit": 0,
+  "observedReconcileLockWait": true,
+  "http": 200,
+  "apiSuccess": true,
+  "eventStatusAfter": "PROCESSING",
+  "versionAfter": "3",
+  "finding": "BUG_REPRODUCED_LATE_EVENT_MISSED_BY_SNAPSHOT"
+}

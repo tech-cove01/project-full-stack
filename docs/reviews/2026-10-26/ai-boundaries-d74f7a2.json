@@ -1,0 +1,52 @@
+{
+  "provider": "stub",
+  "cleanupErrors": [],
+  "sensitive": {
+    "http": {
+      "login_token": 400,
+      "code_is": 400,
+      "code_colon": 400,
+      "plain_code": 400
+    },
+    "callsBefore": {
+      "provider": "stub",
+      "chat": "1",
+      "embed": "1"
+    },
+    "callsAfter": {
+      "provider": "stub",
+      "chat": "1",
+      "embed": "1"
+    },
+    "finding": "PASS"
+  },
+  "lockRetry": {
+    "lockedHttp": 409,
+    "dedupeAfterReject": 0,
+    "retryHttp": 200,
+    "events": [
+      "meta",
+      "status",
+      "status",
+      "sources",
+      "answer",
+      "done"
+    ],
+    "finding": "PASS"
+  },
+  "dailyBudget": {
+    "http": 429,
+    "message": "今日 AI 调用预算已用完",
+    "callsBefore": {
+      "provider": "stub",
+      "chat": "2",
+      "embed": "2"
+    },
+    "callsAfter": {
+      "provider": "stub",
+      "chat": "2",
+      "embed": "2"
+    },
+    "finding": "PASS"
+  }
+}

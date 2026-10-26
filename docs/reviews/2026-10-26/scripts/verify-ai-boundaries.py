@@ -6,8 +6,10 @@ No merchant document is modified and no external model is called.
 """
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+import argparse
 import json
 import secrets
+import time
 
 
 def helpers(filename, marker):
@@ -20,7 +22,7 @@ def helpers(filename, marker):
     return namespace
 
 
-def main():
+def main(output_path=None):
     ai = helpers('verify-ai.py', '\ntry:\n    main()')
     local = helpers('verify-local.py',
         "\nfor name, check in (('trade', trade_regression), ('lua_faults', lua_fault_repro)):")
@@ -90,10 +92,13 @@ def main():
                 redis.command('DEL', lock, dedupe)
         except Exception as error:
             evidence['cleanupErrors'].append(str(error))
-        out = Path(__file__).resolve().parents[1] / 'ai-boundaries-f6c96ac.json'
+        out = (Path(output_path) if output_path else Path(__file__).resolve().parents[1]
+               / f'ai-boundaries-{int(time.time())}.json')
         out.write_text(json.dumps(evidence, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
         print(json.dumps(evidence, ensure_ascii=False))
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--output', help='New result file; use a SHA-specific path to preserve prior evidence')
+    main(parser.parse_args().output)

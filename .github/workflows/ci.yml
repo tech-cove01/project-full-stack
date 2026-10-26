@@ -92,6 +92,11 @@ jobs:
         env:
           GO_INTEGRATION: '1'
           GIN_MODE: release
+      - name: Order admission persistence and recovery against real MySQL and Redis
+        run: go test -race -count=1 -p 1 -v ./internal/orderadmission ./internal/order ./internal/orderstream
+        env:
+          GO_INTEGRATION: '1'
+          GIN_MODE: release
       - run: go build -trimpath -o bin/api ./cmd/api
       - run: python3 ../scripts/go-bootstrap-smoke.py --binary bin/api --output bootstrap-result.json
       - uses: actions/upload-artifact@v4

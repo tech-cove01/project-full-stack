@@ -58,6 +58,7 @@ ai:
   chat-timeout-seconds: ${AI_CHAT_TIMEOUT_SECONDS:60}
   daily-budget: ${AI_DAILY_BUDGET:200}
   turn-timeout-seconds: ${AI_TURN_TIMEOUT_SECONDS:90}
+  stub-delay-millis: ${AI_STUB_DELAY_MS:0}
 app:
   pay-timeout-minutes: ${PAY_TIMEOUT_MINUTES:15}
   rate-limit:

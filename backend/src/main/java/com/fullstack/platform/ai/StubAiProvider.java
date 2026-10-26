@@ -8,6 +8,7 @@ import java.util.Locale;
  */
 public class StubAiProvider implements AiProvider {
     private final int dimensions;
+    private final int chatDelayMillis;
     /** Call counters make it possible to prove a rejected request never reached the provider. */
     private final java.util.concurrent.atomic.AtomicLong embedCalls =
             new java.util.concurrent.atomic.AtomicLong();
@@ -16,6 +17,7 @@ public class StubAiProvider implements AiProvider {
 
     public StubAiProvider(AiProperties properties) {
         this.dimensions = properties.getEmbeddingDimensions();
+        this.chatDelayMillis = properties.getStubDelayMillis();
     }
 
     public long embedCalls() { return embedCalls.get(); }
@@ -56,6 +58,14 @@ public class StubAiProvider implements AiProvider {
     @Override
     public String chat(String systemPrompt, String userPrompt) {
         chatCalls.incrementAndGet();
+        if (chatDelayMillis > 0) {
+            // Test hook: holds the turn open so a delete or lease loss can land mid-flight.
+            try {
+                Thread.sleep(chatDelayMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
         String evidence = between(userPrompt, "【证据】", "【问题】");
         if (evidence.isBlank()) {
             return "（stub）没有检索到可用依据，无法回答。";

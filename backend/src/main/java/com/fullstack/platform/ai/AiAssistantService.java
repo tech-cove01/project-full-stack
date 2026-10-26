@@ -159,6 +159,10 @@ public class AiAssistantService {
 
             AiToolService.ToolResult tool = tools.route(context.userId(), shopId, message);
             if (tool != null) {
+                if (!canFinish(context, conversationId, lockToken, deadline)) {
+                    dedupe.fail(context.userId(), conversationId, clientMessageId);
+                    return;
+                }
                 send(emitter, "status", Map.of("stage", "tool"));
                 if (tool.card() != null) send(emitter, "tool_result", tool.card());
                 Map<String, Object> answer = Map.of("text", tool.text(), "citationIds", tool.citationIds());
@@ -177,6 +181,10 @@ public class AiAssistantService {
             List<AiIndexService.Retrieved> hits = index.search(query, shopId,
                     properties.getTopK(), properties.getMinScore());
             if (hits.isEmpty()) {
+                if (!canFinish(context, conversationId, lockToken, deadline)) {
+                    dedupe.fail(context.userId(), conversationId, clientMessageId);
+                    return;
+                }
                 Map<String, Object> answer = Map.of("text",
                         "没有查到可以支持这个问题的已发布规则，我不能凭空承诺优惠、退款或门店规则。",
                         "citationIds", List.of());
@@ -222,6 +230,10 @@ public class AiAssistantService {
                         .append(chunk.content()).append("\n");
             }
             if (sources.isEmpty()) {
+                if (!canFinish(context, conversationId, lockToken, deadline)) {
+                    dedupe.fail(context.userId(), conversationId, clientMessageId);
+                    return;
+                }
                 Map<String, Object> answer = Map.of("text", "资料刚刚更新，请重新提问。", "citationIds", List.of());
                 send(emitter, "answer", answer);
                 send(emitter, "done", Map.of("messageId", clientMessageId, "usage", "none"));
@@ -252,8 +264,7 @@ public class AiAssistantService {
             }
             // The lease may have expired and been taken over, or the conversation deleted, while
             // the model was running. Such a turn must not stream or persist its result.
-            if (!locks.owns(context.userId(), conversationId, lockToken)
-                    || !conversations.exists(context.userId(), conversationId)) {
+            if (!canFinish(context, conversationId, lockToken, deadline)) {
                 dedupe.fail(context.userId(), conversationId, clientMessageId);
                 return;
             }
@@ -380,6 +391,19 @@ public class AiAssistantService {
         if (System.nanoTime() > deadline) {
             throw new AiProviderException("turn deadline exceeded");
         }
+    }
+
+    /**
+     * Every terminal branch (tool answer, no evidence, stale sources, generated answer) must
+     * confirm the turn is still within its deadline, still owns the conversation lease and that
+     * the conversation was not deleted. Otherwise a late task could stream or persist a result
+     * after the user deleted the conversation or a newer turn took over.
+     */
+    private boolean canFinish(AiAuthContext context, String conversationId, String lockToken,
+                              long deadline) {
+        return System.nanoTime() <= deadline
+                && locks.owns(context.userId(), conversationId, lockToken)
+                && conversations.exists(context.userId(), conversationId);
     }
 
     private static List<String> splitDeps(String value) {

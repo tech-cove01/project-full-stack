@@ -22,6 +22,8 @@ public class AiProperties {
     private int dailyBudget = 200;
     /** Upper bound for one whole turn, including retrieval and generation. */
     private int turnTimeoutSeconds = 90;
+    /** Stub-only artificial chat latency, used to exercise in-flight cancellation windows. */
+    private int stubDelayMillis = 0;
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -55,4 +57,6 @@ public class AiProperties {
     public void setDailyBudget(int dailyBudget) { this.dailyBudget = dailyBudget; }
     public int getTurnTimeoutSeconds() { return turnTimeoutSeconds; }
     public void setTurnTimeoutSeconds(int turnTimeoutSeconds) { this.turnTimeoutSeconds = turnTimeoutSeconds; }
+    public int getStubDelayMillis() { return stubDelayMillis; }
+    public void setStubDelayMillis(int stubDelayMillis) { this.stubDelayMillis = stubDelayMillis; }
 }

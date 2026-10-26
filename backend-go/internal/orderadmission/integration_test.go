@@ -228,6 +228,10 @@ func TestIntegrationAdmission(t *testing.T) {
 		f := newFixture(t, client, 5)
 		id := "9223372036854775807"
 		f.own(t, "order:reservation:"+id)
+		earliest, err := client.Time(ctx).Result()
+		if err != nil {
+			t.Fatal("cannot observe isolated Redis clock")
+		}
 		result, err := f.admission.Reserve(ctx, f.voucherID, "18446744073709551615", id, f.now, f.begin, f.end, 1)
 		if err != nil || result.ID != id || result.Reused {
 			t.Fatal("signed maximum ID or unsigned user ID lost precision")
@@ -237,8 +241,13 @@ func TestIntegrationAdmission(t *testing.T) {
 			t.Fatal("stream fields changed or IDs lost precision")
 		}
 		reservation, err := client.HGetAll(ctx, "order:reservation:"+id).Result()
-		if err != nil || len(reservation) != 5 || reservation["state"] != "PROCESSING" || reservation["userId"] != "18446744073709551615" || reservation["retries"] != "0" || reservation["createdAt"] != strconv.FormatInt(f.now.UnixMilli(), 10) {
+		if err != nil || len(reservation) != 5 || reservation["state"] != "PROCESSING" || reservation["userId"] != "18446744073709551615" || reservation["retries"] != "0" {
 			t.Fatal("reservation fields differ from the legacy contract")
+		}
+		latest, err := client.Time(ctx).Result()
+		created, createdErr := strconv.ParseInt(reservation["createdAt"], 10, 64)
+		if err != nil || createdErr != nil || created < earliest.UnixMilli() || created > latest.UnixMilli() {
+			t.Fatal("createdAt must record actual Redis admission time as decimal milliseconds")
 		}
 		for _, target := range []struct {
 			key     string
@@ -421,10 +430,26 @@ func TestIntegrationAdmission(t *testing.T) {
 					}
 					expected = ErrAlreadyPurchased
 				case "not-started":
-					now = f.begin.Add(-time.Millisecond)
+					clock, err := client.Time(ctx).Result()
+					if err != nil {
+						t.Fatal("cannot observe isolated Redis clock")
+					}
+					f.begin = clock.Add(time.Minute).Truncate(time.Millisecond)
+					f.end = f.begin.Add(time.Hour)
+					if client.MSet(ctx, keys[2], f.begin.UnixMilli(), keys[3], f.end.UnixMilli()).Err() != nil {
+						t.Fatal("cannot arrange future sales projection")
+					}
 					expected = ErrNotStarted
 				case "ended":
-					now = f.end
+					clock, err := client.Time(ctx).Result()
+					if err != nil {
+						t.Fatal("cannot observe isolated Redis clock")
+					}
+					f.end = clock.Add(-time.Minute).Truncate(time.Millisecond)
+					f.begin = f.end.Add(-time.Hour)
+					if client.MSet(ctx, keys[2], f.begin.UnixMilli(), keys[3], f.end.UnixMilli()).Err() != nil {
+						t.Fatal("cannot arrange ended sales projection")
+					}
 					expected = ErrEnded
 				case "closed":
 					if activitypub.NewGate(client).Close(ctx, f.voucherID, 2) != nil {
@@ -437,6 +462,91 @@ func TestIntegrationAdmission(t *testing.T) {
 					t.Fatal("business rejection had the wrong category or changed state")
 				}
 			})
+		}
+	})
+}
+
+func TestIntegrationAdmissionClockBoundary(t *testing.T) {
+	client := integrationRedis(t)
+	ctx := context.Background()
+	setWindow := func(t *testing.T, f *fixture, begin, end time.Time) {
+		t.Helper()
+		f.begin, f.end = begin.Truncate(time.Millisecond), end.Truncate(time.Millisecond)
+		if client.MSet(ctx, "seckill:begin:"+f.voucherID, f.begin.UnixMilli(), "seckill:end:"+f.voucherID, f.end.UnixMilli()).Err() != nil {
+			t.Fatal("cannot set owned sales window")
+		}
+	}
+	serverTime := func(t *testing.T) time.Time {
+		t.Helper()
+		now, err := client.Time(ctx).Result()
+		if err != nil {
+			t.Fatal("cannot observe isolated Redis clock")
+		}
+		return now
+	}
+	t.Run("stale_in_window_timestamp_cannot_admit_after_end", func(t *testing.T) {
+		f := newFixture(t, client, 5)
+		ending := serverTime(t).Add(-time.Second)
+		setWindow(t, f, ending.Add(-time.Hour), ending)
+		keys := f.admission.keys(f.voucherID, f.candidate(0))
+		before := dumpKeys(t, client, keys)
+		_, err := f.admission.Reserve(ctx, f.voucherID, f.user(0), f.candidate(0), f.end.Add(-time.Millisecond), f.begin, f.end, 1)
+		if !errors.Is(err, ErrEnded) || !reflect.DeepEqual(before, dumpKeys(t, client, keys)) {
+			t.Fatalf("expired sale accepted a stale in-window timestamp or mutated state: %v", err)
+		}
+	})
+	t.Run("in_window_argument_cannot_start_a_future_sale", func(t *testing.T) {
+		f := newFixture(t, client, 5)
+		beginning := serverTime(t).Add(time.Minute)
+		setWindow(t, f, beginning, beginning.Add(time.Hour))
+		keys := f.admission.keys(f.voucherID, f.candidate(0))
+		before := dumpKeys(t, client, keys)
+		_, err := f.admission.Reserve(ctx, f.voucherID, f.user(0), f.candidate(0), f.begin, f.begin, f.end, 1)
+		if !errors.Is(err, ErrNotStarted) || !reflect.DeepEqual(before, dumpKeys(t, client, keys)) {
+			t.Fatalf("future sale accepted an in-window argument or mutated state: %v", err)
+		}
+	})
+	t.Run("open_sale_uses_redis_time_for_admission_and_created_at", func(t *testing.T) {
+		f := newFixture(t, client, 5)
+		before := serverTime(t)
+		setWindow(t, f, before, before.Add(time.Hour))
+		stale := before.Add(-time.Hour)
+		result, err := f.admission.Reserve(ctx, f.voucherID, f.user(0), f.candidate(0), stale, f.begin, f.end, 1)
+		if err != nil || result.ID != f.candidate(0) || result.Reused {
+			t.Fatalf("already-open sale rejected stale argument instead of using Redis time: %v", err)
+		}
+		created, err := client.HGet(ctx, "order:reservation:"+result.ID, "createdAt").Int64()
+		after := serverTime(t)
+		if err != nil || created < before.UnixMilli() || created > after.UnixMilli() || created == stale.UnixMilli() {
+			t.Fatal("reservation creation time must be the actual Redis admission time")
+		}
+		f.requireCounts(t, 4, 1)
+	})
+	t.Run("exclusive_end_rejects_without_any_business_writes", func(t *testing.T) {
+		f := newFixture(t, client, 5)
+		ending := serverTime(t)
+		setWindow(t, f, ending.Add(-time.Hour), ending)
+		keys := f.admission.keys(f.voucherID, f.candidate(0))
+		before := dumpKeys(t, client, keys)
+		_, err := f.admission.Reserve(ctx, f.voucherID, f.user(0), f.candidate(0), f.end, f.begin, f.end, 1)
+		if !errors.Is(err, ErrEnded) || !reflect.DeepEqual(before, dumpKeys(t, client, keys)) {
+			t.Fatalf("exclusive sales end allowed a new admission or mutated state: %v", err)
+		}
+	})
+	t.Run("accepted_identity_still_recovers_after_actual_sales_end", func(t *testing.T) {
+		f := newFixture(t, client, 5)
+		first, err := f.reserve(t, 0)
+		if err != nil {
+			t.Fatal("cannot create original acceptance")
+		}
+		ending := serverTime(t).Add(-time.Second)
+		setWindow(t, f, ending.Add(-time.Hour), ending)
+		f.own(t, "order:reservation:"+f.candidate(1))
+		keys := append(f.admission.keys(f.voucherID, f.candidate(1)), "order:reservation:"+first.ID)
+		before := dumpKeys(t, client, keys)
+		result, err := f.admission.Reserve(ctx, f.voucherID, f.user(0), f.candidate(1), f.end.Add(time.Hour), f.begin, f.end, 1)
+		if err != nil || !result.Reused || result.ID != first.ID || !reflect.DeepEqual(before, dumpKeys(t, client, keys)) {
+			t.Fatal("expired sale must recover the same accepted identity without another reservation")
 		}
 	})
 }

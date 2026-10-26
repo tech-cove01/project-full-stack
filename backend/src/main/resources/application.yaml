@@ -56,6 +56,8 @@ ai:
   max-per-minute: ${AI_MAX_PER_MINUTE:20}
   max-output-tokens: ${AI_MAX_OUTPUT_TOKENS:600}
   chat-timeout-seconds: ${AI_CHAT_TIMEOUT_SECONDS:60}
+  daily-budget: ${AI_DAILY_BUDGET:200}
+  turn-timeout-seconds: ${AI_TURN_TIMEOUT_SECONDS:90}
 app:
   pay-timeout-minutes: ${PAY_TIMEOUT_MINUTES:15}
   rate-limit:

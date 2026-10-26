@@ -18,6 +18,10 @@ public class AiProperties {
     private int maxPerMinute = 20;
     private int maxOutputTokens = 600;
     private int chatTimeoutSeconds = 60;
+    /** Hard per-user daily call budget; a rejected request does not reach the provider. */
+    private int dailyBudget = 200;
+    /** Upper bound for one whole turn, including retrieval and generation. */
+    private int turnTimeoutSeconds = 90;
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
@@ -47,4 +51,8 @@ public class AiProperties {
     public void setMaxOutputTokens(int maxOutputTokens) { this.maxOutputTokens = maxOutputTokens; }
     public int getChatTimeoutSeconds() { return chatTimeoutSeconds; }
     public void setChatTimeoutSeconds(int chatTimeoutSeconds) { this.chatTimeoutSeconds = chatTimeoutSeconds; }
+    public int getDailyBudget() { return dailyBudget; }
+    public void setDailyBudget(int dailyBudget) { this.dailyBudget = dailyBudget; }
+    public int getTurnTimeoutSeconds() { return turnTimeoutSeconds; }
+    public void setTurnTimeoutSeconds(int turnTimeoutSeconds) { this.turnTimeoutSeconds = turnTimeoutSeconds; }
 }

@@ -1,5 +1,9 @@
 # 给实现 agent 的交接说明
 
+最新进度、当前剩余修复与工时预估先看 [docs/README.md](README.md)。用户已明确：保留社区、Kafka、Feed、点赞等主要后端亮点，做成完整项目；Canal、SDS/BITFIELD 压缩计数等额外复杂度可选。没有授权将社区整体后置。
+
+投递定位与四条亮点目标在该入口第 6 节：一页简历的一段实习和两个项目，本项目证明后端与全栈，另一个项目证明 Agent。补主要亮点时也要补搜索/分类、真实分页、按门店展示管理按钮等基础完整性；ES 不作必需，不把尚未实现能力或短突发 RPS 写成已验证成绩。
+
 ## 2026-10-26 最新交接（优先执行）
 
 本轮是在当前代码上补社区后端亮点，不是重新开始旧 P0。核对基线 `1af11be029722fd0ab66e8043bf8b6956750d83b`。用户将实现交给另一 agent，本聊天负责设计与独立核验。
@@ -7,13 +11,13 @@
 可直接交给实现 agent：
 
 ```text
-请先读 docs/backend-highlights-plan.md、docs/backend-highlights-acceptance.md，
+请先读 docs/README.md 的当前剩余项，再读 docs/backend-highlights-plan.md、docs/backend-highlights-acceptance.md，
 以及 docs/reviews/2026-10-26/review.md，检查 git 状态和当前 SHA 后开始实现。
 保留现有未提交文件及已验证交易/B端/AI；不要重复搭工程。
 
 按 H0 -> H1 -> H2 -> H3 -> H4 -> H5 逐批交付：
 H0 先修 T1-T4/A1-A3；H1 探店笔记/关注最小闭环、独立社区 outbox 和 Kafka；
-H2 点赞位图/紧凑计数/重建；H3 Feed 三级缓存/热点/抖动/加载合并；
+H2 点赞位图/Lua幂等计数/重建（默认普通计数，自定义压缩布局可选）；H3 Feed 三级缓存/轻量热点/抖动/加载合并；
 H4 关注和发布多投影的版本防重与故障恢复；H5 AI 收口、持续负载和真实演示。
 每批自验后继续下一批，留存可单独复核的 SHA/diff 与证据。
 

@@ -70,6 +70,11 @@ public class AiConversationService {
     public void append(long userId, String conversationId, String role, String text,
                        List<String> citationIds) {
         try {
+            // A deleted conversation must not be recreated by an in-flight turn: require the
+            // conversation hash to still exist before touching its message list.
+            if (!Boolean.TRUE.equals(redis.hasKey(conversationKey(userId, conversationId)))) {
+                return;
+            }
             Message message = new Message(role, text, now(), citationIds == null ? List.of() : citationIds);
             String key = messagesKey(userId, conversationId);
             redis.opsForList().rightPush(key, objectMapper.writeValueAsString(message));

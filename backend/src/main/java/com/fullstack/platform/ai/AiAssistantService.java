@@ -22,7 +22,14 @@ import java.util.regex.Pattern;
 @Service
 public class AiAssistantService {
     private static final Pattern PHONE = Pattern.compile("(?<!\\d)1[3-9]\\d{9}(?!\\d)");
+    /** Redeem token: 32 random bytes hex-encoded. */
     private static final Pattern TOKEN = Pattern.compile("(?<![a-fA-F0-9])[a-fA-F0-9]{64}(?![a-fA-F0-9])");
+    /** Login token: UUID.toString(true), i.e. 32 hex characters without dashes. */
+    private static final Pattern SESSION_TOKEN =
+            Pattern.compile("(?<![a-fA-F0-9])[a-fA-F0-9]{32}(?![a-fA-F0-9])");
+    /** Labelled six-digit SMS code, e.g. "验证码 123456" or "code=123456". */
+    private static final Pattern LABELLED_CODE = Pattern.compile(
+            "(?i)(验证码|校验码|动态码|登录码|\\bcode\\b|\\botp\\b)[\\s:：=]{0,3}\\d{6}");
     private static final int HISTORY_MESSAGES = 6;
 
     private final AiProperties properties;
@@ -33,6 +40,7 @@ public class AiAssistantService {
     private final AiConversationService conversations;
     private final AiDedupeService dedupe;
     private final AiLockService locks;
+    private final AiBudgetService budget;
     private final ObjectMapper objectMapper;
     private final ThreadPoolTaskExecutor executor;
     private final JdbcTemplate jdbc;
@@ -41,7 +49,7 @@ public class AiAssistantService {
     public AiAssistantService(AiProperties properties, AiProvider provider, AiIndexService index,
                               AiKnowledgeService knowledge, AiToolService tools,
                               AiConversationService conversations, AiDedupeService dedupe,
-                              AiLockService locks, ObjectMapper objectMapper,
+                              AiLockService locks, AiBudgetService budget, ObjectMapper objectMapper,
                               @Qualifier("aiExecutor") ThreadPoolTaskExecutor executor,
                               JdbcTemplate jdbc) {
         this.properties = properties;
@@ -52,6 +60,7 @@ public class AiAssistantService {
         this.conversations = conversations;
         this.dedupe = dedupe;
         this.locks = locks;
+        this.budget = budget;
         this.objectMapper = objectMapper;
         this.executor = executor;
         this.jdbc = jdbc;
@@ -83,7 +92,13 @@ public class AiAssistantService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "门店不存在");
             }
         }
-        AiDedupeService.Start start = dedupe.begin(context.userId(), conversationId, clientMessageId, message);
+        String limited = budget.rejectReason(context.userId());
+        if (limited != null) {
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "AI_BUDGET_EXHAUSTED".equals(limited) ? "今日 AI 调用预算已用完" : "AI 请求过于频繁，请稍后再试");
+        }
+        AiDedupeService.Start start = dedupe.begin(context.userId(), conversationId, clientMessageId,
+                shopId, message);
         if (start.state() == AiDedupeService.State.IN_PROGRESS) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "同一消息正在处理中");
         }
@@ -91,17 +106,19 @@ public class AiAssistantService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "同一 clientMessageId 对应了不同内容");
         }
         if (!permits.tryAcquire()) {
-            dedupe.fail(context.userId(), conversationId, clientMessageId);
+            releaseNewRecord(context.userId(), conversationId, clientMessageId, start);
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "AI 当前并发已满，请稍后再试");
         }
         String lockToken = locks.tryLock(context.userId(), conversationId);
         if (lockToken == null) {
+            // A failed lock must not leave a NEW record stuck in PROCESSING for an hour.
             permits.release();
+            releaseNewRecord(context.userId(), conversationId, clientMessageId, start);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "该会话已有请求在处理");
         }
         SseEmitter emitter = new SseEmitter(60_000L);
         if (start.state() == AiDedupeService.State.CACHED) {
-            emitCached(emitter, start.answerJson(), conversationId);
+            emitCached(context, emitter, start.answerJson(), conversationId, clientMessageId);
             locks.unlock(context.userId(), conversationId, lockToken);
             permits.release();
             return emitter;
@@ -121,6 +138,8 @@ public class AiAssistantService {
     private void run(AiAuthContext context, String conversationId, String clientMessageId, String message,
                      Long shopId, String lockToken, SseEmitter emitter) {
         boolean completed = false;
+        long deadline = System.nanoTime() + properties.getTurnTimeoutSeconds() * 1_000_000_000L;
+        List<String> dependencies = new ArrayList<>();
         try {
             send(emitter, "meta", Map.of("conversationId", conversationId,
                     "mode", provider.mode(), "messageId", clientMessageId));
@@ -137,7 +156,7 @@ public class AiAssistantService {
                 conversations.append(context.userId(), conversationId, "assistant", tool.text(),
                         tool.citationIds());
                 dedupe.complete(context.userId(), conversationId, clientMessageId,
-                        objectMapper.writeValueAsString(answer));
+                        objectMapper.writeValueAsString(answer), "");
                 completed = true;
                 return;
             }
@@ -156,7 +175,7 @@ public class AiAssistantService {
                 conversations.append(context.userId(), conversationId, "assistant",
                         String.valueOf(answer.get("text")), List.of());
                 dedupe.complete(context.userId(), conversationId, clientMessageId,
-                        objectMapper.writeValueAsString(answer));
+                        objectMapper.writeValueAsString(answer), "");
                 completed = true;
                 return;
             }
@@ -185,6 +204,7 @@ public class AiAssistantService {
                 source.put("score", Math.round(hit.score() * 1000.0) / 1000.0);
                 sources.add(source);
                 citationIds.add(citationId);
+                dependencies.add(chunk.documentId() + ":" + chunk.version() + ":" + chunk.epoch());
                 evidence.append("[").append(ordinal++).append("] ").append(chunk.title())
                         .append(" (v").append(chunk.version()).append("): ")
                         .append(chunk.content()).append("\n");
@@ -196,9 +216,23 @@ public class AiAssistantService {
                 completed = true;
                 return;
             }
+            requireTurnBudget(deadline);
             send(emitter, "status", Map.of("stage", "generating"));
             String answerText = provider.chat(systemPrompt(), userPrompt(conversationId, context.userId(),
                     evidence.toString(), message));
+            budget.recordUsage(context.userId());
+            String dependenciesCsv = String.join(";", dependencies);
+            // Every source is re-checked after generation: a document disabled or replaced while
+            // the model was working must not be quoted, and the answer must not be cached.
+            if (!stillFresh(dependencies) || System.nanoTime() > deadline) {
+                Map<String, Object> answer = Map.of("text", "资料刚刚更新，请重新提问。", "citationIds", List.of());
+                send(emitter, "status", Map.of("stage", "insufficient_evidence"));
+                send(emitter, "answer", answer);
+                send(emitter, "done", Map.of("messageId", clientMessageId, "usage", "none"));
+                dedupe.fail(context.userId(), conversationId, clientMessageId);
+                completed = true;
+                return;
+            }
             String stripped = answerText == null ? "" : answerText.strip();
             boolean refused = stripped.startsWith("没有查到") || stripped.startsWith("无法")
                     || stripped.startsWith("抱歉");
@@ -210,7 +244,7 @@ public class AiAssistantService {
                 conversations.append(context.userId(), conversationId, "user", message, List.of());
                 conversations.append(context.userId(), conversationId, "assistant", answerText, List.of());
                 dedupe.complete(context.userId(), conversationId, clientMessageId,
-                        objectMapper.writeValueAsString(answer));
+                        objectMapper.writeValueAsString(answer), dependenciesCsv);
                 completed = true;
                 return;
             }
@@ -222,7 +256,7 @@ public class AiAssistantService {
             conversations.append(context.userId(), conversationId, "user", message, List.of());
             conversations.append(context.userId(), conversationId, "assistant", answerText, citationIds);
             dedupe.complete(context.userId(), conversationId, clientMessageId,
-                    objectMapper.writeValueAsString(answer));
+                    objectMapper.writeValueAsString(answer), dependenciesCsv);
             completed = true;
         } catch (AiProviderException e) {
             dedupe.fail(context.userId(), conversationId, clientMessageId);
@@ -238,9 +272,19 @@ public class AiAssistantService {
         }
     }
 
-    private void emitCached(SseEmitter emitter, String answerJson, String conversationId) {
+    private void emitCached(AiAuthContext context, SseEmitter emitter, String answerJson,
+                            String conversationId, String clientMessageId) {
         try {
             send(emitter, "meta", Map.of("conversationId", conversationId, "mode", provider.mode()));
+            // A cached answer is only replayed while all of its sources are still the published
+            // versions. Otherwise the cache is dropped so a disabled rule cannot come back.
+            String cachedDeps = dedupe.dependencies(context.userId(), conversationId, clientMessageId);
+            if (!stillFresh(splitDeps(cachedDeps))) {
+                dedupe.delete(context.userId(), conversationId, clientMessageId);
+                sendError(emitter, "KNOWLEDGE_CHANGED", "资料已更新，请重新提问", false);
+                emitter.complete();
+                return;
+            }
             send(emitter, "status", Map.of("stage", "cached"));
             Map<?, ?> answer = objectMapper.readValue(answerJson, Map.class);
             send(emitter, "answer", answer);
@@ -265,6 +309,12 @@ public class AiAssistantService {
         StringBuilder history = new StringBuilder();
         List<AiConversationService.Message> recent = conversations.recent(userId, conversationId, HISTORY_MESSAGES);
         for (AiConversationService.Message message : recent) {
+            // Old answers whose sources are no longer published must not re-enter the model
+            // context; otherwise a disabled rule survives through conversation memory.
+            if ("assistant".equals(message.role()) && message.citationIds() != null
+                    && !message.citationIds().isEmpty() && !citationsFresh(message.citationIds())) {
+                continue;
+            }
             String line = message.text();
             if (line != null) history.append(message.role()).append(": ").append(line, 0,
                     Math.min(line.length(), 300)).append("\n");
@@ -289,7 +339,65 @@ public class AiAssistantService {
     }
 
     private static boolean containsSensitive(String value) {
-        return PHONE.matcher(value).find() || TOKEN.matcher(value).find();
+        // Covers the real credential shapes used by this app (32-hex login token, 64-hex redeem
+        // token, phone number, labelled six-digit code) without blocking order ids or amounts.
+        return PHONE.matcher(value).find() || TOKEN.matcher(value).find()
+                || SESSION_TOKEN.matcher(value).find() || LABELLED_CODE.matcher(value).find();
+    }
+
+    private void releaseNewRecord(long userId, String conversationId, String clientMessageId,
+                                  AiDedupeService.Start start) {
+        if (start.state() == AiDedupeService.State.NEW) {
+            dedupe.fail(userId, conversationId, clientMessageId);
+        }
+    }
+
+    private void requireTurnBudget(long deadline) {
+        if (System.nanoTime() > deadline) {
+            throw new AiProviderException("turn deadline exceeded");
+        }
+    }
+
+    private static List<String> splitDeps(String value) {
+        if (value == null || value.isBlank()) return List.of();
+        return List.of(value.split(";"));
+    }
+
+    /** Deps are "documentId:version:epoch"; any mismatch means the source is no longer current. */
+    private boolean stillFresh(List<String> dependencies) {
+        for (String dependency : dependencies) {
+            String[] parts = dependency.split(":");
+            if (parts.length != 3) return false;
+            try {
+                PublicKnowledgeView view = knowledge.publicDocument(Long.parseLong(parts[0]),
+                        Integer.parseInt(parts[1]));
+                if (view.epoch() != Long.parseLong(parts[2])) return false;
+            } catch (RuntimeException stale) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /** Citations are "chunk:<id>"; the chunk must still belong to the published version. */
+    private boolean citationsFresh(List<String> citationIds) {
+        for (String citation : citationIds) {
+            if (citation == null || !citation.startsWith("chunk:")) continue;
+            long chunkId;
+            try {
+                chunkId = Long.parseLong(citation.substring(6));
+            } catch (NumberFormatException e) {
+                return false;
+            }
+            Integer count = jdbc.queryForObject("""
+                    SELECT COUNT(*)
+                    FROM tb_ai_chunk c
+                    JOIN tb_ai_document d ON d.id = c.document_id
+                    WHERE c.id = ? AND d.disabled = 0 AND d.published_version = c.version
+                    """, Integer.class, chunkId);
+            if (count == null || count == 0) return false;
+        }
+        return true;
     }
 
     private static String excerpt(String text) {

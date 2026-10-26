@@ -1,0 +1,110 @@
+package activitypub
+
+import (
+	"context"
+	"strings"
+	"sync"
+	"testing"
+	"time"
+
+	"github.com/cityloop/fullstack-go/internal/outbox"
+	"gorm.io/gorm"
+)
+
+// Review-only probe against the frozen production implementation. The row
+// lock forces cancellation during dispatch, rather than before Poll starts.
+func TestReviewCancellationDuringLockedPublication(t *testing.T) {
+	resources := integrationResources(t, true)
+	fixture := newPublicationFixture(t, resources)
+	event := fixture.event("PREPARE", 0)
+	if err := outbox.Enqueue(context.Background(), resources.ORM, event); err != nil {
+		t.Fatal("cannot enqueue owned review event")
+	}
+	blocker := resources.ORM.Begin()
+	if blocker.Error != nil {
+		t.Fatal("cannot begin blocker")
+	}
+	defer blocker.Rollback()
+	var locked string
+	if blocker.Raw("SELECT CAST(id AS CHAR) FROM tb_voucher WHERE id = ? FOR UPDATE", fixture.id).Scan(&locked).Error != nil || locked != fixture.id {
+		t.Fatal("cannot lock the owned voucher")
+	}
+	reached := make(chan struct{})
+	var once sync.Once
+	const callback = "review_go021_dispatch_reached"
+	if err := resources.ORM.Callback().Row().Before("gorm:row").Register(callback, func(tx *gorm.DB) {
+		if strings.Contains(tx.Statement.SQL.String(), "SELECT shop_id FROM tb_voucher WHERE id = ? FOR SHARE") {
+			once.Do(func() { close(reached) })
+		}
+	}); err != nil {
+		t.Fatal("cannot observe dispatch query")
+	}
+	defer resources.ORM.Callback().Row().Remove(callback)
+	type result struct {
+		processed bool
+		err       error
+	}
+	completed := make(chan result, 1)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	worker := NewWorker(resources.ORM, resources.Redis)
+	go func() {
+		processed, err := worker.Poll(ctx)
+		completed <- result{processed, err}
+	}()
+	select {
+	case <-reached:
+	case <-time.After(3 * time.Second):
+		t.Fatal("dispatch did not reach the blocked current read")
+	}
+	select {
+	case <-completed:
+		t.Fatal("dispatch did not wait behind the owned row lock")
+	case <-time.After(100 * time.Millisecond):
+	}
+	cancelledAt := time.Now()
+	cancel()
+	select {
+	case r := <-completed:
+		if !r.processed || r.err == nil {
+			t.Fatal("cancellation must not report successful delivery")
+		}
+	case <-time.After(3 * time.Second):
+		t.Fatal("real in-flight dispatch did not stop after cancellation")
+	}
+	t.Logf("blocked dispatch cancelled in %s", time.Since(cancelledAt))
+	var delivery struct {
+		DeliveryStatus string
+		Attempts       int
+	}
+	if resources.ORM.Raw("SELECT delivery_status, attempts FROM tb_outbox WHERE event_id = ?", event.EventID).Scan(&delivery).Error != nil || delivery.DeliveryStatus != "PROCESSING" || delivery.Attempts != 1 {
+		t.Fatal("cancelled delivery must retain its recoverable lease instead of DONE")
+	}
+	fixture.requireState(t, "INITIALIZING", 0, 0, 0)
+	if n, err := resources.Redis.Exists(context.Background(), gateKeys(fixture.id)...).Result(); err != nil || n != 0 {
+		t.Fatal("cancel before the gated row read must not create Redis projection")
+	}
+	if blocker.Rollback().Error != nil {
+		t.Fatal("cannot release review row lock")
+	}
+	// This accelerates only the owned lease expiry; it does not claim a real
+	// 30-second wait. The production claiming/recovery code remains unchanged.
+	expired := resources.ORM.Exec("UPDATE tb_outbox SET lease_until = TIMESTAMPADD(SECOND,-1,NOW(3)) WHERE event_id = ? AND delivery_status='PROCESSING' AND attempts=1", event.EventID)
+	if expired.Error != nil || expired.RowsAffected != 1 {
+		t.Fatal("cannot expire the exact cancelled lease")
+	}
+	if processed, err := worker.Poll(context.Background()); !processed || err != nil {
+		t.Fatal("cancelled PREPARE did not recover after lease expiry")
+	}
+	if processed, err := worker.Poll(context.Background()); !processed || err != nil {
+		t.Fatal("committed OPEN did not complete after cancellation recovery")
+	}
+	fixture.requireState(t, "ACTIVE", 1, 1, 1)
+	if ready, err := worker.gate.Ready(context.Background(), fixture.id, 1); err != nil || !ready {
+		t.Fatal("recovered activity did not become ready")
+	}
+	var remaining int64
+	if resources.ORM.Raw("SELECT COUNT(*) FROM tb_outbox WHERE aggregate_type='ACTIVITY' AND aggregate_id=? AND delivery_status<>'DONE'", fixture.id).Scan(&remaining).Error != nil || remaining != 0 {
+		t.Fatal("recovered owned publication still has unfinished events")
+	}
+}

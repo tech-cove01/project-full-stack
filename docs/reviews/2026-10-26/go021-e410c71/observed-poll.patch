@@ -1,0 +1,19 @@
+--- a/scripts/go-activity-ui-smoke.mjs
++++ b/scripts/go-activity-ui-smoke.mjs
+@@ -244,0 +245 @@
++    const fresh = page.waitForResponse(r => r.request().method() === 'GET' && new URL(r.url()).pathname === '/api/merchant/activities')
+@@ -245,0 +247,2 @@
++    await (await fresh).json()
++    await page.locator('[aria-label="正在加载活动"]').waitFor({ state: 'detached' })
+@@ -312,0 +316,2 @@
++  await row(seededActivities[11]).getByText('待开放', { exact: true }).waitFor()
++  await page.locator('[aria-label="正在加载活动"]').waitFor({ state: 'detached' })
+@@ -314,0 +320,5 @@
++  const actualPoll = await page.waitForResponse(r => r.request().method() === 'GET' && new URL(r.url()).pathname === '/api/merchant/activities', { timeout: 6000 })
++  await actualPoll.json()
++  await page.locator('[aria-label="正在加载活动"]').waitFor({ state: 'detached' })
++  await row(seededActivities[11]).getByText('待开放', { exact: true }).waitFor()
++  check(actualPoll.ok() && listRequests >= 1, 'a real pending-row poll occurs before navigation')
+@@ -318 +328 @@
+-  await new Promise(resolve => setTimeout(resolve, 1900))
++  await new Promise(resolve => setTimeout(resolve, 3600))

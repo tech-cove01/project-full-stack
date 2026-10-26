@@ -1,0 +1,49 @@
+{
+  "source": "e410c71d9d8dfeaf654e203e439fa3f871c9afd4",
+  "ports": {
+    "mysql": 3319,
+    "redis": 6391,
+    "api": 8093,
+    "vite": 5185
+  },
+  "runs": [
+    {
+      "name": "bootstrap",
+      "exit": 0
+    },
+    {
+      "name": "ui-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 29,
+      "cleanup": true
+    },
+    {
+      "name": "ui-shanghai",
+      "exit": 0,
+      "passed": true,
+      "checks": 29,
+      "cleanup": true
+    },
+    {
+      "name": "workspace",
+      "exit": 0,
+      "passed": true,
+      "checks": 24,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

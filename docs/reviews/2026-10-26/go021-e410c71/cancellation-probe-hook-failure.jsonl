@@ -1,0 +1,9 @@
+{"Time":"2026-10-26T22:32:08.378911+08:00","Action":"start","Package":"github.com/cityloop/fullstack-go/internal/activitypub"}
+{"Time":"2026-10-26T22:32:10.3509267+08:00","Action":"run","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Test":"TestReviewCancellationDuringLockedPublication"}
+{"Time":"2026-10-26T22:32:10.3514624+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Test":"TestReviewCancellationDuringLockedPublication","Output":"=== RUN   TestReviewCancellationDuringLockedPublication\n","OutputType":"frame"}
+{"Time":"2026-10-26T22:32:13.4177712+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Test":"TestReviewCancellationDuringLockedPublication","Output":"    review_cancel_test.go:58: dispatch did not reach the blocked current read\n","OutputType":"error"}
+{"Time":"2026-10-26T22:32:13.4545377+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Test":"TestReviewCancellationDuringLockedPublication","Output":"--- FAIL: TestReviewCancellationDuringLockedPublication (3.10s)\n","OutputType":"frame"}
+{"Time":"2026-10-26T22:32:13.4551355+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Test":"TestReviewCancellationDuringLockedPublication","Elapsed":3.1}
+{"Time":"2026-10-26T22:32:13.4551355+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Output":"FAIL\n","OutputType":"frame"}
+{"Time":"2026-10-26T22:32:13.4578248+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Output":"FAIL\tgithub.com/cityloop/fullstack-go/internal/activitypub\t5.078s\n","OutputType":"frame"}
+{"Time":"2026-10-26T22:32:13.4578248+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/activitypub","Elapsed":5.079}

@@ -87,6 +87,11 @@ jobs:
         run: go test -race -count=1 -v ./internal/merchant
         env:
           GO_INTEGRATION: '1'
+      - name: Activities and publication against real MySQL and Redis
+        run: go test -race -count=1 -p 1 -v ./internal/activity ./internal/activitypub ./internal/outbox
+        env:
+          GO_INTEGRATION: '1'
+          GIN_MODE: release
       - run: go build -trimpath -o bin/api ./cmd/api
       - run: python3 ../scripts/go-bootstrap-smoke.py --binary bin/api --output bootstrap-result.json
       - uses: actions/upload-artifact@v4

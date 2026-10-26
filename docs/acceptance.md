@@ -1,10 +1,23 @@
 # 分阶段验收与结果交付
 
-2026-10-26 更新：本次社区亮点按 [增补方案](backend-highlights-plan.md) 与 [增补验收](backend-highlights-acceptance.md) 执行；先修 [独立核验](reviews/2026-10-26/review.md) 的 T1—T4/A1—A3。本文交易验收继续有效，下面原基线/结果只作历史记录。是否完成以最新 SHA 对应证据为准，不沿用实现计划勾选。
+2026-10-26 Go 更新：本文交易行为与对账不变式继续有效，执行顺序和技术栈以 [Go 总方案](implementation-plan.md) 为准。下方 P* 是业务场景编号，Java 测试/命令/结果仅作历史参考；Go 必须重新提供对应 SHA 的真实依赖、窗口与负载证据。社区查 [增补验收](backend-highlights-acceptance.md)，旧缺陷作为 Go 回归，不继续补 Java。
 
 本文交给实现 agent 执行，也供另一个 agent 独立复核。交易契约与计划 API 以 [交易设计](./transaction-design.md) 为准；本文不另设接口。环境启动命令见 [运行与验证](./development.md) 和 [Windows 开发环境](./windows-development.md)。
 
-## 当前证据与阶段门槛
+## Go 迁移专项验收
+
+以下补迁移本身的验收ID，业务与故障场景继续使用本文及AI/社区验收，不另建一套测试规格。
+
+| ID / 任务 | 场景 | 通过条件 |
+| --- | --- | --- |
+| MIG-GO-01 / GO-001 | 隔离依赖启动、缺配置/依赖失败、正常关闭 | 锁定模块/工具链，健康接口可识别Go服务；错误明确、关闭释放连接/worker；适用gofmt/vet/test及CI结果记录 |
+| MIG-GO-02 / GO-010—011 | 真实Vue登录/退出/浏览，受保护请求401 | 代理实际命中Go而非Java；authorization语义一致，退出/失效不可继续访问；页面错误/空态/分页可用 |
+| MIG-GO-03 / GO-010—042 | 大ID、金额、时区、空结果、分页及SSE兼容矩阵 | ID和金额字符串不丢精度；Asia/Shanghai与原时间格式一致；null/空数组/total与事件名称符合契约，前端无需混用后端 |
+| MIG-GO-04 / GO-030—033 | GORM事务失败/提交不确定、重投、活动重建窗口 | 条件更新/约束/生成列语义正确；tx不混用全局db；不确定结果不ACK或释放；RC当前视图和锁定行回归通过 |
+| MIG-GO-05 / GO-071 | 停Java后Go接管旧状态，切换失败恢复 | 迁移校验和、用户/订单/审计/期限保留；ID不碰撞；Redis键、Stream/group/pending、outbox/review兼容且未决有去向；无双消费者或重置库存掩盖问题 |
+| MIG-GO-06 / GO-070—071 | 干净环境启动、三流程演示、持续负载 | 正式backend/和CI为Go，Java仅保留Git参考；Go真实业务/故障/负载证据独立记录，旧Java和截图指标不迁名 |
+
+## 当前证据与阶段门槛（Java 历史）
 
 - 基线提交：`c99e0b1`。现有 [验证记录](./validation.md) 中的后端 59 项测试、前端构建、9 项 Mock 页面场景是历史证据；编写本文时未重跑。
 - 现有 CI 执行后端 `mvn verify` 和前端 `npm ci`、`npm run build`。订单与 ACK 主要由 Mockito 验证，门店范围查询使用 H2；这些不能证明真实 MySQL 事务、Redis Lua、Stream 恢复或生产性能。
@@ -192,7 +205,7 @@ CI 输出按层分开标注。单元 CI 绿灯不能让未执行的可靠性、�
 
 ```text
 提交：完整 SHA；分支；是否存在未提交改动
-环境：OS/CPU/内存；JDK/Node/MySQL/Redis/工具版本；单/多实例；端口
+环境：OS/CPU/内存；Go工具链/Node/MySQL/Redis/工具版本；单/多实例；端口
 数据：测试库/活动ID；初始库存；用户数；活动时间；支付期限；限流配置
 复现：准备命令 → 执行命令 → 只读核验命令 → 限定范围的清理步骤
 

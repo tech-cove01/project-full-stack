@@ -1,105 +1,59 @@
 # project-full-stack
 
-面向本地生活服务的全栈交易与商家运营平台，连接用户消费、商家经营与平台运营。
+面向本地生活服务的全栈平台，连接用户消费、商家经营与探店分享。围绕活动发布、抢券、模拟支付、到店核销和审计构建交易流程，配套商家工作台与带来源的业务 AI 助手。
 
-项目围绕「活动发布 → 用户抢购 → 异步生成订单 → 到店核销 → 操作审计」构建业务流程，关注突发流量下的订单正确性、清晰的前端状态反馈，以及商家与门店的数据权限。
+**开发状态：后端正在迁移到 Go，前端保留 Vue 3/TypeScript。** 当前源码仍为 Java 基线，Go 服务尚未实现；交易、B 端和 AI 作为迁移契约保留，社区/Feed/Kafka 属于新增范围。具体任务与已验证状态见 [开发入口](docs/README.md)。
 
-开发进度、剩余任务与目录导航统一见 [开发入口](docs/README.md)。社区、Kafka、Feed 缓存属于下一阶段计划，尚未实现。
+## 产品能力
 
-## 功能进度
-
-| 业务 | 当前实现 |
+| 模块 | 目标体验与当前基线 |
 | --- | --- |
-| 用户账号 | 验证码登录、登录态刷新、退出；开发环境提供模拟验证码 |
-| 商铺浏览 | 商铺列表、详情、分类与附近商铺接口；前端已接入列表和详情 |
-| 优惠活动 | 店主发布/下架、Redis 准入门控与库存预热、活动时间校验 |
-| 异步订单 | Redis Stream 消费、事务落库、幂等约束、模拟支付、取消、超时关单、核销、模拟退款与 outbox 补偿 |
-| 前端交互 | 抢购防重复提交、订单状态轮询、支付/取消、核销码展示、订单列表与刷新恢复 |
-| 商家工作台 | 活动管理、门店订单、核销、模拟退款、操作审计；店主与店员访问范围区分 |
-| 并发与恢复 | k6 多账号抢券、同账号重复请求、限流 429、消费者重启与 pending 接管、补偿去重 |
-| AI 助手（MVP） | 平台/门店规则 RAG、来源卡片、本人订单/活动/门店只读工具、Redis 会话、SSE、商家公开 FAQ 发布/停用；已用 SiliconFlow 真实模型联调 |
-| 后续业务 | 探店笔记、点赞/关注、Feed 缓存与社区 Kafka 事件链路；社区内容写入暂未开放 |
+| 用户与商铺 | 验证码登录、商铺列表/详情；补齐搜索、分类与分页交互 |
+| 活动与订单 | 商家发布/下架、抢券异步成单、模拟支付、取消/超时、核销、模拟退款；Java 已有流程，Go 待移植 |
+| 商家工作台 | OWNER/MANAGER/STAFF 门店范围、活动与订单管理、操作审计；Go 待移植并回归混合角色 |
+| 业务 AI | 公开规则检索与来源、本人订单等只读查询、隔离会话、FAQ 发布/停用与 SSE；Java 有 MVP，Go 待移植 |
+| 探店社区 | 笔记发布、关注/点赞、复合游标 Feed；待实现 |
+| 可靠性与性能 | 交易幂等/补偿/review、社区 outbox/Kafka、批量缓存/singleflight；Go 需重新联调和测量 |
 
-当前版本已有交易与商家履约闭环，以及业务 AI 助手 MVP。异常恢复与 AI 生命周期仍在补充核验；未发布并发容量或吞吐量结论。
+模拟支付与退款不接真实资金通道。AI 没有交易写工具，实时库存和订单由服务端按当前身份查询。
 
-## 技术栈
+## 目标技术栈
 
 | 层次 | 选型 |
 | --- | --- |
 | 前端 | Vue 3、TypeScript、Vite、Vue Router、Pinia、Element Plus |
-| 后端 | Java 21、Spring Boot 3.5、MyBatis-Plus、Maven |
-| 数据与缓存 | MySQL 8.4、Redis 7.4、Caffeine、Redisson |
-| 异步处理 | Redis Stream、Lua、数据库事务与业务唯一约束 |
-| 验证与运行 | JUnit、Mockito、H2、Docker Compose、GitHub Actions；提供 HTTP 冒烟与 k6 负载脚本 |
+| 后端 | Go、Gin、GORM、go-redis/v9 |
+| 数据与缓存 | MySQL 8.4、Redis 7.4、有界本地 TTL/LRU、singleflight、Lua |
+| 异步 | 订单 Redis Stream、事务 outbox；社区 Kafka |
+| AI | 兼容 Chat/Embedding API、小规模精确向量检索、MySQL 知识持久化 |
+| 验证与运行 | go test/httptest、k6、Docker Compose、GitHub Actions |
 
-采用模块化单体和单个前端工程，用户区与商家工作台共享基础设施。技术决策、改造顺序和验收标准见[开发方案](docs/implementation-plan.md)。
+采用模块化单体。数据库保留 MySQL；PostgreSQL、ES、Canal 不作为当前交付前置。依赖和客户端兼容版本在相应 Go 实现中锁定。
 
-实现任务见[交接说明](docs/agent-handoff.md)，业务规则见[交易设计](docs/transaction-design.md)，完成条件见[验收标准](docs/acceptance.md)。
+## 开发与验证
 
-AI 助手的实现范围与评测方式见 [AI 方案](docs/ai-design.md) 和 [AI 验收](docs/ai-acceptance.md)。当前默认关闭（`AI_ENABLED=false`）；本地可用 `AI_PROVIDER=stub` 验证协议、权限与 RAG 流程，或配置 SiliconFlow/兼容接口的真实 Key。历史短集的知识来源标题命中 11/12、拒答关键词检查 6/6、工具卡片类型检查 7/7、多轮来源检查 6/6，详见 AI 证据；答案事实与引用支撑仍需逐题复核，不能将这些数字称为答案准确率。
+当前可复用前端、数据库迁移、Lua 和 HTTP 验收脚本。Go 工程启动命令将在首个运行任务完成后补充；请勿将 Java 历史测试或吞吐数字当成 Go 结果。
 
-## 快速开始
+- [迁移与分阶段方案](docs/implementation-plan.md)：Go 任务、契约、隔离与切换。
+- [实现交接](docs/agent-handoff.md)：小任务、自验、独立 commit 与审查。
+- [Windows 开发说明](docs/windows-development.md)：当前路线与历史环境记录。
+- [运行与接口](docs/development.md)：复用接口及历史 Java 启动方法。
+- [交易验收](docs/acceptance.md)、[社区亮点验收](docs/backend-highlights-acceptance.md)、[AI 验收](docs/ai-acceptance.md)。
 
-需要 JDK 21 或兼容版本、Maven、Node.js 24，以及已启动的 Docker。
-
-Windows 的完整启动步骤见 [Windows 开发说明](docs/windows-development.md)。本机原有 MySQL 占用 3306，运行以下命令前，在启动 Compose 和后端的各个 PowerShell 窗口中设置 `$env:MYSQL_PORT = '3307'`。
-
-在仓库根目录启动 MySQL 和 Redis，首次创建数据库卷时会导入表结构与演示数据：
-
-```sh
-docker compose up -d mysql redis
-```
-
-应用版本化迁移（已有数据卷也必须执行）：
-
-```sh
-$env:MYSQL_PORT = '3307'
-node scripts/migrate.mjs
-```
-
-启动后端：
-
-```sh
-mvn -f backend/pom.xml spring-boot:run
-```
-
-启动前端：
-
-```sh
-npm --prefix frontend ci
-npm --prefix frontend run dev
-```
-
-前端地址以终端输出为准，默认为 `http://localhost:5173`；后端默认监听 `127.0.0.1:8081`，由前端开发服务器代理 API 请求。
-
-默认 `dev` 环境会返回随机演示验证码，登录页可直接填入。演示店主手机号为 `13800000000`，可见两家门店；演示店员手机号为 `13900000000`，仅可见一家授权门店。验证码接口每个手机号有 60 秒发送间隔。
-
-`.env.example` 列出本地数据库配置。Docker Compose 会读取根目录的 `.env`；自行修改连接参数时，也需要为后端设置对应环境变量。共享部署应显式使用 `prod` 环境，配置自己的认证与短信服务；当前模拟验证码仅用于本地开发。
-
-## 验证
-
-```sh
-node scripts/migrate.mjs
-mvn -f backend/pom.xml verify
-npm --prefix frontend run build
-python scripts/smoke.py
-```
-
-HTTP 冒烟脚本需要已运行的开发环境，会验证商铺、登录、商家门店范围及异步订单查询，并创建一笔演示订单。P0/P1/P2 的真实联调、页面演示、并发与恢复证据见 [docs/evidence](docs/evidence)。k6 脚本及结果记录方式见[运行与验证](docs/development.md)。
-
-本机开发对比结果：200 个不同账号争抢 100 库存得到 100 笔订单、0 超卖、0 重复；同账号 20 并发只产生 1 笔订单。该数字来自单机短突发压测，不是生产容量承诺。
+Java 参考源码保存在 Git 标签 `java-baseline-20261026`，历史证据位于 [docs/evidence](docs/evidence) 与 [docs/reviews](docs/reviews)。Go 迁移后重新验证权限、事务、故障恢复与持续负载，测量条件和限制随结果记录。
 
 ## 目录
 
-```text
-backend/                 后端服务与测试
+~~~text
+backend/                 当前 Java；Go 验收后收敛到此目录
+backend-go/              迁移期间的临时 Go 路径（尚未创建）
 frontend/                用户端与商家工作台
-infra/mysql/             表结构与演示数据
-scripts/                 HTTP 冒烟与负载脚本
-docs/                    改造方案、接口约定与运行说明
+infra/mysql/             表结构、演示数据与版本迁移
+scripts/                 HTTP 冒烟、恢复与负载脚本
+docs/                    设计、任务、验收与证据
 compose.yaml             本地依赖服务
-```
+~~~
 
 ## 许可证
 
-项目原创内容采用 [MIT License](LICENSE)。复用来源及适用范围见[第三方来源说明](THIRD_PARTY_NOTICES.md)。
+项目原创内容采用 [MIT License](LICENSE)。复用来源及适用范围见 [第三方来源说明](THIRD_PARTY_NOTICES.md)。

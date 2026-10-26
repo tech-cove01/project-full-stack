@@ -1,10 +1,10 @@
 # 后端亮点增补方案：探店社区、可靠事件与业务 AI
 
-日期：2026-10-26。核对源码：`1af11be029722fd0ab66e8043bf8b6956750d83b`。本文是待实现方案，不是完成报告。实现 agent 动手，设计/核验 agent 根据代码和原始证据独立复核。
+2026-10-26 Go 决策：本文保留社区/计数/缓存/事件的业务要求与 H* 场景编号；技术栈和执行顺序以 [Go 总方案](implementation-plan.md) 的 G0—G7 / GO-* 为准。下文旧“当前情况”是 Java 历史对照，不代表 Go 已实现。实现 agent 动手，设计/核验 agent 按交付 SHA 独立复核。
 
 本次用户确定的范围：参考简历中第一个社区项目的后端能力，结合本项目的交易、B 端和适量 AI，做成可以演示、可以深入解释的全栈项目。只借鉴能力设计，不复制对方的性能数字或项目经历。
 
-后续澄清：主要后端能力都要，偏复杂的额外实现不作前置；保留社区/Kafka/Feed。当前进度与剩余 30—50 小时的条件化估计见 [开发入口](README.md)。本文初始基线保留；当前核对到 `e8a292c` 加未提交 AI 修复，H0 已有部分修复，按入口清单补剩余项，不重新开发全部 H0。
+主要后端能力保留，额外复杂实现不作前置；Go 实现状态见 [开发入口](README.md)。原 Java 30—50 小时估计已失效，旧 H0 缺陷/修复转为 Go 回归场景，不继续补 Java。Java 源码参考标签 java-baseline-20261026；业务恢复不变式不能因换语言删减。
 
 ## 1. 最终产品与取舍
 
@@ -30,17 +30,17 @@
 
 ## 3. 栈与兼容原则
 
-Java 21 目标 / Spring Boot 3.5.16 / MyBatis-Plus / MySQL 8.4 / Redis 7.4 / Caffeine / Vue 3 + TypeScript + Element Plus / k6 沿用。新增 `spring-kafka` 由现有 Boot 依赖管理，锁定并验证对应客户端和 broker 版本，不为追新版本升级整个应用。
+Go / Gin / GORM / go-redis/v9 / MySQL 8.4 / Redis 7.4 / 有界本地 TTL-LRU / singleflight；Vue 3 + TypeScript + Element Plus / k6 沿用。社区 Kafka 客户端使用 kafka-go，首次实现时锁定客户端/broker兼容版本；不引入 PostgreSQL 或 RabbitMQ。
 
 Kafka 用 Docker 单节点 KRaft 开发 profile，不额外维护旧虚拟机。官方提供 Docker 启动方式，具体镜像和客户端兼容性由实现批次锁定、记录；单节点不代表生产高可用。见 [Kafka 官方快速开始](https://kafka.apache.org/quickstart/)。
 
-交易创建仍走 Redis Stream；活动/订单补偿仍走原 outbox。新增社区 outbox 独立表，防止两个 worker 抢同一事件或误将订单事件标记完成。不要借本任务重写交易消息链路。
+交易创建仍走 Redis Stream；活动/订单补偿仍走原 outbox。新增社区 outbox 独立表，防止两个 worker 抢同一事件或误将订单事件标记完成。Go 迁移保留此协议，不因换语言切换交易中间件。
 
-AI 保留当前手写 OpenAI-compatible Provider、小规模内存精确检索和服务端规则路由。LangChain4j、Spring AI、模型 Function Calling 都不是本轮前置要求；未实际使用就不写进技术栈。SSE 阶段通知与模型逐 token 流式输出分别描述。
+AI 用 Go net/http/context 重写兼容 Provider、小规模内存精确检索和服务端规则路由；业务契约保持。无需 Java AI 框架，模型 Function Calling 也非前置；SSE 阶段通知与实际模型逐 token 输出分别描述。
 
 ## 4. 顺序与交付边界
 
-不要重新执行旧计划已完成的业务开发；先对照当前 HEAD。下列任务全为待交付，完成后附验收编号与证据再勾选。
+以下 H0—H6 是业务能力/验收编号，不是当前执行顺序或另一份任务状态。Go 按总方案 G0—G7 实施：G3 覆盖交易恢复，G4 覆盖 AI，G5/G6 覆盖 H1—H4，G7 汇总证据；H6 可选。完成状态只在开发入口记录。
 
 | 阶段 | 优先级 | 交付结果 | 进入下一阶段条件 |
 | --- | --- | --- | --- |
@@ -64,7 +64,7 @@ H1 先提供基于 DB 的关注读写与 Feed 查询基线；H3 在正确查询�
 - [ ] A2：原子去重包含身份、有效门店和请求内容；抢锁失败可重试；会话删除 generation fence；取消、整轮 deadline、每用户限频、保守调用预算与资源释放。
 - [ ] A3：合成的真实格式 token、手机号、带标签验证码，在 Embedding/Chat 前遮蔽；避免一刀切屏蔽正常订单号。
 
-实现依据和复现入口在核验报告中。H0 通过后再扩展社区，避免把未解决的补偿和权限问题复制到新模块。
+实现依据和复现入口在核验报告中。Go G3 的恢复与 G4 的 AI 必须覆盖这些失败场景，避免把未解决的补偿和权限问题复制到新模块；不要求继续开发 Java。
 
 ### H1：最小社区与数据契约
 
@@ -108,7 +108,7 @@ Kafka relay 使用短事务认领/带租约恢复 → 事务外发送 → broker
 
 | 层 | 缓存内容 | 隔离与失效 |
 | --- | --- | --- |
-| L1 Caffeine | 当前用户一页 ID/公开内容组合，不含本人 liked | key 含用户、tab、游标、size、Feed 版本；容量上限、短 TTL |
+| L1 Go 有界本地 TTL/LRU | 当前用户一页 ID/公开内容组合，不含本人 liked | key 含用户、tab、游标、size、Feed 版本；容量上限、短 TTL |
 | L2 Redis 页面 | 有序笔记 ID、下一游标与 Feed 版本 | 个性化 key；取关版本变化后旧页失效；不能只按页码共享 |
 | L3 Redis 片段 | 公开笔记内容/作者公开摘要/内容版本 | 跨页面共享；本人 liked、角色、私有订单均不进入共享片段 |
 
@@ -116,7 +116,9 @@ Kafka relay 使用短事务认领/带租约恢复 → 事务外发送 → broker
 
 hotkey 首版用有容量上限的短时间窗口计数与简单进入/退出阈值，先作用于共享笔记片段，不另做分布式热点检测平台或复杂预测。热点 TTL 有最大值，冷却后回到普通策略；内容修改/下线仍能失效。普通 TTL 加受限随机抖动，不能延长订单/活动价格等实时事实的缓存。
 
-同 key miss 用 Caffeine 原子 `get`/异步加载合并，失败释放并允许重试；现有店铺实现可借鉴。[Caffeine 官方加载说明](https://github.com/ben-manes/caffeine/wiki/Population)支持这种本地合并方式。首版只保证每进程同 key 一个加载，不宣称跨实例全局 single-flight；两个实例需记录各自加载次数。L1 通知失效可配短 TTL 兜底，但不能把 Pub/Sub 当可靠事务总线。
+同 key miss 用 [Go singleflight](https://pkg.go.dev/golang.org/x/sync/singleflight) 合并源加载，进入加载函数后复查缓存，失败允许重试。只保证同进程同 Group/key 的在途合并，不宣称跨实例全局一次；双实例分别记录加载次数，等待者超时不误取消其他等待者需要的共享加载。L1 通知失效可配短 TTL 兜底，Pub/Sub 不充当可靠事务总线。
+
+借鉴 Go Feed 的页ID/公开卡片/独立计数分类：整页先批量读取缓存，聚合缺失ID后有限次批量查询回源，再按原顺序装配；当前用户 liked 单独批量查询。为相同页和不同页共享卡片分别记录 DB 查询数，禁止逐条回源形成 N+1。这里是数据分类，物理存储仍为本地缓存和 Redis。
 
 补指标：各层命中、DB 加载次数、合并等待、热点进入/退出、key 数量与容量、P95/P99。热缓存高吞吐与冷 miss 防风暴分别实验，不能只测重复查同一页。
 

@@ -1,6 +1,6 @@
 # AI 业务助手与商家知识维护设计（P1-D，已有 MVP，边界待收口）
 
-2026-10-26：当前实现是手写兼容 Provider、应用内精确检索、服务端关键词路由只读工具和 SSE 阶段反馈；没有 LangChain4j 或模型 Function Calling。已有真实模型历史证据；11/12 等是来源/卡片检查，非完整回答准确率。最新修复与验收以 [独立核验](reviews/2026-10-26/review.md)、[H0/H5 增补方案](backend-highlights-plan.md) 为准。
+2026-10-26 Go 更新：本文业务与生命周期契约继续有效，当前任务为 [Go 总方案](implementation-plan.md) 的 GO-040—042。Java 已有兼容 Provider、精确检索、规则路由和 SSE 的历史 MVP，Go 尚未实现；历史11/12等是来源/卡片检查，非回答准确率。Go重写需覆盖全部终态与旧失败窗口。
 
 日期：2026-10-24。对齐交易规则提交 `eac1b9249ec38ab0666629c4a3156d4c78a9de7e`。应用实现状态见 [AI 证据](evidence/2026-10-24-cbeef75/ai/report.md)：已用 stub 完成确定性验证，并已用 SiliconFlow 真实 Chat/Embedding 完成 UI 与 31 题固定集（知识 11/12、拒答 6/6、工具 7/7、多轮 6/6）；黄金 chunk Recall@K、真实 429/abort、预算与成本数据仍未执行。本文保留为设计契约，不代表通用模型质量已经验收。
 
@@ -30,13 +30,13 @@
 
 ## 3. 技术决策与 Windows 运行
 
-沿用 Java 21 / Spring Boot 3.5.16 和当前兼容 Provider；不为框架名称重写现有实现。LangChain4j 等框架迁移留给有明确收益的后续任务，新增依赖需锁定兼容版本；不直接照抄 PDF 中旧 starter 或为 AI 升级整个业务框架。
+Go 使用 net/http + context 接入兼容 Provider，复用模型协议和业务行为，不移植 Java 框架/Bean。限制连接、并发与整体调用期限；无需为了 AI 新增 PostgreSQL、Spring AI 或 LangChain4j。
 
 沿用已经可用且通过契约验证的兼容提供方，配置显式声明 Chat/Embedding 模型和维度，不要求更换供应商。当前规则路由工具无需模型原生 Function Calling；如果后续改成模型选择工具，再独立验证其协议和权限。结构化输出、token 流和原生工具调用不同时设为首版前置条件。
 
 后端配置至少包括 `AI_ENABLED=false`、`AI_API_KEY`、`AI_BASE_URL`、`AI_CHAT_MODEL`、`AI_EMBEDDING_MODEL`、`AI_EMBEDDING_DIMENSIONS`，有需要时分开配置 embedding 的 Key/Base URL。地址按账号业务空间、地域和官方文档填写，不硬编码旧域名，不承诺免费额度；环境文件不提交密钥。
 
-Windows 原生 Java/Node + 现有 MySQL/Redis 容器即可开发；无需先整理旧虚拟机，也无需 GPU、Ollama 或新向量数据库。`AI_ENABLED=false` 或未配置时，核心业务照常运行，能力接口说明原因；请求助手返回明确未启用/未就绪，不伪造模型回答。
+Windows 原生 Go/Node + MySQL/Redis 容器即可开发；无需先整理旧虚拟机，也无需 GPU、Ollama 或新向量数据库。`AI_ENABLED=false` 或未配置时，核心业务照常运行，能力接口说明原因；请求助手返回明确未启用/未就绪，不伪造模型回答。
 
 ### 向量存储取舍
 
@@ -77,7 +77,7 @@ metadata 至少含 `scope/shopId/documentId/version/epoch/embeddingModel/dimensi
 - `searchShops` 仅返回公开门店的必要字段和站内链接；`listShopActivities` 返回服务端当前可见活动与查询时间，不保证到点击时仍有库存。
 - `getMyOrder` 只能以当前已登录用户限定查询，响应仅含本人订单状态、金额、期限和站内详情链接；不能按任意 userId/手机号查券，不能返回核销 token。不同用户的订单统一不可见。
 - 工具复用现有服务层，参数有长度/页数/ID 校验和结果上限；不把模型生成的 SQL、URL、角色或用户 ID 直接执行。公开知识中的“忽略权限/调用工具”等文本始终是数据，不是系统指令。
-- SSE/worker 的异步线程显式携带服务端创建的不可变 `AuthContext`，不只依赖 `UserHolder` 的 ThreadLocal；工具执行时复查登录有效性及当前资源权限，不继承客户端身份字段。
+- SSE/goroutine 显式传递服务端创建的不可变身份与 context，不跨 goroutine 持有 Gin Context；工具执行时复查登录有效性及当前资源权限，不继承客户端身份字段。
 - 实时金额、库存、订单状态用后端校验过的结构化卡片展示；关键交易规则/业务承诺使用确定性模板或原文引句。模型可组织解释、识别意图，但不能产生新的交易承诺。
 - 来源 ID 只能取本次合法召回集合；后端生成 `{chunkId, documentId, version, title, scope, shopId?, excerpt, href}`，href 仅站内受控知识详情/公开门店链接。模型自造来源、外链、动作路径丢弃。
 - ID 合法不代表原文支持结论。回答的引用支持度仍需固定样例人工评测；本方案不声称自动语义校验或 RAG 可以消除全部幻觉。
@@ -92,7 +92,7 @@ UI 可保留带时间的历史答复；模型记忆与历史展示分开。检�
 
 重放也复查身份、权限和知识 epoch，来源失效返回冲突并要求用新消息 ID 查询；缓存工具快照不宣称为最新状态。会话内去重记录保留至会话到期，设置轮数上限；失败/中断有明确状态，UI 的主动重试使用新 ID，不能无限自动重试花费。
 
-AI 使用独立有界线程池/队列和单独连接/调用超时，不占住下单消费者或交易线程池。至少配置每用户频率、全局在途上限、输入/输出 token、工具轮次/返回条数、总耗时和每日预算；先用保守可调默认值，再根据真实提供方配额校准。
+AI 使用独立有界并发配额/队列和连接/调用超时，不占满下单消费者与DB/HTTP连接；goroutine由context取消并回收资源，后台索引任务与HTTP请求生命周期分开。至少配置每用户频率、全局在途上限、输入/输出 token、工具轮次/返回条数、总耗时和每日预算；先用保守可调默认值，再根据真实提供方配额校准。
 
 前端取消或连接断开及时中止可取消的调用、释放资源；无法取消的底层请求也受总超时限制，不产生第二次业务调用。429、预算耗尽、提供方超时、格式错误不伪装成规则答案。仅记录脱敏 requestId、耗时、错误分类、token/费用估算、检索和工具统计，不记录密钥/完整敏感提示词。
 

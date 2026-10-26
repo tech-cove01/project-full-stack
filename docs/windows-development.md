@@ -1,12 +1,34 @@
 # Windows 本地开发
 
-本项目可以在 Windows 上开发：Java、Node.js 和 k6 在 Windows 原生运行，MySQL 8.4 与 Redis 7.4 由 Docker Desktop 的 Linux 容器提供。日常开发不需要维护 VMware / VirtualBox 里的手工 Linux 虚拟机。
+## 当前路线：Go（2026-10-26）
+
+后续使用 Windows 原生 Go、Node.js、k6，MySQL 8.4 / Redis 7.4 和社区 Kafka 使用 Docker Desktop Linux 容器，不依赖旧虚拟机。保留 MySQL，不需要安装 PostgreSQL、pgvector 或 RabbitMQ。技术版本、任务和切换条件以 [Go 总方案](implementation-plan.md) 为准。
+
+本机已观察到 go1.27.0 windows/amd64 可调用；Go 后端尚无代码或 go.mod。GO-001 要锁定工具链/模块、实现配置和健康/关闭、参数化前端代理并提供实际 Go 启动命令，此前不要把下方 Maven 命令当 Go 启动入口。普通 Go 构建/测试可在 Windows 先做，race 由具备工具链的 Linux CI 执行，不要求先为此安装 Windows C 编译器。
+
+启动前重新检查工具和端口。Go 迁移开发可用 8082 和独立测试依赖 3308/6380；Java 历史基线通常用 8081 与 3307/6379。隔离 Compose 项目名、数据卷与端口，禁止两个后端同时消费同一 Stream/group/outbox。不要据下方历史检查推断今天容器健康。
+
+~~~powershell
+go version
+node --version
+npm.cmd --version
+docker version
+docker compose version
+~~~
+
+Kafka 用 Docker 单节点 KRaft 开发 profile，首次实现锁定镜像和 kafka-go 客户端兼容版本，并记录内外 listener、topic/group、健康检查及持久卷。这里尚未提供已实现的 Kafka 启动命令。
+
+## Java 基线运行与环境历史
+
+以下保留 Java 基线的配置/命令，供迁移对照或回退，不再作为新功能开发路线。Go 首次运行与正式切换的操作记录按交付 SHA 追加；不得批量将旧 Java 验收改名为 Go。
+
+原项目在 Windows 原生运行 Java、Node.js 和 k6，MySQL 8.4 与 Redis 7.4 由 Docker Desktop 的 Linux 容器提供。
 
 推荐 Docker Desktop 使用 WSL 2 后端。WSL 2 仍使用轻量虚拟化和 Linux 内核，只是无需自行维护一台完整的开发虚拟机；无需为了本项目额外安装 Ubuntu 发行版。安装条件和后端设置以 [Docker Windows 文档](https://docs.docker.com/desktop/setup/install/windows-install/)及 [WSL 2 后端文档](https://docs.docker.com/desktop/features/wsl/)为准。
 
 交易改造见[交易与一致性设计](transaction-design.md)，交付条件见[验收清单](acceptance.md)。本文只说明本地开发方式，不代表对应业务已通过验收。
 
-## 2026-10-26 社区增补环境（待实现）
+## 2026-10-26 社区增补环境历史（Java 方案，已由 Go 路线替代）
 
 最新范围见 [后端亮点方案](backend-highlights-plan.md)。仍在 Windows 原生运行 Java/Node/k6；新增 Kafka 使用 Docker KRaft 单节点，建议独立 `community` profile，默认关闭社区时原交易与 AI 可启动。本文没有表示 Kafka/Canal 已安装或可用，实现 agent 不需要先整理旧虚拟机。
 

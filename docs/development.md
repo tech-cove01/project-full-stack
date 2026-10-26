@@ -1,8 +1,10 @@
 # 运行与验证
 
+2026-10-26 Go 路线：接口表作为迁移契约继续复用；当前 GO-001 尚未实现，Go 命令/CI/真实结果待对应任务补充。下面 Maven、JDK、Spring 配置和历史测试均指 Java 基线，不是当前 Go 开发要求，也不能作为 Go 通过记录。执行顺序和隔离切换见 [Go 总方案](implementation-plan.md)。
+
 Windows 本机的具体端口、环境检查和三个 PowerShell 终端启动步骤见 [Windows 开发说明](windows-development.md)。后续改造任务见 [分阶段方案](implementation-plan.md)，交接入口见 [agent-handoff.md](agent-handoff.md)，目标验收见 [acceptance.md](acceptance.md)。本文接口表描述当前基线，不代表规划接口已经实现。
 
-## 环境与启动
+## Java 基线环境与启动（历史参考）
 
 - JDK 21 是编译目标；兼容的较新 JDK 也可以通过 `--release 21` 构建。
 - Node.js 24；前端依赖以 `frontend/package-lock.json` 为准。
@@ -64,7 +66,7 @@ Docker 未运行时，可以进行后端单元测试和前端构建，真实 API
 
 统一响应为 `{success,errorMsg?,data?,total?}`。`authorization` 请求头携带登录 Token；业务失败应读取 `success`，不能只判断 HTTP 200。订单 `state` 取 PROCESSING、CREATED 或 FAILED，业务订单状态另由 `orderStatus` 表示；数据库物理列仍为 `status`。
 
-## 自动化验证
+## Java 基线自动化验证（历史参考）
 
 ```sh
 mvn -B -ntp -f backend/pom.xml verify

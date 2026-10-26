@@ -1,5 +1,7 @@
 # AI 最小版验收与证据
 
+2026-10-26 Go 更新：业务/权限/生命周期条件继续有效，当前执行任务为 GO-040—042，见 [Go 总方案](implementation-plan.md)。下文历史 MVP 和评测均为 Java，不代表 Go 已通过；真实提供方质量与隔离 Stub 故障结果分开报告。
+
 本文对应 [AI 设计](./ai-design.md) 的 P1-D 必需能力及 P2 验收，不另定义 API 路由。交易规则以 [交易设计](./transaction-design.md) 最新有效规则为准：未支付取消/超时后可重买，已支付退款后不可重买。FAQ 发布前必须与该规则核对，不能沿用旧的终身限购说明。
 
 本文仅制定验收，未执行任何测试、调用模型或启动服务。已有项目构建、交易测试及 Mock 页面记录不作为 AI 已通过的证据；没有提供商 Key 时，真实模型项标为“未执行”。
@@ -10,10 +12,10 @@
 
 - P1-D 交付 C 端 FAQ RAG、业务只读工具、Redis 会话记忆、携带鉴权的 POST fetch SSE，以及 B 端公开门店 FAQ 的维护、发布和停用；平台 FAQ 由种子/受控维护流程提供，不新增复杂平台角色后台。
 - SSE 按 AI 设计发送真实阶段 `meta/status/sources/tool_result`；回答完整缓冲并经过权限/来源校验后发送一次 `answer`，再 `done`，异常发 `error`。不发送未校验回答 `delta`，不人为拆字模拟 token 直传；首版不要求上游同时支持流式、工具和结构化输出。
-- 使用 LangChain4j 显式 Bean，保留 Spring Boot 3.5。默认远端百炼 Qwen 兼容 Chat 接口与 `text-embedding-v4`，首版显式配置 1024 维；实际 provider、model、embedding 维度均可配置并写入报告，不根据模型名字猜维度。
-- 单实例、小规模最多 2000 chunks；运行时用 `InMemoryEmbeddingStore`，MySQL 持久保存知识版本及 embedding JSON。不增加向量服务或 GPU，也不将该方案描述为多实例向量集群。
+- Go net/http/context 接入兼容 Chat/Embedding Provider，无需 LangChain4j/Spring。提供方、模型、向量维度显式配置并记报告，沿用已验证账号配置即可，不强制更换供应商或猜测维度。
+- 单实例、小规模最多 2000 chunks；Go 运行时做带范围过滤的精确向量遍历，MySQL 持久保存知识版本及 embedding JSON。不增加向量服务或 GPU，也不将该方案描述为多实例向量集群。
 - 仅检索已发布 `PUBLIC` 平台 FAQ 和 `SHOP_PUBLIC` 门店规则。未提交发布的草稿、私密文档不参与 embedding 或 Chat；授权发布后的不可变 `INDEXING` 候选可生成 embedding，只有 READY 并成为当前发布版本后才可进入问答检索。文档内容、会话和模型输出不能授予权限。
-- 实时价格、库存与本人订单由业务只读工具查询。身份取服务端 `AuthContext`，不采信提示词或工具参数中的手机号、`userId`、角色声明。异步任务显式传递经核验上下文，不能假定 `ThreadLocal` 自动继承。
+- 实时价格、库存与本人订单由业务只读工具查询。身份取服务端 `AuthContext`，不采信提示词或工具参数中的手机号、`userId`、角色声明。异步任务显式传递经核验的不可变身份及 context，不跨 goroutine 持有 Gin Context。
 - AI 关闭或远端故障不阻塞登录、抢购、支付、取消、核销和退款。模型没有这些写工具；用户需要操作时仅引导至正常业务页面。
 
 ## 固定种子与运行条件
@@ -96,7 +98,7 @@ AI 负载使用少量有上限的会话，例如 1–3 个并发、固定问题/
 每阶段在 `docs/evidence/<日期>-<短SHA>/ai/` 提供报告及脱敏原始结果，主交付链接到 [项目验收](./acceptance.md)。本文件创建时不新增测试脚本或运行任何模型调用。
 
 ```text
-提交/环境：完整SHA、未提交改动、JDK/Boot/LangChain4j、MySQL/Redis版本
+提交/环境：完整SHA、未提交改动、Go工具链/模块版本、MySQL/Redis版本
 AI配置：enabled/ready；Chat与embedding的provider/model；实际embedding维度
 检索：chunking、overlap、topK/阈值、知识版本/epoch、向量配置指纹
 提示词：模板版本/hash；身份与门店上下文的服务端来源

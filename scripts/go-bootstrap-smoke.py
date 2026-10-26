@@ -4,7 +4,8 @@ Run with the isolated MYSQL_* and REDIS_* environment from backend-go/.env.examp
     python scripts/go-bootstrap-smoke.py --binary backend-go/api.exe --output report.json
 
 Each scenario starts its own process and uses an ephemeral loopback API port.
-No database rows or Redis keys are created or removed by this script.
+This script creates no fixture database rows or Redis keys. The API can deliver
+previously persisted activity outbox events; run against isolated dependencies.
 """
 
 import argparse

@@ -1,0 +1,37 @@
+=== RUN   TestIntegrationActivity
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+[GIN-debug] GET    /merchant/activities      --> github.com/cityloop/fullstack-go/internal/activity.Register.func1 (3 handlers)
+[GIN-debug] POST   /merchant/activities      --> github.com/cityloop/fullstack-go/internal/activity.Register.func2 (3 handlers)
+[GIN-debug] POST   /merchant/activities/:id/retry-publication --> github.com/cityloop/fullstack-go/internal/activity.Register.func3.func1 (3 handlers)
+[GIN-debug] POST   /merchant/activities/:id/offline --> github.com/cityloop/fullstack-go/internal/activity.Register.func3.func1 (3 handlers)
+=== RUN   TestIntegrationActivity/create_lists_exact_strings_and_commits_single_audit_and_outbox
+=== RUN   TestIntegrationActivity/same_key_concurrent_requests_return_one_activity_and_changed_body_conflicts
+=== RUN   TestIntegrationActivity/mixed_roles_cross_shop_and_old_token_revocation_reject_without_writes
+=== RUN   TestIntegrationActivity/waiting_authorization_read_observes_committed_member_revocation
+=== RUN   TestIntegrationActivity/lists_enforce_staff_scope_filters_stable_pagination_and_empty_arrays
+=== RUN   TestIntegrationActivity/audit_or_outbox_failure_rolls_back_activity_voucher_and_success_records
+=== RUN   TestIntegrationActivity/offline_synchronously_closes_once_and_retry_never_resets_stock
+=== RUN   TestIntegrationActivity/offline_audit_rollback_keeps_gate_closed_and_same_action_converges
+=== RUN   TestIntegrationActivity/redis_close_wrong_type_rejects_without_db_audit_or_outbox_change
+--- PASS: TestIntegrationActivity (1.25s)
+    --- PASS: TestIntegrationActivity/create_lists_exact_strings_and_commits_single_audit_and_outbox (0.08s)
+    --- PASS: TestIntegrationActivity/same_key_concurrent_requests_return_one_activity_and_changed_body_conflicts (0.06s)
+    --- PASS: TestIntegrationActivity/mixed_roles_cross_shop_and_old_token_revocation_reject_without_writes (0.18s)
+    --- PASS: TestIntegrationActivity/waiting_authorization_read_observes_committed_member_revocation (0.11s)
+    --- PASS: TestIntegrationActivity/lists_enforce_staff_scope_filters_stable_pagination_and_empty_arrays (0.08s)
+    --- PASS: TestIntegrationActivity/audit_or_outbox_failure_rolls_back_activity_voucher_and_success_records (0.05s)
+    --- PASS: TestIntegrationActivity/offline_synchronously_closes_once_and_retry_never_resets_stock (0.15s)
+    --- PASS: TestIntegrationActivity/offline_audit_rollback_keeps_gate_closed_and_same_action_converges (0.17s)
+    --- PASS: TestIntegrationActivity/redis_close_wrong_type_rejects_without_db_audit_or_outbox_change (0.05s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/activity	1.506s

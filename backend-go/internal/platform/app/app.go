@@ -13,6 +13,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/cityloop/fullstack-go/internal/activity"
+	"github.com/cityloop/fullstack-go/internal/activitypub"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
@@ -39,13 +41,39 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			auth.Register(routes, identity)
 			shop.Register(routes, shop.NewService(resources.ORM, cfg.Location))
 			merchant.Register(routes, merchant.NewService(resources.ORM), identity)
+			activity.Register(routes, activity.NewService(resources.ORM, resources.Redis), identity)
 		}),
 		ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second,
 		WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
+	// Workers use process lifetime, never a request context. Persistent outbox
+	// rows remain replayable when cancellation interrupts an in-flight event.
+	owned := startBackground(ctx, resources, activitypub.NewWorker(resources.ORM, resources.Redis).Run)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())
-	return serve(ctx, server, listener, resources, cfg.ShutdownTimeout, logger)
+	return serve(ctx, server, listener, owned, cfg.ShutdownTimeout, logger)
+}
+
+type backgroundResources struct {
+	resources io.Closer
+	cancel    context.CancelFunc
+	done      <-chan struct{}
+}
+
+func startBackground(ctx context.Context, resources io.Closer, run func(context.Context)) *backgroundResources {
+	workerCtx, cancel := context.WithCancel(ctx)
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+		run(workerCtx)
+	}()
+	return &backgroundResources{resources: resources, cancel: cancel, done: done}
+}
+
+func (owned *backgroundResources) Close() error {
+	owned.cancel()
+	<-owned.done
+	return owned.resources.Close()
 }
 
 // serve drains accepted HTTP work before releasing database/cache pools. The

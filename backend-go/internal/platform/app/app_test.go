@@ -40,6 +40,38 @@ type testResources struct {
 // changing the shutdown budgets or the drain-ordering assertions below.
 const requestStartTimeout = 5 * time.Second
 
+func TestWorkerCancellationFinishesBeforeDependencyPoolsClose(t *testing.T) {
+	resources := &testResources{closed: make(chan struct{})}
+	started, release := make(chan struct{}), make(chan struct{})
+	owned := startBackground(context.Background(), resources, func(ctx context.Context) {
+		close(started)
+		<-ctx.Done()
+		<-release // A cancelled worker still has to release its in-flight work.
+		select {
+		case <-resources.closed:
+			t.Error("dependency pools closed before the worker returned")
+		default:
+		}
+	})
+	<-started
+	closed := make(chan error, 1)
+	go func() { closed <- owned.Close() }()
+	select {
+	case <-resources.closed:
+		t.Fatal("pool close did not wait for the cancelled worker")
+	case <-time.After(30 * time.Millisecond):
+	}
+	close(release)
+	select {
+	case err := <-closed:
+		if err != nil || resources.calls.Load() != 1 {
+			t.Fatal("worker shutdown did not close resources once")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("worker shutdown did not finish")
+	}
+}
+
 func (resources *testResources) Close() error {
 	resources.calls.Add(1)
 	resources.once.Do(func() { close(resources.closed) })

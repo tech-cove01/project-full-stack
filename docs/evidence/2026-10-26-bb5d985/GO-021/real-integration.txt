@@ -1,0 +1,899 @@
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/empty_title
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/long_title
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/malformed_shop
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/zero_money
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/signed_money
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/money_overflow
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/discount_inverted
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/zero_stock
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/stock_too_large
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/local_time
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/before_redis_epoch
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/fractional_time
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/inverted_sale
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/inverted_redeem
+=== RUN   TestPublishValidationRejectsUnsafeNumbersAndTimes/redeem_too_short
+--- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes (0.04s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/empty_title (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/long_title (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/malformed_shop (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/zero_money (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/signed_money (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/money_overflow (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/discount_inverted (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/zero_stock (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/stock_too_large (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/local_time (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/before_redis_epoch (0.04s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/fractional_time (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/inverted_sale (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/inverted_redeem (0.00s)
+    --- PASS: TestPublishValidationRejectsUnsafeNumbersAndTimes/redeem_too_short (0.00s)
+=== RUN   TestCanonicalHashNormalizesBusinessTimeAndCannotCollideOnDelimiters
+--- PASS: TestCanonicalHashNormalizesBusinessTimeAndCannotCollideOnDelimiters (0.00s)
+=== RUN   TestBusinessTimeUsesShanghaiIANAHistory
+--- PASS: TestBusinessTimeUsesShanghaiIANAHistory (0.00s)
+=== RUN   TestPaginationAvoidsOverflowAndSerializationKeepsExactContracts
+--- PASS: TestPaginationAvoidsOverflowAndSerializationKeepsExactContracts (0.00s)
+=== RUN   TestActivityRoutesAuthenticateAndKeepRecoveryClosed
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /merchant/activities      --> github.com/cityloop/fullstack-go/internal/activity.Register.func1 (3 handlers)
+[GIN-debug] POST   /merchant/activities      --> github.com/cityloop/fullstack-go/internal/activity.Register.func2 (3 handlers)
+[GIN-debug] POST   /merchant/activities/:id/retry-publication --> github.com/cityloop/fullstack-go/internal/activity.Register.func3.func1 (3 handlers)
+[GIN-debug] POST   /merchant/activities/:id/offline --> github.com/cityloop/fullstack-go/internal/activity.Register.func3.func1 (3 handlers)
+--- PASS: TestActivityRoutesAuthenticateAndKeepRecoveryClosed (0.00s)
+=== RUN   TestStrictCreateDecoderRejectsExtraWritableIdentityAndInvalidStock
+--- PASS: TestStrictCreateDecoderRejectsExtraWritableIdentityAndInvalidStock (0.00s)
+=== RUN   TestActivityQueryFiltersValidateBeforeSQL
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestActivityQueryFiltersValidateBeforeSQL (0.00s)
+=== RUN   TestIntegrationActivity
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+[GIN-debug] GET    /merchant/activities      --> github.com/cityloop/fullstack-go/internal/activity.Register.func1 (3 handlers)
+[GIN-debug] POST   /merchant/activities      --> github.com/cityloop/fullstack-go/internal/activity.Register.func2 (3 handlers)
+[GIN-debug] POST   /merchant/activities/:id/retry-publication --> github.com/cityloop/fullstack-go/internal/activity.Register.func3.func1 (3 handlers)
+[GIN-debug] POST   /merchant/activities/:id/offline --> github.com/cityloop/fullstack-go/internal/activity.Register.func3.func1 (3 handlers)
+=== RUN   TestIntegrationActivity/create_lists_exact_strings_and_commits_single_audit_and_outbox
+=== RUN   TestIntegrationActivity/same_key_concurrent_requests_return_one_activity_and_changed_body_conflicts
+=== RUN   TestIntegrationActivity/mixed_roles_cross_shop_and_old_token_revocation_reject_without_writes
+=== RUN   TestIntegrationActivity/lists_enforce_staff_scope_filters_stable_pagination_and_empty_arrays
+=== RUN   TestIntegrationActivity/audit_or_outbox_failure_rolls_back_activity_voucher_and_success_records
+=== RUN   TestIntegrationActivity/offline_synchronously_closes_once_and_retry_never_resets_stock
+=== RUN   TestIntegrationActivity/offline_audit_rollback_keeps_gate_closed_and_same_action_converges
+=== RUN   TestIntegrationActivity/redis_close_wrong_type_rejects_without_db_audit_or_outbox_change
+--- PASS: TestIntegrationActivity (1.34s)
+    --- PASS: TestIntegrationActivity/create_lists_exact_strings_and_commits_single_audit_and_outbox (0.05s)
+    --- PASS: TestIntegrationActivity/same_key_concurrent_requests_return_one_activity_and_changed_body_conflicts (0.06s)
+    --- PASS: TestIntegrationActivity/mixed_roles_cross_shop_and_old_token_revocation_reject_without_writes (0.23s)
+    --- PASS: TestIntegrationActivity/lists_enforce_staff_scope_filters_stable_pagination_and_empty_arrays (0.10s)
+    --- PASS: TestIntegrationActivity/audit_or_outbox_failure_rolls_back_activity_voucher_and_success_records (0.06s)
+    --- PASS: TestIntegrationActivity/offline_synchronously_closes_once_and_retry_never_resets_stock (0.19s)
+    --- PASS: TestIntegrationActivity/offline_audit_rollback_keeps_gate_closed_and_same_action_converges (0.19s)
+    --- PASS: TestIntegrationActivity/redis_close_wrong_type_rejects_without_db_audit_or_outbox_change (0.05s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/activity	1.750s
+=== RUN   TestIntegrationOutbox
+=== RUN   TestIntegrationOutbox/enqueue_uses_transaction_and_checks_duplicate_semantics
+=== RUN   TestIntegrationOutbox/claim_does_not_touch_orders_community_or_unknown_events
+=== RUN   TestIntegrationOutbox/expired_and_reclaimed_leases_fence_stale_completion_and_retry
+=== RUN   TestIntegrationOutbox/concurrent_claims_are_distinct_and_skip_locked_rows
+=== RUN   TestIntegrationOutbox/continued_failures_keep_pending_and_bound_error_and_backoff
+--- PASS: TestIntegrationOutbox (2.09s)
+    --- PASS: TestIntegrationOutbox/enqueue_uses_transaction_and_checks_duplicate_semantics (0.09s)
+    --- PASS: TestIntegrationOutbox/claim_does_not_touch_orders_community_or_unknown_events (0.32s)
+    --- PASS: TestIntegrationOutbox/expired_and_reclaimed_leases_fence_stale_completion_and_retry (0.07s)
+    --- PASS: TestIntegrationOutbox/concurrent_claims_are_distinct_and_skip_locked_rows (0.11s)
+    --- PASS: TestIntegrationOutbox/continued_failures_keep_pending_and_bound_error_and_backoff (0.29s)
+=== RUN   TestDuplicateEventComparesExactIdentityAndJSONSemantics
+--- PASS: TestDuplicateEventComparesExactIdentityAndJSONSemantics (0.00s)
+=== RUN   TestRetryDelayRemainsBoundedWithoutAnAttemptCutoff
+--- PASS: TestRetryDelayRemainsBoundedWithoutAnAttemptCutoff (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/outbox	2.640s
+=== RUN   TestIntegrationGate
+=== RUN   TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes
+=== RUN   TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/0
+=== RUN   TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/1
+=== RUN   TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/2
+=== RUN   TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/3
+=== RUN   TestIntegrationGate/bad_script_arguments_and_aliased_keys_do_not_write
+=== RUN   TestIntegrationGate/retries_preserve_consumed_inventory_and_missing_keys_stay_closed
+=== RUN   TestIntegrationGate/same_version_offline_phase_blocks_failed_initialization_reopen
+=== RUN   TestIntegrationGate/legacy_hashes_fail_closed_and_can_be_offlined
+=== RUN   TestIntegrationGate/open_checks_corrupt_values_and_missing_projection_without_writes
+--- PASS: TestIntegrationGate (0.27s)
+    --- PASS: TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes (0.09s)
+        --- PASS: TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/0 (0.03s)
+        --- PASS: TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/1 (0.02s)
+        --- PASS: TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/2 (0.02s)
+        --- PASS: TestIntegrationGate/every_wrong_key_type_is_rejected_without_partial_writes/3 (0.02s)
+    --- PASS: TestIntegrationGate/bad_script_arguments_and_aliased_keys_do_not_write (0.07s)
+    --- PASS: TestIntegrationGate/retries_preserve_consumed_inventory_and_missing_keys_stay_closed (0.02s)
+    --- PASS: TestIntegrationGate/same_version_offline_phase_blocks_failed_initialization_reopen (0.01s)
+    --- PASS: TestIntegrationGate/legacy_hashes_fail_closed_and_can_be_offlined (0.01s)
+    --- PASS: TestIntegrationGate/open_checks_corrupt_values_and_missing_projection_without_writes (0.06s)
+=== RUN   TestGateRejectsInvalidArgumentsBeforeRedis
+--- PASS: TestGateRejectsInvalidArgumentsBeforeRedis (0.00s)
+=== RUN   TestIntegrationPublication
+=== RUN   TestIntegrationPublication/prepare_commits_active_audit_and_event_before_opening
+=== RUN   TestIntegrationPublication/audit_failure_rolls_back_active_and_outbox_while_gate_stays_closed
+=== RUN   TestIntegrationPublication/outbox_failure_rolls_back_active_and_audit_while_gate_stays_closed
+=== RUN   TestIntegrationPublication/offline_current_row_blocks_a_waiting_old_open
+=== RUN   TestIntegrationPublication/redis_failure_beyond_eight_attempts_remains_pending_then_recovers
+--- PASS: TestIntegrationPublication (2.66s)
+    --- PASS: TestIntegrationPublication/prepare_commits_active_audit_and_event_before_opening (0.12s)
+    --- PASS: TestIntegrationPublication/audit_failure_rolls_back_active_and_outbox_while_gate_stays_closed (0.08s)
+    --- PASS: TestIntegrationPublication/outbox_failure_rolls_back_active_and_audit_while_gate_stays_closed (0.08s)
+    --- PASS: TestIntegrationPublication/offline_current_row_blocks_a_waiting_old_open (0.14s)
+    --- PASS: TestIntegrationPublication/redis_failure_beyond_eight_attempts_remains_pending_then_recovers (0.45s)
+=== RUN   TestWorkerStopsWithoutPollingACancelledLifecycle
+--- PASS: TestWorkerStopsWithoutPollingACancelledLifecycle (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/activitypub	3.503s
+=== RUN   TestUserRoutesAuthenticateOnlyMigratedProtectedOperations
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+--- PASS: TestUserRoutesAuthenticateOnlyMigratedProtectedOperations (0.00s)
+=== RUN   TestMeAcceptsRawOrBearerAndKeepsLargeIDAsString
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+--- PASS: TestMeAcceptsRawOrBearerAndKeepsLargeIDAsString (0.00s)
+=== RUN   TestLogoutDeletesExactlyPresentedSessionAndOmitsNullData
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+--- PASS: TestLogoutDeletesExactlyPresentedSessionAndOmitsNullData (0.00s)
+=== RUN   TestLoginBodyIsBoundedAndIgnoresClientIdentityFields
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+--- PASS: TestLoginBodyIsBoundedAndIgnoresClientIdentityFields (0.00s)
+=== RUN   TestPublicErrorsNeverExposeStorageDiagnostics
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+--- PASS: TestPublicErrorsNeverExposeStorageDiagnostics (0.00s)
+=== RUN   TestCurrentUserReturnsValueCopyAndRequestContextCancels
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestCurrentUserReturnsValueCopyAndRequestContextCancels (0.00s)
+=== RUN   TestIntegrationAuth
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+=== RUN   TestIntegrationAuth/code_login_session_and_logout
+=== RUN   TestIntegrationAuth/concurrent_first_login_reuses_unique_phone
+=== RUN   TestIntegrationAuth/large_string_id_and_invalid_sessions
+=== RUN   TestIntegrationAuth/production_never_returns_or_persists_a_code
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+=== RUN   TestIntegrationAuth/credentials_without_expiry_are_not_accepted
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_code_list
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_throttle_hash
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/login_with_code_list
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/me_with_session_string
+=== RUN   TestIntegrationAuth/logout_cannot_be_resurrected_by_concurrent_refresh
+--- PASS: TestIntegrationAuth (0.47s)
+    --- PASS: TestIntegrationAuth/code_login_session_and_logout (0.09s)
+    --- PASS: TestIntegrationAuth/concurrent_first_login_reuses_unique_phone (0.09s)
+    --- PASS: TestIntegrationAuth/large_string_id_and_invalid_sessions (0.08s)
+    --- PASS: TestIntegrationAuth/production_never_returns_or_persists_a_code (0.02s)
+    --- PASS: TestIntegrationAuth/credentials_without_expiry_are_not_accepted (0.02s)
+    --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes (0.08s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_code_list (0.02s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_throttle_hash (0.02s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/login_with_code_list (0.02s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/me_with_session_string (0.02s)
+    --- PASS: TestIntegrationAuth/logout_cannot_be_resurrected_by_concurrent_refresh (0.06s)
+=== RUN   TestPhonePrefixesRetainNormalJavaSetWithoutComma
+--- PASS: TestPhonePrefixesRetainNormalJavaSetWithoutComma (0.00s)
+=== RUN   TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput
+=== RUN   TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput/issued
+=== RUN   TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput/throttled
+=== RUN   TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput/dependency
+--- PASS: TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput (0.00s)
+    --- PASS: TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput/issued (0.00s)
+    --- PASS: TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput/throttled (0.00s)
+    --- PASS: TestSendCodeSeparatesDevelopmentAndDoesNotTouchStoresOnRejectedInput/dependency (0.00s)
+=== RUN   TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors
+=== RUN   TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/phone
+=== RUN   TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/code_format
+=== RUN   TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/mismatch
+=== RUN   TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/redis_error
+--- PASS: TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors (0.00s)
+    --- PASS: TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/phone (0.00s)
+    --- PASS: TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/code_format (0.00s)
+    --- PASS: TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/mismatch (0.00s)
+    --- PASS: TestLoginRejectsBeforeUserCreationAndHidesDependencyErrors/redis_error (0.00s)
+=== RUN   TestLoginUsesDatabaseIdentityAndRetriesSessionCollisionWithoutOverwriting
+--- PASS: TestLoginUsesDatabaseIdentityAndRetriesSessionCollisionWithoutOverwriting (0.00s)
+=== RUN   TestResolveRejectsMalformedHeadersBeforeRedisAndSummarizesErrors
+--- PASS: TestResolveRejectsMalformedHeadersBeforeRedisAndSummarizesErrors (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/auth	0.922s
+=== RUN   TestWorkspaceAuthenticatesWithoutOpeningOtherMerchantRoutes
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /merchant/workspace       --> github.com/cityloop/fullstack-go/internal/merchant.Register.func1 (3 handlers)
+--- PASS: TestWorkspaceAuthenticatesWithoutOpeningOtherMerchantRoutes (0.00s)
+=== RUN   TestIntegrationMerchant
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+[GIN-debug] GET    /merchant/workspace       --> github.com/cityloop/fullstack-go/internal/merchant.Register.func1 (3 handlers)
+=== RUN   TestIntegrationMerchant/workspace_preserves_mixed_roles_large_ids_and_empty_memberships
+=== RUN   TestIntegrationMerchant/visible_and_managed_ranges_do_not_merge_roles
+=== RUN   TestIntegrationMerchant/concrete_shop_permissions_bind_actual_merchant_and_role
+=== RUN   TestIntegrationMerchant/untrusted_query_headers_and_extra_session_role_do_not_authorize
+=== RUN   TestIntegrationMerchant/scope_revocation_is_effective_for_the_original_token
+=== RUN   TestIntegrationMerchant/shop_ownership_changes_invalidate_dirty_old_scopes
+=== RUN   TestIntegrationMerchant/member_disable_and_role_downgrade_take_effect_without_relogin
+=== RUN   TestIntegrationMerchant/merchant_disable_removes_all_grants_but_not_login_identity
+=== RUN   TestIntegrationMerchant/access_uses_the_callers_transaction_handle
+=== RUN   TestIntegrationMerchant/workspace_uses_one_statement_and_database_errors_are_not_empty_permissions
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+[GIN-debug] GET    /merchant/workspace       --> github.com/cityloop/fullstack-go/internal/merchant.Register.func1 (3 handlers)
+=== RUN   TestIntegrationMerchant/logout_revokes_original_workspace_session
+--- PASS: TestIntegrationMerchant (0.51s)
+    --- PASS: TestIntegrationMerchant/workspace_preserves_mixed_roles_large_ids_and_empty_memberships (0.02s)
+    --- PASS: TestIntegrationMerchant/visible_and_managed_ranges_do_not_merge_roles (0.01s)
+    --- PASS: TestIntegrationMerchant/concrete_shop_permissions_bind_actual_merchant_and_role (0.07s)
+    --- PASS: TestIntegrationMerchant/untrusted_query_headers_and_extra_session_role_do_not_authorize (0.01s)
+    --- PASS: TestIntegrationMerchant/scope_revocation_is_effective_for_the_original_token (0.02s)
+    --- PASS: TestIntegrationMerchant/shop_ownership_changes_invalidate_dirty_old_scopes (0.03s)
+    --- PASS: TestIntegrationMerchant/member_disable_and_role_downgrade_take_effect_without_relogin (0.04s)
+    --- PASS: TestIntegrationMerchant/merchant_disable_removes_all_grants_but_not_login_identity (0.03s)
+    --- PASS: TestIntegrationMerchant/access_uses_the_callers_transaction_handle (0.02s)
+    --- PASS: TestIntegrationMerchant/workspace_uses_one_statement_and_database_errors_are_not_empty_permissions (0.00s)
+    --- PASS: TestIntegrationMerchant/logout_revokes_original_workspace_session (0.00s)
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/#00
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/0
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/00
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/01
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/+1
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/-1
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/_1
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1_
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1.0
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1e2
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/١
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/18446744073709551616
+=== RUN   TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1_OR_1=1
+--- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/#00 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/0 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/00 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/01 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/+1 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/-1 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/_1 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1_ (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1.0 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1e2 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/١ (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/18446744073709551616 (0.00s)
+    --- PASS: TestAccessRejectsNoncanonicalIDsBeforeDatabaseUse/1_OR_1=1 (0.00s)
+=== RUN   TestMembershipManagementRoleFailsClosed
+--- PASS: TestMembershipManagementRoleFailsClosed (0.00s)
+=== RUN   TestWorkspaceJSONRetainsStringIDsAndEmptyArrays
+--- PASS: TestWorkspaceJSONRetainsStringIDsAndEmptyArrays (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/merchant	1.060s
+=== RUN   TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes
+=== RUN   TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/name
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+=== RUN   TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/type?typeId=2
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+=== RUN   TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/name?name=%20%E5%92%96%E5%95%A1%20&typeId=9007199254740993&current=6&pageSize=50
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+=== RUN   TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/type?typeId=2&name=%E5%92%96%E5%95%A1&current=18446744073709551615&pageSize=1
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+--- PASS: TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes (0.00s)
+    --- PASS: TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/name (0.00s)
+    --- PASS: TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/type?typeId=2 (0.00s)
+    --- PASS: TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/name?name=%20%E5%92%96%E5%95%A1%20&typeId=9007199254740993&current=6&pageSize=50 (0.00s)
+    --- PASS: TestPublicListBindsCombinedFiltersAndKeepsLegacyDefaultSizes//shop/of/type?typeId=2&name=%E5%92%96%E5%95%A1&current=18446744073709551615&pageSize=1 (0.00s)
+=== RUN   TestInvalidFiltersAndUnsupportedCoordinatesFailBeforeSQL
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+--- PASS: TestInvalidFiltersAndUnsupportedCoordinatesFailBeforeSQL (0.00s)
+=== RUN   TestClosedWritesAreForbiddenAndUnknownRoutesStayUnavailable
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+--- PASS: TestClosedWritesAreForbiddenAndUnknownRoutesStayUnavailable (0.00s)
+=== RUN   TestMissingShopAndEmptyCategoryOrVoucherListsRemainDistinct
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+--- PASS: TestMissingShopAndEmptyCategoryOrVoucherListsRemainDistinct (0.00s)
+=== RUN   TestDatabaseErrorsStaySafeAndRequestCancellationPropagates
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+--- PASS: TestDatabaseErrorsStaySafeAndRequestCancellationPropagates (0.00s)
+=== RUN   TestIntegrationShop
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.listHandler.func1 (2 handlers)
+[GIN-debug] GET    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func1 (2 handlers)
+[GIN-debug] GET    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func2 (2 handlers)
+[GIN-debug] GET    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func3 (2 handlers)
+[GIN-debug] POST   /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop                     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/:id                 --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/name             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop/of/type             --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type                --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /shop-type/list           --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher                  --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/seckill          --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] POST   /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PUT    /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] PATCH  /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+[GIN-debug] DELETE /voucher/list/:shopId     --> github.com/cityloop/fullstack-go/internal/shop.Register.func4 (2 handlers)
+=== RUN   TestIntegrationShop/all_53_shops_are_reachable_without_duplicate_pages
+=== RUN   TestIntegrationShop/chinese_search_and_category_use_one_intersection
+=== RUN   TestIntegrationShop/literal_wildcards_and_injection_text_are_not_queries
+=== RUN   TestIntegrationShop/detail_keeps_null_empty_yuan_and_local_time_contracts
+=== RUN   TestIntegrationShop/categories_sort_by_sort_then_id_and_omit_null_fields
+=== RUN   TestIntegrationShop/only_enabled_active_vouchers_are_visible_without_stock_or_time_filter
+=== RUN   TestIntegrationShop/invalid_parameters_and_coordinates_are_explicit_errors
+--- PASS: TestIntegrationShop (0.38s)
+    --- PASS: TestIntegrationShop/all_53_shops_are_reachable_without_duplicate_pages (0.04s)
+    --- PASS: TestIntegrationShop/chinese_search_and_category_use_one_intersection (0.02s)
+    --- PASS: TestIntegrationShop/literal_wildcards_and_injection_text_are_not_queries (0.03s)
+    --- PASS: TestIntegrationShop/detail_keeps_null_empty_yuan_and_local_time_contracts (0.01s)
+    --- PASS: TestIntegrationShop/categories_sort_by_sort_then_id_and_omit_null_fields (0.00s)
+    --- PASS: TestIntegrationShop/only_enabled_active_vouchers_are_visible_without_stock_or_time_filter (0.01s)
+    --- PASS: TestIntegrationShop/invalid_parameters_and_coordinates_are_explicit_errors (0.00s)
+=== RUN   TestPageOffsetReturnsEmptyBeforeOverflowing
+--- PASS: TestPageOffsetReturnsEmptyBeforeOverflowing (0.00s)
+=== RUN   TestLiteralSubstringFilterEscapesWildcardsAndBindsCategory
+--- PASS: TestLiteralSubstringFilterEscapesWildcardsAndBindsCategory (0.00s)
+=== RUN   TestPublicShopSerializationKeepsIDYuanNullAndEmptyStringSemantics
+--- PASS: TestPublicShopSerializationKeepsIDYuanNullAndEmptyStringSemantics (0.00s)
+=== RUN   TestPublicTypeAndVoucherHaveOnlySelectedFields
+--- PASS: TestPublicTypeAndVoucherHaveOnlySelectedFields (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/shop	0.965s

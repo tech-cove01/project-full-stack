@@ -21,6 +21,7 @@ var (
 	ErrActivity   = errors.New("活动尚未就绪或已下架")
 	ErrPagination = errors.New("页码必须为正整数，pageSize必须在1到50之间")
 	ErrInvalidID  = errors.New("ID必须为正十进制整数字符串")
+	ErrConflict   = errors.New("当前订单状态或支付期限不允许此操作")
 	businessZone  = loadBusinessZone()
 )
 
@@ -84,6 +85,9 @@ type Service struct {
 	db        *gorm.DB
 	redis     *redis.Client
 	admission admission
+	// Tests may inject entropy failures/collisions; production always defaults
+	// to cryptographic randomness and never accepts a token from HTTP input.
+	newRedeemToken func() (string, error)
 }
 
 func NewService(db *gorm.DB, rdb *redis.Client, payTimeout time.Duration) *Service {

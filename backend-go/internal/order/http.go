@@ -54,6 +54,17 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		count := strconv.FormatUint(total, 10)
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: items, Total: &count})
 	})
+	routes.POST("/voucher-order/:id/pay", auth.RequireLogin(identity), func(c *gin.Context) {
+		user, _ := auth.CurrentUser(c)
+		ctx, cancel := requestContext(c)
+		defer cancel()
+		view, err := service.Pay(ctx, user.ID, c.Param("id"))
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: view})
+	})
 }
 
 func requestContext(c *gin.Context) (context.Context, context.CancelFunc) {
@@ -90,6 +101,8 @@ func writeError(c *gin.Context, err error) {
 		status, message = http.StatusBadRequest, err.Error()
 	case errors.Is(err, ErrNotFound):
 		status, message = http.StatusNotFound, ErrNotFound.Error()
+	case errors.Is(err, ErrConflict):
+		status, message = http.StatusConflict, ErrConflict.Error()
 	case errors.Is(err, ErrActivity), errors.Is(err, orderadmission.ErrSoldOut), errors.Is(err, orderadmission.ErrAlreadyPurchased),
 		errors.Is(err, orderadmission.ErrNotStarted), errors.Is(err, orderadmission.ErrEnded), errors.Is(err, orderadmission.ErrClosed):
 		status, message = http.StatusOK, err.Error()

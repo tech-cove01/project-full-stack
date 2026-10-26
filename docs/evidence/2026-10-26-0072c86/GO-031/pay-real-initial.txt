@@ -1,0 +1,20 @@
+=== RUN   TestIntegrationPay
+=== RUN   TestIntegrationPay/pay_commits_current_snapshot_audit_and_event_without_inventory_change
+=== RUN   TestIntegrationPay/twenty_concurrent_payments_are_one_transition_and_return_the_same_token
+=== RUN   TestIntegrationPay/foreign_or_missing_orders_are_404_and_terminal_conflicts_have_no_token
+=== RUN   TestIntegrationPay/db_deadline_boundary_and_old_configuration_never_allow_late_payment
+=== RUN   TestIntegrationPay/audit_outbox_and_entropy_failures_roll_back_the_complete_transition
+=== RUN   TestIntegrationPay/tokens_are_unique_and_collision_retries_are_bounded_and_rollback_first
+=== RUN   TestIntegrationPay/version_bounds_reject_before_writes_and_tokens_stay_out_of_lists_and_terminals
+=== RUN   TestIntegrationPay/payment_waiting_for_inventory_lock_rechecks_db_time_after_deadline
+--- PASS: TestIntegrationPay (2.68s)
+    --- PASS: TestIntegrationPay/pay_commits_current_snapshot_audit_and_event_without_inventory_change (0.10s)
+    --- PASS: TestIntegrationPay/twenty_concurrent_payments_are_one_transition_and_return_the_same_token (0.20s)
+    --- PASS: TestIntegrationPay/foreign_or_missing_orders_are_404_and_terminal_conflicts_have_no_token (0.14s)
+    --- PASS: TestIntegrationPay/db_deadline_boundary_and_old_configuration_never_allow_late_payment (0.09s)
+    --- PASS: TestIntegrationPay/audit_outbox_and_entropy_failures_roll_back_the_complete_transition (0.20s)
+    --- PASS: TestIntegrationPay/tokens_are_unique_and_collision_retries_are_bounded_and_rollback_first (0.23s)
+    --- PASS: TestIntegrationPay/version_bounds_reject_before_writes_and_tokens_stay_out_of_lists_and_terminals (0.14s)
+    --- PASS: TestIntegrationPay/payment_waiting_for_inventory_lock_rechecks_db_time_after_deadline (1.16s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/order	2.936s

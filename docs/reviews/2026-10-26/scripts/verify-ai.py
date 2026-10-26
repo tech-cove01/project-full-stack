@@ -153,14 +153,26 @@ def main():
                                            'sourceCount': len(after_sources),
                                            'documentIds': after_docs}
 
-        status, sensitive = request('POST', f'/ai/conversations/{conversation_id}/messages',
-                                    {'clientMessageId': 'a3-token', 'shopId': '1',
-                                     'message': '我的登录 token 是 0123456789abcdef0123456789abcdef'}, user)
-        status_code, labelled = request('POST', f'/ai/conversations/{conversation_id}/messages',
-                                        {'clientMessageId': 'a3-code', 'shopId': '1',
-                                         'message': '验证码 123456 帮我登录'}, user)
-        evidence['sensitive'] = {'tokenStatus': status, 'tokenMsg': sensitive.get('errorMsg'),
-                                 'codeStatus': status_code, 'codeMsg': labelled.get('errorMsg')}
+        calls_before = api('GET', '/dev/ai/calls', token=user)
+        variants = {
+            'login_token': '我的登录 token 是 0123456789abcdef0123456789abcdef',
+            'plain_code': '验证码 123456 帮我登录',
+            'code_is': '验证码是123456，帮我看看',
+            'code_colon': '验证码为：123456',
+        }
+        variant_status = {}
+        for name, text in variants.items():
+            code, payload = request('POST', f'/ai/conversations/{conversation_id}/messages',
+                                    {'clientMessageId': 'a3-' + name, 'shopId': '1',
+                                     'message': text}, user)
+            variant_status[name] = code
+        calls_after = api('GET', '/dev/ai/calls', token=user)
+        # A bare six-digit number must still be accepted, so order ids stay usable.
+        plain_status, _ = sse(conversation_id, {
+            'clientMessageId': 'a3-plain-number', 'shopId': '1',
+            'message': '订单 123456 的金额是多少'}, user)
+        evidence['sensitive'] = {'before': calls_before, 'after': calls_after,
+                                 'variants': variant_status, 'bareNumberStatus': plain_status}
 
         limited = []
         for index in range(24):
@@ -177,11 +189,15 @@ def main():
                  and (evidence['cachedReplay']['done'] or {}).get('cached') is True
                  and (evidence['replayAfterDisable']['error'] or {}).get('code') == 'KNOWLEDGE_CHANGED'
                  and str(document_id) not in after_docs)
-        a3_ok = status == 400 and status_code == 400
-        a2_ok = 429 in limited
+        a3_ok = (all(code == 400 for code in variant_status.values())
+                 and calls_before == calls_after
+                 and plain_status != 400)
         evidence['finding'] = {
             'A1': 'FIXED' if a1_ok else 'REVIEW_REQUIRED',
-            'A2': 'FIXED' if a2_ok else 'REVIEW_REQUIRED',
+            'A2_rate_limit': 'FIXED' if 429 in limited else 'REVIEW_REQUIRED',
+            'A2_daily_budget': 'NOT_EXECUTED',
+            'A2_turn_deadline': 'NOT_EXECUTED',
+            'A2_lock_release': 'NOT_EXECUTED',
             'A3': 'FIXED' if a3_ok else 'REVIEW_REQUIRED',
         }
         print(json.dumps(evidence, ensure_ascii=False))
@@ -194,5 +210,7 @@ def main():
 try:
     main()
 except Exception as error:
+    import traceback
+    traceback.print_exc()
     print(json.dumps({'result': 'FAIL', 'error': str(error)}, ensure_ascii=False))
     sys.exit(1)

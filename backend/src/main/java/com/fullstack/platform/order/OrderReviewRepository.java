@@ -39,6 +39,9 @@ public class OrderReviewRepository {
                     stream_message_id = VALUES(stream_message_id),
                     attempts = GREATEST(attempts, VALUES(attempts)),
                     reason = VALUES(reason),
+                    -- A replayed message that failed again must become replayable again:
+                    -- REQUEUED goes back to OPEN, RESOLVED keeps its terminal state.
+                    status = IF(status = 'REQUEUED', 'OPEN', status),
                     updated_at = NOW(3)
                 """, Long.toString(order.getId()), order.getVoucherId(), order.getUserId(),
                 streamMessageId, attempts, reason);

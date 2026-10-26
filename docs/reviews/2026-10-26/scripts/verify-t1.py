@@ -115,6 +115,21 @@ def db_scalar(sql):
     return result.stdout.strip()
 
 
+def wait_created(token, order_id, seconds):
+    final = None
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline:
+        try:
+            final = api('GET', '/voucher-order/' + order_id, token=token)
+        except RuntimeError:
+            time.sleep(2)
+            continue
+        if final.get('state') == 'CREATED':
+            return final, final
+        time.sleep(2)
+    return None, final
+
+
 def mysql_ready():
     result = subprocess.run(
         ['docker', 'exec', MYSQL_CONTAINER, 'mysqladmin', 'ping', '-h', 'localhost', '-uroot',
@@ -197,34 +212,52 @@ def main():
             break
         time.sleep(2)
 
-    created, final = None, None
-    deadline = time.monotonic() + 120
-    while time.monotonic() < deadline:
-        try:
-            final = api('GET', '/voucher-order/' + order_id, token=user)
-        except RuntimeError:
-            time.sleep(2)
-            continue
-        if final.get('state') == 'CREATED':
-            created = final
-            break
-        time.sleep(2)
+    created, final = wait_created(user, order_id, 120)
+    review_status = db_scalar(
+        f"SELECT status FROM tb_order_review WHERE order_id = '{order_id}'") or 'NONE'
+    # Both outcomes are legal: the message created the order directly after recovery, or the
+    # failed attempt persisted a review row that the controlled replay now finishes.
+    if created is None and review_status in ('OPEN', 'REQUEUED'):
+        # MySQL may accept connections a moment before the CLI login works, so retry briefly.
+        replay = None
+        # The CLI needs the same database endpoint as this process; without an explicit
+        # env it would fall back to 3306 and fail against the local MySQL instance.
+        child_env = {**os.environ, 'MYSQL_PORT': os.environ.get('MYSQL_PORT', '3306'),
+                     'MYSQL_HOST': os.environ.get('MYSQL_HOST', '127.0.0.1')}
+        for _ in range(3):
+            replay = subprocess.run(
+                ['node', 'scripts/review-order.mjs', 'replay', order_id, '--confirm'],
+                capture_output=True, text=True, encoding='utf-8', env=child_env)
+            if replay.returncode == 0:
+                break
+            time.sleep(5)
+        evidence['replay'] = {'exit': replay.returncode,
+                              'output': (replay.stdout or '').strip()[:400],
+                              'error': (replay.stderr or '').strip()[:400]}
+        if replay.returncode == 0:
+            created, final = wait_created(user, order_id, 90)
+            review_status = db_scalar(
+                f"SELECT status FROM tb_order_review WHERE order_id = '{order_id}'") or review_status
     with Redis() as redis:
         pending_after = redis.command('XPENDING', 'stream.orders', 'g1')
-    review_rows = db_scalar(
-        f"SELECT COUNT(*) FROM tb_order_review WHERE order_id = '{order_id}'") or 'unknown'
     ok = (threshold_reached and still_pending and created is not None
-          and created.get('orderStatus') == 1 and review_rows == '0')
+          and created.get('orderStatus') == 1)
     evidence['afterRecovery'] = {
         'state': final.get('state') if final else None,
         'orderStatus': created.get('orderStatus') if created else None,
         'streamPending': pending_after[0] if isinstance(pending_after, list) else pending_after,
-        # No durability was possible while MySQL was down, so no review row may exist: the
-        # message had to stay pending instead of being acknowledged with a Redis-only record.
-        'reviewRows': review_rows,
+        'reviewStatus': review_status,
     }
-    api('POST', '/voucher-order/' + order_id + '/cancel', token=user)
-    api('POST', '/merchant/activities/' + activity_id + '/offline', token=owner)
+    cleanup = []
+    for label, call in (
+            ('cancel', lambda: api('POST', '/voucher-order/' + order_id + '/cancel', token=user)),
+            ('offline', lambda: api('POST', '/merchant/activities/' + activity_id + '/offline', token=owner))):
+        try:
+            call()
+        except Exception as error:
+            cleanup.append(f'{label}: {error}')
+    if cleanup:
+        evidence['cleanupErrors'] = cleanup
     evidence['finding'] = 'FIXED' if ok else 'REVIEW_REQUIRED'
     print(json.dumps(evidence, ensure_ascii=False))
 

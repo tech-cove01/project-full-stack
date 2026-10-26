@@ -8,10 +8,18 @@ import java.util.Locale;
  */
 public class StubAiProvider implements AiProvider {
     private final int dimensions;
+    /** Call counters make it possible to prove a rejected request never reached the provider. */
+    private final java.util.concurrent.atomic.AtomicLong embedCalls =
+            new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.atomic.AtomicLong chatCalls =
+            new java.util.concurrent.atomic.AtomicLong();
 
     public StubAiProvider(AiProperties properties) {
         this.dimensions = properties.getEmbeddingDimensions();
     }
+
+    public long embedCalls() { return embedCalls.get(); }
+    public long chatCalls() { return chatCalls.get(); }
 
     @Override public boolean ready() { return true; }
     @Override public String mode() { return "stub"; }
@@ -20,6 +28,7 @@ public class StubAiProvider implements AiProvider {
 
     @Override
     public float[] embed(String text) {
+        embedCalls.incrementAndGet();
         float[] vector = new float[dimensions];
         if (text == null || text.isBlank()) return vector;
         String normalized = text.toLowerCase(Locale.ROOT);
@@ -46,6 +55,7 @@ public class StubAiProvider implements AiProvider {
 
     @Override
     public String chat(String systemPrompt, String userPrompt) {
+        chatCalls.incrementAndGet();
         String evidence = between(userPrompt, "【证据】", "【问题】");
         if (evidence.isBlank()) {
             return "（stub）没有检索到可用依据，无法回答。";

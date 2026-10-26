@@ -27,9 +27,12 @@ public class AiAssistantService {
     /** Login token: UUID.toString(true), i.e. 32 hex characters without dashes. */
     private static final Pattern SESSION_TOKEN =
             Pattern.compile("(?<![a-fA-F0-9])[a-fA-F0-9]{32}(?![a-fA-F0-9])");
-    /** Labelled six-digit SMS code, e.g. "验证码 123456" or "code=123456". */
+    /**
+     * Labelled six-digit SMS code: "验证码 123456", "验证码是123456", "验证码为：123456",
+     * "code=123456". A bare six-digit number is not blocked, order ids stay usable.
+     */
     private static final Pattern LABELLED_CODE = Pattern.compile(
-            "(?i)(验证码|校验码|动态码|登录码|\\bcode\\b|\\botp\\b)[\\s:：=]{0,3}\\d{6}");
+            "(?i)(验证码|校验码|动态码|登录码|\\bcode\\b|\\botp\\b)\\s*[是为:：=]{0,3}\\s*\\d{6}");
     private static final int HISTORY_MESSAGES = 6;
 
     private final AiProperties properties;
@@ -213,11 +216,16 @@ public class AiAssistantService {
                 Map<String, Object> answer = Map.of("text", "资料刚刚更新，请重新提问。", "citationIds", List.of());
                 send(emitter, "answer", answer);
                 send(emitter, "done", Map.of("messageId", clientMessageId, "usage", "none"));
+                // Nothing was generated, so the dedupe record must not stay PROCESSING.
+                dedupe.fail(context.userId(), conversationId, clientMessageId);
                 completed = true;
                 return;
             }
             requireTurnBudget(deadline);
             send(emitter, "status", Map.of("stage", "generating"));
+            // The provider HTTP call cannot be cancelled once started; a client disconnect is
+            // detected on the next send and releases the lock/permit in finally, but the remote
+            // request may still finish and be billed. That limitation is recorded in the docs.
             String answerText = provider.chat(systemPrompt(), userPrompt(conversationId, context.userId(),
                     evidence.toString(), message));
             budget.recordUsage(context.userId());

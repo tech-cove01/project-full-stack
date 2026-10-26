@@ -248,8 +248,10 @@ public class MerchantActivityService {
 
     /**
      * Explicit recovery for an ACTIVE activity whose Redis stock/gate was lost.
-     * It refuses to run while any Stream reservation is still in flight, rebuilds the gate as
-     * CLOSED at a new version, and lets the outbox open it after the DB commit.
+     *
+     * <p>Order of operations matters: admission is closed first (a version no pending OPEN event
+     * can match), then in-flight work is enumerated, and only a quiescent activity is rebuilt
+     * from the locked DB row. A blocked inspection leaves the gate closed on purpose.
      */
     @Transactional(rollbackFor = Exception.class)
     public ActivityView reconcile(long activityId, boolean confirm) {
@@ -267,39 +269,67 @@ public class MerchantActivityService {
         if (!"ACTIVE".equals(status)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "只有 ACTIVE 活动需要重建 Redis 状态");
         }
-        requireNoInflightReservations();
 
-        int next = version + 1;
-        long prepared = publication.prepareForReconcile(activityId, next);
+        // 1. Stop admission. Old ACTIVITY_OPEN events carry a lower version and are rejected by
+        //    activity-open.lua, so a late event cannot reopen the gate during inspection.
+        long closed = publication.closeGate(activityId, version + 1);
+        if (closed < 0) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "准入关闭失败，暂不重建");
+        }
+
+        // 2. Enumerate work that a DB snapshot would miss. pending/lag alone is not enough.
+        List<String> blockers = new ArrayList<>();
+        if (inflightReservations() != 0) blockers.add("ORDER_STREAM_INFLIGHT");
+        if (openReviews(activityId) > 0) blockers.add("ORDER_REVIEW_UNRESOLVED");
+        if (pendingCompensations(activityId) > 0) blockers.add("OUTBOX_PENDING");
+        if (!blockers.isEmpty()) {
+            audit.record(membership.merchantId(), voucher.getShopId(), user.getId(), "MERCHANT",
+                    "ACTIVITY_RECONCILE_BLOCKED", Long.toString(activityId),
+                    Map.of("reason", String.join(",", blockers), "version", version));
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "仍有未处理项，准入保持关闭：" + String.join(",", blockers));
+        }
+
+        // 3. Rebuild from the locked row; the gate stays CLOSED until the outbox opens target.
+        int target = version + 2;
+        long prepared = publication.prepareForReconcile(activityId, target);
         if (prepared == -2) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Redis 状态无法安全重建，需人工核对");
         }
-        if (prepared == 0) {
-            return viewFor(activityId);
-        }
         jdbc.update("UPDATE tb_seckill_voucher SET publish_version = ? "
-                + "WHERE voucher_id = ? AND publish_version = ?", next, activityId, version);
+                + "WHERE voucher_id = ? AND publish_version = ?", target, activityId, version);
         audit.record(membership.merchantId(), voucher.getShopId(), user.getId(), "MERCHANT",
                 "ACTIVITY_RECONCILED", Long.toString(activityId),
-                Map.of("version", next, "previousVersion", version));
-        outbox.enqueue("ACTIVITY:" + activityId + ":" + next + ":OPEN", "ACTIVITY",
-                Long.toString(activityId), next, "ACTIVITY_OPEN",
-                Map.of("activityId", Long.toString(activityId), "version", next));
+                Map.of("version", target, "previousVersion", version, "closedVersion", version + 1));
+        outbox.enqueue("ACTIVITY:" + activityId + ":" + target + ":OPEN", "ACTIVITY",
+                Long.toString(activityId), target, "ACTIVITY_OPEN",
+                Map.of("activityId", Long.toString(activityId), "version", target));
         redis.delete(SECKILL_RECONCILE_KEY + activityId);
         return viewFor(activityId);
     }
 
-    private void requireNoInflightReservations() {
+    /** 0 = no in-flight order message, 1 = pending, 2 = delivered but unread. */
+    private long inflightReservations() {
         Long inflight = redis.execute(INFLIGHT_SCRIPT, List.of("stream.orders"));
-        if (inflight == null || inflight == 0) {
-            return;
-        }
-        if (inflight == 1) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "仍有未确认的订单消息，处理完成后才能重建");
-        }
-        throw new ResponseStatusException(HttpStatus.CONFLICT,
-                "仍有未消费的订单消息，处理完成后才能重建");
+        return inflight == null ? 0 : inflight;
+    }
+
+    private long openReviews(long activityId) {
+        Long count = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM tb_order_review
+                WHERE voucher_id = ? AND status IN ('OPEN', 'REQUEUED')
+                """, Long.class, activityId);
+        return count == null ? 0 : count;
+    }
+
+    private long pendingCompensations(long activityId) {
+        Long count = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM tb_outbox
+                WHERE delivery_status IN ('PENDING', 'IN_PROGRESS', 'NEEDS_REVIEW')
+                  AND aggregate_type = 'ORDER'
+                  AND JSON_UNQUOTE(JSON_EXTRACT(payload, '$.voucherId')) = ?
+                """, Long.class, Long.toString(activityId));
+        return count == null ? 0 : count;
     }
 
     public ActivityView viewFor(long activityId) {

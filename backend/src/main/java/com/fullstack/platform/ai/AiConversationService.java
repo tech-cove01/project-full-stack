@@ -2,6 +2,7 @@ package com.fullstack.platform.ai;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -19,6 +20,20 @@ public class AiConversationService {
     private static final Duration TTL = Duration.ofHours(24);
     private static final int MAX_MESSAGES = 40;
     private static final DateTimeFormatter DISPLAY = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * Checks the conversation and appends the message in one script, so a delete that lands
+     * between "does the conversation exist" and "push the message" can no longer resurrect it.
+     */
+    private static final DefaultRedisScript<Long> APPEND = new DefaultRedisScript<>("""
+            if redis.call('EXISTS', KEYS[1]) == 0 then return 0 end
+            redis.call('RPUSH', KEYS[2], ARGV[1])
+            redis.call('LTRIM', KEYS[2], -tonumber(ARGV[2]), -1)
+            redis.call('EXPIRE', KEYS[2], tonumber(ARGV[3]))
+            redis.call('HSET', KEYS[1], 'updatedAt', ARGV[4])
+            redis.call('EXPIRE', KEYS[1], tonumber(ARGV[3]))
+            return 1
+            """, Long.class);
 
     private final StringRedisTemplate redis;
     private final ObjectMapper objectMapper;
@@ -70,18 +85,13 @@ public class AiConversationService {
     public void append(long userId, String conversationId, String role, String text,
                        List<String> citationIds) {
         try {
-            // A deleted conversation must not be recreated by an in-flight turn: require the
-            // conversation hash to still exist before touching its message list.
-            if (!Boolean.TRUE.equals(redis.hasKey(conversationKey(userId, conversationId)))) {
-                return;
-            }
             Message message = new Message(role, text, now(), citationIds == null ? List.of() : citationIds);
-            String key = messagesKey(userId, conversationId);
-            redis.opsForList().rightPush(key, objectMapper.writeValueAsString(message));
-            redis.opsForList().trim(key, -MAX_MESSAGES, -1);
-            redis.expire(key, TTL);
-            redis.opsForHash().put(conversationKey(userId, conversationId), "updatedAt", now());
-            redis.expire(conversationKey(userId, conversationId), TTL);
+            // Returns 0 when the conversation was deleted by a concurrent request: the message
+            // is dropped instead of recreating the conversation.
+            redis.execute(APPEND,
+                    List.of(conversationKey(userId, conversationId), messagesKey(userId, conversationId)),
+                    objectMapper.writeValueAsString(message), Integer.toString(MAX_MESSAGES),
+                    Long.toString(TTL.toSeconds()), now());
         } catch (Exception e) {
             throw new IllegalStateException("Cannot persist AI message", e);
         }

@@ -27,13 +27,18 @@ export class ApiError extends Error {
     message: string,
     public status?: number,
     public outcomeUncertain = false,
+    public identityChanged = false,
   ) {
     super(message)
     this.name = 'ApiError'
   }
 }
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<Result<T>> {
+async function request<T>(
+  path: string,
+  options: RequestInit = {},
+  sessionToken: string | null = localStorage.getItem(TOKEN_KEY),
+): Promise<Result<T>> {
   const controller = new AbortController()
   let timedOut = false
   const abort = () => controller.abort()
@@ -44,9 +49,17 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<Resu
     controller.abort()
   }, 12_000)
   const headers = new Headers(options.headers)
-  const token = localStorage.getItem(TOKEN_KEY)
-  if (token) headers.set('authorization', token)
+  if (sessionToken) headers.set('authorization', sessionToken)
   if (options.body) headers.set('Content-Type', 'application/json')
+  const identityChanged = () =>
+    sessionToken !== null && localStorage.getItem(TOKEN_KEY) !== sessionToken
+  const changedIdentityError = () =>
+    new ApiError(
+      '登录状态已变化，请重新确认当前账号与本次操作结果。',
+      undefined,
+      !['GET', 'HEAD'].includes(options.method || 'GET'),
+      true,
+    )
 
   try {
     const response = await fetch(`${baseUrl}${path}`, {
@@ -55,10 +68,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<Resu
       signal: controller.signal,
     })
     if (response.status === 401) {
-      localStorage.removeItem(TOKEN_KEY)
-      window.dispatchEvent(new CustomEvent('auth-expired'))
-      throw new ApiError('登录已失效，请重新登录。', 401)
+      // An older tab/request must not revoke the session that replaced it.
+      const expiresCurrentSession = localStorage.getItem(TOKEN_KEY) === sessionToken
+      if (expiresCurrentSession) {
+        localStorage.removeItem(TOKEN_KEY)
+        window.dispatchEvent(new CustomEvent('auth-expired'))
+      }
+      throw new ApiError('登录已失效，请重新登录。', 401, false, !expiresCurrentSession)
     }
+    if (identityChanged()) throw changedIdentityError()
     if (!response.ok) {
       let message = `服务暂时无法处理请求（${response.status}），请稍后重试。`
       try {
@@ -70,10 +88,15 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<Resu
       throw new ApiError(message, response.status, response.status >= 500)
     }
     const result = (await response.json()) as Result<T>
+    if (identityChanged()) throw changedIdentityError()
     if (!result.success) throw new ApiError(result.errorMsg || '操作未完成，请稍后重试。')
     return result
   } catch (error) {
+    // The 401 handler intentionally removed its own session above. That is a
+    // definitive rejection, not an uncertain mutation or a later account swap.
+    if (error instanceof ApiError && error.status === 401) throw error
     if (options.signal?.aborted) throw new DOMException('请求已取消', 'AbortError')
+    if (identityChanged()) throw changedIdentityError()
     if (error instanceof ApiError) throw error
     if (timedOut) throw new ApiError('请求超时，请检查网络后重试。', undefined, true)
     throw new ApiError('无法连接服务，请确认后端已启动，或稍后重试。', undefined, true)
@@ -96,7 +119,8 @@ export const api = {
   login: (phone: string, code: string) =>
     request<string>('/user/login', { method: 'POST', body: JSON.stringify({ phone, code }) }),
   logout: () => request<null>('/user/logout', { method: 'POST' }),
-  me: () => request<User>('/user/me'),
+  me: (signal?: AbortSignal, sessionToken?: string) =>
+    request<User>('/user/me', { signal }, sessionToken),
   shopTypes: (signal?: AbortSignal) => request<ShopType[]>('/shop-type/list', { signal }),
   shops: (
     name: string,
@@ -116,11 +140,15 @@ export const api = {
     request<Shop>(`/shop/${encodeURIComponent(id)}`, { signal }),
   vouchers: (shopId: string, signal?: AbortSignal) =>
     request<Voucher[]>(`/voucher/list/${encodeURIComponent(shopId)}`, { signal }),
-  seckill: (voucherId: string, signal?: AbortSignal) =>
-    request<string>(`/voucher-order/seckill/${encodeURIComponent(voucherId)}`, {
-      method: 'POST',
-      signal,
-    }),
+  seckill: (voucherId: string, signal?: AbortSignal, sessionToken?: string) =>
+    request<string>(
+      `/voucher-order/seckill/${encodeURIComponent(voucherId)}`,
+      {
+        method: 'POST',
+        signal,
+      },
+      sessionToken,
+    ),
   order: (id: string, signal?: AbortSignal) =>
     request<OrderStatus>(`/voucher-order/${encodeURIComponent(id)}`, { signal }),
   myOrders: (current: number, pageSize: number, signal?: AbortSignal) =>

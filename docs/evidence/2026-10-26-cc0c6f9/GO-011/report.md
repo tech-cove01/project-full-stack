@@ -1,6 +1,6 @@
 # GO-011 商铺浏览与优惠自测
 
-日期：2026-10-26（Asia/Shanghai）。状态：自测通过待核验。依赖 GO-010；开始 SHA `cc0c6f920897b3ed65a4f080997a6c538fe0c2fa`。交付为本报告所在的 `feat(GO-011)` 本地提交，完整 SHA 随交付记录补充。
+日期：2026-10-26（Asia/Shanghai）。状态：自测通过待核验。依赖 GO-010；开始 SHA `cc0c6f920897b3ed65a4f080997a6c538fe0c2fa`，交付 SHA `644b2c55ee73e1318f78c74ce8d24affef707295`。
 
 范围：五个公开 GET、名称与分类同 SQL 交集、稳定分页/字符串total、商铺/分类/公开券DTO，Vue分类/搜索/加载更多/独立重试，Shanghai业务时间在不同浏览器时区的解释。未迁移附近坐标查询（x/y明确400）、商铺详情缓存、HEAD、交易/B端/AI；已知旧商铺/券/分类写路由仍403。PRODUCT-01仅覆盖商铺子集，不包含订单/商家列表。
 
@@ -39,3 +39,5 @@ UI每轮另建53店/2类/7券，真实六页无重漏；未提交输入不污染
 Linux race和远端Actions未执行；CI仅新增配置（显式SQL初始化、现有checksum runner两遍、auth/shop真实集成race）。没有持续负载/缓存命中/交易结果或Go性能提升声明。完整三业务流程、恢复窗口、AI与社区仍待后续小任务。
 
 复现见[运行步骤](../../../development.md#go-迁移环境与启动)。UI脚本需现有Playwright模块、Chrome、显式隔离MYSQL和Go/Vite地址。停止应用/前端使用各自Ctrl+C；停止隔离依赖使用 `docker compose -f compose.go.yaml stop mysql redis`，保留卷与未知数据。
+
+收尾实际执行：Ctrl+C 停止本轮Go API（日志HTTP requests drained）与Vite；`docker compose -f compose.go.yaml -p project-full-stack-go stop mysql redis` 后仅两个Go测试容器exited。只读检查原 `project-full-stack` MySQL/Redis仍healthy。没有删卷或删除未知数据。三个GO任务的功能提交分别独立，后续文档提交仅补全交付SHA、限制和此环境交接。

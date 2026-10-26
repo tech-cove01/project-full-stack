@@ -57,11 +57,13 @@
 
 ### GO-011 / 商铺浏览、搜索分类与公开优惠
 
-- 依赖：GO-010；开始 SHA `cc0c6f920897b3ed65a4f080997a6c538fe0c2fa`；交付 SHA 随本票独立 commit 在交付记录中列出。
+- 依赖：GO-010；开始 SHA `cc0c6f920897b3ed65a4f080997a6c538fe0c2fa`；交付 SHA `644b2c55ee73e1318f78c74ce8d24affef707295`。
 - 交付行为：名称与分类在同一后端查询中组合、稳定分页及字符串 total，真实 Vue 53 家店完整翻页，独立分类/优惠重试，详情与公开活动展示。ACTIVE 且启用的券才公开，未开始/已结束/售罄仍展示；人均价为元，券金额为分，均不丢字符串精度。修复无偏移上海时间在 UTC 浏览器被错解析的问题。
 - 验收：MIG-GO-02 浏览子集、MIG-GO-03 商铺/券 DTO 与金额/时间/空值/total 子集、PRODUCT-01 商铺子集；订单和商家列表分页仍归后续任务。
 - 验证：gofmt/vet/full go test PASS；真实 MySQL 7 组、原版本 SQL 首次升级与校验和重跑 PASS；UTC 与上海浏览器各14项 PASS，登录页面回归12项 PASS；frontend build/prettier PASS。[报告和失败/最终证据](evidence/2026-10-26-cc0c6f9/GO-011/report.md)。
 - 限制：`/shop/of/type` 带 x/y 明确400“附近坐标查询尚未迁移”；商铺详情直接读MySQL，L1/Redis缓存未迁移；5个公开GET已实现，HEAD未扩展；交易/商家/AI仍为404。已知旧商铺/券/分类写路由继续403。本票不证明持续容量，Linux race/远端CI未执行。
+
+本轮 G0/G1 实现结束后，测试 Go API/Vite 及 `project-full-stack-go` 的 MySQL/Redis 已停止，卷与隔离库保留，原 `project-full-stack` 容器仍 healthy。下一票 GO-020，从逐门店权限和商家工作台开始；先按运行文档重新启动隔离环境。附近坐标与详情缓存限制仍保留，后续切换前需复核，不能据本轮 GET 子集声称全部旧接口已接管。
 
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 

@@ -1,0 +1,52 @@
+{
+  "task": "GO-031d",
+  "passed": false,
+  "checks": [
+    "direct and proxied requests identify the same Go runtime",
+    "buyer uses a real Vue login and server session",
+    "all seven lifecycle orders were committed by real admission Stream and DB creation",
+    "unpaid detail exposes simulation controls and no redemption credential",
+    "Vue confirms simulated payment with a 256-bit credential only on the paid owned detail",
+    "credential copy succeeds without logging or reporting its value",
+    "refresh preserves paid state and owner-only credential while removing unpaid actions",
+    "a query error immediately removes the paid credential and stale order snapshot",
+    "leaving detail clears the credential and the real owner list never includes it",
+    "another real account receives 404 and no paid credential",
+    "other accounts cannot pay or cancel this owned order",
+    "twenty concurrent real payments return the same paid business state",
+    "concurrent payment commits one version audit and outbox transition and never changes inventory",
+    "cancel on a paid order is a conflict with no reverse transition",
+    "Vue cancellation displays current cancellation time reason and no redemption credential",
+    "repeated cancellation stays at one version and restores DB inventory only once",
+    "payment on cancelled order conflicts while Redis compensation remains explicitly deferred",
+    "a real payment after the controlled DB deadline is rejected regardless of browser time",
+    "bounded unpaid-page polling observes automatic DB closure without a Redis ZSet reminder",
+    "a lost committed payment response is confirmed by GET without automatically repeating a write",
+    "aborting and fencing an old unpaid poll prevents it from replacing a newer paid view",
+    "a real lock-held payment loses its proxy response and the first owned GET still reads genuine unpaid state",
+    "releasing the real inventory lock allows the independently forwarded payment to commit"
+  ],
+  "cleanup": true,
+  "browserTimeZone": "UTC",
+  "fixtureBoundary": {
+    "realWorker": "All orders use real API admission and the real Stream worker.",
+    "deadlines": "Only owned committed orders have SQL deadlines moved as explicit expiry clock fixtures.",
+    "credentials": "Credential values, codes, phones and headers are never logged; screenshots mask sensitive elements.",
+    "restart": "Process restart scanning is verified separately by root, not this browser script."
+  },
+  "step": "delayed real payment confirmation after proxy loss and an initial unpaid read",
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "6701e62-go031-worktree"
+  },
+  "timeoutReminder": "No ZSet reminder is read or written by this implementation; no guessed key was removed.",
+  "failure": "Lifecycle UI verification failed; inspect the safe step and masked screenshot.",
+  "forcedCleanup": true,
+  "cleanupBoundary": {
+    "ownedRowsKeysAndMessages": 0,
+    "sharedStreamGroupAndDailyCounter": "preserved"
+  },
+  "recordedAt": "2026-10-26T15:47:31.068Z"
+}

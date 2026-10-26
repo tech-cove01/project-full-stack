@@ -66,6 +66,8 @@ export interface OrderStatus {
   payTime?: string
   useTime?: string
   refundTime?: string
+  cancelTime?: string
+  cancelReason?: string
 }
 
 export interface MerchantWorkspace {

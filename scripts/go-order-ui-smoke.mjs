@@ -311,9 +311,9 @@ try {
     && sql(`SELECT stock FROM tb_seckill_voucher WHERE voucher_id=${uiVoucher}`) === '0' && await redis('GET', `seckill:stock:${uiVoucher}`) === '0'
     && (await ownedMessages()).filter(item => item.voucherId === uiVoucher).length === 1, 'offline recovery returns the same order ID without a second DB order inventory deduction or Stream entry')
   check(await page.getByText('金额 ¥90071992547409.93', { exact: true }).count() === 1
-    && await page.getByRole('button', { name: '模拟支付 · 稍后开放', exact: true }).isDisabled()
-    && await page.getByRole('button', { name: '取消订单 · 稍后开放', exact: true }).isDisabled()
-    && await page.locator('.redeem-token').count() === 0, 'CREATED page displays exact money above 2^53 and leaves payment cancellation and token actions unavailable')
+    && await page.getByRole('button', { name: '模拟支付', exact: true }).isEnabled()
+    && await page.getByRole('button', { name: '取消订单', exact: true }).isEnabled()
+    && await page.locator('.redeem-token').count() === 0, 'CREATED unpaid page displays exact money above 2^53 and exposes payment cancellation controls without a token; lifecycle writes are tested separately')
   await page.reload()
   await page.locator('.order-layout[data-order-state="CREATED"]').waitFor()
   const createdAt = sql(`SELECT DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s') FROM tb_voucher_order WHERE id=${lostID}`)

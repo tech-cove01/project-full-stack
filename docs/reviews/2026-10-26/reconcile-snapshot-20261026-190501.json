@@ -1,0 +1,12 @@
+{
+  "activityId": "1054",
+  "eventId": "review-snapshot-6e5f84cf95f1",
+  "window": "row locked before insert; reconcile blocked inside its transaction",
+  "versionBefore": 1,
+  "reconcileBlocked": true,
+  "insertedWhileBlocked": "PROCESSING",
+  "http": 409,
+  "errorMsg": "仍有未处理项，准入保持关闭：OUTBOX_PENDING",
+  "versionAfter": "1",
+  "finding": "FIXED"
+}

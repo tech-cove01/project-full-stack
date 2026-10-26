@@ -1,0 +1,28 @@
+{
+  "documentId": "31",
+  "provider": "stub",
+  "cleanupErrors": [
+    "delete-conversation: DELETE /ai/conversations/adbdab11-4e8b-4842-bd66-2bcf37163827: HTTP 404: 会话不存在"
+  ],
+  "deletedMidFlight": {
+    "events": [
+      "meta",
+      "status",
+      "status"
+    ],
+    "dedupeExists": 0,
+    "hasAnswer": false,
+    "hasDone": false
+  },
+  "leaseLost": {
+    "events": [
+      "meta",
+      "status",
+      "status"
+    ],
+    "dedupeExists": 0,
+    "hasAnswer": false,
+    "hasDone": false
+  },
+  "finding": "FIXED"
+}

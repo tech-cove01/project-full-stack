@@ -93,7 +93,7 @@ jobs:
           GO_INTEGRATION: '1'
           GIN_MODE: release
       - name: Order admission persistence and recovery against real MySQL and Redis
-        run: go test -race -count=1 -p 1 -v ./internal/orderadmission ./internal/order ./internal/orderstream
+        run: go test -race -count=1 -p 1 -v ./internal/orderadmission ./internal/order ./internal/orderstream ./internal/ordertimeout
         env:
           GO_INTEGRATION: '1'
           GIN_MODE: release

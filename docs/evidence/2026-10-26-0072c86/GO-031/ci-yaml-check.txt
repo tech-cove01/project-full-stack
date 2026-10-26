@@ -1,0 +1,2 @@
+CI YAML parsed; jobs=backend-go,backend,frontend
+Linux race / remote CI: NOT RUN

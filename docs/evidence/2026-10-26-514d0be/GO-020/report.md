@@ -1,6 +1,6 @@
 # GO-020 逐门店授权与商家工作台
 
-2026-10-26（Asia/Shanghai），自测通过待核验。开始SHA `514d0beef3de443be12f812faa3a7b3dd94d64d2`；GO-011-QA1已在此前独立fix提交。GO-020交付为本报告所在的 `feat(GO-020)` 本地提交，完整SHA在交付记录补充。
+2026-10-26（Asia/Shanghai），自测通过待核验。开始SHA `514d0beef3de443be12f812faa3a7b3dd94d64d2`；GO-011-QA1已在此前独立fix提交。GO-020交付SHA `8731642b5b37eb8fe7b2d32fc02f2adb6882ef5a`；后续文档提交仅补全SHA，不改变已测应用源码。
 
 交付：仅开放 `GET /merchant/workspace`，角色/门店信息来自当前登录身份和实时MySQL；新增可复用Access具体门店/管理权限及可见/可管理范围。一个LEFT JOIN读取工作台，保留有效但零门店的成员；ID字符串、空merchants/shops数组，与Vue契约兼容。OWNER/MANAGER仅本商家，STAFF仅scope，脏scope不能跨商家。角色不写进token，不把同账号A的OWNER权限提升到B。数据库错误保留503，身份失效401，普通登录无商家返回200空工作台。
 

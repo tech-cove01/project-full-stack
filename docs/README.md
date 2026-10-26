@@ -75,13 +75,13 @@
 
 ### GO-020 / 逐门店授权与商家工作台
 
-- 依赖：已核验GO-010/011；开始SHA `514d0beef3de443be12f812faa3a7b3dd94d64d2`。
+- 依赖：已核验GO-010/011；开始SHA `514d0beef3de443be12f812faa3a7b3dd94d64d2`；交付SHA `8731642b5b37eb8fe7b2d32fc02f2adb6882ef5a`。
 - 交付范围：仅 `GET /merchant/workspace` 和可复用的具体门店访问/管理权限、可见/可管理门店查询；不增加测试专用权限端点，不提前开放活动/订单/审计/FAQ操作。
 - 授权：来自当前登录用户和实时MySQL，商家/成员ACTIVE；OWNER/MANAGER仅本商家，STAFF还须有效scope，跨商家脏scope不生效。可见范围与管理范围分离，角色不写入session；成员/商家停用或scope撤回后原token的授权立即缩减，登录身份可仍有效。
 - 验收：P1-6权限基础子集、MIG-GO-03工作台DTO；具体发布/核销/退款等HTTP越权验收留对应业务票。真实DB服务层测试不写成这些未实现接口已通过。
 - 无新DDL；`tb_shop`无status字段，本票不声明门店停用，只验证商家/成员状态、scope和归属。
 
-- 结果：gofmt/vet/full普通Go测试、真实merchant集成11主组（含13组具体门店权限矩阵、tx句柄和真实闭池503）PASS；前端构建/文件格式PASS；真实Vue四账号24项PASS。独立只读审查者重复普通Go与真实11组并查看截图，无阻断。[命令、失败证据、边界](evidence/2026-10-26-514d0be/GO-020/report.md)。交付SHA随本票独立commit补充。
+- 结果：gofmt/vet/full普通Go测试、真实merchant集成11主组（含13组具体门店权限矩阵、tx句柄和真实闭池503）PASS；前端构建/文件格式PASS；真实Vue四账号24项PASS。独立只读审查者重复普通Go与真实11组并查看截图，无阻断。[命令、失败证据、边界](evidence/2026-10-26-514d0be/GO-020/report.md)。
 - 后续边界：Access(tx)继承隔离级别，RR普通SELECT可能仍读旧快照，不是并发撤权屏障。GO-021/032的写操作必须使用锁定当前读或覆盖授权事实的条件更新；旧活动/订单页面的全局canManage及重试发布按钮需在启用对应业务时改成按每行shopId判断，不能沿用全局最高角色。
 
 GO-020本轮收尾已停止测试Go API/Vite与独立Go MySQL/Redis（Exited 0），卷和隔离库保留，原 `project-full-stack` 容器仍healthy。下一票GO-021，先核验本票再接活动发布/下架、交易outbox。附近坐标与详情缓存限制仍保留，后续切换前需复核，不能据当前GET子集声称全部旧接口已接管。

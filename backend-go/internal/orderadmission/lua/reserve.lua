@@ -18,11 +18,11 @@ for i = 1, 8 do
 end
 if not decimal(ARGV[1], '18446744073709551615') or not decimal(ARGV[2], '18446744073709551615')
   or not decimal(ARGV[3], '9223372036854775807') then return {6, ''} end
-local now = integer(ARGV[4], 1, 9007199254740991)
+local suppliedNow = integer(ARGV[4], 1, 9007199254740991)
 local fallbackBegin = integer(ARGV[5], 1, 9007199254740991)
 local fallbackEnd = integer(ARGV[6], 1, 9007199254740991)
 local target = integer(ARGV[7], 1, 2147483647)
-if not now or not fallbackBegin or not fallbackEnd or fallbackBegin >= fallbackEnd or not target then return {6, ''} end
+if not suppliedNow or not fallbackBegin or not fallbackEnd or fallbackBegin >= fallbackEnd or not target then return {6, ''} end
 local expected = {'hash', 'string', 'string', 'string', 'set', 'hash', 'hash', 'stream'}
 local types = {}
 for i = 1, 8 do
@@ -52,6 +52,11 @@ if not stock or not begin or not ending or begin >= ending then return {6, ''} e
 -- The legacy fallback arguments are retained for wire compatibility, but a
 -- missing/mismatched prepared projection must never open a sale.
 if begin ~= fallbackBegin or ending ~= fallbackEnd then return {6, ''} end
+-- The caller's timestamp can predate Redis/SQL work or queueing. Decide new
+-- admission at this atomic execution boundary, never using that stale sample.
+local clock = redis.call('TIME')
+local now = tonumber(clock[1]) * 1000 + math.floor(tonumber(clock[2]) / 1000)
+if now < 1 or now > 9007199254740991 then return {6, ''} end
 if now < begin then return {4, ''} end
 if now >= ending then return {5, ''} end
 if types[5] == 'set' and redis.call('SISMEMBER', KEYS[5], ARGV[2]) == 1 then return {2, ''} end
@@ -67,7 +72,7 @@ end
 -- Every foreseeable key, argument and counter error was checked before writes.
 redis.call('INCRBY', KEYS[2], -1)
 redis.call('SADD', KEYS[5], ARGV[2])
-redis.call('HSET', KEYS[6], 'userId', ARGV[2], 'voucherId', ARGV[1], 'state', 'PROCESSING', 'createdAt', ARGV[4], 'retries', '0')
+redis.call('HSET', KEYS[6], 'userId', ARGV[2], 'voucherId', ARGV[1], 'state', 'PROCESSING', 'createdAt', string.format('%.0f', now), 'retries', '0')
 redis.call('EXPIRE', KEYS[6], 86400)
 redis.call('HSET', KEYS[7], ARGV[2], ARGV[3])
 redis.call('EXPIRE', KEYS[7], 604800)

@@ -1,0 +1,27 @@
+{
+  "source_base": "0072c867ab1f34d7219e815d04779c651c55d9d0",
+  "label": "identity-initial",
+  "runs": [
+    {
+      "name": "identity-initial-utc",
+      "exit": 1,
+      "passed": false,
+      "checks": 1,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": false,
+  "failure": "RuntimeError: UI validation failed"
+}

@@ -1,0 +1,11 @@
+{
+  "owned_users": 0,
+  "owned_merchants": 0,
+  "owned_shops": 0,
+  "owned_vouchers": 0,
+  "orders": 0,
+  "outbox_rows": 0,
+  "stream_length": 0,
+  "pending": 0,
+  "passed": true
+}

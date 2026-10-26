@@ -1,0 +1,39 @@
+{
+  "task": "GO-030-identity",
+  "passed": false,
+  "checks": [
+    "direct and proxied requests identify the same Go service",
+    "changing account in the second tab cannot submit a recovery purchase as the new account",
+    "the original account retains its accepted order",
+    "a new legitimate session for the same account recovers the original ID without a duplicate order",
+    "a genuine successful acceptance delivered after an account switch cannot remember or navigate to the original order or purchase for the new account",
+    "a genuine delayed 401 from the previous session cannot clear the newer account session"
+  ],
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "0072c86-review-fixes"
+  },
+  "step": "late logout response",
+  "crossAccount": {
+    "requestsAsNewAccount": 0,
+    "ordersAsNewAccount": 0
+  },
+  "lateSuccess": {
+    "originalOrderState": "CREATED",
+    "rememberedOriginalOrder": false,
+    "navigatedToOriginalOrder": false,
+    "requestsAsNewAccount": 0,
+    "ordersAsNewAccount": 0
+  },
+  "lateLogout": {
+    "newSessionRetained": false,
+    "newSessionValid": true,
+    "originalPageRetained": true,
+    "misleadingExitMessage": true
+  },
+  "failure": "a genuine delayed logout cannot clear the replacement account session, redirect its page or report that it logged out",
+  "recordedAt": "2026-10-26T15:46:13.436Z"
+}

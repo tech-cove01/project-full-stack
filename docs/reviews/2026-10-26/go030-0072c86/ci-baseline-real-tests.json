@@ -1,0 +1,21 @@
+{
+  "run": "40349194001",
+  "job": 121664272089,
+  "sha": "0072c867ab1f34d7219e815d04779c651c55d9d0",
+  "conclusion": "success",
+  "integration_entrypoints": [
+    "TestIntegrationAcceptedRecovery",
+    "TestIntegrationActivity",
+    "TestIntegrationAdmission",
+    "TestIntegrationAuth",
+    "TestIntegrationGate",
+    "TestIntegrationMerchant",
+    "TestIntegrationOrder",
+    "TestIntegrationOrderID",
+    "TestIntegrationOrderStream",
+    "TestIntegrationOutbox",
+    "TestIntegrationPublication",
+    "TestIntegrationShop"
+  ],
+  "race_command_present": true
+}

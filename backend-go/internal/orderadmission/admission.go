@@ -116,6 +116,9 @@ func (admission *Admission) Recover(ctx context.Context, voucherID, userID strin
 	}
 }
 
+// Reserve retains now as a validated legacy wire argument. Redis execution time
+// decides new admission and createdAt, so earlier SQL/Redis delays cannot extend
+// the sales window. Existing accepted identities remain recoverable afterward.
 func (admission *Admission) Reserve(ctx context.Context, voucherID, userID, candidateID string, now, begin, end time.Time, version int) (Result, error) {
 	if !unsignedID(voucherID) || !unsignedID(userID) || !orderID(candidateID) ||
 		version < 1 || version > math.MaxInt32 || !safeMillis(now) || !safeMillis(begin) || !safeMillis(end) || !begin.Before(end) {

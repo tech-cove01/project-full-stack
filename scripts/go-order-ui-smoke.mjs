@@ -196,6 +196,272 @@ async function ownedMessages() {
 async function waitCreated(token, orderID) {
   return await eventually(() => api(`/voucher-order/${orderID}`, token), result => result.status === 200 && result.body.data?.state === 'CREATED' && result.body.data.orderStatus === 1, 'Accepted order did not reach committed CREATED/status 1', 60000)
 }
+// A short, opt-in cross-tab regression. Every session and successful response
+// comes from the real API; only response delivery is delayed/dropped.
+async function identityRegression() {
+  let browser, seeded = false, page
+  const result = { task: 'GO-030-identity', passed: false, checks: [], cleanup: false }
+  const verify = (value, description) => { assert.ok(value, description); result.checks.push(description) }
+  try {
+    const health = await api('/actuator/health')
+    const proxy = await (await fetch(`${WEB}/api/actuator/health`)).json()
+    verify(health.status === 200 && proxy.runtime === 'go' && proxy.version === health.body.version,
+      'direct and proxied requests identify the same Go service')
+    result.service = proxy
+    sql(`START TRANSACTION;
+      INSERT INTO tb_user(id,phone,nick_name) VALUES ${users.slice(0, 3).map((user, i) => `(${user},'${phoneList[i]}','${prefix} identity${i}')`).join(',')};
+      INSERT INTO tb_merchant(id,name) VALUES(${merchant},'${prefix} identity');
+      INSERT INTO tb_shop(id,merchant_id,name,type_id,address,x,y) VALUES(${shop},${merchant},'${prefix} identity',1,'identity fixture',120,30);
+      INSERT INTO tb_merchant_member(id,merchant_id,user_id,role_code) VALUES(${member},${merchant},${users[0]},'OWNER'); COMMIT;`)
+    seeded = true
+    const owner = await loginAPI(0)
+    browser = await chromium.launch({ ...(process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {}), headless: true })
+    const context = await browser.newContext({ viewport: { width: 1440, height: 1080 }, timezoneId: process.env.BROWSER_TIMEZONE || 'UTC' })
+    async function loginPage(index) {
+      const p = await context.newPage()
+      await p.goto(`${WEB}/login?redirect=${encodeURIComponent(`/shops/${shop}`)}`)
+      await p.getByPlaceholder('请输入手机号').fill(phoneList[index])
+      await p.getByRole('button', { name: '获取验证码', exact: true }).click()
+      await p.waitForFunction(() => /^\d{6}$/.test(document.querySelector('input[placeholder="6 位验证码"]')?.value || ''))
+      await p.getByRole('button', { name: '登录并继续', exact: true }).click()
+      await p.waitForURL(url => url.pathname === `/shops/${shop}`)
+      const token = await p.evaluate(() => localStorage.getItem('cityloop.token'))
+      assert.ok(typeof token === 'string' && /^[a-f0-9]{32}$/.test(token), 'real UI login did not produce a session')
+      sessions.add(token)
+      return { page: p, token }
+    }
+    async function loseAcceptance(voucher) {
+      let acceptedID, failed = false
+      await page.route(`**/api/voucher-order/seckill/${voucher}`, async route => {
+        try {
+          const response = await route.fetch()
+          const body = await response.json()
+          if (!body.success || typeof body.data !== 'string') throw new Error('acceptance failed')
+          acceptedID = body.data; orderIDs.add(acceptedID)
+          await route.abort('failed')
+        } catch { failed = true; await route.abort('failed').catch(() => {}) }
+      })
+      await page.locator(`[data-voucher-id="${voucher}"]`).getByRole('button', { name: '立即抢购', exact: true }).click()
+      await eventually(() => acceptedID || failed, Boolean, 'acceptance response was not intercepted')
+      assert.ok(!failed && acceptedID, 'real acceptance failed')
+      await page.getByRole('button', { name: '重试本次抢券', exact: true }).waitFor()
+      await page.unroute(`**/api/voucher-order/seckill/${voucher}`)
+      return acceptedID
+    }
+    result.step = 'cross-account recovery'
+    const crossVoucher = await publish(owner, 'identity-cross', 3)
+    const first = await loginPage(1)
+    page = first.page
+    const acceptedA = await loseAcceptance(crossVoucher)
+    await waitCreated(first.token, acceptedA)
+    const second = await loginPage(2)
+    let requestsAsB = 0
+    page.on('request', request => {
+      if (request.method() === 'POST' && new URL(request.url()).pathname === `/api/voucher-order/seckill/${crossVoucher}`
+        && request.headers().authorization === second.token) requestsAsB++
+    })
+    const recovery = page.getByRole('button', { name: '重试本次抢券', exact: true })
+    if (await recovery.isVisible()) {
+      await recovery.click()
+      await eventually(async () => requestsAsB > 0 || !(await recovery.isVisible()), Boolean, 'changed identity was not handled')
+    }
+    if (requestsAsB > 0) {
+      // Record the old implementation's real wrong-account order before
+      // closing its browser, rather than racing an in-flight POST in cleanup.
+      await eventually(() => sql(`SELECT COUNT(*) FROM tb_voucher_order WHERE user_id=${users[2]} AND voucher_id=${crossVoucher}`), value => value === '1', 'wrong-account request did not reach a settled cleanup point')
+    }
+    result.crossAccount = { requestsAsNewAccount: requestsAsB, ordersAsNewAccount: Number(sql(`SELECT COUNT(*) FROM tb_voucher_order WHERE user_id=${users[2]} AND voucher_id=${crossVoucher}`)) }
+    verify(requestsAsB === 0 && sql(`SELECT COUNT(*) FROM tb_voucher_order WHERE user_id=${users[2]} AND voucher_id=${crossVoucher}`) === '0'
+      && await redis('HGET', `seckill:accepted:${crossVoucher}`, users[2]) === null,
+    'changing account in the second tab cannot submit a recovery purchase as the new account')
+    verify((await api(`/voucher-order/${acceptedA}`, first.token)).body.data?.state === 'CREATED', 'the original account retains its accepted order')
+
+    result.step = 'same-account new session'
+    const sameVoucher = await publish(owner, 'identity-same', 3)
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), first.token)
+    await page.goto(`${WEB}/shops/${shop}`)
+    const sameID = await loseAcceptance(sameVoucher)
+    await waitCreated(first.token, sameID)
+    // Remove only this fixture phone's cooldown to obtain a second legitimate
+    // OTP session immediately. This is setup, not a rate-limit assertion.
+    await redis('DEL', `login:code:throttle:${phoneList[1]}`)
+    const refreshed = await loginAPI(1)
+    assert.notEqual(refreshed, first.token)
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), refreshed)
+    await page.getByRole('button', { name: '重试本次抢券', exact: true }).click()
+    await page.waitForURL(url => url.pathname === `/orders/${sameID}`)
+    await page.locator('.order-layout[data-order-state="CREATED"]').waitFor()
+    verify(sql(`SELECT COUNT(*) FROM tb_voucher_order WHERE user_id=${users[1]} AND voucher_id=${sameVoucher}`) === '1'
+      && await redis('GET', `seckill:stock:${sameVoucher}`) === '2', 'a new legitimate session for the same account recovers the original ID without a duplicate order')
+
+    result.step = 'late successful acceptance'
+    const lateVoucher = await publish(owner, 'identity-late-success', 3)
+    await page.goto(`${WEB}/shops/${shop}`)
+    const previousRecent = await page.evaluate(() => localStorage.getItem('cityloop.last-order'))
+    let heldSuccess, heldSuccessFailed = false, lateRequestsAsB = 0
+    const latePattern = `**/api/voucher-order/seckill/${lateVoucher}`
+    page.on('request', request => {
+      if (request.method() === 'POST' && new URL(request.url()).pathname === `/api/voucher-order/seckill/${lateVoucher}`
+        && request.headers().authorization === second.token) lateRequestsAsB++
+    })
+    await page.route(latePattern, async route => {
+      try {
+        assert.equal(route.request().headers().authorization, refreshed)
+        const response = await route.fetch()
+        const body = await response.json()
+        assert.ok(response.status() === 200 && body.success && typeof body.data === 'string', 'real delayed acceptance failed')
+        orderIDs.add(body.data)
+        heldSuccess = { route, response, orderID: body.data }
+      } catch {
+        heldSuccessFailed = true
+        await route.abort('failed').catch(() => {})
+      }
+    })
+    await page.locator(`[data-voucher-id="${lateVoucher}"]`).getByRole('button', { name: '立即抢购', exact: true }).click()
+    await eventually(() => Boolean(heldSuccess) || heldSuccessFailed, Boolean, 'successful acceptance response was not held')
+    assert.ok(!heldSuccessFailed && heldSuccess, 'real delayed acceptance was not captured')
+    await waitCreated(refreshed, heldSuccess.orderID)
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), second.token)
+    await heldSuccess.route.fulfill({ response: heldSuccess.response })
+    await page.getByText('登录账号已切换，未替新账号重试抢券；请回到原账号查看订单。', { exact: true }).waitFor()
+    const lateRecent = await page.evaluate(() => localStorage.getItem('cityloop.last-order'))
+    result.lateSuccess = {
+      originalOrderState: (await api(`/voucher-order/${heldSuccess.orderID}`, refreshed)).body.data?.state,
+      rememberedOriginalOrder: lateRecent === heldSuccess.orderID,
+      navigatedToOriginalOrder: new URL(page.url()).pathname === `/orders/${heldSuccess.orderID}`,
+      requestsAsNewAccount: lateRequestsAsB,
+      ordersAsNewAccount: Number(sql(`SELECT COUNT(*) FROM tb_voucher_order WHERE user_id=${users[2]} AND voucher_id=${lateVoucher}`)),
+    }
+    verify(result.lateSuccess.originalOrderState === 'CREATED'
+      && new URL(page.url()).pathname === `/shops/${shop}` && lateRecent === previousRecent
+      && lateRequestsAsB === 0 && result.lateSuccess.ordersAsNewAccount === 0
+      && await redis('HGET', `seckill:accepted:${lateVoucher}`, users[2]) === null,
+    'a genuine successful acceptance delivered after an account switch cannot remember or navigate to the original order or purchase for the new account')
+    await page.unroute(latePattern)
+
+    result.step = 'late unauthorized response'
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), refreshed)
+    await api('/user/logout', refreshed, 'POST')
+    let held
+    let releaseHeld
+    const heldReady = new Promise(resolveReady => { releaseHeld = resolveReady })
+    await page.route('**/api/user/me', async route => {
+      if (route.request().headers().authorization !== refreshed) return await route.continue()
+      const response = await route.fetch()
+      assert.equal(response.status(), 401)
+      held = { route, response }; releaseHeld()
+    })
+    const oldRead = page.evaluate(async () => { const { api } = await import('/src/api.ts'); try { await api.me() } catch {} })
+    await heldReady
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), second.token)
+    await held.route.fulfill({ response: held.response })
+    await oldRead
+    verify(await page.evaluate(() => localStorage.getItem('cityloop.token')) === second.token,
+      'a genuine delayed 401 from the previous session cannot clear the newer account session')
+    await page.unroute('**/api/user/me')
+
+    result.step = 'late logout response'
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), first.token)
+    await page.goto(`${WEB}/shops/${shop}`)
+    const logoutPagePath = new URL(page.url()).pathname
+    let heldLogout, heldLogoutFailed = false
+    await page.route('**/api/user/logout', async route => {
+      try {
+        assert.equal(route.request().headers().authorization, first.token)
+        const response = await route.fetch()
+        const body = await response.json()
+        assert.ok(response.status() === 200 && body.success, 'real delayed logout failed')
+        heldLogout = { route, response }
+      } catch {
+        heldLogoutFailed = true
+        await route.abort('failed').catch(() => {})
+      }
+    })
+    await page.locator('.account-actions').getByRole('button', { name: '退出', exact: true }).click()
+    await eventually(() => Boolean(heldLogout) || heldLogoutFailed, Boolean, 'real logout response was not held')
+    assert.ok(!heldLogoutFailed && heldLogout, 'real delayed logout was not captured')
+    assert.equal((await api('/user/me', first.token)).status, 401, 'the original session was not revoked by the actual logout')
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), second.token)
+    await heldLogout.route.fulfill({ response: heldLogout.response })
+    await page.waitForFunction(() => !document.querySelector('.account-actions button.is-loading'))
+    const retainedAccount = await api('/user/me', second.token)
+    result.lateLogout = {
+      newSessionRetained: await page.evaluate(() => localStorage.getItem('cityloop.token')) === second.token,
+      newSessionValid: retainedAccount.status === 200 && retainedAccount.body.data?.id === users[2],
+      originalPageRetained: new URL(page.url()).pathname === logoutPagePath,
+      misleadingExitMessage: await page.locator('.el-message').filter({ hasText: /已退出登录|本地登录已退出/ }).count() > 0,
+    }
+    verify(result.lateLogout.newSessionRetained && result.lateLogout.newSessionValid
+      && result.lateLogout.originalPageRetained && !result.lateLogout.misleadingExitMessage,
+    'a genuine delayed logout cannot clear the replacement account session, redirect its page or report that it logged out')
+    await page.unroute('**/api/user/logout')
+
+    result.step = 'current session unauthorized classification'
+    await api('/user/logout', second.token, 'POST')
+    const rejected = await page.evaluate(async voucher => {
+      const { api } = await import('/src/api.ts')
+      try { await api.seckill(voucher); return { unexpectedSuccess: true } }
+      catch (error) { return { status: error.status, outcomeUncertain: error.outcomeUncertain, identityChanged: error.identityChanged } }
+    }, crossVoucher)
+    result.current401 = rejected
+    verify(rejected.status === 401 && rejected.outcomeUncertain === false && rejected.identityChanged === false
+      && await page.evaluate(() => localStorage.getItem('cityloop.token')) === null,
+    'a genuine current-session POST 401 stays a definitive rejection and clears only that session')
+
+    result.step = 'ordinary logout'
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), owner)
+    await page.goto(`${WEB}/shops/${shop}`)
+    await page.locator('.account-actions').getByRole('button', { name: '退出', exact: true }).click()
+    await page.waitForURL(url => url.pathname === '/')
+    verify(await page.evaluate(() => localStorage.getItem('cityloop.token')) === null
+      && (await api('/user/me', owner)).status === 401
+      && await page.getByRole('button', { name: '登录 / 注册', exact: true }).isVisible(),
+    'ordinary logout still revokes its real session, clears local identity and returns to the public home page')
+    result.passed = true
+  } catch (error) {
+    result.failure = error instanceof Error ? error.message.split('\n')[0].slice(0, 160) : 'identity regression failed'
+    process.exitCode = 1
+  } finally {
+    if (browser) await browser.close().catch(() => {})
+    let clean = true
+    for (const token of sessions) {
+      try { const response = await api('/user/logout', token, 'POST'); if (![200, 401].includes(response.status)) clean = false } catch { clean = false }
+    }
+    if (seeded) {
+      try {
+        const messages = await ownedMessages()
+        for (const message of messages) orderIDs.add(message.id)
+        await eventually(async () => {
+          const persisted = Number(sql(`SELECT COUNT(*) FROM tb_voucher_order WHERE user_id IN (${users.slice(0, 3).join(',')})`))
+          const pending = await mapLimit(messages, 10, message => redis('XPENDING', 'stream.orders', 'g1', message.sourceID, message.sourceID, 1))
+          return persisted >= messages.length && pending.every(rows => rows.length === 0)
+        }, Boolean, 'identity fixture worker did not drain')
+        const ownedOrders = sql(`SELECT id FROM tb_voucher_order WHERE user_id IN (${users.slice(0, 3).join(',')})`).split(/\s+/).filter(Boolean)
+        ownedOrders.forEach(value => orderIDs.add(value))
+        const vouchers = [...activityIDs]
+        sql(`START TRANSACTION; SELECT id FROM tb_voucher WHERE shop_id=${shop} FOR UPDATE;
+          DELETE FROM tb_outbox WHERE (aggregate_type='ACTIVITY' AND aggregate_id IN (${vouchers.map(v => `'${v}'`).join(',') || "''"})) OR (aggregate_type IN ('ORDER','RESERVATION') AND aggregate_id IN (${[...orderIDs].map(v => `'${v}'`).join(',')}));
+          DELETE FROM tb_audit_log WHERE merchant_id=${merchant}; DELETE FROM tb_voucher_order WHERE user_id IN (${users.slice(0, 3).join(',')});
+          DELETE FROM tb_seckill_voucher WHERE voucher_id IN (${vouchers.join(',') || '0'}); DELETE FROM tb_voucher WHERE shop_id=${shop};
+          DELETE FROM tb_merchant_member WHERE id=${member}; DELETE FROM tb_shop WHERE id=${shop}; DELETE FROM tb_merchant WHERE id=${merchant}; DELETE FROM tb_user WHERE id IN (${users.slice(0, 3).join(',')}); COMMIT;`)
+        for (const message of messages) { await redis('XACK', 'stream.orders', 'g1', message.sourceID); await redis('XDEL', 'stream.orders', message.sourceID) }
+        for (const voucher of vouchers) await redis('DEL', ...['gate', 'stock', 'begin', 'end', 'order', 'accepted'].map(part => `seckill:${part}:${voucher}`))
+        for (const order of orderIDs) await redis('DEL', `order:reservation:${order}`)
+        clean &&= sql(`SELECT (SELECT COUNT(*) FROM tb_user WHERE id IN (${users.slice(0, 3).join(',')}))+(SELECT COUNT(*) FROM tb_voucher WHERE shop_id=${shop})+(SELECT COUNT(*) FROM tb_voucher_order WHERE user_id IN (${users.slice(0, 3).join(',')}))`) === '0'
+        clean &&= (await ownedMessages()).length === 0
+      } catch { clean = false }
+    }
+    result.cleanup = clean
+    if (!clean) { result.passed = false; process.exitCode = 1 }
+    result.recordedAt = new Date().toISOString()
+    await writeFile(output, JSON.stringify(result, null, 2) + '\n')
+    process.stdout.write(JSON.stringify({ passed: result.passed, cleanup: result.cleanup, output }) + '\n')
+  }
+}
+
+if (process.env.ORDER_IDENTITY_ONLY === '1') {
+  await identityRegression()
+} else {
 let browser, mainPage, seeded = false
 const pageErrors = []
 try {
@@ -461,4 +727,5 @@ try {
   report.recordedAt = new Date().toISOString()
   await writeFile(output, JSON.stringify(report, null, 2) + '\n')
   process.stdout.write(JSON.stringify({ passed: report.passed, checks: report.checks.length, cleanup: report.cleanup, output }) + '\n')
+}
 }

@@ -1,0 +1,30 @@
+{
+  "task": "GO-030-identity",
+  "passed": true,
+  "checks": [
+    "direct and proxied requests identify the same Go service",
+    "changing account in the second tab cannot submit a recovery purchase as the new account",
+    "the original account retains its accepted order",
+    "a new legitimate session for the same account recovers the original ID without a duplicate order",
+    "a genuine delayed 401 from the previous session cannot clear the newer account session",
+    "a genuine current-session POST 401 stays a definitive rejection and clears only that session"
+  ],
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "0072c86-review-fixes"
+  },
+  "step": "current session unauthorized classification",
+  "crossAccount": {
+    "requestsAsNewAccount": 0,
+    "ordersAsNewAccount": 0
+  },
+  "current401": {
+    "status": 401,
+    "outcomeUncertain": false,
+    "identityChanged": false
+  },
+  "recordedAt": "2026-10-26T15:41:00.045Z"
+}

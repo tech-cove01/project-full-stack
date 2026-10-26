@@ -7,7 +7,15 @@ import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import 'element-plus/es/components/tag/style/css'
 import { useRoute, useRouter } from 'vue-router'
-import { api, ApiError, errorMessage, money, parseBusinessTime, rememberOrder } from '../api'
+import {
+  api,
+  ApiError,
+  errorMessage,
+  money,
+  parseBusinessTime,
+  rememberOrder,
+  TOKEN_KEY,
+} from '../api'
 import { useAuthStore } from '../stores/auth'
 import type { Shop, Voucher } from '../types'
 
@@ -22,7 +30,8 @@ const error = ref('')
 const voucherError = ref('')
 const purchasing = ref<string | null>(null)
 const purchaseError = ref('')
-const uncertainVoucherId = ref('')
+const uncertainPurchase = ref<{ voucherId: string; userId: string } | null>(null)
+const uncertainVoucherId = computed(() => uncertainPurchase.value?.voucherId || '')
 const now = ref(Date.now())
 const clock = setInterval(() => {
   now.value = Date.now()
@@ -105,16 +114,63 @@ async function purchase(voucherId: string) {
   purchaseError.value = ''
   const active = new AbortController()
   purchaseController = active
+  const expectedUserId = uncertainPurchase.value?.userId || auth.user?.id
+  let purchaserId: string | undefined
+  let submitted = false
   try {
-    const { data: id } = await api.seckill(voucherId, active.signal)
+    // Verify the principal again, then pin that exact session to the POST.
+    // Reading localStorage again inside POST could otherwise submit as a user
+    // who logged in in a second tab after this check.
+    const session = await auth.verifySession(active.signal)
     if (active.signal.aborted) return
+    if (!session) {
+      purchaseError.value = '登录状态已变化，请确认当前账号后重试。'
+      return
+    }
+    if (expectedUserId && session.user.id !== expectedUserId) {
+      uncertainPurchase.value = null
+      purchaseError.value = '登录账号已切换，未替新账号重试抢券；请回到原账号查看订单。'
+      return
+    }
+    purchaserId = session.user.id
+    if (localStorage.getItem(TOKEN_KEY) !== session.token) {
+      throw new ApiError('登录状态已变化，请确认账号后重试。', undefined, false, true)
+    }
+    submitted = true
+    const { data: id } = await api.seckill(voucherId, active.signal, session.token)
+    if (active.signal.aborted) return
+    if (localStorage.getItem(TOKEN_KEY) !== session.token) {
+      throw new ApiError('登录状态已变化，本次抢券结果仍待确认。', undefined, true, true)
+    }
     rememberOrder(id)
-    uncertainVoucherId.value = ''
+    uncertainPurchase.value = null
     await router.push(`/orders/${id}`)
   } catch (cause) {
     if (active.signal.aborted) return
     purchaseError.value = errorMessage(cause)
-    uncertainVoucherId.value = cause instanceof ApiError && cause.outcomeUncertain ? voucherId : ''
+    if (submitted && purchaserId) {
+      uncertainPurchase.value =
+        cause instanceof ApiError && cause.outcomeUncertain
+          ? { voucherId, userId: purchaserId }
+          : null
+    }
+    if (cause instanceof ApiError && cause.identityChanged) {
+      try {
+        const current = await auth.verifySession(active.signal)
+        if (active.signal.aborted) return
+        if (
+          current &&
+          uncertainPurchase.value &&
+          current.user.id !== uncertainPurchase.value.userId
+        ) {
+          uncertainPurchase.value = null
+          purchaseError.value = '登录账号已切换，未替新账号重试抢券；请回到原账号查看订单。'
+        }
+      } catch {
+        // Keep the original principal and unknown outcome until identity can
+        // be verified. A replacement token alone does not prove order failure.
+      }
+    }
   } finally {
     if (purchaseController === active) {
       purchasing.value = null
@@ -125,7 +181,7 @@ async function purchase(voucherId: string) {
 watch(
   () => String(route.params.id),
   (id) => {
-    uncertainVoucherId.value = ''
+    uncertainPurchase.value = null
     void load(id)
   },
   { immediate: true },

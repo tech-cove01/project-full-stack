@@ -4,7 +4,7 @@ import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { ElButton, ElMessage } from 'element-plus'
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/message/style/css'
-import { api, errorMessage, LAST_ORDER_KEY } from './api'
+import { api, errorMessage, LAST_ORDER_KEY, TOKEN_KEY } from './api'
 import { useAuthStore } from './stores/auth'
 
 const auth = useAuthStore()
@@ -25,15 +25,24 @@ function onExpired() {
 async function logout() {
   if (loggingOut.value) return
   loggingOut.value = true
+  const logoutToken = localStorage.getItem(TOKEN_KEY)
+  const hasReplacementSession = () => {
+    const currentToken = localStorage.getItem(TOKEN_KEY)
+    return currentToken !== null && currentToken !== logoutToken
+  }
   try {
     await api.logout()
-    ElMessage.success('已退出登录')
+    if (!hasReplacementSession()) ElMessage.success('已退出登录')
   } catch (cause) {
-    ElMessage.warning(`本地登录已退出。${errorMessage(cause)}`)
+    if (!hasReplacementSession()) ElMessage.warning(`本地登录已退出。${errorMessage(cause)}`)
   } finally {
-    auth.clear()
     loggingOut.value = false
-    await router.push('/')
+    // A delayed logout belongs to its original session. An actual 401 may
+    // already have cleared that session; neither case may clear a newer one.
+    if (!hasReplacementSession()) {
+      auth.clear()
+      await router.push('/')
+    }
   }
 }
 onMounted(() => {

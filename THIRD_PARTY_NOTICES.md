@@ -20,3 +20,7 @@ The following repositories informed design decisions; no complete module or bund
 - https://github.com/youlaitech/vue3-element-admin
 
 Dependencies declared in Maven and npm retain their respective licenses. Consult their published license files when redistributing dependency artifacts.
+
+## Go migration dependencies
+
+The Go implementation under `backend-go/` is newly written against the retained API/data contracts. Gin (MIT), GORM and its MySQL driver (MIT), go-sql-driver/mysql (MPL-2.0), and go-redis/v9 (BSD-2-Clause) retain their upstream licenses, as do transitive dependencies. Exact versions and checksums are recorded in `backend-go/go.mod` and `go.sum`; inspect the modules' LICENSE files before redistributing them. The Java source and Lua attribution above continues to apply wherever retained source is reused.

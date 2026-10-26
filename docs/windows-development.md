@@ -4,7 +4,7 @@
 
 后续使用 Windows 原生 Go、Node.js、k6，MySQL 8.4 / Redis 7.4 和社区 Kafka 使用 Docker Desktop Linux 容器，不依赖旧虚拟机。保留 MySQL，不需要安装 PostgreSQL、pgvector 或 RabbitMQ。技术版本、任务和切换条件以 [Go 总方案](implementation-plan.md) 为准。
 
-本机已观察到 go1.27.0 windows/amd64 可调用；Go 后端尚无代码或 go.mod。GO-001 要锁定工具链/模块、实现配置和健康/关闭、参数化前端代理并提供实际 Go 启动命令，此前不要把下方 Maven 命令当 Go 启动入口。普通 Go 构建/测试可在 Windows 先做，race 由具备工具链的 Linux CI 执行，不要求先为此安装 Windows C 编译器。
+本机工具链为 go1.27.0 windows/amd64，Go 配置/健康/关闭工程基础位于 `backend-go/`。使用 [Go 启动步骤](development.md#go-迁移环境与启动)，实际任务与证据见 [开发入口](README.md)。前端代理默认指向 Go 8082，历史 Java 调试需显式设置 `API_PROXY_TARGET=http://127.0.0.1:8081`。普通 Go 构建/测试在 Windows 执行，race 由具备工具链的 Linux CI 执行，不要求先安装 Windows C 编译器。
 
 启动前重新检查工具和端口。Go 迁移开发可用 8082 和独立测试依赖 3308/6380；Java 历史基线通常用 8081 与 3307/6379。隔离 Compose 项目名、数据卷与端口，禁止两个后端同时消费同一 Stream/group/outbox。不要据下方历史检查推断今天容器健康。
 

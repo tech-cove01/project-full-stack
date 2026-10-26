@@ -2,7 +2,7 @@
 
 面向本地生活服务的全栈平台，连接用户消费、商家经营与探店分享。围绕活动发布、抢券、模拟支付、到店核销和审计构建交易流程，配套商家工作台与带来源的业务 AI 助手。
 
-**开发状态：后端正在迁移到 Go，前端保留 Vue 3/TypeScript。** 当前源码仍为 Java 基线，Go 服务尚未实现；交易、B 端和 AI 作为迁移契约保留，社区/Feed/Kafka 属于新增范围。具体任务与已验证状态见 [开发入口](docs/README.md)。
+**开发状态：后端正在迁移到 Go，前端保留 Vue 3/TypeScript。** Go 配置、健康检查和关闭基础已实现于 `backend-go/`，业务仍待逐项迁移；交易、B 端和 AI 作为迁移契约保留，社区/Feed/Kafka 属于新增范围。具体任务与已验证状态见 [开发入口](docs/README.md)。
 
 ## 产品能力
 
@@ -32,7 +32,7 @@
 
 ## 开发与验证
 
-当前可复用前端、数据库迁移、Lua 和 HTTP 验收脚本。Go 工程启动命令将在首个运行任务完成后补充；请勿将 Java 历史测试或吞吐数字当成 Go 结果。
+当前可复用前端、数据库迁移、Lua 和 HTTP 验收脚本。[Go 启动步骤](docs/development.md#go-迁移环境与启动) 使用隔离 Compose、API 8082 / MySQL 3308 / Redis 6380；前端代理默认指向 Go。请勿将 Java 历史测试或吞吐数字当成 Go 结果。
 
 - [迁移与分阶段方案](docs/implementation-plan.md)：Go 任务、契约、隔离与切换。
 - [实现交接](docs/agent-handoff.md)：小任务、自验、独立 commit 与审查。
@@ -46,12 +46,13 @@ Java 参考源码保存在 Git 标签 `java-baseline-20261026`，历史证据位
 
 ~~~text
 backend/                 当前 Java；Go 验收后收敛到此目录
-backend-go/              迁移期间的临时 Go 路径（尚未创建）
+backend-go/              迁移期间的 Go 工程基础；业务逐项迁移
 frontend/                用户端与商家工作台
 infra/mysql/             表结构、演示数据与版本迁移
 scripts/                 HTTP 冒烟、恢复与负载脚本
 docs/                    设计、任务、验收与证据
 compose.yaml             本地依赖服务
+compose.go.yaml          Go 迁移隔离依赖（独立项目与数据卷）
 ~~~
 
 ## 许可证

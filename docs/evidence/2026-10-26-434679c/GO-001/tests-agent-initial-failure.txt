@@ -1,0 +1,74 @@
+GO-001 initial agent test output, 2026-10-26
+Base SHA: 434679cf86aaa125f1f9a35fa695cc7050eed907
+Command: go test ./internal/platform/... ./cmd/api
+Working directory: backend-go/
+Result: FAIL (first compilation/execution, while other Go builds also ran).
+
+--- FAIL: TestShutdownDrainsAcceptedRequestBeforeClosingResources (1.01s)
+    app_test.go:63: request did not reach server
+--- FAIL: TestShutdownDeadlineForcesCloseAndCancelsHandler (1.00s)
+    app_test.go:123: request did not reach server
+FAIL
+FAIL github.com/cityloop/fullstack-go/internal/platform/app 2.489s
+ok   github.com/cityloop/fullstack-go/internal/platform/config 0.369s
+ok   github.com/cityloop/fullstack-go/internal/platform/database 0.441s
+ok   github.com/cityloop/fullstack-go/internal/platform/httpapi 0.546s
+?    github.com/cityloop/fullstack-go/cmd/api [no test files]
+FAIL
+
+Observed boundary: both failures happened before the HTTP handler was entered,
+not during drain ordering or forced-close assertions. The original one-second
+request-start wait did not capture the pending client error, so this output
+alone does not prove a root cause. There was concurrent cold compilation on
+Windows. A separate warmed targeted run immediately passed all three lifecycle
+tests (including the subsequently added permanent-Accept-error case):
+
+Command: go test -count=1 -v ./internal/platform/app
+=== RUN   TestShutdownDrainsAcceptedRequestBeforeClosingResources
+--- PASS: TestShutdownDrainsAcceptedRequestBeforeClosingResources (0.07s)
+=== RUN   TestShutdownDeadlineForcesCloseAndCancelsHandler
+--- PASS: TestShutdownDeadlineForcesCloseAndCancelsHandler (0.03s)
+=== RUN   TestUnexpectedListenerFailureDrainsActiveRequestBeforeClosingResources
+--- PASS: TestUnexpectedListenerFailureDrainsActiveRequestBeforeClosingResources (0.04s)
+PASS
+ok github.com/cityloop/fullstack-go/internal/platform/app 3.276s
+
+Further investigation/repeat results are appended below; the initial failure
+must not be overwritten or reclassified as a passing result.
+
+Second concurrent all-package invocation also failed before handler entry:
+Command: go test ./internal/platform/... ./cmd/api
+--- FAIL: TestShutdownDrainsAcceptedRequestBeforeClosingResources (1.01s)
+    app_test.go:81: request did not reach server
+--- FAIL: TestShutdownDeadlineForcesCloseAndCancelsHandler (1.00s)
+    app_test.go:141: request did not reach server
+--- FAIL: TestUnexpectedListenerFailureDrainsActiveRequestBeforeClosingResources (1.00s)
+    app_test.go:199: request did not reach server
+FAIL
+FAIL github.com/cityloop/fullstack-go/internal/platform/app 4.503s
+ok   github.com/cityloop/fullstack-go/internal/platform/config 0.385s
+ok   github.com/cityloop/fullstack-go/internal/platform/database 0.481s
+ok   github.com/cityloop/fullstack-go/internal/platform/httpapi 1.619s
+?    github.com/cityloop/fullstack-go/cmd/api [no test files]
+FAIL
+
+Investigation:
+- No HTTP_PROXY/HTTPS_PROXY/ALL_PROXY/NO_PROXY process variables were present.
+- Windows Go runtime source confirms CTRL_BREAK_EVENT maps to SIGINT; these
+  unit tests use context cancellation and do not depend on console signals.
+- The original one-second entry budget was retained for a warmed repeat:
+  go test -count=5 -v ./internal/platform/app
+  All 15 tests passed; individual lifecycle tests took 0.03-0.05s.
+- Added immediate pending-client-result diagnostics to distinguish connection
+  failure from slow entry. Then ran, still with the one-second entry budget:
+  go test -count=1 -v ./internal/platform/... ./cmd/api
+  PASS app 1.859s, config 0.262s, database 0.285s, httpapi 0.370s.
+
+The failure was not reproduced after cold compilation ended. Scheduling or
+cold Windows process/network startup remains an inference, not a proven root
+cause. The test entry budget is now five seconds with a ten-second client
+budget and immediate client-error reporting. The one-second normal shutdown
+budget, 30ms forced-shutdown budget, dependency ordering, cancellation, and
+listener-error assertions remain unchanged. This prevents a one-second
+precondition wait from masquerading as a shutdown regression, while preserving
+both failed raw rounds and the exact verification boundary.

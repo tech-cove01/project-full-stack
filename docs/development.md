@@ -1,8 +1,58 @@
 # 运行与验证
 
-2026-10-26 Go 路线：接口表作为迁移契约继续复用；当前 GO-001 尚未实现，Go 命令/CI/真实结果待对应任务补充。下面 Maven、JDK、Spring 配置和历史测试均指 Java 基线，不是当前 Go 开发要求，也不能作为 Go 通过记录。执行顺序和隔离切换见 [Go 总方案](implementation-plan.md)。
+2026-10-26 Go 路线：接口表作为迁移契约继续复用。Go 工程基础位于 `backend-go/`，只交付下述已列出的能力，业务迁移进度见 [开发入口](README.md)。下面 Maven、JDK、Spring 配置和历史测试均指 Java 基线，不是当前 Go 开发要求，也不能作为 Go 通过记录。执行顺序和隔离切换见 [Go 总方案](implementation-plan.md)。
 
 Windows 本机的具体端口、环境检查和三个 PowerShell 终端启动步骤见 [Windows 开发说明](windows-development.md)。后续改造任务见 [分阶段方案](implementation-plan.md)，交接入口见 [agent-handoff.md](agent-handoff.md)，目标验收见 [acceptance.md](acceptance.md)。本文接口表描述当前基线，不代表规划接口已经实现。
+
+## Go 迁移环境与启动
+
+工具链固定 Go `1.27.0`，Gin `1.11.0`、GORM `1.31.1`、GORM MySQL `1.6.0`、go-redis/v9 `9.17.0`；完整依赖与校验和见 `backend-go/go.mod` / `go.sum`。MySQL `8.4`、Redis `7.4-alpine` 沿用版本系列标签，证据另记实际镜像 digest。程序不自动读 `.env`，不执行 AutoMigrate，也不启动交易消费者或预热/重置活动库存。
+
+在根目录启动隔离依赖（不与 `compose.yaml` 混用）：
+
+~~~powershell
+docker compose -f compose.go.yaml up -d --wait mysql redis
+docker compose -f compose.go.yaml ps
+~~~
+
+独立项目名 `project-full-stack-go`、卷 `go-mysql-data` / `go-redis-data`，默认端口 3308 / 6380。首次初始化复用 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`；后续业务需要的版本 SQL 仍显式执行，应用启动不迁移库。禁止把 Go 指向 Java 的数据或同时消费同一 Stream/outbox。
+
+另一个 PowerShell 在根目录设置进程环境（示例是隔离本机开发值）：
+
+~~~powershell
+$env:GO_ENV = 'development'
+$env:API_ADDR = '127.0.0.1:8082'
+$env:MYSQL_HOST = '127.0.0.1'
+$env:MYSQL_PORT = '3308'
+$env:MYSQL_DATABASE = 'project_full_stack_go'
+$env:MYSQL_USER = 'fullstack'
+$env:MYSQL_PASSWORD = 'fullstack_go_dev_only'
+$env:REDIS_HOST = '127.0.0.1'
+$env:REDIS_PORT = '6380'
+$env:REDIS_DATABASE = '0'
+$env:REDIS_PASSWORD = ''
+Set-Location backend-go
+go run ./cmd/api
+~~~
+
+Go 默认监听 `127.0.0.1:8082`。MySQL host/port/database/user/password 和 Redis host/port 必须显式配置；缺配置或启动探测失败均非零退出。`GO_ENV` 取 development/test/production；默认 development，仅适用于本机，生产短信尚未接入。时区固定 `Asia/Shanghai`，不使用机器时区。可选 `GO_STARTUP_TIMEOUT=8s`、`GO_HEALTH_TIMEOUT=2s`、`GO_SHUTDOWN_TIMEOUT=10s`（正时长且不超过 1m）。Ctrl+C 会停止接收请求，在关闭期限内排空后关闭 MySQL/Redis 池；超期强制关闭并报错。
+
+`GET /health/live` 返回进程存活，`GET /health/ready` 与 `/actuator/health` 实时探测两个依赖，失败返回 503；响应含 `service: project-full-stack-go`、`runtime: go`、构建 revision（未注入时 unknown）。健康不证明业务迁移已完成。
+
+前端在 `frontend/` 执行 `npm.cmd run dev -- --port 5174 --strictPort`，默认代理 `http://127.0.0.1:8082`。可通过进程环境或 `frontend/.env.local` 的 `API_PROXY_TARGET` 覆盖；`VITE_API_BASE_URL` 默认 `/api`。先访问 `/api/actuator/health` 确认 Go 身份。回看 Java 时必须显式改目标为 `http://127.0.0.1:8081`。
+
+在 `backend-go/` 中验证：
+
+~~~powershell
+go mod verify
+gofmt -l .
+go vet ./...
+go test -count=1 ./...
+go build -trimpath -o bin/api.exe ./cmd/api
+python ../scripts/go-bootstrap-smoke.py --binary bin/api.exe --output ../bootstrap-result.json
+~~~
+
+最后一条需以上真实依赖环境。Linux CI 增加 `go test -race` 和真实依赖启动脚本；配置不等于远端 CI 已执行，实际结果见任务证据。停止应用用 Ctrl+C；停止依赖用 `docker compose -f compose.go.yaml stop mysql redis`，保留卷。Git 回退不会撤销数据库变更，不用删卷回退。
 
 ## Java 基线环境与启动（历史参考）
 

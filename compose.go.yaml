@@ -1,0 +1,38 @@
+name: project-full-stack-go
+
+# Separate project, ports and volumes: never attaches to the Java baseline data.
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: project_full_stack_go
+      MYSQL_USER: fullstack
+      MYSQL_PASSWORD: fullstack_go_dev_only
+      MYSQL_ROOT_PASSWORD: root_go_dev_only
+      TZ: Asia/Shanghai
+    ports:
+      - "127.0.0.1:${GO_MYSQL_PORT:-3308}:3306"
+    volumes:
+      - go-mysql-data:/var/lib/mysql
+      - ./infra/mysql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec"]
+    ports:
+      - "127.0.0.1:${GO_REDIS_PORT:-6380}:6379"
+    volumes:
+      - go-redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  go-mysql-data:
+  go-redis-data:

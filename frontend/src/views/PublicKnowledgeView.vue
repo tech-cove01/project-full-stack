@@ -31,7 +31,9 @@ onMounted(async () => {
     <el-skeleton v-if="loading" :rows="5" animated />
     <el-alert v-else-if="error" :title="error" type="error" :closable="false" show-icon />
     <template v-else-if="doc">
-      <span class="eyebrow">{{ doc.scope === 'PLATFORM' ? 'PLATFORM RULE' : 'SHOP PUBLIC RULE' }}</span>
+      <span class="eyebrow">{{
+        doc.scope === 'PLATFORM' ? 'PLATFORM RULE' : 'SHOP PUBLIC RULE'
+      }}</span>
       <h1>{{ doc.title }}</h1>
       <p class="muted">当前发布版本 v{{ doc.version }} · {{ doc.scope }}</p>
       <p class="public-body">{{ doc.body }}</p>

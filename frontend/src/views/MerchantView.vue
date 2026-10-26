@@ -44,9 +44,15 @@ onBeforeUnmount(() => controller?.abort())
     <p>管理已授权的商家与门店，连接到店服务。</p>
   </section>
   <div class="page-top merchant-actions">
-    <RouterLink class="text-link" to="/merchant/activities"><el-button>活动管理</el-button></RouterLink>
-    <RouterLink class="text-link" to="/merchant/orders"><el-button>订单与核销</el-button></RouterLink>
-    <RouterLink class="text-link" to="/merchant/knowledge"><el-button>公开规则</el-button></RouterLink>
+    <RouterLink class="text-link" to="/merchant/activities"
+      ><el-button>活动管理</el-button></RouterLink
+    >
+    <RouterLink class="text-link" to="/merchant/orders"
+      ><el-button>订单与核销</el-button></RouterLink
+    >
+    <RouterLink class="text-link" to="/merchant/knowledge"
+      ><el-button>公开规则</el-button></RouterLink
+    >
   </div>
   <el-alert
     v-if="error"

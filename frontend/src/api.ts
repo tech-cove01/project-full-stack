@@ -118,10 +118,7 @@ export const api = {
   workspace: (signal?: AbortSignal) =>
     request<MerchantWorkspace>('/merchant/workspace', { signal }),
   activities: (current: number, pageSize: number, signal?: AbortSignal) =>
-    request<Activity[]>(
-      `/merchant/activities?current=${current}&pageSize=${pageSize}`,
-      { signal },
-    ),
+    request<Activity[]>(`/merchant/activities?current=${current}&pageSize=${pageSize}`, { signal }),
   createActivity: (body: unknown, idempotencyKey: string) =>
     request<Activity>('/merchant/activities', {
       method: 'POST',
@@ -176,7 +173,9 @@ export const api = {
       { signal },
     ),
   merchantKnowledge: (shopId: string, signal?: AbortSignal) =>
-    request<AiKnowledgeDoc[]>(`/merchant/knowledge?shopId=${encodeURIComponent(shopId)}`, { signal }),
+    request<AiKnowledgeDoc[]>(`/merchant/knowledge?shopId=${encodeURIComponent(shopId)}`, {
+      signal,
+    }),
   createKnowledge: (shopId: string, title: string, body: string) =>
     request<AiKnowledgeDoc>('/merchant/knowledge', {
       method: 'POST',
@@ -188,11 +187,17 @@ export const api = {
       body: JSON.stringify({ title, body }),
     }),
   publishKnowledge: (id: string) =>
-    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/publish`, { method: 'POST' }),
+    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/publish`, {
+      method: 'POST',
+    }),
   disableKnowledge: (id: string) =>
-    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/disable`, { method: 'POST' }),
+    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/disable`, {
+      method: 'POST',
+    }),
   rebuildKnowledge: (id: string) =>
-    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/rebuild`, { method: 'POST' }),
+    request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/rebuild`, {
+      method: 'POST',
+    }),
 }
 
 export function money(cents: number | string | null | undefined): string {

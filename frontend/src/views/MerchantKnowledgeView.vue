@@ -46,7 +46,9 @@ const shops = computed(() =>
     merchant.shops.map((shop) => ({ ...shop, role: merchant.role })),
   ),
 )
-const selectedRole = computed(() => shops.value.find((shop) => shop.id === selectedShop.value)?.role)
+const selectedRole = computed(
+  () => shops.value.find((shop) => shop.id === selectedShop.value)?.role,
+)
 const canManage = computed(() => selectedRole.value === 'OWNER' || selectedRole.value === 'MANAGER')
 
 async function loadWorkspace() {
@@ -146,11 +148,15 @@ async function rebuild(doc: any) {
 
 async function disable(doc: any) {
   try {
-    await ElMessageBox.confirm('停用后该规则将立即退出助手检索和来源引用，确定继续吗？', '停用知识', {
-      confirmButtonText: '停用',
-      cancelButtonText: '取消',
-      type: 'warning',
-    })
+    await ElMessageBox.confirm(
+      '停用后该规则将立即退出助手检索和来源引用，确定继续吗？',
+      '停用知识',
+      {
+        confirmButtonText: '停用',
+        cancelButtonText: '取消',
+        type: 'warning',
+      },
+    )
   } catch {
     return
   }
@@ -202,13 +208,34 @@ onBeforeUnmount(() => controller?.abort())
     <el-button v-if="canManage" type="primary" @click="openCreate">新建公开规则</el-button>
   </div>
 
-  <el-alert v-if="error" :title="error" type="error" :closable="false" show-icon class="space-bottom" />
+  <el-alert
+    v-if="error"
+    :title="error"
+    type="error"
+    :closable="false"
+    show-icon
+    class="space-bottom"
+  />
   <div class="filter-row space-bottom">
-    <el-select v-model="selectedShop" placeholder="选择门店" style="width: 240px" @change="switchShop">
-      <el-option v-for="shop in shops" :key="shop.id" :label="shop.name + '（' + shop.id + '）'" :value="shop.id" />
+    <el-select
+      v-model="selectedShop"
+      placeholder="选择门店"
+      style="width: 240px"
+      @change="switchShop"
+    >
+      <el-option
+        v-for="shop in shops"
+        :key="shop.id"
+        :label="shop.name + '（' + shop.id + '）'"
+        :value="shop.id"
+      />
     </el-select>
     <span class="muted">
-      {{ selectedRole === 'STAFF' ? '店员只读：仅显示已发布公开规则' : '店主/管理者可编辑、发布、停用和重建' }}
+      {{
+        selectedRole === 'STAFF'
+          ? '店员只读：仅显示已发布公开规则'
+          : '店主/管理者可编辑、发布、停用和重建'
+      }}
     </span>
   </div>
 
@@ -275,7 +302,11 @@ onBeforeUnmount(() => controller?.abort())
     </el-table>
   </section>
 
-  <el-dialog v-model="dialogOpen" :title="editingId ? '编辑公开规则' : '新建公开规则'" width="680px">
+  <el-dialog
+    v-model="dialogOpen"
+    :title="editingId ? '编辑公开规则' : '新建公开规则'"
+    width="680px"
+  >
     <el-form label-position="top">
       <el-form-item label="标题">
         <el-input v-model="form.title" maxlength="255" placeholder="例如：街角咖啡停车规则" />

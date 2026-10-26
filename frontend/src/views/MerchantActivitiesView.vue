@@ -50,7 +50,9 @@ const shops = computed(() =>
   ),
 )
 const canManage = computed(() =>
-  (workspace.value?.merchants || []).some((merchant) => merchant.role === 'OWNER' || merchant.role === 'MANAGER'),
+  (workspace.value?.merchants || []).some(
+    (merchant) => merchant.role === 'OWNER' || merchant.role === 'MANAGER',
+  ),
 )
 
 function pad(value: number) {
@@ -239,7 +241,14 @@ onBeforeUnmount(() => controller?.abort())
     <el-button v-if="canManage" type="primary" @click="openDialog">发布活动</el-button>
   </div>
 
-  <el-alert v-if="error" :title="error" type="error" :closable="false" show-icon class="space-bottom" />
+  <el-alert
+    v-if="error"
+    :title="error"
+    type="error"
+    :closable="false"
+    show-icon
+    class="space-bottom"
+  />
   <el-skeleton v-if="loading" :rows="6" animated />
   <el-empty v-else-if="!activities.length" description="还没有活动，先发布一个门店优惠券吧">
     <el-button v-if="canManage" type="primary" @click="openDialog">发布活动</el-button>
@@ -254,7 +263,9 @@ onBeforeUnmount(() => controller?.abort())
         </template>
       </el-table-column>
       <el-table-column label="价格 / 面值" width="150">
-        <template #default="{ row }">¥{{ money(row.payValue) }} / ¥{{ money(row.actualValue) }}</template>
+        <template #default="{ row }"
+          >¥{{ money(row.payValue) }} / ¥{{ money(row.actualValue) }}</template
+        >
       </el-table-column>
       <el-table-column label="库存" width="110">
         <template #default="{ row }">{{ row.stock }} / {{ row.totalStock }}</template>
@@ -265,7 +276,9 @@ onBeforeUnmount(() => controller?.abort())
         </template>
       </el-table-column>
       <el-table-column label="销售时间" min-width="180">
-        <template #default="{ row }">{{ row.beginTime }}<br /><span class="muted">至 {{ row.endTime }}</span></template>
+        <template #default="{ row }"
+          >{{ row.beginTime }}<br /><span class="muted">至 {{ row.endTime }}</span></template
+        >
       </el-table-column>
       <el-table-column label="操作" width="180">
         <template #default="{ row }">
@@ -319,13 +332,31 @@ onBeforeUnmount(() => controller?.abort())
       </el-form-item>
       <div class="form-grid">
         <el-form-item label="购买价（元）">
-          <el-input-number v-model="form.payYuan" :min="0.01" :precision="2" :step="1" style="width: 100%" />
+          <el-input-number
+            v-model="form.payYuan"
+            :min="0.01"
+            :precision="2"
+            :step="1"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="抵扣面值（元）">
-          <el-input-number v-model="form.actualYuan" :min="0.01" :precision="2" :step="1" style="width: 100%" />
+          <el-input-number
+            v-model="form.actualYuan"
+            :min="0.01"
+            :precision="2"
+            :step="1"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="总库存">
-          <el-input-number v-model="form.totalStock" :min="1" :max="1000000" :step="10" style="width: 100%" />
+          <el-input-number
+            v-model="form.totalStock"
+            :min="1"
+            :max="1000000"
+            :step="10"
+            style="width: 100%"
+          />
         </el-form-item>
       </div>
       <div class="form-grid">

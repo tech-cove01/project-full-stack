@@ -44,7 +44,9 @@ const shops = computed(() =>
   ),
 )
 const canManage = computed(() =>
-  (workspace.value?.merchants || []).some((merchant) => merchant.role === 'OWNER' || merchant.role === 'MANAGER'),
+  (workspace.value?.merchants || []).some(
+    (merchant) => merchant.role === 'OWNER' || merchant.role === 'MANAGER',
+  ),
 )
 const labels: Record<number, string> = {
   1: '待支付',
@@ -156,7 +158,14 @@ onBeforeUnmount(() => controller?.abort())
     <RouterLink class="text-link" to="/merchant/activities">活动管理 →</RouterLink>
   </div>
 
-  <el-alert v-if="error" :title="error" type="error" :closable="false" show-icon class="space-bottom" />
+  <el-alert
+    v-if="error"
+    :title="error"
+    type="error"
+    :closable="false"
+    show-icon
+    class="space-bottom"
+  />
 
   <section class="panel space-bottom">
     <div class="section-heading">
@@ -167,7 +176,12 @@ onBeforeUnmount(() => controller?.abort())
     </div>
     <div class="redeem-form">
       <el-select v-model="redeemShop" placeholder="授权门店" style="width: 220px">
-        <el-option v-for="shop in shops" :key="shop.id" :label="`${shop.name}（${shop.id}）`" :value="shop.id" />
+        <el-option
+          v-for="shop in shops"
+          :key="shop.id"
+          :label="`${shop.name}（${shop.id}）`"
+          :value="shop.id"
+        />
       </el-select>
       <el-input
         v-model="tokenInput"
@@ -187,10 +201,22 @@ onBeforeUnmount(() => controller?.abort())
         <h2>门店订单</h2>
       </div>
       <div class="filter-row">
-        <el-select v-model="filterShop" clearable placeholder="全部门店" style="width: 180px" @change="load">
+        <el-select
+          v-model="filterShop"
+          clearable
+          placeholder="全部门店"
+          style="width: 180px"
+          @change="load"
+        >
           <el-option v-for="shop in shops" :key="shop.id" :label="shop.name" :value="shop.id" />
         </el-select>
-        <el-select v-model="filterStatus" clearable placeholder="全部状态" style="width: 150px" @change="load">
+        <el-select
+          v-model="filterStatus"
+          clearable
+          placeholder="全部状态"
+          style="width: 150px"
+          @change="load"
+        >
           <el-option label="待支付" value="1" />
           <el-option label="已支付" value="2" />
           <el-option label="已核销" value="3" />
@@ -203,7 +229,9 @@ onBeforeUnmount(() => controller?.abort())
     <el-empty v-else-if="!orders.length" description="当前筛选下没有订单" />
     <el-table v-else :data="orders" style="width: 100%">
       <el-table-column label="订单号" min-width="180">
-        <template #default="{ row }"><span class="mono">{{ row.id }}</span></template>
+        <template #default="{ row }"
+          ><span class="mono">{{ row.id }}</span></template
+        >
       </el-table-column>
       <el-table-column prop="shopName" label="门店" width="130" />
       <el-table-column label="用户" width="150">
@@ -212,7 +240,9 @@ onBeforeUnmount(() => controller?.abort())
       <el-table-column prop="voucherTitle" label="活动" min-width="150" />
       <el-table-column label="状态" width="110">
         <template #default="{ row }">
-          <el-tag :type="tagTypes[row.orderStatus] || 'info'">{{ labels[row.orderStatus] || row.orderStatus }}</el-tag>
+          <el-tag :type="tagTypes[row.orderStatus] || 'info'">{{
+            labels[row.orderStatus] || row.orderStatus
+          }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="金额" width="100">

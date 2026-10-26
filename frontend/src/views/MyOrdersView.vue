@@ -57,7 +57,14 @@ onBeforeUnmount(() => controller?.abort())
     <h1>我的订单</h1>
     <p>查看抢购、支付和核销状态；取消或退款后的订单仍可在这里找回。</p>
   </section>
-  <el-alert v-if="error" :title="error" type="error" :closable="false" show-icon class="space-bottom" />
+  <el-alert
+    v-if="error"
+    :title="error"
+    type="error"
+    :closable="false"
+    show-icon
+    class="space-bottom"
+  />
   <el-skeleton v-if="loading" :rows="5" animated />
   <el-empty v-else-if="!orders.length" description="还没有订单">
     <RouterLink to="/"><el-button type="primary">去逛逛</el-button></RouterLink>

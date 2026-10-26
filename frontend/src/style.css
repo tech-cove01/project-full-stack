@@ -911,8 +911,15 @@ nav a.active {
   animation: stage-pulse 1s infinite ease-in-out;
 }
 @keyframes stage-pulse {
-  0%, 100% { opacity: 0.3; transform: scale(0.8); }
-  50% { opacity: 1; transform: scale(1.1); }
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
 }
 .assistant-input {
   padding: 16px 26px 20px;

@@ -156,9 +156,23 @@ onBeforeUnmount(stop)
     <span class="eyebrow">YOUR ORDER</span>
     <div
       class="status-symbol"
-      :class="status?.state === 'FAILED' ? 'failed' : status?.orderStatus === 2 ? 'paid' : 'processing'"
+      :class="
+        status?.state === 'FAILED' ? 'failed' : status?.orderStatus === 2 ? 'paid' : 'processing'
+      "
     >
-      {{ status?.orderStatus === 3 ? '✓' : status?.orderStatus === 4 ? '—' : status?.orderStatus === 6 ? '↩' : status?.orderStatus === 2 ? '✓' : status?.state === 'FAILED' ? '×' : '…' }}
+      {{
+        status?.orderStatus === 3
+          ? '✓'
+          : status?.orderStatus === 4
+            ? '—'
+            : status?.orderStatus === 6
+              ? '↩'
+              : status?.orderStatus === 2
+                ? '✓'
+                : status?.state === 'FAILED'
+                  ? '×'
+                  : '…'
+      }}
     </div>
     <h1>{{ title }}</h1>
     <p class="order-id">订单号：{{ orderId }}</p>
@@ -169,7 +183,12 @@ onBeforeUnmount(stop)
       请求已受理，正在异步生成订单。刷新页面可以继续查询。
     </p>
     <p v-else-if="status?.state === 'FAILED'" class="muted">
-      {{ status.failureReason || status.errorMsg || status.message || '未能创建订单，请返回店铺查看活动情况。' }}
+      {{
+        status.failureReason ||
+        status.errorMsg ||
+        status.message ||
+        '未能创建订单，请返回店铺查看活动情况。'
+      }}
     </p>
 
     <div v-if="status?.state === 'CREATED'" class="order-meta">

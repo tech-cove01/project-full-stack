@@ -78,10 +78,7 @@ async function load() {
   loadingPage.value = true
   error.value = ''
   try {
-    const [capsResult, shopResult] = await Promise.all([
-      api.aiCapabilities(),
-      api.shops('', 1),
-    ])
+    const [capsResult, shopResult] = await Promise.all([api.aiCapabilities(), api.shops('', 1)])
     capabilities.value = capsResult.data
     shops.value = shopResult.data || []
     if (capabilities.value?.ready) {
@@ -243,7 +240,13 @@ onBeforeUnmount(() => controller?.abort())
         <p>只依据已发布规则、公开活动信息和本人订单回答；不会替你下单或退款。</p>
       </div>
       <div class="assistant-controls">
-        <el-select v-model="selectedShop" placeholder="通用规则" clearable style="width: 190px" @change="switchShop">
+        <el-select
+          v-model="selectedShop"
+          placeholder="通用规则"
+          clearable
+          style="width: 190px"
+          @change="switchShop"
+        >
           <el-option label="通用规则（不选门店）" value="" />
           <el-option v-for="shop in shops" :key="shop.id" :label="shop.name" :value="shop.id" />
         </el-select>
@@ -259,15 +262,19 @@ onBeforeUnmount(() => controller?.abort())
       show-icon
       class="space-bottom"
     />
-    <el-alert v-if="error" :title="error" type="error" :closable="false" show-icon class="space-bottom" />
+    <el-alert
+      v-if="error"
+      :title="error"
+      type="error"
+      :closable="false"
+      show-icon
+      class="space-bottom"
+    />
     <el-skeleton v-if="loadingPage" :rows="6" animated />
 
     <section v-else-if="capabilities?.ready" class="assistant-shell">
       <div ref="log" class="assistant-log">
-        <el-empty
-          v-if="!messages.length"
-          description="问门店规则、查本人订单，或了解当前活动"
-        />
+        <el-empty v-if="!messages.length" description="问门店规则、查本人订单，或了解当前活动" />
         <article
           v-for="(message, index) in messages"
           :key="index"
@@ -287,7 +294,10 @@ onBeforeUnmount(() => controller?.abort())
                 class="source-card"
               >
                 <strong>{{ source.title }}</strong>
-                <span>v{{ source.version }} · {{ source.scope === 'PLATFORM' ? '平台规则' : '门店公开规则' }}</span>
+                <span
+                  >v{{ source.version }} ·
+                  {{ source.scope === 'PLATFORM' ? '平台规则' : '门店公开规则' }}</span
+                >
                 <small>{{ source.excerpt }}</small>
               </RouterLink>
             </div>

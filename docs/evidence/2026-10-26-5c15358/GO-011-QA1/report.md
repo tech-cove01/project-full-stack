@@ -2,6 +2,8 @@
 
 开始 SHA：`5c15358b287a39567df59d3becd52be54a28ee23`。日期2026-10-26（Asia/Shanghai），自测通过待核验；非阻断问题来自独立G1核验。此票单独 `fix(GO-011-QA1)` 提交，不混入GO-020。
 
+完整交付SHA：`514d0beef3de443be12f812faa3a7b3dd94d64d2`。
+
 只改UI脚本seed的一行：同一个 `sql()` 调用先 `SET time_zone='+08:00'`，再开启事务及执行NOW/INSERT。没有修改应用业务时间、全局DB设置或清理逻辑，无新DDL。
 
 验证：

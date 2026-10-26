@@ -1,0 +1,3 @@
+{
+  "rawOutput": " Container project-full-stack-go-mysql-1 Stopping \r\n Container project-full-stack-go-redis-1 Stopping \r\n Container project-full-stack-go-redis-1 Stopped \r\n Container project-full-stack-go-mysql-1 Stopped \r\nproject-full-stack-go-mysql-1 exited exit=0\r\nproject-full-stack-go-redis-1 exited exit=0\r\nproject-full-stack-mysql-1 Up 3 hours (healthy)\r\nproject-full-stack-redis-1 Up 2 days (healthy)\r\n"
+}

@@ -14,6 +14,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/cityloop/fullstack-go/internal/auth"
+	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
@@ -34,8 +35,10 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	}
 	server := &http.Server{
 		Handler: httpapi.NewRouter(resources, cfg.ProbeTimeout, revision, logger, func(routes gin.IRouter) {
-			auth.Register(routes, auth.NewService(resources.ORM, resources.Redis, cfg.Environment))
+			identity := auth.NewService(resources.ORM, resources.Redis, cfg.Environment)
+			auth.Register(routes, identity)
 			shop.Register(routes, shop.NewService(resources.ORM, cfg.Location))
+			merchant.Register(routes, merchant.NewService(resources.ORM), identity)
 		}),
 		ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second,
 		WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,

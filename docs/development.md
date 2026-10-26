@@ -69,6 +69,12 @@ GO-011 提供公开 `GET /shop/of/name?name=&typeId=&current=1&pageSize=10`、`/
 
 真实商铺测试执行 `GO_INTEGRATION=1 go test -count=1 -v ./internal/shop -run TestIntegrationShop`（PowerShell先设置该环境变量）。`node scripts/go-shop-ui-smoke.mjs` 使用同一组UI环境变量，并需要显式MYSQL连接环境；创建53家大ID店铺、分类与券后精确清理，支持 `UI_TIMEZONE=UTC` / `Asia/Shanghai`。脚本通过浏览器离线和选择性网络abort验证失败/重试，成功响应均来自真实Go，不Mock数据。大ID夹具会推进隔离表AUTO_INCREMENT，即使清理也不重置；不要把该脚本指向旧库或共享数据环境。
 
+GO-020 已提供受保护的 `GET /merchant/workspace`，返回当前身份的 `{merchants:[{id,name,role,shops:[{id,name,address}]}]}`。没有商家身份仍返回200空数组；匿名/过期登录401；MySQL失败503，不伪装为空权限。OWNER/MANAGER仅有本商家的门店，STAFF还需显式scope，当前商家/成员都必须ACTIVE。每个请求重新查DB，角色不缓存于token；停用成员/商家或撤回scope后，原token仍可 `/user/me`，但工作台授权立即缩减。
+
+商家集成：在 `backend-go/` 显式设置隔离环境及 `GO_INTEGRATION=1` 后运行 `go test -count=1 -v ./internal/merchant -run TestIntegrationMerchant`。无新增SQL迁移。`merchant.NewAccess(tx)`复用事务句柄，但读取继承tx隔离级别；后续业务写操作须另外保证当前授权事实与变更边界一致，不能把RR普通查询当并发撤权保护。
+
+根目录 `node scripts/go-merchant-ui-smoke.mjs` 运行真实Vue工作台验证，使用与商铺UI脚本相同的MYSQL/Playwright/Chrome/WEB_BASE/API_BASE/UI_EVIDENCE环境变量。脚本造3商家/5店/4用户，真实页面取码登录，沿原token验证混合身份、撤权/降级/停用、脏scope、错误重试与失效；只清理自身精确DB行并撤销发放session，验证码节流键按原60秒TTL到期。大ID夹具会推进对应自增序列。成功响应均来自真实Go；选择性网络abort仅用于失败注入。工作台未开放的活动/订单/规则入口显示禁用，不代表这些业务已完成。
+
 ## Java 基线环境与启动（历史参考）
 
 - JDK 21 是编译目标；兼容的较新 JDK 也可以通过 `--release 21` 构建。

@@ -1,0 +1,47 @@
+{
+  "task": "GO-020",
+  "acceptance": [
+    "P1-6 (workspace subset)",
+    "MIG-GO-03"
+  ],
+  "passed": true,
+  "checks": [
+    "direct and proxied requests identify the same Go service",
+    "anonymous workspace request is 401",
+    "fixture user 0 logs in through real Vue",
+    "mixed OWNER-A and STAFF-B see exactly A1 A2 B1 with string IDs",
+    "roles and scope labels remain specific to each merchant",
+    "unavailable entry 活动管理 · 稍后开放 is disabled",
+    "unavailable entry 订单与核销 · 稍后开放 is disabled",
+    "unavailable entry 公开规则 · 稍后开放 is disabled",
+    "client user merchant shop and role parameters cannot change authorization",
+    "disabled A membership immediately disappears while the original login remains valid",
+    "scope revocation removes the old shop and keeps an empty membership",
+    "role change is loaded without a new token",
+    "downgrade to STAFF immediately removes the unscoped shop",
+    "disabled merchant removes business authorization without revoking the original login",
+    "failed refresh clears the previous authorization display",
+    "retry restores current authorization from the real Go API",
+    "fixture user 1 logs in through real Vue",
+    "STAFF-A sees A1 only and a dirty scope to B2 grants nothing",
+    "fixture user 2 logs in through real Vue",
+    "MANAGER-A sees both A shops and no other merchant",
+    "fixture user 3 logs in through real Vue",
+    "ordinary authenticated user sees an empty workspace",
+    "revoked login triggers 401 and clears the client identity",
+    "no uncaught browser errors"
+  ],
+  "fixture": {
+    "merchants": 3,
+    "shops": 5,
+    "users": 4
+  },
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "514d0be-go020-worktree"
+  },
+  "recordedAt": "2026-10-26T13:02:48.253Z"
+}

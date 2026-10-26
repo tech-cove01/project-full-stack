@@ -1,0 +1,26 @@
+=== RUN   TestIntegrationMerchant
+=== RUN   TestIntegrationMerchant/workspace_preserves_mixed_roles_large_ids_and_empty_memberships
+=== RUN   TestIntegrationMerchant/visible_and_managed_ranges_do_not_merge_roles
+=== RUN   TestIntegrationMerchant/concrete_shop_permissions_bind_actual_merchant_and_role
+=== RUN   TestIntegrationMerchant/untrusted_query_headers_and_extra_session_role_do_not_authorize
+=== RUN   TestIntegrationMerchant/scope_revocation_is_effective_for_the_original_token
+=== RUN   TestIntegrationMerchant/shop_ownership_changes_invalidate_dirty_old_scopes
+=== RUN   TestIntegrationMerchant/member_disable_and_role_downgrade_take_effect_without_relogin
+=== RUN   TestIntegrationMerchant/merchant_disable_removes_all_grants_but_not_login_identity
+=== RUN   TestIntegrationMerchant/access_uses_the_callers_transaction_handle
+=== RUN   TestIntegrationMerchant/workspace_uses_one_statement_and_database_errors_are_not_empty_permissions
+=== RUN   TestIntegrationMerchant/logout_revokes_original_workspace_session
+--- PASS: TestIntegrationMerchant (0.43s)
+    --- PASS: TestIntegrationMerchant/workspace_preserves_mixed_roles_large_ids_and_empty_memberships (0.02s)
+    --- PASS: TestIntegrationMerchant/visible_and_managed_ranges_do_not_merge_roles (0.01s)
+    --- PASS: TestIntegrationMerchant/concrete_shop_permissions_bind_actual_merchant_and_role (0.06s)
+    --- PASS: TestIntegrationMerchant/untrusted_query_headers_and_extra_session_role_do_not_authorize (0.01s)
+    --- PASS: TestIntegrationMerchant/scope_revocation_is_effective_for_the_original_token (0.02s)
+    --- PASS: TestIntegrationMerchant/shop_ownership_changes_invalidate_dirty_old_scopes (0.03s)
+    --- PASS: TestIntegrationMerchant/member_disable_and_role_downgrade_take_effect_without_relogin (0.04s)
+    --- PASS: TestIntegrationMerchant/merchant_disable_removes_all_grants_but_not_login_identity (0.03s)
+    --- PASS: TestIntegrationMerchant/access_uses_the_callers_transaction_handle (0.02s)
+    --- PASS: TestIntegrationMerchant/workspace_uses_one_statement_and_database_errors_are_not_empty_permissions (0.00s)
+    --- PASS: TestIntegrationMerchant/logout_revokes_original_workspace_session (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/merchant	0.678s

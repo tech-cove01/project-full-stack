@@ -1,0 +1,18 @@
+2026-10-26 GO-020 implementation agent
+Command (ordinary workspace sandbox): go test ./internal/merchant ./internal/platform/app
+Working directory: project-full-stack/backend-go
+Exit: 1
+This was the initial production-source compilation before merchant tests were added.
+The merchant package compiled successfully. Existing app socket tests were blocked
+by the Windows execution context; this output does not establish an app regression.
+
+?   github.com/cityloop/fullstack-go/internal/merchant [no test files]
+--- FAIL: TestShutdownDrainsAcceptedRequestBeforeClosingResources (0.01s)
+    app_test.go:85: HTTP client completed before handler entry: Get "http://127.0.0.1:51233": dial tcp 127.0.0.1:51233: connectex: An attempt was made to access a socket in a way forbidden by its access permissions.
+--- FAIL: TestShutdownDeadlineForcesCloseAndCancelsHandler (0.00s)
+    app_test.go:147: HTTP client completed before handler entry: Get "http://127.0.0.1:51235": dial tcp 127.0.0.1:51235: connectex: An attempt was made to access a socket in a way forbidden by its access permissions.
+--- FAIL: TestUnexpectedListenerFailureDrainsActiveRequestBeforeClosingResources (0.00s)
+    app_test.go:207: HTTP client completed before handler entry: Get "http://127.0.0.1:51237": dial tcp 127.0.0.1:51237: connectex: An attempt was made to access a socket in a way forbidden by its access permissions.
+FAIL
+FAIL github.com/cityloop/fullstack-go/internal/platform/app 0.365s
+FAIL

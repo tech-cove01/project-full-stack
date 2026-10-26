@@ -1,0 +1,28 @@
+{
+  "task": "GO-031",
+  "recordedAt": "2026-10-26T15:58:12.4493211Z",
+  "databaseVerification": "cleanup-db.txt",
+  "sharedOrderStreamLength": 0,
+  "sharedOrderGroupPending": 0,
+  "privateGo030StreamsRemaining": 0,
+  "redisObservation": "Before stop, read-only XPENDING stream.orders g1 and XLEN stream.orders returned 0; private stream.go030.test.* scan was empty.",
+  "apiAndViteListenersRemaining": [],
+  "isolatedContainers": [
+    {
+      "exitCode": 0,
+      "name": "project-full-stack-go-mysql-1",
+      "state": "exited",
+      "oomKilled": false
+    },
+    {
+      "exitCode": 0,
+      "name": "project-full-stack-go-redis-1",
+      "state": "exited",
+      "oomKilled": false
+    }
+  ],
+  "stopCommand": "docker compose -f compose.go.yaml -p project-full-stack-go stop --timeout 60 mysql redis",
+  "isolatedVolumes": "preserved",
+  "originalProjectContainers": "MySQL3307 and Redis6379 remained healthy",
+  "evidenceBoundary": "Fixture cleanup removes owned pending outbox rows; zero remaining rows is not evidence that GO-033 Redis compensation ran."
+}

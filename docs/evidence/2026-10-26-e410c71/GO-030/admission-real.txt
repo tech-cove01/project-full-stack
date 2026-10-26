@@ -1,0 +1,98 @@
+=== RUN   TestInvalidIdentityAndWindowFailBeforeRedis
+--- PASS: TestInvalidIdentityAndWindowFailBeforeRedis (0.00s)
+=== RUN   TestIDTimestampBoundsFailBeforeRedis
+--- PASS: TestIDTimestampBoundsFailBeforeRedis (0.00s)
+=== RUN   TestAdmissionDecodesExactStringIDs
+--- PASS: TestAdmissionDecodesExactStringIDs (0.00s)
+=== RUN   TestIntegrationAdmission
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/0
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/1
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/2
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/3
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/4
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/5
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/6
+=== RUN   TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/7
+=== RUN   TestIntegrationAdmission/bad_argv_aliased_keys_and_noncanonical_stock_do_not_write
+=== RUN   TestIntegrationAdmission/candidate_reservation_collision_is_never_overwritten
+=== RUN   TestIntegrationAdmission/exact_signed_maximum_id_and_ttls_match_the_wire_contract
+=== RUN   TestIntegrationAdmission/same_user_twenty_requests_make_one_reservation_and_return_one_id
+=== RUN   TestIntegrationAdmission/two_hundred_users_compete_for_one_hundred_inventory_without_oversell
+=== RUN   TestIntegrationAdmission/closed_or_ended_sale_still_recovers_original_accepted_id_without_mutation
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/missing-stock
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/missing-begin
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/missing-end
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/mismatched-time
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/bad-stock
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/bad-time
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/legacy-phase
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/wrong-version
+=== RUN   TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/max-stream-id
+=== RUN   TestIntegrationAdmission/business_failures_are_distinct_and_read_only
+=== RUN   TestIntegrationAdmission/business_failures_are_distinct_and_read_only/sold-out
+=== RUN   TestIntegrationAdmission/business_failures_are_distinct_and_read_only/already-purchased
+=== RUN   TestIntegrationAdmission/business_failures_are_distinct_and_read_only/not-started
+=== RUN   TestIntegrationAdmission/business_failures_are_distinct_and_read_only/ended
+=== RUN   TestIntegrationAdmission/business_failures_are_distinct_and_read_only/closed
+--- PASS: TestIntegrationAdmission (1.24s)
+    --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair (0.26s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/0 (0.03s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/1 (0.03s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/2 (0.04s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/3 (0.03s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/4 (0.03s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/5 (0.03s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/6 (0.03s)
+        --- PASS: TestIntegrationAdmission/all_eight_wrong_key_types_fail_without_partial_writes_and_recover_after_repair/7 (0.03s)
+    --- PASS: TestIntegrationAdmission/bad_argv_aliased_keys_and_noncanonical_stock_do_not_write (0.22s)
+    --- PASS: TestIntegrationAdmission/candidate_reservation_collision_is_never_overwritten (0.02s)
+    --- PASS: TestIntegrationAdmission/exact_signed_maximum_id_and_ttls_match_the_wire_contract (0.01s)
+    --- PASS: TestIntegrationAdmission/same_user_twenty_requests_make_one_reservation_and_return_one_id (0.04s)
+    --- PASS: TestIntegrationAdmission/two_hundred_users_compete_for_one_hundred_inventory_without_oversell (0.25s)
+    --- PASS: TestIntegrationAdmission/closed_or_ended_sale_still_recovers_original_accepted_id_without_mutation (0.03s)
+    --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed (0.24s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/missing-stock (0.03s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/missing-begin (0.03s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/missing-end (0.02s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/mismatched-time (0.03s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/bad-stock (0.03s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/bad-time (0.03s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/legacy-phase (0.03s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/wrong-version (0.03s)
+        --- PASS: TestIntegrationAdmission/missing_time_bad_projection_or_max_stream_id_fail_closed/max-stream-id (0.03s)
+    --- PASS: TestIntegrationAdmission/business_failures_are_distinct_and_read_only (0.14s)
+        --- PASS: TestIntegrationAdmission/business_failures_are_distinct_and_read_only/sold-out (0.03s)
+        --- PASS: TestIntegrationAdmission/business_failures_are_distinct_and_read_only/already-purchased (0.03s)
+        --- PASS: TestIntegrationAdmission/business_failures_are_distinct_and_read_only/not-started (0.03s)
+        --- PASS: TestIntegrationAdmission/business_failures_are_distinct_and_read_only/ended (0.03s)
+        --- PASS: TestIntegrationAdmission/business_failures_are_distinct_and_read_only/closed (0.03s)
+=== RUN   TestIntegrationOrderID
+=== RUN   TestIntegrationOrderID/concurrent_daily_ids_keep_legacy_shanghai_high_bits_and_no_ttl
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/wrong-type
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/-1
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/01
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/1.0
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/4294967295
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/4294967296
+=== RUN   TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/ttl
+=== RUN   TestIntegrationOrderID/last_32_bit_sequence_is_valid_then_exhaustion_fails_without_wrap
+=== RUN   TestIntegrationOrderID/daily_rollover_uses_independent_counter_keys
+--- PASS: TestIntegrationOrderID (0.17s)
+    --- PASS: TestIntegrationOrderID/concurrent_daily_ids_keep_legacy_shanghai_high_bits_and_no_ttl (0.02s)
+    --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment (0.10s)
+        --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/wrong-type (0.01s)
+        --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/-1 (0.01s)
+        --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/01 (0.01s)
+        --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/1.0 (0.01s)
+        --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/4294967295 (0.02s)
+        --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/4294967296 (0.02s)
+        --- PASS: TestIntegrationOrderID/bad_counter_type_value_ttl_and_exhaustion_never_reset_or_increment/ttl (0.01s)
+    --- PASS: TestIntegrationOrderID/last_32_bit_sequence_is_valid_then_exhaustion_fails_without_wrap (0.02s)
+    --- PASS: TestIntegrationOrderID/daily_rollover_uses_independent_counter_keys (0.02s)
+=== RUN   TestIntegrationAcceptedRecovery
+--- PASS: TestIntegrationAcceptedRecovery (0.02s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/orderadmission	1.694s

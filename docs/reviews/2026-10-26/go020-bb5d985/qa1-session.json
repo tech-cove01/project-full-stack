@@ -1,0 +1,19 @@
+{
+  "source": "514d0beef3de443be12f812faa3a7b3dd94d64d2",
+  "actual_seed_prefix": "SET NAMES utf8mb4; SET time_zone='+08:00';",
+  "rows": [
+    [
+      "before",
+      "+00:00",
+      "SYSTEM"
+    ],
+    [
+      "after",
+      "+08:00",
+      "28800",
+      "SYSTEM"
+    ]
+  ],
+  "passed": true,
+  "scope": "same frozen seed prefix, no fixture INSERTs or global changes"
+}

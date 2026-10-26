@@ -1,0 +1,29 @@
+--- a/scripts/go-merchant-ui-smoke.mjs
++++ b/scripts/go-merchant-ui-smoke.mjs
+@@ -122 +122,3 @@
+-    return (await response).json()
++    const body = await (await response).json()
++    await page.locator('[aria-label="正在加载门店授权"]').waitFor({ state: 'detached' })
++    return body
+@@ -129,0 +132,3 @@
++  check(await section(merchants[0]).count() === 0
++    && await section(merchants[1]).getAttribute('data-role') === 'STAFF'
++    && await row(shops[2]).count() === 1, 'steady rendered membership revocation keeps only the authorized B shop')
+@@ -142,0 +148,4 @@
++  await section(merchants[1]).locator('.merchant-role').filter({ hasText: '门店员工' }).waitFor()
++  check(await section(merchants[1]).getAttribute('data-role') === 'STAFF'
++    && await row(shops[2]).count() === 1 && await row(shops[3]).count() === 0,
++  'steady rendered downgrade is STAFF with B1 present and B2 absent')
+@@ -165,0 +175,6 @@
++  await staff.page.locator('[aria-label="正在加载门店授权"]').waitFor({ state: 'detached' })
++  await staff.page.locator('.merchant-workspace').waitFor()
++  check(await staff.page.locator('.merchant-workspace[data-role="STAFF"]').count() === 1
++    && await staff.page.locator('.merchant-shop').count() === 1
++    && await staff.page.locator(`.merchant-shop[data-shop-id="${shops[0]}"]`).count() === 1,
++  'steady STAFF page displays A1 only')
+@@ -169,0 +185,5 @@
++  await manager.page.locator('[aria-label="正在加载门店授权"]').waitFor({ state: 'detached' })
++  await manager.page.locator('.merchant-workspace').waitFor()
++  check(await manager.page.locator('.merchant-workspace[data-role="MANAGER"]').count() === 1
++    && await manager.page.locator('.merchant-shop').count() === 2,
++  'steady MANAGER page displays exactly two A shops')

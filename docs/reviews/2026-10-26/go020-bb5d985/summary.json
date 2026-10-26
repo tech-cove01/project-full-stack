@@ -1,0 +1,39 @@
+{
+  "source": "bb5d985d69bfb3d38d694b33ee934fc1499f647f",
+  "compose_project": "project-full-stack-review-go020",
+  "ports": {
+    "mysql": 3318,
+    "redis": 6390,
+    "api": 8092,
+    "vite": 5184
+  },
+  "runs": [
+    {
+      "name": "ui-original",
+      "exit": 0,
+      "passed": true,
+      "checks": 24,
+      "cleanup": true
+    },
+    {
+      "name": "ui-steady",
+      "exit": 0,
+      "passed": true,
+      "checks": 28,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

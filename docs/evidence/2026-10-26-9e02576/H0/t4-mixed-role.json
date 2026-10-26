@@ -1,0 +1,6 @@
+{
+  "mixedRole": "OWNER merchant1 + STAFF merchant2/shop3",
+  "auditACount": 1,
+  "auditBCount": 0,
+  "result": "PASS"
+}

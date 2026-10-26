@@ -1,0 +1,28 @@
+{
+  "activityId": "1035",
+  "startupGate": [
+    "state",
+    "CLOSED"
+  ],
+  "reconcileMarker": [
+    "reason",
+    "STOCK_MISSING",
+    "dbStock",
+    "2",
+    "publishVersion",
+    "1"
+  ],
+  "stockKeyMissing": true,
+  "admissionClosedBeforeReconcile": true,
+  "reconciledStatus": "ACTIVE",
+  "gateAfterReconcile": {
+    "state": "OPEN",
+    "stock": "2"
+  },
+  "orderAfterReconcile": {
+    "id": "652992954939473949",
+    "state": "CREATED",
+    "orderStatus": 1
+  },
+  "finding": "FIXED"
+}

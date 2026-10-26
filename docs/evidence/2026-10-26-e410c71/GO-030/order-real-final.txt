@@ -1,0 +1,36 @@
+=== RUN   TestIntegrationOrder
+=== RUN   TestIntegrationOrder/creation_commits_db_clock_snapshots_inventory_audit_and_event_even_after_offline
+=== RUN   TestIntegrationOrder/same_message_replay_reads_current_terminal_state_without_rewriting_order_or_stock
+=== RUN   TestIntegrationOrder/same_id_concurrency_and_active_unique_have_one_stock_effect_and_durable_rejection
+=== RUN   TestIntegrationOrder/sold_out_rejection_is_persistent_idempotent_private_and_not_an_inventory_compensation
+=== RUN   TestIntegrationOrder/audit_or_outbox_failure_rolls_back_all_order_and_inventory_effects
+=== RUN   TestIntegrationOrder/identifier_collision_including_cross_voucher_rejection_race_never_creates_two_facts
+=== RUN   TestIntegrationOrder/identifier_lock_contention_stays_unknown_and_release_failure_discards_its_connection
+=== RUN   TestIntegrationOrder/db_facts_override_forged_redis_terminal_states_and_pending_is_explicit_null
+=== RUN   TestIntegrationOrder/get_returns_the_owned_order_committed_between_its_two_db_reads
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_foreign_pending
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_committed
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_pending
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_wrong_type_reservation
+=== RUN   TestIntegrationOrder/owned_list_has_stable_tie_order_paging_empty_total_and_no_tokens
+=== RUN   TestIntegrationOrder/seckill_reuses_existing_db_or_accepted_id_and_reserves_new_request_once
+--- PASS: TestIntegrationOrder (2.57s)
+    --- PASS: TestIntegrationOrder/creation_commits_db_clock_snapshots_inventory_audit_and_event_even_after_offline (0.09s)
+    --- PASS: TestIntegrationOrder/same_message_replay_reads_current_terminal_state_without_rewriting_order_or_stock (0.17s)
+    --- PASS: TestIntegrationOrder/same_id_concurrency_and_active_unique_have_one_stock_effect_and_durable_rejection (0.20s)
+    --- PASS: TestIntegrationOrder/sold_out_rejection_is_persistent_idempotent_private_and_not_an_inventory_compensation (0.07s)
+    --- PASS: TestIntegrationOrder/audit_or_outbox_failure_rolls_back_all_order_and_inventory_effects (0.17s)
+    --- PASS: TestIntegrationOrder/identifier_collision_including_cross_voucher_rejection_race_never_creates_two_facts (0.10s)
+    --- PASS: TestIntegrationOrder/identifier_lock_contention_stays_unknown_and_release_failure_discards_its_connection (0.09s)
+    --- PASS: TestIntegrationOrder/db_facts_override_forged_redis_terminal_states_and_pending_is_explicit_null (0.12s)
+    --- PASS: TestIntegrationOrder/get_returns_the_owned_order_committed_between_its_two_db_reads (0.07s)
+    --- PASS: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings (0.18s)
+        --- PASS: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_foreign_pending (0.03s)
+        --- PASS: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_committed (0.09s)
+        --- PASS: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_pending (0.03s)
+        --- PASS: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_wrong_type_reservation (0.03s)
+    --- PASS: TestIntegrationOrder/owned_list_has_stable_tie_order_paging_empty_total_and_no_tokens (0.24s)
+    --- PASS: TestIntegrationOrder/seckill_reuses_existing_db_or_accepted_id_and_reserves_new_request_once (0.16s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/order	2.841s

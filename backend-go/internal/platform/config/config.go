@@ -35,6 +35,7 @@ type Config struct {
 	StartupTimeout  time.Duration
 	ProbeTimeout    time.Duration
 	ShutdownTimeout time.Duration
+	OrderPayTimeout time.Duration
 }
 
 func Load() (Config, error) { return load(os.LookupEnv) }
@@ -44,6 +45,7 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		Environment: "development", APIAddr: "127.0.0.1:8082",
 		StartupTimeout: 8 * time.Second, ProbeTimeout: 2 * time.Second,
 		ShutdownTimeout: 10 * time.Second,
+		OrderPayTimeout: 15 * time.Minute,
 	}
 	var err error
 	cfg.Location, err = time.LoadLocation("Asia/Shanghai")
@@ -120,6 +122,13 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 			}
 			*item.target = parsed
 		}
+	}
+	if value, ok := lookup("GO_ORDER_PAY_TIMEOUT"); ok {
+		parsed, parseErr := time.ParseDuration(value)
+		if parseErr != nil || parsed < time.Second || parsed > 24*time.Hour || parsed%time.Second != 0 {
+			return Config{}, fmt.Errorf("GO_ORDER_PAY_TIMEOUT must be whole seconds between 1s and 24h")
+		}
+		cfg.OrderPayTimeout = parsed
 	}
 	return cfg, nil
 }

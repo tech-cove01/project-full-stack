@@ -1,0 +1,19 @@
+=== RUN   TestIntegrationOrder
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_foreign_pending
+    integration_test.go:434: foreign or malformed accepted binding leaked order identifier "9225523948920178"
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_committed
+    integration_test.go:434: foreign or malformed accepted binding leaked order identifier "9225523948920180"
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_pending
+    integration_test.go:434: foreign or malformed accepted binding leaked order identifier "9225523948920182"
+=== RUN   TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_wrong_type_reservation
+    integration_test.go:434: foreign or malformed accepted binding leaked order identifier "9225523948920184"
+--- FAIL: TestIntegrationOrder (0.29s)
+    --- FAIL: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings (0.14s)
+        --- FAIL: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_foreign_pending (0.02s)
+        --- FAIL: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_committed (0.06s)
+        --- FAIL: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/reuse_foreign_pending (0.02s)
+        --- FAIL: TestIntegrationOrder/accepted_recovery_and_lua_reuse_reject_foreign_pending_or_committed_bindings/recover_wrong_type_reservation (0.03s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/order	0.561s
+FAIL

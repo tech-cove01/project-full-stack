@@ -26,6 +26,9 @@ func TestExplicitDependenciesAndSafeDefaults(t *testing.T) {
 	if cfg.Environment != "development" || cfg.APIAddr != "127.0.0.1:8082" || cfg.Redis.Database != 0 || cfg.Redis.Password != "" {
 		t.Fatalf("unexpected non-secret defaults: environment=%s address=%s Redis DB=%d", cfg.Environment, cfg.APIAddr, cfg.Redis.Database)
 	}
+	if cfg.OrderPayTimeout != 15*time.Minute {
+		t.Fatal("new orders must default to the specified fifteen-minute payment window")
+	}
 	_, offset := time.Now().In(cfg.Location).Zone()
 	if cfg.Location.String() != "Asia/Shanghai" || offset != 8*60*60 {
 		t.Fatal("time zone must explicitly be Asia/Shanghai")
@@ -47,6 +50,8 @@ func TestMissingAndInvalidConfigurationFailsWithoutValues(t *testing.T) {
 		{"MYSQL_PORT", "3307password"}, {"REDIS_PORT", "0"}, {"REDIS_DATABASE", "-1"},
 		{"REDIS_DATABASE", "16"}, {"API_ADDR", "invalid-address"}, {"API_ADDR", "127.0.0.1:0"},
 		{"GO_ENV", "invalid-environment"}, {"GO_HEALTH_TIMEOUT", "0s"}, {"GO_STARTUP_TIMEOUT", "2m"},
+		{"GO_ORDER_PAY_TIMEOUT", "0s"}, {"GO_ORDER_PAY_TIMEOUT", "500ms"},
+		{"GO_ORDER_PAY_TIMEOUT", "1.5s"}, {"GO_ORDER_PAY_TIMEOUT", "25h"},
 	} {
 		t.Run(test.key+"_"+test.value, func(t *testing.T) {
 			values := validEnvironment()
@@ -71,11 +76,15 @@ func TestTimeoutAndRedisOverrides(t *testing.T) {
 	values["GO_STARTUP_TIMEOUT"] = "3s"
 	values["GO_HEALTH_TIMEOUT"] = "500ms"
 	values["GO_SHUTDOWN_TIMEOUT"] = "5s"
+	values["GO_ORDER_PAY_TIMEOUT"] = "30s"
 	cfg, err := fromMap(values)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if cfg.APIAddr != "[::1]:8083" || cfg.Redis.Database != 2 || cfg.Redis.Password != "secret" || cfg.StartupTimeout != 3*time.Second || cfg.ProbeTimeout != 500*time.Millisecond || cfg.ShutdownTimeout != 5*time.Second {
 		t.Fatal("explicit overrides were not applied")
+	}
+	if cfg.OrderPayTimeout != 30*time.Second {
+		t.Fatal("order deadline configuration was not applied")
 	}
 }

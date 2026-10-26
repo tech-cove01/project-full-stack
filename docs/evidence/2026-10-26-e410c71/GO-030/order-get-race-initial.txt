@@ -1,0 +1,8 @@
+=== RUN   TestIntegrationOrder
+=== RUN   TestIntegrationOrder/get_returns_the_owned_order_committed_between_its_two_db_reads
+    integration_test.go:388: order committed between Get reads must be CREATED, got state="" err=订单不存在
+--- FAIL: TestIntegrationOrder (0.16s)
+    --- FAIL: TestIntegrationOrder/get_returns_the_owned_order_committed_between_its_two_db_reads (0.06s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/order	0.462s
+FAIL

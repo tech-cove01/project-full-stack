@@ -1,0 +1,50 @@
+{
+  "task": "GO-021c",
+  "passed": false,
+  "checks": [
+    "direct and proxied requests identify the same Go service",
+    "fixture user 0 logs in through real Vue",
+    "first page has ten activities and preserves large string IDs",
+    "OWNER-A plus STAFF-B has no management buttons on the B1 row",
+    "the same mixed account can manage an A2 row",
+    "mixed roles list only A1 A2 B1; unscoped B2 is excluded and total is a string",
+    "two real pages cover all fourteen authorized activities without overlap",
+    "shop filter reaches the backend and resets pagination to page one",
+    "status filter shows the real empty state",
+    "publish defaults to the first manageable shop even when STAFF merchant sorts first",
+    "default datetime is Shanghai business time in this browser time zone",
+    "real publish sends exact cents above 2^53 and four explicit Shanghai offsets"
+  ],
+  "browserTimeZone": "UTC",
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "bb5d985-go021-worktree"
+  },
+  "step": "option 筛选状态",
+  "failure": "lost committed response keeps immutable content and targets the manageable shop",
+  "controls": [
+    {
+      "id": "activity-shop",
+      "label": "筛选门店",
+      "expanded": "false"
+    },
+    {
+      "id": "activity-status",
+      "label": "筛选状态",
+      "expanded": "false"
+    },
+    {
+      "id": "el-id-9062-44",
+      "label": "每页活动数",
+      "expanded": "false"
+    },
+    {
+      "id": "publish-shop",
+      "label": "发布门店",
+      "expanded": "false"
+    }
+  ]
+}

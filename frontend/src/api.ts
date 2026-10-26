@@ -4,6 +4,7 @@ import type {
   AiConversation,
   AiKnowledgeDoc,
   AuditLog,
+  CreateActivityRequest,
   MerchantOrder,
   MerchantWorkspace,
   OrderStatus,
@@ -132,21 +133,33 @@ export const api = {
     ),
   workspace: (signal?: AbortSignal) =>
     request<MerchantWorkspace>('/merchant/workspace', { signal }),
-  activities: (current: number, pageSize: number, signal?: AbortSignal) =>
-    request<Activity[]>(`/merchant/activities?current=${current}&pageSize=${pageSize}`, { signal }),
-  createActivity: (body: unknown, idempotencyKey: string) =>
+  activities: (
+    current: number,
+    pageSize: number,
+    signal?: AbortSignal,
+    filters: { shopId?: string; status?: Activity['publishStatus'] } = {},
+  ) => {
+    const query = new URLSearchParams({ current: String(current), pageSize: String(pageSize) })
+    if (filters.shopId) query.set('shopId', filters.shopId)
+    if (filters.status) query.set('status', filters.status)
+    return request<Activity[]>(`/merchant/activities?${query.toString()}`, { signal })
+  },
+  createActivity: (body: CreateActivityRequest, idempotencyKey: string, signal?: AbortSignal) =>
     request<Activity>('/merchant/activities', {
       method: 'POST',
       body: JSON.stringify(body),
       headers: { 'Idempotency-Key': idempotencyKey },
+      signal,
     }),
-  retryActivity: (id: string) =>
+  retryActivity: (id: string, signal?: AbortSignal) =>
     request<Activity>(`/merchant/activities/${encodeURIComponent(id)}/retry-publication`, {
       method: 'POST',
+      signal,
     }),
-  offlineActivity: (id: string) =>
+  offlineActivity: (id: string, signal?: AbortSignal) =>
     request<Activity>(`/merchant/activities/${encodeURIComponent(id)}/offline`, {
       method: 'POST',
+      signal,
     }),
   merchantOrders: (
     params: { current: number; pageSize: number; shopId?: string; status?: string },

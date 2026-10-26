@@ -1,0 +1,16 @@
+{
+  "task": "GO-021c",
+  "passed": false,
+  "phase": "intermediate lost-response browser test",
+  "failure": "Vite plain-pipe process exited; route.fetch raised ECONNRESET",
+  "rawHeadersSaved": false,
+  "temporarySessionRevoked": true,
+  "cleanup": {
+    "method": "inspected fixture prefix GOA609f5d56 then deleted its exact IDs",
+    "activities": 15,
+    "redisKeysRemoved": 60,
+    "shopsRemaining": 0
+  },
+  "correction": "Run Vite with a PTY; catch route errors without rendering request headers; wait for the committed response and enabled retry control before assertions",
+  "note": "An intermediate uncaught Playwright diagnostic reached the console. Its temporary fixture session was explicitly logged out, and the diagnostic headers are not stored in this evidence. Subsequent runs use redacted errors and completed cleanup."
+}

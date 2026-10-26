@@ -1,0 +1,22 @@
+{
+  "task": "GO-021c",
+  "passed": false,
+  "checks": [
+    "direct and proxied requests identify the same Go service",
+    "fixture user 0 logs in through real Vue",
+    "first page has ten activities and preserves large string IDs",
+    "OWNER-A plus STAFF-B has no management buttons on the B1 row",
+    "the same mixed account can manage an A2 row",
+    "mixed roles list only A1 A2 B1; unscoped B2 is excluded and total is a string",
+    "two real pages cover all fourteen authorized activities without overlap"
+  ],
+  "browserTimeZone": "UTC",
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "bb5d985-go021-worktree"
+  },
+  "failure": "locator.click: Timeout 30000ms exceeded."
+}

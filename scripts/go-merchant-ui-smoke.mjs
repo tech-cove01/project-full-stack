@@ -105,7 +105,9 @@ try {
     && await section(merchants[1]).getByText('授权门店', { exact: true }).count() === 1
     && await row(shops[3]).count() === 0 && await row(shops[4]).count() === 0,
   'roles and scope labels remain specific to each merchant')
-  for (const label of ['活动管理 · 稍后开放', '订单与核销 · 稍后开放', '公开规则 · 稍后开放']) {
+  check(await page.getByRole('link', { name: '活动管理', exact: true }).getAttribute('href') === '/merchant/activities',
+    'GO-021 exposes the activities entry')
+  for (const label of ['订单与核销 · 稍后开放', '公开规则 · 稍后开放']) {
     check(await page.getByRole('button', { name: label, exact: true }).isDisabled(), `unavailable entry ${label} is disabled`)
   }
   const forged = await api(`/merchant/workspace?userId=${users[2]}&merchantId=${merchants[2]}&shopId=${shops[3]}&role=OWNER`, mixed.token)

@@ -96,6 +96,20 @@ export interface Activity {
   redeemEndTime?: string
 }
 
+export interface CreateActivityRequest {
+  shopId: string
+  title: string
+  subTitle: string | null
+  rules: string | null
+  payValue: string
+  actualValue: string
+  totalStock: number
+  beginTime: string
+  endTime: string
+  redeemBeginTime: string
+  redeemEndTime: string
+}
+
 export interface MerchantOrder {
   id: string
   shopId: string

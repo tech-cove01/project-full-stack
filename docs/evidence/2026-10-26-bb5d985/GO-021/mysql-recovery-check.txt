@@ -1,0 +1,9 @@
+check_name	result
+owned_ui_users_remaining	0
+owned_ui_activities_remaining	0
+pending_activity_events	0
+Table	Op	Msg_type	Msg_text
+project_full_stack_go.tb_voucher	check	status	OK
+project_full_stack_go.tb_seckill_voucher	check	status	OK
+project_full_stack_go.tb_audit_log	check	status	OK
+project_full_stack_go.tb_outbox	check	status	OK

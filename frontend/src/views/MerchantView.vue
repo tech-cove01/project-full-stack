@@ -49,7 +49,7 @@ onBeforeUnmount(() => controller?.abort())
   </section>
   <div class="page-top merchant-actions">
     <el-button type="primary" :loading="loading" @click="load">刷新授权</el-button>
-    <el-button disabled>活动管理 · 稍后开放</el-button>
+    <RouterLink to="/merchant/activities"><el-button>活动管理</el-button></RouterLink>
     <el-button disabled>订单与核销 · 稍后开放</el-button>
     <el-button disabled>公开规则 · 稍后开放</el-button>
   </div>

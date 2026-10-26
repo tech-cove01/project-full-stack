@@ -153,12 +153,15 @@ export const api = {
     request<OrderStatus>(`/voucher-order/${encodeURIComponent(id)}`, { signal }),
   myOrders: (current: number, pageSize: number, signal?: AbortSignal) =>
     request<OrderStatus[]>(`/voucher-order?current=${current}&pageSize=${pageSize}`, { signal }),
-  payOrder: (id: string) =>
-    request<OrderStatus>(`/voucher-order/${encodeURIComponent(id)}/pay`, { method: 'POST' }),
-  cancelOrder: (id: string, reason = 'USER_CANCEL') =>
+  payOrder: (id: string, signal?: AbortSignal) =>
+    request<OrderStatus>(`/voucher-order/${encodeURIComponent(id)}/pay`, {
+      method: 'POST',
+      signal,
+    }),
+  cancelOrder: (id: string, reason = 'USER_CANCEL', signal?: AbortSignal) =>
     request<OrderStatus>(
       `/voucher-order/${encodeURIComponent(id)}/cancel?reason=${encodeURIComponent(reason)}`,
-      { method: 'POST' },
+      { method: 'POST', signal },
     ),
   workspace: (signal?: AbortSignal) =>
     request<MerchantWorkspace>('/merchant/workspace', { signal }),

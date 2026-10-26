@@ -1,0 +1,20 @@
+{
+  "task": "GO-030-identity",
+  "passed": false,
+  "checks": [
+    "direct and proxied requests identify the same Go service"
+  ],
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "0072c86-review-fixes"
+  },
+  "step": "cross-account recovery",
+  "crossAccount": {
+    "requestsAsNewAccount": 1
+  },
+  "failure": "changing account in the second tab cannot submit a recovery purchase as the new account",
+  "recordedAt": "2026-10-26T15:31:49.631Z"
+}

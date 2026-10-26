@@ -1,0 +1,33 @@
+{
+  "source_base": "0072c867ab1f34d7219e815d04779c651c55d9d0",
+  "label": "identity-final",
+  "runs": [
+    {
+      "name": "identity-final-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 5,
+      "cleanup": true
+    },
+    {
+      "name": "identity-final-shanghai",
+      "exit": 0,
+      "passed": true,
+      "checks": 5,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

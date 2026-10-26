@@ -1,0 +1,33 @@
+{
+  "source_base": "0072c867ab1f34d7219e815d04779c651c55d9d0",
+  "label": "identity-refined",
+  "runs": [
+    {
+      "name": "identity-refined-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 6,
+      "cleanup": true
+    },
+    {
+      "name": "identity-refined-shanghai",
+      "exit": 0,
+      "passed": true,
+      "checks": 7,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

@@ -7,7 +7,7 @@ import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import 'element-plus/es/components/tag/style/css'
 import { useRoute, useRouter } from 'vue-router'
-import { api, errorMessage, money, parseBusinessTime, rememberOrder } from '../api'
+import { api, ApiError, errorMessage, money, parseBusinessTime, rememberOrder } from '../api'
 import { useAuthStore } from '../stores/auth'
 import type { Shop, Voucher } from '../types'
 
@@ -22,6 +22,7 @@ const error = ref('')
 const voucherError = ref('')
 const purchasing = ref<string | null>(null)
 const purchaseError = ref('')
+const uncertainVoucherId = ref('')
 const now = ref(Date.now())
 const clock = setInterval(() => {
   now.value = Date.now()
@@ -86,33 +87,45 @@ function disabledReason(voucher: Voucher): string {
 }
 
 async function buy(voucher: Voucher) {
-  if (purchasing.value || disabledReason(voucher)) return
+  if (uncertainVoucherId.value || disabledReason(voucher)) return
+  await purchase(voucher.id)
+}
+
+async function recoverPurchase() {
+  if (uncertainVoucherId.value) await purchase(uncertainVoucherId.value)
+}
+
+async function purchase(voucherId: string) {
+  if (purchasing.value) return
   if (!auth.loggedIn) {
     await router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
-  purchasing.value = voucher.id
+  purchasing.value = voucherId
   purchaseError.value = ''
   const active = new AbortController()
   purchaseController = active
   try {
-    const { data: id } = await api.seckill(voucher.id, active.signal)
+    const { data: id } = await api.seckill(voucherId, active.signal)
     if (active.signal.aborted) return
     rememberOrder(id)
+    uncertainVoucherId.value = ''
     await router.push(`/orders/${id}`)
   } catch (cause) {
     if (active.signal.aborted) return
     purchaseError.value = errorMessage(cause)
-    if (purchaseError.value.includes('超时') || purchaseError.value.includes('无法连接')) {
-      purchaseError.value += ' 提交结果暂不确定；若已保存订单号，请先查看最近订单。'
-    }
+    uncertainVoucherId.value = cause instanceof ApiError && cause.outcomeUncertain ? voucherId : ''
   } finally {
-    if (purchaseController === active) purchasing.value = null
+    if (purchaseController === active) {
+      purchasing.value = null
+      purchaseController = undefined
+    }
   }
 }
 watch(
   () => String(route.params.id),
   (id) => {
+    uncertainVoucherId.value = ''
     void load(id)
   },
   { immediate: true },
@@ -179,13 +192,30 @@ onBeforeUnmount(() => {
         show-icon
         class="space-bottom"
       />
+      <div v-if="uncertainVoucherId" class="purchase-recovery panel" role="status">
+        <p>
+          本次抢券结果尚未确认。若先前已受理，重试会返回原结果；售罄、下架或活动结束后仍可找回已有结果。
+        </p>
+        <el-button
+          type="primary"
+          :loading="purchasing === uncertainVoucherId"
+          @click="recoverPurchase"
+          >重试本次抢券</el-button
+        >
+        <RouterLink class="text-link" to="/orders">查看我的订单 →</RouterLink>
+      </div>
       <el-skeleton v-if="vouchersLoading && !vouchers.length" :rows="3" animated />
       <el-empty
         v-else-if="!vouchers.length && !voucherError"
         description="这家店暂时没有上架优惠券"
       />
       <div v-else class="voucher-list">
-        <article v-for="voucher in vouchers" :key="voucher.id" class="voucher-card">
+        <article
+          v-for="voucher in vouchers"
+          :key="voucher.id"
+          class="voucher-card"
+          :data-voucher-id="voucher.id"
+        >
           <div class="voucher-value">
             <span
               >¥<strong>{{ money(voucher.payValue) }}</strong></span
@@ -205,7 +235,9 @@ onBeforeUnmount(() => {
             size="large"
             :loading="purchasing === voucher.id"
             :disabled="
-              Boolean(disabledReason(voucher)) || (purchasing !== null && purchasing !== voucher.id)
+              Boolean(disabledReason(voucher)) ||
+              (purchasing !== null && purchasing !== voucher.id) ||
+              Boolean(uncertainVoucherId)
             "
             @click="buy(voucher)"
             >{{ disabledReason(voucher) || (auth.loggedIn ? '立即抢购' : '登录后抢购') }}</el-button
@@ -223,5 +255,11 @@ onBeforeUnmount(() => {
   gap: 12px;
   align-items: center;
   justify-content: flex-end;
+}
+.purchase-recovery {
+  margin: 16px 0;
+}
+.purchase-recovery .text-link {
+  margin-left: 16px;
 }
 </style>

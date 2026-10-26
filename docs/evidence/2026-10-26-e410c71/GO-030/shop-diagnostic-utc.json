@@ -1,0 +1,119 @@
+{
+  "task": "GO-011",
+  "acceptance": [
+    "MIG-GO-02",
+    "MIG-GO-03",
+    "PRODUCT-01"
+  ],
+  "passed": true,
+  "checks": [
+    "direct API identifies Go before creating fixtures",
+    "Vite proxy identifies the same Go service",
+    "first page returns string total, exact IDs and avgPrice in yuan",
+    "unsubmitted input does not change load-more filters",
+    "53 shops across six pages have no missing or duplicate IDs and stable order",
+    "category plus submitted name uses one backend intersection and resets pagination",
+    "no-match search shows the empty state",
+    "failed next page preserves existing results",
+    "load-more retry requests the failed page instead of skipping it",
+    "category failure leaves all-shops browsing usable and supports a real retry",
+    "voucher retry preserves shop detail and hides INITIALIZING, OFFLINE and disabled vouchers",
+    "Shanghai sale window is interpreted correctly in the configured browser timezone",
+    "voucher cents stay exact strings and availability states remain visible",
+    "no uncaught browser errors"
+  ],
+  "fixture": {
+    "prefix": "GOUI1d130666",
+    "shops": 53,
+    "types": 2
+  },
+  "cleanup": true,
+  "diagnostics": {
+    "stages": [
+      {
+        "stage": "category:inject-failure",
+        "at": "2026-10-26T15:10:29.656Z"
+      },
+      {
+        "stage": "category:reload",
+        "at": "2026-10-26T15:10:29.661Z"
+      },
+      {
+        "stage": "category:wait-retry-button",
+        "at": "2026-10-26T15:10:29.977Z"
+      },
+      {
+        "stage": "category:wait-shop-card",
+        "at": "2026-10-26T15:10:30.100Z"
+      },
+      {
+        "stage": "category:remove-failure",
+        "at": "2026-10-26T15:10:30.105Z"
+      },
+      {
+        "stage": "category:click-retry",
+        "at": "2026-10-26T15:10:30.107Z"
+      },
+      {
+        "stage": "category:wait-fixture-category",
+        "at": "2026-10-26T15:10:30.135Z"
+      },
+      {
+        "stage": "voucher:open-detail",
+        "at": "2026-10-26T15:10:30.148Z"
+      },
+      {
+        "stage": "complete",
+        "at": "2026-10-26T15:10:30.900Z"
+      }
+    ],
+    "events": [
+      {
+        "event": "console-error"
+      },
+      {
+        "event": "response",
+        "path": "/api/shop-type/list",
+        "status": 200
+      },
+      {
+        "event": "requestfailed",
+        "path": "/api/shop/of/name",
+        "error": "net::ERR_INTERNET_DISCONNECTED"
+      },
+      {
+        "event": "console-error"
+      },
+      {
+        "event": "requestfailed",
+        "path": "/api/shop-type/list",
+        "error": "net::ERR_FAILED"
+      },
+      {
+        "event": "console-error"
+      },
+      {
+        "event": "response",
+        "path": "/api/shop-type/list",
+        "status": 200
+      },
+      {
+        "event": "requestfailed",
+        "path": "/api/voucher/list/9007199523229293",
+        "error": "net::ERR_FAILED"
+      },
+      {
+        "event": "console-error"
+      }
+    ]
+  },
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "f86a97f-go030-worktree"
+  },
+  "browserTimezone": "UTC",
+  "diagnosticStage": "complete",
+  "recordedAt": "2026-10-26T15:10:31.368Z"
+}

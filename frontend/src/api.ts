@@ -26,6 +26,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status?: number,
+    public outcomeUncertain = false,
   ) {
     super(message)
     this.name = 'ApiError'
@@ -66,7 +67,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<Resu
       } catch {
         /* ignore non-JSON error bodies */
       }
-      throw new ApiError(message, response.status)
+      throw new ApiError(message, response.status, response.status >= 500)
     }
     const result = (await response.json()) as Result<T>
     if (!result.success) throw new ApiError(result.errorMsg || '操作未完成，请稍后重试。')
@@ -74,8 +75,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<Resu
   } catch (error) {
     if (options.signal?.aborted) throw new DOMException('请求已取消', 'AbortError')
     if (error instanceof ApiError) throw error
-    if (timedOut) throw new ApiError('请求超时，请检查网络后重试。')
-    throw new ApiError('无法连接服务，请确认后端已启动，或稍后重试。')
+    if (timedOut) throw new ApiError('请求超时，请检查网络后重试。', undefined, true)
+    throw new ApiError('无法连接服务，请确认后端已启动，或稍后重试。', undefined, true)
   } finally {
     clearTimeout(timer)
     options.signal?.removeEventListener('abort', abort)

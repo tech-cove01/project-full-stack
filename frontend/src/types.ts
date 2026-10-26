@@ -55,7 +55,7 @@ export interface OrderStatus {
   failureReason?: string
   errorMsg?: string
   message?: string
-  orderStatus?: OrderStatusValue
+  orderStatus?: OrderStatusValue | null
   shopId?: string
   payAmount?: string
   payDeadlineAt?: string

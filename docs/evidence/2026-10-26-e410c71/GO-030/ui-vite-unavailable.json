@@ -1,0 +1,17 @@
+{
+  "task": "GO-030",
+  "passed": false,
+  "checks": [],
+  "cleanup": true,
+  "browserTimeZone": "UTC",
+  "fixtureBoundary": {
+    "realWorker": "All admitted orders in the single-user, 200-user and lost-response cases use the real Stream worker.",
+    "pagination": "Twelve SQL orders with separate disabled vouchers and identical create_time are read-only pagination fixtures.",
+    "pending": "One owned Redis reservation without a Stream message or DB order is a query-only PROCESSING fixture.",
+    "performance": "Short-burst correctness only; no sustained throughput or capacity claim."
+  },
+  "step": "service identity and isolated fixtures",
+  "failure": "fetch failed",
+  "forcedCleanup": true,
+  "recordedAt": "2026-10-26T15:08:34.028Z"
+}

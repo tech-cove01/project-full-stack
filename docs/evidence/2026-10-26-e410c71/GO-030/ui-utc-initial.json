@@ -1,0 +1,68 @@
+{
+  "task": "GO-030",
+  "passed": true,
+  "checks": [
+    "direct and proxied requests identify the same Go service",
+    "anonymous order list is 401",
+    "buyer logs in through real Vue with a server-created session",
+    "twenty concurrent requests from one real session all return accepted string IDs",
+    "twenty retries return exactly one accepted order ID",
+    "same-user retries create one real DB order and consume DB and Redis inventory exactly once",
+    "same-user retries produce one creation audit one order outbox event and one Stream entry",
+    "all 200 independently authenticated short-burst requests receive a response",
+    "200 users obtain exactly 100 unique accepted IDs and 100 stock business rejections",
+    "real worker commits 100 orders with zero DB and Redis inventory and no duplicate active user order",
+    "every burst order is owner-queryable CREATED/status 1 with exactly one Stream audit and outbox effect",
+    "real Vue purchase can lose a committed acceptance response and expose an independent recovery action",
+    "real owner closes the accepted activity before the buyer recovers its result",
+    "recovery remains available after the activity disappears from the public shop list",
+    "offline recovery returns the same order ID without a second DB order inventory deduction or Stream entry",
+    "CREATED page displays exact money above 2^53 and leaves payment cancellation and token actions unavailable",
+    "refresh restores the real owned order exact money Shanghai creation time and recent order",
+    "owner list has fourteen exact-string orders including twelve explicitly labeled same-time SQL pagination fixtures and omits tokens",
+    "two real pages preserve create_time and ID descending order with no duplicates or omissions",
+    "changing the real page size resets to page one and respects total",
+    "fifty-item page size is supported without fabricating extra rows",
+    "a failed real list refresh clears previously displayed owned rows",
+    "list retry restores owned rows from the real API",
+    "visiting another buyer order returns 404 clears details and does not replace the recent owned order",
+    "another real Vue login cannot read the original order or learn its money and does not remember a forbidden ID",
+    "an authenticated buyer without orders receives a real empty list and zero string total",
+    "query-only reservation fixture remains PROCESSING with null business status and no fabricated DB snapshot or Stream message",
+    "real PROCESSING page distinguishes acceptance from creation and displays no amount or deadline",
+    "leaving the PROCESSING page cancels its scheduled order polls",
+    "all real browser pages complete without uncaught page errors"
+  ],
+  "cleanup": true,
+  "browserTimeZone": "UTC",
+  "fixtureBoundary": {
+    "realWorker": "All admitted orders in the single-user, 200-user and lost-response cases use the real Stream worker.",
+    "pagination": "Twelve SQL orders with separate disabled vouchers and identical create_time are read-only pagination fixtures.",
+    "pending": "One owned Redis reservation without a Stream message or DB order is a query-only PROCESSING fixture.",
+    "performance": "Short-burst correctness only; no sustained throughput or capacity claim."
+  },
+  "step": "explicit PROCESSING query fixture and poll cleanup",
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "f86a97f-go030-worktree"
+  },
+  "shortBurst": {
+    "users": 200,
+    "initialInventory": 100,
+    "acceptedUnique": 100,
+    "stockRejected": 100,
+    "remainingInventory": 0,
+    "observedElapsedMs": 4661,
+    "interpretation": "short-burst correctness, not throughput or sustained capacity"
+  },
+  "cleanupBoundary": {
+    "ownedDatabaseRowsRemaining": 0,
+    "ownedRedisKeysRemaining": 0,
+    "ownedStreamEntriesRemaining": 0,
+    "sharedStreamAndGroup": "preserved",
+    "realDailyOrderCounter": "preserved"
+  },
+  "recordedAt": "2026-10-26T15:04:57.543Z"
+}

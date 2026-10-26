@@ -1,0 +1,35 @@
+{
+  "task": "GO-011",
+  "acceptance": [
+    "MIG-GO-02",
+    "MIG-GO-03",
+    "PRODUCT-01"
+  ],
+  "passed": false,
+  "checks": [
+    "direct API identifies Go before creating fixtures",
+    "Vite proxy identifies the same Go service",
+    "first page returns string total, exact IDs and avgPrice in yuan",
+    "unsubmitted input does not change load-more filters",
+    "53 shops across six pages have no missing or duplicate IDs and stable order",
+    "category plus submitted name uses one backend intersection and resets pagination",
+    "no-match search shows the empty state",
+    "failed next page preserves existing results",
+    "load-more retry requests the failed page instead of skipping it"
+  ],
+  "fixture": {
+    "prefix": "GOUIea09bc7a",
+    "shops": 53,
+    "types": 2
+  },
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "f86a97f-go030-worktree"
+  },
+  "browserTimezone": "UTC",
+  "failure": "locator.waitFor: Timeout 30000ms exceeded.",
+  "recordedAt": "2026-10-26T15:06:58.309Z"
+}

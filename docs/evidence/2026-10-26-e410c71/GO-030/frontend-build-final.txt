@@ -1,0 +1,69 @@
+
+> project-full-stack-web@0.1.0 build
+> npm run typecheck && vite build
+
+
+> project-full-stack-web@0.1.0 typecheck
+> vue-tsc --noEmit
+
+vite v8.3.5 building client environment for production...
+transforming...
+✓ 1683 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                      0.68 kB │ gzip:  0.37 kB
+dist/assets/ShopView-CkcvB3Iz.css                    0.23 kB │ gzip:  0.16 kB
+dist/assets/OrderView-LF4tOeXt.css                   0.26 kB │ gzip:  0.17 kB
+dist/assets/ExploreView-DGer5E8P.css                 0.29 kB │ gzip:  0.18 kB
+dist/assets/css-CA1QqFHX.css                         0.37 kB │ gzip:  0.18 kB
+dist/assets/MyOrdersView-BjuPXd-G.css                0.37 kB │ gzip:  0.22 kB
+dist/assets/css-S7fQQ3B8.css                         1.15 kB │ gzip:  0.45 kB
+dist/assets/css-B0_1wuTg.css                         1.57 kB │ gzip:  0.52 kB
+dist/assets/css-BJcvv8Uw.css                         2.81 kB │ gzip:  0.81 kB
+dist/assets/css-B6UgayC7.css                         3.47 kB │ gzip:  0.73 kB
+dist/assets/css-TSZfE1b8.css                         3.70 kB │ gzip:  1.01 kB
+dist/assets/css-C8-vPSoj.css                         3.80 kB │ gzip:  0.89 kB
+dist/assets/MerchantActivitiesView-BPWsVYD7.css      5.11 kB │ gzip:  1.16 kB
+dist/assets/css-1VV9QMa7.css                         6.02 kB │ gzip:  0.95 kB
+dist/assets/api-cyJZB4WD.css                         7.85 kB │ gzip:  1.96 kB
+dist/assets/css-CiUvAR8P.css                         8.20 kB │ gzip:  1.92 kB
+dist/assets/css-Nqb2n_Xn.css                        11.18 kB │ gzip:  1.86 kB
+dist/assets/css-Bzvq530A.css                        25.84 kB │ gzip:  3.75 kB
+dist/assets/index-L88MvJYl.css                     372.71 kB │ gzip: 51.09 kB
+dist/assets/_plugin-vue_export-helper-BDNMzG2s.js    0.08 kB │ gzip:  0.09 kB
+dist/assets/castArray-DxqE8Orx.js                    0.12 kB │ gzip:  0.13 kB
+dist/assets/use-attrs-OL11ndXU.js                    0.43 kB │ gzip:  0.33 kB
+dist/assets/use-lockscreen-C1m92lCz.js               0.79 kB │ gzip:  0.47 kB
+dist/assets/debounce-Crogj4B9.js                     1.05 kB │ gzip:  0.56 kB
+dist/assets/use-composition-CYVTiKQk.js              1.15 kB │ gzip:  0.58 kB
+dist/assets/scroll-DENJTiED.js                       1.16 kB │ gzip:  0.61 kB
+dist/assets/PublicKnowledgeView-Cj6Y_fRR.js          1.35 kB │ gzip:  0.83 kB
+dist/assets/css-BOOkDn-Z.js                          1.70 kB │ gzip:  0.88 kB
+dist/assets/css-Cg4jGZDF.js                          1.86 kB │ gzip:  0.84 kB
+dist/assets/use-aria-DcjtK7do.js                     2.07 kB │ gzip:  1.04 kB
+dist/assets/css-w3mSuh-j.js                          2.18 kB │ gzip:  1.02 kB
+dist/assets/LoginView-uhA5G8yp.js                    3.29 kB │ gzip:  1.80 kB
+dist/assets/MerchantView-BW4g23zX.js                 4.11 kB │ gzip:  1.99 kB
+dist/assets/event-4qLniGvV.js                        4.48 kB │ gzip:  2.05 kB
+dist/assets/MyOrdersView-DUvT_pdO.js                 4.59 kB │ gzip:  2.22 kB
+dist/assets/_baseClone-B0mIWBJT.js                   4.65 kB │ gzip:  1.88 kB
+dist/assets/OrderView-BNNYfYiL.js                    4.83 kB │ gzip:  2.31 kB
+dist/assets/ExploreView-CC0Jpxy6.js                  5.63 kB │ gzip:  2.69 kB
+dist/assets/ShopView-oJc2yz6K.js                     6.03 kB │ gzip:  2.84 kB
+dist/assets/MerchantOrdersView-B9v8FlIM.js           6.85 kB │ gzip:  2.91 kB
+dist/assets/MerchantKnowledgeView-MHtameft.js        7.51 kB │ gzip:  3.09 kB
+dist/assets/AssistantView-B9wmubD0.js                8.08 kB │ gzip:  3.72 kB
+dist/assets/css-DFK2QDkf.js                          8.86 kB │ gzip:  3.45 kB
+dist/assets/css-B2M0U0go.js                         10.19 kB │ gzip:  3.91 kB
+dist/assets/css-B8XYTbBN.js                         11.21 kB │ gzip:  4.30 kB
+dist/assets/message-box-jftqqCaP.js                 13.44 kB │ gzip:  5.01 kB
+dist/assets/css-D3iRz2pH.js                         14.31 kB │ gzip:  5.19 kB
+dist/assets/MerchantActivitiesView-CwNMecIs.js      25.26 kB │ gzip:  9.25 kB
+dist/assets/css-D0fCEFRx.js                         26.55 kB │ gzip:  9.14 kB
+dist/assets/css-Ch3bPyWF.js                         31.05 kB │ gzip: 10.66 kB
+dist/assets/css-B_Xpe0Pj.js                         47.43 kB │ gzip: 16.71 kB
+dist/assets/index-CPFAzuoH.js                       48.07 kB │ gzip: 18.75 kB
+dist/assets/css-BgcAAwTE.js                         84.79 kB │ gzip: 28.69 kB
+dist/assets/api-du3-I-mX.js                        148.19 kB │ gzip: 55.76 kB
+
+✓ built in 793ms

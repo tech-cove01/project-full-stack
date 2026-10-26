@@ -41,3 +41,5 @@
 冻结0072c86已经实际完成Linux race和订单真实集成，三job成功，不再沿用交付时“远端未执行”的状态：[基线CI](https://github.com/tech-cove01/project-full-stack/actions/runs/40349194001)、[结构结果](ci-baseline.json)、[真实入口核对](ci-baseline-real-tests.json)。QA2代码72645fa的Linux CI同样通过：[修复CI](https://github.com/tech-cove01/project-full-stack/actions/runs/40352081306)。QA3最终代码08d5953三个job全部成功，包含Linux race及全部真实集成入口：[最终代码CI](https://github.com/tech-cove01/project-full-stack/actions/runs/40352995705)、[结构结果](ci-final-code.json)、[真实入口核对](ci-final-code-real-tests.json)。
 
 GO-031仍是独立待验收范围。合入本轮修复时必须保留其新增支付/取消/超时与页面，不以本轮旧文件覆盖同路径；同步API session可选参数和原smoke新增身份分支。若主工作区同文件仍在修改，先保留隔离修复分支和清晰合入记录，不stash/reset其开发内容。
+
+实际交接：修复与全部证据已推送 `origin/review/go030-0072c86`。准备整合时，main已到 `43eb901e6bc63033ea291691f253559b69e3857a`，实现者仍在修改 `frontend/src/api.ts`、`frontend/src/types.ts`、`frontend/src/views/OrderView.vue`、`scripts/go-order-ui-smoke.mjs`，因此保留其工作区，不强行合入main。已在隔离分支 `integrate/go030-review` 准备候选 `9949b1dd3022651359abc00d4812f6cdf462b251`：仅进度表冲突需合并已核验行与GO-031进行中行，源码自动合并；候选全套普通Go测试及vet通过。这是整合兼容检查，不是GO-031业务独立验收。GO-031提交上述同路径修改后，再在隔离候选合并该提交并验证差量，主工作区无重叠未提交修改时安全快进；保留原修复SHA，勿用整文件覆盖。

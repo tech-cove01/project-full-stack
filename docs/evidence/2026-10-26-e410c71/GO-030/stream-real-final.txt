@@ -1,0 +1,24 @@
+=== RUN   TestIntegrationOrderStream
+=== RUN   TestIntegrationOrderStream/db_fact_overrides_a_cached_failed_reservation
+=== RUN   TestIntegrationOrderStream/cancel_after_order_insert_before_commit_rolls_back_and_reclaims
+=== RUN   TestIntegrationOrderStream/cancel_after_commit_before_ack_replays_current_order_without_decrement
+=== RUN   TestIntegrationOrderStream/unavailable_db_beyond_five_attempts_never_acks_then_recovers
+=== RUN   TestIntegrationOrderStream/poison_pending_does_not_starve_later_pending_or_new_messages
+=== RUN   TestIntegrationOrderStream/durable_rejection_is_ackable_and_compensation_remains_pending
+=== RUN   TestIntegrationOrderStream/transient_claim_error_does_not_destroy_recovery_cursor
+=== RUN   TestIntegrationOrderStream/cancelled_run_returns_without_group_mutation
+--- PASS: TestIntegrationOrderStream (0.88s)
+    --- PASS: TestIntegrationOrderStream/db_fact_overrides_a_cached_failed_reservation (0.09s)
+    --- PASS: TestIntegrationOrderStream/cancel_after_order_insert_before_commit_rolls_back_and_reclaims (0.12s)
+    --- PASS: TestIntegrationOrderStream/cancel_after_commit_before_ack_replays_current_order_without_decrement (0.12s)
+    --- PASS: TestIntegrationOrderStream/unavailable_db_beyond_five_attempts_never_acks_then_recovers (0.11s)
+    --- PASS: TestIntegrationOrderStream/poison_pending_does_not_starve_later_pending_or_new_messages (0.20s)
+    --- PASS: TestIntegrationOrderStream/durable_rejection_is_ackable_and_compensation_remains_pending (0.08s)
+    --- PASS: TestIntegrationOrderStream/transient_claim_error_does_not_destroy_recovery_cursor (0.09s)
+    --- PASS: TestIntegrationOrderStream/cancelled_run_returns_without_group_mutation (0.03s)
+=== RUN   TestCancelledWorkerDoesNotAccessDependencies
+--- PASS: TestCancelledWorkerDoesNotAccessDependencies (0.00s)
+=== RUN   TestMessageIDsRemainCanonicalStringsWithSignedOrderRange
+--- PASS: TestMessageIDsRemainCanonicalStringsWithSignedOrderRange (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	1.192s

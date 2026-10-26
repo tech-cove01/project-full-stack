@@ -1,0 +1,31 @@
+GO-011 frontend initial build failure, 2026-10-26
+Base SHA: cc0c6f920897b3ed65a4f080997a6c538fe0c2fa
+Working directory: frontend/
+Command: npm.cmd run build
+
+Raw build stdout/stderr preserved from the first command tool response:
+
+> project-full-stack-web@0.1.0 build
+> npm run typecheck && vite build
+
+
+> project-full-stack-web@0.1.0 typecheck
+> vue-tsc --noEmit
+
+src/views/AssistantView.vue(81,89): error TS2345: Argument of type 'string' is not assignable to parameter of type '{ name: string; typeId?: string | undefined; current: number; pageSize: number; }'.
+
+Explanation and correction:
+The initial api.shops change accepted a query object. The unchanged
+AssistantView.vue still called api.shops('', 1), so TypeScript correctly rejected
+the incompatible signature. No Vite production build ran in this failed step.
+The API method now retains shops(name, current, signal?) and accepts an optional
+fourth filters argument containing typeId/pageSize. ExploreView uses the fourth
+argument; AssistantView and other unassigned files were not changed.
+
+Subsequent verification on the corrected four-file implementation:
+- npm.cmd run build: PASS (vue-tsc --noEmit, Vite, 1684 modules transformed).
+- npm.cmd exec -- prettier --check src/api.ts src/types.ts src/views/ExploreView.vue src/views/ShopView.vue: PASS.
+
+The shell command that produced the first failure also ran Prettier afterward;
+its final process exit code was zero because Prettier passed. That aggregate
+exit code does not change the TypeScript build failure recorded above.

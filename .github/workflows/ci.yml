@@ -48,6 +48,9 @@ jobs:
         with:
           go-version-file: backend-go/go.mod
           cache-dependency-path: backend-go/go.sum
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
       - run: go mod verify
       - name: Check formatting
         run: test -z "$(gofmt -l .)"
@@ -61,6 +64,23 @@ jobs:
           < ../infra/mysql/001-schema.sql
       - name: Auth against real MySQL and Redis
         run: go test -race -count=1 -v ./internal/auth
+        env:
+          GO_INTEGRATION: '1'
+      - name: Apply versioned SQL to the isolated database
+        env:
+          MYSQL_CONTAINER: ${{ job.services.mysql.id }}
+          MYSQL_PORT: '3306'
+          MIGRATIONS_DIR: ../infra/mysql/migrations
+        run: |
+          cat > "$RUNNER_TEMP/mysql-go" <<'SH'
+          #!/usr/bin/env bash
+          exec docker exec -i -e MYSQL_PWD="$MYSQL_PWD" "$MYSQL_CONTAINER" mysql "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/mysql-go"
+          MYSQL_BIN="$RUNNER_TEMP/mysql-go" node ../scripts/migrate.mjs
+          MYSQL_BIN="$RUNNER_TEMP/mysql-go" node ../scripts/migrate.mjs
+      - name: Shops against real MySQL
+        run: go test -race -count=1 -v ./internal/shop
         env:
           GO_INTEGRATION: '1'
       - run: go build -trimpath -o bin/api ./cmd/api

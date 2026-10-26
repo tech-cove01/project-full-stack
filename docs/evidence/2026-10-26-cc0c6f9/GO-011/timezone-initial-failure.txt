@@ -1,0 +1,27 @@
+GO-011 timezone failure reproduced before correction, 2026-10-26
+Base SHA: cc0c6f920897b3ed65a4f080997a6c538fe0c2fa
+Source: frontend/src/views/ShopView.vue disabledReason
+Boundary: deterministic Node execution of the source expression; this is not
+the pending real UTC-browser reproduction.
+
+Executed JavaScript (PowerShell here-string piped to node):
+const begin = '2026-10-26T20:00:00'
+const now = '2026-10-26T12:30:00Z'
+for (const timezone of ['UTC', 'Asia/Shanghai']) {
+  process.env.TZ = timezone
+  const parsedBegin = Date.parse(begin.replace(' ', 'T'))
+  console.log(JSON.stringify({ timezone, begin, now, parsedBegin: new Date(parsedBegin).toISOString(), showsNotStarted: Date.parse(now) < parsedBegin }))
+}
+
+Raw stdout (exit code 0):
+{"timezone":"UTC","begin":"2026-10-26T20:00:00","now":"2026-10-26T12:30:00Z","parsedBegin":"2026-10-26T20:00:00.000Z","showsNotStarted":true}
+{"timezone":"Asia/Shanghai","begin":"2026-10-26T20:00:00","now":"2026-10-26T12:30:00Z","parsedBegin":"2026-10-26T12:00:00.000Z","showsNotStarted":false}
+
+Expected: begin is a Shanghai local business datetime, so its instant is
+2026-10-26T12:00:00Z and the voucher has already started at the supplied now.
+Observed failure: the old expression marks it not started in UTC. The result
+changes with the client time zone and differs by eight hours.
+
+At evidence capture, the source remains frozen pending root's real-browser
+failure reproduction. Correction will explicitly add +08:00 only to datetime
+strings without a UTC marker or numeric offset; existing offsets stay intact.

@@ -7,16 +7,52 @@ import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/input/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import { api, errorMessage } from '../api'
-import type { Shop } from '../types'
+import type { Shop, ShopType } from '../types'
 
+const pageSize = 10
 const query = ref('')
+const selectedTypeId = ref('')
+const shopTypes = ref<ShopType[]>([])
+const typesLoading = ref(false)
+const typesError = ref('')
 const shops = ref<Shop[]>([])
 const page = ref(1)
 const loading = ref(false)
 const error = ref('')
 const hasMore = ref(true)
+const total = ref<string | null>(null)
+const activeName = ref('')
+const activeTypeId = ref('')
 let requestController: AbortController | undefined
-let activeName = ''
+let typesController: AbortController | undefined
+
+function parseTotal(value: string | number | undefined): bigint | undefined {
+  if (typeof value === 'string' && /^\d+$/.test(value)) return BigInt(value)
+  if (typeof value === 'number' && Number.isSafeInteger(value) && value >= 0) return BigInt(value)
+  return undefined
+}
+
+async function loadTypes() {
+  typesController?.abort()
+  const controller = new AbortController()
+  typesController = controller
+  typesLoading.value = true
+  typesError.value = ''
+  try {
+    const { data } = await api.shopTypes(controller.signal)
+    if (!controller.signal.aborted) shopTypes.value = data || []
+  } catch (cause) {
+    if (!controller.signal.aborted) typesError.value = errorMessage(cause)
+  } finally {
+    if (!controller.signal.aborted) typesLoading.value = false
+  }
+}
+
+function selectType(id: string) {
+  if (selectedTypeId.value === id) return
+  selectedTypeId.value = id
+  void search()
+}
 
 async function search(reset = true) {
   if (!reset && loading.value) return
@@ -25,17 +61,31 @@ async function search(reset = true) {
   requestController = controller
   if (reset) {
     page.value = 1
-    activeName = query.value.trim()
+    activeName.value = query.value.trim()
+    activeTypeId.value = selectedTypeId.value
     shops.value = []
+    total.value = null
+    hasMore.value = true
   }
   loading.value = true
   error.value = ''
   try {
-    const { data } = await api.shops(activeName, page.value, controller.signal)
+    const { data, total: count } = await api.shops(
+      activeName.value,
+      page.value,
+      controller.signal,
+      { typeId: activeTypeId.value || undefined, pageSize },
+    )
     if (controller.signal.aborted) return
     const batch = data || []
     shops.value = reset ? batch : [...shops.value, ...batch]
-    hasMore.value = batch.length > 0
+    const countValue = parseTotal(count)
+    total.value = countValue === undefined ? null : countValue.toString()
+    hasMore.value =
+      batch.length > 0 &&
+      (countValue === undefined
+        ? batch.length === pageSize
+        : BigInt(shops.value.length) < countValue)
     page.value += 1
   } catch (cause) {
     if (!controller.signal.aborted) error.value = errorMessage(cause)
@@ -47,9 +97,13 @@ function cover(shop: Shop) {
   return shop.images?.split(',')[0]
 }
 onMounted(() => {
+  void loadTypes()
   void search()
 })
-onBeforeUnmount(() => requestController?.abort())
+onBeforeUnmount(() => {
+  requestController?.abort()
+  typesController?.abort()
+})
 </script>
 
 <template>
@@ -68,7 +122,7 @@ onBeforeUnmount(() => requestController?.abort())
           size="large"
           placeholder="搜索店铺名称"
           clearable
-        /><el-button type="primary" size="large" native-type="submit" :loading="loading"
+        /><el-button type="primary" size="large" native-type="submit" :aria-busy="loading"
           >找好店</el-button
         >
       </div>
@@ -81,7 +135,30 @@ onBeforeUnmount(() => requestController?.abort())
         <span class="eyebrow">EXPLORE THE NEIGHBORHOOD</span>
         <h2>{{ activeName ? `“${activeName}”的搜索结果` : '发现附近好店' }}</h2>
       </div>
-      <span class="muted">已加载 {{ shops.length }} 家</span>
+      <span class="muted"
+        >已加载 {{ shops.length }} 家<span v-if="total !== null"> / 共 {{ total }} 家</span></span
+      >
+    </div>
+    <div class="shop-categories" role="group" aria-label="店铺分类">
+      <el-button
+        :type="selectedTypeId === '' ? 'primary' : 'default'"
+        :aria-pressed="selectedTypeId === ''"
+        @click="selectType('')"
+        >全部</el-button
+      >
+      <el-button
+        v-for="type in shopTypes"
+        :key="type.id"
+        :type="selectedTypeId === type.id ? 'primary' : 'default'"
+        :aria-pressed="selectedTypeId === type.id"
+        @click="selectType(type.id)"
+        >{{ type.name || '未命名分类' }}</el-button
+      >
+      <span v-if="typesLoading" class="muted" role="status">正在加载分类…</span>
+    </div>
+    <div v-if="typesError" class="category-error space-bottom" role="status">
+      <span>分类暂时无法加载，可先浏览全部店铺。{{ typesError }}</span>
+      <el-button :loading="typesLoading" @click="loadTypes">重试分类</el-button>
     </div>
     <el-alert
       v-if="error"
@@ -95,7 +172,7 @@ onBeforeUnmount(() => requestController?.abort())
     <el-empty
       v-else-if="!shops.length"
       :description="error ? '暂时无法加载店铺' : '没有找到相关店铺，换个关键词试试'"
-      ><el-button v-if="error" @click="search()">重新加载</el-button></el-empty
+      ><el-button v-if="error" @click="search(false)">重新加载</el-button></el-empty
     >
     <div v-else class="shop-grid">
       <RouterLink v-for="shop in shops" :key="shop.id" :to="`/shops/${shop.id}`" class="shop-card">
@@ -122,8 +199,31 @@ onBeforeUnmount(() => requestController?.abort())
       </RouterLink>
     </div>
     <div v-if="shops.length" class="load-more">
-      <el-button v-if="hasMore" :loading="loading" @click="search(false)">加载更多店铺</el-button
+      <el-button v-if="hasMore || error" :loading="loading" @click="search(false)">{{
+        error ? '重试加载店铺' : '加载更多店铺'
+      }}</el-button
       ><span v-else class="muted">已经看完所有店铺了</span>
     </div>
   </section>
 </template>
+
+<style scoped>
+.shop-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 22px;
+}
+.shop-categories .el-button + .el-button {
+  margin-left: 0;
+}
+.category-error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  color: #819089;
+  font-size: 13px;
+}
+</style>

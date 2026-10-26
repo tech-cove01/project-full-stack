@@ -1,0 +1,4 @@
+apply 003-trade
+apply 004-ai
+apply 005-order-review
+migrations applied

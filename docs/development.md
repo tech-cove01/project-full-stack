@@ -15,7 +15,7 @@ docker compose -f compose.go.yaml up -d --wait mysql redis
 docker compose -f compose.go.yaml ps
 ~~~
 
-独立项目名 `project-full-stack-go`、卷 `go-mysql-data` / `go-redis-data`，默认端口 3308 / 6380。首次初始化复用 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`；后续业务需要的版本 SQL 仍显式执行，应用启动不迁移库。禁止把 Go 指向 Java 的数据或同时消费同一 Stream/outbox。
+独立项目名 `project-full-stack-go`、卷 `go-mysql-data` / `go-redis-data`，默认端口 3308 / 6380。首次初始化复用 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`。GO-011 的公开券查询需要已有 `003-trade` 版本列，启动应用前在根目录显式执行 `node scripts/migrate.mjs`，需本机 MySQL 客户端（可用 `MYSQL_BIN` 指定路径）；连接环境使用下方3308隔离配置。runner 会记录003—005的版本与校验和，重跑应跳过，不能靠重启容器或 AutoMigrate 代替。应用启动不迁移库。禁止把 Go 指向 Java 的数据或同时消费同一 Stream/outbox。
 
 另一个 PowerShell 在根目录设置进程环境（示例是隔离本机开发值）：
 
@@ -64,6 +64,10 @@ go test -count=1 -v ./internal/auth -run TestIntegrationAuth
 ~~~
 
 测试复用 `001-schema.sql` 的 `tb_user`，只清理自身随机用户/key，不清空数据。真实 Vue 脚本在根目录 `node scripts/go-auth-ui-smoke.mjs`；需设置 `PLAYWRIGHT_MODULE`（已安装 Playwright 的模块路径或 file URL）、可选 `CHROME_PATH`、`WEB_BASE`（默认5174）、`API_BASE`（默认8082）、`UI_EVIDENCE`（JSON输出）。脚本创建随机演示用户、退出并撤销其 session，证据不含手机号/验证码/token。该页面脚本不证明商铺/交易已迁移。
+
+GO-011 提供公开 `GET /shop/of/name?name=&typeId=&current=1&pageSize=10`、`/shop/of/type?typeId=...`（默认每页5条）、`/shop/{id}`、`/shop-type/list` 和 `/voucher/list/{shopId}`。名称为字面子串，可和分类组合，`pageSize` 上限50，稳定按ID升序及字符串total；空结果为 `[]`。商铺人均价是元，券金额是分，两者均字符串；时间保留无偏移的Shanghai ISO格式，前端显式按+08:00解释。坐标x/y查询暂返回400，未迁移详情缓存；旧已知商铺/分类/券写路由继续403。
+
+真实商铺测试执行 `GO_INTEGRATION=1 go test -count=1 -v ./internal/shop -run TestIntegrationShop`（PowerShell先设置该环境变量）。`node scripts/go-shop-ui-smoke.mjs` 使用同一组UI环境变量，并需要显式MYSQL连接环境；创建53家大ID店铺、分类与券后精确清理，支持 `UI_TIMEZONE=UTC` / `Asia/Shanghai`。脚本通过浏览器离线和选择性网络abort验证失败/重试，成功响应均来自真实Go，不Mock数据。大ID夹具会推进隔离表AUTO_INCREMENT，即使清理也不重置；不要把该脚本指向旧库或共享数据环境。
 
 ## Java 基线环境与启动（历史参考）
 

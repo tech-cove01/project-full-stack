@@ -14,6 +14,7 @@ export interface User {
 export interface Shop {
   id: string
   name: string
+  typeId?: string
   images?: string
   area?: string
   address?: string
@@ -22,6 +23,13 @@ export interface Shop {
   comments?: number
   score?: number
   openHours?: string
+}
+
+export interface ShopType {
+  id: string
+  name?: string
+  icon?: string
+  sort: number
 }
 
 export interface Voucher {

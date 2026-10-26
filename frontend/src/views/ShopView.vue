@@ -7,7 +7,7 @@ import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import 'element-plus/es/components/tag/style/css'
 import { useRoute, useRouter } from 'vue-router'
-import { api, errorMessage, money, rememberOrder } from '../api'
+import { api, errorMessage, money, parseBusinessTime, rememberOrder } from '../api'
 import { useAuthStore } from '../stores/auth'
 import type { Shop, Voucher } from '../types'
 
@@ -17,6 +17,7 @@ const auth = useAuthStore()
 const shop = ref<Shop | null>(null)
 const vouchers = ref<Voucher[]>([])
 const loading = ref(true)
+const vouchersLoading = ref(false)
 const error = ref('')
 const voucherError = ref('')
 const purchasing = ref<string | null>(null)
@@ -26,35 +27,59 @@ const clock = setInterval(() => {
   now.value = Date.now()
 }, 1000)
 const images = computed(() => shop.value?.images?.split(',').filter(Boolean) || [])
-let controller: AbortController | undefined
+let shopController: AbortController | undefined
+let voucherController: AbortController | undefined
+let purchaseController: AbortController | undefined
 
-async function load(id: string) {
-  controller?.abort()
-  const active = new AbortController()
-  controller = active
-  loading.value = true
-  error.value = ''
-  voucherError.value = ''
+function load(id: string) {
+  shopController?.abort()
+  voucherController?.abort()
+  purchaseController?.abort()
+  purchasing.value = null
   shop.value = null
   vouchers.value = []
-  const results = await Promise.allSettled([
-    api.shop(id, active.signal),
-    api.vouchers(id, active.signal),
-  ])
-  if (active.signal.aborted) return
-  const [shopResult, voucherResult] = results
-  if (shopResult.status === 'fulfilled') shop.value = shopResult.value.data
-  else error.value = errorMessage(shopResult.reason)
-  if (voucherResult.status === 'fulfilled') vouchers.value = voucherResult.value.data || []
-  else voucherError.value = errorMessage(voucherResult.reason)
-  loading.value = false
+  purchaseError.value = ''
+  void loadShop(id)
+  void loadVouchers(id)
+}
+
+async function loadShop(id: string) {
+  shopController?.abort()
+  const active = new AbortController()
+  shopController = active
+  loading.value = true
+  error.value = ''
+  try {
+    const { data } = await api.shop(id, active.signal)
+    if (!active.signal.aborted) shop.value = data
+  } catch (cause) {
+    if (!active.signal.aborted) error.value = errorMessage(cause)
+  } finally {
+    if (!active.signal.aborted) loading.value = false
+  }
+}
+
+async function loadVouchers(id: string) {
+  voucherController?.abort()
+  const active = new AbortController()
+  voucherController = active
+  vouchersLoading.value = true
+  voucherError.value = ''
+  try {
+    const { data } = await api.vouchers(id, active.signal)
+    if (!active.signal.aborted) vouchers.value = data || []
+  } catch (cause) {
+    if (!active.signal.aborted) voucherError.value = errorMessage(cause)
+  } finally {
+    if (!active.signal.aborted) vouchersLoading.value = false
+  }
 }
 
 function disabledReason(voucher: Voucher): string {
   if (voucher.type !== 1) return '普通券购买待接入'
   if (voucher.stock != null && voucher.stock <= 0) return '已抢完'
-  const start = voucher.beginTime ? Date.parse(voucher.beginTime.replace(' ', 'T')) : NaN
-  const end = voucher.endTime ? Date.parse(voucher.endTime.replace(' ', 'T')) : NaN
+  const start = parseBusinessTime(voucher.beginTime)
+  const end = parseBusinessTime(voucher.endTime)
   if (!Number.isNaN(start) && now.value < start) return '尚未开始'
   if (!Number.isNaN(end) && now.value >= end) return '活动已结束'
   return ''
@@ -68,17 +93,21 @@ async function buy(voucher: Voucher) {
   }
   purchasing.value = voucher.id
   purchaseError.value = ''
+  const active = new AbortController()
+  purchaseController = active
   try {
-    const { data: id } = await api.seckill(voucher.id)
+    const { data: id } = await api.seckill(voucher.id, active.signal)
+    if (active.signal.aborted) return
     rememberOrder(id)
     await router.push(`/orders/${id}`)
   } catch (cause) {
+    if (active.signal.aborted) return
     purchaseError.value = errorMessage(cause)
     if (purchaseError.value.includes('超时') || purchaseError.value.includes('无法连接')) {
       purchaseError.value += ' 提交结果暂不确定；若已保存订单号，请先查看最近订单。'
     }
   } finally {
-    purchasing.value = null
+    if (purchaseController === active) purchasing.value = null
   }
 }
 watch(
@@ -89,7 +118,9 @@ watch(
   { immediate: true },
 )
 onBeforeUnmount(() => {
-  controller?.abort()
+  shopController?.abort()
+  voucherController?.abort()
+  purchaseController?.abort()
   clearInterval(clock)
 })
 </script>
@@ -126,7 +157,12 @@ onBeforeUnmount(() => {
           <span class="eyebrow">A LITTLE TREAT FOR YOU</span>
           <h2>到店优惠</h2>
         </div>
-        <span class="muted">活动库存与资格以提交结果为准</span>
+        <div class="voucher-actions">
+          <span class="muted">活动库存与资格以提交结果为准</span>
+          <el-button :loading="vouchersLoading" @click="loadVouchers(String(route.params.id))">{{
+            voucherError ? '重试优惠' : '刷新优惠'
+          }}</el-button>
+        </div>
       </div>
       <el-alert
         v-if="voucherError"
@@ -143,8 +179,12 @@ onBeforeUnmount(() => {
         show-icon
         class="space-bottom"
       />
-      <el-empty v-if="!vouchers.length && !voucherError" description="这家店暂时没有上架优惠券" />
-      <div class="voucher-list">
+      <el-skeleton v-if="vouchersLoading && !vouchers.length" :rows="3" animated />
+      <el-empty
+        v-else-if="!vouchers.length && !voucherError"
+        description="这家店暂时没有上架优惠券"
+      />
+      <div v-else class="voucher-list">
         <article v-for="voucher in vouchers" :key="voucher.id" class="voucher-card">
           <div class="voucher-value">
             <span
@@ -175,3 +215,13 @@ onBeforeUnmount(() => {
     </section>
   </template>
 </template>
+
+<style scoped>
+.voucher-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+}
+</style>

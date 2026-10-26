@@ -1,6 +1,6 @@
 # GO-010 身份链路自测
 
-日期：2026-10-26（Asia/Shanghai）。状态：自测通过待核验。依赖 GO-001；开始 SHA `69ddd3ee001251b5a16ee252fbacf51130643630`，交付为本报告所在的 `feat(GO-010)` 本地提交，完整 SHA 随下一交付记录和聊天列出。
+日期：2026-10-26（Asia/Shanghai）。状态：自测通过待核验。依赖 GO-001；开始 SHA `69ddd3ee001251b5a16ee252fbacf51130643630`，交付 SHA `cc0c6f920897b3ed65a4f080997a6c538fe0c2fa`。最终冻结二进制 SHA256：`CB2E9A7F74B5D1E551EF884B3577D964A29BFCA15586B188888C46879586A244`。
 
 范围为四个 user API、验证码/用户/session 持久行为、已有 Vue 登录/恢复/退出与失效拦截。不新增页面、表结构、独立 refresh 路由或业务 worker。沿用原 Java 的正常手机号号段，修正旧 `[0-3,5-9]` 误收逗号；验证码 TTL120秒/节流60秒、session36000分钟、原始/Bearer authorization 与三字段 hash 兼容。Go 写入与续期 Lua 原子化，缺 TTL 的异常凭证拒绝授权/消费，不自动修复。
 

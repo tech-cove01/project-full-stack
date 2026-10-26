@@ -10,6 +10,7 @@ import type {
   PublicKnowledge,
   Result,
   Shop,
+  ShopType,
   User,
   Voucher,
 } from './types'
@@ -94,16 +95,30 @@ export const api = {
     request<string>('/user/login', { method: 'POST', body: JSON.stringify({ phone, code }) }),
   logout: () => request<null>('/user/logout', { method: 'POST' }),
   me: () => request<User>('/user/me'),
-  shops: (name: string, current: number, signal?: AbortSignal) =>
-    request<Shop[]>(`/shop/of/name?name=${encodeURIComponent(name)}&current=${current}`, {
-      signal,
-    }),
+  shopTypes: (signal?: AbortSignal) => request<ShopType[]>('/shop-type/list', { signal }),
+  shops: (
+    name: string,
+    current: number,
+    signal?: AbortSignal,
+    filters: { typeId?: string; pageSize?: number } = {},
+  ) => {
+    const query = new URLSearchParams({
+      name,
+      current: String(current),
+      pageSize: String(filters.pageSize ?? 10),
+    })
+    if (filters.typeId) query.set('typeId', filters.typeId)
+    return request<Shop[]>(`/shop/of/name?${query.toString()}`, { signal })
+  },
   shop: (id: string, signal?: AbortSignal) =>
     request<Shop>(`/shop/${encodeURIComponent(id)}`, { signal }),
   vouchers: (shopId: string, signal?: AbortSignal) =>
     request<Voucher[]>(`/voucher/list/${encodeURIComponent(shopId)}`, { signal }),
-  seckill: (voucherId: string) =>
-    request<string>(`/voucher-order/seckill/${encodeURIComponent(voucherId)}`, { method: 'POST' }),
+  seckill: (voucherId: string, signal?: AbortSignal) =>
+    request<string>(`/voucher-order/seckill/${encodeURIComponent(voucherId)}`, {
+      method: 'POST',
+      signal,
+    }),
   order: (id: string, signal?: AbortSignal) =>
     request<OrderStatus>(`/voucher-order/${encodeURIComponent(id)}`, { signal }),
   myOrders: (current: number, pageSize: number, signal?: AbortSignal) =>
@@ -198,6 +213,15 @@ export const api = {
     request<AiKnowledgeDoc>(`/merchant/knowledge/${encodeURIComponent(id)}/rebuild`, {
       method: 'POST',
     }),
+}
+
+// Offset-free API datetimes are Shanghai local business times. Preserve an
+// explicit Z/offset, and never inherit the browser's local time zone.
+export function parseBusinessTime(value: string | null | undefined): number {
+  if (!value) return NaN
+  const text = value.trim().replace(' ', 'T')
+  const localDateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?$/.test(text)
+  return Date.parse(localDateTime ? `${text}+08:00` : text)
 }
 
 export function money(cents: number | string | null | undefined): string {

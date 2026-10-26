@@ -17,6 +17,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/platform/config"
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
+	"github.com/cityloop/fullstack-go/internal/shop"
 )
 
 func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision string) error {
@@ -34,6 +35,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	server := &http.Server{
 		Handler: httpapi.NewRouter(resources, cfg.ProbeTimeout, revision, logger, func(routes gin.IRouter) {
 			auth.Register(routes, auth.NewService(resources.ORM, resources.Redis, cfg.Environment))
+			shop.Register(routes, shop.NewService(resources.ORM, cfg.Location))
 		}),
 		ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second,
 		WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,

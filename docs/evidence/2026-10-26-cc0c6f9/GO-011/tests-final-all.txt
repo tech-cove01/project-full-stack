@@ -1,0 +1,7 @@
+?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+ok  	github.com/cityloop/fullstack-go/internal/auth	0.887s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	0.764s
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.479s
+ok  	github.com/cityloop/fullstack-go/internal/platform/database	0.531s
+ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	0.660s
+ok  	github.com/cityloop/fullstack-go/internal/shop	0.865s

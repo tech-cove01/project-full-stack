@@ -1,0 +1,18 @@
+=== RUN   TestIntegrationShop
+=== RUN   TestIntegrationShop/all_53_shops_are_reachable_without_duplicate_pages
+=== RUN   TestIntegrationShop/chinese_search_and_category_use_one_intersection
+=== RUN   TestIntegrationShop/literal_wildcards_and_injection_text_are_not_queries
+=== RUN   TestIntegrationShop/detail_keeps_null_empty_yuan_and_local_time_contracts
+=== RUN   TestIntegrationShop/categories_sort_by_sort_then_id_and_omit_null_fields
+=== RUN   TestIntegrationShop/only_enabled_active_vouchers_are_visible_without_stock_or_time_filter
+=== RUN   TestIntegrationShop/invalid_parameters_and_coordinates_are_explicit_errors
+--- PASS: TestIntegrationShop (0.36s)
+    --- PASS: TestIntegrationShop/all_53_shops_are_reachable_without_duplicate_pages (0.04s)
+    --- PASS: TestIntegrationShop/chinese_search_and_category_use_one_intersection (0.04s)
+    --- PASS: TestIntegrationShop/literal_wildcards_and_injection_text_are_not_queries (0.06s)
+    --- PASS: TestIntegrationShop/detail_keeps_null_empty_yuan_and_local_time_contracts (0.02s)
+    --- PASS: TestIntegrationShop/categories_sort_by_sort_then_id_and_omit_null_fields (0.00s)
+    --- PASS: TestIntegrationShop/only_enabled_active_vouchers_are_visible_without_stock_or_time_filter (0.01s)
+    --- PASS: TestIntegrationShop/invalid_parameters_and_coordinates_are_explicit_errors (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/shop	0.671s

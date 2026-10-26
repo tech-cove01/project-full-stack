@@ -1,0 +1,4 @@
+skip  003-trade
+skip  004-ai
+skip  005-order-review
+database is up to date

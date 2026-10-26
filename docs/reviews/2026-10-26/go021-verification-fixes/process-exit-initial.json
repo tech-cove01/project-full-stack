@@ -1,0 +1,27 @@
+{
+  "_provenance": "Recovered from actual tool stdout. Initial summary.json was overwritten by the successful rerun; original native stderr was not captured. Checks completed before exit are unknown.",
+  "application_source": "e410c71d9d8dfeaf654e203e439fa3f871c9afd4",
+  "runs": [
+    {
+      "name": "activity-utc",
+      "exit": 3221226505,
+      "passed": false,
+      "checks": null,
+      "cleanup": null
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": false,
+  "failure": "Native Node process exited without UI JSON; root cause not established"
+}

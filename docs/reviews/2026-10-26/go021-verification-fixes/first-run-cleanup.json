@@ -1,0 +1,12 @@
+{
+  "prefix": "GOA98e137fe",
+  "exact_users": [
+    "9007200305785793",
+    "9007200305785794"
+  ],
+  "vouchers": 16,
+  "recovered_sessions": 2,
+  "remaining_sql_rows": 0,
+  "remaining_exact_keys": 0,
+  "passed": true
+}

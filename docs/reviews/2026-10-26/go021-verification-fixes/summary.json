@@ -1,0 +1,40 @@
+{
+  "application_source": "e410c71d9d8dfeaf654e203e439fa3f871c9afd4",
+  "scope": "fixed scripts; unchanged Go/frontend from the prior frozen review",
+  "runs": [
+    {
+      "name": "activity-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 29,
+      "cleanup": true
+    },
+    {
+      "name": "activity-shanghai",
+      "exit": 0,
+      "passed": true,
+      "checks": 29,
+      "cleanup": true
+    },
+    {
+      "name": "merchant",
+      "exit": 0,
+      "passed": true,
+      "checks": 28,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

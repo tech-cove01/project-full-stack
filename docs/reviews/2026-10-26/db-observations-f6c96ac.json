@@ -1,0 +1,5 @@
+{
+  "databasePort": 3307,
+  "isolation": "REPEATABLE-READ",
+  "reviewAfterCreated": "653018492815015973\tREQUEUED"
+}

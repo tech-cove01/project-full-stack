@@ -222,7 +222,9 @@ def main():
         replay = None
         # The CLI needs the same database endpoint as this process; without an explicit
         # env it would fall back to 3306 and fail against the local MySQL instance.
-        child_env = {**os.environ, 'MYSQL_PORT': os.environ.get('MYSQL_PORT', '3306'),
+        # This workstation maps the project database to 3307; the CLI must use the same endpoint
+        # as the application (override with MYSQL_PORT when running elsewhere).
+        child_env = {**os.environ, 'MYSQL_PORT': os.environ.get('MYSQL_PORT', '3307'),
                      'MYSQL_HOST': os.environ.get('MYSQL_HOST', '127.0.0.1')}
         for _ in range(3):
             replay = subprocess.run(
@@ -236,6 +238,8 @@ def main():
                               'error': (replay.stderr or '').strip()[:400]}
         if replay.returncode == 0:
             created, final = wait_created(user, order_id, 90)
+            # The consumer resolves the review row right after the order commit.
+            time.sleep(1.5)
             review_status = db_scalar(
                 f"SELECT status FROM tb_order_review WHERE order_id = '{order_id}'") or review_status
     with Redis() as redis:

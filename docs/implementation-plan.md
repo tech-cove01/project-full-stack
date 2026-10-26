@@ -197,6 +197,8 @@ AI 最初增补核对到 `eac1b92`，并保留其“未支付取消后可重买�
 
 为尽快交接，本轮直接使用仓库内 Markdown 规范，不新增 CLI 或生成的 agent 指令。实现 agent 无需安装 OpenSpec 即可执行。后续确需使用时，可按阶段把本方案迁移成独立 change，保持需求、任务和验收对应；不要让两套规范同时出现冲突。
 
+2026-10-26 工作流增补：当前采用 [交接说明中的任务与审查规则](agent-handoff.md)，借鉴可验收功能切分、明确依赖、关键行为失败复现，以及需求/代码两方面独立审查。任务状态只在现有开发入口维护；没有另外初始化 OpenSpec 或安装 Matt skills。若未来迁移，新旧入口必须同步指向同一份状态，不能让 `docs/` 和 `openspec/changes` 各自勾选完成。
+
 参考：[OpenSpec 官方入门](https://github.com/Fission-AI/OpenSpec/blob/main/docs/getting-started.md)。
 
 ## 8. 设计参考与来源

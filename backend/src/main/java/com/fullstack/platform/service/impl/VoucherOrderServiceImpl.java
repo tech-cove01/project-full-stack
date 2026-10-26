@@ -191,6 +191,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         try {
             // Separate Spring bean: transaction interception includes both stock and order writes.
             orderCreationService.create(order);
+            resolveReview(order.getId());
             redis.opsForHash().putAll(key, Map.of("userId", order.getUserId().toString(),
                     "voucherId", order.getVoucherId().toString(), "state", "CREATED", "message", "订单已创建"));
             redis.expire(key, STATUS_TTL);
@@ -202,6 +203,8 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                             "seckill:accepted:" + order.getVoucherId()),
                     order.getUserId().toString(), rejected.getMessage(),
                     rejected.keepPurchaseMarker() ? "1" : "0", order.getId().toString());
+            // A definitive rejection is a terminal outcome as well; the row must stop blocking.
+            resolveReview(order.getId());
             acknowledge(record);
             return true;
         } catch (Exception retryable) {
@@ -227,6 +230,17 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                 return true;
             }
             return false;
+        }
+    }
+
+    private void resolveReview(long orderId) {
+        try {
+            orderReviewRepository.resolve(orderId);
+        } catch (Exception e) {
+            // The order is durable already; a failed cleanup only keeps reconcile blocked and is
+            // visible through the review table, so it must not undo the acknowledgement.
+            log.warn("Order {} reached a terminal outcome but its review row could not be resolved",
+                    orderId, e);
         }
     }
 

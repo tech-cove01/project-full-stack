@@ -1,6 +1,6 @@
 # 当前进度与开发入口
 
-更新：2026-10-26。本轮核对 HEAD `e8a292c`，另有 AI 修复、前端格式化和核验脚本未提交。以下区分代码现状、独立检查与实现者自报。
+更新：2026-10-26。本轮核对 HEAD `f6c96ac`，核验开始时工作区干净。最新结论见 [独立核验与具体修复单](reviews/2026-10-26/review-f6c96ac.md)，以下区分代码现状、独立检查与实现者自报。
 
 ## 1. 本次确定的交付范围
 
@@ -16,24 +16,25 @@
 
 | 部分 | 当前判断 | 剩余工作 |
 | --- | --- | --- |
-| 用户交易与 B 端 | 主流程已有，T1—T4 已提交一批修复 | 受控库存重建、反复重放与真实恢复证据仍需闭合 |
-| AI | Chat/Embedding、RAG、只读工具、FAQ/SSE 已有；工作区新增失效校验、原子去重、限频/预算 | 删除/取消/deadline、失效分支清理、敏感输入变体和针对性验证 |
-| 前端 | 11 个路由页面；当前工作区修改以格式化为主 | 社区页面未做；混合角色按门店控制按钮可同批完善 |
+| 用户交易与 B 端 | 主流程已有；先关闸、T1 持久复核后重放已取得真实证据；本轮正常链路通过 | R1 补偿状态漏检、R2 重建快照、R3 复核终态与重放竞态 |
+| AI | MVP 与失效校验/原子去重等已提交；原子 append、来源空分支、验证码变体已修；日预算/锁失败重试本轮实测通过 | R4 bindShop 删除竞态、R5 任务截止与锁/SSE 生命周期；其他边界验证 |
+| 前端 | 11 个路由页面，格式化已提交；构建/格式通过 | 三个列表分页、分类、按门店按钮与社区新页面 |
 | 社区/点赞/关注 | 旧模块写入口仍关闭 | 新 DTO/事实关系/版本/迁移、笔记与关注小闭环尚未开始 |
 | Kafka / Feed | 未见依赖、服务、消费者及新页面 | 是剩余主体开发量，不能计为已有亮点 |
 | 工程化/证据 | 迁移、脚本、CI 与历史证据存在 | 统一复现入口、修正过强结论、持续负载和成型演示 |
 
-本轮独立执行：后端 `verify` **60 tests PASS**；前端 `build`（含类型检查）**PASS**；`format:check` **PASS**。后端使用本机 Mockito 5.17.0 显式 javaagent，见 [早前核验的本机命令](reviews/2026-10-26/review.md)。未重新中断数据库、压测或调用付费模型；构建通过不等于下列缺陷已经通过真实场景验证。
+本轮独立执行：后端 `verify` **60 tests PASS**；前端 `build`（含类型检查）**PASS**；`format:check` **PASS**；真实交易与四场景 Lua 回归、AI Stub 敏感输入/锁重试/日预算均通过。`PROCESSING` 补偿漏检已实测复现。没有停数据库、压测或调用付费模型；命令与边界见最新报告。
 
 ## 3. 实现 agent 下一批先做什么
 
 不再增加同类总计划。按本清单处理当前状态，再继续 H1—H5；具体业务契约仍在 [后端亮点方案](backend-highlights-plan.md)。
 
-- [ ] **库存恢复协议**：[MerchantActivityService.java](../backend/src/main/java/com/fullstack/platform/activity/MerchantActivityService.java) 的 `reconcile` 当前先检查 Stream，再重写库存，尚未建立完整停写窗口。需先关闭准入并防止旧 OPEN 重开，核对目标活动的在途消息、未决 review 和待补偿 outbox，再按最新锁定 DB 状态重建。pending/lag=0 不足以证明可重建。
-- [ ] **再次重放的状态**：[OrderReviewRepository.java](../backend/src/main/java/com/fullstack/platform/order/OrderReviewRepository.java) 刷新已 REQUEUED 记录时没有回到 OPEN，而 CLI 只允许 OPEN 重放；第一次重放再次失败后应仍可受控恢复。无需另做工单平台。
-- [ ] **AI 生命周期**：[AiConversationService.java](../backend/src/main/java/com/fullstack/platform/ai/AiConversationService.java) 的 EXISTS 与写消息/hash 分开，删除仍有竞态；原子检查写入并加会话 generation。`AiAssistantService` 在来源全部失效的提前返回分支清理 PROCESSING；将 SSE/取消/整轮截止与任务资源释放关联，避免工作超过会话锁还继续写结果。对无法取消的远端请求准确记录限制。
-- [ ] **敏感输入验证**：覆盖“验证码是123456”“验证码为：123456”等常见表达，用捕获型 Stub 确认没有原文发往 embedding/chat；不把所有六位数字都当验证码。
-- [ ] **证据修正**：未提交 `h0-fix-report.md` 声称 T1/A2 已 FIXED，但 `t1-result.json` 实际是 FAIL/取消404，AI 脚本仅凭一次429就标整个 A2 完成。T1 脚本要接受“持久 review → 受控重放”的合法恢复分支，保留中间时间线，不让清理失败覆盖业务结果。AI 按实际覆盖的子场景分别给结论。
+- [ ] **R1 库存恢复阻断**：`pendingCompensations` 查询 `IN_PROGRESS`，实际 outbox 使用 `PROCESSING`，已实测允许错误重建；统一状态并补阻断验证。
+- [ ] **R2 重建快照**：直接从 FOR UPDATE 锁定行取得库存等必要字段，避免普通查询回到 RR 旧快照；补可控并发提交窗口。
+- [ ] **R3 复核生命周期**：再次失败回 OPEN 的串行分支已修；还要让成功进入明确终态，并修复 CLI 先 XADD、后状态更新覆盖消费结果的竞态。
+- [ ] **R4/R5 AI 生命周期**：原子 append 与全来源失效清理已修；bindShop 也要原子“存在才绑定”，统一任务截止/锁租期/SSE，并禁止失效任务继续写结果。
+
+已通过项不重做：正常交易、Lua 四场景、T1 当前持久复核重放分支、验证码变体拦截、锁失败同消息重试、日请求预算。剩余详细触发、文件行号与验收见 [本轮报告](reviews/2026-10-26/review-f6c96ac.md)。没有把未跑的慢调用/并发边界标通过。
 
 以上是当前实质剩余项，不是重新设计 H0。T2 的已验证类型/数值预校验、T4 后端管理审计隔离可保留，不要求重复开发。完成后提交一个可回溯版本，再开始社区纵向流程。
 

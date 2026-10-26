@@ -112,14 +112,18 @@ public class AiAssistantService {
             releaseNewRecord(context.userId(), conversationId, clientMessageId, start);
             throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "AI 当前并发已满，请稍后再试");
         }
-        String lockToken = locks.tryLock(context.userId(), conversationId);
+        // One budget for queue wait, generation and streaming: the lease covers the whole turn,
+        // and the emitter cannot outlive it by much.
+        long deadline = System.nanoTime() + properties.getTurnTimeoutSeconds() * 1_000_000_000L;
+        String lockToken = locks.tryLock(context.userId(), conversationId,
+                java.time.Duration.ofSeconds(properties.getTurnTimeoutSeconds() + 30L));
         if (lockToken == null) {
             // A failed lock must not leave a NEW record stuck in PROCESSING for an hour.
             permits.release();
             releaseNewRecord(context.userId(), conversationId, clientMessageId, start);
             throw new ResponseStatusException(HttpStatus.CONFLICT, "该会话已有请求在处理");
         }
-        SseEmitter emitter = new SseEmitter(60_000L);
+        SseEmitter emitter = new SseEmitter((properties.getTurnTimeoutSeconds() + 10L) * 1000L);
         if (start.state() == AiDedupeService.State.CACHED) {
             emitCached(context, emitter, start.answerJson(), conversationId, clientMessageId);
             locks.unlock(context.userId(), conversationId, lockToken);
@@ -128,7 +132,7 @@ public class AiAssistantService {
         }
         try {
             executor.execute(() -> run(context, conversationId, clientMessageId, message, shopId,
-                    lockToken, emitter));
+                    lockToken, deadline, emitter));
         } catch (RuntimeException e) {
             locks.unlock(context.userId(), conversationId, lockToken);
             permits.release();
@@ -139,11 +143,16 @@ public class AiAssistantService {
     }
 
     private void run(AiAuthContext context, String conversationId, String clientMessageId, String message,
-                     Long shopId, String lockToken, SseEmitter emitter) {
+                     Long shopId, String lockToken, long deadline, SseEmitter emitter) {
         boolean completed = false;
-        long deadline = System.nanoTime() + properties.getTurnTimeoutSeconds() * 1_000_000_000L;
         List<String> dependencies = new ArrayList<>();
         try {
+            // The deadline starts when the request is accepted, so queue wait counts against it.
+            if (System.nanoTime() > deadline) {
+                dedupe.fail(context.userId(), conversationId, clientMessageId);
+                sendError(emitter, "TURN_TIMEOUT", "请求排队超时，请重试", true);
+                return;
+            }
             send(emitter, "meta", Map.of("conversationId", conversationId,
                     "mode", provider.mode(), "messageId", clientMessageId));
             send(emitter, "status", Map.of("stage", "retrieving"));
@@ -239,6 +248,13 @@ public class AiAssistantService {
                 send(emitter, "done", Map.of("messageId", clientMessageId, "usage", "none"));
                 dedupe.fail(context.userId(), conversationId, clientMessageId);
                 completed = true;
+                return;
+            }
+            // The lease may have expired and been taken over, or the conversation deleted, while
+            // the model was running. Such a turn must not stream or persist its result.
+            if (!locks.owns(context.userId(), conversationId, lockToken)
+                    || !conversations.exists(context.userId(), conversationId)) {
+                dedupe.fail(context.userId(), conversationId, clientMessageId);
                 return;
             }
             String stripped = answerText == null ? "" : answerText.strip();

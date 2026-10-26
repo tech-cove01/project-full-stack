@@ -47,6 +47,18 @@ public class OrderReviewRepository {
                 streamMessageId, attempts, reason);
     }
 
+    /**
+     * Terminal outcome reached: the order now exists (or was definitively rejected), so the row
+     * must stop blocking reconciliation and stop being replayable.
+     */
+    public void resolve(long orderId) {
+        jdbc.update("""
+                UPDATE tb_order_review
+                SET status = 'RESOLVED', resolved_at = NOW(3), updated_at = NOW(3)
+                WHERE order_id = ? AND status <> 'RESOLVED'
+                """, Long.toString(orderId));
+    }
+
     public long openCount() {
         Long count = jdbc.queryForObject(
                 "SELECT COUNT(*) FROM tb_order_review WHERE status = 'OPEN'", Long.class);

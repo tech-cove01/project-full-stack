@@ -7,7 +7,7 @@
     "mode": "stub"
   },
   "trade": {
-    "activity_id": "1042",
+    "activity_id": "1049",
     "initial_stock": 3,
     "checks": {
       "publication_idempotent": true,
@@ -18,9 +18,9 @@
       "refund_idempotent_no_rebuy": true
     },
     "orders": [
-      "653019884384419878",
-      "653019888679387175",
-      "653019888679387176"
+      "653028311110254640",
+      "653028311110254641",
+      "653028315405221938"
     ],
     "final_db_stock": 2,
     "final_redis_stock": 2,

@@ -1,0 +1,13 @@
+{
+  "activityId": "1046",
+  "eventId": "review-processing-025bc5401f63",
+  "expected": "HTTP 409 while PROCESSING compensation is leased",
+  "cleanupErrors": [],
+  "versionBefore": 1,
+  "processingBefore": "PROCESSING",
+  "http": 409,
+  "apiSuccess": false,
+  "versionAfter": "1",
+  "processingAfter": "PROCESSING",
+  "finding": "PASS"
+}

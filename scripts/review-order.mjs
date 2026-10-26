@@ -60,15 +60,23 @@ function replay(orderId) {
   const [voucherId, userId, status] = row.split('\t')
   if (status !== 'OPEN') throw new Error('review record is ' + status + ', only OPEN can be replayed')
 
+  // Claim before publishing. The consumer can only react after XADD, so a failure it records
+  // afterwards (REQUEUED -> OPEN) must not be overwritten by a late CLI update.
+  const claimed = Number(query(`UPDATE tb_order_review
+      SET status = 'REQUEUED', resolved_at = NULL, updated_at = NOW(3)
+      WHERE order_id = '${orderId}' AND status = 'OPEN'; SELECT ROW_COUNT();`).trim())
+  if (claimed !== 1) throw new Error('review row could not be claimed; it may have changed meanwhile')
+
   const added = spawnSync('docker',
     ['exec', redisContainer, 'redis-cli', 'XADD', stream, '*',
       'id', orderId, 'userId', userId, 'voucherId', voucherId],
     { encoding: 'utf8' })
-  if (added.error) throw added.error
-  if (added.status !== 0) throw new Error(added.stderr || 'XADD failed')
-
-  exec(`UPDATE tb_order_review SET status = 'REQUEUED', resolved_at = NOW(3),
-        updated_at = NOW(3) WHERE order_id = '${orderId}' AND status = 'OPEN'`)
+  if (added.error || added.status !== 0) {
+    // Nothing was published: put the row back so the operator can retry.
+    exec(`UPDATE tb_order_review SET status = 'OPEN', updated_at = NOW(3)
+          WHERE order_id = '${orderId}' AND status = 'REQUEUED'`)
+    throw new Error(added.error ? String(added.error) : (added.stderr || 'XADD failed'))
+  }
   console.log('requeued ' + orderId + ' as stream entry ' + added.stdout.trim())
   console.log('the consumer now decides: existing row -> reports it, unknown -> retries creation')
 }

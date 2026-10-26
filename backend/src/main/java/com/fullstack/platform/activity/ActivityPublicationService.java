@@ -117,14 +117,12 @@ public class ActivityPublicationService {
      * Callers must first prove that no reservation is still in flight; this method never opens
      * the gate, it writes it CLOSED at the new version so the ACTIVITY_OPEN event opens it.
      */
-    public long prepareForReconcile(long activityId, int targetVersion) {
-        SeckillVoucher activity = seckillMapper.selectById(activityId);
-        if (activity == null) {
-            throw new NeedsReviewException("Activity " + activityId + " disappeared");
-        }
-        Long prepared = redis.execute(RECONCILE, gateKeys(activity), Integer.toString(targetVersion),
-                Integer.toString(activity.getStock()), millis(activity.getBeginTime()),
-                millis(activity.getEndTime()));
+    public long prepareForReconcile(long activityId, int targetVersion, int stock,
+                                    java.time.LocalDateTime beginTime, java.time.LocalDateTime endTime) {
+        // The caller passes the values read inside its own FOR UPDATE statement. Re-reading the
+        // row here would use a separate (possibly older) snapshot under REPEATABLE READ.
+        Long prepared = redis.execute(RECONCILE, gateKeys(activityId), Integer.toString(targetVersion),
+                Integer.toString(stock), millis(beginTime), millis(endTime));
         return prepared == null ? -2 : prepared;
     }
 
@@ -151,7 +149,10 @@ public class ActivityPublicationService {
     }
 
     private static List<String> gateKeys(SeckillVoucher activity) {
-        long id = activity.getVoucherId();
+        return gateKeys(activity.getVoucherId());
+    }
+
+    private static List<String> gateKeys(long id) {
         return List.of(SECKILL_GATE_KEY + id, SECKILL_STOCK_KEY + id,
                 SECKILL_BEGIN_KEY + id, SECKILL_END_KEY + id);
     }

@@ -261,11 +261,18 @@ public class MerchantActivityService {
         if (!confirm) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "需要显式确认已处理完在途预约");
         }
-        Map<String, Object> locked = jdbc.queryForMap(
-                "SELECT publish_status, publish_version FROM tb_seckill_voucher WHERE voucher_id = ? FOR UPDATE",
-                activityId);
-        String status = (String) locked.get("publish_status");
-        int version = ((Number) locked.get("publish_version")).intValue();
+        LockedActivity locked = jdbc.queryForObject("""
+                SELECT publish_status, publish_version, stock, begin_time, end_time
+                FROM tb_seckill_voucher WHERE voucher_id = ? FOR UPDATE
+                """, (rs, rowNum) -> new LockedActivity(
+                        rs.getString("publish_status"), rs.getInt("publish_version"), rs.getInt("stock"),
+                        rs.getObject("begin_time", LocalDateTime.class),
+                        rs.getObject("end_time", LocalDateTime.class)), activityId);
+        if (locked == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "活动不存在");
+        }
+        String status = locked.status();
+        int version = locked.version();
         if (!"ACTIVE".equals(status)) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "只有 ACTIVE 活动需要重建 Redis 状态");
         }
@@ -292,7 +299,8 @@ public class MerchantActivityService {
 
         // 3. Rebuild from the locked row; the gate stays CLOSED until the outbox opens target.
         int target = version + 2;
-        long prepared = publication.prepareForReconcile(activityId, target);
+        long prepared = publication.prepareForReconcile(activityId, target, locked.stock(),
+                locked.beginTime(), locked.endTime());
         if (prepared == -2) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Redis 状态无法安全重建，需人工核对");
         }
@@ -323,9 +331,12 @@ public class MerchantActivityService {
     }
 
     private long pendingCompensations(long activityId) {
+        // Must match the values OutboxRepository actually writes: PENDING is queued,
+        // PROCESSING is leased by the relay, NEEDS_REVIEW stopped after retries. 'IN_PROGRESS'
+        // is not a value used by the table and previously let leased compensations slip through.
         Long count = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM tb_outbox
-                WHERE delivery_status IN ('PENDING', 'IN_PROGRESS', 'NEEDS_REVIEW')
+                WHERE delivery_status IN ('PENDING', 'PROCESSING', 'NEEDS_REVIEW')
                   AND aggregate_type = 'ORDER'
                   AND JSON_UNQUOTE(JSON_EXTRACT(payload, '$.voucherId')) = ?
                 """, Long.class, Long.toString(activityId));
@@ -400,6 +411,10 @@ public class MerchantActivityService {
                                String publishStatus, int publishVersion, LocalDateTime beginTime,
                                LocalDateTime endTime, LocalDateTime redeemBeginTime,
                                LocalDateTime redeemEndTime) { }
+
+    /** Values read inside the reconcile FOR UPDATE statement; the rebuild must use these. */
+    private record LockedActivity(String status, int version, int stock,
+                                  LocalDateTime beginTime, LocalDateTime endTime) { }
 
     public record Page(List<ActivityView> items, long total) { }
 

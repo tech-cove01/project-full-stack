@@ -35,6 +35,13 @@ public class AiConversationService {
             return 1
             """, Long.class);
 
+    private static final DefaultRedisScript<Long> BIND_SHOP = new DefaultRedisScript<>("""
+            if redis.call('EXISTS', KEYS[1]) == 0 then return 0 end
+            redis.call('HSET', KEYS[1], 'shopId', ARGV[1], 'updatedAt', ARGV[2])
+            redis.call('EXPIRE', KEYS[1], tonumber(ARGV[3]))
+            return 1
+            """, Long.class);
+
     private final StringRedisTemplate redis;
     private final ObjectMapper objectMapper;
 
@@ -76,10 +83,14 @@ public class AiConversationService {
 
     public void bindShop(long userId, String conversationId, Long shopId) {
         if (shopId == null) return;
-        if (!Boolean.TRUE.equals(redis.hasKey(conversationKey(userId, conversationId)))) return;
-        redis.opsForHash().put(conversationKey(userId, conversationId), "shopId", shopId.toString());
-        redis.opsForHash().put(conversationKey(userId, conversationId), "updatedAt", now());
-        redis.expire(conversationKey(userId, conversationId), TTL);
+        // Same "exists then write" hazard as append: a delete between the check and the two
+        // HSET calls would recreate the conversation. Check and write inside one script.
+        redis.execute(BIND_SHOP, List.of(conversationKey(userId, conversationId)),
+                shopId.toString(), now(), Long.toString(TTL.toSeconds()));
+    }
+
+    public boolean exists(long userId, String conversationId) {
+        return Boolean.TRUE.equals(redis.hasKey(conversationKey(userId, conversationId)));
     }
 
     public void append(long userId, String conversationId, String role, String text,

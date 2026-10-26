@@ -1,0 +1,19 @@
+go version go1.27.0 windows/amd64
+all modules verified
+gofmt: PASS
+go vet: PASS
+?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+ok  	github.com/cityloop/fullstack-go/internal/activity	2.183s
+ok  	github.com/cityloop/fullstack-go/internal/activitypub	0.620s
+ok  	github.com/cityloop/fullstack-go/internal/auth	2.120s
+ok  	github.com/cityloop/fullstack-go/internal/merchant	2.009s
+ok  	github.com/cityloop/fullstack-go/internal/order	2.018s
+ok  	github.com/cityloop/fullstack-go/internal/orderadmission	0.543s
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	3.845s
+ok  	github.com/cityloop/fullstack-go/internal/ordertimeout	3.988s
+ok  	github.com/cityloop/fullstack-go/internal/outbox	0.586s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	2.291s
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.444s
+ok  	github.com/cityloop/fullstack-go/internal/platform/database	0.502s
+ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	0.600s
+ok  	github.com/cityloop/fullstack-go/internal/shop	3.881s

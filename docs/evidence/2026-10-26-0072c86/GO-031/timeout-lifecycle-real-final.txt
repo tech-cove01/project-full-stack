@@ -1,0 +1,17 @@
+=== RUN   TestIntegrationTimeoutLifecycle
+=== RUN   TestIntegrationTimeoutLifecycle/real_lifecycle_closes_due_order_with_inventory_system_audit_and_pending_event_without_redis
+    lifecycle_integration_test.go:218: actualLifecycle=order.Service.CancelExpired due=9300987103005714 future=9300987103005715 paid=9300987103005716 attempts=1,0 stock=8 version=1 actor=SYSTEM/0 compensation=PENDING redisClient=none
+    lifecycle_integration_test.go:58: cleanup=exact owned catalog/users/orders/audit/outbox remaining=0 redisClient=none
+=== RUN   TestIntegrationTimeoutLifecycle/two_real_lifecycle_scanners_commit_only_one_transition
+    lifecycle_integration_test.go:264: actualLifecycle=order.Service.CancelExpired order=9300434024323291 scanners=2 selected=2 committed=1 version=1 stock=10 systemAudits=1 pendingEvents=1
+    lifecycle_integration_test.go:58: cleanup=exact owned catalog/users/orders/audit/outbox remaining=0 redisClient=none
+=== RUN   TestIntegrationTimeoutLifecycle/durable_outbox_conflict_rolls_back_first_row_without_starving_second_and_recovers_on_rescan
+    lifecycle_integration_test.go:294: fault=durable semantic outbox conflict first=9300535888397846 rollback=status1/version0/noCancelAudit second=9300535888397847 committed=status4/version1 stock=9
+    lifecycle_integration_test.go:305: recovery=removed exact owned conflicting row first=9300535888397846 rescanAttempts=1,0 committed=1 version=1 stock=10 systemAudits=2 pendingEvents=2
+    lifecycle_integration_test.go:58: cleanup=exact owned catalog/users/orders/audit/outbox remaining=0 redisClient=none
+--- PASS: TestIntegrationTimeoutLifecycle (0.74s)
+    --- PASS: TestIntegrationTimeoutLifecycle/real_lifecycle_closes_due_order_with_inventory_system_audit_and_pending_event_without_redis (0.27s)
+    --- PASS: TestIntegrationTimeoutLifecycle/two_real_lifecycle_scanners_commit_only_one_transition (0.16s)
+    --- PASS: TestIntegrationTimeoutLifecycle/durable_outbox_conflict_rolls_back_first_row_without_starving_second_and_recovers_on_rescan (0.29s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/ordertimeout	2.656s

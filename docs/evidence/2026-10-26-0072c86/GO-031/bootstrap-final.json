@@ -1,0 +1,119 @@
+{
+  "task": "GO-001",
+  "acceptance": "MIG-GO-01",
+  "recorded_at": "2026-10-26T15:45:45.985570+00:00",
+  "binary": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\backend-go\\bin\\api-go031.exe",
+  "platform": "nt",
+  "startup_timeout_seconds": 15.0,
+  "service_deadlines": {
+    "startup": "8s",
+    "health": "2s",
+    "shutdown": "10s"
+  },
+  "passed": true,
+  "scenarios": [
+    {
+      "scenario": "healthy_start_and_shutdown",
+      "passed": true,
+      "health": [
+        {
+          "path": "/health/live",
+          "http_status": 200,
+          "body": {
+            "status": "UP",
+            "service": "project-full-stack-go",
+            "runtime": "go",
+            "version": "6701e62-go031-worktree"
+          },
+          "passed": true
+        },
+        {
+          "path": "/health/ready",
+          "http_status": 200,
+          "body": {
+            "status": "UP",
+            "service": "project-full-stack-go",
+            "runtime": "go",
+            "version": "6701e62-go031-worktree"
+          },
+          "passed": true
+        },
+        {
+          "path": "/actuator/health",
+          "http_status": 200,
+          "body": {
+            "status": "UP",
+            "service": "project-full-stack-go",
+            "runtime": "go",
+            "version": "6701e62-go031-worktree"
+          },
+          "passed": true
+        }
+      ],
+      "exit_code": 0,
+      "forced_cleanup": false,
+      "password_in_raw_log": false,
+      "api_address": "127.0.0.1:51142",
+      "startup_seconds": 0.597,
+      "shutdown_signal": "CTRL_BREAK_EVENT",
+      "api_port_rebindable": true,
+      "log": "{\"time\":\"2026-10-26T23:45:44.0458738+08:00\",\"level\":\"INFO\",\"msg\":\"Go API ready\",\"service\":\"project-full-stack-go\",\"runtime\":\"go\",\"version\":\"6701e62-go031-worktree\",\"address\":\"127.0.0.1:51142\"}\n{\"time\":\"2026-10-26T23:45:44.5684886+08:00\",\"level\":\"INFO\",\"msg\":\"Go API shutting down\"}\n{\"time\":\"2026-10-26T23:45:44.5684886+08:00\",\"level\":\"INFO\",\"msg\":\"Go API HTTP requests drained\"}\n",
+      "duration_seconds": 0.605
+    },
+    {
+      "scenario": "missing_mysql_password",
+      "passed": true,
+      "health": [],
+      "exit_code": 1,
+      "forced_cleanup": false,
+      "password_in_raw_log": false,
+      "api_address": "127.0.0.1:51153",
+      "log": "{\"time\":\"2026-10-26T23:45:44.6254591+08:00\",\"level\":\"ERROR\",\"msg\":\"Go API stopped\",\"error\":\"MYSQL_PASSWORD must be explicitly configured\"}\n",
+      "duration_seconds": 0.153
+    },
+    {
+      "scenario": "missing_mysql_port",
+      "passed": true,
+      "health": [],
+      "exit_code": 1,
+      "forced_cleanup": false,
+      "password_in_raw_log": false,
+      "api_address": "127.0.0.1:51154",
+      "log": "{\"time\":\"2026-10-26T23:45:44.7788642+08:00\",\"level\":\"ERROR\",\"msg\":\"Go API stopped\",\"error\":\"MYSQL_PORT must be explicitly configured\"}\n",
+      "duration_seconds": 0.144
+    },
+    {
+      "scenario": "mysql_connection_refused",
+      "passed": true,
+      "health": [],
+      "exit_code": 1,
+      "forced_cleanup": false,
+      "password_in_raw_log": false,
+      "api_address": "127.0.0.1:51155",
+      "log": "{\"time\":\"2026-10-26T23:45:44.9380978+08:00\",\"level\":\"ERROR\",\"msg\":\"Go API stopped\",\"error\":\"MySQL startup check failed; verify MYSQL_* configuration and isolated instance\"}\n",
+      "duration_seconds": 0.186
+    },
+    {
+      "scenario": "redis_connection_refused",
+      "passed": true,
+      "health": [],
+      "exit_code": 1,
+      "forced_cleanup": false,
+      "password_in_raw_log": false,
+      "api_address": "127.0.0.1:51158",
+      "log": "redis: 2026/10/26 23:45:45 pool.go:422: redis: connection pool: failed to dial after 5 attempts: dial tcp 127.0.0.1:51159: connectex: No connection could be made because the target machine actively refused it.\n{\"time\":\"2026-10-26T23:45:45.779004+08:00\",\"level\":\"ERROR\",\"msg\":\"Go API stopped\",\"error\":\"Redis startup check failed; verify REDIS_* configuration and isolated instance\"}\n",
+      "duration_seconds": 0.725
+    },
+    {
+      "scenario": "api_port_in_use",
+      "passed": true,
+      "health": [],
+      "exit_code": 1,
+      "forced_cleanup": false,
+      "password_in_raw_log": false,
+      "api_address": "127.0.0.1:51167",
+      "log": "{\"time\":\"2026-10-26T23:45:45.8777685+08:00\",\"level\":\"ERROR\",\"msg\":\"Go API stopped\",\"error\":\"listen HTTP API: listen tcp 127.0.0.1:51167: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.\"}\n",
+      "duration_seconds": 0.198
+    }
+  ]
+}

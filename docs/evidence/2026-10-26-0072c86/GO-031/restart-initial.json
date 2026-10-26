@@ -1,0 +1,87 @@
+{
+  "task": "GO-031",
+  "passed": true,
+  "checks": [
+    "Development login returns a code without exposing it",
+    "Development login returns a code without exposing it",
+    "Development login returns a code without exposing it",
+    "A real second buyer pays before the deadline",
+    "Unpaid real order is stopped before its immutable DB deadline",
+    "API exits cleanly and releases its port",
+    "The API has fully exited before the DB deadline passes",
+    "Deadline passes offline without pretending the stopped scanner ran",
+    "Restart closes the old deadline once even when new-order timeout changes to one hour",
+    "Only the expired unpaid order restores one DB stock unit",
+    "Timeout has exactly one trusted SYSTEM cancellation audit",
+    "Timeout persists one compensation event without claiming Redis compensation completed",
+    "Redis preallocation stays unchanged until GO-033 compensation",
+    "The paid order stays paid after its old deadline",
+    "Late payment cannot revive a timeout-cancelled order",
+    "Repeating cancellation returns the existing cancelled order",
+    "A later production-interval scan causes no second transition or stock restoration",
+    "API exits cleanly and releases its port"
+  ],
+  "runs": [
+    {
+      "timeoutConfig": "10s",
+      "port": 63305,
+      "version": "6701e62-go031-worktree",
+      "shutdownSignal": "CTRL_BREAK_EVENT",
+      "exitCode": 0,
+      "portRebindable": true
+    },
+    {
+      "timeoutConfig": "1h",
+      "port": 60481,
+      "version": "6701e62-go031-worktree",
+      "shutdownSignal": "CTRL_BREAK_EVENT",
+      "exitCode": 0,
+      "portRebindable": true
+    }
+  ],
+  "cleanup": true,
+  "step": "restart with changed configuration and no ZSet hints",
+  "sourceMessages": [
+    {
+      "sourceId": "1793029467182-0",
+      "orderId": "653105895399490360"
+    },
+    {
+      "sourceId": "1793029467373-0",
+      "orderId": "653105899694457657"
+    }
+  ],
+  "beforeStop": {
+    "orderId": "653105895399490360",
+    "status": 1,
+    "version": 0,
+    "deadlineEpochMs": "1793029477000",
+    "dbNowEpochMs": "1793029467705"
+  },
+  "afterStop": {
+    "dbNowEpochMs": "1793029467844",
+    "deadlineEpochMs": "1793029477000",
+    "apiExited": true
+  },
+  "afterRestart": {
+    "orderId": "653105895399490360",
+    "status": 4,
+    "version": 1,
+    "dbStock": 2,
+    "redisStock": 1,
+    "compensation": "PENDING",
+    "zsetBoundary": "No hint is created or needed by the DB-based producer/scanner"
+  },
+  "forcedCleanup": false,
+  "processLogs": [
+    {
+      "privateValueFound": false,
+      "log": "{\"time\":\"2026-10-26T23:44:24.7289009+08:00\",\"level\":\"INFO\",\"msg\":\"Go API ready\",\"service\":\"project-full-stack-go\",\"runtime\":\"go\",\"version\":\"6701e62-go031-worktree\",\"address\":\"127.0.0.1:63305\"}\n{\"time\":\"2026-10-26T23:44:27.3516252+08:00\",\"level\":\"INFO\",\"msg\":\"Go API shutting down\"}\n{\"time\":\"2026-10-26T23:44:27.3521672+08:00\",\"level\":\"INFO\",\"msg\":\"Go API HTTP requests drained\"}\n"
+    },
+    {
+      "privateValueFound": false,
+      "log": "{\"time\":\"2026-10-26T23:44:37.5199227+08:00\",\"level\":\"INFO\",\"msg\":\"Go API ready\",\"service\":\"project-full-stack-go\",\"runtime\":\"go\",\"version\":\"6701e62-go031-worktree\",\"address\":\"127.0.0.1:60481\"}\n{\"time\":\"2026-10-26T23:44:44.1377774+08:00\",\"level\":\"INFO\",\"msg\":\"Go API shutting down\"}\n{\"time\":\"2026-10-26T23:44:44.1384069+08:00\",\"level\":\"INFO\",\"msg\":\"Go API HTTP requests drained\"}\n"
+    }
+  ],
+  "recordedAt": "2026-10-26T15:44:44.930081+00:00"
+}

@@ -109,3 +109,24 @@ func TestErrorsUseCompatibleJSONAndHidePanicValues(t *testing.T) {
 		})
 	}
 }
+
+func TestResultPreservesOmittedFieldsEmptyArraysAndStringTotals(t *testing.T) {
+	zero := "0"
+	for _, test := range []struct {
+		name   string
+		result Result
+		want   string
+	}{
+		{"empty_success", Result{Success: true}, `{"success":true}`},
+		{"business_error", Result{ErrorMsg: "failure"}, `{"success":false,"errorMsg":"failure"}`},
+		{"empty_page", Result{Success: true, Data: []string{}, Total: &zero}, `{"success":true,"data":[],"total":"0"}`},
+		{"string_id", Result{Success: true, Data: "18446744073709551615"}, `{"success":true,"data":"18446744073709551615"}`},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			encoded, err := json.Marshal(test.result)
+			if err != nil || string(encoded) != test.want {
+				t.Fatal("Result serialization differs from the frontend contract")
+			}
+		})
+	}
+}

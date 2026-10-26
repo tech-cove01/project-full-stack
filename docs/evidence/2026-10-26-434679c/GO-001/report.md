@@ -2,8 +2,8 @@
 
 日期：2026-10-26（Asia/Shanghai）。状态：自测通过待核验。
 
-- 开始 SHA：`434679cf86aaa125f1f9a35fa695cc7050eed907`；交付为本报告随同的 `feat(GO-001)` 本地提交，完整 SHA 在后续交付记录及聊天中记录。
-- 范围：Go 配置/连接池/健康/HTTP 生命周期，隔离 Compose，Vite 代理，Linux CI 配置。没有迁移业务、执行 DDL、开 worker、清库存或操作 Java 实例。
+- 开始 SHA：`434679cf86aaa125f1f9a35fa695cc7050eed907`；交付 SHA：`69ddd3ee001251b5a16ee252fbacf51130643630`。
+- 范围：Go 配置/连接池/健康/HTTP 生命周期，隔离 Compose，Vite 代理，Linux CI 配置。未新增/修改 DDL，应用不执行迁移；隔离空库仅复用首次初始化 SQL。没有迁移业务、开 worker、清库存或操作 Java 实例。
 - 环境：Windows amd64 / Go 1.27.0，i9-13900H / 20 逻辑核 / 约 31.6 GiB RAM；Docker Engine 29.3.1、Compose 5.1.0。API 随机 loopback 端口，真实隔离 MySQL 3308 / Redis 6380，单实例。
 - 镜像：MySQL `mysql@sha256:76f0358884cb92d9a086d24e5671c38048d3fef40f2588703d73eb55392d6b69`；Redis `redis@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541`。
 
@@ -29,6 +29,8 @@
 [初版 binary 的启动证据](bootstrap-initial.json) 与最终源码构建的证据分别保留。一次在 binary 尚未构建时调用脚本，参数校验明确报“不存在预构建文件”，未启动进程，不计入六场景。
 
 Linux race / 远端 GitHub Actions、启动后的真实 MySQL/Redis 中断恢复、长期连接/负载与业务流程均未执行。本任务不声明吞吐、业务迁移完成或全面验收。现有 Java 测试/数字不作 Go 成绩。
+
+独立只读 agent 对本票源码、配置、脚本和证据复查并独立执行 verify/vet/test/gofmt 与真实启动 6/6，无阻断发现。其普通权限 Docker pipe 访问被拒，故容器/卷归属由实现者的 Docker 输出确认；未独立执行 Linux race/远端 CI 或启动后依赖中断。最终 binary SHA256：`FAD073CF5DAB12E104873712600862B58D3BD937B429CC02C70ABD8484211523`。
 
 ## 复现与回退
 

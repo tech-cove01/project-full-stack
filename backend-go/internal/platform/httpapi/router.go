@@ -17,8 +17,10 @@ type Probe interface {
 // Result retains the existing frontend error envelope. Business handlers can
 // explicitly select data/null/empty-array behavior as their contracts require.
 type Result struct {
-	Success  bool   `json:"success"`
-	ErrorMsg string `json:"errorMsg,omitempty"`
+	Success  bool    `json:"success"`
+	ErrorMsg string  `json:"errorMsg,omitempty"`
+	Data     any     `json:"data,omitempty"`
+	Total    *string `json:"total,omitempty"`
 }
 
 type health struct {

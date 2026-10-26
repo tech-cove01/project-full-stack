@@ -1,0 +1,29 @@
+{
+  "task": "GO-010",
+  "acceptance": [
+    "MIG-GO-02",
+    "MIG-GO-03"
+  ],
+  "passed": true,
+  "checks": [
+    "Vite proxy and direct API both identify the Go service",
+    "anonymous protected request is 401",
+    "profile ID is a decimal string",
+    "UI stores a valid opaque session",
+    "page refresh restores the authenticated profile",
+    "UI logout clears session and remembered order",
+    "logout revokes the previous session on the server",
+    "profile ID is a decimal string",
+    "UI stores a valid opaque session",
+    "session is revoked remotely while the page remains open",
+    "401 on reload redirects to login and clears client identity",
+    "no uncaught browser errors"
+  ],
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "69ddd3e-go010-worktree"
+  },
+  "recordedAt": "2026-10-26T12:00:30.183Z"
+}

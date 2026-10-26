@@ -1,0 +1,21 @@
+GO-010 implementation agent, initial sandbox verification
+Command: go test ./...
+Working directory: backend-go
+Observed before auth unit/integration test files were added.
+Exit code: 1
+No credentials, phone numbers, login tokens or verification codes are recorded.
+
+?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+?   	github.com/cityloop/fullstack-go/internal/auth	[no test files]
+--- FAIL: TestShutdownDrainsAcceptedRequestBeforeClosingResources (0.01s)
+    app_test.go:85: HTTP client completed before handler entry: Get "http://127.0.0.1:60275": dial tcp 127.0.0.1:60275: connectex: An attempt was made to access a socket in a way forbidden by its access permissions.
+--- FAIL: TestShutdownDeadlineForcesCloseAndCancelsHandler (0.00s)
+    app_test.go:147: HTTP client completed before handler entry: Get "http://127.0.0.1:60277": dial tcp 127.0.0.1:60277: connectex: An attempt was made to access a socket in a way forbidden by its access permissions.
+--- FAIL: TestUnexpectedListenerFailureDrainsActiveRequestBeforeClosingResources (0.00s)
+    app_test.go:207: HTTP client completed before handler entry: Get "http://127.0.0.1:60279": dial tcp 127.0.0.1:60279: connectex: An attempt was made to access a socket in a way forbidden by its access permissions.
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/platform/app	2.713s
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.242s
+ok  	github.com/cityloop/fullstack-go/internal/platform/database	0.288s
+ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	1.244s
+FAIL

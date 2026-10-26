@@ -11,6 +11,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
+
+	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
@@ -29,7 +32,9 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		return fmt.Errorf("listen HTTP API: %w", err)
 	}
 	server := &http.Server{
-		Handler:           httpapi.NewRouter(resources, cfg.ProbeTimeout, revision, logger),
+		Handler: httpapi.NewRouter(resources, cfg.ProbeTimeout, revision, logger, func(routes gin.IRouter) {
+			auth.Register(routes, auth.NewService(resources.ORM, resources.Redis, cfg.Environment))
+		}),
 		ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second,
 		WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
 		MaxHeaderBytes: 1 << 20,

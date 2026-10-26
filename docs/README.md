@@ -28,7 +28,8 @@
 | --- | --- | --- |
 | GO-000 规范与 Java 冻结 | 已交付规范；13份文档静态核对及独立设计审查通过，随本任务提交 | 本地标签已核对；不改应用或运行中的服务 |
 | GO-001 Go 工程、配置、健康、关闭与 CI | 自测通过待核验 | 真实隔离依赖六场景通过；Linux CI/race 配置已添加，远端未执行 |
-| GO-010 / 011 登录与商铺 | 待做 | Vue→Go 首条真实链路、响应兼容测试 |
+| GO-010 登录、身份恢复与退出 | 自测通过待核验 | 真实 Vue 12 项、真实 MySQL/Redis 7 组通过；见下方证据 |
+| GO-011 商铺列表详情/搜索分类 | 待做 | 接通首页浏览、分类、稳定分页和优惠读取 |
 | GO-020 / 021 商家权限与活动 | 待做 | 逐门店范围、幂等发布/关闸、交易 outbox |
 | GO-030—033 交易与恢复 | 待做 | 成单/履约/补偿/review/重建；真实窗口回归 |
 | GO-040—042 业务 AI | 待做 | FAQ/检索/只读工具/SSE/生命周期；Stub 与真实质量分开 |
@@ -40,11 +41,19 @@
 
 ### GO-001 / 工程、配置、健康与关闭
 
-- 依赖：GO-000；开始 SHA `434679cf86aaa125f1f9a35fa695cc7050eed907`。交付 SHA 随本地 commit 在交付记录中列出。
+- 依赖：GO-000；开始 SHA `434679cf86aaa125f1f9a35fa695cc7050eed907`；交付 SHA `69ddd3ee001251b5a16ee252fbacf51130643630`。
 - 交付行为：隔离 MySQL/Redis 启动 Go API；缺配置、依赖不可达或端口冲突明确失败；健康区分 live/ready 并返回 Go 身份；所有 HTTP 退出路径有界排空后关池。前端代理目标可配置，默认 Go 8082。
 - 验收：MIG-GO-01；MIG-GO-02 的代理配置部分（业务与真实页面归 GO-010/011）。不涉及业务/SQL 变更、Lua、Stream/outbox 消费。
 - 命令与证据：`go mod verify`、`gofmt -l .`、`go vet ./...`、`go test -count=1 ./...`、构建和 `go-bootstrap-smoke.py`；前端 build / Vite 配置 prettier。详见 [报告](evidence/2026-10-26-434679c/GO-001/report.md)。
 - 限制：Linux race 和远端 CI 未执行；启动后真实依赖中断恢复尚未执行，ready 失效/超时由局部测试覆盖。独立静态审查不替代完整业务验收。
+
+### GO-010 / 登录、身份恢复与退出
+
+- 依赖：GO-001；开始 SHA `69ddd3ee001251b5a16ee252fbacf51130643630`；交付 SHA 随本票独立 commit 在交付记录中列出。
+- 交付行为：真实 Vue 经代理登录 Go、刷新 `/user/me` 恢复身份、退出撤销当前 session；失效请求 401 清理本地身份。验证码节流/单次消费、DB 手机号唯一、session 写入及续期原子化，大 ID 保持字符串。
+- 验收：MIG-GO-02 身份子集、MIG-GO-03 字符串 ID / null省略 / 空数组 / total兼容子集；商铺、金额/业务时间、SSE不在本票。
+- 验证：gofmt/vet/full go test PASS；真实 `GO_INTEGRATION=1 go test -count=1 -v ./internal/auth -run TestIntegrationAuth` 七组通过；真实 `go-auth-ui-smoke.mjs` 十二项通过。原始证据与命令见 [报告](evidence/2026-10-26-69ddd3e/GO-010/report.md)。
+- 限制：Linux race / 远端 CI 未执行；手机号沿 Java 正常号段集合（去掉旧正则误收逗号），不扩大到前端接受的全部号段；无独立 refresh 路由。坏类型为 503，缺失/过期/损坏或无 TTL session 为 401；不把异常永久凭证修复为有效态。未知业务路由暂为 404。
 
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 

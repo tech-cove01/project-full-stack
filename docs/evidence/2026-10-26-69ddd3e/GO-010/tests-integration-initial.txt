@@ -1,0 +1,48 @@
+=== RUN   TestIntegrationAuth
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+=== RUN   TestIntegrationAuth/code_login_session_and_logout
+=== RUN   TestIntegrationAuth/concurrent_first_login_reuses_unique_phone
+=== RUN   TestIntegrationAuth/large_string_id_and_invalid_sessions
+=== RUN   TestIntegrationAuth/production_never_returns_or_persists_a_code
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] POST   /user/code                --> github.com/cityloop/fullstack-go/internal/auth.Register.func1 (2 handlers)
+[GIN-debug] POST   /user/login               --> github.com/cityloop/fullstack-go/internal/auth.Register.func2 (2 handlers)
+[GIN-debug] GET    /user/me                  --> github.com/cityloop/fullstack-go/internal/auth.Register.func3 (3 handlers)
+[GIN-debug] POST   /user/logout              --> github.com/cityloop/fullstack-go/internal/auth.Register.func4 (3 handlers)
+=== RUN   TestIntegrationAuth/credentials_without_expiry_are_not_accepted
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_code_list
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_throttle_hash
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/login_with_code_list
+=== RUN   TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/me_with_session_string
+=== RUN   TestIntegrationAuth/logout_cannot_be_resurrected_by_concurrent_refresh
+--- PASS: TestIntegrationAuth (0.38s)
+    --- PASS: TestIntegrationAuth/code_login_session_and_logout (0.07s)
+    --- PASS: TestIntegrationAuth/concurrent_first_login_reuses_unique_phone (0.07s)
+    --- PASS: TestIntegrationAuth/large_string_id_and_invalid_sessions (0.06s)
+    --- PASS: TestIntegrationAuth/production_never_returns_or_persists_a_code (0.02s)
+    --- PASS: TestIntegrationAuth/credentials_without_expiry_are_not_accepted (0.02s)
+    --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes (0.07s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_code_list (0.01s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/send_with_throttle_hash (0.02s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/login_with_code_list (0.02s)
+        --- PASS: TestIntegrationAuth/wrong_redis_types_fail_without_partial_writes/me_with_session_string (0.02s)
+    --- PASS: TestIntegrationAuth/logout_cannot_be_resurrected_by_concurrent_refresh (0.06s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/auth	0.626s

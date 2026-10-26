@@ -53,6 +53,16 @@ jobs:
         run: test -z "$(gofmt -l .)"
       - run: go vet ./...
       - run: go test -race -count=1 ./...
+      - name: Initialize isolated SQL schema
+        run: >-
+          docker exec -i -e MYSQL_PWD=fullstack_go_dev_only
+          '${{ job.services.mysql.id }}' mysql --user=fullstack
+          --default-character-set=utf8mb4 project_full_stack_go
+          < ../infra/mysql/001-schema.sql
+      - name: Auth against real MySQL and Redis
+        run: go test -race -count=1 -v ./internal/auth
+        env:
+          GO_INTEGRATION: '1'
       - run: go build -trimpath -o bin/api ./cmd/api
       - run: python3 ../scripts/go-bootstrap-smoke.py --binary bin/api --output bootstrap-result.json
       - uses: actions/upload-artifact@v4

@@ -54,6 +54,17 @@ python ../scripts/go-bootstrap-smoke.py --binary bin/api.exe --output ../bootstr
 
 最后一条需以上真实依赖环境。Linux CI 增加 `go test -race` 和真实依赖启动脚本；配置不等于远端 CI 已执行，实际结果见任务证据。停止应用用 Ctrl+C；停止依赖用 `docker compose -f compose.go.yaml stop mysql redis`，保留卷。Git 回退不会撤销数据库变更，不用删卷回退。
 
+GO-010 已实现 `POST /user/code`、`POST /user/login`、`GET /user/me`、`POST /user/logout`。`GO_ENV=development` 返回本机模拟验证码，生产未接短信时取码失败且不写 Redis。验证码 120 秒 / 每手机号 60 秒间隔，session 沿 Java 的 36000 分钟（25 天）滑动有效期，Redis key/hash 字段保持兼容。前端刷新通过 `/user/me` 恢复身份，没有独立 refresh 接口；authorization 使用原始 token 或 `Bearer <token>`。手机号正常号段与 Java 一致，仅修正正则中的逗号误匹配；未迁移业务返回 404。
+
+真实身份测试（同样先显式设置隔离连接环境，`backend-go/` 中执行）：
+
+~~~powershell
+$env:GO_INTEGRATION = '1'
+go test -count=1 -v ./internal/auth -run TestIntegrationAuth
+~~~
+
+测试复用 `001-schema.sql` 的 `tb_user`，只清理自身随机用户/key，不清空数据。真实 Vue 脚本在根目录 `node scripts/go-auth-ui-smoke.mjs`；需设置 `PLAYWRIGHT_MODULE`（已安装 Playwright 的模块路径或 file URL）、可选 `CHROME_PATH`、`WEB_BASE`（默认5174）、`API_BASE`（默认8082）、`UI_EVIDENCE`（JSON输出）。脚本创建随机演示用户、退出并撤销其 session，证据不含手机号/验证码/token。该页面脚本不证明商铺/交易已迁移。
+
 ## Java 基线环境与启动（历史参考）
 
 - JDK 21 是编译目标；兼容的较新 JDK 也可以通过 `--release 21` 构建。

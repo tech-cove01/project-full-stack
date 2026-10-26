@@ -359,6 +359,43 @@ async function identityRegression() {
     verify(await page.evaluate(() => localStorage.getItem('cityloop.token')) === second.token,
       'a genuine delayed 401 from the previous session cannot clear the newer account session')
     await page.unroute('**/api/user/me')
+
+    result.step = 'late logout response'
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), first.token)
+    await page.goto(`${WEB}/shops/${shop}`)
+    const logoutPagePath = new URL(page.url()).pathname
+    let heldLogout, heldLogoutFailed = false
+    await page.route('**/api/user/logout', async route => {
+      try {
+        assert.equal(route.request().headers().authorization, first.token)
+        const response = await route.fetch()
+        const body = await response.json()
+        assert.ok(response.status() === 200 && body.success, 'real delayed logout failed')
+        heldLogout = { route, response }
+      } catch {
+        heldLogoutFailed = true
+        await route.abort('failed').catch(() => {})
+      }
+    })
+    await page.locator('.account-actions').getByRole('button', { name: '退出', exact: true }).click()
+    await eventually(() => Boolean(heldLogout) || heldLogoutFailed, Boolean, 'real logout response was not held')
+    assert.ok(!heldLogoutFailed && heldLogout, 'real delayed logout was not captured')
+    assert.equal((await api('/user/me', first.token)).status, 401, 'the original session was not revoked by the actual logout')
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), second.token)
+    await heldLogout.route.fulfill({ response: heldLogout.response })
+    await page.waitForFunction(() => !document.querySelector('.account-actions button.is-loading'))
+    const retainedAccount = await api('/user/me', second.token)
+    result.lateLogout = {
+      newSessionRetained: await page.evaluate(() => localStorage.getItem('cityloop.token')) === second.token,
+      newSessionValid: retainedAccount.status === 200 && retainedAccount.body.data?.id === users[2],
+      originalPageRetained: new URL(page.url()).pathname === logoutPagePath,
+      misleadingExitMessage: await page.locator('.el-message').filter({ hasText: /已退出登录|本地登录已退出/ }).count() > 0,
+    }
+    verify(result.lateLogout.newSessionRetained && result.lateLogout.newSessionValid
+      && result.lateLogout.originalPageRetained && !result.lateLogout.misleadingExitMessage,
+    'a genuine delayed logout cannot clear the replacement account session, redirect its page or report that it logged out')
+    await page.unroute('**/api/user/logout')
+
     result.step = 'current session unauthorized classification'
     await api('/user/logout', second.token, 'POST')
     const rejected = await page.evaluate(async voucher => {
@@ -370,6 +407,16 @@ async function identityRegression() {
     verify(rejected.status === 401 && rejected.outcomeUncertain === false && rejected.identityChanged === false
       && await page.evaluate(() => localStorage.getItem('cityloop.token')) === null,
     'a genuine current-session POST 401 stays a definitive rejection and clears only that session')
+
+    result.step = 'ordinary logout'
+    await second.page.evaluate(token => localStorage.setItem('cityloop.token', token), owner)
+    await page.goto(`${WEB}/shops/${shop}`)
+    await page.locator('.account-actions').getByRole('button', { name: '退出', exact: true }).click()
+    await page.waitForURL(url => url.pathname === '/')
+    verify(await page.evaluate(() => localStorage.getItem('cityloop.token')) === null
+      && (await api('/user/me', owner)).status === 401
+      && await page.getByRole('button', { name: '登录 / 注册', exact: true }).isVisible(),
+    'ordinary logout still revokes its real session, clears local identity and returns to the public home page')
     result.passed = true
   } catch (error) {
     result.failure = error instanceof Error ? error.message.split('\n')[0].slice(0, 160) : 'identity regression failed'

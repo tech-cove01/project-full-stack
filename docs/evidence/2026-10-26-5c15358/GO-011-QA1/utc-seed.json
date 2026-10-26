@@ -1,0 +1,39 @@
+{
+  "task": "GO-011-QA1",
+  "recordedAt": "2026-10-26T12:55:07.756Z",
+  "source": "scripts/go-shop-ui-smoke.mjs",
+  "execution": "Extract and execute actual fixture declarations, actual seed sql() argument and actual exact-ID cleanup sql() argument from current script. MySQL CLI --init-command forces each connection to +00:00 before seed SQL. No global SET statements. Old control removes only the newly added session SET from the extracted seed.",
+  "command": "mysql --protocol=TCP --host=127.0.0.1 --port=3308 --user=fullstack --default-character-set=utf8mb4 --batch --skip-column-names --init-command=\"SET time_zone='+00:00'\" project_full_stack_go < controlled-seed-sql (password passed via MYSQL_PWD, omitted)",
+  "fixture": {
+    "shops": 53,
+    "types": 2,
+    "vouchers": 7
+  },
+  "cases": [
+    {
+      "name": "old seed negative control in UTC session",
+      "initialSessionTimezone": "+00:00",
+      "finalSessionTimezone": "+00:00",
+      "globalTimezoneBefore": "SYSTEM",
+      "globalTimezoneAfter": "SYSTEM",
+      "nowMinusUTCSeconds": 0,
+      "beginRelativeToShanghaiNowSeconds": -30600,
+      "endRelativeToShanghaiNowSeconds": -27000,
+      "remainingFixtureRows": 0,
+      "passed": true
+    },
+    {
+      "name": "fixed actual seed in UTC session",
+      "initialSessionTimezone": "+00:00",
+      "finalSessionTimezone": "+08:00",
+      "globalTimezoneBefore": "SYSTEM",
+      "globalTimezoneAfter": "SYSTEM",
+      "nowMinusUTCSeconds": 28800,
+      "beginRelativeToShanghaiNowSeconds": -1800,
+      "endRelativeToShanghaiNowSeconds": 1800,
+      "remainingFixtureRows": 0,
+      "passed": true
+    }
+  ],
+  "passed": true
+}

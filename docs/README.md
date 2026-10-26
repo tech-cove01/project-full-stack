@@ -30,7 +30,7 @@
 | GO-001 Go 工程、配置、健康、关闭与 CI | 已核验（本票运行范围） | 独立重跑启动/关闭6场景；Linux race/远端CI仍未执行 |
 | GO-010 登录、身份恢复与退出 | 已核验（身份子集） | 独立真实集成与Vue12项通过 |
 | GO-011 商铺列表详情/搜索分类 | 已核验（浏览子集） | 独立真实集成、UTC/上海页面各14项通过；QA1脚本修正非阻断 |
-| GO-011-QA1 UI夹具会话时区 | 待做，非阻断 | seed同SQL会话显式+08:00，避免默认UTC误报；单独fix提交 |
+| GO-011-QA1 UI夹具会话时区 | 自测通过待核验，非阻断 | 同会话显式+08:00；真实UTC seed负对照/修复、UTC浏览器14项通过；单独fix提交 |
 | GO-020 门店权限/工作台 | 待做，可继续 | 混合角色、跨商家、成员停用旧token与真实Vue；独立commit交核验 |
 | GO-021 活动发布/下架 | 待做，依赖GO-020 | 幂等发布/关闸、交易outbox与审计 |
 | GO-030—033 交易与恢复 | 待做 | 成单/履约/补偿/review/重建；真实窗口回归 |
@@ -66,6 +66,12 @@
 - 验收：MIG-GO-02 浏览子集、MIG-GO-03 商铺/券 DTO 与金额/时间/空值/total 子集、PRODUCT-01 商铺子集；订单和商家列表分页仍归后续任务。
 - 验证：gofmt/vet/full go test PASS；真实 MySQL 7 组、原版本 SQL 首次升级与校验和重跑 PASS；UTC 与上海浏览器各14项 PASS，登录页面回归12项 PASS；frontend build/prettier PASS。[报告和失败/最终证据](evidence/2026-10-26-cc0c6f9/GO-011/report.md)。
 - 限制：`/shop/of/type` 带 x/y 明确400“附近坐标查询尚未迁移”；商铺详情直接读MySQL，L1/Redis缓存未迁移；5个公开GET已实现，HEAD未扩展；交易/商家/AI仍为404。已知旧商铺/券/分类写路由继续403。本票不证明持续容量，Linux race/远端CI未执行。
+
+### GO-011-QA1 / UI夹具会话时区
+
+- 依赖：GO-011；开始SHA `5c15358b287a39567df59d3becd52be54a28ee23`；单独fix提交的完整SHA随下一交付记录补充。
+- 行为：seed自己的同一MySQL会话先 `SET time_zone='+08:00'`，再执行NOW和INSERT；不改变数据库全局时区、业务实现或精确ID清理。
+- 验证：`node --check` PASS；受控初始UTC会话下旧seed窗口相对上海为-30600/-27000秒，当前实际seed为-1800/+1800秒，global前后均SYSTEM，清理剩余0；真实UTC浏览器14项PASS。[证据与边界](evidence/2026-10-26-5c15358/GO-011-QA1/report.md)。未重跑无关Go测试或Linux race/远端CI。
 
 本轮 G0/G1 实现结束后，测试 Go API/Vite 及 `project-full-stack-go` 的 MySQL/Redis 已停止，卷与隔离库保留，原 `project-full-stack` 容器仍 healthy。下一票 GO-020，从逐门店权限和商家工作台开始；先按运行文档重新启动隔离环境。附近坐标与详情缓存限制仍保留，后续切换前需复核，不能据本轮 GET 子集声称全部旧接口已接管。
 

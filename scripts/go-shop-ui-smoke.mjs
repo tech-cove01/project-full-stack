@@ -52,7 +52,7 @@ try {
     const end = i === 0 ? 'DATE_ADD(NOW(),INTERVAL 30 MINUTE)' : i === 2 ? 'DATE_SUB(NOW(),INTERVAL 1 DAY)' : 'DATE_ADD(NOW(),INTERVAL 3 DAY)'
     return `(${id},1,${i === 3 ? 0 : 10},10,'${state}',1,${begin},${end},DATE_SUB(NOW(),INTERVAL 2 DAY),DATE_ADD(NOW(),INTERVAL 4 DAY))`
   }).join(',')
-  sql(`SET NAMES utf8mb4; START TRANSACTION;
+  sql(`SET NAMES utf8mb4; SET time_zone='+08:00'; START TRANSACTION;
     INSERT INTO tb_shop_type(id,name,icon,sort) VALUES(${types[0]},'${prefix} 分类A','',100),(${types[1]},'${prefix} 分类B','',100);
     INSERT INTO tb_shop(id,merchant_id,name,type_id,images,area,address,x,y,avg_price,score,open_hours) VALUES ${shopRows};
     INSERT INTO tb_voucher(id,shop_id,title,pay_value,actual_value,type,status) VALUES ${voucherRows};

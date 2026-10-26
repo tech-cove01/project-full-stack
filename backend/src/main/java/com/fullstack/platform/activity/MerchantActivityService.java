@@ -253,7 +253,13 @@ public class MerchantActivityService {
      * can match), then in-flight work is enumerated, and only a quiescent activity is rebuilt
      * from the locked DB row. A blocked inspection leaves the gate closed on purpose.
      */
-    @Transactional(rollbackFor = Exception.class)
+    /**
+     * READ_COMMITTED + locking reads: the default REPEATABLE READ snapshot is created by the
+     * first ordinary read (the voucher lookup) and would hide rows inserted by a concurrent
+     * cancellation between that read and the blocker checks.
+     */
+    @Transactional(rollbackFor = Exception.class,
+            isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
     public ActivityView reconcile(long activityId, boolean confirm) {
         UserDTO user = access.requireUser();
         Voucher voucher = requireVoucher(activityId);
@@ -322,25 +328,29 @@ public class MerchantActivityService {
         return inflight == null ? 0 : inflight;
     }
 
+    /** Locking read: counts rows that are current at this point, not the transaction snapshot. */
     private long openReviews(long activityId) {
-        Long count = jdbc.queryForObject("""
-                SELECT COUNT(*) FROM tb_order_review
+        List<Long> ids = jdbc.queryForList("""
+                SELECT id FROM tb_order_review
                 WHERE voucher_id = ? AND status IN ('OPEN', 'REQUEUED')
+                FOR UPDATE
                 """, Long.class, activityId);
-        return count == null ? 0 : count;
+        return ids.size();
     }
 
+    /** Locking read for the same reason; also blocks new compensations until we commit. */
     private long pendingCompensations(long activityId) {
         // Must match the values OutboxRepository actually writes: PENDING is queued,
         // PROCESSING is leased by the relay, NEEDS_REVIEW stopped after retries. 'IN_PROGRESS'
         // is not a value used by the table and previously let leased compensations slip through.
-        Long count = jdbc.queryForObject("""
-                SELECT COUNT(*) FROM tb_outbox
+        List<Long> ids = jdbc.queryForList("""
+                SELECT id FROM tb_outbox
                 WHERE delivery_status IN ('PENDING', 'PROCESSING', 'NEEDS_REVIEW')
                   AND aggregate_type = 'ORDER'
                   AND JSON_UNQUOTE(JSON_EXTRACT(payload, '$.voucherId')) = ?
+                FOR UPDATE
                 """, Long.class, Long.toString(activityId));
-        return count == null ? 0 : count;
+        return ids.size();
     }
 
     public ActivityView viewFor(long activityId) {

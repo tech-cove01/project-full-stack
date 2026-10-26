@@ -1,0 +1,39 @@
+{
+  "task": "GO-011",
+  "acceptance": [
+    "MIG-GO-02",
+    "MIG-GO-03",
+    "PRODUCT-01"
+  ],
+  "passed": true,
+  "checks": [
+    "direct API identifies Go before creating fixtures",
+    "Vite proxy identifies the same Go service",
+    "first page returns string total, exact IDs and avgPrice in yuan",
+    "unsubmitted input does not change load-more filters",
+    "53 shops across six pages have no missing or duplicate IDs and stable order",
+    "category plus submitted name uses one backend intersection and resets pagination",
+    "no-match search shows the empty state",
+    "failed next page preserves existing results",
+    "load-more retry requests the failed page instead of skipping it",
+    "category failure leaves all-shops browsing usable and supports a real retry",
+    "voucher retry preserves shop detail and hides INITIALIZING, OFFLINE and disabled vouchers",
+    "Shanghai sale window is interpreted correctly in the configured browser timezone",
+    "voucher cents stay exact strings and availability states remain visible",
+    "no uncaught browser errors"
+  ],
+  "fixture": {
+    "prefix": "GOUIf89a18db",
+    "shops": 53,
+    "types": 2
+  },
+  "cleanup": true,
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "d27a8ead5280853dc88cbf597bfac13638ee659e"
+  },
+  "browserTimezone": "UTC",
+  "recordedAt": "2026-10-26T12:47:23.504Z"
+}

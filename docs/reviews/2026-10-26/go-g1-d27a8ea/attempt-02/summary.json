@@ -1,0 +1,43 @@
+{
+  "source": "d27a8ead5280853dc88cbf597bfac13638ee659e",
+  "runs": [
+    {
+      "name": "bootstrap",
+      "exit": 0
+    },
+    {
+      "name": "auth-ui",
+      "exit": 0,
+      "passed": true,
+      "checks": 12,
+      "cleanup": null
+    },
+    {
+      "name": "shop-ui-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 14,
+      "cleanup": true
+    },
+    {
+      "name": "shop-ui-shanghai",
+      "exit": 0,
+      "passed": true,
+      "checks": 14,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "go-api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

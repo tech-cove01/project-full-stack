@@ -1,0 +1,12 @@
+{
+  "source": "d27a8ead5280853dc88cbf597bfac13638ee659e",
+  "runs": [
+    {
+      "name": "bootstrap",
+      "exit": 1
+    }
+  ],
+  "shutdown": [],
+  "passed": false,
+  "failure": "RuntimeError: bootstrap check failed; inspect bootstrap.json"
+}

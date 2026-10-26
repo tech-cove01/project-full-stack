@@ -1,0 +1,27 @@
+{
+  "task": "GO-030",
+  "recordedAt": "2026-10-26T15:17:10.1129205Z",
+  "databaseVerification": "cleanup-db.txt",
+  "sharedOrderStreamLength": 0,
+  "sharedOrderGroupPending": 0,
+  "privateGo030StreamsRemaining": 0,
+  "redisObservation": "Read-only redis-cli XPENDING stream.orders g1, XLEN stream.orders, and --scan --pattern stream.go030.test.* all returned zero/empty before stop.",
+  "apiAndViteListenersRemaining": [],
+  "isolatedContainers": [
+    {
+      "oomKilled": false,
+      "exitCode": 0,
+      "name": "project-full-stack-go-mysql-1",
+      "state": "exited"
+    },
+    {
+      "oomKilled": false,
+      "exitCode": 0,
+      "name": "project-full-stack-go-redis-1",
+      "state": "exited"
+    }
+  ],
+  "stopCommand": "docker compose -f compose.go.yaml -p project-full-stack-go stop --timeout 60 mysql redis",
+  "isolatedVolumes": "preserved",
+  "originalProjectContainers": "project-full-stack-mysql-1 (3307) and project-full-stack-redis-1 (6379) remained healthy"
+}

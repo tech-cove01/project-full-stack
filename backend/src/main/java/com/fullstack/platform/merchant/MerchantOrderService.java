@@ -184,10 +184,12 @@ public class MerchantOrderService {
 
     public PageResult<AuditView> audits(int current, int pageSize, String shopId, String action) {
         UserDTO user = access.requireUser();
-        if (!access.hasManagerRole(user.getId())) {
+        // Audit scope is management scope only: STAFF scopes from another merchant must not leak in.
+        List<Long> managed = access.managedShopIds(user.getId());
+        if (managed.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "需要商家管理权限");
         }
-        List<Long> visible = access.visibleShopIds(user.getId());
+        List<Long> visible = managed;
         if (visible.isEmpty()) {
             return new PageResult<>(List.of(), 0L);
         }

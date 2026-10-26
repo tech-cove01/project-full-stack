@@ -35,9 +35,10 @@ run([...base, database, '-e', `CREATE TABLE IF NOT EXISTS tb_schema_migration (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`])
 
 const applied = new Map()
-for (const line of query('SELECT version, checksum FROM tb_schema_migration').trim().split('\n')) {
+for (const line of query('SELECT version, checksum FROM tb_schema_migration').trim().split(/\r?\n/)) {
   if (!line) continue
-  const [version, checksum] = line.split('\t')
+  // Windows mysql.exe emits CRLF; a trailing \r would make every checksum look mismatched.
+  const [version, checksum] = line.split('\t').map(value => value.trim())
   applied.set(version, checksum)
 }
 

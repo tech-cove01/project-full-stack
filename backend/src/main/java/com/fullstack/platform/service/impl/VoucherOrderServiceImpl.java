@@ -8,6 +8,7 @@ import com.fullstack.platform.entity.VoucherOrder;
 import com.fullstack.platform.mapper.VoucherOrderMapper;
 import com.fullstack.platform.service.ISeckillVoucherService;
 import com.fullstack.platform.service.IVoucherOrderService;
+import com.fullstack.platform.order.OrderReviewRepository;
 import com.fullstack.platform.service.order.OrderCreationService;
 import com.fullstack.platform.service.order.OrderRejectedException;
 import com.fullstack.platform.utils.RedisIdWorker;
@@ -57,6 +58,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private final RedisIdWorker redisIdWorker;
     private final StringRedisTemplate redis;
     private final OrderCreationService orderCreationService;
+    private final OrderReviewRepository orderReviewRepository;
     private final String consumerName = "order-" + UUID.randomUUID();
     private final ExecutorService executor = Executors.newSingleThreadExecutor(task -> {
         Thread thread = new Thread(task, "order-stream-consumer");
@@ -67,11 +69,13 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
 
     public VoucherOrderServiceImpl(ISeckillVoucherService seckillVoucherService,
                                    RedisIdWorker redisIdWorker, StringRedisTemplate redis,
-                                   OrderCreationService orderCreationService) {
+                                   OrderCreationService orderCreationService,
+                                   OrderReviewRepository orderReviewRepository) {
         this.seckillVoucherService = seckillVoucherService;
         this.redisIdWorker = redisIdWorker;
         this.redis = redis;
         this.orderCreationService = orderCreationService;
+        this.orderReviewRepository = orderReviewRepository;
     }
 
     private static DefaultRedisScript<Long> script(String file) {
@@ -111,6 +115,7 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
     private void consume() {
         boolean initialized = false;
         long nextRecovery = 0;
+        long retryDelay = 1_000;
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
                 if (!initialized) {
@@ -127,13 +132,20 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
                 }
                 if (records != null) {
                     for (MapRecord<String, Object, Object> record : records) {
-                        if (!processRecord(record)) pause(1_000);
+                        if (processRecord(record)) {
+                            retryDelay = 1_000;
+                        } else {
+                            // Exponential backoff: the message stays pending until a durable outcome exists.
+                            pause(retryDelay);
+                            retryDelay = Math.min(retryDelay * 2, 30_000);
+                        }
                     }
                 }
             } catch (Exception e) {
                 initialized = false;
                 log.error("Order consumer unavailable; pending messages will be retried", e);
-                pause(1_000);
+                pause(retryDelay);
+                retryDelay = Math.min(retryDelay * 2, 30_000);
             }
         }
     }
@@ -198,7 +210,15 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
             log.warn("Order {} attempt {} failed", order.getId(), attempts, retryable);
             if (attempts >= MAX_ATTEMPTS) {
                 // Connection/commit errors are uncertain. Releasing stock could oversell an order
-                // which already committed. Keep it reserved and preserve evidence for reconciliation.
+                // which already committed. The message may only be acknowledged once a durable
+                // record exists; if the DB is still down this insert fails and we keep it pending.
+                try {
+                    orderReviewRepository.record(order, record.getId().getValue(), attempts, retryable);
+                } catch (Exception notDurable) {
+                    log.error("Order {} needs review but no durable record could be written; "
+                            + "keeping message {} pending", order.getId(), record.getId().getValue(), notDurable);
+                    return false;
+                }
                 deadLetter(record, retryable.getClass().getSimpleName());
                 redis.opsForHash().putAll(key, Map.of("userId", order.getUserId().toString(),
                         "voucherId", order.getVoucherId().toString(), "state", "PROCESSING",

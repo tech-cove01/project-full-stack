@@ -27,6 +27,7 @@ public class ActivityPublicationService {
     private static final DefaultRedisScript<Long> PREPARE = script("activity-prepare.lua");
     private static final DefaultRedisScript<Long> OPEN = script("activity-open.lua");
     private static final DefaultRedisScript<Long> CLOSE = script("activity-close.lua");
+    private static final DefaultRedisScript<Long> RECONCILE = script("activity-reconcile.lua");
 
     private final SeckillVoucherMapper seckillMapper;
     private final VoucherMapper voucherMapper;
@@ -66,9 +67,14 @@ public class ActivityPublicationService {
         if ("OFFLINE".equals(activity.getPublishStatus())) {
             return;
         }
+        if (!"INITIALIZING".equals(activity.getPublishStatus())) {
+            // ACTIVE: only an already prepared gate may be opened. Rebuilding stock from the DB
+            // would admit stock promised to accepted messages that are still pending.
+            openOnly(activityId);
+            return;
+        }
         int version = activity.getPublishVersion() == null ? 0 : activity.getPublishVersion();
-        int target = "INITIALIZING".equals(activity.getPublishStatus())
-                ? version + 1 : Math.max(version, 1);
+        int target = version + 1;
 
         Long prepared = redis.execute(PREPARE, gateKeys(activity), Integer.toString(target),
                 Integer.toString(activity.getStock()), millis(activity.getBeginTime()),
@@ -104,6 +110,22 @@ public class ActivityPublicationService {
         if (opened == null || opened < 0) {
             throw new NeedsReviewException("Activity " + activityId + " gate open failed: " + opened);
         }
+    }
+
+    /**
+     * Rebuilds Redis state for an ACTIVE activity whose stock or gate was lost.
+     * Callers must first prove that no reservation is still in flight; this method never opens
+     * the gate, it writes it CLOSED at the new version so the ACTIVITY_OPEN event opens it.
+     */
+    public long prepareForReconcile(long activityId, int targetVersion) {
+        SeckillVoucher activity = seckillMapper.selectById(activityId);
+        if (activity == null) {
+            throw new NeedsReviewException("Activity " + activityId + " disappeared");
+        }
+        Long prepared = redis.execute(RECONCILE, gateKeys(activity), Integer.toString(targetVersion),
+                Integer.toString(activity.getStock()), millis(activity.getBeginTime()),
+                millis(activity.getEndTime()));
+        return prepared == null ? -2 : prepared;
     }
 
     /** ACTIVE but not yet open: retry opening without touching stock. */

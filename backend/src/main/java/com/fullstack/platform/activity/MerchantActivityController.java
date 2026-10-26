@@ -43,4 +43,11 @@ public class MerchantActivityController {
     public Result offline(@PathVariable("id") long id) {
         return Result.ok(service.offline(id));
     }
+
+    /** Explicit recovery after a Redis loss; refuses while any order message is in flight. */
+    @PostMapping("/{id}/reconcile")
+    public Result reconcile(@PathVariable("id") long id,
+                            @RequestParam(value = "confirm", defaultValue = "false") boolean confirm) {
+        return Result.ok(service.reconcile(id, confirm));
+    }
 }

@@ -6,6 +6,14 @@
 
 交易改造见[交易与一致性设计](transaction-design.md)，交付条件见[验收清单](acceptance.md)。本文只说明本地开发方式，不代表对应业务已通过验收。
 
+## 2026-10-26 社区增补环境（待实现）
+
+最新范围见 [后端亮点方案](backend-highlights-plan.md)。仍在 Windows 原生运行 Java/Node/k6；新增 Kafka 使用 Docker KRaft 单节点，建议独立 `community` profile，默认关闭社区时原交易与 AI 可启动。本文没有表示 Kafka/Canal 已安装或可用，实现 agent 不需要先整理旧虚拟机。
+
+实现批次需提供：锁定 Kafka 镜像与 Boot 管理的客户端兼容验证、持久卷、健康检查、topic/consumer group 初始化、精确启动/停止命令和新环境复现。宿主 Java 访问用 `127.0.0.1:9092`，容器间访问用独立内部 listener（例如 `kafka:29092`）；正确设置 advertised listeners，避免首次连接成功、取到容器地址后失败。启动前检查端口和资源，不占用无关项目。
+
+Canal 仅 H6 可选，单独 profile；必须实测所选版本与现有 MySQL 8.4 的 binlog/认证兼容、持久位点与恢复。不能为 CDC 删除或重建原 MySQL 数据卷。Kafka/Canal 的依赖版本、端口和真实健康检查结果由实现 agent 完成后追加，不能把下方 2026-10-24 记录当当前在线状态。
+
 ## 当前环境记录
 
 以下为 2026-10-24 的只读检查，未安装工具、拉取镜像、启动或修改服务。

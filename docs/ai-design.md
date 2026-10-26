@@ -1,4 +1,6 @@
-# AI 业务助手与商家知识维护设计（P1-D，MVP 已实现，真实模型待 Key）
+# AI 业务助手与商家知识维护设计（P1-D，已有 MVP，边界待收口）
+
+2026-10-26：当前实现是手写兼容 Provider、应用内精确检索、服务端关键词路由只读工具和 SSE 阶段反馈；没有 LangChain4j 或模型 Function Calling。已有真实模型历史证据；11/12 等是来源/卡片检查，非完整回答准确率。最新修复与验收以 [独立核验](reviews/2026-10-26/review.md)、[H0/H5 增补方案](backend-highlights-plan.md) 为准。
 
 日期：2026-10-24。对齐交易规则提交 `eac1b9249ec38ab0666629c4a3156d4c78a9de7e`。应用实现状态见 [AI 证据](evidence/2026-10-24-cbeef75/ai/report.md)：已用 stub 完成确定性验证，并已用 SiliconFlow 真实 Chat/Embedding 完成 UI 与 31 题固定集（知识 11/12、拒答 6/6、工具 7/7、多轮 6/6）；黄金 chunk Recall@K、真实 429/abort、预算与成本数据仍未执行。本文保留为设计契约，不代表通用模型质量已经验收。
 
@@ -28,9 +30,9 @@
 
 ## 3. 技术决策与 Windows 运行
 
-沿用 Java 21 / Spring Boot 3.5.16，采用 LangChain4j 核心库与模型适配模块、显式 Spring Bean。实现时锁定同一兼容版本/BOM，记录实际版本并运行 Maven 编译/测试；不直接照抄 PDF 中旧 starter 或为 AI 升级整个业务框架。
+沿用 Java 21 / Spring Boot 3.5.16 和当前兼容 Provider；不为框架名称重写现有实现。LangChain4j 等框架迁移留给有明确收益的后续任务，新增依赖需锁定兼容版本；不直接照抄 PDF 中旧 starter 或为 AI 升级整个业务框架。
 
-首选可配置百炼 Qwen 的兼容 Chat API 和 `text-embedding-v4`（首版显式固定 1024 维）；可替换为已经可用且通过契约验证的兼容提供方。Chat 模型必须实测支持选用的工具调用；结构化输出可先用受限 JSON 加解析，不把提供方原生 schema、token 流、工具调用三者同时支持设为前置条件。
+沿用已经可用且通过契约验证的兼容提供方，配置显式声明 Chat/Embedding 模型和维度，不要求更换供应商。当前规则路由工具无需模型原生 Function Calling；如果后续改成模型选择工具，再独立验证其协议和权限。结构化输出、token 流和原生工具调用不同时设为首版前置条件。
 
 后端配置至少包括 `AI_ENABLED=false`、`AI_API_KEY`、`AI_BASE_URL`、`AI_CHAT_MODEL`、`AI_EMBEDDING_MODEL`、`AI_EMBEDDING_DIMENSIONS`，有需要时分开配置 embedding 的 Key/Base URL。地址按账号业务空间、地域和官方文档填写，不硬编码旧域名，不承诺免费额度；环境文件不提交密钥。
 
@@ -38,7 +40,7 @@ Windows 原生 Java/Node + 现有 MySQL/Redis 容器即可开发；无需先整�
 
 ### 向量存储取舍
 
-首版使用支持 metadata 过滤的 `InMemoryEmbeddingStore<TextSegment>`，单实例演示、最多 2000 个当前发布分块；知识版本、分块和向量 JSON 持久化到 MySQL，启动时恢复，无需每次重启重新付费嵌入。
+首版沿用自写内存向量精确遍历，检索前按授权范围与发布版本过滤，单实例演示、最多 2000 个当前发布分块；知识版本、分块和向量 JSON 持久化到 MySQL，启动时恢复，无需每次重启重新付费嵌入。无需仅为采用 `InMemoryEmbeddingStore` 而引入框架。
 
 这是内存精确遍历，不是 ANN，也不是 MySQL 原生向量索引。现有普通 Redis 7.4 容器不被视为开箱可用的向量检索服务。达到数据量、内存或延迟瓶颈后，再按测量选择 Qdrant/pgvector 等，并重新验收 metadata 过滤；首版不宣称支持多实例索引同步。
 

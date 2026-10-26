@@ -79,6 +79,23 @@ public class ShopAccessService {
         return count != null && count > 0;
     }
 
+    /**
+     * Shop IDs the user may manage (OWNER/MANAGER only).
+     * STAFF scopes are deliberately excluded: a mixed A-OWNER/B-STAFF account must not read
+     * B's audit trail just because it manages some other merchant.
+     */
+    public List<Long> managedShopIds(long userId) {
+        return jdbc.queryForList("""
+                SELECT s.id
+                FROM tb_shop s
+                JOIN tb_merchant m ON m.id = s.merchant_id AND m.status = 'ACTIVE'
+                JOIN tb_merchant_member mm ON mm.merchant_id = s.merchant_id
+                     AND mm.user_id = ? AND mm.status = 'ACTIVE'
+                WHERE mm.role_code IN ('OWNER', 'MANAGER')
+                ORDER BY s.id
+                """, Long.class, userId);
+    }
+
     /** Shop IDs visible to the user: all shops for OWNER/MANAGER, scoped shops for STAFF. */
     public List<Long> visibleShopIds(long userId) {
         return jdbc.queryForList("""

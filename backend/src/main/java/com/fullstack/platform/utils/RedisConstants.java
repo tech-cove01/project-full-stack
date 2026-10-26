@@ -20,6 +20,8 @@ public class RedisConstants {
     public static final String SECKILL_GATE_KEY = "seckill:gate:";
     public static final String SECKILL_ACCEPTED_KEY = "seckill:accepted:";
     public static final String SECKILL_PURCHASE_KEY = "seckill:order:";
+    /** Set when an ACTIVE activity's Redis admission state is missing or out of version. */
+    public static final String SECKILL_RECONCILE_KEY = "seckill:reconcile:";
     public static final String BLOG_LIKED_KEY = "blog:liked:";
     public static final String FEED_KEY = "feed:";
     public static final String SHOP_GEO_KEY = "shop:geo:";

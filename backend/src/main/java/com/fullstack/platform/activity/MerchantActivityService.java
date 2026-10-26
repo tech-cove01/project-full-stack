@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -32,12 +33,33 @@ import java.util.List;
 import java.util.Map;
 
 import static com.fullstack.platform.utils.RedisConstants.SECKILL_GATE_KEY;
+import static com.fullstack.platform.utils.RedisConstants.SECKILL_RECONCILE_KEY;
 
 /** Merchant activity lifecycle: create with idempotency, list, retry publication, offline. */
 @Service
 public class MerchantActivityService {
     private static final ZoneId BUSINESS_ZONE = ZoneId.of("Asia/Shanghai");
     private static final DateTimeFormatter DISPLAY_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    /**
+     * Returns 0 when the order Stream has nothing in flight, 1 when a consumer group still has
+     * pending entries, 2 when delivered-but-unread entries exist. Redis loss recovery must not
+     * rebuild stock while either is non-zero.
+     */
+    private static final DefaultRedisScript<Long> INFLIGHT_SCRIPT = new DefaultRedisScript<>("""
+            local ok, groups = pcall(redis.call, 'XINFO', 'GROUPS', KEYS[1])
+            if not ok then return 0 end
+            for _, group in ipairs(groups) do
+              local pending, lag = 0, 0
+              for i = 1, #group, 2 do
+                if group[i] == 'pending' then pending = tonumber(group[i + 1]) or 0 end
+                if group[i] == 'lag' then lag = tonumber(group[i + 1]) or 0 end
+              end
+              if pending > 0 then return 1 end
+              if lag > 0 then return 2 end
+            end
+            return 0
+            """, Long.class);
 
     private final JdbcTemplate jdbc;
     private final VoucherMapper voucherMapper;
@@ -222,6 +244,62 @@ public class MerchantActivityService {
                 Long.toString(activityId), next, "ACTIVITY_CLOSE",
                 Map.of("activityId", Long.toString(activityId), "version", next));
         return viewFor(activityId);
+    }
+
+    /**
+     * Explicit recovery for an ACTIVE activity whose Redis stock/gate was lost.
+     * It refuses to run while any Stream reservation is still in flight, rebuilds the gate as
+     * CLOSED at a new version, and lets the outbox open it after the DB commit.
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public ActivityView reconcile(long activityId, boolean confirm) {
+        UserDTO user = access.requireUser();
+        Voucher voucher = requireVoucher(activityId);
+        ShopAccessService.Membership membership = access.requireManager(voucher.getShopId(), user.getId());
+        if (!confirm) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "需要显式确认已处理完在途预约");
+        }
+        Map<String, Object> locked = jdbc.queryForMap(
+                "SELECT publish_status, publish_version FROM tb_seckill_voucher WHERE voucher_id = ? FOR UPDATE",
+                activityId);
+        String status = (String) locked.get("publish_status");
+        int version = ((Number) locked.get("publish_version")).intValue();
+        if (!"ACTIVE".equals(status)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "只有 ACTIVE 活动需要重建 Redis 状态");
+        }
+        requireNoInflightReservations();
+
+        int next = version + 1;
+        long prepared = publication.prepareForReconcile(activityId, next);
+        if (prepared == -2) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Redis 状态无法安全重建，需人工核对");
+        }
+        if (prepared == 0) {
+            return viewFor(activityId);
+        }
+        jdbc.update("UPDATE tb_seckill_voucher SET publish_version = ? "
+                + "WHERE voucher_id = ? AND publish_version = ?", next, activityId, version);
+        audit.record(membership.merchantId(), voucher.getShopId(), user.getId(), "MERCHANT",
+                "ACTIVITY_RECONCILED", Long.toString(activityId),
+                Map.of("version", next, "previousVersion", version));
+        outbox.enqueue("ACTIVITY:" + activityId + ":" + next + ":OPEN", "ACTIVITY",
+                Long.toString(activityId), next, "ACTIVITY_OPEN",
+                Map.of("activityId", Long.toString(activityId), "version", next));
+        redis.delete(SECKILL_RECONCILE_KEY + activityId);
+        return viewFor(activityId);
+    }
+
+    private void requireNoInflightReservations() {
+        Long inflight = redis.execute(INFLIGHT_SCRIPT, List.of("stream.orders"));
+        if (inflight == null || inflight == 0) {
+            return;
+        }
+        if (inflight == 1) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "仍有未确认的订单消息，处理完成后才能重建");
+        }
+        throw new ResponseStatusException(HttpStatus.CONFLICT,
+                "仍有未消费的订单消息，处理完成后才能重建");
     }
 
     public ActivityView viewFor(long activityId) {

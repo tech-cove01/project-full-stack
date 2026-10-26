@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-26",
+  "scope": "local existing service; no AI calls",
+  "ai_readonly_capabilities": {
+    "enabled": true,
+    "ready": true,
+    "mode": "stub"
+  },
+  "trade": {
+    "activity_id": "1034",
+    "initial_stock": 3,
+    "checks": {
+      "publication_idempotent": true,
+      "staff_publish_denied": true,
+      "publication_ready": true,
+      "other_user_order_denied": true,
+      "cancel_rebuy_pay_redeem_idempotent": true,
+      "refund_idempotent_no_rebuy": true
+    },
+    "orders": [
+      "652992130305753112",
+      "652992134600720409",
+      "652992138895687706"
+    ],
+    "final_db_stock": 2,
+    "final_redis_stock": 2,
+    "result": "PASS"
+  },
+  "lua_faults": [
+    {
+      "scenario": "non_integer_stock",
+      "first": -2,
+      "retry": -2,
+      "done_marker": null,
+      "stock_after": "not-an-integer",
+      "purchase_marker": 1,
+      "accepted_mapping_after": "fixture-order",
+      "finding": "FIXED"
+    },
+    {
+      "scenario": "wrong_purchase_type",
+      "first": -2,
+      "retry": -2,
+      "done_marker": null,
+      "stock_after": "5",
+      "purchase_marker": "wrong-type-fixture",
+      "accepted_mapping_after": "fixture-order",
+      "finding": "FIXED"
+    },
+    {
+      "scenario": "normal_restore",
+      "first": 1,
+      "retry": 0,
+      "done_marker": "1",
+      "stock_after": "6",
+      "purchase_marker": 0,
+      "accepted_mapping_after": null,
+      "finding": "FIXED"
+    },
+    {
+      "scenario": "over_total",
+      "first": -3,
+      "retry": -3,
+      "done_marker": null,
+      "stock_after": "5",
+      "purchase_marker": 1,
+      "accepted_mapping_after": "fixture-order",
+      "finding": "FIXED"
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # 分阶段验收与结果交付
 
+2026-10-26 更新：本次社区亮点按 [增补方案](backend-highlights-plan.md) 与 [增补验收](backend-highlights-acceptance.md) 执行；先修 [独立核验](reviews/2026-10-26/review.md) 的 T1—T4/A1—A3。本文交易验收继续有效，下面原基线/结果只作历史记录。是否完成以最新 SHA 对应证据为准，不沿用实现计划勾选。
+
 本文交给实现 agent 执行，也供另一个 agent 独立复核。交易契约与计划 API 以 [交易设计](./transaction-design.md) 为准；本文不另设接口。环境启动命令见 [运行与验证](./development.md) 和 [Windows 开发环境](./windows-development.md)。
 
 ## 当前证据与阶段门槛

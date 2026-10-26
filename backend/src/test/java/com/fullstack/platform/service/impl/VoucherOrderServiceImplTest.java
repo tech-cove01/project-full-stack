@@ -5,6 +5,7 @@ import com.fullstack.platform.dto.Result;
 import com.fullstack.platform.dto.UserDTO;
 import com.fullstack.platform.entity.SeckillVoucher;
 import com.fullstack.platform.entity.VoucherOrder;
+import com.fullstack.platform.order.OrderReviewRepository;
 import com.fullstack.platform.service.ISeckillVoucherService;
 import com.fullstack.platform.service.order.OrderCreationService;
 import com.fullstack.platform.utils.RedisIdWorker;
@@ -39,13 +40,14 @@ class VoucherOrderServiceImplTest {
     @Mock RedisIdWorker ids;
     @Mock StringRedisTemplate redis;
     @Mock OrderCreationService writer;
+    @Mock OrderReviewRepository reviews;
     @Mock HashOperations<String, Object, Object> hashes;
     @Mock StreamOperations<String, Object, Object> streams;
     VoucherOrderServiceImpl service;
 
     @BeforeEach
     void setUp() {
-        service = new VoucherOrderServiceImpl(vouchers, ids, redis, writer);
+        service = new VoucherOrderServiceImpl(vouchers, ids, redis, writer, reviews);
         UserDTO user = new UserDTO();
         user.setId(7L);
         UserHolder.saveUser(user);
@@ -149,12 +151,27 @@ class VoucherOrderServiceImplTest {
         doThrow(new DataAccessResourceFailureException("unknown commit outcome")).when(writer).create(any());
         MapRecord<String, Object, Object> record = record();
         assertTrue(service.processRecord(record));
-        var sequence = inOrder(streams, hashes);
+        var sequence = inOrder(reviews, streams, hashes);
+        sequence.verify(reviews).record(any(VoucherOrder.class), eq(record.getId().getValue()), eq(5L), any());
         sequence.verify(streams).add(eq("stream.orders.dead"), argThat(map -> "100".equals(map.get("id"))));
         sequence.verify(hashes).putAll(eq("order:reservation:100"), argThat(map -> "true".equals(map.get("manualReview"))
                 && "PROCESSING".equals(map.get("state"))));
         sequence.verify(streams).acknowledge("stream.orders", "g1", record.getId());
         verify(redis, never()).execute(any(RedisScript.class), anyList(), any(Object[].class));
+    }
+
+    @Test
+    void messageStaysPendingWhenTheReviewRowCannotBePersisted() {
+        when(redis.opsForHash()).thenReturn(hashes);
+        when(hashes.increment("order:reservation:100", "retries", 1L)).thenReturn(5L);
+        doThrow(new DataAccessResourceFailureException("unknown commit outcome")).when(writer).create(any());
+        doThrow(new DataAccessResourceFailureException("database still unavailable"))
+                .when(reviews).record(any(VoucherOrder.class), any(), anyLong(), any());
+
+        assertFalse(service.processRecord(record()));
+        // No dead letter, no Redis-only acknowledgement: the Stream entry must stay pending.
+        verify(redis, never()).opsForStream();
+        verify(reviews, never()).openCount();
     }
 
     @Test

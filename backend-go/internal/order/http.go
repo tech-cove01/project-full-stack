@@ -65,6 +65,17 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: view})
 	})
+	routes.POST("/voucher-order/:id/cancel", auth.RequireLogin(identity), func(c *gin.Context) {
+		user, _ := auth.CurrentUser(c)
+		ctx, cancel := requestContext(c)
+		defer cancel()
+		view, err := service.Cancel(ctx, user.ID, c.Param("id"), c.Query("reason"))
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: view})
+	})
 }
 
 func requestContext(c *gin.Context) (context.Context, context.CancelFunc) {
@@ -97,7 +108,7 @@ func parseQuery(c *gin.Context) (Query, error) {
 func writeError(c *gin.Context, err error) {
 	status, message := http.StatusServiceUnavailable, "服务暂时无法处理请求，请稍后重试。"
 	switch {
-	case errors.Is(err, ErrInvalidID), errors.Is(err, ErrPagination):
+	case errors.Is(err, ErrInvalidID), errors.Is(err, ErrPagination), errors.Is(err, ErrReason):
 		status, message = http.StatusBadRequest, err.Error()
 	case errors.Is(err, ErrNotFound):
 		status, message = http.StatusNotFound, ErrNotFound.Error()

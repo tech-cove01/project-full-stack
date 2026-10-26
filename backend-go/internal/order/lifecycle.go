@@ -10,6 +10,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	mysqldriver "github.com/go-sql-driver/mysql"
 	"gorm.io/gorm"
@@ -160,6 +161,172 @@ func writePaidTransition(ctx context.Context, tx *gorm.DB, row record, merchant,
 	version := strconv.Itoa(row.Version)
 	payload, _ := json.Marshal(map[string]string{"orderId": id, "voucherId": decimal(row.VoucherID), "shopId": decimal(row.ShopID), "userId": decimal(user),
 		"targetStatus": "2", "stockRestore": "0", "releaseEligibility": "false", "version": version})
+	return outbox.Enqueue(ctx, tx, outbox.Event{EventID: "ORDER:" + id + ":" + version + ":CHANGED", AggregateType: "ORDER", AggregateID: id,
+		AggregateVersion: row.Version, EventType: "ORDER_CHANGED", Payload: payload})
+}
+
+func cancelReason(reason string) (string, error) {
+	if !utf8.ValidString(reason) {
+		return "", ErrReason
+	}
+	reason = strings.TrimSpace(reason)
+	if reason == "" {
+		return "USER_CANCEL", nil
+	}
+	runes := []rune(reason)
+	if len(runes) > 64 {
+		reason = string(runes[:64])
+	}
+	return reason, nil
+}
+
+// Cancel only changes DB business facts. The durable event owns subsequent
+// Redis inventory/eligibility effects; no network call extends this transaction.
+func (service *Service) Cancel(ctx context.Context, userID, id, reason string) (View, error) {
+	user, err := unsignedID(userID)
+	if err != nil {
+		return View{}, err
+	}
+	order, err := orderID(id)
+	if err != nil {
+		return View{}, err
+	}
+	reason, err = cancelReason(reason)
+	if err != nil {
+		return View{}, err
+	}
+	binding, err := service.ownedBinding(ctx, user, order)
+	if err != nil {
+		return View{}, err
+	}
+	var view View
+	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		current, merchant, err := lockLifecycle(ctx, tx, order, user, binding)
+		if err != nil {
+			return err
+		}
+		if current.Status == 4 {
+			view = toView(current, false)
+			return nil
+		}
+		if current.Status != 1 {
+			return ErrConflict
+		}
+		updated, changed, err := cancelCurrent(ctx, tx, current, merchant, user, "USER", reason, false)
+		if err != nil {
+			return err
+		}
+		if !changed {
+			return ErrConflict
+		}
+		view = toView(updated, false)
+		return nil
+	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	if err != nil {
+		return View{}, err
+	}
+	return view, nil
+}
+
+// CancelExpired is the scanner contract: only one due unpaid transition returns
+// true. Missing, not-yet-due and terminal rows are successful no-ops. An error
+// never tells the scanner to discard the durable reminder or skip its retry.
+func (service *Service) CancelExpired(ctx context.Context, id string) (bool, error) {
+	order, err := orderID(id)
+	if err != nil {
+		return false, err
+	}
+	var binding lifecycleBinding
+	if err = service.db.WithContext(ctx).Raw("SELECT user_id,voucher_id,shop_id FROM tb_voucher_order WHERE id=?", order).Scan(&binding).Error; err != nil {
+		return false, err
+	}
+	if binding.UserID == 0 {
+		return false, nil
+	}
+	var changed bool
+	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		current, merchant, err := lockLifecycle(ctx, tx, order, binding.UserID, binding)
+		if errors.Is(err, ErrNotFound) {
+			return nil
+		}
+		if err != nil {
+			return err
+		}
+		if current.Status != 1 {
+			return nil
+		}
+		// This statement runs after every current locking read. Even a scanner
+		// candidate whose deadline changed while waiting is re-evaluated here.
+		var due bool
+		if err = tx.Raw("SELECT pay_deadline_at<=NOW(3) FROM tb_voucher_order WHERE id=?", order).Scan(&due).Error; err != nil {
+			return err
+		}
+		if !due {
+			return nil
+		}
+		_, changed, err = cancelCurrent(ctx, tx, current, merchant, 0, "SYSTEM", "PAY_TIMEOUT", true)
+		return err
+	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	if err != nil {
+		return false, err
+	}
+	return changed, nil
+}
+
+func cancelCurrent(ctx context.Context, tx *gorm.DB, current record, merchant, operator uint64, operatorType, reason string, expired bool) (record, bool, error) {
+	if current.Version < 0 || current.Version >= math.MaxInt32 {
+		return record{}, false, ErrUnsafe
+	}
+	query := `UPDATE tb_voucher_order
+ SET status=4,cancel_time=NOW(3),cancel_reason=?,redeem_token=NULL,version=version+1
+ WHERE id=? AND user_id=? AND status=1 AND version=?`
+	if expired {
+		query += " AND pay_deadline_at<=NOW(3)"
+	}
+	result := tx.WithContext(ctx).Exec(query, reason, current.ID, current.UserID, current.Version)
+	if result.Error != nil {
+		return record{}, false, result.Error
+	}
+	if result.RowsAffected == 0 {
+		if expired {
+			return record{}, false, nil
+		}
+		return record{}, false, ErrConflict
+	}
+	if result.RowsAffected != 1 {
+		return record{}, false, ErrUnsafe
+	}
+	restored := tx.Exec(`UPDATE tb_seckill_voucher SET stock=stock+1
+ WHERE voucher_id=? AND stock>=0 AND stock<total_stock`, current.VoucherID)
+	if restored.Error != nil {
+		return record{}, false, restored.Error
+	}
+	if restored.RowsAffected != 1 {
+		return record{}, false, ErrUnsafe
+	}
+	updated, err := findOrder(ctx, tx, current.ID, true)
+	if err != nil {
+		return record{}, false, err
+	}
+	if updated == nil || updated.Status != 4 || updated.Version != current.Version+1 || updated.RedeemToken != nil {
+		return record{}, false, ErrUnsafe
+	}
+	if err = writeCancelledTransition(ctx, tx, *updated, merchant, operator, operatorType, reason); err != nil {
+		return record{}, false, err
+	}
+	return *updated, true, nil
+}
+
+func writeCancelledTransition(ctx context.Context, tx *gorm.DB, row record, merchant, operator uint64, operatorType, reason string) error {
+	id, version := strconv.FormatInt(row.ID, 10), strconv.Itoa(row.Version)
+	detail, _ := json.Marshal(map[string]any{"orderStatus": 4, "reason": reason, "version": row.Version})
+	if err := tx.WithContext(ctx).Exec(`INSERT INTO tb_audit_log
+ (merchant_id,shop_id,operator_user_id,operator_type,action,resource_id,detail)
+ VALUES(?,?,?,?, 'ORDER_CANCELLED',?,?)`, merchant, row.ShopID, operator, operatorType, id, string(detail)).Error; err != nil {
+		return err
+	}
+	payload, _ := json.Marshal(map[string]string{"orderId": id, "voucherId": decimal(row.VoucherID), "shopId": decimal(row.ShopID), "userId": decimal(row.UserID),
+		"targetStatus": "4", "stockRestore": "1", "releaseEligibility": "true", "version": version})
 	return outbox.Enqueue(ctx, tx, outbox.Event{EventID: "ORDER:" + id + ":" + version + ":CHANGED", AggregateType: "ORDER", AggregateID: id,
 		AggregateVersion: row.Version, EventType: "ORDER_CHANGED", Payload: payload})
 }

@@ -55,13 +55,13 @@ func TestOrderIdentifiersAndPagingRejectOverflow(t *testing.T) {
 	}
 }
 
-func TestOrderRoutesAuthenticateAndLeaveFutureWritesClosed(t *testing.T) {
+func TestOrderRoutesAuthenticateProtectedOperations(t *testing.T) {
 	identity := auth.NewService(nil, nil, "development")
 	router := httpapi.NewRouter(nil, time.Second, "order-test", slog.New(slog.NewTextHandler(io.Discard, nil)), func(routes gin.IRouter) { Register(routes, NewService(nil, nil, 15*time.Minute), identity) })
 	for _, test := range []struct {
 		method, path string
 		status       int
-	}{{http.MethodPost, "/voucher-order/seckill/1", 401}, {http.MethodGet, "/voucher-order/1", 401}, {http.MethodGet, "/voucher-order", 401}, {http.MethodPost, "/voucher-order/1/pay", 401}, {http.MethodPost, "/voucher-order/1/cancel", 404}} {
+	}{{http.MethodPost, "/voucher-order/seckill/1", 401}, {http.MethodGet, "/voucher-order/1", 401}, {http.MethodGet, "/voucher-order", 401}, {http.MethodPost, "/voucher-order/1/pay", 401}, {http.MethodPost, "/voucher-order/1/cancel", 401}} {
 		response := httptest.NewRecorder()
 		request := httptest.NewRequest(test.method, test.path, strings.NewReader(`{"userId":"1"}`))
 		request.Header.Set("userId", "1")

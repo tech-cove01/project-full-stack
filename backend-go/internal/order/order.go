@@ -22,6 +22,7 @@ var (
 	ErrPagination = errors.New("页码必须为正整数，pageSize必须在1到50之间")
 	ErrInvalidID  = errors.New("ID必须为正十进制整数字符串")
 	ErrConflict   = errors.New("当前订单状态或支付期限不允许此操作")
+	ErrReason     = errors.New("取消原因必须为有效UTF-8文本")
 	businessZone  = loadBusinessZone()
 )
 
@@ -56,6 +57,8 @@ type View struct {
 	PayTime         *string `json:"payTime,omitempty"`
 	UseTime         *string `json:"useTime,omitempty"`
 	RefundTime      *string `json:"refundTime,omitempty"`
+	CancelTime      *string `json:"cancelTime,omitempty"`
+	CancelReason    *string `json:"cancelReason,omitempty"`
 }
 
 // A nil error is evidence of a durable result: CREATED is a committed order,
@@ -134,12 +137,14 @@ type record struct {
 	PayTime         *time.Time
 	UseTime         *time.Time
 	RefundTime      *time.Time
+	CancelTime      *time.Time
+	CancelReason    *string
 }
 
 func (record) TableName() string { return "tb_voucher_order" }
 
 const columns = `id,user_id,voucher_id,shop_id,pay_type,pay_amount,status,version,
- pay_deadline_at,redeem_begin_time,redeem_end_time,redeem_token,create_time,pay_time,use_time,refund_time`
+ pay_deadline_at,redeem_begin_time,redeem_end_time,redeem_token,create_time,pay_time,use_time,refund_time,cancel_time,cancel_reason`
 
 func toView(row record, includeToken bool) View {
 	status := row.Status
@@ -148,6 +153,7 @@ func toView(row record, includeToken bool) View {
 		ShopID: &shop, PayAmount: &amount, PayDeadlineAt: formatted(&row.PayDeadlineAt),
 		RedeemBeginTime: formatted(row.RedeemBeginTime), RedeemEndTime: formatted(row.RedeemEndTime),
 		CreateTime: formatted(&row.CreateTime), PayTime: formatted(row.PayTime), UseTime: formatted(row.UseTime), RefundTime: formatted(row.RefundTime)}
+	view.CancelTime, view.CancelReason = formatted(row.CancelTime), row.CancelReason
 	if includeToken && status == 2 {
 		view.RedeemToken = row.RedeemToken
 	}

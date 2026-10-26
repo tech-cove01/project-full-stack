@@ -3,12 +3,15 @@ package order
 import (
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"io"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
 
@@ -51,5 +54,18 @@ func TestPayAuthenticatesAndLifecycleConflictHasSafeEnvelope(t *testing.T) {
 	_ = json.Unmarshal(encoded, &body)
 	if _, present := body["redeemToken"]; present {
 		t.Fatal("terminal state cannot expose a redeem token")
+	}
+}
+
+func TestCancellationReasonUsesUnicodeCharactersAndDefault(t *testing.T) {
+	if reason, err := cancelReason(" \t\u3000"); err != nil || reason != "USER_CANCEL" {
+		t.Fatal("blank cancellation reason must receive the stable default")
+	}
+	reason, err := cancelReason("  " + strings.Repeat("猫🐱中", 30) + "  ")
+	if err != nil || !utf8.ValidString(reason) || utf8.RuneCountInString(reason) != 64 || reason != string([]rune(strings.Repeat("猫🐱中", 30))[:64]) {
+		t.Fatal("reason truncation must preserve exactly 64 Unicode characters")
+	}
+	if _, err := cancelReason(string([]byte{0xff})); !errors.Is(err, ErrReason) {
+		t.Fatal("invalid UTF8 must fail before DB changes")
 	}
 }

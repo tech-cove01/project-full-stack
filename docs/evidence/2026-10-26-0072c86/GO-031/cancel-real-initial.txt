@@ -1,0 +1,26 @@
+=== RUN   TestIntegrationCancel
+=== RUN   TestIntegrationCancel/owned_cancel_clears_token_and_commits_one_restore_audit_and_event
+=== RUN   TestIntegrationCancel/twenty_concurrent_cancels_restore_inventory_only_once
+=== RUN   TestIntegrationCancel/foreign_missing_paid_and_other_terminal_orders_do_not_change
+=== RUN   TestIntegrationCancel/pay_and_cancel_compete_for_one_transition_in_twelve_rounds
+=== RUN   TestIntegrationCancel/pay_and_expired_scan_choose_valid_outcomes_on_both_sides_of_deadline
+=== RUN   TestIntegrationCancel/scanner_contract_missing_future_terminal_noop_and_due_is_idempotent
+=== RUN   TestIntegrationCancel/audit_event_and_inventory_failure_roll_back_user_and_system_cancellations
+=== RUN   TestIntegrationCancel/reason_normalization_is_unicode_safe_and_does_not_overwrite_first_cancellation
+=== RUN   TestIntegrationCancel/cancelled_creator_replay_preserves_terminal_and_only_db_eligibility_is_released
+=== RUN   TestIntegrationCancel/invalid_versions_stop_due_and_manual_cancellation_without_partial_restore
+=== RUN   TestIntegrationCancel/expiry_rechecks_deadline_after_waiting_for_current_inventory_lock
+--- PASS: TestIntegrationCancel (4.77s)
+    --- PASS: TestIntegrationCancel/owned_cancel_clears_token_and_commits_one_restore_audit_and_event (0.11s)
+    --- PASS: TestIntegrationCancel/twenty_concurrent_cancels_restore_inventory_only_once (0.16s)
+    --- PASS: TestIntegrationCancel/foreign_missing_paid_and_other_terminal_orders_do_not_change (0.16s)
+    --- PASS: TestIntegrationCancel/pay_and_cancel_compete_for_one_transition_in_twelve_rounds (0.97s)
+    --- PASS: TestIntegrationCancel/pay_and_expired_scan_choose_valid_outcomes_on_both_sides_of_deadline (0.83s)
+    --- PASS: TestIntegrationCancel/scanner_contract_missing_future_terminal_noop_and_due_is_idempotent (0.21s)
+    --- PASS: TestIntegrationCancel/audit_event_and_inventory_failure_roll_back_user_and_system_cancellations (0.45s)
+    --- PASS: TestIntegrationCancel/reason_normalization_is_unicode_safe_and_does_not_overwrite_first_cancellation (0.14s)
+    --- PASS: TestIntegrationCancel/cancelled_creator_replay_preserves_terminal_and_only_db_eligibility_is_released (0.18s)
+    --- PASS: TestIntegrationCancel/invalid_versions_stop_due_and_manual_cancellation_without_partial_restore (0.31s)
+    --- PASS: TestIntegrationCancel/expiry_rechecks_deadline_after_waiting_for_current_inventory_lock (0.19s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/order	5.044s

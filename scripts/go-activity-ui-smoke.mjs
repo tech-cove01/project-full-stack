@@ -242,7 +242,10 @@ try {
   await eventually(() => api(`/merchant/activities?shopId=${shops[2]}&pageSize=50`, token), r => r.body.data?.find(item => item.id === created.id)?.ready,
     'real worker did not publish the committed activity')
   async function refresh() {
+    const response = page.waitForResponse(r => r.request().method() === 'GET' && new URL(r.url()).pathname === '/api/merchant/activities')
     await page.getByRole('button', { name: '刷新授权与活动', exact: true }).click()
+    await (await response).json()
+    await page.locator('[aria-label="正在加载活动"]').waitFor({ state: 'detached' })
     await eventually(() => rows().count(), count => count > 0, 'activity refresh did not complete')
   }
   await refresh()
@@ -310,13 +313,20 @@ try {
     'STAFF page is read-only and dirty cross-merchant scope does not appear')
   await redis('DEL', `seckill:stock:${seededActivities[11]}`)
   await refresh()
+  await row(seededActivities[11]).getByText('待开放', { exact: true }).waitFor()
+  await page.locator('[aria-label="正在加载活动"]').waitFor({ state: 'detached' })
   let listRequests = 0
   page.on('request', request => { if (new URL(request.url()).pathname === '/api/merchant/activities') listRequests++ })
+  const actualPoll = await page.waitForResponse(r => r.request().method() === 'GET' && new URL(r.url()).pathname === '/api/merchant/activities', { timeout: 6000 })
+  await actualPoll.json()
+  await page.locator('[aria-label="正在加载活动"]').waitFor({ state: 'detached' })
+  await row(seededActivities[11]).getByText('待开放', { exact: true }).waitFor()
+  check(actualPoll.ok() && listRequests >= 1, 'a real pending-row poll occurs before navigation')
   await page.getByRole('link', { name: '← 返回工作台', exact: true }).click()
   await page.getByRole('heading', { name: '商家工作台', exact: true }).waitFor()
   const atUnmount = listRequests
-  await new Promise(resolve => setTimeout(resolve, 1900))
-  check(listRequests === atUnmount, 'leaving the page cancels the pending activity poll')
+  await new Promise(resolve => setTimeout(resolve, 3600))
+  check(listRequests === atUnmount, 'no activity requests occur during two poll periods after leaving the page')
   check(errors.length === 0, 'no uncaught browser errors')
   report.passed = true
 } catch (error) {

@@ -121,7 +121,9 @@ try {
   async function refresh() {
     const response = page.waitForResponse(r => new URL(r.url()).pathname === '/api/merchant/workspace')
     await page.getByRole('button', { name: '刷新授权', exact: true }).click()
-    return (await response).json()
+    const body = await (await response).json()
+    await page.locator('[aria-label="正在加载门店授权"]').waitFor({ state: 'detached' })
+    return body
   }
   sql(`UPDATE tb_merchant_member SET status='DISABLED' WHERE id=${members[0]};`)
   let body = await refresh()
@@ -129,6 +131,10 @@ try {
   check(body.data.merchants.length === 1 && body.data.merchants[0].id === merchants[1]
     && (await api('/user/me', mixed.token)).status === 200,
   'disabled A membership immediately disappears while the original login remains valid')
+  check(await section(merchants[0]).count() === 0
+    && await section(merchants[1]).getAttribute('data-role') === 'STAFF'
+    && await row(shops[2]).count() === 1,
+  'settled membership revocation keeps the authorized B1 row')
   sql(`DELETE FROM tb_member_shop_scope WHERE member_id=${members[1]} AND shop_id=${shops[2]};`)
   body = await refresh()
   await section(merchants[1]).locator('.merchant-empty-shops').waitFor()
@@ -142,6 +148,10 @@ try {
   body = await refresh()
   await row(shops[3]).waitFor({ state: 'detached' })
   check(body.data.merchants[0].role === 'STAFF' && body.data.merchants[0].shops.length === 1, 'downgrade to STAFF immediately removes the unscoped shop')
+  await section(merchants[1]).locator('.merchant-role').filter({ hasText: '门店员工' }).waitFor()
+  check(await section(merchants[1]).getAttribute('data-role') === 'STAFF'
+    && await row(shops[2]).count() === 1 && await row(shops[3]).count() === 0,
+  'settled downgrade renders STAFF with B1 present and B2 absent')
   sql(`UPDATE tb_merchant SET status='DISABLED' WHERE id=${merchants[1]};`)
   body = await refresh()
   await page.getByText('当前账号还没有商家或门店授权', { exact: true }).waitFor()
@@ -165,10 +175,24 @@ try {
   check(staff.body.data.merchants.length === 1
     && staff.body.data.merchants[0].shops.map(s => s.id).join(',') === shops[0],
   'STAFF-A sees A1 only and a dirty scope to B2 grants nothing')
+  await staff.page.locator('[aria-label="正在加载门店授权"]').waitFor({ state: 'detached' })
+  const staffSection = staff.page.locator(`.merchant-workspace[data-merchant-id="${merchants[0]}"]`)
+  await staffSection.waitFor()
+  const staffShopIDs = await staff.page.locator('.merchant-shop').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-shop-id')))
+  check(await staffSection.getAttribute('data-role') === 'STAFF'
+    && JSON.stringify(staffShopIDs) === JSON.stringify([shops[0]]),
+  'settled STAFF page renders exactly A1')
   const manager = await login(2)
   check(manager.body.data.merchants.length === 1 && manager.body.data.merchants[0].role === 'MANAGER'
     && manager.body.data.merchants[0].shops.map(s => s.id).join(',') === shops.slice(0, 2).join(','),
   'MANAGER-A sees both A shops and no other merchant')
+  await manager.page.locator('[aria-label="正在加载门店授权"]').waitFor({ state: 'detached' })
+  const managerSection = manager.page.locator(`.merchant-workspace[data-merchant-id="${merchants[0]}"]`)
+  await managerSection.waitFor()
+  const managerShopIDs = await manager.page.locator('.merchant-shop').evaluateAll(nodes => nodes.map(node => node.getAttribute('data-shop-id')))
+  check(await managerSection.getAttribute('data-role') === 'MANAGER'
+    && JSON.stringify(managerShopIDs) === JSON.stringify(shops.slice(0, 2)),
+  'settled MANAGER page renders exactly A1 and A2')
   const ordinary = await login(3)
   await ordinary.page.getByText('当前账号还没有商家或门店授权', { exact: true }).waitFor()
   check(ordinary.body.data.merchants.length === 0, 'ordinary authenticated user sees an empty workspace')

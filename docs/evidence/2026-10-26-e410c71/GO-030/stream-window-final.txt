@@ -1,0 +1,29 @@
+=== RUN   TestIntegrationOrderStream
+=== RUN   TestIntegrationOrderStream/db_fact_overrides_a_cached_failed_reservation
+=== RUN   TestIntegrationOrderStream/cancel_after_order_insert_before_commit_rolls_back_and_reclaims
+    integration_test.go:165: barrier=after-insert-before-commit orderId=9007199775168809 sourceId=1793027498165-0 consumer=before-commit at=2026-10-26T15:11:38.3481545Z
+    integration_test.go:181: after-cancel orderId=9007199775168809 dbOrders=0 dbStock=10 pending=1 at=2026-10-26T15:11:38.3595716Z
+    integration_test.go:189: after-reclaim orderId=9007199775168809 sourceId=1793027498165-0 consumer=after-precommit dbOrders=1 dbStock=9 pending=0 at=2026-10-26T15:11:38.4122895Z
+=== RUN   TestIntegrationOrderStream/cancel_after_commit_before_ack_replays_current_order_without_decrement
+    integration_test.go:203: barrier=after-commit-before-ack orderId=9007199467614229 sourceId=1793027498307-0 consumer=before-ack at=2026-10-26T15:11:38.4982272Z
+    integration_test.go:233: after-replay orderId=9007199467614229 sourceId=1793027498307-0 consumer=after-ack status=4 dbStock=10 pending=0 at=2026-10-26T15:11:38.5381596Z
+=== RUN   TestIntegrationOrderStream/unavailable_db_beyond_five_attempts_never_acks_then_recovers
+=== RUN   TestIntegrationOrderStream/poison_pending_does_not_starve_later_pending_or_new_messages
+=== RUN   TestIntegrationOrderStream/durable_rejection_is_ackable_and_compensation_remains_pending
+=== RUN   TestIntegrationOrderStream/transient_claim_error_does_not_destroy_recovery_cursor
+=== RUN   TestIntegrationOrderStream/cancelled_run_returns_without_group_mutation
+--- PASS: TestIntegrationOrderStream (0.86s)
+    --- PASS: TestIntegrationOrderStream/db_fact_overrides_a_cached_failed_reservation (0.09s)
+    --- PASS: TestIntegrationOrderStream/cancel_after_order_insert_before_commit_rolls_back_and_reclaims (0.14s)
+    --- PASS: TestIntegrationOrderStream/cancel_after_commit_before_ack_replays_current_order_without_decrement (0.12s)
+    --- PASS: TestIntegrationOrderStream/unavailable_db_beyond_five_attempts_never_acks_then_recovers (0.10s)
+    --- PASS: TestIntegrationOrderStream/poison_pending_does_not_starve_later_pending_or_new_messages (0.19s)
+    --- PASS: TestIntegrationOrderStream/durable_rejection_is_ackable_and_compensation_remains_pending (0.08s)
+    --- PASS: TestIntegrationOrderStream/transient_claim_error_does_not_destroy_recovery_cursor (0.09s)
+    --- PASS: TestIntegrationOrderStream/cancelled_run_returns_without_group_mutation (0.03s)
+=== RUN   TestCancelledWorkerDoesNotAccessDependencies
+--- PASS: TestCancelledWorkerDoesNotAccessDependencies (0.00s)
+=== RUN   TestMessageIDsRemainCanonicalStringsWithSignedOrderRange
+--- PASS: TestMessageIDsRemainCanonicalStringsWithSignedOrderRange (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	1.150s

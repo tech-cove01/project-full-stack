@@ -1,0 +1,14 @@
+?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+ok  	github.com/cityloop/fullstack-go/internal/activity	2.013s
+ok  	github.com/cityloop/fullstack-go/internal/activitypub	1.928s
+ok  	github.com/cityloop/fullstack-go/internal/auth	1.002s
+ok  	github.com/cityloop/fullstack-go/internal/merchant	1.890s
+ok  	github.com/cityloop/fullstack-go/internal/order	1.957s
+ok  	github.com/cityloop/fullstack-go/internal/orderadmission	1.782s
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	1.602s
+ok  	github.com/cityloop/fullstack-go/internal/outbox	1.848s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	2.086s
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.911s
+ok  	github.com/cityloop/fullstack-go/internal/platform/database	1.033s
+ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	1.876s
+ok  	github.com/cityloop/fullstack-go/internal/shop	1.721s

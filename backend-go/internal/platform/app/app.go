@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,6 +18,8 @@ import (
 	"github.com/cityloop/fullstack-go/internal/activitypub"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/merchant"
+	"github.com/cityloop/fullstack-go/internal/order"
+	"github.com/cityloop/fullstack-go/internal/orderstream"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
@@ -42,6 +45,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			shop.Register(routes, shop.NewService(resources.ORM, cfg.Location))
 			merchant.Register(routes, merchant.NewService(resources.ORM), identity)
 			activity.Register(routes, activity.NewService(resources.ORM, resources.Redis), identity)
+			order.Register(routes, order.NewService(resources.ORM, resources.Redis, cfg.OrderPayTimeout), identity)
 		}),
 		ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second,
 		WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
@@ -49,7 +53,9 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	}
 	// Workers use process lifetime, never a request context. Persistent outbox
 	// rows remain replayable when cancellation interrupts an in-flight event.
-	owned := startBackground(ctx, resources, activitypub.NewWorker(resources.ORM, resources.Redis).Run)
+	owned := startBackground(ctx, resources,
+		activitypub.NewWorker(resources.ORM, resources.Redis).Run,
+		orderstream.NewWorker(resources.Redis, order.NewCreator(resources.ORM, cfg.OrderPayTimeout)).Run)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())
 	return serve(ctx, server, listener, owned, cfg.ShutdownTimeout, logger)
 }
@@ -60,12 +66,17 @@ type backgroundResources struct {
 	done      <-chan struct{}
 }
 
-func startBackground(ctx context.Context, resources io.Closer, run func(context.Context)) *backgroundResources {
+func startBackground(ctx context.Context, resources io.Closer, runs ...func(context.Context)) *backgroundResources {
 	workerCtx, cancel := context.WithCancel(ctx)
 	done := make(chan struct{})
+	var workers sync.WaitGroup
+	for _, run := range runs {
+		workers.Add(1)
+		go func() { defer workers.Done(); run(workerCtx) }()
+	}
 	go func() {
 		defer close(done)
-		run(workerCtx)
+		workers.Wait()
 	}()
 	return &backgroundResources{resources: resources, cancel: cancel, done: done}
 }

@@ -3,7 +3,42 @@ package merchantorder
 import (
 	"context"
 	"time"
+
+	"gorm.io/gorm"
 )
+
+// viewFor reads one merchant-facing order inside the caller's handle (a pool or
+// an open transaction). It is used by the mutations so the response reflects the
+// committed row they just wrote.
+func (service *Service) viewFor(ctx context.Context, db *gorm.DB, orderID int64) (View, error) {
+	var rows []orderRow
+	if err := db.WithContext(ctx).Raw(`SELECT o.id,o.shop_id,s.name AS shop_name,o.user_id,u.phone,
+		o.voucher_id,v.title AS voucher_title,o.status,o.pay_amount,
+		o.create_time,o.pay_time,o.use_time,o.refund_time,o.redeem_end_time
+		FROM tb_voucher_order o
+		JOIN tb_shop s ON s.id=o.shop_id
+		JOIN tb_user u ON u.id=o.user_id
+		JOIN tb_voucher v ON v.id=o.voucher_id
+		WHERE o.id=?`, orderID).Scan(&rows).Error; err != nil {
+		return View{}, err
+	}
+	if len(rows) != 1 {
+		return View{}, ErrUnsafe
+	}
+	row := rows[0]
+	phone := ""
+	if row.Phone != nil {
+		phone = maskPhone(*row.Phone)
+	}
+	return View{
+		ID: decimal(uint64(row.ID)), ShopID: decimal(row.ShopID), ShopName: row.ShopName,
+		UserID: decimal(row.UserID), Phone: phone, VoucherID: decimal(row.VoucherID),
+		VoucherTitle: row.VoucherTitle, Status: row.Status, PayAmount: decimal(row.PayAmount),
+		CreateTime: formattedTime(&row.CreateTime), PayTime: formattedTime(row.PayTime),
+		UseTime: formattedTime(row.UseTime), RefundTime: formattedTime(row.RefundTime),
+		RedeemEndTime: formattedTime(row.RedeemEndTime),
+	}, nil
+}
 
 type orderRow struct {
 	ID            int64

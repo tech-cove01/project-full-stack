@@ -85,7 +85,7 @@ func TestMerchantListsRequireLogin(t *testing.T) {
 		{http.MethodGet, "/merchant/audits", http.StatusUnauthorized},
 		{http.MethodGet, "/merchant/orders?userId=1&shopId=1", http.StatusUnauthorized},
 		{http.MethodPost, "/merchant/orders", http.StatusMethodNotAllowed},
-		{http.MethodPost, "/merchant/orders/redeem", http.StatusNotFound},
+		{http.MethodPost, "/merchant/orders/redeem", http.StatusUnauthorized},
 	} {
 		response := httptest.NewRecorder()
 		request := httptest.NewRequest(test.method, test.path, nil)

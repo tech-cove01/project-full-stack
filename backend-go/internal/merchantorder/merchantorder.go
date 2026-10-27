@@ -16,8 +16,10 @@ import (
 
 var (
 	ErrInvalidQuery = errors.New("查询参数不合法")
-	ErrForbidden    = errors.New("无权限查看该数据")
+	ErrForbidden    = errors.New("无权限操作该数据")
 	ErrUnsafe       = errors.New("数据状态需要核对，请稍后重试")
+	// ErrConflict covers a state that no longer allows the requested action.
+	ErrConflict = errors.New("订单当前状态或期限不允许此操作")
 )
 
 // View is the merchant-facing order row. The phone is always masked: a merchant

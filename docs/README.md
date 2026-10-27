@@ -36,7 +36,7 @@
 | GO-030 受理→Stream成单 | 已核验（本票范围，含QA修复） | 销售期/跨账号恢复/迟到退出已修复；真实集成、两时区各30+9项通过；[独立报告](reviews/2026-10-26/go030-0072c86/report.md)；支付/补偿留后票 |
 | GO-031 支付/取消/超时 | 自测通过待核验 | a/b/c/d功能及e CI分步提交；真实支付8/取消11/扫描6+3，重启18项、两时区页面各25项；Redis补偿留GO-033 |
 | GO-032 核销/退款/审计 | 自测通过待核验 | a/b/c/d 四个提交；普通Go/前端构建通过，真实MySQL并发/库存对账留核验 |
-| GO-033 补偿/review/重建 | 进行中 | 持久review与重放、Redis补偿与缺键、显式重建；真实窗口回归 |
+| GO-033 补偿/review/重建 | 自测通过待核验 | a/b/c/d 四个提交；普通Go全绿，真实Redis补偿/重放/重建窗口留核验 |
 | GO-040—042 业务 AI | 待做 | FAQ/检索/只读工具/SSE/生命周期；Stub 与真实质量分开 |
 | GO-050—053 社区与 Kafka | 待做 | 笔记、关注、DB Feed、可靠事件、期望状态点赞 |
 | GO-060—062 缓存/计数/多投影 | 待做 | 批量装配、singleflight、复合游标、热点/位图与重建 |
@@ -124,6 +124,14 @@ GO-021测试应用及隔离依赖已停止，卷保留，原项目容器未变�
 - 验收：接近 P1-C/P1-5/P1-6 的业务子集；本票不覆盖重建与补偿。
 - 验证：`gofmt -l` 干净、`go vet ./...`、`go test -count=1 ./...` 全绿（含新包 `merchantorder`）；前端 `vue-tsc`、生产构建、prettier 通过。
 - 限制：真实 MySQL 并发核销/退款、库存对账与浏览器页面均未执行，留独立核验；Redis 资格与库存回补仍 PENDING，归 GO-033；Linux race、远端 CI 未执行。
+
+### GO-033 / 补偿、复核与重建
+
+- 依赖：GO-030/031/032；开始 SHA `3519a08`（文档收尾后的工作区）。四个功能提交：补偿 worker `5fc0879848eb684847a31dffb4b27cf9064cc194`；持久复核与 ACK 顺序 `ac67d416955058bb57e1dc242fe32b9820c90f14`；重放命令 `9b00b9ae2fee4958c44e07c01c40de0b02317dec`；显式重建 `c279cf806e9f8d0f85587dcd869c0bff831ce253`。
+- 交付行为：`ORDER_CHANGED` 由独立 worker 认领并幂等应用到 Redis，脚本先校验标记类型、库存键存在/类型/可解析、`stock+1<=total_stock` 与资格键类型，全部通过才写标记与效果；缺键、错类型、越界停车 `NEEDS_REVIEW`，不再静默跳过。消费者对未知结果不 ACK，超过 5 次先写 `tb_order_review` 再 ACK，写不进去保持 pending；建单或持久拒绝后置 `RESOLVED`。`cmd/review list|replay` 先认领（`OPEN→REQUEUED`）再 XADD，失败回退 `OPEN`。重建接口先关闸 N+1，再核对 Stream 在途、未决 review、待补偿 outbox（全部锁定读，`READ_COMMITTED`），清零后按锁定行在 N+2 重建，旧 OPEN 事件因版本不匹配被拒。
+- 验收：接近 P1-C/P1-5 的恢复子集与交易对账不变式；不覆盖持续负载。
+- 验证：`gofmt -l` 干净、`go vet ./...`、`go test -count=1 ./...`、`go build ./...` 全部通过（新增 `ordercomp`、`orderreview`、`cmd/review`）。
+- 限制：真实 MySQL/Redis 的补偿缺键、DB 停机跨阈值、重放二次失败、重建停写窗口均未执行，留独立核验；Redis 重建的并发窗口证据未采集；Linux race、远端 CI 未执行。
 
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 

@@ -80,8 +80,8 @@ func TestIntegrationLikeBitmap(t *testing.T) {
 		t.Fatalf("a rebuild must replace the previous bits, got %d", count)
 	}
 	// A user id beyond the 32-bit offset limit is skipped instead of failing.
-	if changed, err := bitmap.Mark(ctx, noteID, math.MaxUint32+1, true); err != nil || changed {
-		t.Fatalf("an out-of-range id must be skipped: %v %v", changed, err)
+	if changed, err := bitmap.Mark(ctx, noteID, math.MaxUint32+1, true); err == nil || changed {
+		t.Fatalf("an out-of-range id must be reported: %v %v", changed, err)
 	}
 	if count, _, _ = bitmap.Count(ctx, noteID); count != 1 {
 		t.Fatalf("a skipped id must not change the count, got %d", count)

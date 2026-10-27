@@ -41,7 +41,8 @@
 | GO-041 检索/只读工具/SSE | 自测通过待核验 | a/b/c 三个提交；普通Go全绿，真实Redis/MySQL回合留核验 |
 | GO-042 去重/预算/终态 | 自测通过待核验 | a/b + 端到端集成测试；真实MySQL/Redis回合PASS，真实模型质量留核验 |
 | GO-050 笔记发布/详情 | 自测通过待核验 | 迁移006、`internal/note`、页面；真实MySQL发布PASS |
-| GO-051—053 关注/Feed/Kafka/点赞 | 待做 | 关注与DB Feed、社区outbox→Kafka、期望状态点赞 |
+| GO-051 关注与DB Feed | 自测通过待核验 | 后端与页面；真实MySQL幂等/游标PASS，EXPLAIN走idx_blog_feed |
+| GO-052—053 Kafka投影/点赞 | 待做 | 社区outbox→Kafka、期望状态点赞与位图 |
 | GO-060—062 缓存/计数/多投影 | 待做 | 批量装配、singleflight、复合游标、热点/位图与重建 |
 | GO-070 / 071 证据与正式切换 | 待做 | 持续负载、三流程演示、目录/CI/启动收敛到 Go |
 
@@ -167,6 +168,14 @@ GO-021测试应用及隔离依赖已停止，卷保留，原项目容器未变�
 - 验收：PRODUCT-01 笔记子集；点赞/关注/Feed/事件属 GO-051—053。
 - 验证：真实 MySQL 集成（发布、读回、未知门店拒绝）PASS；`gofmt/vet/go test/go build` 与前端类型检查/构建/prettier 通过。
 - 限制：仅发布即公开，无草稿/审核流；列表、搜索与 Feed 未做；`tb_blog.liked/comments` 仍是被动计数，位图投影属 GO-062；Linux race/远端 CI 未执行。
+
+### GO-051 / 关注与 DB 基线 Feed
+
+- 依赖：GO-050；开始 SHA `7c23cc4`。提交：后端 `e2c1474495d381fa1cdbad0fd34e98ff6810369e`；页面 `76abdd7d42792ca44aba411c1705afd983d34db3`。
+- 交付行为：`PUT /authors/:id/follow` 为期望状态写入，重复当前状态不改版本，真实变化版本 +1 并与社区 outbox 同事务；关注自己或不存在作者被拒绝。`GET /authors/:id/relationship` 返回本人关系与公开关注数；`GET /feed/notes` 用 `(create_time,id)` 复合游标，先读关注作者再按索引倒序取一页。
+- 验收：PRODUCT-02 关注/Feed 子集；Kafka 投影与点赞属 GO-052/053。
+- 验证：真实 MySQL 集成覆盖幂等（重复关注版本不变）、每真实变化一条事件、同秒三条笔记的游标翻页无重复、取关后为空；`EXPLAIN` 显示 JOIN 写法 `Using temporary; Using filesort`，两步写法为 `Backward index scan` 且命中 `idx_blog_feed`。`gofmt/vet/go test/go build` 与前端类型检查/构建/prettier 通过。
+- 限制：Feed 只有第一页与"加载更多"，无定位跳页；关注数实时 COUNT，未接 Redis 计数投影；关注列表、作者主页未做；社区 outbox 尚无投递者（GO-052）；Linux race/远端 CI 未执行。
 
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 

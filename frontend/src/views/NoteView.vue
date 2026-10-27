@@ -9,7 +9,7 @@ import 'element-plus/es/components/empty/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import { api, errorMessage } from '../api'
 import { useAuthStore } from '../stores/auth'
-import type { Note } from '../types'
+import type { LikeState, Note } from '../types'
 
 const auth = useAuthStore()
 
@@ -24,6 +24,8 @@ const form = ref({ shopId: '', title: '', content: '', images: '' })
 const following = ref(false)
 const followerCount = ref(0)
 const followLoading = ref(false)
+const likeState = ref<LikeState | null>(null)
+const likeLoading = ref(false)
 const canFollow = computed(
   () => auth.loggedIn && !!note.value && auth.user?.id !== note.value.userId,
 )
@@ -37,6 +39,29 @@ async function loadRelationship() {
     followerCount.value = data.followerCount
   } catch {
     // A relationship read failure must not hide the note itself.
+  }
+}
+
+async function loadLike() {
+  if (!auth.loggedIn || !note.value) return
+  try {
+    const { data } = await api.noteLike(note.value.id)
+    likeState.value = data
+  } catch {
+    // A like-state read failure must not hide the note itself.
+  }
+}
+
+async function toggleLike() {
+  if (!note.value || likeLoading.value) return
+  likeLoading.value = true
+  try {
+    const { data } = await api.setLike(note.value.id, !(likeState.value?.liked ?? false))
+    likeState.value = data
+  } catch (cause) {
+    ElMessage.error(errorMessage(cause))
+  } finally {
+    likeLoading.value = false
   }
 }
 
@@ -69,7 +94,7 @@ async function loadNote() {
     const { data } = await api.note(String(route.params.id), active.signal)
     if (active.signal.aborted) return
     note.value = data
-    await loadRelationship()
+    await Promise.all([loadRelationship(), loadLike()])
   } catch (cause) {
     if (!active.signal.aborted) {
       error.value = errorMessage(cause)
@@ -197,6 +222,14 @@ onMounted(() => {
         </div>
         <div class="note-head-actions">
           <el-button
+            v-if="auth.loggedIn"
+            :type="likeState?.liked ? 'success' : 'default'"
+            size="small"
+            :loading="likeLoading"
+            @click="toggleLike"
+            >{{ likeState?.liked ? '已点赞' : '点赞' }}</el-button
+          >
+          <el-button
             v-if="canFollow"
             :type="following ? 'default' : 'primary'"
             size="small"
@@ -221,7 +254,7 @@ onMounted(() => {
       <p class="note-content">{{ note.content }}</p>
       <div class="note-meta">
         <span>作者 #{{ note.userId }}</span>
-        <span>{{ note.liked }} 人觉得有用</span>
+        <span>{{ likeState?.likes ?? note.liked }} 人觉得有用</span>
         <span>{{ note.comments }} 条评论</span>
         <span>{{ followerCount }} 位关注者</span>
       </div>

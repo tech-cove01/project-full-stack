@@ -6,6 +6,7 @@ import type {
   AuditLog,
   CreateActivityRequest,
   FeedPage,
+  LikeState,
   MerchantOrder,
   MerchantWorkspace,
   Note,
@@ -231,6 +232,13 @@ export const api = {
     }),
   note: (id: string, signal?: AbortSignal) =>
     request<Note>(`/notes/${encodeURIComponent(id)}`, { signal }),
+  setLike: (noteId: string, liked: boolean) =>
+    request<LikeState>(`/notes/${encodeURIComponent(noteId)}/like`, {
+      method: 'PUT',
+      body: JSON.stringify({ liked }),
+    }),
+  noteLike: (noteId: string, signal?: AbortSignal) =>
+    request<LikeState>(`/notes/${encodeURIComponent(noteId)}/like`, { signal }),
   setFollow: (authorId: string, follow: boolean) =>
     request<Relationship>(`/authors/${encodeURIComponent(authorId)}/follow`, {
       method: 'PUT',

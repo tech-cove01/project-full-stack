@@ -151,6 +151,13 @@ export interface Note {
   updateTime: string
 }
 
+export interface LikeState {
+  noteId: string
+  liked: boolean
+  version: number
+  likes: number
+}
+
 export interface Relationship {
   authorId: string
   following: boolean

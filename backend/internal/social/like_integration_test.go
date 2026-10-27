@@ -64,7 +64,9 @@ func TestIntegrationExpectedStateLike(t *testing.T) {
 	}
 	// The bitmap projection must follow the committed fact.
 	if count, present, err := bitmap.Count(ctx, note); err != nil || !present || count != 1 {
-		t.Fatalf("the bitmap must hold the committed like: %d %v %v", count, present, err)
+		exists, _ := resources.Redis.Exists(ctx, "community:likes:"+noteID).Result()
+		t.Fatalf("the bitmap must hold the committed like: count=%d present=%v err=%v user=%d note=%d exists=%d",
+			count, present, err, reader, note, exists)
 	}
 	state, err := service.LikeState(ctx, userID, noteID)
 	if err != nil || state.Likes != 1 {

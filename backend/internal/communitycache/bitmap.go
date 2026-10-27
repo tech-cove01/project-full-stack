@@ -2,6 +2,7 @@ package communitycache
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strconv"
 
@@ -32,7 +33,8 @@ func offset(userID uint64) (int64, bool) {
 func (bitmap *Bitmap) Mark(ctx context.Context, noteID, userID uint64, liked bool) (bool, error) {
 	off, ok := offset(userID)
 	if !ok {
-		return false, nil
+		// Skipping silently would hide a broken projection, so the caller can log it.
+		return false, errors.New("like bitmap offset is outside the supported range")
 	}
 	value := 0
 	if liked {

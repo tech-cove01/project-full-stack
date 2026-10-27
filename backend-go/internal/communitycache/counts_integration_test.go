@@ -31,15 +31,7 @@ func TestIntegrationNoteCountsCache(t *testing.T) {
 			t.Error("dependency cleanup failed")
 		}
 	})
-	if err = resources.ORM.WithContext(ctx).Exec(`INSERT INTO tb_blog
-		(shop_id,user_id,title,images,content,status,publish_version)
-		VALUES (0,1,'计数缓存集成测试','','正文','PUBLISHED',1)`).Error; err != nil {
-		t.Fatal("note fixture insert failed")
-	}
-	var noteID uint64
-	if err = resources.ORM.WithContext(ctx).Raw("SELECT LAST_INSERT_ID()").Scan(&noteID).Error; err != nil || noteID == 0 {
-		t.Fatal("note id unavailable")
-	}
+	noteID := insertNoteFixture(t, resources)
 	cache := New(resources.Redis, resources.ORM)
 	t.Cleanup(func() {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
@@ -104,4 +96,68 @@ func TestIntegrationNoteCountsCache(t *testing.T) {
 	if _, exists := bulk[999999999]; exists {
 		t.Fatal("a missing note must not appear in the batch result")
 	}
+}
+
+// A hot key is served from the in-process copy: deleting the Redis entry does not
+// force a database read until the local copy expires.
+func TestIntegrationLocalLayerAbsorbsHotKey(t *testing.T) {
+	if os.Getenv("GO_INTEGRATION") != "1" {
+		t.Skip("set GO_INTEGRATION=1 with isolated MySQL and Redis")
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatal("invalid integration configuration")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	resources, err := database.Open(ctx, cfg)
+	if err != nil {
+		t.Fatal("isolated dependencies unavailable")
+	}
+	t.Cleanup(func() {
+		if resources.Close() != nil {
+			t.Error("dependency cleanup failed")
+		}
+	})
+	noteID := insertNoteFixture(t, resources)
+	cache := New(resources.Redis, resources.ORM).WithLocalTTL(80 * time.Millisecond)
+	t.Cleanup(func() {
+		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stop()
+		_ = resources.Redis.Del(cleanupCtx, key(noteID)).Err()
+		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_blog WHERE id=?", noteID).Error
+	})
+	if _, err = cache.Get(ctx, noteID); err != nil {
+		t.Fatal(err)
+	}
+	// Remove the Redis copy; the in-process entry must still answer.
+	if err = resources.Redis.Del(ctx, key(noteID)).Err(); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = cache.Get(ctx, noteID); err != nil {
+		t.Fatal("a hot key must still be served from the local layer")
+	}
+	// The local copy must expire, after which the read rebuilds the Redis key.
+	time.Sleep(150 * time.Millisecond)
+	if _, err = cache.Get(ctx, noteID); err != nil {
+		t.Fatal(err)
+	}
+	exists, err := resources.Redis.Exists(ctx, key(noteID)).Result()
+	if err != nil || exists != 1 {
+		t.Fatalf("an expired local copy must fall through to Redis and rebuild it: %d %v", exists, err)
+	}
+}
+
+func insertNoteFixture(t *testing.T, resources *database.Resources) uint64 {
+	t.Helper()
+	if err := resources.ORM.Exec(`INSERT INTO tb_blog
+		(shop_id,user_id,title,images,content,status,publish_version)
+		VALUES (0,1,'计数缓存集成测试','','正文','PUBLISHED',1)`).Error; err != nil {
+		t.Fatal("note fixture insert failed")
+	}
+	var noteID uint64
+	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&noteID).Error; err != nil || noteID == 0 {
+		t.Fatal("note id unavailable")
+	}
+	return noteID
 }

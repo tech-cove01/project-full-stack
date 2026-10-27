@@ -161,6 +161,14 @@ GO-021测试应用及隔离依赖已停止，卷保留，原项目容器未变�
 - 验证：真实 Kafka 集成 PASS —— 发送后可从 topic 读回、信封与 header 正确、状态 `DONE`、完成后不再重复投递、空队列返回无工作；`127.0.0.1:1` 不可达时保持 `PENDING`、`attempts=1`、`next_attempt_at` 在未来。`gofmt/vet/go test ./...`（23 包）全绿。本机 broker 用后已 `stop`，卷与镜像保留，复跑用 `docker compose -f compose.go.yaml --profile kafka up -d kafka`。
 - 限制：至少一次语义，消费者必须按 `eventId` 去重；没有死信重放的运维命令；未接真实消费端（投影在后续票）；Linux race/远端 CI 未执行。
 
+### GO-053 / 期望状态点赞
+
+- 依赖：GO-050/052；开始 SHA `f4eac0f`。提交：后端 `b7e9717ce8af381315087721dd174b5fb91e4aa8`；页面 `3e99ce98d4ceccb3a214260101335dbac4ac25f9`。
+- 交付行为：`PUT /notes/:id/like` 以期望状态写入；先 `FOR UPDATE` 锁笔记行，再改 `tb_blog_like` 与 `tb_blog.liked` 计数，重复状态不改版本、不发事件；计数用 `GREATEST(0, liked+?)` 保底，每次真实变化写一条 `LIKE_CHANGED` 到 `tb_community_outbox`。`GET /notes/:id/like` 返回本人状态、版本与公开计数；未发布与不存在的笔记同为 404。笔记详情页提供点赞按钮并同步计数。
+- 验收：社区互动子集；位图计数与重建属 GO-062。
+- 验证：真实 MySQL 集成通过 —— like/unlike 幂等（版本与计数不变）、10 并发点赞收敛为 1 条 active 与 1 条事件、未知笔记拒绝；`gofmt/vet/go test ./...`、前端类型检查/构建/prettier 全绿。
+- 限制：计数仍为 `tb_blog.liked` 单列，未接 Redis 位图；无点赞列表；Linux race/远端 CI 未执行。
+
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 
 ## 文档与目录

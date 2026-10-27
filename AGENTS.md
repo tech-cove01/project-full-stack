@@ -1,5 +1,10 @@
 # 项目协作约定
 
+## 共享工作区
+
+- 与 project-crm 同处 project/code，但保持独立 Git 与任务状态。存在 ../WORKSPACE.md 时读取共享目录约定；独立克隆不依赖父层文件。
+- 本仓通过 .agents/skills 的本地目录联接共用 workspace-delivery、typescript-pro、sql-pro、playwright-expert。按任务需要加载，不将 React/Pi 或 CRM 简历规则套到 Go/Vue，也不因 Skill 增加无关测试或更改现有技术路线。
+
 ## 当前路线
 
 - 用户已确定全面迁移 Go，后续不再新增 Java 功能。保留 Vue 3/TS、MySQL 8.4、Redis 7.4、SQL/Lua 和外部业务契约。

@@ -37,7 +37,7 @@
 | GO-060 页卡片批量装配与计数缓存 | 自测通过待核验 | `e67e280`、`f521831`；真实 Redis/MySQL 缓存与并发读 PASS |
 | GO-061 热点保护 | 自测通过待核验 | `031d97c`；进程内短 TTL 吸收热点，真实 Redis 验证 |
 | GO-062 位图计数与重建 | 自测通过待核验 | `54fc5e8`；位图投影 + `cmd/recount`，真实 Redis/MySQL PASS |
-| GO-070 三流程演示 | 自测通过待核验 | `93dea4a`；本机 22 项检查全过、清理无残留，见 [证据](docs/evidence/2026-10-27-go070/go-flow-demo-result.json) |
+| GO-070 验收脚本与故障演练 | 自测通过待核验 | `93dea4a`、负载与 Redis 故障脚本；隔离环境下三流程 22 项、并发抢券 9 项、Redis 停机 6 项全过 |
 | GO-071 目录/CI/启动收敛 | 待做 | 后端目录收敛、CI 矩阵与启动脚本切到 Go |
 
 ### GO-053 交付记录
@@ -67,7 +67,9 @@
 - 行为：`scripts/go-flow-demo.mjs <trade|community|ai|all>` 用真实 MySQL/Redis 跑通三条流程 —— 交易：发活动、等 gate ready、抢券、成单、支付、拿核销码、店员核销、审计可见 `ORDER_REDEEMED`；社区：发笔记、点赞、关注、关注动态出现该笔记且 `likedByMe` 正确；AI：建 FAQ 草稿、发布、开会话、SSE 依次给出 meta/sources/answer/done。脚本只删自己插入的行，从不 truncate。
 - 验证：本机 22 项检查全过、清理无残留；证据 `docs/evidence/2026-10-27-go070/go-flow-demo-result.json`。
 - 缺陷：写脚本时发现核销/退款事件缺 `voucherId/userId`，补偿 worker 无法解析会停在 `NEEDS_REVIEW`（退款将无法回补 Redis 库存），已修复并加回归测试。
-- 限制：持续负载与故障注入仍属 GO-070 剩余部分；浏览器页面证据未包含。
+- 追加：并发抢券脚本 `go-load-seckill.mjs`（库存 5、并发 30 → 受理 5、拒绝 25，数据库与 Redis 库存一致）和 Redis 故障脚本 `go-fault-redis.mjs`（停容器 → 请求 503 且无订单写入 → 恢复后重试被受理并恰好一单）。隔离环境下分别 9 项、6 项检查全过，证据在 `docs/evidence/`。
+- 环境结论：之前偶发的“活动不就绪”不是 Go 缺陷，而是 Java 基线实例与 Go API 共用同一 MySQL/Redis，两套 worker 互相消费 outbox 事件，Java 写入的 gate 缺少 `phase` 字段被 Go 脚本拒绝；改用隔离环境后不再出现。
+- 限制：浏览器页面证据未包含；MySQL 停机下的受理/复核/重放窗口未做（Redis 停机已覆盖）；持续压测与容量结论未做。
 
 ## 门槛（未满足前不开放对应能力）
 
@@ -99,6 +101,26 @@ docker compose -f compose.go.yaml --profile kafka up -d kafka
 go test -count=1 -run 'TestIntegration' ./...
 ```
 
+## 隔离环境（Go 专用，务必用它复跑）
+
+```bash
+docker compose -f compose.go.yaml up -d mysql redis
+$env:MYSQL_HOST='127.0.0.1'; $env:MYSQL_PORT='3308'
+$env:MYSQL_DATABASE='project_full_stack_go'
+$env:MYSQL_USER='fullstack'; $env:MYSQL_PASSWORD='fullstack_go_dev_only'
+$env:REDIS_HOST='127.0.0.1'; $env:REDIS_PORT='6380'
+node scripts/migrate.mjs
+
+cd backend-go && $env:GO_INTEGRATION='1' && go test -count=1 -run 'TestIntegration' ./...
+
+node scripts/go-flow-demo.mjs all      # 交易 / 社区 / AI 三流程
+node scripts/go-load-seckill.mjs 5 30   # 并发抢券不超卖
+node scripts/go-fault-redis.mjs         # Redis 停机 → 干净拒绝 → 恢复
+```
+
+Kafka 需要时：`docker compose -f compose.go.yaml --profile kafka up -d kafka`，并设置 `KAFKA_BROKERS=127.0.0.1:9092`。
+
+> 混跑提醒：Java 基线实例（8081）与 Go API（8082）若共用同一个 MySQL/Redis，两套 worker 会互相消费对方的 outbox 事件。Java 的活动脚本写入不带 `phase` 的 gate，Go 的 gate 脚本按“缺少 phase 即拒绝”处理，表现为活动迟迟不就绪。这不是 Go 的缺陷，但会让演练结果失真，因此复跑请始终使用上面的隔离环境。
 ## 已核验票的证据
 
 独立核验报告在 `docs/reviews/`，本文件只给状态与链接；实现者自测记录仍在 `docs/README.md` 各票小节，不覆盖历史失败。

@@ -97,6 +97,16 @@ jobs:
         env:
           GO_INTEGRATION: '1'
           GIN_MODE: release
+      - name: Community, AI and knowledge against real MySQL and Redis
+        run: go test -race -count=1 -p 1 -v ./internal/note ./internal/social ./internal/aiknowledge ./internal/aichat ./internal/communitycache
+        env:
+          GO_INTEGRATION: '1'
+          GIN_MODE: release
+      - name: Merchant orders and compensation against real MySQL and Redis
+        run: go test -race -count=1 -p 1 -v ./internal/merchantorder ./internal/ordercomp
+        env:
+          GO_INTEGRATION: '1'
+          GIN_MODE: release
       - run: go build -trimpath -o bin/api ./cmd/api
       - run: python3 ../scripts/go-bootstrap-smoke.py --binary bin/api --output bootstrap-result.json
       - uses: actions/upload-artifact@v4
@@ -105,6 +115,8 @@ jobs:
           name: go-bootstrap-evidence
           path: backend-go/bootstrap-result.json
 
+  # The Java baseline is frozen at tag java-baseline-20261026. This job only keeps
+  # the archived reference build compiling; the product runs on the Go service.
   backend:
     runs-on: ubuntu-latest
     steps:
@@ -131,3 +143,86 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run build
+
+  community-kafka:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend-go
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: project_full_stack_go
+          MYSQL_USER: fullstack
+          MYSQL_PASSWORD: fullstack_go_dev_only
+          MYSQL_ROOT_PASSWORD: root_go_dev_only
+          TZ: Asia/Shanghai
+        ports: ['3308:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost -uroot -proot_go_dev_only --silent"
+          --health-interval=5s --health-timeout=3s --health-retries=40
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6380:6379']
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=5s --health-timeout=3s --health-retries=20
+      kafka:
+        image: apache/kafka:3.9.0
+        env:
+          CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+          KAFKA_NODE_ID: 1
+          KAFKA_PROCESS_ROLES: broker,controller
+          KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+          KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+          KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+          KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_NUM_PARTITIONS: 1
+          KAFKA_LOG_DIRS: /var/lib/kafka/data
+          KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+        ports: ['9092:9092']
+        options: >-
+          --health-cmd="/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"
+          --health-interval=10s --health-timeout=5s --health-retries=30
+    env:
+      GO_ENV: development
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: '3308'
+      MYSQL_DATABASE: project_full_stack_go
+      MYSQL_USER: fullstack
+      MYSQL_PASSWORD: fullstack_go_dev_only
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: '6380'
+      KAFKA_BROKERS: 127.0.0.1:9092
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend-go/go.mod
+          cache-dependency-path: backend-go/go.sum
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+      - name: Apply versioned SQL to the isolated database
+        env:
+          MYSQL_CONTAINER: ${{ job.services.mysql.id }}
+          MYSQL_PORT: '3306'
+          MIGRATIONS_DIR: ../infra/mysql/migrations
+        run: |
+          cat > "$RUNNER_TEMP/mysql-go" <<'SH'
+          #!/usr/bin/env bash
+          exec docker exec -i -e MYSQL_PWD="$MYSQL_PWD" "$MYSQL_CONTAINER" mysql "$@"
+          SH
+          chmod +x "$RUNNER_TEMP/mysql-go"
+          MYSQL_BIN="$RUNNER_TEMP/mysql-go" node ../scripts/migrate.mjs
+      - name: Community events against a real broker
+        run: go test -race -count=1 -v ./internal/communityrelay
+        env:
+          GO_INTEGRATION: '1'

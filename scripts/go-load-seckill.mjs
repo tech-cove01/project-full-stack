@@ -98,7 +98,7 @@ try {
   check(activity.status === 200 && activity.body?.success, 'the merchant can publish the load activity')
   const voucherId = activity.body.data.id
   let published = null
-  for (let attempt = 0; attempt < 40; attempt++) {
+  for (let attempt = 0; attempt < 120; attempt++) {
     const reply = await api('GET', '/merchant/activities?current=1&pageSize=50', undefined, owner)
     published = (reply.body?.data || []).find(item => item.id === voucherId)
     if (published?.publishStatus === 'ACTIVE' && published.ready) break

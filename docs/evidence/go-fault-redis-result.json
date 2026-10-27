@@ -1,0 +1,37 @@
+{
+  "task": "GO-070",
+  "kind": "redis-fault",
+  "passed": true,
+  "checks": [
+    "the merchant can publish the activity",
+    "the activity is ACTIVE with a ready gate",
+    "a request while Redis is down must not be accepted",
+    "no order may be written while Redis is down (0)",
+    "the retry after recovery is accepted",
+    "the recovered request creates exactly one order (1)"
+  ],
+  "published": {
+    "id": "1003",
+    "shopId": "4",
+    "shopName": "fault-3641f35f",
+    "title": "fault-3641f35f",
+    "payValue": "1900",
+    "actualValue": "2500",
+    "totalStock": 2,
+    "stock": 2,
+    "publishStatus": "ACTIVE",
+    "publishVersion": 1,
+    "ready": true,
+    "beginTime": "2026-10-27 23:04:03",
+    "endTime": "2026-10-28 01:04:03",
+    "redeemBeginTime": "2026-10-27 23:04:03",
+    "redeemEndTime": "2026-10-28 02:04:03"
+  },
+  "gate": "state\nOPEN\nversion\n1\nphase\nOPEN",
+  "events": "ACTIVITY:1003:0:PREPARE\tACTIVITY_PREPARE\tDONE\t1\tNULL\r\nACTIVITY:1003:1:OPEN\tACTIVITY_OPEN\tDONE\t1\tNULL",
+  "refusedStatus": 503,
+  "refusedMessage": "服务暂时无法处理请求，请稍后重试。",
+  "acceptedStatus": 200,
+  "voucherId": "1003",
+  "orders": 1
+}

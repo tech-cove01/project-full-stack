@@ -16,10 +16,10 @@
     "every accepted request owns a different order id"
   ],
   "published": {
-    "id": "1063",
-    "shopId": "17",
-    "shopName": "load-1d518229",
-    "title": "load-1d518229",
+    "id": "1004",
+    "shopId": "5",
+    "shopName": "load-34ded072",
+    "title": "load-34ded072",
     "payValue": "1900",
     "actualValue": "2500",
     "totalStock": 5,
@@ -27,10 +27,10 @@
     "publishStatus": "ACTIVE",
     "publishVersion": 1,
     "ready": true,
-    "beginTime": "2026-10-27 22:57:28",
-    "endTime": "2026-10-28 00:57:28",
-    "redeemBeginTime": "2026-10-27 22:57:28",
-    "redeemEndTime": "2026-10-28 01:57:28"
+    "beginTime": "2026-10-27 23:04:21",
+    "endTime": "2026-10-28 01:04:21",
+    "redeemBeginTime": "2026-10-27 23:04:21",
+    "redeemEndTime": "2026-10-28 02:04:21"
   },
   "accepted": 5,
   "rejected": 25,
@@ -48,7 +48,7 @@
       "errorMsg": "库存不足"
     }
   ],
-  "voucherId": "1063",
+  "voucherId": "1004",
   "orders": 5,
   "redisStock": 0
 }

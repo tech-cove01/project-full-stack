@@ -124,7 +124,7 @@ func (service *Service) Refund(ctx context.Context, userID, orderID, reason stri
 			return ErrUnsafe
 		}
 		if err = writeRefundedTransition(ctx, tx, activity.MerchantID, binding.ShopID, operator,
-			id, current.Version+1, reason); err != nil {
+			binding.VoucherID, binding.UserID, id, current.Version+1, reason); err != nil {
 			return err
 		}
 		view = updated
@@ -151,8 +151,8 @@ func refundReason(value string) (string, error) {
 	return value, nil
 }
 
-func writeRefundedTransition(ctx context.Context, tx *gorm.DB, merchantID, shopID, operator uint64,
-	orderID int64, version int, reason string) error {
+func writeRefundedTransition(ctx context.Context, tx *gorm.DB, merchantID, shopID, operator,
+	voucherID, buyerUserID uint64, orderID int64, version int, reason string) error {
 	id := strconv.FormatInt(orderID, 10)
 	detail, _ := json.Marshal(map[string]any{"orderStatus": 6, "reason": reason, "version": version})
 	if err := tx.WithContext(ctx).Exec(`INSERT INTO tb_audit_log
@@ -162,10 +162,9 @@ func writeRefundedTransition(ctx context.Context, tx *gorm.DB, merchantID, shopI
 		return err
 	}
 	// releaseEligibility=false: a refunded order keeps the purchase eligibility,
-	// so the user cannot buy the same activity again.
-	payload, _ := json.Marshal(map[string]string{
-		"orderId": id, "targetStatus": "6", "stockRestore": "1",
-		"releaseEligibility": "false", "version": strconv.Itoa(version)})
+	// so the user cannot buy the same activity again. The activity and the buyer
+	// are part of the event because the compensation worker restores the stock.
+	payload := orderEventPayload(id, voucherID, shopID, buyerUserID, "6", "1", "false", version)
 	return outbox.Enqueue(ctx, tx, outbox.Event{
 		EventID:       "ORDER:" + id + ":" + strconv.Itoa(version) + ":CHANGED",
 		AggregateType: "ORDER", AggregateID: id, AggregateVersion: version,

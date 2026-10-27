@@ -131,8 +131,8 @@ func (service *Service) Redeem(ctx context.Context, userID, shopID, token string
 		if updated.Status != 3 {
 			return ErrUnsafe
 		}
-		if err = writeRedeemedTransition(ctx, tx, activity.MerchantID, shop, operator, locator.ID,
-			current.Version+1); err != nil {
+		if err = writeRedeemedTransition(ctx, tx, activity.MerchantID, shop, operator,
+			binding.VoucherID, binding.UserID, locator.ID, current.Version+1); err != nil {
 			return err
 		}
 		result = RedeemResult{Order: updated}
@@ -144,8 +144,8 @@ func (service *Service) Redeem(ctx context.Context, userID, shopID, token string
 	return result, nil
 }
 
-func writeRedeemedTransition(ctx context.Context, tx *gorm.DB, merchantID, shopID, operator uint64,
-	orderID int64, version int) error {
+func writeRedeemedTransition(ctx context.Context, tx *gorm.DB, merchantID, shopID, operator,
+	voucherID, buyerUserID uint64, orderID int64, version int) error {
 	id := strconv.FormatInt(orderID, 10)
 	detail, _ := json.Marshal(map[string]int{"orderStatus": 3, "version": version})
 	if err := tx.WithContext(ctx).Exec(`INSERT INTO tb_audit_log
@@ -154,9 +154,9 @@ func writeRedeemedTransition(ctx context.Context, tx *gorm.DB, merchantID, shopI
 		merchantID, shopID, operator, id, string(detail)).Error; err != nil {
 		return err
 	}
-	payload, _ := json.Marshal(map[string]string{
-		"orderId": id, "targetStatus": "3", "stockRestore": "0",
-		"releaseEligibility": "false", "version": strconv.Itoa(version)})
+	// The compensation worker needs the activity and the buyer to restore stock and
+	// release eligibility; an event without them cannot be applied later.
+	payload := orderEventPayload(id, voucherID, shopID, buyerUserID, "3", "0", "false", version)
 	return outbox.Enqueue(ctx, tx, outbox.Event{
 		EventID:       "ORDER:" + id + ":" + strconv.Itoa(version) + ":CHANGED",
 		AggregateType: "ORDER", AggregateID: id, AggregateVersion: version,

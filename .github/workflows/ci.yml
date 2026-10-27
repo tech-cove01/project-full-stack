@@ -97,6 +97,12 @@ jobs:
         env:
           GO_INTEGRATION: '1'
           GIN_MODE: release
+      - name: Load the demo fixtures used by the community tests
+        run: >-
+          docker exec -i -e MYSQL_PWD=fullstack_go_dev_only
+          '${{ job.services.mysql.id }}' mysql --user=fullstack
+          --default-character-set=utf8mb4 project_full_stack_go
+          < ../infra/mysql/002-demo-data.sql
       - name: Community, AI and knowledge against real MySQL and Redis
         run: go test -race -count=1 -p 1 -v ./internal/note ./internal/social ./internal/aiknowledge ./internal/aichat ./internal/communitycache
         env:
@@ -214,6 +220,12 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: '24'
+      - name: Initialize isolated SQL schema
+        run: >-
+          docker exec -i -e MYSQL_PWD=fullstack_go_dev_only
+          '${{ job.services.mysql.id }}' mysql --user=fullstack
+          --default-character-set=utf8mb4 project_full_stack_go
+          < ../infra/mysql/001-schema.sql
       - name: Apply versioned SQL to the isolated database
         env:
           MYSQL_CONTAINER: ${{ job.services.mysql.id }}

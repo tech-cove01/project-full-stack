@@ -23,6 +23,36 @@ func (stub *Stub) Mode() string   { return "stub" }
 func (stub *Stub) Model() string  { return "stub-lexical" }
 func (stub *Stub) Dimension() int { return stub.dimension }
 
+// Chat quotes the first retrieved evidence line. It is deterministic and proves
+// the prompt/citation protocol; it is not a quality claim about any model.
+func (stub *Stub) Chat(ctx context.Context, systemPrompt, userPrompt string) (string, error) {
+	if ctx.Err() != nil {
+		return "", ctx.Err()
+	}
+	evidence := between(userPrompt, "【证据】", "【问题】")
+	if strings.TrimSpace(evidence) == "" {
+		return "（stub）没有检索到可用依据，无法回答。", nil
+	}
+	first := strings.Split(strings.TrimSpace(evidence), "\n")[0]
+	if runes := []rune(first); len(runes) > 220 {
+		first = string(runes[:220])
+	}
+	return "（stub 模式）根据已发布资料：" + first, nil
+}
+
+func between(text, start, end string) string {
+	from := strings.Index(text, start)
+	if from < 0 {
+		return ""
+	}
+	from += len(start)
+	to := strings.Index(text[from:], end)
+	if to < 0 {
+		return text[from:]
+	}
+	return text[from : from+to]
+}
+
 func (stub *Stub) Embed(ctx context.Context, texts []string) ([][]float32, error) {
 	if len(texts) == 0 {
 		return nil, ErrBadInput

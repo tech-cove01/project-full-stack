@@ -17,7 +17,9 @@ import (
 	"github.com/cityloop/fullstack-go/internal/activity"
 	"github.com/cityloop/fullstack-go/internal/activitypub"
 	"github.com/cityloop/fullstack-go/internal/ai"
+	"github.com/cityloop/fullstack-go/internal/aichat"
 	"github.com/cityloop/fullstack-go/internal/aiknowledge"
+	"github.com/cityloop/fullstack-go/internal/aitool"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
@@ -45,6 +47,11 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		return fmt.Errorf("listen HTTP API: %w", err)
 	}
 	orders := order.NewService(resources.ORM, resources.Redis, cfg.OrderPayTimeout)
+	// One provider instance is shared so indexing and retrieval always speak the
+	// same model; a model switch requires rebuilding the chunk vectors.
+	embedder := ai.NewStub(256)
+	knowledge := aiknowledge.NewService(resources.ORM, embedder)
+	conversations := aichat.NewConversations(resources.Redis)
 	// The consumer parks an unresolved outcome in tb_order_review before it may
 	// acknowledge the Stream entry; the replay command owns the recovery.
 	stream := orderstream.NewWorker(resources.Redis, order.NewCreator(resources.ORM, cfg.OrderPayTimeout))
@@ -56,7 +63,10 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			shop.Register(routes, shop.NewService(resources.ORM, cfg.Location))
 			merchant.Register(routes, merchant.NewService(resources.ORM), identity)
 			merchantorder.Register(routes, merchantorder.NewService(resources.ORM), identity)
-			aiknowledge.Register(routes, aiknowledge.NewService(resources.ORM, ai.NewStub(256)), identity)
+			aiknowledge.Register(routes, knowledge, identity)
+			aichat.Register(routes, conversations,
+				aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder),
+				embedder.Mode(), identity)
 			activity.Register(routes, activity.NewService(resources.ORM, resources.Redis), identity)
 			order.Register(routes, orders, identity)
 		}),

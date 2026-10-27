@@ -19,4 +19,7 @@ type Provider interface {
 	Dimension() int
 	// Embed returns one vector per input text, in the same order.
 	Embed(ctx context.Context, texts []string) ([][]float32, error)
+	// Chat answers from the system and user prompts it is given. It must not be
+	// trusted to obey business rules on its own: callers bound the input.
+	Chat(ctx context.Context, systemPrompt, userPrompt string) (string, error)
 }

@@ -86,6 +86,28 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: result})
 	})
+	routes.POST("/merchant/orders/:id/refund", auth.RequireLogin(identity), func(c *gin.Context) {
+		var body struct {
+			Reason string `json:"reason"`
+		}
+		if err := decodeBody(c, &body); err != nil {
+			writeError(c, err)
+			return
+		}
+		user, valid := auth.CurrentUser(c)
+		if !valid {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, httpapi.Result{ErrorMsg: "请先登录"})
+			return
+		}
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		view, err := service.Refund(ctx, user.ID, c.Param("id"), body.Reason)
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: view})
+	})
 }
 
 // decodeBody caps the payload and rejects unknown fields: the request DTO is a
@@ -93,7 +115,7 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 func decodeBody(c *gin.Context, target any) error {
 	decoder := json.NewDecoder(io.LimitReader(c.Request.Body, 4096))
 	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(target); err != nil {
+	if err := decoder.Decode(target); err != nil && !errors.Is(err, io.EOF) {
 		return ErrInvalidQuery
 	}
 	return nil
@@ -143,6 +165,8 @@ func writeError(c *gin.Context, err error) {
 		status, message = http.StatusForbidden, ErrForbidden.Error()
 	case errors.Is(err, ErrToken):
 		status, message = http.StatusNotFound, ErrToken.Error()
+	case errors.Is(err, ErrNotFound):
+		status, message = http.StatusNotFound, ErrNotFound.Error()
 	case errors.Is(err, ErrConflict):
 		status, message = http.StatusConflict, ErrConflict.Error()
 	case errors.Is(err, ErrUnsafe):

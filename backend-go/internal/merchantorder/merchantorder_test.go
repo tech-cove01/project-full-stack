@@ -71,6 +71,34 @@ func TestPlaceholdersNeverProduceEmptyTuples(t *testing.T) {
 	}
 }
 
+func TestRefundReasonIsBoundedAndDefaulted(t *testing.T) {
+	if reason, err := refundReason("  "); err != nil || reason != "MERCHANT_REFUND" {
+		t.Fatalf("blank reason must fall back to the documented default, got %q", reason)
+	}
+	long := ""
+	for i := 0; i < maxReasonRunes+10; i++ {
+		long += "a"
+	}
+	reason, err := refundReason(long)
+	if err != nil || len([]rune(reason)) != maxReasonRunes {
+		t.Fatal("an oversized reason must be truncated to the stored limit")
+	}
+	if _, err = refundReason(string([]byte{0xff, 0xfe})); !errors.Is(err, ErrInvalidQuery) {
+		t.Fatal("invalid UTF-8 must be rejected instead of stored")
+	}
+}
+
+func TestOrderKeyRejectsNonCanonicalIdentifiers(t *testing.T) {
+	for _, value := range []string{"", "0", "-1", "01", "1e3", "9223372036854775808"} {
+		if _, err := orderKey(value); !errors.Is(err, ErrInvalidQuery) {
+			t.Fatalf("order id %q must be rejected", value)
+		}
+	}
+	if key, err := orderKey("652313753106251777"); err != nil || key != 652313753106251777 {
+		t.Fatal("a canonical snowflake id must parse")
+	}
+}
+
 func TestMerchantListsRequireLogin(t *testing.T) {
 	identity := auth.NewService(nil, nil, "development")
 	router := httpapi.NewRouter(nil, time.Second, "merchantorder-test",

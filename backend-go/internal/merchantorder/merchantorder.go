@@ -20,6 +20,7 @@ var (
 	ErrUnsafe       = errors.New("数据状态需要核对，请稍后重试")
 	// ErrConflict covers a state that no longer allows the requested action.
 	ErrConflict = errors.New("订单当前状态或期限不允许此操作")
+	ErrNotFound = errors.New("订单不存在")
 )
 
 // View is the merchant-facing order row. The phone is always masked: a merchant
@@ -86,6 +87,16 @@ func decimal(id uint64) string { return strconv.FormatUint(id, 10) }
 func positive(value string) (uint64, error) {
 	parsed, err := strconv.ParseUint(value, 10, 64)
 	if err != nil || parsed == 0 || strconv.FormatUint(parsed, 10) != value {
+		return 0, ErrInvalidQuery
+	}
+	return parsed, nil
+}
+
+// orderKey parses the signed order identifier. Order ids are snowflake values
+// that still fit an int64; the canonical decimal form is enforced.
+func orderKey(value string) (int64, error) {
+	parsed, err := strconv.ParseInt(value, 10, 64)
+	if err != nil || parsed <= 0 || strconv.FormatInt(parsed, 10) != value {
 		return 0, ErrInvalidQuery
 	}
 	return parsed, nil

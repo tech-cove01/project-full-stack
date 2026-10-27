@@ -33,6 +33,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
 	"github.com/cityloop/fullstack-go/internal/shop"
+	"github.com/cityloop/fullstack-go/internal/social"
 )
 
 func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision string) error {
@@ -66,6 +67,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			merchantorder.Register(routes, merchantorder.NewService(resources.ORM), identity)
 			aiknowledge.Register(routes, knowledge, identity)
 			note.Register(routes, note.NewService(resources.ORM), identity)
+			social.Register(routes, social.NewService(resources.ORM), identity)
 			assistant := aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder).
 				WithGuards(aichat.NewDedupe(resources.Redis), aichat.NewLock(resources.Redis)).
 				WithBudget(aichat.NewBudget(resources.Redis))

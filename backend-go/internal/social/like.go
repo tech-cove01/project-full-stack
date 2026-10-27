@@ -109,6 +109,11 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	if service.counts != nil {
 		_ = service.counts.Invalidate(ctx, note)
 	}
+	// The bitmap is updated after the commit: a failure leaves MySQL authoritative
+	// and the next recount repairs the projection.
+	if service.bitmap != nil {
+		_, _ = service.bitmap.Mark(ctx, note, user, liked)
+	}
 	return service.LikeState(ctx, userID, noteID)
 }
 
@@ -152,6 +157,13 @@ func (service *Service) LikeState(ctx context.Context, userID, noteID string) (L
 	}
 	state := LikeState{NoteID: strconv.FormatUint(note, 10), Liked: row.Active == 1,
 		Version: row.Version, Likes: row.Liked}
+	// Prefer the bitmap projection; an absent key falls back to the cached/own value.
+	if service.bitmap != nil {
+		if count, ok, err := service.bitmap.Count(ctx, note); err == nil && ok {
+			state.Likes = count
+			return state, nil
+		}
+	}
 	if service.counts != nil {
 		if cached, err := service.counts.Get(ctx, note); err == nil {
 			state.Likes = cached.Likes

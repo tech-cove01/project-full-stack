@@ -33,6 +33,7 @@ type Relationship struct {
 type Service struct {
 	db     *gorm.DB
 	counts *communitycache.Cache
+	bitmap *communitycache.Bitmap
 }
 
 func NewService(db *gorm.DB) *Service { return &Service{db: db} }
@@ -41,6 +42,13 @@ func NewService(db *gorm.DB) *Service { return &Service{db: db} }
 // MySQL, which keeps unit tests Redis-free.
 func (service *Service) WithCounts(cache *communitycache.Cache) *Service {
 	service.counts = cache
+	return service
+}
+
+// WithBitmap attaches the per-note like bitmap. It is a projection: a failure
+// leaves MySQL authoritative and is fixed by the recount command.
+func (service *Service) WithBitmap(bitmap *communitycache.Bitmap) *Service {
+	service.bitmap = bitmap
 	return service
 }
 

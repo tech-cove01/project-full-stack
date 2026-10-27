@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cityloop/fullstack-go/internal/communitycache"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 )
@@ -50,11 +51,24 @@ func TestIntegrationExpectedStateLike(t *testing.T) {
 		_ = resources.ORM.WithContext(cleanupCtx).Exec(
 			"DELETE FROM tb_user WHERE id IN (?,?)", author, reader).Error
 	})
-	service := NewService(resources.ORM)
+	service := NewService(resources.ORM).WithBitmap(communitycache.NewBitmap(resources.Redis))
+	bitmap := communitycache.NewBitmap(resources.Redis)
+	t.Cleanup(func() {
+		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stop()
+		_ = resources.Redis.Del(cleanupCtx, "community:likes:"+noteID).Err()
+	})
 
-	state, err := service.SetLike(ctx, userID, noteID, true)
-	if err != nil || !state.Liked || state.Likes != 1 || state.Version != 1 {
-		t.Fatalf("first like must count once: %+v %v", state, err)
+	if _, err = service.SetLike(ctx, userID, noteID, true); err != nil {
+		t.Fatalf("like failed: %v", err)
+	}
+	// The bitmap projection must follow the committed fact.
+	if count, present, err := bitmap.Count(ctx, note); err != nil || !present || count != 1 {
+		t.Fatalf("the bitmap must hold the committed like: %d %v %v", count, present, err)
+	}
+	state, err := service.LikeState(ctx, userID, noteID)
+	if err != nil || state.Likes != 1 {
+		t.Fatalf("the state read must use the bitmap: %+v %v", state, err)
 	}
 	// Repeating the same state must not bump the version or the counter.
 	state, err = service.SetLike(ctx, userID, noteID, true)

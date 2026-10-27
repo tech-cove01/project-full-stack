@@ -20,6 +20,17 @@ type Processor interface {
 	Create(context.Context, string, string, string) (order.Outcome, error)
 }
 
+// Reviewer persists an accepted order whose database outcome is still unknown.
+// Its record must exist before the message may be acknowledged.
+type Reviewer interface {
+	Record(ctx context.Context, orderID, userID, voucherID, messageID string, attempts int, cause error) error
+	Resolve(ctx context.Context, orderID string) error
+}
+
+// reviewThreshold is the attempt count after which an unresolved message is
+// parked in tb_order_review (and only then acknowledged).
+const reviewThreshold = 5
+
 type retryState struct {
 	attempts int
 	next     time.Time
@@ -28,6 +39,7 @@ type retryState struct {
 type Worker struct {
 	client                     *redis.Client
 	processor                  Processor
+	reviewer                   Reviewer
 	stream, group, consumer    string
 	initialized                bool
 	turn                       int
@@ -39,6 +51,10 @@ type Worker struct {
 	// integration tests. Production constructors leave them unset.
 	afterCommit func(context.Context, redis.XMessage) error
 }
+
+// UseReviewer attaches the durable review store. Without it the worker keeps an
+// unknown outcome pending forever, which is safe but not operable.
+func (worker *Worker) UseReviewer(reviewer Reviewer) { worker.reviewer = reviewer }
 
 func NewWorker(client *redis.Client, processor Processor) *Worker {
 	var entropy [16]byte
@@ -150,7 +166,7 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 	err = worker.deliver(ctx, *message)
 	if err != nil {
 		previous := worker.retries[message.ID]
-		if previous.attempts < 5 {
+		if previous.attempts < reviewThreshold {
 			previous.attempts++
 		}
 		previous.next = time.Now().Add(time.Duration(1<<previous.attempts) * time.Second)
@@ -159,10 +175,40 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 			clear(worker.retries)
 		}
 		worker.retries[message.ID] = previous
+		// Past the threshold the outcome must be parked durably before the ACK.
+		// If the insert fails (database still down) the message stays pending.
+		if previous.attempts >= reviewThreshold && worker.reviewer != nil {
+			if parked := worker.parkForReview(ctx, *message, previous.attempts, err); parked == nil {
+				delete(worker.retries, message.ID)
+				return true, nil
+			}
+		}
 		return true, err
 	}
 	delete(worker.retries, message.ID)
 	return true, nil
+}
+
+// parkForReview writes the durable review row and only then acknowledges the
+// message. The row, not the PEL entry, is what the replay command reads.
+func (worker *Worker) parkForReview(ctx context.Context, message redis.XMessage, attempts int, cause error) error {
+	id, idOK := field(message, "id", true)
+	user, userOK := field(message, "userId", false)
+	voucher, voucherOK := field(message, "voucherId", false)
+	if !idOK || !userOK || !voucherOK {
+		return errors.New("invalid message cannot be parked for review")
+	}
+	recordCtx, stopRecord := context.WithTimeout(ctx, 3*time.Second)
+	defer stopRecord()
+	if err := worker.reviewer.Record(recordCtx, id, user, voucher, message.ID, attempts, cause); err != nil {
+		return errors.New("unknown outcome and review record not durable")
+	}
+	ackCtx, stopAck := context.WithTimeout(ctx, time.Second)
+	defer stopAck()
+	if err := worker.client.XAck(ackCtx, worker.stream, worker.group, message.ID).Err(); err != nil {
+		return errors.New("durable review awaiting ACK retry")
+	}
+	return nil
 }
 
 func (worker *Worker) read(ctx context.Context, position string) (*redis.XMessage, error) {
@@ -206,6 +252,13 @@ func (worker *Worker) deliver(ctx context.Context, message redis.XMessage) error
 	}
 	if outcome.State != "CREATED" && outcome.State != "FAILED" {
 		return errors.New("order outcome has no durable proof")
+	}
+	// The order (or the rejection event) is already durable, so a failed cleanup
+	// only keeps the review row blocking a rebuild; it must not undo the ACK.
+	if worker.reviewer != nil {
+		resolveCtx, stopResolve := context.WithTimeout(ctx, time.Second)
+		_ = worker.reviewer.Resolve(resolveCtx, id)
+		stopResolve()
 	}
 	if worker.afterCommit != nil {
 		if err := worker.afterCommit(ctx, message); err != nil {

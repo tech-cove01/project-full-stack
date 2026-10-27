@@ -21,6 +21,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
 	"github.com/cityloop/fullstack-go/internal/order"
 	"github.com/cityloop/fullstack-go/internal/ordercomp"
+	"github.com/cityloop/fullstack-go/internal/orderreview"
 	"github.com/cityloop/fullstack-go/internal/orderstream"
 	"github.com/cityloop/fullstack-go/internal/ordertimeout"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
@@ -42,6 +43,10 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		return fmt.Errorf("listen HTTP API: %w", err)
 	}
 	orders := order.NewService(resources.ORM, resources.Redis, cfg.OrderPayTimeout)
+	// The consumer parks an unresolved outcome in tb_order_review before it may
+	// acknowledge the Stream entry; the replay command owns the recovery.
+	stream := orderstream.NewWorker(resources.Redis, order.NewCreator(resources.ORM, cfg.OrderPayTimeout))
+	stream.UseReviewer(orderreview.NewRepository(resources.ORM))
 	server := &http.Server{
 		Handler: httpapi.NewRouter(resources, cfg.ProbeTimeout, revision, logger, func(routes gin.IRouter) {
 			identity := auth.NewService(resources.ORM, resources.Redis, cfg.Environment)
@@ -60,7 +65,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	// rows remain replayable when cancellation interrupts an in-flight event.
 	owned := startBackground(ctx, resources,
 		activitypub.NewWorker(resources.ORM, resources.Redis).Run,
-		orderstream.NewWorker(resources.Redis, order.NewCreator(resources.ORM, cfg.OrderPayTimeout)).Run,
+		stream.Run,
 		ordertimeout.NewWorker(resources.ORM, orders).Run,
 		ordercomp.NewWorker(resources.ORM, resources.Redis).Run)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())

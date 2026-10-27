@@ -151,6 +151,29 @@ export interface Note {
   updateTime: string
 }
 
+export interface Relationship {
+  authorId: string
+  following: boolean
+  version: number
+  followerCount: number
+}
+
+export interface FeedItem {
+  id: string
+  userId: string
+  title: string
+  content: string
+  images: string[]
+  liked: number
+  comments: number
+  createTime: string
+}
+
+export interface FeedPage {
+  items: FeedItem[]
+  nextCursor?: { publishedAt: string; id: string }
+}
+
 export interface AuditLog {
   id: string
   shopId?: string

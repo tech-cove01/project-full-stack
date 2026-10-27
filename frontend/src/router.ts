@@ -21,6 +21,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/feed',
+      name: 'feed',
+      component: () => import('./views/FeedView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/notes/new',
       name: 'note-compose',
       component: () => import('./views/NoteView.vue'),

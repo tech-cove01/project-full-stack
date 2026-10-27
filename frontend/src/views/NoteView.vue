@@ -8,7 +8,10 @@ import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/empty/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import { api, errorMessage } from '../api'
+import { useAuthStore } from '../stores/auth'
 import type { Note } from '../types'
+
+const auth = useAuthStore()
 
 const route = useRoute()
 const router = useRouter()
@@ -18,7 +21,39 @@ const loading = ref(false)
 const error = ref('')
 const submitting = ref(false)
 const form = ref({ shopId: '', title: '', content: '', images: '' })
+const following = ref(false)
+const followerCount = ref(0)
+const followLoading = ref(false)
+const canFollow = computed(
+  () => auth.loggedIn && !!note.value && auth.user?.id !== note.value.userId,
+)
 let controller: AbortController | undefined
+
+async function loadRelationship() {
+  if (!canFollow.value || !note.value) return
+  try {
+    const { data } = await api.relationship(note.value.userId)
+    following.value = data.following
+    followerCount.value = data.followerCount
+  } catch {
+    // A relationship read failure must not hide the note itself.
+  }
+}
+
+async function toggleFollow() {
+  if (!note.value || followLoading.value) return
+  followLoading.value = true
+  try {
+    const { data } = await api.setFollow(note.value.userId, !following.value)
+    following.value = data.following
+    followerCount.value = data.followerCount
+    ElMessage.success(data.following ? '已关注该作者' : '已取消关注')
+  } catch (cause) {
+    ElMessage.error(errorMessage(cause))
+  } finally {
+    followLoading.value = false
+  }
+}
 
 const imageList = computed(() =>
   (note.value?.images || []).filter((image) => /^https?:\/\//.test(image)),
@@ -34,6 +69,7 @@ async function loadNote() {
     const { data } = await api.note(String(route.params.id), active.signal)
     if (active.signal.aborted) return
     note.value = data
+    await loadRelationship()
   } catch (cause) {
     if (!active.signal.aborted) {
       error.value = errorMessage(cause)
@@ -159,7 +195,17 @@ onMounted(() => {
           <span class="eyebrow">NOTE</span>
           <h2>{{ note.title }}</h2>
         </div>
-        <span class="muted">{{ note.createTime }}</span>
+        <div class="note-head-actions">
+          <el-button
+            v-if="canFollow"
+            :type="following ? 'default' : 'primary'"
+            size="small"
+            :loading="followLoading"
+            @click="toggleFollow"
+            >{{ following ? '已关注' : '关注作者' }}</el-button
+          >
+          <span class="muted">{{ note.createTime }}</span>
+        </div>
       </div>
       <p v-if="note.shopId" class="muted">关联门店 #{{ note.shopId }}</p>
       <div v-if="imageList.length" class="note-images">
@@ -177,6 +223,7 @@ onMounted(() => {
         <span>作者 #{{ note.userId }}</span>
         <span>{{ note.liked }} 人觉得有用</span>
         <span>{{ note.comments }} 条评论</span>
+        <span>{{ followerCount }} 位关注者</span>
       </div>
     </article>
   </section>
@@ -200,6 +247,12 @@ onMounted(() => {
 
 .note-actions {
   display: flex;
+  gap: 12px;
+}
+
+.note-head-actions {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 

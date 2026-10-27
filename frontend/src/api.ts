@@ -5,10 +5,12 @@ import type {
   AiKnowledgeDoc,
   AuditLog,
   CreateActivityRequest,
+  FeedPage,
   MerchantOrder,
   MerchantWorkspace,
   Note,
   OrderStatus,
+  Relationship,
   PublicKnowledge,
   Result,
   Shop,
@@ -229,6 +231,23 @@ export const api = {
     }),
   note: (id: string, signal?: AbortSignal) =>
     request<Note>(`/notes/${encodeURIComponent(id)}`, { signal }),
+  setFollow: (authorId: string, follow: boolean) =>
+    request<Relationship>(`/authors/${encodeURIComponent(authorId)}/follow`, {
+      method: 'PUT',
+      body: JSON.stringify({ follow }),
+    }),
+  relationship: (authorId: string, signal?: AbortSignal) =>
+    request<Relationship>(`/authors/${encodeURIComponent(authorId)}/relationship`, { signal }),
+  feed: (
+    params: { cursorTime?: string; cursorId?: string; limit?: number },
+    signal?: AbortSignal,
+  ) => {
+    const query = new URLSearchParams()
+    if (params.cursorTime) query.set('cursorTime', params.cursorTime)
+    if (params.cursorId) query.set('cursorId', params.cursorId)
+    query.set('limit', String(params.limit ?? 10))
+    return request<FeedPage>(`/feed/notes?${query.toString()}`, { signal })
+  },
   aiCapabilities: () => request<AiCapabilities>('/ai/capabilities'),
   createConversation: (shopId?: string) =>
     request<AiConversation>('/ai/conversations', {

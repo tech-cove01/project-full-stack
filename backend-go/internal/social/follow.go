@@ -11,6 +11,8 @@ import (
 	"strconv"
 
 	"gorm.io/gorm"
+
+	"github.com/cityloop/fullstack-go/internal/communitycache"
 )
 
 var (
@@ -28,9 +30,19 @@ type Relationship struct {
 	FollowerCount int64  `json:"followerCount"`
 }
 
-type Service struct{ db *gorm.DB }
+type Service struct {
+	db     *gorm.DB
+	counts *communitycache.Cache
+}
 
 func NewService(db *gorm.DB) *Service { return &Service{db: db} }
+
+// WithCounts attaches the page-card counter cache. Without it every read goes to
+// MySQL, which keeps unit tests Redis-free.
+func (service *Service) WithCounts(cache *communitycache.Cache) *Service {
+	service.counts = cache
+	return service
+}
 
 func positive(value string) (uint64, error) {
 	parsed, err := strconv.ParseUint(value, 10, 64)

@@ -105,6 +105,10 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	if err != nil {
 		return LikeState{}, err
 	}
+	// The counter changed, so the cached copy must go; the next read rebuilds it.
+	if service.counts != nil {
+		_ = service.counts.Invalidate(ctx, note)
+	}
 	return service.LikeState(ctx, userID, noteID)
 }
 
@@ -146,6 +150,12 @@ func (service *Service) LikeState(ctx context.Context, userID, noteID string) (L
 			return LikeState{}, ErrNoteNotFound
 		}
 	}
-	return LikeState{NoteID: strconv.FormatUint(note, 10), Liked: row.Active == 1,
-		Version: row.Version, Likes: row.Liked}, nil
+	state := LikeState{NoteID: strconv.FormatUint(note, 10), Liked: row.Active == 1,
+		Version: row.Version, Likes: row.Liked}
+	if service.counts != nil {
+		if cached, err := service.counts.Get(ctx, note); err == nil {
+			state.Likes = cached.Likes
+		}
+	}
+	return state, nil
 }

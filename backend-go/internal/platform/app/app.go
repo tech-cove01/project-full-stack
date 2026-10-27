@@ -21,6 +21,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/aiknowledge"
 	"github.com/cityloop/fullstack-go/internal/aitool"
 	"github.com/cityloop/fullstack-go/internal/auth"
+	"github.com/cityloop/fullstack-go/internal/communitycache"
 	"github.com/cityloop/fullstack-go/internal/communityrelay"
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
@@ -68,7 +69,9 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			merchantorder.Register(routes, merchantorder.NewService(resources.ORM), identity)
 			aiknowledge.Register(routes, knowledge, identity)
 			note.Register(routes, note.NewService(resources.ORM), identity)
-			social.Register(routes, social.NewService(resources.ORM), identity)
+			social.Register(routes,
+				social.NewService(resources.ORM).WithCounts(
+					communitycache.New(resources.Redis, resources.ORM)), identity)
 			assistant := aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder).
 				WithGuards(aichat.NewDedupe(resources.Redis), aichat.NewLock(resources.Redis)).
 				WithBudget(aichat.NewBudget(resources.Redis))

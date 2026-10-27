@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 	_ "time/tzdata"
+
+	"github.com/cityloop/fullstack-go/internal/communitycache"
 )
 
 const (
@@ -147,6 +149,18 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 			liked[id] = true
 		}
 	}
+	// Counters come from the page cache in one MGET; a miss falls back to the rows
+	// already loaded, so the feed never issues a query per card.
+	cachedCounts := map[uint64]communitycache.Counts{}
+	if service.counts != nil {
+		ids := make([]uint64, 0, len(rows))
+		for _, row := range rows {
+			ids = append(ids, row.ID)
+		}
+		if loaded, cacheErr := service.counts.GetMany(ctx, ids); cacheErr == nil {
+			cachedCounts = loaded
+		}
+	}
 	items := make([]FeedItem, 0, len(rows))
 	for _, row := range rows {
 		images := make([]string, 0)
@@ -155,9 +169,13 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 				images = append(images, image)
 			}
 		}
+		likes, comments := int(row.Liked), int(row.Comments)
+		if cached, ok := cachedCounts[row.ID]; ok {
+			likes, comments = int(cached.Likes), int(cached.Comments)
+		}
 		item := FeedItem{ID: strconv.FormatUint(row.ID, 10),
 			UserID: strconv.FormatUint(row.UserID, 10), Title: row.Title, Content: row.Content,
-			Images: images, Liked: int(row.Liked), Comments: int(row.Comments),
+			Images: images, Liked: likes, Comments: comments,
 			LikedByMe: liked[row.ID], CreateTime: row.CreateTime.In(zone()).Format(feedTimeLayout)}
 		if row.ShopID != 0 {
 			shop := strconv.FormatUint(row.ShopID, 10)

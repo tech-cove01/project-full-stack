@@ -20,14 +20,19 @@ type Cursor struct {
 }
 
 type FeedItem struct {
-	ID         string   `json:"id"`
-	UserID     string   `json:"userId"`
-	Title      string   `json:"title"`
-	Content    string   `json:"content"`
-	Images     []string `json:"images"`
-	Liked      int      `json:"liked"`
-	Comments   int      `json:"comments"`
-	CreateTime string   `json:"createTime"`
+	ID       string   `json:"id"`
+	UserID   string   `json:"userId"`
+	ShopID   *string  `json:"shopId,omitempty"`
+	ShopName string   `json:"shopName,omitempty"`
+	Title    string   `json:"title"`
+	Content  string   `json:"content"`
+	Images   []string `json:"images"`
+	Liked    int      `json:"liked"`
+	Comments int      `json:"comments"`
+	// LikedByMe is filled from one batched query for the whole page, never one
+	// round trip per card.
+	LikedByMe  bool   `json:"likedByMe"`
+	CreateTime string `json:"createTime"`
 }
 
 type FeedPage struct {
@@ -89,19 +94,21 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		return FeedPage{Items: []FeedItem{}}, nil
 	}
 	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(authors)), ",")
-	where := ` WHERE status='PUBLISHED' AND user_id IN (` + placeholders + `)`
+	where := ` WHERE b.status='PUBLISHED' AND b.user_id IN (` + placeholders + `)`
 	args := make([]any, 0, len(authors)+3)
 	for _, author := range authors {
 		args = append(args, author)
 	}
 	if hasCursor {
-		where += " AND (create_time < ? OR (create_time = ? AND id < ?))"
+		where += " AND (b.create_time < ? OR (b.create_time = ? AND b.id < ?))"
 		args = append(args, cursorAt, cursorAt, cursorKey)
 	}
 	args = append(args, limit)
 	rows := make([]struct {
 		ID         uint64
 		UserID     uint64
+		ShopID     uint64
+		ShopName   *string
 		Title      string
 		Images     string
 		Content    string
@@ -109,9 +116,36 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		Comments   uint64
 		CreateTime time.Time
 	}, 0, limit)
-	if err = service.db.WithContext(ctx).Raw(`SELECT id,user_id,title,images,content,liked,comments,create_time
-		FROM tb_blog`+where+` ORDER BY create_time DESC,id DESC LIMIT ?`, args...).Scan(&rows).Error; err != nil {
+	// One join assembles the shop label for the whole page instead of querying it
+	// per card; the feed still scans idx_blog_feed for the ordered page.
+	if err = service.db.WithContext(ctx).Raw(`SELECT b.id,b.user_id,b.shop_id,s.name AS shop_name,
+		b.title,b.images,b.content,b.liked,b.comments,b.create_time
+		FROM tb_blog b LEFT JOIN tb_shop s ON s.id=b.shop_id`+where+
+		` ORDER BY b.create_time DESC,b.id DESC LIMIT ?`, args...).Scan(&rows).Error; err != nil {
 		return FeedPage{}, err
+	}
+	// One query for the caller's own likes, not one per card.
+	liked := make(map[uint64]bool, len(rows))
+	if len(rows) > 0 {
+		ids := make([]uint64, 0, len(rows))
+		for _, row := range rows {
+			ids = append(ids, row.ID)
+		}
+		likePlaceholders := strings.TrimSuffix(strings.Repeat("?,", len(ids)), ",")
+		likeArgs := make([]any, 0, len(ids)+1)
+		likeArgs = append(likeArgs, user)
+		for _, id := range ids {
+			likeArgs = append(likeArgs, id)
+		}
+		likedIDs := make([]uint64, 0)
+		if err = service.db.WithContext(ctx).Raw(`SELECT blog_id FROM tb_blog_like
+			WHERE user_id=? AND active=1 AND blog_id IN (`+likePlaceholders+`)`,
+			likeArgs...).Scan(&likedIDs).Error; err != nil {
+			return FeedPage{}, err
+		}
+		for _, id := range likedIDs {
+			liked[id] = true
+		}
 	}
 	items := make([]FeedItem, 0, len(rows))
 	for _, row := range rows {
@@ -121,10 +155,18 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 				images = append(images, image)
 			}
 		}
-		items = append(items, FeedItem{ID: strconv.FormatUint(row.ID, 10),
+		item := FeedItem{ID: strconv.FormatUint(row.ID, 10),
 			UserID: strconv.FormatUint(row.UserID, 10), Title: row.Title, Content: row.Content,
 			Images: images, Liked: int(row.Liked), Comments: int(row.Comments),
-			CreateTime: row.CreateTime.In(zone()).Format(feedTimeLayout)})
+			LikedByMe: liked[row.ID], CreateTime: row.CreateTime.In(zone()).Format(feedTimeLayout)}
+		if row.ShopID != 0 {
+			shop := strconv.FormatUint(row.ShopID, 10)
+			item.ShopID = &shop
+		}
+		if row.ShopName != nil {
+			item.ShopName = *row.ShopName
+		}
+		items = append(items, item)
 	}
 	page := FeedPage{Items: items}
 	if len(items) == limit {

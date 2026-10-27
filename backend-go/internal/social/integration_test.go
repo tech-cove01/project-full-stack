@@ -54,7 +54,10 @@ func TestIntegrationFollowAndFeed(t *testing.T) {
 	first := insertNote(t, resources, author, "第一页笔记", sameSecond)
 	second := insertNote(t, resources, author, "同秒第二篇", sameSecond)
 	third := insertNote(t, resources, author, "更早的笔记", older)
-	_ = first
+	// Attach the first note to an existing shop so the page assembles a shop label.
+	if err = resources.ORM.WithContext(ctx).Exec("UPDATE tb_blog SET shop_id=1 WHERE id=?", first).Error; err != nil {
+		t.Fatal(err)
+	}
 	_ = second
 
 	service := NewService(resources.ORM)
@@ -71,9 +74,27 @@ func TestIntegrationFollowAndFeed(t *testing.T) {
 		t.Fatalf("a repeated follow must stay at version 1, got %+v %v", repeated, err)
 	}
 
+	if _, err = service.SetLike(ctx, userID, strconv.FormatUint(first, 10), true); err != nil {
+		t.Fatalf("like failed: %v", err)
+	}
 	page, err := service.Feed(ctx, userID, "", "", 2)
 	if err != nil || len(page.Items) != 2 || page.NextCursor == nil {
 		t.Fatalf("first page shape is wrong: %+v %v", page, err)
+	}
+	// The page assembles the shop label and the caller's own like in one batch.
+	var likedItem *FeedItem
+	for index := range page.Items {
+		if page.Items[index].ID == strconv.FormatUint(first, 10) {
+			likedItem = &page.Items[index]
+		}
+		if page.Items[index].ID == strconv.FormatUint(second, 10) &&
+			(page.Items[index].LikedByMe || page.Items[index].ShopName != "") {
+			t.Fatal("a note without shop or like must not borrow another card's fields")
+		}
+	}
+	if likedItem == nil || !likedItem.LikedByMe || likedItem.ShopName == "" ||
+		likedItem.ShopID == nil || *likedItem.ShopID != "1" {
+		t.Fatalf("the liked note must carry its own shop and like state: %+v", likedItem)
 	}
 	seen := map[string]bool{}
 	for _, item := range page.Items {

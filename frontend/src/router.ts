@@ -21,6 +21,17 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/notes/new',
+      name: 'note-compose',
+      component: () => import('./views/NoteView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/notes/:id',
+      name: 'note',
+      component: () => import('./views/NoteView.vue'),
+    },
+    {
       path: '/merchant',
       name: 'merchant',
       component: () => import('./views/MerchantView.vue'),

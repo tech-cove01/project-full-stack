@@ -136,6 +136,21 @@ export interface RedeemResult {
   alreadyRedeemed: boolean
 }
 
+export interface Note {
+  id: string
+  shopId?: string
+  userId: string
+  title: string
+  content: string
+  images: string[]
+  liked: number
+  comments: number
+  status: string
+  publishVersion: number
+  createTime: string
+  updateTime: string
+}
+
 export interface AuditLog {
   id: string
   shopId?: string

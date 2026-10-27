@@ -7,6 +7,7 @@ import type {
   CreateActivityRequest,
   MerchantOrder,
   MerchantWorkspace,
+  Note,
   OrderStatus,
   PublicKnowledge,
   Result,
@@ -217,6 +218,17 @@ export const api = {
     }),
   audits: (current: number, pageSize: number, signal?: AbortSignal) =>
     request<AuditLog[]>(`/merchant/audits?current=${current}&pageSize=${pageSize}`, { signal }),
+  createNote: (
+    body: { shopId?: string; title: string; content: string; images: string[] },
+    signal?: AbortSignal,
+  ) =>
+    request<Note>('/notes', {
+      method: 'POST',
+      body: JSON.stringify(body),
+      signal,
+    }),
+  note: (id: string, signal?: AbortSignal) =>
+    request<Note>(`/notes/${encodeURIComponent(id)}`, { signal }),
   aiCapabilities: () => request<AiCapabilities>('/ai/capabilities'),
   createConversation: (shopId?: string) =>
     request<AiConversation>('/ai/conversations', {

@@ -42,7 +42,8 @@
 | GO-042 去重/预算/终态 | 自测通过待核验 | a/b + 端到端集成测试；真实MySQL/Redis回合PASS，真实模型质量留核验 |
 | GO-050 笔记发布/详情 | 自测通过待核验 | 迁移006、`internal/note`、页面；真实MySQL发布PASS |
 | GO-051 关注与DB Feed | 自测通过待核验 | 后端与页面；真实MySQL幂等/游标PASS，EXPLAIN走idx_blog_feed |
-| GO-052—053 Kafka投影/点赞 | 待做 | 社区outbox→Kafka、期望状态点赞与位图 |
+| GO-052 社区outbox→Kafka | 自测通过待核验 | relay + KRaft profile；真实投递/重试PASS，消费端幂等与投影待053后 |
+| GO-053 期望状态点赞与位图 | 待做 | 期望状态点赞、位图计数与重建 |
 | GO-060—062 缓存/计数/多投影 | 待做 | 批量装配、singleflight、复合游标、热点/位图与重建 |
 | GO-070 / 071 证据与正式切换 | 待做 | 持续负载、三流程演示、目录/CI/启动收敛到 Go |
 
@@ -176,6 +177,14 @@ GO-021测试应用及隔离依赖已停止，卷保留，原项目容器未变�
 - 验收：PRODUCT-02 关注/Feed 子集；Kafka 投影与点赞属 GO-052/053。
 - 验证：真实 MySQL 集成覆盖幂等（重复关注版本不变）、每真实变化一条事件、同秒三条笔记的游标翻页无重复、取关后为空；`EXPLAIN` 显示 JOIN 写法 `Using temporary; Using filesort`，两步写法为 `Backward index scan` 且命中 `idx_blog_feed`。`gofmt/vet/go test/go build` 与前端类型检查/构建/prettier 通过。
 - 限制：Feed 只有第一页与"加载更多"，无定位跳页；关注数实时 COUNT，未接 Redis 计数投影；关注列表、作者主页未做；社区 outbox 尚无投递者（GO-052）；Linux race/远端 CI 未执行。
+
+### GO-052 / 社区 outbox → Kafka
+
+- 依赖：GO-051；开始 SHA `f6dc4f1`。提交：relay 与配置 `db77e58346fbcf359fbc3e8e26c45271e8997c4e`；真实 broker 测试 `2f920ca3bb92f9c22e3d5cacf96f9a27fef88c6d`。
+- 交付行为：`compose.go.yaml` 增加 `kafka` profile（KRaft 单节点，不 advertise 0.0.0.0，`log.dirs` 指向命名卷）。`KAFKA_BROKERS` 为空时 relay 不启动、进程照常运行。relay 以 30 秒租约认领 `tb_community_outbox`，`attempts` 作为 fence；broker 确认后写 `DONE`，失败按 1→2→4…→256 秒退避，超过 8 次停车 `NEEDS_REVIEW`；失去租约的 worker 得到 `ErrLeaseLost` 而不是覆盖新结果。消息以 `aggregate_id` 为 key，信封含 `eventId/eventType/aggregateType/aggregateId/version/payload`，并带 `eventType/eventId/version` header。
+- 验收：事件可靠性子集（至少一次）；消费端幂等与 Feed 投影属 GO-053/060。
+- 验证：真实 Kafka 集成 PASS —— 发送后可从 topic 读回、信封与 header 正确、状态 `DONE`、完成后不再重复投递、空队列返回无工作；`127.0.0.1:1` 不可达时保持 `PENDING`、`attempts=1`、`next_attempt_at` 在未来。`gofmt/vet/go test ./...`（23 包）全绿。本机 broker 用后已 `stop`，卷与镜像保留，复跑用 `docker compose -f compose.go.yaml --profile kafka up -d kafka`。
+- 限制：至少一次语义，消费者必须按 `eventId` 去重；没有死信重放的运维命令；未接真实消费端（投影在后续票）；Linux race/远端 CI 未执行。
 
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 

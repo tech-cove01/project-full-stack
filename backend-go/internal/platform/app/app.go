@@ -20,6 +20,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
 	"github.com/cityloop/fullstack-go/internal/order"
+	"github.com/cityloop/fullstack-go/internal/ordercomp"
 	"github.com/cityloop/fullstack-go/internal/orderstream"
 	"github.com/cityloop/fullstack-go/internal/ordertimeout"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
@@ -60,7 +61,8 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	owned := startBackground(ctx, resources,
 		activitypub.NewWorker(resources.ORM, resources.Redis).Run,
 		orderstream.NewWorker(resources.Redis, order.NewCreator(resources.ORM, cfg.OrderPayTimeout)).Run,
-		ordertimeout.NewWorker(resources.ORM, orders).Run)
+		ordertimeout.NewWorker(resources.ORM, orders).Run,
+		ordercomp.NewWorker(resources.ORM, resources.Redis).Run)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())
 	return serve(ctx, server, listener, owned, cfg.ShutdownTimeout, logger)
 }

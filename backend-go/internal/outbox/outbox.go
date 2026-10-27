@@ -102,16 +102,38 @@ func NewRepository(db *gorm.DB) *Repository { return &Repository{db: db} }
 // ClaimActivity claims one supported activity event. Orders, community events,
 // and unsupported activity events are deliberately outside this worker's scope.
 func (repository *Repository) ClaimActivity(ctx context.Context) (*Event, error) {
+	return repository.claim(ctx, "ACTIVITY",
+		[]string{"ACTIVITY_PREPARE", "ACTIVITY_OPEN", "ACTIVITY_CLOSE"})
+}
+
+// ClaimOrder claims one order transition for the compensation worker. The two
+// event families use separate claims so neither worker can take the other's rows.
+func (repository *Repository) ClaimOrder(ctx context.Context) (*Event, error) {
+	return repository.claim(ctx, "ORDER", []string{"ORDER_CHANGED"})
+}
+
+// claim takes a 30 s lease and increments the attempts fence in one statement, so
+// a previous worker cannot finish an event that has been reclaimed.
+func (repository *Repository) claim(ctx context.Context, aggregate string, eventTypes []string) (*Event, error) {
+	if aggregate == "" || len(eventTypes) == 0 {
+		return nil, errors.New("invalid claim scope")
+	}
+	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(eventTypes)), ",")
+	args := make([]any, 0, len(eventTypes)+1)
+	args = append(args, aggregate)
+	for _, eventType := range eventTypes {
+		args = append(args, eventType)
+	}
 	var claimed *Event
 	err := repository.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var rows []Event
 		if err := tx.Raw(`SELECT id, event_id, aggregate_type, aggregate_id,
 			aggregate_version, event_type, payload, attempts FROM tb_outbox
-			WHERE BINARY aggregate_type = 'ACTIVITY'
-			  AND BINARY event_type IN ('ACTIVITY_PREPARE', 'ACTIVITY_OPEN', 'ACTIVITY_CLOSE')
+			WHERE BINARY aggregate_type = ?
+			  AND BINARY event_type IN (`+placeholders+`)
 			  AND ((delivery_status = 'PENDING' AND next_attempt_at <= NOW(3))
 			    OR (delivery_status = 'PROCESSING' AND lease_until < NOW(3)))
-			ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`).Scan(&rows).Error; err != nil {
+			ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`, args...).Scan(&rows).Error; err != nil {
 			return err
 		}
 		if len(rows) == 0 {
@@ -159,6 +181,24 @@ func (repository *Repository) Retry(ctx context.Context, event Event, cause erro
 		    next_attempt_at = TIMESTAMPADD(SECOND, ?, NOW(3)), last_error = ?
 		WHERE id = ? AND delivery_status = 'PROCESSING' AND attempts = ? AND lease_until > NOW(3)`,
 		retryDelay(event.Attempts), message, event.ID, event.Attempts))
+}
+
+// NeedsReview parks an event whose Redis state cannot be applied safely (missing
+// stock key, wrong type, counter out of range). The row stays visible for
+// reconciliation instead of being retried forever or silently deleted.
+func (repository *Repository) NeedsReview(ctx context.Context, event Event, cause error) error {
+	message := "needs reconciliation"
+	if cause != nil {
+		message = cause.Error()
+	}
+	runes := []rune(message)
+	if len(runes) > 500 {
+		message = string(runes[:500])
+	}
+	return fenced(repository.db.WithContext(ctx).Exec(`UPDATE tb_outbox
+		SET delivery_status = 'NEEDS_REVIEW', lease_until = NULL, last_error = ?
+		WHERE id = ? AND delivery_status = 'PROCESSING' AND attempts = ? AND lease_until > NOW(3)`,
+		message, event.ID, event.Attempts))
 }
 
 func retryDelay(attempts int) int {

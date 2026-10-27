@@ -16,6 +16,8 @@ import (
 
 	"github.com/cityloop/fullstack-go/internal/activity"
 	"github.com/cityloop/fullstack-go/internal/activitypub"
+	"github.com/cityloop/fullstack-go/internal/ai"
+	"github.com/cityloop/fullstack-go/internal/aiknowledge"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
@@ -54,6 +56,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			shop.Register(routes, shop.NewService(resources.ORM, cfg.Location))
 			merchant.Register(routes, merchant.NewService(resources.ORM), identity)
 			merchantorder.Register(routes, merchantorder.NewService(resources.ORM), identity)
+			aiknowledge.Register(routes, aiknowledge.NewService(resources.ORM, ai.NewStub(256)), identity)
 			activity.Register(routes, activity.NewService(resources.ORM, resources.Redis), identity)
 			order.Register(routes, orders, identity)
 		}),

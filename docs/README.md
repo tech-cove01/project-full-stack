@@ -35,7 +35,8 @@
 | GO-021 活动发布/下架 | 已核验（本票范围） | 独立真实25组、两时区活动各29项，CI/轮询证据已补；[报告](reviews/2026-10-26/go021-e410c71/report.md)、[验证修复](reviews/2026-10-26/go021-verification-fixes/report.md) |
 | GO-030 受理→Stream成单 | 已核验（本票范围，含QA修复） | 销售期/跨账号恢复/迟到退出已修复；真实集成、两时区各30+9项通过；[独立报告](reviews/2026-10-26/go030-0072c86/report.md)；支付/补偿留后票 |
 | GO-031 支付/取消/超时 | 自测通过待核验 | a/b/c/d功能及e CI分步提交；真实支付8/取消11/扫描6+3，重启18项、两时区页面各25项；Redis补偿留GO-033 |
-| GO-032—033 核销与恢复 | 待做 | 核销/退款/审计、补偿/review/重建；真实窗口回归 |
+| GO-032 核销/退款/审计 | 自测通过待核验 | a/b/c/d 四个提交；普通Go/前端构建通过，真实MySQL并发/库存对账留核验 |
+| GO-033 补偿/review/重建 | 进行中 | 持久review与重放、Redis补偿与缺键、显式重建；真实窗口回归 |
 | GO-040—042 业务 AI | 待做 | FAQ/检索/只读工具/SSE/生命周期；Stub 与真实质量分开 |
 | GO-050—053 社区与 Kafka | 待做 | 笔记、关注、DB Feed、可靠事件、期望状态点赞 |
 | GO-060—062 缓存/计数/多投影 | 待做 | 批量装配、singleflight、复合游标、热点/位图与重建 |
@@ -115,6 +116,14 @@ GO-021测试应用及隔离依赖已停止，卷保留，原项目容器未变�
 - 真实支付8/取消11/扫描SQL6/实际scanner→生命周期3主组通过；20支付/20取消、支付/取消及支付/过期竞争有DB对账。API在10秒旧期限前完整退出，离线跨期限，改1h配置重启仍关旧单；18项PASS、两进程exit0，另启动关闭6场景PASS。无ZSet依赖。
 - 普通Go/verify/gofmt/vet、前端构建/格式、UTC/上海生命周期页面各25项、GO-030真实落单12/Stream8及原页面30项回归通过。真实行锁复现延迟支付确认后旧错误遮凭证的初始FAIL，修复后原断言通过；scanner夹具同值UPDATE误报及各轮日志也保留。并发均为正确性实验，不是持续容量。
 - API/Vite与隔离Go依赖已停、卷保留、原项目容器healthy；[收尾](evidence/2026-10-26-0072c86/GO-031/cleanup-final.json)。Linux race/远端CI、OS强杀、物理断库、Redis重启及持续负载未执行；核销/退款/审计留GO-032，完整补偿/review/重建留GO-033。
+
+### GO-032 / 核销、退款与审计
+
+- 依赖：GO-031；开始 SHA `fa1fa50409567b75d06f1b89344b3eb68bf1d927`。四个功能提交：列表与审计 `8d5b655cf277ae2f39eb02aa73bf665a978e9a64`；核销 `b5439fd57364bceaecda1b1988c48658b7418f81`；退款 `1b292691de017b4e313a256baac0b37ce5fb3e76`；前端分页与字段对齐 `f0d9c55c7dc4a23de5a8b3eab85f32d71ccd0919`。
+- 交付行为：商家订单列表按可见门店范围分页，支持 `shopId/status/orderId`，手机号服务端掩码；审计列表按管理范围分页，STAFF 的跨商家 scope 不并入。核销以 token 为凭证但仍按当前 membership 授权，未知 token 与他人门店 token 同为 404；锁序 `catalog→inventory→order`，状态更新同时校验核销期，重复核销返回 `alreadyRedeemed`。退款仅 OWNER/MANAGER，要求已支付且未过核销结束时间，DB 库存同事务回补一次，事件 `releaseEligibility=false`。前端两个列表改为服务端分页并把 `MerchantOrder` 字段对齐为 `phone/status`。
+- 验收：接近 P1-C/P1-5/P1-6 的业务子集；本票不覆盖重建与补偿。
+- 验证：`gofmt -l` 干净、`go vet ./...`、`go test -count=1 ./...` 全绿（含新包 `merchantorder`）；前端 `vue-tsc`、生产构建、prettier 通过。
+- 限制：真实 MySQL 并发核销/退款、库存对账与浏览器页面均未执行，留独立核验；Redis 资格与库存回补仍 PENDING，归 GO-033；Linux race、远端 CI 未执行。
 
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 

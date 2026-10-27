@@ -18,6 +18,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/activitypub"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/merchant"
+	"github.com/cityloop/fullstack-go/internal/merchantorder"
 	"github.com/cityloop/fullstack-go/internal/order"
 	"github.com/cityloop/fullstack-go/internal/orderstream"
 	"github.com/cityloop/fullstack-go/internal/ordertimeout"
@@ -46,6 +47,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			auth.Register(routes, identity)
 			shop.Register(routes, shop.NewService(resources.ORM, cfg.Location))
 			merchant.Register(routes, merchant.NewService(resources.ORM), identity)
+			merchantorder.Register(routes, merchantorder.NewService(resources.ORM), identity)
 			activity.Register(routes, activity.NewService(resources.ORM, resources.Redis), identity)
 			order.Register(routes, orders, identity)
 		}),

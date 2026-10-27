@@ -55,7 +55,7 @@ Canal 仅 H6 可选，单独 profile；必须实测所选版本与现有 MySQL 8
 | k6 | 已安装 2.2.0（`C:\Program Files\k6\k6.exe`） | 新开终端若仍找不到命令，使用完整路径或重开 PowerShell |
 | 真实服务联调 / 性能 / 故障恢复 | 尚未验收 | 健康检查、冒烟和压测需按下文执行并记录结果 |
 
-依赖版本分别由 `backend/pom.xml`、`frontend/package-lock.json` 和 `compose.yaml` 管理。MySQL `8.4`、Redis `7.4-alpine` 是版本系列标签，重拉可能获得更新补丁；压测报告应记录实际镜像版本或 digest。
+依赖版本分别由 `backend-go/go.mod`、`frontend/package-lock.json` 和 `compose.go.yaml` 管理；Java 基线的 `pom.xml` 已随源码归档到 `archive/backend-java-20261026/`。。MySQL `8.4`、Redis `7.4-alpine` 是版本系列标签，重拉可能获得更新补丁；压测报告应记录实际镜像版本或 digest。
 
 ## 启动前检查
 

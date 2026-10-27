@@ -115,10 +115,14 @@ jobs:
           name: go-bootstrap-evidence
           path: backend-go/bootstrap-result.json
 
-  # The Java baseline is frozen at tag java-baseline-20261026. This job only keeps
-  # the archived reference build compiling; the product runs on the Go service.
+  # The Java baseline is frozen at tag java-baseline-20261026 and its sources now
+  # live under archive/. This job only keeps the archived reference build
+  # compiling; the product runs on the Go service.
   backend:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: archive/backend-java-20261026
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
@@ -126,8 +130,8 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-          cache-dependency-path: backend/pom.xml
-      - run: mvn -B -ntp -f backend/pom.xml verify
+          cache-dependency-path: archive/backend-java-20261026/pom.xml
+      - run: mvn -B -ntp -f pom.xml verify
 
   frontend:
     runs-on: ubuntu-latest

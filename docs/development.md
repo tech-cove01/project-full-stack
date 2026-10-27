@@ -79,13 +79,32 @@ GO-021 已提供 `GET /merchant/activities?current=1&pageSize=10&shopId=...&stat
 
 真实服务测试：先停API/worker，在 `backend-go/` 用 `GO_INTEGRATION=1 go test -count=1 -v ./internal/activity ./internal/outbox ./internal/activitypub`；真实消费测试只运行在无其他待认领事件的隔离库，包间用命名锁串行claim。之后启动API和Vite，根目录 `node scripts/go-activity-ui-smoke.mjs`，除已有UI环境外还需显式REDIS_HOST/REDIS_PORT；`BROWSER_TIMEZONE=UTC`或`Asia/Shanghai`。脚本真实提交后丢弃响应验证原键重试，按精确ID先清持久事件/业务，再删Redis键并确认0、注销session。不要对共享/正式库运行；大ID自增水位不回拨。phase/hash旧数据兼容与未执行项见[GO-021证据](evidence/2026-10-26-bb5d985/GO-021/report.md)。
 
+## Go 服务启动（当前）
+
+```sh
+# 隔离环境：不要与 Java 基线共用 3307/6379
+docker compose -f compose.go.yaml up -d mysql redis
+$env:MYSQL_HOST='127.0.0.1'; $env:MYSQL_PORT='3308'
+$env:MYSQL_DATABASE='project_full_stack_go'
+$env:MYSQL_USER='fullstack'; $env:MYSQL_PASSWORD='fullstack_go_dev_only'
+$env:REDIS_HOST='127.0.0.1'; $env:REDIS_PORT='6380'
+node scripts/migrate.mjs
+
+cd backend-go && go run ./cmd/api     # 默认 127.0.0.1:8082
+npm --prefix frontend run dev       # 前端代理到 Go API
+```
+
+社区事件投递需要 Kafka 时：`docker compose -f compose.go.yaml --profile kafka up -d kafka`，并设置 `KAFKA_BROKERS=127.0.0.1:9092`。
+
 ## Java 基线环境与启动（历史参考）
+
+Java 源码已随基线冻结归档到 `archive/backend-java-20261026/`，下面的命令只用于查看或复现历史基线，不再是产品启动路径。
 
 - JDK 21 是编译目标；兼容的较新 JDK 也可以通过 `--release 21` 构建。
 - Node.js 24；前端依赖以 `frontend/package-lock.json` 为准。
 - Maven 3.6.3+；Docker Compose v2。
 
-先运行 `docker compose up -d mysql redis`，等 `docker compose ps` 显示两个服务 healthy 后，再运行 `mvn -f backend/pom.xml spring-boot:run`。
+先运行 `docker compose up -d mysql redis`，等 `docker compose ps` 显示两个服务 healthy 后，再运行 `mvn -f archive/backend-java-20261026/pom.xml spring-boot:run`。
 
 本机原有 MySQL 已占用 3306；在启动 Compose 和后端的各个 PowerShell 窗口中都先执行 `$env:MYSQL_PORT = '3307'`，使项目容器映射与后端连接保持一致。仓库默认值仍是 3306；这个环境变量是本机端口覆盖，不会更改原有 MySQL 服务。
 

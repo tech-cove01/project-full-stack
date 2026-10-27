@@ -2,7 +2,7 @@
 
 面向本地生活服务的全栈平台，连接用户消费、商家经营与探店分享。围绕活动发布、抢券、模拟支付、到店核销和审计构建交易流程，配套商家工作台与带来源的业务 AI 助手。
 
-**开发状态：后端正在迁移到 Go，前端保留 Vue 3/TypeScript。** Go 工程基础、登录与身份恢复、商铺浏览及公开优惠、逐门店授权、商家活动发布/下架已实现于 `backend-go/`；订单履约、其他商家操作和 AI 继续逐项迁移，社区/Feed/Kafka 属于新增范围。具体任务与已验证状态见 [开发入口](docs/README.md)。
+**开发状态：后端已切换到 Go 服务，前端保留 Vue 3/TypeScript。** 登录与身份恢复、商铺浏览、逐门店授权、活动发布/下架、受理成单、支付取消、核销退款审计、补偿与重建、业务 AI、社区与 Kafka 均已实现于 `backend-go/`；Java 基线冻结在标签 `java-baseline-20261026` 并归档到 `archive/`。具体任务与已验证状态见 [工作流与状态](STATUS.md)。
 
 ## 产品能力
 
@@ -45,8 +45,8 @@ Java 参考源码保存在 Git 标签 `java-baseline-20261026`，历史证据位
 ## 目录
 
 ~~~text
-backend/                 当前 Java；Go 验收后收敛到此目录
-backend-go/              迁移期间的 Go 工程基础；业务逐项迁移
+archive/backend-java-20261026/ 冻结的 Java 基线源码（标签 java-baseline-20261026），不再参与构建
+backend-go/              Go 服务；目录收敛后占用 backend/
 frontend/                用户端与商家工作台
 infra/mysql/             表结构、演示数据与版本迁移
 scripts/                 HTTP 冒烟、恢复与负载脚本

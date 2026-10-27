@@ -215,6 +215,8 @@ func writeError(c *gin.Context, err error) {
 		status, message = http.StatusNotFound, ErrNotFound.Error()
 	case errors.Is(err, ErrBusy), errors.Is(err, ErrConflict):
 		status, message = http.StatusConflict, err.Error()
+	case errors.Is(err, ErrRateLimited), errors.Is(err, ErrBudgetExhausted):
+		status, message = http.StatusTooManyRequests, err.Error()
 	}
 	c.AbortWithStatusJSON(status, httpapi.Result{ErrorMsg: message})
 }

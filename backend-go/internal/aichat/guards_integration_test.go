@@ -4,7 +4,9 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/binary"
+	"errors"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -72,6 +74,32 @@ func TestIntegrationDedupeAndLock(t *testing.T) {
 	}
 	if state, _, _ = dedupe.Begin(ctx, userID, conversation, message, "fingerprint-a"); state != DedupeNew {
 		t.Fatalf("after cleanup the id must be claimable again, got %v", state)
+	}
+
+	budget := NewBudgetWithLimits(resources.Redis, 2, 2)
+	rateKey := "ai:rate:" + strconv.FormatUint(userID, 10) + ":" + time.Now().Format("200601021504")
+	dailyKey := "ai:budget:" + strconv.FormatUint(userID, 10) + ":" +
+		time.Now().In(zoneForBudget()).Format("20060102")
+	t.Cleanup(func() {
+		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stop()
+		_ = resources.Redis.Del(cleanupCtx, rateKey, dailyKey).Err()
+	})
+	if err = budget.Allow(ctx, userID); err != nil {
+		t.Fatal("first request must pass the minute limit")
+	}
+	if err = budget.Allow(ctx, userID); err != nil {
+		t.Fatal("second request must pass the minute limit")
+	}
+	if err = budget.Allow(ctx, userID); !errors.Is(err, ErrRateLimited) {
+		t.Fatalf("third request must hit the minute limit, got %v", err)
+	}
+	// A fresh minute with the daily cap already used must report the daily error.
+	if err = resources.Redis.Del(ctx, rateKey).Err(); err != nil {
+		t.Fatal(err)
+	}
+	if err = budget.Allow(ctx, userID); !errors.Is(err, ErrBudgetExhausted) {
+		t.Fatalf("the daily cap must be reported separately, got %v", err)
 	}
 
 	token, err := lock.Try(ctx, userID, conversation, time.Minute)

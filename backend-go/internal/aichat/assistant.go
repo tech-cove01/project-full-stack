@@ -52,6 +52,7 @@ type Assistant struct {
 	provider      ai.Provider
 	dedupe        *Dedupe
 	lock          *Lock
+	budget        *Budget
 }
 
 func NewAssistant(conversations *Conversations, knowledge *aiknowledge.Service,
@@ -63,6 +64,13 @@ func NewAssistant(conversations *Conversations, knowledge *aiknowledge.Service,
 // without Redis and still exercise routing and prompts.
 func (assistant *Assistant) WithGuards(dedupe *Dedupe, lock *Lock) *Assistant {
 	assistant.dedupe, assistant.lock = dedupe, lock
+	return assistant
+}
+
+// WithBudget rejects a request before it can reach the provider. It is separate
+// from WithGuards so a test can exercise dedupe without rate limits.
+func (assistant *Assistant) WithBudget(budget *Budget) *Assistant {
+	assistant.budget = budget
 	return assistant
 }
 
@@ -80,6 +88,11 @@ func (assistant *Assistant) Ask(ctx context.Context, userID uint64, conversation
 	}
 	if !exists {
 		return ErrNotFound
+	}
+	// Rate and daily caps are checked before the lease and the provider, so a
+	// rejected request costs nothing and cannot hold the conversation.
+	if err = assistant.budget.Allow(ctx, userID); err != nil {
+		return err
 	}
 	current := turn{userID: userID, conversationID: conversationID, clientMessage: clientMessageID,
 		deadline: time.Now().Add(turnTimeout)}

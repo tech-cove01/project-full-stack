@@ -36,6 +36,13 @@ const filterShop = ref('')
 const filterStatus = ref('')
 const redeemShop = ref('')
 const tokenInput = ref('')
+// Server-side pagination: the list never silently shows only the first page.
+const orderPage = ref(1)
+const orderPageSize = 10
+const orderTotal = ref(0)
+const auditPage = ref(1)
+const auditPageSize = 10
+const auditTotal = ref(0)
 let controller: AbortController | undefined
 
 const shops = computed(() =>
@@ -76,8 +83,8 @@ async function load() {
     if (!redeemShop.value && shops.value.length) redeemShop.value = shops.value[0].id
     const orderResult = await api.merchantOrders(
       {
-        current: 1,
-        pageSize: 50,
+        current: orderPage.value,
+        pageSize: orderPageSize,
         shopId: filterShop.value || undefined,
         status: filterStatus.value || undefined,
       },
@@ -85,15 +92,24 @@ async function load() {
     )
     if (active.signal.aborted) return
     orders.value = orderResult.data || []
+    orderTotal.value = Number(orderResult.total || 0)
     if (canManage.value) {
-      const auditResult = await api.audits(1, 30, active.signal)
-      if (!active.signal.aborted) audits.value = auditResult.data || []
+      const auditResult = await api.audits(auditPage.value, auditPageSize, active.signal)
+      if (active.signal.aborted) return
+      audits.value = auditResult.data || []
+      auditTotal.value = Number(auditResult.total || 0)
     }
   } catch (cause) {
     if (!active.signal.aborted) error.value = errorMessage(cause)
   } finally {
     if (!active.signal.aborted) loading.value = false
   }
+}
+
+// A new filter always restarts at page 1 so the user never sees an empty page 3.
+function applyFilters() {
+  orderPage.value = 1
+  void load()
 }
 
 async function redeem() {
@@ -206,7 +222,7 @@ onBeforeUnmount(() => controller?.abort())
           clearable
           placeholder="全部门店"
           style="width: 180px"
-          @change="load"
+          @change="applyFilters"
         >
           <el-option v-for="shop in shops" :key="shop.id" :label="shop.name" :value="shop.id" />
         </el-select>
@@ -215,7 +231,7 @@ onBeforeUnmount(() => controller?.abort())
           clearable
           placeholder="全部状态"
           style="width: 150px"
-          @change="load"
+          @change="applyFilters"
         >
           <el-option label="待支付" value="1" />
           <el-option label="已支付" value="2" />
@@ -235,13 +251,13 @@ onBeforeUnmount(() => controller?.abort())
       </el-table-column>
       <el-table-column prop="shopName" label="门店" width="130" />
       <el-table-column label="用户" width="150">
-        <template #default="{ row }">{{ row.userPhone }}</template>
+        <template #default="{ row }">{{ row.phone }}</template>
       </el-table-column>
       <el-table-column prop="voucherTitle" label="活动" min-width="150" />
       <el-table-column label="状态" width="110">
         <template #default="{ row }">
-          <el-tag :type="tagTypes[row.orderStatus] || 'info'">{{
-            labels[row.orderStatus] || row.orderStatus
+          <el-tag :type="tagTypes[row.status] || 'info'">{{
+            labels[row.status] || row.status
           }}</el-tag>
         </template>
       </el-table-column>
@@ -252,7 +268,7 @@ onBeforeUnmount(() => controller?.abort())
       <el-table-column label="操作" width="140">
         <template #default="{ row }">
           <el-button
-            v-if="canManage && row.orderStatus === 2"
+            v-if="canManage && row.status === 2"
             link
             type="danger"
             :loading="refundingId === row.id"
@@ -263,6 +279,15 @@ onBeforeUnmount(() => controller?.abort())
         </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      v-if="orderTotal > orderPageSize"
+      v-model:current-page="orderPage"
+      :page-size="orderPageSize"
+      :total="orderTotal"
+      layout="prev, pager, next, total"
+      style="margin-top: 12px; justify-content: flex-end"
+      @current-change="load"
+    />
   </section>
 
   <section v-if="canManage" class="panel">
@@ -271,7 +296,7 @@ onBeforeUnmount(() => controller?.abort())
         <span class="eyebrow">AUDIT</span>
         <h2>操作审计</h2>
       </div>
-      <span class="muted">最近 30 条</span>
+      <span class="muted">共 {{ auditTotal }} 条</span>
     </div>
     <el-empty v-if="!audits.length" description="还没有审计记录" />
     <el-table v-else :data="audits" style="width: 100%">
@@ -281,5 +306,14 @@ onBeforeUnmount(() => controller?.abort())
       <el-table-column prop="detail" label="详情" min-width="240" show-overflow-tooltip />
       <el-table-column prop="createTime" label="时间" width="170" />
     </el-table>
+    <el-pagination
+      v-if="auditTotal > auditPageSize"
+      v-model:current-page="auditPage"
+      :page-size="auditPageSize"
+      :total="auditTotal"
+      layout="prev, pager, next, total"
+      style="margin-top: 12px; justify-content: flex-end"
+      @current-change="load"
+    />
   </section>
 </template>

@@ -117,10 +117,12 @@ export interface MerchantOrder {
   shopId: string
   shopName: string
   userId: string
-  userPhone: string
+  /** Already masked by the server; the full number is never sent to a merchant. */
+  phone: string
   voucherId: string
   voucherTitle: string
-  orderStatus: OrderStatusValue
+  /** Business status of the merchant order row (1/2/3/4/6). */
+  status: OrderStatusValue
   payAmount: string
   createTime: string
   payTime?: string

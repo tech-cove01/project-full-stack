@@ -37,7 +37,8 @@
 | GO-060 页卡片批量装配与计数缓存 | 自测通过待核验 | `e67e280`、`f521831`；真实 Redis/MySQL 缓存与并发读 PASS |
 | GO-061 热点保护 | 自测通过待核验 | `031d97c`；进程内短 TTL 吸收热点，真实 Redis 验证 |
 | GO-062 位图计数与重建 | 自测通过待核验 | `54fc5e8`；位图投影 + `cmd/recount`，真实 Redis/MySQL PASS |
-| GO-070 / 071 证据与正式切换 | 待做 | 持续负载、三流程演示、目录/CI/启动收敛到 Go |
+| GO-070 三流程演示 | 自测通过待核验 | `93dea4a`；本机 22 项检查全过、清理无残留，见 [证据](docs/evidence/2026-10-27-go070/go-flow-demo-result.json) |
+| GO-071 目录/CI/启动收敛 | 待做 | 后端目录收敛、CI 矩阵与启动脚本切到 Go |
 
 ### GO-053 交付记录
 
@@ -59,6 +60,14 @@
 - 行为：计数缓存前加 2 秒进程内副本（上限 4096 条，失效时两层同时清除），热点笔记不再每次打 Redis；点赞位图按平台用户 id 置位，事务提交后更新、状态读取优先位图，超出 32 位偏移的 id 跳过；`cmd/recount <noteId>` 从 `tb_blog_like` 用一个流水线重建位图，计数与事实不符时以非零退出报错。
 - 验证：真实 Redis/MySQL 通过 —— 删除 Redis 键后本地层仍能命中、过期后回源重建；位图幂等置位、取消、重建替换旧位、越界 id 跳过；点赞后位图与状态读取一致。
 - 限制：位图无 TTL，靠 `recount` 修复而非过期；重建只支持单个笔记；`tb_blog.liked` 仍是并行计数列，未做统一对账入口。
+
+### GO-070 交付记录
+
+- 依赖 GO-053/062；提交：演示脚本 `93dea4a`；缺陷修复 `fix(GO-033)`（核销/退款事件补齐补偿字段）。
+- 行为：`scripts/go-flow-demo.mjs <trade|community|ai|all>` 用真实 MySQL/Redis 跑通三条流程 —— 交易：发活动、等 gate ready、抢券、成单、支付、拿核销码、店员核销、审计可见 `ORDER_REDEEMED`；社区：发笔记、点赞、关注、关注动态出现该笔记且 `likedByMe` 正确；AI：建 FAQ 草稿、发布、开会话、SSE 依次给出 meta/sources/answer/done。脚本只删自己插入的行，从不 truncate。
+- 验证：本机 22 项检查全过、清理无残留；证据 `docs/evidence/2026-10-27-go070/go-flow-demo-result.json`。
+- 缺陷：写脚本时发现核销/退款事件缺 `voucherId/userId`，补偿 worker 无法解析会停在 `NEEDS_REVIEW`（退款将无法回补 Redis 库存），已修复并加回归测试。
+- 限制：持续负载与故障注入仍属 GO-070 剩余部分；浏览器页面证据未包含。
 
 ## 门槛（未满足前不开放对应能力）
 

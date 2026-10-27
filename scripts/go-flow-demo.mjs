@@ -14,7 +14,7 @@ for (const key of ['MYSQL_HOST', 'MYSQL_PORT', 'MYSQL_DATABASE', 'MYSQL_USER', '
   if (!process.env[key]) throw new Error(`Explicit isolated ${key} is required`)
 }
 const API = process.env.API_BASE || 'http://127.0.0.1:8082'
-const output = resolve(process.env.FLOW_EVIDENCE || 'go-flow-demo-result.json')
+const output = resolve(process.env.FLOW_EVIDENCE || 'docs/evidence/go-flow-demo-result.json')
 await mkdir(dirname(output), { recursive: true })
 const suffix = randomBytes(4).toString('hex')
 const phones = [`138${randomInt(10000000, 100000000)}`, `137${randomInt(10000000, 100000000)}`]

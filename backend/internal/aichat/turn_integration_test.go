@@ -146,7 +146,9 @@ func insertPublished(t *testing.T, resources *database.Resources, stub *ai.Stub,
 		t.Fatal("document insert failed")
 	}
 	var id uint64
-	if err := resources.ORM.WithContext(ctx).Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	// The id is read back by the business key: LAST_INSERT_ID() belongs to one
+	// connection, and the pool may hand out a different one.
+	if err := resources.ORM.WithContext(ctx).Raw("SELECT id FROM tb_ai_document WHERE title=? ORDER BY id DESC LIMIT 1", title).Scan(&id).Error; err != nil || id == 0 {
 		t.Fatal("document id unavailable")
 	}
 	vectors, err := stub.Embed(ctx, []string{body})

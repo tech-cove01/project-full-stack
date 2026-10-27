@@ -156,7 +156,7 @@ func insertNoteFixture(t *testing.T, resources *database.Resources) uint64 {
 		t.Fatal("note fixture insert failed")
 	}
 	var noteID uint64
-	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&noteID).Error; err != nil || noteID == 0 {
+	if err := resources.ORM.Raw("SELECT id FROM tb_blog ORDER BY id DESC LIMIT 1").Scan(&noteID).Error; err != nil || noteID == 0 {
 		t.Fatal("note id unavailable")
 	}
 	return noteID

@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log/slog"
 	"strconv"
 
 	"gorm.io/gorm"
@@ -112,7 +113,10 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	// The bitmap is updated after the commit: a failure leaves MySQL authoritative
 	// and the next recount repairs the projection.
 	if service.bitmap != nil {
-		_, _ = service.bitmap.Mark(ctx, note, user, liked)
+		if _, markErr := service.bitmap.Mark(ctx, note, user, liked); markErr != nil {
+			// The projection is repairable, but the failure must be visible.
+			slog.Warn("like bitmap update failed", "note_id", note, "user_id", user, "error", markErr)
+		}
 	}
 	return service.LikeState(ctx, userID, noteID)
 }

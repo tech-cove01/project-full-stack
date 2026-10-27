@@ -145,7 +145,9 @@ func insertUser(t *testing.T, resources *database.Resources, prefix string) uint
 		t.Fatalf("user insert failed: %v", err)
 	}
 	var id uint64
-	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	// LAST_INSERT_ID() belongs to one connection, so the id is read back by the
+	// business key instead of the session state.
+	if err := resources.ORM.Raw("SELECT id FROM tb_user WHERE phone=? ORDER BY id DESC LIMIT 1", phone).Scan(&id).Error; err != nil || id == 0 {
 		t.Fatal("user id unavailable")
 	}
 	return id
@@ -161,7 +163,7 @@ func insertNote(t *testing.T, resources *database.Resources, author uint64, titl
 		t.Fatalf("note insert failed: %v", err)
 	}
 	var id uint64
-	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	if err := resources.ORM.Raw("SELECT id FROM tb_blog WHERE user_id=? AND title=? ORDER BY id DESC LIMIT 1", author, title).Scan(&id).Error; err != nil || id == 0 {
 		t.Fatal("note id unavailable")
 	}
 	return id

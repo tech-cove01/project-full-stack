@@ -123,14 +123,23 @@ func (service *Service) Create(ctx context.Context, userID string, request Creat
 		}
 		shopID = parsed
 	}
-	result := service.db.WithContext(ctx).Exec(`INSERT INTO tb_blog
-		(shop_id,user_id,title,images,content,status,publish_version)
-		VALUES (?,?,?,?,?,'PUBLISHED',1)`, shopID, user, title, strings.Join(images, ","), content)
-	if result.Error != nil {
-		return View{}, result.Error
-	}
 	var id uint64
-	if err = service.db.WithContext(ctx).Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	// LAST_INSERT_ID() belongs to the connection that ran the insert, and the
+	// pool may hand out a different one. The insert and the read therefore share
+	// a transaction, which pins them to the same connection.
+	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		result := tx.Exec(`INSERT INTO tb_blog
+			(shop_id,user_id,title,images,content,status,publish_version)
+			VALUES (?,?,?,?,?,'PUBLISHED',1)`, shopID, user, title, strings.Join(images, ","), content)
+		if result.Error != nil {
+			return result.Error
+		}
+		return tx.Raw("SELECT LAST_INSERT_ID() AS id").Scan(&id).Error
+	})
+	if err != nil {
+		return View{}, err
+	}
+	if id == 0 {
 		return View{}, ErrNotFound
 	}
 	return service.Detail(ctx, strconv.FormatUint(id, 10))

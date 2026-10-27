@@ -99,7 +99,7 @@ func insertUser(t *testing.T, resources *database.Resources) uint64 {
 		t.Fatal(err)
 	}
 	var id uint64
-	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	if err := resources.ORM.Raw("SELECT id FROM tb_user WHERE phone=? ORDER BY id DESC LIMIT 1", phone).Scan(&id).Error; err != nil || id == 0 {
 		t.Fatal("user id unavailable")
 	}
 	return id
@@ -111,7 +111,7 @@ func insertMerchant(t *testing.T, resources *database.Resources) uint64 {
 		t.Fatal(err)
 	}
 	var id uint64
-	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	if err := resources.ORM.Raw("SELECT id FROM tb_merchant WHERE name=? ORDER BY id DESC LIMIT 1", "重建测试商家").Scan(&id).Error; err != nil || id == 0 {
 		t.Fatal("merchant id unavailable")
 	}
 	return id
@@ -125,7 +125,7 @@ func insertShop(t *testing.T, resources *database.Resources, merchant uint64) ui
 		t.Fatal(err)
 	}
 	var id uint64
-	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	if err := resources.ORM.Raw("SELECT id FROM tb_shop WHERE name=? ORDER BY id DESC LIMIT 1", "重建测试门店").Scan(&id).Error; err != nil || id == 0 {
 		t.Fatal("shop id unavailable")
 	}
 	return id
@@ -148,7 +148,7 @@ func insertDocument(t *testing.T, resources *database.Resources, shop uint64, ti
 		t.Fatal(err)
 	}
 	var id uint64
-	if err := resources.ORM.Raw("SELECT LAST_INSERT_ID()").Scan(&id).Error; err != nil || id == 0 {
+	if err := resources.ORM.Raw("SELECT id FROM tb_ai_document WHERE title=? ORDER BY id DESC LIMIT 1", "重建测试文档").Scan(&id).Error; err != nil || id == 0 {
 		t.Fatal("document id unavailable")
 	}
 	return id

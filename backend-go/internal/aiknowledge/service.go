@@ -28,6 +28,9 @@ const (
 	maxBodyRunes  = 8000
 	scopeShop     = "SHOP_PUBLIC"
 	zoneName      = "Asia/Shanghai"
+	// minScore keeps weak lexical overlap out of the retrieval result instead of
+	// padding the context with unrelated rules.
+	minScore = 0.18
 )
 
 type View struct {

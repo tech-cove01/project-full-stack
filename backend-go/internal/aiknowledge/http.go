@@ -90,6 +90,36 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: view})
 	})
+	// Anonymous retrieval returns only published, non-disabled chunks; without a
+	// shopId it is limited to platform-scope knowledge.
+	routes.GET("/ai/search", func(c *gin.Context) {
+		var shop *uint64
+		if raw := c.Query("shopId"); raw != "" {
+			parsed, err := positive(raw)
+			if err != nil {
+				writeError(c, err)
+				return
+			}
+			shop = &parsed
+		}
+		limit := 5
+		if raw := c.Query("limit"); raw != "" {
+			parsed, err := strconv.Atoi(raw)
+			if err != nil || parsed <= 0 || parsed > 20 {
+				writeError(c, ErrInput)
+				return
+			}
+			limit = parsed
+		}
+		ctx, cancel := requestContext(c)
+		defer cancel()
+		hits, err := service.Search(ctx, c.Query("q"), shop, limit, minScore)
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: hits})
+	})
 	routes.GET("/ai/knowledge/:id", func(c *gin.Context) {
 		var version *int
 		if raw := c.Query("version"); raw != "" {

@@ -28,7 +28,7 @@ G7完成真实负载、故障恢复、三条前后端演示及正式Go切换。
 核验发现问题时一并修复、验证、分步提交并正常push至origin/main，无需再次确认；
 不包含强推、覆盖他人修改或部署/发布，实现者自测仍只代表待独立核验。
 
-Go 服务在 `backend-go/` 开发；Java 基线源码已归档到 `archive/backend-java-20261026/`，最终只保留 `backend/` 的 Go 服务。
+Go 服务在 `backend/` 开发；Java 基线源码已归档到 `archive/backend-java-20261026/`，最终只保留 `backend/` 的 Go 服务。
 Java源码由Git标签保留，不继续补Java功能，不长期维护两套运行时。
 开发选独立MySQL/Redis测试实例、独立端口；不能两端同时消费同一Stream/group/outbox。
 正式切换前停止旧worker并核对pending/outbox/review，前端只指向Go。

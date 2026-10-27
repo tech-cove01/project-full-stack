@@ -1,12 +1,12 @@
 # 运行与验证
 
-2026-10-26 Go 路线：接口表作为迁移契约继续复用。Go 工程基础位于 `backend-go/`，只交付下述已列出的能力，业务迁移进度见 [开发入口](README.md)。下面 Maven、JDK、Spring 配置和历史测试均指 Java 基线，不是当前 Go 开发要求，也不能作为 Go 通过记录。执行顺序和隔离切换见 [Go 总方案](implementation-plan.md)。
+2026-10-26 Go 路线：接口表作为迁移契约继续复用。Go 工程基础位于 `backend/`，只交付下述已列出的能力，业务迁移进度见 [开发入口](README.md)。下面 Maven、JDK、Spring 配置和历史测试均指 Java 基线，不是当前 Go 开发要求，也不能作为 Go 通过记录。执行顺序和隔离切换见 [Go 总方案](implementation-plan.md)。
 
 Windows 本机的具体端口、环境检查和三个 PowerShell 终端启动步骤见 [Windows 开发说明](windows-development.md)。后续改造任务见 [分阶段方案](implementation-plan.md)，交接入口见 [agent-handoff.md](agent-handoff.md)，目标验收见 [acceptance.md](acceptance.md)。本文接口表描述当前基线，不代表规划接口已经实现。
 
 ## Go 迁移环境与启动
 
-工具链固定 Go `1.27.0`，Gin `1.11.0`、GORM `1.31.1`、GORM MySQL `1.6.0`、go-redis/v9 `9.17.0`；完整依赖与校验和见 `backend-go/go.mod` / `go.sum`。MySQL `8.4`、Redis `7.4-alpine` 沿用版本系列标签，证据另记实际镜像 digest。程序不自动读 `.env`，不执行 AutoMigrate，不启动订单 Stream 消费者或预热/重置活动库存。GO-021会启动仅认领ACTIVITY三类事件的持久outbox worker，连接配置必须使用隔离库；重启可继续投递已有活动事件。
+工具链固定 Go `1.27.0`，Gin `1.11.0`、GORM `1.31.1`、GORM MySQL `1.6.0`、go-redis/v9 `9.17.0`；完整依赖与校验和见 `backend/go.mod` / `go.sum`。MySQL `8.4`、Redis `7.4-alpine` 沿用版本系列标签，证据另记实际镜像 digest。程序不自动读 `.env`，不执行 AutoMigrate，不启动订单 Stream 消费者或预热/重置活动库存。GO-021会启动仅认领ACTIVITY三类事件的持久outbox worker，连接配置必须使用隔离库；重启可继续投递已有活动事件。
 
 在根目录启动隔离依赖（不与 `compose.yaml` 混用）：
 
@@ -31,7 +31,7 @@ $env:REDIS_HOST = '127.0.0.1'
 $env:REDIS_PORT = '6380'
 $env:REDIS_DATABASE = '0'
 $env:REDIS_PASSWORD = ''
-Set-Location backend-go
+Set-Location backend
 go run ./cmd/api
 ~~~
 
@@ -41,7 +41,7 @@ Go 默认监听 `127.0.0.1:8082`。MySQL host/port/database/user/password 和 Re
 
 前端在 `frontend/` 执行 `npm.cmd run dev -- --port 5174 --strictPort`，默认代理 `http://127.0.0.1:8082`。可通过进程环境或 `frontend/.env.local` 的 `API_PROXY_TARGET` 覆盖；`VITE_API_BASE_URL` 默认 `/api`。先访问 `/api/actuator/health` 确认 Go 身份。回看 Java 时必须显式改目标为 `http://127.0.0.1:8081`。
 
-在 `backend-go/` 中验证：
+在 `backend/` 中验证：
 
 ~~~powershell
 go mod verify
@@ -56,7 +56,7 @@ python ../scripts/go-bootstrap-smoke.py --binary bin/api.exe --output ../bootstr
 
 GO-010 已实现 `POST /user/code`、`POST /user/login`、`GET /user/me`、`POST /user/logout`。`GO_ENV=development` 返回本机模拟验证码，生产未接短信时取码失败且不写 Redis。验证码 120 秒 / 每手机号 60 秒间隔，session 沿 Java 的 36000 分钟（25 天）滑动有效期，Redis key/hash 字段保持兼容。前端刷新通过 `/user/me` 恢复身份，没有独立 refresh 接口；authorization 使用原始 token 或 `Bearer <token>`。手机号正常号段与 Java 一致，仅修正正则中的逗号误匹配；未迁移业务返回 404。
 
-真实身份测试（同样先显式设置隔离连接环境，`backend-go/` 中执行）：
+真实身份测试（同样先显式设置隔离连接环境，`backend/` 中执行）：
 
 ~~~powershell
 $env:GO_INTEGRATION = '1'
@@ -71,13 +71,13 @@ GO-011 提供公开 `GET /shop/of/name?name=&typeId=&current=1&pageSize=10`、`/
 
 GO-020 已提供受保护的 `GET /merchant/workspace`，返回当前身份的 `{merchants:[{id,name,role,shops:[{id,name,address}]}]}`。没有商家身份仍返回200空数组；匿名/过期登录401；MySQL失败503，不伪装为空权限。OWNER/MANAGER仅有本商家的门店，STAFF还需显式scope，当前商家/成员都必须ACTIVE。每个请求重新查DB，角色不缓存于token；停用成员/商家或撤回scope后，原token仍可 `/user/me`，但工作台授权立即缩减。
 
-商家集成：在 `backend-go/` 显式设置隔离环境及 `GO_INTEGRATION=1` 后运行 `go test -count=1 -v ./internal/merchant -run TestIntegrationMerchant`。无新增SQL迁移。`merchant.NewAccess(tx)`复用事务句柄，但读取继承tx隔离级别；后续业务写操作须另外保证当前授权事实与变更边界一致，不能把RR普通查询当并发撤权保护。
+商家集成：在 `backend/` 显式设置隔离环境及 `GO_INTEGRATION=1` 后运行 `go test -count=1 -v ./internal/merchant -run TestIntegrationMerchant`。无新增SQL迁移。`merchant.NewAccess(tx)`复用事务句柄，但读取继承tx隔离级别；后续业务写操作须另外保证当前授权事实与变更边界一致，不能把RR普通查询当并发撤权保护。
 
 根目录 `node scripts/go-merchant-ui-smoke.mjs` 运行真实Vue工作台验证，使用与商铺UI脚本相同的MYSQL/Playwright/Chrome/WEB_BASE/API_BASE/UI_EVIDENCE环境变量。脚本造3商家/5店/4用户，真实页面取码登录，沿原token验证混合身份、撤权/降级/停用、脏scope、错误重试与失效；只清理自身精确DB行并撤销发放session，验证码节流键按原60秒TTL到期。大ID夹具会推进对应自增序列。成功响应均来自真实Go；选择性网络abort仅用于失败注入。GO-021启用活动入口；订单/规则入口保持禁用。
 
 GO-021 已提供 `GET /merchant/activities?current=1&pageSize=10&shopId=...&status=ACTIVE`（筛选可省略，pageSize上限50）、`POST /merchant/activities`（稳定Idempotency-Key）、`POST /merchant/activities/{id}/retry-publication` 和 `/offline`。创建只接受门店、标题/副标题/规则、字符串分金额、正整数库存及四个带偏移整秒时间，服务端做逐门店当前锁定授权；同键不同规范内容409。发布闭闸准备→提交ACTIVE/审计/OPEN→独立事件开闸；下架同步关闸成功才提交并返回。缺键不重建、OFFLINE不重新上架，无reconcile路由。
 
-真实服务测试：先停API/worker，在 `backend-go/` 用 `GO_INTEGRATION=1 go test -count=1 -v ./internal/activity ./internal/outbox ./internal/activitypub`；真实消费测试只运行在无其他待认领事件的隔离库，包间用命名锁串行claim。之后启动API和Vite，根目录 `node scripts/go-activity-ui-smoke.mjs`，除已有UI环境外还需显式REDIS_HOST/REDIS_PORT；`BROWSER_TIMEZONE=UTC`或`Asia/Shanghai`。脚本真实提交后丢弃响应验证原键重试，按精确ID先清持久事件/业务，再删Redis键并确认0、注销session。不要对共享/正式库运行；大ID自增水位不回拨。phase/hash旧数据兼容与未执行项见[GO-021证据](evidence/2026-10-26-bb5d985/GO-021/report.md)。
+真实服务测试：先停API/worker，在 `backend/` 用 `GO_INTEGRATION=1 go test -count=1 -v ./internal/activity ./internal/outbox ./internal/activitypub`；真实消费测试只运行在无其他待认领事件的隔离库，包间用命名锁串行claim。之后启动API和Vite，根目录 `node scripts/go-activity-ui-smoke.mjs`，除已有UI环境外还需显式REDIS_HOST/REDIS_PORT；`BROWSER_TIMEZONE=UTC`或`Asia/Shanghai`。脚本真实提交后丢弃响应验证原键重试，按精确ID先清持久事件/业务，再删Redis键并确认0、注销session。不要对共享/正式库运行；大ID自增水位不回拨。phase/hash旧数据兼容与未执行项见[GO-021证据](evidence/2026-10-26-bb5d985/GO-021/report.md)。
 
 ## Go 服务启动（当前）
 
@@ -90,7 +90,7 @@ $env:MYSQL_USER='fullstack'; $env:MYSQL_PASSWORD='fullstack_go_dev_only'
 $env:REDIS_HOST='127.0.0.1'; $env:REDIS_PORT='6380'
 node scripts/migrate.mjs
 
-cd backend-go && go run ./cmd/api     # 默认 127.0.0.1:8082
+cd backend && go run ./cmd/api     # 默认 127.0.0.1:8082
 npm --prefix frontend run dev       # 前端代理到 Go API
 ```
 

@@ -38,7 +38,7 @@
 | GO-061 热点保护 | 自测通过待核验 | `031d97c`；进程内短 TTL 吸收热点，真实 Redis 验证 |
 | GO-062 位图计数与重建 | 自测通过待核验 | `54fc5e8`；位图投影 + `cmd/recount`，真实 Redis/MySQL PASS |
 | GO-070 验收脚本与故障演练 | 自测通过待核验 | `93dea4a`、负载与 Redis 故障脚本；隔离环境下三流程 22 项、并发抢券 9 项、Redis 停机 6 项全过 |
-| GO-071 目录/CI/启动收敛 | 待做 | 后端目录收敛、CI 矩阵与启动脚本切到 Go |
+| GO-071 目录/CI/启动收敛 | 自测通过待核验 | CI 覆盖社区/AI/Kafka；Java 基线归档到 archive/；Go 服务目录已收敛为 backend/；收敛后三流程复跑通过 |
 
 ### GO-053 交付记录
 
@@ -89,7 +89,7 @@
 
 ```bash
 # 后端
-cd backend-go && gofmt -l . && go vet ./... && go test -count=1 ./... && go build ./...
+cd backend && gofmt -l . && go vet ./... && go test -count=1 ./... && go build ./...
 
 # 前端
 npm --prefix frontend run build && npm --prefix frontend run format:check
@@ -101,6 +101,12 @@ docker compose -f compose.go.yaml --profile kafka up -d kafka
 go test -count=1 -run 'TestIntegration' ./...
 ```
 
+### GO-071 交付记录
+
+- 依赖 GO-070；提交：CI 覆盖 `ci(GO-071)`；Java 归档与文档 `refactor(GO-071)`；目录收敛 `refactor(GO-071)`。
+- 行为：CI 新增社区/AI/知识库/计数缓存与商家订单/补偿的真实依赖测试，并新增带单节点 KRaft broker 的 `community-kafka` 作业，社区事件投递不再只靠核验轮；Java 源码以 rename 方式移到 `archive/backend-java-20261026/`，Java CI 只守护归档构建；Go 服务目录由 `backend-go/` 收敛为 `backend/`，CI、脚本与文档路径同步更新（历史核验报告与证据文件保留当时的路径原样）。
+- 验证：改名后 `gofmt/vet/go test/go build` 与前端构建、格式检查全部通过，三流程演示脚本复跑 22 项全过；CI YAML 解析通过。
+- 注意：核验方请改用 `backend/` 路径；`docs/reviews/` 与 `docs/evidence/` 中的 `backend-go` 字样是历史记录，未做改写。
 ## 隔离环境（Go 专用，务必用它复跑）
 
 ```bash
@@ -111,7 +117,7 @@ $env:MYSQL_USER='fullstack'; $env:MYSQL_PASSWORD='fullstack_go_dev_only'
 $env:REDIS_HOST='127.0.0.1'; $env:REDIS_PORT='6380'
 node scripts/migrate.mjs
 
-cd backend-go && $env:GO_INTEGRATION='1' && go test -count=1 -run 'TestIntegration' ./...
+cd backend && $env:GO_INTEGRATION='1' && go test -count=1 -run 'TestIntegration' ./...
 
 node scripts/go-flow-demo.mjs all      # 交易 / 社区 / AI 三流程
 node scripts/go-load-seckill.mjs 5 30   # 并发抢券不超卖

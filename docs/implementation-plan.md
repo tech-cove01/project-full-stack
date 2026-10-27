@@ -74,7 +74,7 @@ scripts/
 docs/
 ~~~
 
-Go 服务在 `backend-go/` 开发，不持续开发两套业务。Java 冻结在标签，不再加功能，其源码已移到 `archive/backend-java-20261026/`，主分支不再跟踪 Java 源码与 pom，Java CI 只守护归档构建；Go 完成等价验收后把目录收敛到 `backend/`。迁移与删除先检查文件归属，不递归删除未知文件或数据卷。
+Go 服务在 `backend/` 开发，不持续开发两套业务。Java 冻结在标签，不再加功能，其源码已移到 `archive/backend-java-20261026/`，主分支不再跟踪 Java 源码与 pom，Java CI 只守护归档构建；Go 服务已收敛到 `backend/`（原 `backend-go/`）。迁移与删除先检查文件归属，不递归删除未知文件或数据卷。
 
 隔离开发默认可使用 Go API 8082、独立 Compose 项目/测试依赖 3308/6380；现有 Java 8081、MySQL3307/Redis6379 保留参考。实现者选择并记录隔离方式，测试脚本不得硬编码旧端口。两个后端禁止同时消费同一 Stream/group/outbox。
 

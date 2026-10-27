@@ -4,7 +4,7 @@
 
 后续使用 Windows 原生 Go、Node.js、k6，MySQL 8.4 / Redis 7.4 和社区 Kafka 使用 Docker Desktop Linux 容器，不依赖旧虚拟机。保留 MySQL，不需要安装 PostgreSQL、pgvector 或 RabbitMQ。技术版本、任务和切换条件以 [Go 总方案](implementation-plan.md) 为准。
 
-本机工具链为 go1.27.0 windows/amd64，Go 配置/健康/关闭工程基础位于 `backend-go/`。使用 [Go 启动步骤](development.md#go-迁移环境与启动)，实际任务与证据见 [开发入口](README.md)。前端代理默认指向 Go 8082，历史 Java 调试需显式设置 `API_PROXY_TARGET=http://127.0.0.1:8081`。普通 Go 构建/测试在 Windows 执行，race 由具备工具链的 Linux CI 执行，不要求先安装 Windows C 编译器。
+本机工具链为 go1.27.0 windows/amd64，Go 配置/健康/关闭工程基础位于 `backend/`。使用 [Go 启动步骤](development.md#go-迁移环境与启动)，实际任务与证据见 [开发入口](README.md)。前端代理默认指向 Go 8082，历史 Java 调试需显式设置 `API_PROXY_TARGET=http://127.0.0.1:8081`。普通 Go 构建/测试在 Windows 执行，race 由具备工具链的 Linux CI 执行，不要求先安装 Windows C 编译器。
 
 启动前重新检查工具和端口。Go 迁移开发可用 8082 和独立测试依赖 3308/6380；Java 历史基线通常用 8081 与 3307/6379。隔离 Compose 项目名、数据卷与端口，禁止两个后端同时消费同一 Stream/group/outbox。不要据下方历史检查推断今天容器健康。
 
@@ -55,7 +55,7 @@ Canal 仅 H6 可选，单独 profile；必须实测所选版本与现有 MySQL 8
 | k6 | 已安装 2.2.0（`C:\Program Files\k6\k6.exe`） | 新开终端若仍找不到命令，使用完整路径或重开 PowerShell |
 | 真实服务联调 / 性能 / 故障恢复 | 尚未验收 | 健康检查、冒烟和压测需按下文执行并记录结果 |
 
-依赖版本分别由 `backend-go/go.mod`、`frontend/package-lock.json` 和 `compose.go.yaml` 管理；Java 基线的 `pom.xml` 已随源码归档到 `archive/backend-java-20261026/`。。MySQL `8.4`、Redis `7.4-alpine` 是版本系列标签，重拉可能获得更新补丁；压测报告应记录实际镜像版本或 digest。
+依赖版本分别由 `backend/go.mod`、`frontend/package-lock.json` 和 `compose.go.yaml` 管理；Java 基线的 `pom.xml` 已随源码归档到 `archive/backend-java-20261026/`。。MySQL `8.4`、Redis `7.4-alpine` 是版本系列标签，重拉可能获得更新补丁；压测报告应记录实际镜像版本或 digest。
 
 ## 启动前检查
 

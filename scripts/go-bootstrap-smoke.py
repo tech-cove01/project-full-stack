@@ -1,7 +1,7 @@
 """Check a prebuilt Go API against real MySQL/Redis, using only Python's stdlib.
 
-Run with the isolated MYSQL_* and REDIS_* environment from backend-go/.env.example:
-    python scripts/go-bootstrap-smoke.py --binary backend-go/api.exe --output report.json
+Run with the isolated MYSQL_* and REDIS_* environment from backend/.env.example:
+    python scripts/go-bootstrap-smoke.py --binary backend/api.exe --output report.json
 
 Each scenario starts its own process and uses an ephemeral loopback API port.
 This script creates no fixture database rows. API workers can initialize the

@@ -29,6 +29,8 @@ func TestSocialRoutesRequireLogin(t *testing.T) {
 		{http.MethodPut, "/authors/2/follow"},
 		{http.MethodGet, "/authors/2/relationship"},
 		{http.MethodGet, "/feed/notes"},
+		{http.MethodPut, "/notes/1/like"},
+		{http.MethodGet, "/notes/1/like"},
 	} {
 		response := httptest.NewRecorder()
 		router.ServeHTTP(response, httptest.NewRequest(test.method, test.path, nil))
@@ -67,6 +69,18 @@ func TestFeedCursorRequiresBothHalvesAndABoundedLimit(t *testing.T) {
 			test.limit); !errors.Is(err, ErrPagination) {
 			t.Fatalf("cursor %q/%q limit %d must be rejected",
 				test.cursorTime, test.cursorID, test.limit)
+		}
+	}
+}
+
+func TestLikeRejectsBadIdsBeforeStorage(t *testing.T) {
+	service := NewService(nil)
+	for _, pair := range [][2]string{{"0", "1"}, {"1", "0"}, {"01", "1"}, {"1", "01"}, {"x", "1"}} {
+		if _, err := service.SetLike(context.Background(), pair[0], pair[1], true); !errors.Is(err, ErrInput) {
+			t.Fatalf("ids %v must be rejected before SQL", pair)
+		}
+		if _, err := service.LikeState(context.Background(), pair[0], pair[1]); !errors.Is(err, ErrInput) {
+			t.Fatalf("ids %v must be rejected by the state read too", pair)
 		}
 	}
 }

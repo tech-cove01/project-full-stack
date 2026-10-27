@@ -42,6 +42,40 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: relationship})
 	})
+	// Expected-state like: the body must say which state the caller wants.
+	routes.PUT("/notes/:id/like", auth.RequireLogin(identity), func(c *gin.Context) {
+		var body struct {
+			Liked *bool `json:"liked"`
+		}
+		if err := decodeBody(c, &body); err != nil {
+			writeError(c, err)
+			return
+		}
+		if body.Liked == nil {
+			writeError(c, ErrInput)
+			return
+		}
+		user, _ := auth.CurrentUser(c)
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		state, err := service.SetLike(ctx, user.ID, c.Param("id"), *body.Liked)
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: state})
+	})
+	routes.GET("/notes/:id/like", auth.RequireLogin(identity), func(c *gin.Context) {
+		user, _ := auth.CurrentUser(c)
+		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
+		defer cancel()
+		state, err := service.LikeState(ctx, user.ID, c.Param("id"))
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: state})
+	})
 	routes.GET("/authors/:id/relationship", auth.RequireLogin(identity), func(c *gin.Context) {
 		user, _ := auth.CurrentUser(c)
 		ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
@@ -89,8 +123,8 @@ func writeError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, ErrInput), errors.Is(err, ErrPagination), errors.Is(err, ErrSelf):
 		status, message = http.StatusBadRequest, err.Error()
-	case errors.Is(err, ErrNotFound):
-		status, message = http.StatusNotFound, ErrNotFound.Error()
+	case errors.Is(err, ErrNotFound), errors.Is(err, ErrNoteNotFound):
+		status, message = http.StatusNotFound, err.Error()
 	case errors.Is(err, ErrUnsafe):
 		status, message = http.StatusServiceUnavailable, ErrUnsafe.Error()
 	}

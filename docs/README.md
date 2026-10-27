@@ -40,7 +40,8 @@
 | GO-040 FAQ/索引版本 | 自测通过待核验 | provider 抽象 + stub、FAQ 草稿/发布/停用、分块与版本；真实 MySQL 发布留核验 |
 | GO-041 检索/只读工具/SSE | 自测通过待核验 | a/b/c 三个提交；普通Go全绿，真实Redis/MySQL回合留核验 |
 | GO-042 去重/预算/终态 | 自测通过待核验 | a/b + 端到端集成测试；真实MySQL/Redis回合PASS，真实模型质量留核验 |
-| GO-050—053 社区与 Kafka | 待做 | 笔记、关注、DB Feed、可靠事件、期望状态点赞 |
+| GO-050 笔记发布/详情 | 自测通过待核验 | 迁移006、`internal/note`、页面；真实MySQL发布PASS |
+| GO-051—053 关注/Feed/Kafka/点赞 | 待做 | 关注与DB Feed、社区outbox→Kafka、期望状态点赞 |
 | GO-060—062 缓存/计数/多投影 | 待做 | 批量装配、singleflight、复合游标、热点/位图与重建 |
 | GO-070 / 071 证据与正式切换 | 待做 | 持续负载、三流程演示、目录/CI/启动收敛到 Go |
 
@@ -158,6 +159,14 @@ GO-021测试应用及隔离依赖已停止，卷保留，原项目容器未变�
 - 验收：AI 验收的生命周期子集（去重/预算/取消/终态）与 P1-D 失效保护子集。
 - 验证：真实 Redis/MySQL 集成通过 —— 认领四态、重放载荷、清理、租约归属、分钟与日上限、以及“发布 FAQ → 检索 → 生成 → 历史 → 重放 → 删除会话”整轮；`gofmt/vet/go test/go build` 全绿。
 - 限制：真实模型质量未评测（stub 只证明协议）；SSE 客户端断连与上游不可取消只做了资源释放，未测真实慢调用；Linux race/远端 CI 未执行。
+
+### GO-050 / 笔记发布与详情
+
+- 依赖：GO-033；开始 SHA `db612ea`。提交：后端与迁移 `147c70a9ef690201057d1701fdf9ece93fa83994`；页面 `f12a04deeef1ca44913f94b4ed1142b2d1e044cd`。
+- 交付行为：迁移 006 为 `tb_blog` 增加 `status/publish_version`，新增 `tb_blog_like`（每对一条、active+version）、为 `tb_follow` 补 active/version 与唯一对、建立独立 `tb_community_outbox`。`POST /notes` 只接受门店、标题、正文与 http(s) 图片，作者取自会话，门店必须存在；`GET /notes/:id` 公开且只返回 `PUBLISHED`，草稿与不存在的 id 同为 404。页面 `/notes/new` 与 `/notes/:id` 共用 `NoteView`。
+- 验收：PRODUCT-01 笔记子集；点赞/关注/Feed/事件属 GO-051—053。
+- 验证：真实 MySQL 集成（发布、读回、未知门店拒绝）PASS；`gofmt/vet/go test/go build` 与前端类型检查/构建/prettier 通过。
+- 限制：仅发布即公开，无草稿/审核流；列表、搜索与 Feed 未做；`tb_blog.liked/comments` 仍是被动计数，位图投影属 GO-062；Linux race/远端 CI 未执行。
 
 原 Java 增量开发的 30—50 小时估计已失效，不能用于 Go 重写。GO-010/011 首次真实贯通后按实际移植速度、剩余交易/AI边界与联调量重新估算。不要把模型生成代码时间当成可投递项目交付时间。
 

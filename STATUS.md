@@ -30,15 +30,15 @@
 | GO-040 FAQ/索引版本 | 自测通过待核验 | `2a0cc97`、`21e843d`、`bed4092`（补齐前端重建入口）；真实 MySQL 发布/重建待核验 |
 | GO-041 检索/只读工具/SSE | 自测通过待核验 | `85a5ef7`、`536fe09`、`ec89df7`；真实回合待核验 |
 | GO-042 去重/预算/终态 | 自测通过待核验 | `eacd5a3`、`c638912`、`515973d`；真实 MySQL/Redis 回合 PASS |
-| GO-050 笔记发布/详情 | 自测通过待核验 | `147c70a`、`f12a04d`；迁移 006，真实 MySQL 发布 PASS |
+| GO-050 笔记发布/详情 | 自测通过待核验 | `147c70a`、`f12a04d`、`bed4092`；补齐跨连接取 id 缺陷；真实 MySQL 发布 PASS |
 | GO-051 关注与 DB Feed | 自测通过待核验 | `e2c1474`、`76abdd7`；幂等/游标 PASS，`EXPLAIN` 走 `idx_blog_feed` |
 | GO-052 社区 outbox → Kafka | 自测通过待核验 | `db77e58`、`2f920ca`；真实 broker 投递/重试 PASS |
 | GO-053 期望状态点赞 | 自测通过待核验 | `b7e9717`、`3e99ce9`；真实 MySQL 幂等/10 并发收敛 PASS；位图计数与重建归 GO-062 |
 | GO-060 页卡片批量装配与计数缓存 | 自测通过待核验 | `e67e280`、`f521831`；真实 Redis/MySQL 缓存与并发读 PASS |
 | GO-061 热点保护 | 自测通过待核验 | `031d97c`；进程内短 TTL 吸收热点，真实 Redis 验证 |
-| GO-062 位图计数与重建 | 自测通过待核验 | `54fc5e8`；位图投影 + `cmd/recount`，真实 Redis/MySQL PASS |
+| GO-062 点赞计数投影 | 自测通过待核验 | `54fc5e8`、`4a3458e`；雪花 user id 不能做位图偏移，改用精确集合 + `cmd/recount` 重建 |
 | GO-070 验收脚本与故障演练 | 自测通过待核验 | `93dea4a`、负载与 Redis 故障脚本；隔离环境下三流程 22 项、并发抢券 9 项、Redis 停机 6 项全过 |
-| GO-071 目录/CI/启动收敛 | 自测通过待核验 | CI 覆盖社区/AI/Kafka；Java 基线归档到 archive/；Go 服务目录已收敛为 backend/；收敛后三流程复跑通过 |
+| GO-071 目录/CI/启动收敛 | 自测通过待核验 | CI 覆盖社区/AI/Kafka，Java 基线归档，Go 服务目录已收敛为 backend/；远端 CI 首次全绿 |
 
 ### GO-053 交付记录
 
@@ -82,7 +82,7 @@
 - 商铺详情未接 Redis/L1 缓存；`GET /shop/of/type` 附近坐标查询仍是明确 400。
 - 交易/商家/AI/社区的大量 Java 旧路由在 Go 下仍是 404，旧写入口保持 403。
 - 前端已接 Go：商家订单/核销/退款/审计、商家活动、商家知识库（含重建）、AI 助手、笔记/关注/Feed/点赞；仍缺页面级浏览器证据与运维入口。
-- Linux `-race` 与远端 CI 至今未实际执行。
+- Linux `-race` 与远端 CI：已在 GitHub Actions 执行（2026-10-28 首次全绿，含 `-race`、真实 Kafka、真实 MySQL/Redis 集成）。
 - Java 基线已修的并发窗口（review 快照、锁定行、AI 终态）需要在 Go 对应票里重新取证。
 
 ## 复跑命令
@@ -107,6 +107,13 @@ go test -count=1 -run 'TestIntegration' ./...
 - 行为：CI 新增社区/AI/知识库/计数缓存与商家订单/补偿的真实依赖测试，并新增带单节点 KRaft broker 的 `community-kafka` 作业，社区事件投递不再只靠核验轮；Java 源码以 rename 方式移到 `archive/backend-java-20261026/`，Java CI 只守护归档构建；Go 服务目录由 `backend-go/` 收敛为 `backend/`，CI、脚本与文档路径同步更新（历史核验报告与证据文件保留当时的路径原样）。
 - 验证：改名后 `gofmt/vet/go test/go build` 与前端构建、格式检查全部通过，三流程演示脚本复跑 22 项全过；CI YAML 解析通过。
 - 注意：核验方请改用 `backend/` 路径；`docs/reviews/` 与 `docs/evidence/` 中的 `backend-go` 字样是历史记录，未做改写。
+### 远端 CI（2026-10-28 首次全绿）
+
+- `backend-go`：编译、`gofmt`、`go vet`、`go test -race ./...`、真实 MySQL/Redis 集成（认证、商铺、商家、活动、订单、社区、AI、知识库、计数缓存）、启动冒烟 —— 全绿。
+- `community-kafka`：新增作业，启动单节点 KRaft broker，社区事件投递集成测试通过。
+- `backend`：归档后的 Java 基线守护构建通过；`frontend`：构建与格式检查通过。
+- 本轮在 CI 上暴露并修掉三个真实缺陷：目录改名导致两个 job 同名使工作流被 GitHub 拒绝；发布笔记后跨连接读 `LAST_INSERT_ID()` 导致详情 404；雪花 user id 无法作为位图偏移使点赞投影始终为空。
+
 ## 隔离环境（Go 专用，务必用它复跑）
 
 ```bash

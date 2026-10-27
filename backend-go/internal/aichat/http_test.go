@@ -57,7 +57,7 @@ func TestChatRoutesRequireLoginButCapabilitiesStaysPublic(t *testing.T) {
 
 func TestAskRejectsBlankMessageBeforeTouchingStorage(t *testing.T) {
 	assistant := NewAssistant(nil, nil, nil, nil)
-	err := assistant.Ask(context.Background(), 1, "conversation", nil, "   ",
+	err := assistant.Ask(context.Background(), 1, "conversation", nil, "client-1", "   ",
 		func(string, any) error { return nil })
 	if !errors.Is(err, ErrInput) {
 		t.Fatal("a blank message must fail before Redis or the provider")
@@ -66,7 +66,7 @@ func TestAskRejectsBlankMessageBeforeTouchingStorage(t *testing.T) {
 	for i := 0; i < maxMessageRunes+1; i++ {
 		long += "字"
 	}
-	err = assistant.Ask(context.Background(), 1, "conversation", nil, long,
+	err = assistant.Ask(context.Background(), 1, "conversation", nil, "client-1", long,
 		func(string, any) error { return nil })
 	if !errors.Is(err, ErrInput) {
 		t.Fatal("an oversized message must be rejected instead of truncated")

@@ -64,9 +64,9 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			merchant.Register(routes, merchant.NewService(resources.ORM), identity)
 			merchantorder.Register(routes, merchantorder.NewService(resources.ORM), identity)
 			aiknowledge.Register(routes, knowledge, identity)
-			aichat.Register(routes, conversations,
-				aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder),
-				embedder.Mode(), identity)
+			assistant := aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder).
+				WithGuards(aichat.NewDedupe(resources.Redis), aichat.NewLock(resources.Redis))
+			aichat.Register(routes, conversations, assistant, embedder.Mode(), identity)
 			activity.Register(routes, activity.NewService(resources.ORM, resources.Redis), identity)
 			order.Register(routes, orders, identity)
 		}),

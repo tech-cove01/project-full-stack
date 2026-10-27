@@ -124,7 +124,7 @@ func Register(routes gin.IRouter, conversations *Conversations, assistant *Assis
 			writeError(c, err)
 			return
 		}
-		if err = assistant.Ask(ctx, userID, c.Param("id"), shop, body.Message, emit); err != nil {
+		if err = assistant.Ask(ctx, userID, c.Param("id"), shop, body.ClientMessageID, body.Message, emit); err != nil {
 			// Headers are already sent; the only honest signal left is an error event.
 			_ = emit("error", map[string]any{"code": codeOf(err), "message": messageOf(err)})
 		}
@@ -213,6 +213,8 @@ func writeError(c *gin.Context, err error) {
 		status, message = http.StatusBadRequest, ErrInput.Error()
 	case errors.Is(err, ErrNotFound):
 		status, message = http.StatusNotFound, ErrNotFound.Error()
+	case errors.Is(err, ErrBusy), errors.Is(err, ErrConflict):
+		status, message = http.StatusConflict, err.Error()
 	}
 	c.AbortWithStatusJSON(status, httpapi.Result{ErrorMsg: message})
 }

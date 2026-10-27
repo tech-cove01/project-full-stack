@@ -2,9 +2,14 @@ package aichat
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 
 	"github.com/cityloop/fullstack-go/internal/ai"
@@ -14,13 +19,39 @@ import (
 
 const systemPrompt = `你是本地生活平台助手。只根据【证据】回答；证据不足就明确说没有查到，不要承诺未公开的优惠、退款或门店规则。回答用中文，简洁，不输出证据以外的订单或个人信息。`
 
+const (
+	// turnTimeout bounds queue wait, retrieval, generation and streaming.
+	turnTimeout  = 60 * time.Second
+	lockTTL      = 90 * time.Second
+	historyLimit = 6
+)
+
+var (
+	// ErrBusy means another turn currently owns this conversation.
+	ErrBusy = errors.New("该会话正在处理另一条消息")
+	// ErrConflict means the same clientMessageId was reused with other content.
+	ErrConflict = errors.New("相同消息编号对应了不同内容")
+)
+
 type Emit func(event string, data any) error
+
+// turn carries the ownership facts of one request. Every terminal branch checks
+// them before streaming or persisting anything.
+type turn struct {
+	userID         uint64
+	conversationID string
+	clientMessage  string
+	token          string
+	deadline       time.Time
+}
 
 type Assistant struct {
 	conversations *Conversations
 	knowledge     *aiknowledge.Service
 	tools         *aitool.Service
 	provider      ai.Provider
+	dedupe        *Dedupe
+	lock          *Lock
 }
 
 func NewAssistant(conversations *Conversations, knowledge *aiknowledge.Service,
@@ -28,10 +59,17 @@ func NewAssistant(conversations *Conversations, knowledge *aiknowledge.Service,
 	return &Assistant{conversations: conversations, knowledge: knowledge, tools: tools, provider: provider}
 }
 
-// Ask runs one turn and reports progress through emit. It never accepts a user id
-// or role from the request: ownership comes from userID.
+// WithGuards attaches the optional turn guards. Tests can build an assistant
+// without Redis and still exercise routing and prompts.
+func (assistant *Assistant) WithGuards(dedupe *Dedupe, lock *Lock) *Assistant {
+	assistant.dedupe, assistant.lock = dedupe, lock
+	return assistant
+}
+
+// Ask runs one turn and reports progress through emit. Ownership always comes
+// from userID; no request field can widen it.
 func (assistant *Assistant) Ask(ctx context.Context, userID uint64, conversationID string,
-	shopID *uint64, message string, emit Emit) error {
+	shopID *uint64, clientMessageID, message string, emit Emit) error {
 	message = strings.TrimSpace(message)
 	if message == "" || !utf8.ValidString(message) || utf8.RuneCountInString(message) > maxMessageRunes {
 		return ErrInput
@@ -43,53 +81,106 @@ func (assistant *Assistant) Ask(ctx context.Context, userID uint64, conversation
 	if !exists {
 		return ErrNotFound
 	}
-	if err = emit("meta", map[string]any{"conversationId": conversationID, "mode": assistant.provider.Mode()}); err != nil {
+	current := turn{userID: userID, conversationID: conversationID, clientMessage: clientMessageID,
+		deadline: time.Now().Add(turnTimeout)}
+	token, err := assistant.lock.Try(ctx, userID, conversationID, lockTTL)
+	if err != nil {
+		return err
+	}
+	if token == "" {
+		return ErrBusy
+	}
+	current.token = token
+	defer releaseQuietly(assistant.lock, userID, conversationID, token)
+
+	state, cached, err := assistant.dedupe.Begin(ctx, userID, conversationID, clientMessageID,
+		fingerprintOf(message, shopID))
+	if err != nil {
+		return err
+	}
+	switch state {
+	case DedupeConflict:
+		return ErrConflict
+	case DedupeInProgress:
+		return ErrBusy
+	case DedupeCached:
+		return assistant.replay(conversationID, cached, emit)
+	}
+	// Any failure clears the claim so the same id can be retried.
+	completed := false
+	defer func() {
+		if !completed {
+			cleanupCtx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			_ = assistant.dedupe.Fail(cleanupCtx, userID, conversationID, clientMessageID)
+			cancel()
+		}
+	}()
+
+	if ok, err := assistant.emit(ctx, current, emit, "meta",
+		map[string]any{"conversationId": conversationID, "mode": assistant.provider.Mode()}); err != nil || !ok {
 		return err
 	}
 	if err = assistant.conversations.Append(ctx, userID, conversationID,
 		Message{Role: "user", Text: message}); err != nil {
 		return err
 	}
-
-	// A self-scoped data question is answered from MySQL, never from retrieval.
-	toolResult, err := assistant.tools.Route(ctx, userID, message)
+	answer, citations, err := assistant.respond(ctx, current, shopID, message, emit)
 	if err != nil {
 		return err
 	}
+	if answer == "" {
+		// A guard refused this turn: nothing may be streamed or persisted.
+		return nil
+	}
+	if err = assistant.close(ctx, current, answer, citations, emit); err != nil {
+		return err
+	}
+	completed = true
+	return nil
+}
+
+// respond produces the answer and streams sources before it. An empty text with a
+// nil error means a guard aborted the turn.
+func (assistant *Assistant) respond(ctx context.Context, current turn, shopID *uint64,
+	message string, emit Emit) (string, []string, error) {
+	toolResult, err := assistant.tools.Route(ctx, current.userID, message)
+	if err != nil {
+		return "", nil, err
+	}
 	if toolResult != nil {
-		if err = emit("status", map[string]any{"stage": "tool"}); err != nil {
-			return err
+		if ok, err := assistant.emit(ctx, current, emit, "status",
+			map[string]any{"stage": "tool"}); err != nil || !ok {
+			return "", nil, err
 		}
 		if toolResult.Card != nil {
-			if err = emit("tool_result", toolResult.Card); err != nil {
-				return err
+			if ok, err := assistant.emit(ctx, current, emit, "tool_result",
+				toolResult.Card); err != nil || !ok {
+				return "", nil, err
 			}
 		}
-		return assistant.finish(ctx, userID, conversationID, toolResult.Text, nil, emit)
+		return toolResult.Text, nil, nil
 	}
 
-	if err = emit("status", map[string]any{"stage": "retrieving"}); err != nil {
-		return err
+	if ok, err := assistant.emit(ctx, current, emit, "status",
+		map[string]any{"stage": "retrieving"}); err != nil || !ok {
+		return "", nil, err
 	}
 	hits, err := assistant.knowledge.Search(ctx, message, shopID, 5, 0.18)
 	if err != nil {
-		return err
+		return "", nil, err
 	}
-	// Old knowledge that is not published, disabled or replaced never reaches here,
-	// because Search only reads the version pointed at by published_version.
 	if len(hits) == 0 {
-		return assistant.finish(ctx, userID, conversationID,
-			"没有查到可以支持这个问题的已发布规则，我不能凭空承诺优惠、退款或门店规则。", nil, emit)
+		return "没有查到可以支持这个问题的已发布规则，我不能凭空承诺优惠、退款或门店规则。", nil, nil
 	}
 	sources := make([]map[string]any, 0, len(hits))
 	citations := make([]string, 0, len(hits))
 	var evidence strings.Builder
 	for index, hit := range hits {
 		ordinal := index + 1
-		citation := "chunk:" + strconvUint(hit.ChunkID)
+		citation := "chunk:" + strconv.FormatUint(hit.ChunkID, 10)
 		citations = append(citations, citation)
 		source := map[string]any{
-			"citationId": citation, "documentId": strconvUint(hit.DocumentID),
+			"citationId": citation, "documentId": strconv.FormatUint(hit.DocumentID, 10),
 			"version": hit.Version, "title": hit.Title, "scope": hit.Scope,
 			"excerpt": excerpt(hit.Content), "score": round(hit.Score),
 		}
@@ -99,37 +190,132 @@ func (assistant *Assistant) Ask(ctx context.Context, userID uint64, conversation
 		sources = append(sources, source)
 		fmt.Fprintf(&evidence, "[%d] %s (v%d): %s\n", ordinal, hit.Title, hit.Version, hit.Content)
 	}
-	if err = emit("sources", sources); err != nil {
+	if ok, err := assistant.emit(ctx, current, emit, "sources", sources); err != nil || !ok {
+		return "", nil, err
+	}
+	if ok, err := assistant.emit(ctx, current, emit, "status",
+		map[string]any{"stage": "generating"}); err != nil || !ok {
+		return "", nil, err
+	}
+	prompt, err := assistant.promptWithHistory(ctx, current, evidence.String(), message)
+	if err != nil {
+		return "", nil, err
+	}
+	answer, err := assistant.provider.Chat(ctx, systemPrompt, prompt)
+	if err != nil {
+		return "", nil, err
+	}
+	return answer, citations, nil
+}
+
+// promptWithHistory prepends recent stored turns so a follow-up keeps its subject.
+func (assistant *Assistant) promptWithHistory(ctx context.Context, current turn,
+	evidence, message string) (string, error) {
+	history, err := assistant.conversations.History(ctx, current.userID, current.conversationID)
+	if err != nil && !errors.Is(err, ErrNotFound) {
+		return "", err
+	}
+	if len(history) > historyLimit {
+		history = history[len(history)-historyLimit:]
+	}
+	var recent strings.Builder
+	for _, item := range history {
+		runes := []rune(item.Text)
+		if len(runes) > 200 {
+			runes = runes[:200]
+		}
+		fmt.Fprintf(&recent, "%s: %s\n", item.Role, string(runes))
+	}
+	return "【历史】\n" + recent.String() + "【证据】\n" + evidence + "【问题】\n" + message, nil
+}
+
+// close persists the assistant message, caches the answer and streams answer/done.
+func (assistant *Assistant) close(ctx context.Context, current turn, answer string,
+	citations []string, emit Emit) error {
+	if !assistant.alive(ctx, current) {
+		return nil
+	}
+	if err := assistant.conversations.Append(ctx, current.userID, current.conversationID,
+		Message{Role: "assistant", Text: answer, CitationIDs: citations}); err != nil {
 		return err
 	}
-	if err = emit("status", map[string]any{"stage": "generating"}); err != nil {
-		return err
-	}
-	answer, err := assistant.provider.Chat(ctx, systemPrompt,
-		"【证据】\n"+evidence.String()+"【问题】\n"+message)
+	payload, err := json.Marshal(map[string]any{"text": answer, "citationIds": citations})
 	if err != nil {
 		return err
 	}
-	return assistant.finish(ctx, userID, conversationID, answer, citations, emit)
-}
-
-// finish appends the assistant message and closes the stream. The order matters:
-// a persisted message must exist before done, so a reconnecting client can replay
-// history instead of a lost answer.
-func (assistant *Assistant) finish(ctx context.Context, userID uint64, conversationID,
-	text string, citations []string, emit Emit) error {
-	if err := assistant.conversations.Append(ctx, userID, conversationID,
-		Message{Role: "assistant", Text: text, CitationIDs: citations}); err != nil {
+	if err = assistant.dedupe.Complete(ctx, current.userID, current.conversationID,
+		current.clientMessage, string(payload)); err != nil {
 		return err
 	}
-	if err := emit("answer", map[string]any{"text": text, "citationIds": citations}); err != nil {
+	if _, err = assistant.emit(ctx, current, emit, "answer",
+		map[string]any{"text": answer, "citationIds": citations}); err != nil {
 		return err
 	}
-	return emit("done", map[string]any{"usage": "unknown", "sourceCount": len(citations)})
+	_, err = assistant.emit(ctx, current, emit, "done",
+		map[string]any{"usage": "unknown", "sourceCount": len(citations)})
+	return err
 }
 
-func strconvUint(value uint64) string {
-	return strconv.FormatUint(value, 10)
+// alive is the terminal guard: deadline, lease ownership and conversation
+// existence must all still hold before anything is streamed or written.
+func (assistant *Assistant) alive(ctx context.Context, current turn) bool {
+	if time.Now().After(current.deadline) {
+		return false
+	}
+	owns, err := assistant.lock.Owns(ctx, current.userID, current.conversationID, current.token)
+	if err != nil || !owns {
+		return false
+	}
+	exists, err := assistant.conversations.Exists(ctx, current.userID, current.conversationID)
+	return err == nil && exists
+}
+
+// emit returns ok=false when a guard stopped the turn; the caller must stop.
+func (assistant *Assistant) emit(ctx context.Context, current turn, emit Emit,
+	event string, data any) (bool, error) {
+	if !assistant.alive(ctx, current) {
+		return false, nil
+	}
+	if err := emit(event, data); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// replay emits a stored answer without calling the provider again.
+func (assistant *Assistant) replay(conversationID, payload string, emit Emit) error {
+	var cached struct {
+		Text        string   `json:"text"`
+		CitationIDs []string `json:"citationIds"`
+	}
+	if err := json.Unmarshal([]byte(payload), &cached); err != nil {
+		return ErrConflict
+	}
+	if err := emit("meta", map[string]any{"conversationId": conversationID, "mode": assistant.provider.Mode()}); err != nil {
+		return err
+	}
+	if err := emit("status", map[string]any{"stage": "cached"}); err != nil {
+		return err
+	}
+	if err := emit("answer", map[string]any{"text": cached.Text, "citationIds": cached.CitationIDs}); err != nil {
+		return err
+	}
+	return emit("done", map[string]any{"cached": true, "usage": "none"})
+}
+
+func fingerprintOf(message string, shopID *uint64) string {
+	shop := "-"
+	if shopID != nil {
+		shop = strconv.FormatUint(*shopID, 10)
+	}
+	digest := sha256.Sum256([]byte(shop + "|" + message))
+	return hex.EncodeToString(digest[:])
+}
+
+func releaseQuietly(lock *Lock, userID uint64, conversationID, token string) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	_ = lock.Release(ctx, userID, conversationID, token)
 }
 
 func excerpt(text string) string {

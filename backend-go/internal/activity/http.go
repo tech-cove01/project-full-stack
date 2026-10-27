@@ -73,6 +73,19 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 	}
 	routes.POST("/merchant/activities/:id/retry-publication", auth.RequireLogin(identity), mutate(false))
 	routes.POST("/merchant/activities/:id/offline", auth.RequireLogin(identity), mutate(true))
+	// Explicit rebuild after a Redis loss. The query flag proves the operator
+	// accepted that admission closes until the rebuild completes.
+	routes.POST("/merchant/activities/:id/reconcile", auth.RequireLogin(identity), func(c *gin.Context) {
+		user, _ := auth.CurrentUser(c)
+		ctx, cancel := requestContext(c)
+		defer cancel()
+		view, err := service.Reconcile(ctx, user.ID, c.Param("id"), c.Query("confirm") == "true")
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: view})
+	})
 }
 
 func requestContext(c *gin.Context) (context.Context, context.CancelFunc) {
@@ -161,9 +174,14 @@ func parseQuery(c *gin.Context) (Query, error) {
 func writeError(c *gin.Context, err error) {
 	status, message := http.StatusServiceUnavailable, "服务暂时无法处理请求，请稍后重试。"
 	var validation validationError
+	var blocked blockedError
 	switch {
 	case errors.As(err, &validation):
 		status, message = http.StatusBadRequest, err.Error()
+	case errors.As(err, &blocked):
+		status, message = http.StatusConflict, blocked.Error()
+	case errors.Is(err, ErrNotActive):
+		status, message = http.StatusConflict, ErrNotActive.Error()
 	case errors.Is(err, ErrForbidden):
 		status, message = http.StatusForbidden, ErrForbidden.Error()
 	case errors.Is(err, ErrNotFound):

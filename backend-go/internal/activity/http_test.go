@@ -24,7 +24,7 @@ func TestActivityRoutesAuthenticateAndKeepRecoveryClosed(t *testing.T) {
 	}{
 		{http.MethodGet, "/merchant/activities", 401}, {http.MethodPost, "/merchant/activities", 401},
 		{http.MethodPost, "/merchant/activities/1/retry-publication", 401}, {http.MethodPost, "/merchant/activities/1/offline", 401},
-		{http.MethodPost, "/merchant/activities/1/reconcile?confirm=true", 404},
+		{http.MethodPost, "/merchant/activities/1/reconcile?confirm=true", 401},
 		{http.MethodGet, "/merchant/orders", 404}, {http.MethodGet, "/merchant/audits", 404},
 	} {
 		response := httptest.NewRecorder()
@@ -54,6 +54,22 @@ func TestStrictCreateDecoderRejectsExtraWritableIdentityAndInvalidStock(t *testi
 		if _, err := decodeCreate(httptest.NewRecorder(), request); err == nil {
 			t.Fatal("malformed or extra writable input must be rejected")
 		}
+	}
+}
+
+func TestBlockedRebuildReportsEveryBlockerAndKeepsAdmissionClosed(t *testing.T) {
+	router := gin.New()
+	router.GET("/blocked", func(c *gin.Context) {
+		writeError(c, blockedError{reason: "ORDER_STREAM_PENDING,OUTBOX_PENDING"})
+	})
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/blocked", nil))
+	var body httpapi.Result
+	if response.Code != http.StatusConflict || json.Unmarshal(response.Body.Bytes(), &body) != nil ||
+		body.Success || !strings.Contains(body.ErrorMsg, "ORDER_STREAM_PENDING") ||
+		!strings.Contains(body.ErrorMsg, "OUTBOX_PENDING") {
+		t.Fatalf("a blocked rebuild must be a 409 naming every blocker, got %d %s",
+			response.Code, response.Body.String())
 	}
 }
 

@@ -28,9 +28,17 @@ var (
 	ErrConflict  = errors.New("相同请求键对应不同发布内容")
 	ErrOffline   = errors.New("活动已下架")
 	ErrUnsafe    = errors.New("活动发布状态需要核对，请稍后重试")
+	// ErrNotActive rejects a rebuild of anything that is not an ACTIVE activity.
+	ErrNotActive = errors.New("只有 ACTIVE 活动需要重建 Redis 状态")
 	keyPattern   = regexp.MustCompile(`^[A-Za-z0-9_-]{8,64}$`)
 	businessZone = mustBusinessZone()
 )
+
+// blockedError lists the in-flight work that prevents a rebuild. The gate stays
+// closed, so refusing here is the safe outcome rather than a failed operation.
+type blockedError struct{ reason string }
+
+func (e blockedError) Error() string { return "仍有未处理项，准入保持关闭：" + e.reason }
 
 func mustBusinessZone() *time.Location {
 	zone, err := time.LoadLocation("Asia/Shanghai")
@@ -89,16 +97,18 @@ type Query struct {
 
 type gate interface {
 	Close(context.Context, string, int) error
+	Reconcile(context.Context, string, int, int, time.Time, time.Time) error
 	Ready(context.Context, string, int) (bool, error)
 }
 
 type Service struct {
-	db   *gorm.DB
-	gate gate
+	db    *gorm.DB
+	gate  gate
+	redis *redis.Client
 }
 
 func NewService(db *gorm.DB, rdb *redis.Client) *Service {
-	return &Service{db: db, gate: activitypub.NewGate(rdb)}
+	return &Service{db: db, gate: activitypub.NewGate(rdb), redis: rdb}
 }
 
 type validated struct {

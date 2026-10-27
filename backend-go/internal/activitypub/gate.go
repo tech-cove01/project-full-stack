@@ -28,10 +28,14 @@ var closeSource string
 //go:embed lua/ready.lua
 var readySource string
 
+//go:embed lua/reconcile.lua
+var reconcileSource string
+
 var prepareScript = redis.NewScript(prepareSource)
 var openScript = redis.NewScript(openSource)
 var closeScript = redis.NewScript(closeSource)
 var readyScript = redis.NewScript(readySource)
+var reconcileScript = redis.NewScript(reconcileSource)
 
 type Gate struct{ redis *redis.Client }
 
@@ -66,6 +70,17 @@ func (gate *Gate) Close(ctx context.Context, id string, version int) error {
 		return ErrUnsafe
 	}
 	return gate.execute(ctx, closeScript, gateKeys(id)[:1], version)
+}
+
+// Reconcile overwrites the stock and time bounds of an activity that was proven
+// quiescent. Unlike Prepare it accepts existing string keys, but it never accepts
+// a version that is not strictly greater than the current gate version.
+func (gate *Gate) Reconcile(ctx context.Context, id string, version, stock int, begin, end time.Time) error {
+	if !validID(id) || version < 2 || version > 2147483647 || stock < 0 || stock > 2147483647 ||
+		!begin.Before(end) || begin.UnixMilli() < 1 || end.UnixMilli() > 9007199254740991 {
+		return ErrUnsafe
+	}
+	return gate.execute(ctx, reconcileScript, gateKeys(id), version, stock, begin.UnixMilli(), end.UnixMilli())
 }
 
 func (gate *Gate) Ready(ctx context.Context, id string, version int) (bool, error) {

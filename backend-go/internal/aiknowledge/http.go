@@ -92,6 +92,17 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 	})
 	// Anonymous retrieval returns only published, non-disabled chunks; without a
 	// shopId it is limited to platform-scope knowledge.
+	routes.POST("/merchant/knowledge/:id/rebuild", auth.RequireLogin(identity), func(c *gin.Context) {
+		user, _ := auth.CurrentUser(c)
+		ctx, cancel := requestContext(c)
+		defer cancel()
+		view, err := service.Rebuild(ctx, user.ID, c.Param("id"))
+		if err != nil {
+			writeError(c, err)
+			return
+		}
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: view})
+	})
 	routes.GET("/ai/search", func(c *gin.Context) {
 		var shop *uint64
 		if raw := c.Query("shopId"); raw != "" {

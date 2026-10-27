@@ -112,8 +112,8 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	}
 	// The bitmap is updated after the commit: a failure leaves MySQL authoritative
 	// and the next recount repairs the projection.
-	if service.bitmap != nil {
-		if _, markErr := service.bitmap.Mark(ctx, note, user, liked); markErr != nil {
+	if service.likes != nil {
+		if _, markErr := service.likes.Mark(ctx, note, user, liked); markErr != nil {
 			// The projection is repairable, but the failure must be visible.
 			slog.Warn("like bitmap update failed", "note_id", note, "user_id", user, "error", markErr)
 		}
@@ -162,8 +162,8 @@ func (service *Service) LikeState(ctx context.Context, userID, noteID string) (L
 	state := LikeState{NoteID: strconv.FormatUint(note, 10), Liked: row.Active == 1,
 		Version: row.Version, Likes: row.Liked}
 	// Prefer the bitmap projection; an absent key falls back to the cached/own value.
-	if service.bitmap != nil {
-		if count, ok, err := service.bitmap.Count(ctx, note); err == nil && ok {
+	if service.likes != nil {
+		if count, ok, err := service.likes.Count(ctx, note); err == nil && ok {
 			state.Likes = count
 			return state, nil
 		}

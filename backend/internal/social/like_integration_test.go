@@ -51,8 +51,8 @@ func TestIntegrationExpectedStateLike(t *testing.T) {
 		_ = resources.ORM.WithContext(cleanupCtx).Exec(
 			"DELETE FROM tb_user WHERE id IN (?,?)", author, reader).Error
 	})
-	service := NewService(resources.ORM).WithBitmap(communitycache.NewBitmap(resources.Redis))
-	bitmap := communitycache.NewBitmap(resources.Redis)
+	service := NewService(resources.ORM).WithLikes(communitycache.NewLikes(resources.Redis))
+	bitmap := communitycache.NewLikes(resources.Redis)
 	t.Cleanup(func() {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()

@@ -2,7 +2,6 @@ package communitycache
 
 import (
 	"context"
-	"math"
 	"os"
 	"testing"
 	"time"
@@ -32,11 +31,11 @@ func TestIntegrationLikeBitmap(t *testing.T) {
 		}
 	})
 	noteID := insertNoteFixture(t, resources)
-	bitmap := NewBitmap(resources.Redis)
+	bitmap := NewLikes(resources.Redis)
 	t.Cleanup(func() {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
-		_ = resources.Redis.Del(cleanupCtx, bitmapKey(noteID)).Err()
+		_ = resources.Redis.Del(cleanupCtx, likesKey(noteID)).Err()
 		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_blog WHERE id=?", noteID).Error
 	})
 
@@ -80,8 +79,8 @@ func TestIntegrationLikeBitmap(t *testing.T) {
 		t.Fatalf("a rebuild must replace the previous bits, got %d", count)
 	}
 	// A user id beyond the 32-bit offset limit is skipped instead of failing.
-	if changed, err := bitmap.Mark(ctx, noteID, math.MaxUint32+1, true); err == nil || changed {
-		t.Fatalf("an out-of-range id must be reported: %v %v", changed, err)
+	if changed, err := bitmap.Mark(ctx, noteID, 0, true); err == nil || changed {
+		t.Fatalf("a zero user id must be reported: %v %v", changed, err)
 	}
 	if count, _, _ = bitmap.Count(ctx, noteID); count != 1 {
 		t.Fatalf("a skipped id must not change the count, got %d", count)

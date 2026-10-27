@@ -3,85 +3,75 @@ package communitycache
 import (
 	"context"
 	"errors"
-	"math"
 	"strconv"
 
 	"github.com/redis/go-redis/v9"
 )
 
-// Bitmap stores one bit per user id for a note. The platform user id is a
-// monotonically increasing integer, so the bit offset is the id itself; a value
-// beyond the 32-bit offset limit is skipped and the database counter stays the
-// fallback for that note.
-type Bitmap struct{ redis *redis.Client }
+// Likes stores the active like facts of a note as a Redis set of user ids.
+//
+// The platform user id is a snowflake, so it cannot address a single bit in a
+// bitmap: an offset beyond 32 bits either fails or has to be folded, which would
+// count a user twice. The set keeps the count exact for every user id. A bitmap
+// keyed by the tb_blog_like row id is the cheaper follow-up once the projection
+// is fed from the fact table instead of the user id.
+type Likes struct{ redis *redis.Client }
 
-func NewBitmap(client *redis.Client) *Bitmap { return &Bitmap{redis: client} }
+func NewLikes(client *redis.Client) *Likes { return &Likes{redis: client} }
 
-func bitmapKey(noteID uint64) string {
+func likesKey(noteID uint64) string {
 	return "community:likes:" + strconv.FormatUint(noteID, 10)
 }
 
-func offset(userID uint64) (int64, bool) {
-	if userID == 0 || userID > math.MaxUint32 {
-		return 0, false
+// Mark adds or removes the like fact of one user. Repeating a state is
+// idempotent; the return value reports whether the set actually changed.
+func (likes *Likes) Mark(ctx context.Context, noteID, userID uint64, liked bool) (bool, error) {
+	key := likesKey(noteID)
+	if userID == 0 {
+		return false, errors.New("like projection needs a real user id")
 	}
-	return int64(userID), true
-}
-
-// Mark sets or clears one bit and keeps the key's TTL refreshed. Repeating a state
-// is idempotent; the return value reports whether the bit actually changed.
-func (bitmap *Bitmap) Mark(ctx context.Context, noteID, userID uint64, liked bool) (bool, error) {
-	off, ok := offset(userID)
-	if !ok {
-		// Skipping silently would hide a broken projection, so the caller can log it.
-		return false, errors.New("like bitmap offset is outside the supported range")
-	}
-	value := 0
 	if liked {
-		value = 1
+		added, err := likes.redis.SAdd(ctx, key, userID).Result()
+		return added > 0, err
 	}
-	// No TTL: the bitmap is the counter projection and is rebuilt from MySQL by the
-	// recount command, not expired on a timer.
-	changed, err := bitmap.redis.SetBit(ctx, bitmapKey(noteID), off, value).Result()
-	if err != nil {
-		return false, err
-	}
-	return changed != int64(value), nil
+	removed, err := likes.redis.SRem(ctx, key, userID).Result()
+	return removed > 0, err
 }
 
-// Count reads the bitmap, reporting ok=false when the key does not exist yet so
+// Count reads the projection, reporting ok=false when the key does not exist so
 // the caller can fall back to MySQL instead of reading zero.
-func (bitmap *Bitmap) Count(ctx context.Context, noteID uint64) (int64, bool, error) {
-	key := bitmapKey(noteID)
-	exists, err := bitmap.redis.Exists(ctx, key).Result()
+func (likes *Likes) Count(ctx context.Context, noteID uint64) (int64, bool, error) {
+	key := likesKey(noteID)
+	exists, err := likes.redis.Exists(ctx, key).Result()
 	if err != nil || exists == 0 {
 		return 0, false, err
 	}
-	count, err := bitmap.redis.BitCount(ctx, key, &redis.BitCount{Start: 0, End: -1}).Result()
+	count, err := likes.redis.SCard(ctx, key).Result()
 	if err != nil {
 		return 0, false, err
 	}
 	return count, true, nil
 }
 
-// Rebuild replaces the bitmap from the authoritative rows. The delete and the
-// batch of set bits are one pipeline, so a reader sees either the old or the new
-// projection, never a half-written one.
-func (bitmap *Bitmap) Rebuild(ctx context.Context, noteID uint64, userIDs []uint64) (int64, error) {
-	key := bitmapKey(noteID)
-	pipe := bitmap.redis.TxPipeline()
+// Rebuild replaces the projection from the authoritative rows. The delete and the
+// insert are one transaction, so a reader sees either the old or the new set and
+// never a half-written one.
+func (likes *Likes) Rebuild(ctx context.Context, noteID uint64, userIDs []uint64) (int64, error) {
+	key := likesKey(noteID)
+	pipe := likes.redis.TxPipeline()
 	pipe.Del(ctx, key)
-	written := 0
+	members := make([]any, 0, len(userIDs))
 	for _, userID := range userIDs {
-		off, ok := offset(userID)
-		if !ok {
+		if userID == 0 {
 			continue
 		}
-		pipe.SetBit(ctx, key, off, 1)
-		written++
+		members = append(members, userID)
+	}
+	if len(members) > 0 {
+		pipe.SAdd(ctx, key, members...)
 	}
 	if _, err := pipe.Exec(ctx); err != nil {
 		return 0, err
 	}
-	return int64(written), nil
+	return int64(len(members)), nil
 }

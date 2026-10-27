@@ -33,7 +33,7 @@ type Relationship struct {
 type Service struct {
 	db     *gorm.DB
 	counts *communitycache.Cache
-	bitmap *communitycache.Bitmap
+	likes  *communitycache.Likes
 }
 
 func NewService(db *gorm.DB) *Service { return &Service{db: db} }
@@ -45,10 +45,10 @@ func (service *Service) WithCounts(cache *communitycache.Cache) *Service {
 	return service
 }
 
-// WithBitmap attaches the per-note like bitmap. It is a projection: a failure
+// WithLikes attaches the per-note like projection. It is a projection: a failure
 // leaves MySQL authoritative and is fixed by the recount command.
-func (service *Service) WithBitmap(bitmap *communitycache.Bitmap) *Service {
-	service.bitmap = bitmap
+func (service *Service) WithLikes(likes *communitycache.Likes) *Service {
+	service.likes = likes
 	return service
 }
 

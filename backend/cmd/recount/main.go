@@ -45,7 +45,7 @@ func main() {
 		WHERE blog_id=? AND active=1 ORDER BY user_id`, noteID).Scan(&userIDs).Error; err != nil {
 		fail("cannot read like rows: " + err.Error())
 	}
-	bitmap := communitycache.NewBitmap(resources.Redis)
+	bitmap := communitycache.NewLikes(resources.Redis)
 	written, err := bitmap.Rebuild(ctx, noteID, userIDs)
 	if err != nil {
 		fail("bitmap rebuild failed: " + err.Error())

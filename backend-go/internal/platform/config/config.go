@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 	_ "time/tzdata"
 )
+
+// topicPattern matches Kafka's documented topic character set and length.
+var topicPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,249}$`)
 
 type MySQL struct {
 	Host     string
@@ -26,11 +30,19 @@ type Redis struct {
 	Password string
 }
 
+// Kafka is optional. An empty broker list disables the community relay instead
+// of failing startup: local development must work without a broker.
+type Kafka struct {
+	Brokers []string
+	Topic   string
+}
+
 type Config struct {
 	Environment     string
 	APIAddr         string
 	MySQL           MySQL
 	Redis           Redis
+	Kafka           Kafka
 	Location        *time.Location
 	StartupTimeout  time.Duration
 	ProbeTimeout    time.Duration
@@ -129,6 +141,27 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 			return Config{}, fmt.Errorf("GO_ORDER_PAY_TIMEOUT must be whole seconds between 1s and 24h")
 		}
 		cfg.OrderPayTimeout = parsed
+	}
+	cfg.Kafka.Topic = "community.events"
+	if value, ok := lookup("KAFKA_BROKERS"); ok && strings.TrimSpace(value) != "" {
+		for _, broker := range strings.Split(value, ",") {
+			broker = strings.TrimSpace(broker)
+			host, port, splitErr := net.SplitHostPort(broker)
+			if splitErr != nil || host == "" || strings.ContainsAny(host, "/\\ \t\r\n") {
+				return Config{}, fmt.Errorf("KAFKA_BROKERS must be a comma-separated host:port list")
+			}
+			if _, err := parseInt("KAFKA_BROKERS port", port, 1, 65535); err != nil {
+				return Config{}, err
+			}
+			cfg.Kafka.Brokers = append(cfg.Kafka.Brokers, broker)
+		}
+	}
+	if value, ok := lookup("KAFKA_TOPIC"); ok {
+		topic := strings.TrimSpace(value)
+		if !topicPattern.MatchString(topic) {
+			return Config{}, fmt.Errorf("KAFKA_TOPIC must be 1-249 characters of letters, digits, dot, underscore or dash")
+		}
+		cfg.Kafka.Topic = topic
 	}
 	return cfg, nil
 }

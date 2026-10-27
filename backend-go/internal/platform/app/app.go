@@ -21,6 +21,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/aiknowledge"
 	"github.com/cityloop/fullstack-go/internal/aitool"
 	"github.com/cityloop/fullstack-go/internal/auth"
+	"github.com/cityloop/fullstack-go/internal/communityrelay"
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
 	"github.com/cityloop/fullstack-go/internal/note"
@@ -81,11 +82,20 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	}
 	// Workers use process lifetime, never a request context. Persistent outbox
 	// rows remain replayable when cancellation interrupts an in-flight event.
-	owned := startBackground(ctx, resources,
+	workers := []func(context.Context){
 		activitypub.NewWorker(resources.ORM, resources.Redis).Run,
 		stream.Run,
 		ordertimeout.NewWorker(resources.ORM, orders).Run,
-		ordercomp.NewWorker(resources.ORM, resources.Redis).Run)
+		ordercomp.NewWorker(resources.ORM, resources.Redis).Run,
+	}
+	if len(cfg.Kafka.Brokers) > 0 {
+		// The community relay only runs when a broker is configured; local
+		// development stays a two-container environment.
+		relay := communityrelay.NewWorker(resources.ORM, cfg.Kafka.Brokers, cfg.Kafka.Topic)
+		defer func() { _ = relay.Close() }()
+		workers = append(workers, relay.Run)
+	}
+	owned := startBackground(ctx, resources, workers...)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())
 	return serve(ctx, server, listener, owned, cfg.ShutdownTimeout, logger)
 }

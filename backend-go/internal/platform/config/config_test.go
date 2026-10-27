@@ -18,6 +18,40 @@ func fromMap(values map[string]string) (Config, error) {
 	return load(func(key string) (string, bool) { value, ok := values[key]; return value, ok })
 }
 
+func TestKafkaIsOptionalButValidatedWhenPresent(t *testing.T) {
+	cfg, err := fromMap(validEnvironment())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cfg.Kafka.Brokers) != 0 || cfg.Kafka.Topic != "community.events" {
+		t.Fatal("an unset broker list must disable the relay without failing startup")
+	}
+	values := validEnvironment()
+	values["KAFKA_BROKERS"] = "127.0.0.1:9092, 127.0.0.1:9093"
+	values["KAFKA_TOPIC"] = "community.events.v1"
+	cfg, err = fromMap(values)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(cfg.Kafka.Brokers) != 2 || cfg.Kafka.Brokers[1] != "127.0.0.1:9093" ||
+		cfg.Kafka.Topic != "community.events.v1" {
+		t.Fatalf("brokers must be trimmed and kept in order: %+v", cfg.Kafka)
+	}
+	for _, test := range []struct{ key, value string }{
+		{"KAFKA_BROKERS", "127.0.0.1"},
+		{"KAFKA_BROKERS", "127.0.0.1:0"},
+		{"KAFKA_BROKERS", "127.0.0.1:9092,"},
+		{"KAFKA_TOPIC", "bad topic"},
+		{"KAFKA_TOPIC", ""},
+	} {
+		values := validEnvironment()
+		values[test.key] = test.value
+		if _, err = fromMap(values); err == nil || !strings.Contains(err.Error(), test.key) {
+			t.Fatalf("%s=%q must be rejected with a diagnostic", test.key, test.value)
+		}
+	}
+}
+
 func TestExplicitDependenciesAndSafeDefaults(t *testing.T) {
 	cfg, err := fromMap(validEnvironment())
 	if err != nil {

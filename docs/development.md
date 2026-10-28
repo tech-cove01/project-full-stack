@@ -6,7 +6,7 @@ Windows 本机的具体端口、环境检查和三个 PowerShell 终端启动步
 
 ## Go 迁移环境与启动
 
-工具链固定 Go `1.27.0`，Gin `1.11.0`、GORM `1.31.1`、GORM MySQL `1.6.0`、go-redis/v9 `9.17.0`；完整依赖与校验和见 `backend/go.mod` / `go.sum`。MySQL `8.4`、Redis `7.4-alpine` 沿用版本系列标签，证据另记实际镜像 digest。程序不自动读 `.env`，不执行 AutoMigrate，不启动订单 Stream 消费者或预热/重置活动库存。GO-021会启动仅认领ACTIVITY三类事件的持久outbox worker，连接配置必须使用隔离库；重启可继续投递已有活动事件。
+工具链固定 Go `1.27.0`，Gin `1.11.0`、GORM `1.31.1`、GORM MySQL `1.6.0`、go-redis/v9 `9.17.0`；完整依赖与校验和见 `backend/go.mod` / `go.sum`。MySQL `8.4`、Redis `7.4-alpine` 沿用版本系列标签，证据另记实际镜像 digest。程序不自动读 `.env`，不执行 AutoMigrate或重置活动库存。当前API会运行订单Stream、交易/活动outbox及后台恢复任务；配置Kafka后运行社区relay及follow/feed消费者，ES配置就绪后另运行search消费者。连接必须使用隔离库，不可与另一API进程共用worker数据；重启会继续已有持久任务。
 
 在根目录启动隔离依赖（不与 `compose.yaml` 混用）：
 
@@ -15,7 +15,7 @@ docker compose -f compose.go.yaml up -d --wait mysql redis
 docker compose -f compose.go.yaml ps
 ~~~
 
-独立项目名 `project-full-stack-go`、卷 `go-mysql-data` / `go-redis-data`，默认端口 3308 / 6380。首次初始化复用 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`。GO-011 的公开券查询需要已有 `003-trade` 版本列，启动应用前在根目录显式执行 `node scripts/migrate.mjs`，需本机 MySQL 客户端（可用 `MYSQL_BIN` 指定路径）；连接环境使用下方3308隔离配置。runner 会记录003—005的版本与校验和，重跑应跳过，不能靠重启容器或 AutoMigrate 代替。应用启动不迁移库。禁止把 Go 指向 Java 的数据或同时消费同一 Stream/outbox。
+独立项目名 `project-full-stack-go`、卷 `go-mysql-data` / `go-redis-data`，默认端口 3308 / 6380。首次初始化复用 `infra/mysql/001-schema.sql` 和 `002-demo-data.sql`。启动应用前在根目录显式执行 `node scripts/migrate.mjs`，需本机 MySQL 客户端（可用 `MYSQL_BIN` 指定路径）；连接环境使用下方3308隔离配置。runner记录003—012的版本与校验和，重跑应跳过，不能靠重启容器或 AutoMigrate 代替。应用启动不迁移库。禁止把 Go 指向 Java 的数据或同时消费同一 Stream/outbox。
 
 另一个 PowerShell 在根目录设置进程环境（示例是隔离本机开发值）：
 
@@ -99,6 +99,37 @@ npm --prefix frontend run dev       # 前端代理到 Go API
 关注关系公开计数和Feed目录完整时使用投影，响应中的 `source=projection` 表示相应读模型参与；本人状态、内容及可见范围仍由DB事实决定。不完整、历史无事件或可选查询故障时 `source=database`，不会把缺失投影当作空数据。
 
 在 `backend/` 用 `go run ./cmd/community-projector stats follow-v1` 查看收据/停车状态；`replay <projection> <topic> <partition> <offset>` 精确重放原失败记录；`rebuild follow-v1` 或 `rebuild feed-v1` 原子重建该环境的整张派生模型。命令不修改事实或Kafkaoffset，重放失败保持PARKED。命令与限制详见 [GO-072恢复说明](evidence/2026-10-28-8c3fb0e/GO-072/recovery-report.md)。
+
+## 公开笔记搜索（GO-076）
+
+搜索为可选能力。先停止本环境的 API/消费者，在仓库根目录启动并等待依赖健康，运行全部版本迁移（含012）；下面沿用 Go 默认端口，若已有其它实例，须整套改用独立 project/端口，不能共用 worker 数据。
+
+```powershell
+docker compose -f compose.go.yaml --profile kafka --profile search up -d --wait mysql redis kafka elasticsearch
+# 先显式导出上节完整 MYSQL_*/REDIS_*，Go 不自动加载 .env
+node scripts/migrate.mjs
+$env:KAFKA_BROKERS='127.0.0.1:9092'
+$env:ES_URL='http://127.0.0.1:9202'
+$env:ES_INDEX='community-notes-v1'
+$env:ES_TIMEOUT_SECONDS='3'
+Push-Location backend
+$env:GO_SEARCH_REBUILD_OFFLINE='1'
+go run ./cmd/note-search rebuild
+Remove-Item Env:GO_SEARCH_REBUILD_OFFLINE
+go run ./cmd/note-search stats
+go run ./cmd/api
+Pop-Location
+```
+
+随后另开终端启动前端。主导航“搜索笔记”允许匿名访问；`GET /notes/search?q=咖啡&shopId=1&sort=recent&limit=10` 按标题/正文查询，`shopId` 可省略，排序可用 `relevance` 或 `recent`，limit为1—20。ID始终为字符串，同发布时间的ID按关键字字典序排序。分页只使用响应的 `nextCursor`，游标绑定原查询和一分钟有效期；进程重启或分页失效需从第一页重新搜索。MySQL复核当前公开状态/版本可能使页变短或为空；只要仍有游标即可继续，没有精确总数。
+
+ES固定8.19.23，标题/正文使用内置CJK；不需要安装插件。`ES_URL` 为空或配置非法时仅关闭搜索，搜索请求503；实际ES不可达也不阻断核心健康检查、交易或普通商铺浏览。启用后新笔记经独立 `community.search-v1` 消费组同步；索引尚未重建时不能靠旧收据视为初始化成功。ES故障可能先形成持久PARKED记录再提交Kafka位置，lag=0不代表搜索已追平，必须同时检查恢复记录和文档版本。
+
+恢复在 `backend/` 显式加载相同连接环境后执行 `go run ./cmd/note-search replay <topic> <partition> <offset>`，只重放原停车消息，不改内容或重置offset。全量重建须先停API/消费者并显式设置 `GO_SEARCH_REBUILD_OFFLINE=1`；命令创建新代次、完整写入/refresh后切换alias，保留旧代次/收据/失败历史。ES与SQL不是一个事务；切换alias后SQL提交失败需继续保持离线并重跑rebuild，使二者收敛。不宣传零停机重建。012只新增派生表，代码回退不自动撤销迁移或删除数据。
+
+容器内Kafka只读CLI使用 `--bootstrap-server localhost:9094`；宿主机API仍使用 `127.0.0.1:${GO_KAFKA_PORT}`（默认9092）。9094是容器内部监听器，不映射宿主机，避免独立端口下CLI跟随错误的advertised地址。
+
+真实自测（先停同环境API/消费者）：在 `backend/` 设置 `GO_INTEGRATION=1`，执行 `go test -count=1 -timeout 3m -v -run 'TestIntegration(PublicNoteSearch|SearchSync)$' ./internal/notesearch`。页面与物理停机脚本需要专用隔离环境，具体环境/清理门槛、两时区50项与物理停机17项原始记录见 [GO-076交接](evidence/2026-10-28-290cd60/GO-076/report.md)。本票自测不等于独立核验，最终HEAD的远端CI/Linux race与持续负载另验。
 
 ## Java 基线环境与启动（历史参考）
 

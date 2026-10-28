@@ -1,0 +1,81 @@
+{
+  "recordedAt": "2026-10-28T10:53:57.290500+00:00",
+  "sourceHead": "6ec7f4afbca21e7a03af08d3e391114d072493a2",
+  "passed": true,
+  "sqlCounts": {
+    "ownedUsers": 0,
+    "ownedMerchants": 0,
+    "ownedShops": 0,
+    "ownedNotes": 0,
+    "outboxPending": 0,
+    "receiptsTotal": 0,
+    "consumerFailuresTotal": 0,
+    "searchStateTotal": 0,
+    "publishedSeedFactsRetained": 0
+  },
+  "kafka": [
+    {
+      "group": "community.follow-v1",
+      "partitions": [
+        {
+          "partition": 0,
+          "committed": 43,
+          "logEnd": 43,
+          "lag": 0
+        }
+      ]
+    },
+    {
+      "group": "community.feed-v1",
+      "partitions": [
+        {
+          "partition": 0,
+          "committed": 43,
+          "logEnd": 43,
+          "lag": 0
+        }
+      ]
+    },
+    {
+      "group": "community.search-v1",
+      "partitions": [
+        {
+          "partition": 0,
+          "committed": 43,
+          "logEnd": 43,
+          "lag": 0
+        }
+      ]
+    }
+  ],
+  "redisMatchingKeys": {
+    "login:token:*": 0,
+    "login:code:*": 0,
+    "ai:*": 0
+  },
+  "alias": {
+    "community-notes-v1-build-307827c775d8ccf8": {
+      "aliases": {
+        "community-notes-v1": {
+          "is_write_index": true
+        }
+      }
+    }
+  },
+  "indexedSeedDocumentsRetained": 0,
+  "binaries": {
+    "backend/bin/api-go076-final.exe": {
+      "sha256": "d2859255090fac1fef72ec007c906d30898c997129cdfca1b91a560b609b566d",
+      "bytes": 44781056
+    },
+    "backend/bin/api-go076.exe": {
+      "sha256": "cddd948cd0009a888a840a51ae4ed243f281f82ab069b8079b295b0d848b953d",
+      "bytes": 44782592
+    },
+    "backend/bin/note-search-go076.exe": {
+      "sha256": "b1fc043f1d6263039b1732a9f864b1b8982c8e758a2183b3b921a17b97e66656",
+      "bytes": 26740224
+    }
+  },
+  "searchControl": "search-v1\tcommunity-notes-v1\tcommunity-notes-v1-build-307827c775d8ccf8"
+}

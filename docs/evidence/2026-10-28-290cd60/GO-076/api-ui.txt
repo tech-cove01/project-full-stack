@@ -1,0 +1,7 @@
+{"time":"2026-10-28T18:31:08.4377361+08:00","level":"INFO","msg":"Go API ready","service":"project-full-stack-go","runtime":"go","version":"go076-worktree","address":"127.0.0.1:8086"}
+2026/10/28 18:42:56 WARN community projection will retry projection=search-v1
+2026/10/28 18:42:57 WARN community projection will retry projection=search-v1
+2026/10/28 18:42:57 WARN community projection will retry projection=search-v1
+2026/10/28 18:42:57 WARN community projection will retry projection=search-v1
+{"time":"2026-10-28T18:47:12.8302697+08:00","level":"INFO","msg":"Go API shutting down"}
+{"time":"2026-10-28T18:47:12.8308296+08:00","level":"INFO","msg":"Go API HTTP requests drained"}

@@ -1,0 +1,149 @@
+{
+  "recordedAt": "2026-10-28T10:54:47.450972+00:00",
+  "passed": true,
+  "project": "project-full-stack-go076",
+  "before": [
+    {
+      "service": "mysql",
+      "name": "project-full-stack-go076-mysql-1",
+      "state": {
+        "Running": true,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:07:38.460520124Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-mysql-data"
+      ]
+    },
+    {
+      "service": "redis",
+      "name": "project-full-stack-go076-redis-1",
+      "state": {
+        "Running": true,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:07:38.368355478Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-redis-data"
+      ]
+    },
+    {
+      "service": "kafka",
+      "name": "project-full-stack-go076-kafka-1",
+      "state": {
+        "Running": true,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:28:17.936501733Z",
+        "FinishedAt": "0001-01-01T00:00:00Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-kafka-data",
+        "670547568fbac5dcf7aa0af598c0b38bb6a8c3795998a9860e394dd0ade358d1",
+        "3bcfad0034c52e19b28d0d9c9086a8844c321a2a3ac92c480219b7e490b150c9"
+      ]
+    },
+    {
+      "service": "elasticsearch",
+      "name": "project-full-stack-go076-elasticsearch-1",
+      "state": {
+        "Running": true,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:43:16.348682326Z",
+        "FinishedAt": "2026-10-28T10:42:54.592362145Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-search-data"
+      ]
+    }
+  ],
+  "after": [
+    {
+      "service": "mysql",
+      "name": "project-full-stack-go076-mysql-1",
+      "state": {
+        "Running": false,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:07:38.460520124Z",
+        "FinishedAt": "2026-10-28T10:54:39.812186036Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-mysql-data"
+      ]
+    },
+    {
+      "service": "redis",
+      "name": "project-full-stack-go076-redis-1",
+      "state": {
+        "Running": false,
+        "ExitCode": 0,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:07:38.368355478Z",
+        "FinishedAt": "2026-10-28T10:54:37.932127059Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-redis-data"
+      ]
+    },
+    {
+      "service": "kafka",
+      "name": "project-full-stack-go076-kafka-1",
+      "state": {
+        "Running": false,
+        "ExitCode": 143,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:28:17.936501733Z",
+        "FinishedAt": "2026-10-28T10:54:38.981835159Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-kafka-data",
+        "670547568fbac5dcf7aa0af598c0b38bb6a8c3795998a9860e394dd0ade358d1",
+        "3bcfad0034c52e19b28d0d9c9086a8844c321a2a3ac92c480219b7e490b150c9"
+      ]
+    },
+    {
+      "service": "elasticsearch",
+      "name": "project-full-stack-go076-elasticsearch-1",
+      "state": {
+        "Running": false,
+        "ExitCode": 143,
+        "OOMKilled": false,
+        "StartedAt": "2026-10-28T10:43:16.348682326Z",
+        "FinishedAt": "2026-10-28T10:54:40.582797291Z"
+      },
+      "volumes": [
+        "project-full-stack-go076_go-search-data"
+      ]
+    }
+  ],
+  "ports": {
+    "8086": {
+      "tcpListenerAbsent": true
+    },
+    "5176": {
+      "tcpListenerAbsent": true
+    },
+    "3332": {
+      "tcpListenerAbsent": true
+    },
+    "6404": {
+      "tcpListenerAbsent": true
+    },
+    "9099": {
+      "tcpListenerAbsent": true
+    },
+    "9202": {
+      "tcpListenerAbsent": true
+    }
+  },
+  "volumesRetained": true,
+  "unrelatedRunningContainersUnchanged": true,
+  "unrelatedRunningCount": 0,
+  "operation": "compose stop only; no remove/down/volume deletion"
+}

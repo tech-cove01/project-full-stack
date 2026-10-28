@@ -1,0 +1,2 @@
+GROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
+community.feed-v1 community.events 0          43              43              0               -               -               -

@@ -32,8 +32,8 @@ node --check scripts/go-note-search-ui-smoke.mjs
 | --- | --- | --- |
 | 上海首次 | 11项后脚本失败；原夹具保留，未判产品失败 | [初次记录](ui-shanghai-initial.json)、[截图](ui-shanghai-initial-failure.png)、[trace](ui-shanghai-initial-failure-trace.zip) |
 | 原夹具受控清理 | 三组 offset 门槛通过，精确清理成功；没有新增浏览器验收 | [清理记录](ui-initial-controlled-cleanup.json) |
-| 上海修正后 | 25项 PASS，cleanup=true，三组/三个分区 caughtUp=true | [结果](ui-shanghai-final.json)、[截图](ui-shanghai-final-results.png)、[trace](ui-shanghai-final-trace.zip) |
-| UTC | 25项 PASS，cleanup=true，三组/三个分区 caughtUp=true | [结果](ui-utc-final.json)、[截图](ui-utc-final-results.png)、[trace](ui-utc-final-trace.zip) |
+| 上海修正后 | 25项 PASS，cleanup=true，三组各检查分区0，共3条记录 caughtUp=true | [结果](ui-shanghai-final.json)、[截图](ui-shanghai-final-results.png)、[trace](ui-shanghai-final-trace.zip) |
+| UTC | 25项 PASS，cleanup=true，三组各检查分区0，共3条记录 caughtUp=true | [结果](ui-utc-final.json)、[截图](ui-utc-final-results.png)、[trace](ui-utc-final-trace.zip) |
 
 首次失败保留了两个测试脚本问题：详情断言仅等待与结果卡片同名的 heading，可能在 Vue 路由提交前就匹配旧卡片，实际截图已正确进入笔记详情；追加 `waitForURL` 后复跑。首次清理误把社区 outbox 的完成字段写成 `status/SENT`，实际契约为 `delivery_status/DONE`，SQL 明确失败并保留了13条自有笔记；修正字段后，用原失败文件的精确 ID 执行独立受控清理，原失败 JSON 不覆盖。这两项未改动产品行为，也未把失败记录改成 PASS。
 

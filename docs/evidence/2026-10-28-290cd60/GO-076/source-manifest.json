@@ -1,0 +1,139 @@
+{
+  "baseline": "290cd60358e0467f43caef4ddd647704bdbcfac6",
+  "implementationHead": "6ec7f4afbca21e7a03af08d3e391114d072493a2",
+  "scope": "Changed runtime/test/config/script files on shared main, including preserved independent GO-072/075 QA commits; documentation-only worktree changes may be included.",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "59f046d49c613cb0d06b0df0bcc0a1d210d1e5299e5a68e58220613e78d89667"
+    },
+    {
+      "path": "backend/.env.example",
+      "sha256": "517907df4c576b5743fab33395db5ce2e227bd7231200d27c7404107b64312cc"
+    },
+    {
+      "path": "backend/cmd/note-search/main.go",
+      "sha256": "b84838d49b895da0883f1faadb851436e50281ea56517a3335debb3e021e1821"
+    },
+    {
+      "path": "backend/internal/aichat/review_compatible_http_integration_test.go",
+      "sha256": "90e4bd319d1f49de1d459903d354a8468afcbdf42ee4608ef512499827bc9b97"
+    },
+    {
+      "path": "backend/internal/communityconsumer/worker.go",
+      "sha256": "2d50aa7bb6461d6a8fc2b8342f446bd24c67933f82d1811abeee764116b4dc95"
+    },
+    {
+      "path": "backend/internal/communityconsumer/worker_test.go",
+      "sha256": "fd0a927f94051f1f7cdd5475ad4bbce1545876d005faac5e735c64f9e067db78"
+    },
+    {
+      "path": "backend/internal/notesearch/client.go",
+      "sha256": "8e5147d5832c2a877aadeb081a491ea6288d6cd09113c23cf9e11d45e5252799"
+    },
+    {
+      "path": "backend/internal/notesearch/client_test.go",
+      "sha256": "878d3855d1aab25e4d5d825c79c8f0c0473a91205a421423d71f33dba6c57451"
+    },
+    {
+      "path": "backend/internal/notesearch/http.go",
+      "sha256": "09cf432788c332d7039952f264faa0b2664dc851e5d16de4c09e8b02ce988ed7"
+    },
+    {
+      "path": "backend/internal/notesearch/http_test.go",
+      "sha256": "f6d894b24bbac05700ffbb53d4a53ec8540fc20e4daacf7877216037366924b2"
+    },
+    {
+      "path": "backend/internal/notesearch/rebuild.go",
+      "sha256": "28414a01b47297cb4ef8bf14c90d7ae5167ea1b19fedb459ed6b190769009670"
+    },
+    {
+      "path": "backend/internal/notesearch/search_integration_test.go",
+      "sha256": "3d8ad53b0ecf510067d11ef1aed40ecfbd9d3467634cd375db31e50692798f01"
+    },
+    {
+      "path": "backend/internal/notesearch/service.go",
+      "sha256": "2e96b3e2603b1beded625580c5287f0af489f19e159b7bbe4a71691902afe802"
+    },
+    {
+      "path": "backend/internal/notesearch/service_test.go",
+      "sha256": "001e65edb7582a43e695c54abbd7cc76ef0dc534b8007cec269ce0d85ef5316a"
+    },
+    {
+      "path": "backend/internal/notesearch/sync.go",
+      "sha256": "910bae03654bd2987e27f6c10e55e9d7f2057736e06ba8898126a579b43e2737"
+    },
+    {
+      "path": "backend/internal/notesearch/sync_integration_test.go",
+      "sha256": "784c4cf4d83bc702d72eb6b9eba42d1a9059461de60c00bd852b577ddea53ba8"
+    },
+    {
+      "path": "backend/internal/notesearch/sync_test.go",
+      "sha256": "e996ca76e9bec0564fd034a0e7dc32f7833306a1b62b6bee60b7ea85629dba10"
+    },
+    {
+      "path": "backend/internal/platform/app/app.go",
+      "sha256": "b948c629a645bb80ca2b04bf5a1fa80add90ada1e4ae18432ad44a09a77e48cc"
+    },
+    {
+      "path": "backend/internal/platform/app/search.go",
+      "sha256": "94b90517836aebe46402667c198b1db84fdfafaeaef505054db6cd3bd8c74ce2"
+    },
+    {
+      "path": "backend/internal/platform/app/search_test.go",
+      "sha256": "a573d53849c8c2bb8873944c8ae03a8be91686bcec7f872df594069c5a529d3d"
+    },
+    {
+      "path": "backend/internal/platform/config/config.go",
+      "sha256": "8e82b896b50324f3de23c24ee8e2af20c4113ff03ccc91cef0f1c3a047877982"
+    },
+    {
+      "path": "backend/internal/platform/config/config_test.go",
+      "sha256": "f146c535b919a441fc932d28c31c23738fdb96c3ae7b0f0b66b02a67b064fad5"
+    },
+    {
+      "path": "backend/internal/platform/config/search.go",
+      "sha256": "4a9943ffb680a00404d70034f8b43095c3d525fcb6cc4159fb853d696f53bc45"
+    },
+    {
+      "path": "backend/internal/platform/config/search_test.go",
+      "sha256": "009805565117c48db5a6cfe8ce26849bb3fbd0d03e6cde5d799a2cedeecf0a44"
+    },
+    {
+      "path": "compose.go.yaml",
+      "sha256": "127335e19a80ef10f6d730eff852de0be5acf4d8d9c3d03c3688f02aa0788078"
+    },
+    {
+      "path": "frontend/src/App.vue",
+      "sha256": "9035449aa302f01287094fc84070bf4a4926dc57a6666c4c8ca5be03cc7676e7"
+    },
+    {
+      "path": "frontend/src/api.ts",
+      "sha256": "3875b1348b650bd24412a4d096f798b848a001d5c42adb6cf404ef230ee3a363"
+    },
+    {
+      "path": "frontend/src/router.ts",
+      "sha256": "356b2ac266f622bf6b1b7a0e7e8c75c6b14e9df58e67e60990c9107553b074a9"
+    },
+    {
+      "path": "frontend/src/types.ts",
+      "sha256": "5244de8756a38bfec40dccc6d41a70bed3e2a27c839da0a043f554eb1ba673b0"
+    },
+    {
+      "path": "frontend/src/views/NoteSearchView.vue",
+      "sha256": "1d3060677d6cd7e8ad38b9a5159681387fe9a405733df89da81c4650d968d6b8"
+    },
+    {
+      "path": "infra/mysql/migrations/012-note-search.sql",
+      "sha256": "08e92cf649788cf7695920a246b08a70f5fcec92d977ee7bb01d8c2ca04a53b9"
+    },
+    {
+      "path": "scripts/go-note-search-fault.mjs",
+      "sha256": "dc78833c0808ede58b56748007e44102aefda0fbf99c4c3fc842bf62fc991564"
+    },
+    {
+      "path": "scripts/go-note-search-ui-smoke.mjs",
+      "sha256": "ab90c0a9dd855ece988fd25d8149a311c522c2ea51ba6fa8aa46e6b6d66c2855"
+    }
+  ]
+}

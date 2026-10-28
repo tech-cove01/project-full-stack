@@ -1,0 +1,44 @@
+{
+  "recordedAt": "2026-10-28T11:02:43.480885+00:00",
+  "implementationHead": "6ec7f4afbca21e7a03af08d3e391114d072493a2",
+  "passed": true,
+  "jsonParsed": 16,
+  "localMarkdownLinks": 68,
+  "traces": [
+    {
+      "file": "ui-shanghai-final-trace.zip",
+      "requests": 104,
+      "nonemptyAuthorizationHeaders": 0,
+      "nonemptyCookieHeaders": 0,
+      "loginSetupUrls": 0,
+      "fullPhoneUrls": 0
+    },
+    {
+      "file": "ui-shanghai-initial-failure-trace.zip",
+      "requests": 93,
+      "nonemptyAuthorizationHeaders": 0,
+      "nonemptyCookieHeaders": 0,
+      "loginSetupUrls": 0,
+      "fullPhoneUrls": 0
+    },
+    {
+      "file": "ui-utc-final-trace.zip",
+      "requests": 104,
+      "nonemptyAuthorizationHeaders": 0,
+      "nonemptyCookieHeaders": 0,
+      "loginSetupUrls": 0,
+      "fullPhoneUrls": 0
+    },
+    {
+      "file": "fault-initial\\search-es-fault-trace.zip",
+      "requests": 35,
+      "nonemptyAuthorizationHeaders": 0,
+      "nonemptyCookieHeaders": 0,
+      "loginSetupUrls": 0,
+      "fullPhoneUrls": 0
+    }
+  ],
+  "sourceHashes": 33,
+  "errors": [],
+  "scope": "Parse JSON, resolve local module-report links, verify ZIP CRC and anonymous trace request headers/URLs, scan evidence text for key/bearer patterns; not a proof of absence of every possible secret."
+}

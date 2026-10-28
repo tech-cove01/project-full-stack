@@ -29,7 +29,15 @@ func (repository *Repository) Record(ctx context.Context, orderID, userID, vouch
 	if runes := []rune(reason); len(runes) > 240 {
 		reason = string(runes[:240])
 	}
-	err := repository.db.WithContext(ctx).Exec(`INSERT INTO tb_order_review
+	err := repository.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var existing struct{ UserID, VoucherID string }
+		if err := tx.Raw("SELECT user_id,voucher_id FROM tb_order_review WHERE order_id=? FOR UPDATE", orderID).Scan(&existing).Error; err != nil {
+			return err
+		}
+		if existing.UserID != "" && (existing.UserID != userID || existing.VoucherID != voucherID) {
+			return ErrNotDurable
+		}
+		return tx.Exec(`INSERT INTO tb_order_review
 		(order_id, voucher_id, user_id, stream_message_id, attempts, reason, status)
 		VALUES (?, ?, ?, ?, ?, ?, 'OPEN')
 		ON DUPLICATE KEY UPDATE
@@ -38,7 +46,8 @@ func (repository *Repository) Record(ctx context.Context, orderID, userID, vouch
 			reason = VALUES(reason),
 			status = IF(status = 'REQUEUED', 'OPEN', status),
 			updated_at = NOW(3)`,
-		orderID, voucherID, userID, messageID, attempts, reason).Error
+			orderID, voucherID, userID, messageID, attempts, reason).Error
+	})
 	if err != nil {
 		return ErrNotDurable
 	}
@@ -63,16 +72,27 @@ func (repository *Repository) Open(ctx context.Context, voucherID string) (bool,
 	return count > 0, nil
 }
 
-// Claim moves an OPEN row to REQUEUED before the message is published. Rows that
-// are RESOLVED or already claimed cannot be replayed twice.
+// Claim marks a review replay before publishing. REQUEUED remains replayable:
+// a previous command may have exited after this commit but before XADD, or lost
+// its XADD reply. Repeating the same IDs is safe because creation is idempotent.
+// RESOLVED is never replayable. The row stays a rebuild blocker until resolved.
 func (repository *Repository) Claim(ctx context.Context, orderID string) (bool, error) {
-	result := repository.db.WithContext(ctx).Exec(`UPDATE tb_order_review
-		SET status = 'REQUEUED', resolved_at = NULL, updated_at = NOW(3)
-		WHERE order_id = ? AND status = 'OPEN'`, orderID)
-	if result.Error != nil {
-		return false, result.Error
-	}
-	return result.RowsAffected == 1, nil
+	claimed := false
+	err := repository.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var row struct{ Status string }
+		if err := tx.Raw("SELECT status FROM tb_order_review WHERE order_id=? FOR UPDATE", orderID).Scan(&row).Error; err != nil {
+			return err
+		}
+		if row.Status != "OPEN" && row.Status != "REQUEUED" {
+			return nil
+		}
+		if err := tx.Exec("UPDATE tb_order_review SET status='REQUEUED',resolved_at=NULL,updated_at=NOW(3) WHERE order_id=?", orderID).Error; err != nil {
+			return err
+		}
+		claimed = true
+		return nil
+	})
+	return claimed, err
 }
 
 // Release puts a claimed row back to OPEN when publishing the message failed.

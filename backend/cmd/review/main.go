@@ -78,8 +78,8 @@ func replay(ctx context.Context, repository *orderreview.Repository, client *red
 	if !found {
 		fail("no review record for order " + orderID)
 	}
-	if row.Status != "OPEN" {
-		fail("review row is " + row.Status + ", only OPEN can be replayed")
+	if row.Status != "OPEN" && row.Status != "REQUEUED" {
+		fail("review row is " + row.Status + ", only OPEN or REQUEUED can be replayed")
 	}
 	// Claim first: the consumer can only react after XADD, so a failure it records
 	// afterwards (REQUEUED -> OPEN) is never overwritten by a late claim.

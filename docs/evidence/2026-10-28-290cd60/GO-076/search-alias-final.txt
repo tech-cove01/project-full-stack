@@ -1,0 +1,4 @@
+=== RUN   TestActivateRejectsPartiallySuccessfulActions
+--- PASS: TestActivateRejectsPartiallySuccessfulActions (0.01s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/notesearch	2.080s

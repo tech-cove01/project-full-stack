@@ -1,0 +1,61 @@
+=== RUN   TestClientConfigurationAndPathBoundaries
+--- PASS: TestClientConfigurationAndPathBoundaries (0.00s)
+=== RUN   TestClientMappingVersionAndAtomicAlias
+--- PASS: TestClientMappingVersionAndAtomicAlias (0.01s)
+=== RUN   TestClientRejectsConflictsFailuresAndUnownedAlias
+=== RUN   TestClientRejectsConflictsFailuresAndUnownedAlias/conflict
+=== RUN   TestClientRejectsConflictsFailuresAndUnownedAlias/false-success
+=== RUN   TestClientRejectsConflictsFailuresAndUnownedAlias/bad-version
+=== RUN   TestClientRejectsConflictsFailuresAndUnownedAlias/unavailable
+--- PASS: TestClientRejectsConflictsFailuresAndUnownedAlias (0.01s)
+    --- PASS: TestClientRejectsConflictsFailuresAndUnownedAlias/conflict (0.00s)
+    --- PASS: TestClientRejectsConflictsFailuresAndUnownedAlias/false-success (0.00s)
+    --- PASS: TestClientRejectsConflictsFailuresAndUnownedAlias/bad-version (0.00s)
+    --- PASS: TestClientRejectsConflictsFailuresAndUnownedAlias/unavailable (0.00s)
+=== RUN   TestClientSearchQueryAndPartialFailure
+=== RUN   TestClientSearchQueryAndPartialFailure/valid
+=== RUN   TestClientSearchQueryAndPartialFailure/timedout
+=== RUN   TestClientSearchQueryAndPartialFailure/failed
+=== RUN   TestClientSearchQueryAndPartialFailure/expired
+=== RUN   TestClientSearchQueryAndPartialFailure/oversized
+--- PASS: TestClientSearchQueryAndPartialFailure (0.01s)
+    --- PASS: TestClientSearchQueryAndPartialFailure/valid (0.00s)
+    --- PASS: TestClientSearchQueryAndPartialFailure/timedout (0.00s)
+    --- PASS: TestClientSearchQueryAndPartialFailure/failed (0.00s)
+    --- PASS: TestClientSearchQueryAndPartialFailure/expired (0.00s)
+    --- PASS: TestClientSearchQueryAndPartialFailure/oversized (0.00s)
+=== RUN   TestClientDeadlineAndRedirect
+--- PASS: TestClientDeadlineAndRedirect (0.03s)
+=== RUN   TestPublicSearchInputAndDisabled
+--- PASS: TestPublicSearchInputAndDisabled (0.00s)
+=== RUN   TestIntegrationPublicNoteSearch
+    search_integration_test.go:34: explicit isolated SQL/Redis/ES required
+--- SKIP: TestIntegrationPublicNoteSearch (0.00s)
+=== RUN   TestSearchInputsBeforeStorage
+--- PASS: TestSearchInputsBeforeStorage (0.00s)
+=== RUN   TestCursorSignatureScopeAndExpiry
+--- PASS: TestCursorSignatureScopeAndExpiry (0.00s)
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/invalid-topic
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/contradictory-header
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/duplicate-header
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/too-many-headers
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/too-long-header
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/unknown-field
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/wrong-key
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/negative-offset
+=== RUN   TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/negative-partition
+--- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/invalid-topic (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/contradictory-header (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/duplicate-header (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/too-many-headers (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/too-long-header (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/unknown-field (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/wrong-key (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/negative-offset (0.00s)
+    --- PASS: TestSearchSyncValidatesSourceAndExistingEnvelopeBeforeStorage/negative-partition (0.00s)
+=== RUN   TestSearchFailureDigestBindsExactOriginalMessageAndNormalizesNilBlobs
+--- PASS: TestSearchFailureDigestBindsExactOriginalMessageAndNormalizesNilBlobs (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/notesearch	0.265s

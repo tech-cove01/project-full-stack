@@ -1,0 +1,6 @@
+=== RUN   TestActivateRejectsPartiallySuccessfulActions
+    client_test.go:205: acknowledged=true does not mean every alias action succeeded
+--- FAIL: TestActivateRejectsPartiallySuccessfulActions (0.01s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/notesearch	2.465s
+FAIL

@@ -1,0 +1,10 @@
+=== RUN   TestIntegrationPublicNoteSearch
+=== RUN   TestIntegrationPublicNoteSearch/Chinese_query_AND_shop_and_SQL_content
+=== RUN   TestIntegrationPublicNoteSearch/PIT_short_empty_page_advances_raw_cursor_and_filters_current_facts
+=== RUN   TestIntegrationPublicNoteSearch/external_version_guards
+--- PASS: TestIntegrationPublicNoteSearch (1.79s)
+    --- PASS: TestIntegrationPublicNoteSearch/Chinese_query_AND_shop_and_SQL_content (0.47s)
+    --- PASS: TestIntegrationPublicNoteSearch/PIT_short_empty_page_advances_raw_cursor_and_filters_current_facts (0.15s)
+    --- PASS: TestIntegrationPublicNoteSearch/external_version_guards (0.04s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/notesearch	2.009s

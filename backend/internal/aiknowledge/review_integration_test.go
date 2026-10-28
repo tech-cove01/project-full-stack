@@ -62,6 +62,20 @@ func TestIntegrationReviewKnowledgeAuthorizationAndVersions(t *testing.T) {
 		_ = resources.ORM.Exec("DELETE FROM tb_merchant WHERE id=?", merchant).Error
 		_ = resources.ORM.Exec("DELETE FROM tb_user WHERE id=?", user).Error
 	})
+	t.Run("public_detail_scope_follows_server_dto", func(t *testing.T) {
+		defer resources.ORM.Exec("UPDATE tb_ai_document SET scope='SHOP_PUBLIC',shop_id=? WHERE id=?", shop, doc)
+		for _, scope := range []string{"SHOP_PUBLIC", "PUBLIC"} {
+			if resources.ORM.Exec("UPDATE tb_ai_document SET scope=?,shop_id=IF(?='PUBLIC',NULL,?) WHERE id=?", scope, scope, shop, doc).Error != nil {
+				t.Fatal("owned scope fixture update failed")
+			}
+			view, err := service.Public(ctx, decimal(doc), nil)
+			encoded, marshalErr := json.Marshal(view)
+			var payload map[string]any
+			if err != nil || marshalErr != nil || json.Unmarshal(encoded, &payload) != nil || payload["scope"] != scope {
+				t.Fatal("public knowledge DTO must preserve PUBLIC versus SHOP_PUBLIC for source labels")
+			}
+		}
+	})
 	t.Run("unauthorized_rebuild_never_calls_provider", func(t *testing.T) {
 		p.calls = 0
 		_, err := service.Rebuild(ctx, decimal(user+1), decimal(doc))

@@ -348,7 +348,7 @@ onBeforeUnmount(() => {
                 <strong>{{ source.title }}</strong>
                 <span
                   >v{{ source.version }} ·
-                  {{ source.scope === 'PLATFORM' ? '平台规则' : '门店公开规则' }}</span
+                  {{ source.scope === 'PUBLIC' ? '平台规则' : '门店公开规则' }}</span
                 >
                 <small>{{ source.excerpt }}</small>
               </RouterLink>

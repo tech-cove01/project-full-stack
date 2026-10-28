@@ -1,0 +1,8 @@
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/public_detail_scope_follows_server_dto
+    review_integration_test.go:75: public knowledge DTO must preserve PUBLIC versus SHOP_PUBLIC for source labels
+--- FAIL: TestIntegrationReviewKnowledgeAuthorizationAndVersions (0.11s)
+    --- FAIL: TestIntegrationReviewKnowledgeAuthorizationAndVersions/public_detail_scope_follows_server_dto (0.01s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aiknowledge	2.911s
+FAIL

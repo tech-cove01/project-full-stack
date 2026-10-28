@@ -1,0 +1,18 @@
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/public_detail_scope_follows_server_dto
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/unauthorized_rebuild_never_calls_provider
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/disabled_rebuild_never_calls_provider
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_failure_retains_current_version
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/nonpublic_scope_is_never_a_public_source
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/revocation_during_indexing_rejects_commit
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_rebuild_disable_audits_and_old_version_hidden
+--- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions (0.39s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/public_detail_scope_follows_server_dto (0.02s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/unauthorized_rebuild_never_calls_provider (0.01s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/disabled_rebuild_never_calls_provider (0.02s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_failure_retains_current_version (0.02s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/nonpublic_scope_is_never_a_public_source (0.02s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/revocation_during_indexing_rejects_commit (0.04s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_rebuild_disable_audits_and_old_version_hidden (0.14s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	2.757s

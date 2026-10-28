@@ -66,6 +66,7 @@ type ListItem struct {
 type PublicView struct {
 	ID         string `json:"id"`
 	DocumentID string `json:"documentId"`
+	Scope      string `json:"scope"`
 	Title      string `json:"title"`
 	Body       string `json:"body"`
 	Version    int    `json:"version"`
@@ -362,6 +363,7 @@ func (service *Service) Public(ctx context.Context, documentID string, version *
 	}
 	var rows []struct {
 		ID               uint64
+		Scope            string
 		Title            string
 		PublishedVersion int
 		Epoch            int64
@@ -374,7 +376,7 @@ func (service *Service) Public(ctx context.Context, documentID string, version *
 		target = "?"
 		args = append([]any{*version}, args...)
 	}
-	if err = service.db.WithContext(ctx).Raw(`SELECT d.id,v.title,v.version AS published_version,
+	if err = service.db.WithContext(ctx).Raw(`SELECT d.id,d.scope,v.title,v.version AS published_version,
 		v.epoch,v.body,v.create_time
 		FROM tb_ai_document d
 		JOIN tb_ai_document_version v ON v.document_id=d.id AND v.version=`+target+`
@@ -386,7 +388,7 @@ func (service *Service) Public(ctx context.Context, documentID string, version *
 		return PublicView{}, ErrNotFound
 	}
 	row := rows[0]
-	return PublicView{ID: decimal(row.ID), DocumentID: decimal(row.ID), Title: row.Title, Body: row.Body,
+	return PublicView{ID: decimal(row.ID), DocumentID: decimal(row.ID), Scope: row.Scope, Title: row.Title, Body: row.Body,
 		Version: row.PublishedVersion, Epoch: row.Epoch,
 		UpdateTime: row.CreateTime.In(zone()).Format("2006-01-02 15:04:05")}, nil
 }

@@ -1,0 +1,13 @@
+{
+  "task": "GO-074b-QA2",
+  "kind": "command-result-summary",
+  "note": "Executed command outcomes; raw real-dependency assertion evidence is preserved separately in scope-initial.txt and scope-final.txt.",
+  "commands": [
+    {"cwd":"backend","command":"go test -count=1 ./internal/aiknowledge","exitCode":0},
+    {"cwd":"backend","command":"go vet ./internal/aiknowledge","exitCode":0},
+    {"cwd":"backend","command":"gofmt -w internal/aiknowledge/service.go internal/aiknowledge/review_integration_test.go","exitCode":0},
+    {"cwd":"repository","command":"frontend/node_modules/.bin/prettier.cmd --write frontend/src/views/AssistantView.vue frontend/src/views/PublicKnowledgeView.vue","exitCode":0},
+    {"cwd":"repository","command":"npm --prefix frontend run build","exitCode":0,"includes":"vue-tsc --noEmit and Vite production build"},
+    {"cwd":"repository","command":"npm --prefix frontend run format:check","exitCode":0}
+  ]
+}

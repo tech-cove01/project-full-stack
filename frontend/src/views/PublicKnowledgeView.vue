@@ -32,7 +32,7 @@ onMounted(async () => {
     <el-alert v-else-if="error" :title="error" type="error" :closable="false" show-icon />
     <template v-else-if="doc">
       <span class="eyebrow">{{
-        doc.scope === 'PLATFORM' ? 'PLATFORM RULE' : 'SHOP PUBLIC RULE'
+        doc.scope === 'PUBLIC' ? 'PLATFORM RULE' : 'SHOP PUBLIC RULE'
       }}</span>
       <h1>{{ doc.title }}</h1>
       <p class="muted">当前发布版本 v{{ doc.version }} · {{ doc.scope }}</p>

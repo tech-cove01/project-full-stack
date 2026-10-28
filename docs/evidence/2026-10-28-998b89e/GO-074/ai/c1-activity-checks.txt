@@ -1,0 +1,3 @@
+ok  	github.com/cityloop/fullstack-go/internal/aitool	0.289s
+ok  	github.com/cityloop/fullstack-go/internal/aichat	2.119s
+gofmt/vet/build: PASS

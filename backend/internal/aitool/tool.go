@@ -184,13 +184,15 @@ func (service *Service) activity(ctx context.Context, activityID string) (*Resul
 	}
 	var rows []struct {
 		ID        uint64
+		ShopID    uint64
 		Title     string
 		PayValue  uint64
+		Stock     uint64
 		BeginTime time.Time
 		EndTime   time.Time
 		Status    string
 	}
-	if err = service.db.WithContext(ctx).Raw(`SELECT sv.voucher_id AS id,v.title,v.pay_value,
+	if err = service.db.WithContext(ctx).Raw(`SELECT sv.voucher_id AS id,v.shop_id,v.title,v.pay_value,sv.stock,
 		sv.begin_time,sv.end_time,sv.publish_status AS status
 		FROM tb_seckill_voucher sv JOIN tb_voucher v ON v.id=sv.voucher_id
 		WHERE sv.voucher_id=? AND v.status=1 AND sv.publish_status='ACTIVE'`, id).Scan(&rows).Error; err != nil {
@@ -200,8 +202,13 @@ func (service *Service) activity(ctx context.Context, activityID string) (*Resul
 		return &Result{Kind: KindActivity, Text: "没有找到这个活动。"}, nil
 	}
 	row := rows[0]
+	item := map[string]any{
+		"id": strconv.FormatUint(row.ID, 10), "shopId": strconv.FormatUint(row.ShopID, 10),
+		"title": row.Title, "payValue": strconv.FormatUint(row.PayValue, 10), "status": row.Status,
+		"stock": strconv.FormatUint(row.Stock, 10), "href": "/shops/" + strconv.FormatUint(row.ShopID, 10),
+	}
 	return &Result{Kind: KindActivity, Text: "活动：" + row.Title + "。",
-		Card: map[string]any{"type": "activities", "items": []map[string]any{{"id": strconv.FormatUint(row.ID, 10), "title": row.Title, "payValue": strconv.FormatUint(row.PayValue, 10), "status": row.Status}}, "id": strconv.FormatUint(row.ID, 10), "title": row.Title,
+		Card: map[string]any{"type": "activities", "items": []map[string]any{item}, "id": strconv.FormatUint(row.ID, 10), "title": row.Title,
 			"payValue": strconv.FormatUint(row.PayValue, 10), "status": row.Status,
 			"beginTime": display(&row.BeginTime), "endTime": display(&row.EndTime)}}, nil
 }

@@ -1,0 +1,19 @@
+=== RUN   TestIntegrationReviewActivityTool
+=== RUN   TestIntegrationReviewActivityTool/public_card_stock_and_large_string_ids
+    review_integration_test.go:77: activity item stock = <nil>, want exact string "1"
+    review_integration_test.go:77: activity item href = <nil>, want exact string "/shops/9007201634802562"
+    review_integration_test.go:77: activity item shopId = <nil>, want exact string "9007201634802562"
+=== RUN   TestIntegrationReviewActivityTool/same_service_reads_updated_zero_stock
+    review_integration_test.go:82: activity item shopId = <nil>, want exact string "9007201634802562"
+    review_integration_test.go:82: activity item stock = <nil>, want exact string "0"
+    review_integration_test.go:82: activity item href = <nil>, want exact string "/shops/9007201634802562"
+=== RUN   TestIntegrationReviewActivityTool/unpublished_voucher_stays_hidden
+=== RUN   TestIntegrationReviewActivityTool/offline_activity_stays_hidden
+--- FAIL: TestIntegrationReviewActivityTool (0.13s)
+    --- FAIL: TestIntegrationReviewActivityTool/public_card_stock_and_large_string_ids (0.00s)
+    --- FAIL: TestIntegrationReviewActivityTool/same_service_reads_updated_zero_stock (0.02s)
+    --- PASS: TestIntegrationReviewActivityTool/unpublished_voucher_stays_hidden (0.02s)
+    --- PASS: TestIntegrationReviewActivityTool/offline_activity_stays_hidden (0.01s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aitool	2.029s
+FAIL

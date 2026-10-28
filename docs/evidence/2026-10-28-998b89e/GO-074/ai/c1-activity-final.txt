@@ -1,0 +1,18 @@
+=== RUN   TestIntegrationReviewActivityTool
+=== RUN   TestIntegrationReviewActivityTool/public_card_stock_and_large_string_ids
+=== RUN   TestIntegrationReviewActivityTool/same_service_reads_updated_zero_stock
+=== RUN   TestIntegrationReviewActivityTool/unpublished_voucher_stays_hidden
+=== RUN   TestIntegrationReviewActivityTool/offline_activity_stays_hidden
+--- PASS: TestIntegrationReviewActivityTool (0.12s)
+    --- PASS: TestIntegrationReviewActivityTool/public_card_stock_and_large_string_ids (0.00s)
+    --- PASS: TestIntegrationReviewActivityTool/same_service_reads_updated_zero_stock (0.01s)
+    --- PASS: TestIntegrationReviewActivityTool/unpublished_voucher_stays_hidden (0.02s)
+    --- PASS: TestIntegrationReviewActivityTool/offline_activity_stays_hidden (0.01s)
+=== RUN   TestParseOnlyTakesOverExplicitDataQuestions
+--- PASS: TestParseOnlyTakesOverExplicitDataQuestions (0.00s)
+=== RUN   TestStatusMessagesCoverEveryTerminalState
+--- PASS: TestStatusMessagesCoverEveryTerminalState (0.00s)
+=== RUN   TestRouteIgnoresUnrelatedMessagesWithoutTouchingStorage
+--- PASS: TestRouteIgnoresUnrelatedMessagesWithoutTouchingStorage (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/aitool	1.938s

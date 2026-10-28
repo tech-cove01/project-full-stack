@@ -1,0 +1,2 @@
+Topic: community.events	TopicId: C4uPKHh9Q5K-KcUyBGGEYA	PartitionCount: 1	ReplicationFactor: 1	Configs: 
+	Topic: community.events	Partition: 0	Leader: 1	Replicas: 1	Isr: 1	Elr: 	LastKnownElr: 

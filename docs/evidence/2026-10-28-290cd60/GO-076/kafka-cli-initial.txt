@@ -1,0 +1,5 @@
+Initial command (GO-076 dedicated broker):
+docker exec project-full-stack-go076-kafka-1 /opt/kafka/bin/kafka-topics.sh --bootstrap-server localhost:9092 --create --if-not-exists --topic community.events --partitions 1 --replication-factor 1
+Observed repeated WARN: Connection to node 1 (/127.0.0.1:9099) could not be established. Node may not be available.
+The host Kafka client integrations had passed. This failure occurs inside the container: its metadata advertises the host-mapped 9099 while it only listens on 9092 there.
+The initial command's live output is retained in the tool transcript; this file records the exact command and observed warning without presenting it as a complete redirected raw log.

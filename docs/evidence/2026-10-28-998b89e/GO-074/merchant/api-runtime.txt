@@ -1,0 +1,3 @@
+{"time":"2026-10-28T19:21:00.0966408+08:00","level":"INFO","msg":"Go API ready","service":"project-full-stack-go","runtime":"go","version":"go074-qa2-worktree","address":"127.0.0.1:8120"}
+{"time":"2026-10-28T19:30:05.2027377+08:00","level":"INFO","msg":"Go API shutting down"}
+{"time":"2026-10-28T19:30:05.2033692+08:00","level":"INFO","msg":"Go API HTTP requests drained"}

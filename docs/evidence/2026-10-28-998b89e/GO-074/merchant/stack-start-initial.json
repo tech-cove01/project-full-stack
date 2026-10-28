@@ -1,0 +1,8 @@
+{
+  "task": "GO-074",
+  "mode": "merchant",
+  "started": false,
+  "processes": [],
+  "error": "FileNotFoundError",
+  "portsReusable": true
+}

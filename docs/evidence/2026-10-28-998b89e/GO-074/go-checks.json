@@ -1,0 +1,10 @@
+{
+  "source": "fa47463",
+  "gofmt": "PASS",
+  "test": "PASS",
+  "platform": "windows/amd64",
+  "integration": "separately recorded; this ordinary suite has GO_INTEGRATION unset",
+  "vet": "PASS",
+  "modVerify": "PASS",
+  "build": "PASS"
+}

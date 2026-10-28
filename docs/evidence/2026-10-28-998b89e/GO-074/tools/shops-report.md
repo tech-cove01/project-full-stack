@@ -1,5 +1,7 @@
-# GO-074c2 门店工具卡片契约
+# GO-074c2：门店工具卡片与既有DTO一致
 
-既有Go门店只读工具返回id/name/address，Vue却读取没有返回的area/score，链接缺省时回首页。仅修shops卡片：显示实际name/address，缺省链接按字符串id进入现有 `/shops/:id`；已有同id站内href仍可保留。不新增评分契约、后端工具或模型调用。
+起点 `05f0baa52f14566566339786b10ef8d4193cb4ed`。后端 `aitool.shop` 的既有 items DTO 仅有字符串id、name、address；Vue原来读取不存在的area/score，默认href又回到首页。该独立修复只改 `AssistantView.vue` shops分支：显示name/address，缺href时链接到对应 `/shops/:id`，保留同id有效站内href的兼容。没有修改活动分支、工具路由或后端契约，没有发明评分。
 
-根agent非作者审读接口字段、路由、字符串ID和安全站内href回退通过；[前端构建/类型](shops-build.txt)、[格式](shops-format.txt)均PASS。本小修独立提交，随后由真实GoAITool工具页面专项补大ID/地址/点击详情验证，另交运行结果，不把本次静态构建当浏览器通过。实现者自测仍待独立核验。
+已执行前端构建（含vue-tsc）及全前端格式检查，均PASS：[构建](shops-build.txt)、[格式](shops-format.txt)。来源/模型等其它卡片不随此提交改写。真实AITool页面与大ID详情点击随后由独立工具脚本取证，不把类型/格式通过当作浏览器验收，也不重新调用真实模型。
+
+状态：主实现者独立审查后已提交 `13d5f49c787740f9bf2b83b9c843fb4ce3d6e1c1`。随后真实工具页面、大ID详情点击与交易后库存刷新已完成专项自测，结果另见 [report.md](report.md)，不重写本独立源代码提交。

@@ -1,0 +1,1 @@
+{"observerReady":true,"port":9291,"maxPaidRequests":12}

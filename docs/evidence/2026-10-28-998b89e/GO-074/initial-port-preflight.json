@@ -1,0 +1,10 @@
+{
+  "task": "GO-074",
+  "passed": false,
+  "stage": "port preflight before docker compose",
+  "attemptedPorts": [3350, 6420],
+  "observedOwner": "project-full-stack-review076",
+  "result": "socket bind rejected with Windows error 10048; no compose creation or migration executed",
+  "replacementPorts": {"merchantMysql": 3380, "merchantRedis": 6450, "aiMysql": 3381, "aiRedis": 6451},
+  "rawStderrPolicy": "Original tool output contains local non-ASCII path rendering loss only; this is a structured observation of the failed preflight, not a raw transcript."
+}

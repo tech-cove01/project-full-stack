@@ -1,0 +1,18 @@
+{
+  "task": "GO-074",
+  "mode": "merchant",
+  "started": true,
+  "processes": [
+    {
+      "name": "vite",
+      "exitCode": 1,
+      "forced": false
+    },
+    {
+      "name": "api",
+      "exitCode": 0,
+      "forced": false
+    }
+  ],
+  "portsReusable": true
+}

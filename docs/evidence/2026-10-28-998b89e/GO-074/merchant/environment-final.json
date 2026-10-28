@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-10-28T11:32:25.029057+00:00",
+  "mode": "merchant",
+  "passed": true,
+  "sqlCounts": {
+    "ownedUsers": 0,
+    "ownedMerchants": 0,
+    "ownedShops": 0,
+    "ownedKnowledge": 0,
+    "ordersTotal": 0,
+    "unfinishedOutbox": 0,
+    "unresolvedReview": 0
+  },
+  "redisMatchingKeys": {
+    "login:token:*": 0,
+    "login:code:*": 0,
+    "login:code:throttle:*": 0,
+    "ai:*": 0,
+    "seckill:*": 0,
+    "order:reservation:*": 0,
+    "comp:done:*": 0
+  },
+  "orderPendingSummary": "0",
+  "before": [
+    {
+      "service": "mysql",
+      "running": true,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-merchant_go-mysql-data"
+      ]
+    },
+    {
+      "service": "redis",
+      "running": true,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-merchant_go-redis-data"
+      ]
+    }
+  ],
+  "after": [
+    {
+      "service": "mysql",
+      "running": false,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-merchant_go-mysql-data"
+      ]
+    },
+    {
+      "service": "redis",
+      "running": false,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-merchant_go-redis-data"
+      ]
+    }
+  ],
+  "volumesRetained": true,
+  "onlyOwnedServicesInStopCommand": true,
+  "otherRunningContainersEqualAcrossSnapshots": true,
+  "otherRunningCountAfter": 16,
+  "portsWithoutTcpListener": {
+    "3380": true,
+    "6450": true,
+    "8120": true,
+    "5220": true
+  }
+}

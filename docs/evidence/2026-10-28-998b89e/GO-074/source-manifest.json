@@ -1,0 +1,86 @@
+{
+  "recordedAt": "2026-10-28T12:22:16.948679+00:00",
+  "baseline": "998b89e81bed42786d25d0cebbadb401fd506f70",
+  "implementationHead": "2811dc6f89fc7405a4f72c7f4bb102fa76d8bfed",
+  "finalApplicationSource": "b97b03adaa845136773da5e7cba16c8ab2677520",
+  "applicationDiffFromFinalSource": [],
+  "scope": "Current file-byte hashes for changed runtime/test/scripts and two executed binaries; dirty VCS metadata retained in buildinfo. External GO-076 documentation commits are preserved but not authored here.",
+  "files": [
+    {
+      "path": "backend/internal/aichat/assistant.go",
+      "sha256": "a8ab1f1330001de39824f2144ce85e012aa08c93245fb9284571c25c87323ede"
+    },
+    {
+      "path": "backend/internal/aichat/turn_integration_test.go",
+      "sha256": "c2446234137280bd7043a384b0e3637047e69119802e3289abaeb8acb9f9494c"
+    },
+    {
+      "path": "backend/internal/aiknowledge/review_integration_test.go",
+      "sha256": "f02af56e6e4e18ec56c39d2e0e210ae9a6519ed1a7a375f3392eeb68ed0cfba7"
+    },
+    {
+      "path": "backend/internal/aiknowledge/service.go",
+      "sha256": "c2254e0636300dd3da41799868a1e06099ce4ed1bee9295804ad1969849ed187"
+    },
+    {
+      "path": "backend/internal/aitool/review_integration_test.go",
+      "sha256": "7aef01761d1f785f5311cfda38abe94c5cf50158af999faed049d6b582b64a6c"
+    },
+    {
+      "path": "backend/internal/aitool/tool.go",
+      "sha256": "0b219964e82ef8c681fd413ab831f1c6c4309aed0cf4150e074bb7e3fab610ae"
+    },
+    {
+      "path": "compose.go.yaml",
+      "sha256": "6c6d90f2b8c19cba5a221c3827b5472fc3c3a1942b185fbcc6f9a8cba4770b03"
+    },
+    {
+      "path": "frontend/src/views/AssistantView.vue",
+      "sha256": "edece27b44a6ef74dfcb56f2eb8bc6ec32862e2b1394ad94ae1893dc4da8fc7e"
+    },
+    {
+      "path": "frontend/src/views/MerchantView.vue",
+      "sha256": "08b0cc73fce32aa2a1b57541c6a0f041fad37b896b5dd5a2004a5721bbdbc5de"
+    },
+    {
+      "path": "frontend/src/views/PublicKnowledgeView.vue",
+      "sha256": "a5401ed7190eb210f7148c0d694133b3bd5418fbc26a835bac87f673e15f9c35"
+    },
+    {
+      "path": "scripts/go-ai-provider-observer.mjs",
+      "sha256": "9151be28f852cf1b0982d5db4b9382f90f23018f4460fe9657346f30c149b8d5"
+    },
+    {
+      "path": "scripts/go-ai-provider-ui-smoke.mjs",
+      "sha256": "82879058c6ab86dc5f3e1abf43335cb818f54bbf0430bfc012cd03521c5f22d3"
+    },
+    {
+      "path": "scripts/go-ai-tools-ui-smoke.mjs",
+      "sha256": "0f2803ee4d17916b60c99607e02cc2e7c3df78b659bdc782533b4383080ec028"
+    },
+    {
+      "path": "scripts/go-merchant-orders-ui-smoke.mjs",
+      "sha256": "422ae8fce3e1b9d5866a083439ed7d0cef48598fcb87d19d55cdae48d0925315"
+    },
+    {
+      "path": "scripts/lib/sse-reader-observer.mjs",
+      "sha256": "bef029c7a429e8148bfd2ab266b7edc96ac9f5c7e6d7d7621aed0eb4099bfe61"
+    }
+  ],
+  "binaries": [
+    {
+      "path": "backend/bin/api-go074.exe",
+      "sha256": "84cf4d55147d3b13fb9f88237709bb71d3ac92d3d7cfcad0793be2063d38968b",
+      "bytes": 44839424,
+      "runtimeVersion": "go074-qa2-worktree",
+      "cohort": "merchant and real AI"
+    },
+    {
+      "path": "backend/bin/api-go074-tools.exe",
+      "sha256": "2ef2e6905350a3999eb38d8b032ed2f2bbaca3ed96fb52dfcb58a1882e64396a",
+      "bytes": 44839936,
+      "runtimeVersion": "go074-b97b03a",
+      "cohort": "final deterministic tools"
+    }
+  ]
+}

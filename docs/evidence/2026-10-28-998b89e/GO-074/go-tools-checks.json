@@ -1,0 +1,10 @@
+{
+  "reason": "New activity DTO/SQL fix after previous fa47463 check",
+  "modVerify": "PASS",
+  "test": "PASS",
+  "gofmt": "PASS",
+  "source": "b97b03adaa845136773da5e7cba16c8ab2677520",
+  "build": "PASS",
+  "vet": "PASS",
+  "platform": "windows/amd64"
+}

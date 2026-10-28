@@ -1,0 +1,75 @@
+{
+  "recordedAt": "2026-10-28T11:50:54.971151+00:00",
+  "mode": "ai",
+  "passed": true,
+  "sqlCounts": {
+    "ownedUsers": 0,
+    "ownedMerchants": 0,
+    "ownedShops": 0,
+    "ownedKnowledge": 0,
+    "ordersTotal": 0,
+    "unfinishedOutbox": 0,
+    "unresolvedReview": 0
+  },
+  "redisMatchingKeys": {
+    "login:token:*": 0,
+    "login:code:*": 0,
+    "login:code:throttle:*": 0,
+    "ai:*": 0,
+    "seckill:*": 0,
+    "order:reservation:*": 0,
+    "comp:done:*": 0
+  },
+  "orderPendingSummary": "not created by AI fixture",
+  "before": [
+    {
+      "service": "mysql",
+      "running": true,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-ai_go-mysql-data"
+      ]
+    },
+    {
+      "service": "redis",
+      "running": true,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-ai_go-redis-data"
+      ]
+    }
+  ],
+  "after": [
+    {
+      "service": "mysql",
+      "running": false,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-ai_go-mysql-data"
+      ]
+    },
+    {
+      "service": "redis",
+      "running": false,
+      "exitCode": 0,
+      "oom": false,
+      "volumes": [
+        "project-full-stack-go074-ai_go-redis-data"
+      ]
+    }
+  ],
+  "volumesRetained": true,
+  "onlyOwnedServicesInStopCommand": true,
+  "otherRunningContainersEqualAcrossSnapshots": true,
+  "otherRunningCountAfter": 14,
+  "portsWithoutTcpListener": {
+    "3381": true,
+    "6451": true,
+    "8121": true,
+    "5221": true,
+    "9291": true
+  }
+}

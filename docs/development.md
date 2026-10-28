@@ -73,7 +73,7 @@ GO-020 已提供受保护的 `GET /merchant/workspace`，返回当前身份的 `
 
 商家集成：在 `backend/` 显式设置隔离环境及 `GO_INTEGRATION=1` 后运行 `go test -count=1 -v ./internal/merchant -run TestIntegrationMerchant`。无新增SQL迁移。`merchant.NewAccess(tx)`复用事务句柄，但读取继承tx隔离级别；后续业务写操作须另外保证当前授权事实与变更边界一致，不能把RR普通查询当并发撤权保护。
 
-根目录 `node scripts/go-merchant-ui-smoke.mjs` 运行真实Vue工作台验证，使用与商铺UI脚本相同的MYSQL/Playwright/Chrome/WEB_BASE/API_BASE/UI_EVIDENCE环境变量。脚本造3商家/5店/4用户，真实页面取码登录，沿原token验证混合身份、撤权/降级/停用、脏scope、错误重试与失效；只清理自身精确DB行并撤销发放session，验证码节流键按原60秒TTL到期。大ID夹具会推进对应自增序列。成功响应均来自真实Go；选择性网络abort仅用于失败注入。GO-021启用活动入口；订单/规则入口保持禁用。
+根目录 `node scripts/go-merchant-ui-smoke.mjs` 运行真实Vue工作台验证，使用与商铺UI脚本相同的MYSQL/Playwright/Chrome/WEB_BASE/API_BASE/UI_EVIDENCE环境变量。脚本造3商家/5店/4用户，真实页面取码登录，沿原token验证混合身份、撤权/降级/停用、脏scope、错误重试与失效；只清理自身精确DB行并撤销发放session，验证码节流键按原60秒TTL到期。大ID夹具会推进对应自增序列。成功响应均来自真实Go；选择性网络abort仅用于失败注入。当前工作台可进入活动、订单/核销、公开规则页面；管理按钮和数据范围由当前逐门店权限决定，不能以入口可见代替服务端授权。
 
 GO-021 已提供 `GET /merchant/activities?current=1&pageSize=10&shopId=...&status=ACTIVE`（筛选可省略，pageSize上限50）、`POST /merchant/activities`（稳定Idempotency-Key）、`POST /merchant/activities/{id}/retry-publication` 和 `/offline`。创建只接受门店、标题/副标题/规则、字符串分金额、正整数库存及四个带偏移整秒时间，服务端做逐门店当前锁定授权；同键不同规范内容409。发布闭闸准备→提交ACTIVE/审计/OPEN→独立事件开闸；下架同步关闸成功才提交并返回。缺键不重建、OFFLINE不重新上架，无reconcile路由。
 
@@ -130,6 +130,18 @@ ES固定8.19.23，标题/正文使用内置CJK；不需要安装插件。`ES_URL
 容器内Kafka只读CLI使用 `--bootstrap-server localhost:9094`；宿主机API仍使用 `127.0.0.1:${GO_KAFKA_PORT}`（默认9092）。9094是容器内部监听器，不映射宿主机，避免独立端口下CLI跟随错误的advertised地址。
 
 真实自测（先停同环境API/消费者）：在 `backend/` 设置 `GO_INTEGRATION=1`，执行 `go test -count=1 -timeout 3m -v -run 'TestIntegration(PublicNoteSearch|SearchSync)$' ./internal/notesearch`。页面与物理停机脚本需要专用隔离环境，具体环境/清理门槛、两时区50项与物理停机17项原始记录见 [GO-076交接](evidence/2026-10-28-290cd60/GO-076/report.md)。本票自测不等于独立核验，最终HEAD的远端CI/Linux race与持续负载另验。
+
+## GO-074 页面差量复跑
+
+工作台已开放订单/核销、公开规则入口。来源详情路径为 `/ai/knowledge/:id?version=...`，scope采用`PUBLIC`/`SHOP_PUBLIC`。AI活动卡片的stock/shopId/金额/ID为字符串，读取已提交MySQL快照，库存不保证点击时仍可购；门店卡片显示真实name/address，缺href时按同id进入 `/shops/:id`。
+
+先按上节准备并迁移隔离依赖，实际API/Vue与脚本必须使用同一环境。GO-074使用merchant3380/6450/API8120/Vue5220，以及AI/工具3381/6451/API8121/Vue5221。显式配置完整MYSQL/Redis、API_BASE/WEB_BASE、PLAYWRIGHT_MODULE/CHROME_PATH；Go不自动加载env文件。原输出及首次失败保留，新运行选择新文件/目录。
+
+- 商家矩阵：`node scripts/go-merchant-orders-ui-smoke.mjs`，`UI_EVIDENCE`指向新JSON文件，真实发布/准入/成单/支付/核销退款，等本人outbox/PEL/补偿完成才清理。角色与权限变化只操作自有fixture。
+- 真实AI：`node scripts/go-ai-provider-ui-smoke.mjs`；需已有授权Provider配置，页面脚本不读取Key。实际API采用`openai-compatible`，本票Chat/Embedding为qwen3.8-flash/text-embedding-v4、1536维，`AI_DISABLE_THINKING=true`、TOP_K=5、MIN_SCORE=0.5、MAX_OUTPUT_TOKENS=400、CHAT_TIMEOUT_SECONDS=40（均为`AI_`前缀变量）。观察器先设置`$env:AI_OBSERVER_EVIDENCE='<新文件>'`，再执行`node scripts/go-ai-provider-observer.mjs`，监听loopback9291，仅转发固定百炼HTTPS、无自动重试且最多12次。API的AI_BASE_URL设为`http://127.0.0.1:9291/v1`，`AI_UI_OBSERVER_URL=http://127.0.0.1:9291/metrics`。新账本用baseline0；本轮保留首次3次后明确baseline3继续，不能重置已耗尽账本。新endpoint是新向量身份，使用自有合成FAQ，不复用另一endpoint旧向量。
+- 工具差量：`node scripts/go-ai-tools-ui-smoke.mjs`，`UI_EVIDENCE`为新JSON。API可用stub/Key空，脚本确认只有真实GoAITool分支且无检索/生成；该脚本不评模型质量。通过正常抢券→Stream持久成单改变库存，再在同一会话重新读取，不伪造成功JSON。
+
+真实AI与工具脚本共用读取观察辅助，只旁路记录Vue实际消费的字节，保留原Promise/Response/Reader/read结果/cancel，不增reader/read或替换响应，有少量回调开销。没有保存带登录头的trace/HAR；原始证明与人工复核见 [本票总报告](evidence/2026-10-28-998b89e/GO-074/report.md)、[B端](evidence/2026-10-28-998b89e/GO-074/merchant/module-report.md)、[真实AI](evidence/2026-10-28-998b89e/GO-074/ai/report.md)、[工具](evidence/2026-10-28-998b89e/GO-074/tools/report.md)。这组为页面正确性差量，持续负载由GO-073在最终代码上另跑。
 
 ## Java 基线环境与启动（历史参考）
 

@@ -1,6 +1,6 @@
 # Windows 本地开发
 
-## 当前路线：Go（2026-10-26）
+## 当前路线：Go（2026-10-28）
 
 后续使用 Windows 原生 Go、Node.js、k6，MySQL 8.4 / Redis 7.4 和社区 Kafka 使用 Docker Desktop Linux 容器，不依赖旧虚拟机。保留 MySQL，不需要安装 PostgreSQL、pgvector 或 RabbitMQ。技术版本、任务和切换条件以 [Go 总方案](implementation-plan.md) 为准。
 
@@ -16,7 +16,7 @@ docker version
 docker compose version
 ~~~
 
-Kafka 用 Docker 单节点 KRaft 开发 profile，首次实现锁定镜像和 kafka-go 客户端兼容版本，并记录内外 listener、topic/group、健康检查及持久卷。这里尚未提供已实现的 Kafka 启动命令。
+Kafka使用固定 `apache/kafka:3.9.0` 单节点KRaft：`docker compose -f compose.go.yaml --profile kafka up -d --wait kafka`，宿主机配置 `KAFKA_BROKERS=127.0.0.1:9092`，容器内只读CLI连接 `localhost:9094`。可选ES8.19.23及首次离线重建见 [搜索启动](development.md#公开笔记搜索go-076)。先显式运行003—012版本迁移，再启动Go；当前能力/独立核验与未执行项以根 [STATUS](../STATUS.md) 为准，不沿用下方Java环境历史。
 
 ## Java 基线运行与环境历史
 

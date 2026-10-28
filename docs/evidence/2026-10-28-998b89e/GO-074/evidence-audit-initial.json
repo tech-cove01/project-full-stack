@@ -1,0 +1,35 @@
+{
+  "recordedAt": "2026-10-28T12:21:20.698045+00:00",
+  "implementationHead": "2811dc6f89fc7405a4f72c7f4bb102fa76d8bfed",
+  "passed": false,
+  "jsonParsed": 25,
+  "localLinks": 110,
+  "textFilesScanned": 77,
+  "traceOrHarFiles": [],
+  "checks": {
+    "merchant/round-3.json": {
+      "passed": true,
+      "checks": 34,
+      "cleanup": true
+    },
+    "ai/round-2/result.json": {
+      "passed": true,
+      "checks": 35,
+      "cleanup": true
+    },
+    "tools/round-1.json": {
+      "passed": true,
+      "checks": 23,
+      "cleanup": true
+    }
+  },
+  "providerAttempts": 12,
+  "knownUsageTokens": 1055,
+  "unknownUsageAttemptIDs": [
+    10
+  ],
+  "errors": [
+    "Broken link report.md evidence-audit.json"
+  ],
+  "limits": "JSON/link/credential and phone-pattern checks plus explicit result/ledger consistency; no claim that finite scans prove absence of every secret. Screenshots reviewed separately."
+}

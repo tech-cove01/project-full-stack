@@ -1,0 +1,25 @@
+=== RUN   TestIntegrationProjectionRepository
+=== RUN   TestIntegrationProjectionRepository/follow_relation_versions_survive_reordering_duplicates_and_author_shared_partition
+=== RUN   TestIntegrationProjectionRepository/concurrent_first_relation_and_same_receipt_apply_atomically
+    repository_integration_test.go:180: concurrent same receipt was not idempotent (mysql code 1213)
+=== RUN   TestIntegrationProjectionRepository/same_event_id_conflicting_state_never_overwrites_effect_or_receipt
+=== RUN   TestIntegrationProjectionRepository/known_irrelevant_events_have_independent_ignored_receipts_unknowns_have_none
+=== RUN   TestIntegrationProjectionRepository/note_catalog_uses_db_author_and_time_while_versions_never_go_backwards
+    repository_integration_test.go:239: cannot inspect note receipt hash
+=== RUN   TestIntegrationProjectionRepository/missing_unpublished_future_or_foreign_note_fact_rolls_back_receipt
+=== RUN   TestIntegrationProjectionRepository/projection_or_receipt_failure_rolls_back_both_sides_and_outer_transaction_controls_replay
+=== RUN   TestIntegrationProjectionRepository/bootstrap_same_version_accepts_only_matching_state_author_and_time
+=== RUN   TestIntegrationProjectionRepository/apply_waits_for_rebuild_control_row_and_does_not_interleave_effects
+--- FAIL: TestIntegrationProjectionRepository (3.14s)
+    --- PASS: TestIntegrationProjectionRepository/follow_relation_versions_survive_reordering_duplicates_and_author_shared_partition (0.18s)
+    --- FAIL: TestIntegrationProjectionRepository/concurrent_first_relation_and_same_receipt_apply_atomically (0.61s)
+    --- PASS: TestIntegrationProjectionRepository/same_event_id_conflicting_state_never_overwrites_effect_or_receipt (0.05s)
+    --- PASS: TestIntegrationProjectionRepository/known_irrelevant_events_have_independent_ignored_receipts_unknowns_have_none (0.21s)
+    --- FAIL: TestIntegrationProjectionRepository/note_catalog_uses_db_author_and_time_while_versions_never_go_backwards (0.35s)
+    --- PASS: TestIntegrationProjectionRepository/missing_unpublished_future_or_foreign_note_fact_rolls_back_receipt (0.19s)
+    --- PASS: TestIntegrationProjectionRepository/projection_or_receipt_failure_rolls_back_both_sides_and_outer_transaction_controls_replay (0.07s)
+    --- PASS: TestIntegrationProjectionRepository/bootstrap_same_version_accepts_only_matching_state_author_and_time (0.36s)
+    --- PASS: TestIntegrationProjectionRepository/apply_waits_for_rebuild_control_row_and_does_not_interleave_effects (0.08s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/communityprojection	7.534s
+FAIL

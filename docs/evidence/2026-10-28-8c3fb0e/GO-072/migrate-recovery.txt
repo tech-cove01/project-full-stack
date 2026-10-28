@@ -1,0 +1,9 @@
+skip  003-trade
+skip  004-ai
+skip  005-order-review
+skip  006-community
+skip  007-feed-index
+skip  008-ai-version-title
+skip  009-community-projections
+apply 010-community-consumer-recovery
+migrations applied

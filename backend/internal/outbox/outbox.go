@@ -109,7 +109,9 @@ func (repository *Repository) ClaimActivity(ctx context.Context) (*Event, error)
 // ClaimOrder claims one order transition for the compensation worker. The two
 // event families use separate claims so neither worker can take the other's rows.
 func (repository *Repository) ClaimOrder(ctx context.Context) (*Event, error) {
-	return repository.claim(ctx, "ORDER", []string{"ORDER_CHANGED"})
+	return repository.claimWhere(ctx,
+		`((BINARY aggregate_type=? AND BINARY event_type=?) OR (BINARY aggregate_type=? AND BINARY event_type=?))`,
+		[]any{"ORDER", "ORDER_CHANGED", "RESERVATION", "RESERVATION_REJECTED"})
 }
 
 // claim takes a 30 s lease and increments the attempts fence in one statement, so
@@ -124,13 +126,16 @@ func (repository *Repository) claim(ctx context.Context, aggregate string, event
 	for _, eventType := range eventTypes {
 		args = append(args, eventType)
 	}
+	return repository.claimWhere(ctx, "BINARY aggregate_type = ? AND BINARY event_type IN ("+placeholders+")", args)
+}
+
+func (repository *Repository) claimWhere(ctx context.Context, scope string, args []any) (*Event, error) {
 	var claimed *Event
 	err := repository.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var rows []Event
 		if err := tx.Raw(`SELECT id, event_id, aggregate_type, aggregate_id,
 			aggregate_version, event_type, payload, attempts FROM tb_outbox
-			WHERE BINARY aggregate_type = ?
-			  AND BINARY event_type IN (`+placeholders+`)
+			WHERE (`+scope+`)
 			  AND ((delivery_status = 'PENDING' AND next_attempt_at <= NOW(3))
 			    OR (delivery_status = 'PROCESSING' AND lease_until < NOW(3)))
 			ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`, args...).Scan(&rows).Error; err != nil {

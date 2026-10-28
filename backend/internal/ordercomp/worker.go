@@ -96,12 +96,21 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 // Apply is idempotent per event id. A payment event carries stockRestore=0 and
 // only marks the outbox row done; cancel/refund events restore one unit.
 func (worker *Worker) Apply(ctx context.Context, event outbox.Event) error {
-	parsed, err := parse(event.Payload)
+	parsed, err := parseEvent(event)
 	if err != nil {
 		return worker.repo.NeedsReview(ctx, event, err)
 	}
 	if parsed.StockRestore == "0" {
 		return worker.repo.Done(ctx, event)
+	}
+	if event.AggregateType == "RESERVATION" {
+		var exists bool
+		if err := worker.db.WithContext(ctx).Raw("SELECT EXISTS(SELECT 1 FROM tb_voucher_order WHERE id=?)", parsed.OrderID).Scan(&exists).Error; err != nil {
+			return worker.repo.Retry(ctx, event, err)
+		}
+		if exists {
+			return worker.repo.NeedsReview(ctx, event, errors.New("rejected reservation has a committed order"))
+		}
 	}
 	maxStock, err := worker.totalStock(ctx, parsed.VoucherID)
 	if err != nil {
@@ -193,6 +202,40 @@ func parse(raw json.RawMessage) (payload, error) {
 		return payload{}, errPayload
 	}
 	return parsed, nil
+}
+
+func parseEvent(event outbox.Event) (payload, error) {
+	if event.AggregateType == "ORDER" && event.EventType == "ORDER_CHANGED" {
+		p, err := parse(event.Payload)
+		if err != nil || p.OrderID != event.AggregateID {
+			return payload{}, errPayload
+		}
+		return p, nil
+	}
+	if event.AggregateType != "RESERVATION" || event.EventType != "RESERVATION_REJECTED" {
+		return payload{}, errPayload
+	}
+	var rejection struct {
+		OrderID         string `json:"orderId"`
+		UserID          string `json:"userId"`
+		VoucherID       string `json:"voucherId"`
+		StockDelta      int    `json:"stockDelta"`
+		ReleasePurchase bool   `json:"releasePurchase"`
+		Reason          string `json:"reason"`
+	}
+	if json.Unmarshal(event.Payload, &rejection) != nil || rejection.OrderID != event.AggregateID || event.EventID != "RESERVED:"+event.AggregateID+":REJECTED" || rejection.StockDelta != 1 || rejection.Reason == "" {
+		return payload{}, errPayload
+	}
+	for _, id := range []string{rejection.OrderID, rejection.UserID, rejection.VoucherID} {
+		if !canonical(id) {
+			return payload{}, errPayload
+		}
+	}
+	p := payload{OrderID: rejection.OrderID, UserID: rejection.UserID, VoucherID: rejection.VoucherID, StockRestore: "1", ReleaseEligibility: "false"}
+	if rejection.ReleasePurchase {
+		p.ReleaseEligibility = "true"
+	}
+	return p, nil
 }
 
 func canonical(value string) bool {

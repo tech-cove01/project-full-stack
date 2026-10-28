@@ -3,9 +3,11 @@ package activity
 import (
 	"context"
 	"database/sql"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 )
 
@@ -66,7 +68,26 @@ func (service *Service) Reconcile(ctx context.Context, userID, activityID string
 		if activity.PublishStatus != "ACTIVE" {
 			return ErrNotActive
 		}
-		closedVersion, err := nextVersion(activity.PublishVersion)
+		// A previous attempt may have rewritten Redis and then rolled back the
+		// database audit/outbox. Fence above both versions; never rewind Redis
+		// or permanently strand the activity behind that prepared generation.
+		baseVersion := activity.PublishVersion
+		if service.redis != nil {
+			value, readErr := service.redis.HGet(ctx, "seckill:gate:"+activityID, "version").Result()
+			if readErr != nil && readErr != redis.Nil {
+				return readErr
+			}
+			if readErr == nil {
+				observed, parseErr := strconv.Atoi(value)
+				if parseErr != nil || observed < 1 || observed > 2147483647 {
+					return ErrUnsafe
+				}
+				if observed > baseVersion {
+					baseVersion = observed
+				}
+			}
+		}
+		closedVersion, err := nextVersion(baseVersion)
 		if err != nil {
 			return err
 		}
@@ -83,7 +104,10 @@ func (service *Service) Reconcile(ctx context.Context, userID, activityID string
 		if len(blockers) > 0 {
 			return blockedError{reason: strings.Join(blockers, ",")}
 		}
-		target := activity.PublishVersion + 2
+		target, err := nextVersion(closedVersion)
+		if err != nil {
+			return err
+		}
 		if err = service.gate.Reconcile(ctx, activityID, target, activity.Stock,
 			activity.BeginTime, activity.EndTime); err != nil {
 			return err
@@ -135,7 +159,7 @@ func (service *Service) blockers(ctx context.Context, tx *gorm.DB, activityID st
 	var outboxIDs []uint64
 	if err = tx.WithContext(ctx).Raw(`SELECT id FROM tb_outbox
 		WHERE delivery_status IN ('PENDING','PROCESSING','NEEDS_REVIEW')
-		  AND aggregate_type='ORDER'
+		  AND aggregate_type IN ('ORDER','RESERVATION')
 		  AND JSON_UNQUOTE(JSON_EXTRACT(payload,'$.voucherId'))=?
 		FOR UPDATE`, activityID).Scan(&outboxIDs).Error; err != nil {
 		return nil, err
@@ -149,23 +173,44 @@ func (service *Service) blockers(ctx context.Context, tx *gorm.DB, activityID st
 // inflight returns 0 for an idle stream, 1 for pending entries and 2 for
 // delivered-but-unread entries. A missing stream means nothing was ever accepted.
 func (service *Service) inflight(ctx context.Context) (int, error) {
-	if service.redis == nil {
-		return 0, nil
+	return streamInflight(ctx, service.redis, "stream.orders")
+}
+
+func streamInflight(ctx context.Context, client *redis.Client, stream string) (int, error) {
+	if client == nil {
+		return 0, ErrUnsafe
 	}
 	bounded, cancel := context.WithTimeout(ctx, time.Second)
 	defer cancel()
-	groups, err := service.redis.XInfoGroups(bounded, "stream.orders").Result()
+	kind, err := client.Type(bounded, stream).Result()
 	if err != nil {
-		if strings.Contains(err.Error(), "NOGROUP") {
-			return 0, nil
-		}
 		return 0, err
+	}
+	if kind == "none" {
+		return 0, nil
+	}
+	if kind != "stream" {
+		return 0, ErrUnsafe
+	}
+	groups, err := client.XInfoGroups(bounded, stream).Result()
+	if err != nil {
+		return 0, err
+	}
+	if len(groups) == 0 {
+		length, err := client.XLen(bounded, stream).Result()
+		if err != nil {
+			return 0, err
+		}
+		if length > 0 {
+			return 2, nil
+		}
+		return 0, nil
 	}
 	for _, group := range groups {
 		if group.Pending > 0 {
 			return 1, nil
 		}
-		if group.Lag > 0 {
+		if group.Lag != 0 {
 			return 2, nil
 		}
 	}

@@ -49,19 +49,23 @@ type View struct {
 // ListItem omits the body: a merchant list is a navigation surface, and the
 // full text is only needed when editing one document.
 type ListItem struct {
-	ID               string `json:"id"`
-	Title            string `json:"title"`
-	Status           string `json:"status"`
-	PublishedVersion *int   `json:"publishedVersion,omitempty"`
-	Epoch            int64  `json:"epoch"`
-	Disabled         bool   `json:"disabled"`
-	UpdateTime       string `json:"updateTime"`
+	ID               string  `json:"id"`
+	Body             string  `json:"body"`
+	Scope            string  `json:"scope"`
+	ShopID           *string `json:"shopId,omitempty"`
+	Title            string  `json:"title"`
+	Status           string  `json:"status"`
+	PublishedVersion *int    `json:"publishedVersion,omitempty"`
+	Epoch            int64   `json:"epoch"`
+	Disabled         bool    `json:"disabled"`
+	UpdateTime       string  `json:"updateTime"`
 }
 
 // PublicView is what a user-facing citation can quote: one immutable published
 // version with the epoch needed to detect a later replacement.
 type PublicView struct {
 	ID         string `json:"id"`
+	DocumentID string `json:"documentId"`
 	Title      string `json:"title"`
 	Body       string `json:"body"`
 	Version    int    `json:"version"`
@@ -116,7 +120,7 @@ func positive(value string) (uint64, error) {
 
 func cleanText(value string, max int) (string, error) {
 	value = strings.TrimSpace(value)
-	if !utf8.ValidString(value) || strings.ContainsRune(value, 0) || utf8.RuneCountInString(value) > max || value == "" {
+	if !utf8.ValidString(value) || strings.ContainsRune(value, 0) || utf8.RuneCountInString(value) > max || value == "" || ai.SensitiveInput(value) {
 		return "", ErrInput
 	}
 	return value, nil
@@ -160,14 +164,14 @@ func (service *Service) authorize(ctx context.Context, db *gorm.DB, userID strin
 	if row.Scope != scopeShop || row.ShopID == nil {
 		return documentRow{}, merchant.Membership{}, ErrForbidden
 	}
-	membership, err := merchant.NewAccess(db).RequireManager(ctx, userID, decimal(*row.ShopID))
+	merchantID, err := service.manageShop(ctx, db, userID, decimal(*row.ShopID))
 	if err != nil {
 		if errors.Is(err, merchant.ErrForbidden) {
 			return documentRow{}, merchant.Membership{}, ErrForbidden
 		}
 		return documentRow{}, merchant.Membership{}, err
 	}
-	return row, membership, nil
+	return row, merchant.Membership{MerchantID: merchantID}, nil
 }
 
 func (service *Service) CreateDraft(ctx context.Context, userID, shopID, title, body string) (View, error) {
@@ -195,6 +199,9 @@ func (service *Service) CreateDraft(ctx context.Context, userID, shopID, title, 
 	}
 	var id uint64
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if _, err := service.manageShop(ctx, tx, userID, shopID); err != nil {
+			return err
+		}
 		result := tx.Exec(`INSERT INTO tb_ai_document
 			(scope,shop_id,title,body,status,epoch,created_by,updated_by)
 			VALUES (?,?,?,?,'DRAFT',0,?,?)`, scopeShop, shop, title, body, user, user)
@@ -232,12 +239,15 @@ func (service *Service) UpdateDraft(ctx context.Context, userID, documentID, tit
 		return View{}, err
 	}
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		row, _, err := service.authorize(ctx, tx, userID, id)
+		row, membership, err := service.authorize(ctx, tx, userID, id)
 		if err != nil {
 			return err
 		}
 		if row.Disabled {
 			return ErrConflict
+		}
+		if row.Title == title && row.Body == body {
+			return nil
 		}
 		result := tx.Exec(`UPDATE tb_ai_document SET title=?,body=?,updated_by=? WHERE id=?`,
 			title, body, user, id)
@@ -247,7 +257,7 @@ func (service *Service) UpdateDraft(ctx context.Context, userID, documentID, tit
 		if result.RowsAffected != 1 {
 			return ErrUnsafe
 		}
-		return nil
+		return audit(ctx, tx, user, id, decimal(*row.ShopID), membership.MerchantID, "KNOWLEDGE_UPDATE", 0)
 	}, nil)
 	if err != nil {
 		return View{}, err
@@ -265,7 +275,7 @@ func (service *Service) Disable(ctx context.Context, userID, documentID string) 
 		return View{}, err
 	}
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		row, _, err := service.authorize(ctx, tx, userID, id)
+		row, membership, err := service.authorize(ctx, tx, userID, id)
 		if err != nil {
 			return err
 		}
@@ -280,7 +290,11 @@ func (service *Service) Disable(ctx context.Context, userID, documentID string) 
 		if result.RowsAffected != 1 {
 			return ErrUnsafe
 		}
-		return nil
+		version := 0
+		if row.PublishedVersion != nil {
+			version = *row.PublishedVersion
+		}
+		return audit(ctx, tx, user, id, decimal(*row.ShopID), membership.MerchantID, "KNOWLEDGE_DISABLE", version)
 	}, nil)
 	if err != nil {
 		return View{}, err
@@ -293,21 +307,32 @@ func (service *Service) List(ctx context.Context, userID, shopID string) ([]List
 	if err != nil {
 		return nil, err
 	}
-	if _, err = merchant.NewAccess(service.db).RequireManager(ctx, userID, decimal(shop)); err != nil {
+	membership, err := merchant.NewAccess(service.db).MembershipForShop(ctx, userID, decimal(shop))
+	if err != nil {
 		if errors.Is(err, merchant.ErrForbidden) {
 			return nil, ErrForbidden
 		}
 		return nil, err
 	}
 	rows := make([]documentRow, 0)
-	if err = service.db.WithContext(ctx).Raw("SELECT "+documentColumns+
-		" FROM tb_ai_document WHERE scope=? AND shop_id=? ORDER BY id DESC",
-		scopeShop, shop).Scan(&rows).Error; err != nil {
+	query := "SELECT " + documentColumns + " FROM tb_ai_document WHERE scope=? AND shop_id=? ORDER BY id DESC"
+	if !membership.IsManager() {
+		query = `SELECT d.id,d.scope,d.shop_id,v.title,v.body,d.status,d.published_version,d.epoch,d.disabled,d.update_time
+ FROM tb_ai_document d JOIN tb_ai_document_version v ON v.document_id=d.id AND v.version=d.published_version
+ WHERE d.scope=? AND d.shop_id=? AND d.disabled=0 AND d.status='PUBLISHED'
+ AND v.status='READY' AND v.epoch=d.epoch AND v.title IS NOT NULL ORDER BY d.id DESC`
+	}
+	if err = service.db.WithContext(ctx).Raw(query, scopeShop, shop).Scan(&rows).Error; err != nil {
 		return nil, err
 	}
 	items := make([]ListItem, 0, len(rows))
 	for _, row := range rows {
-		items = append(items, ListItem{ID: decimal(row.ID), Title: row.Title, Status: row.Status,
+		var shopText *string
+		if row.ShopID != nil {
+			value := decimal(*row.ShopID)
+			shopText = &value
+		}
+		items = append(items, ListItem{ID: decimal(row.ID), Body: row.Body, Scope: row.Scope, ShopID: shopText, Title: row.Title, Status: row.Status,
 			PublishedVersion: row.PublishedVersion, Epoch: row.Epoch, Disabled: row.Disabled,
 			UpdateTime: row.UpdateTime.In(zone()).Format("2006-01-02 15:04:05")})
 	}
@@ -335,19 +360,19 @@ func (service *Service) Public(ctx context.Context, documentID string, version *
 		target = "?"
 		args = append([]any{*version}, args...)
 	}
-	if err = service.db.WithContext(ctx).Raw(`SELECT d.id,d.title,v.version AS published_version,
+	if err = service.db.WithContext(ctx).Raw(`SELECT d.id,v.title,v.version AS published_version,
 		v.epoch,v.body,v.create_time
 		FROM tb_ai_document d
 		JOIN tb_ai_document_version v ON v.document_id=d.id AND v.version=`+target+`
-		WHERE d.id=? AND d.disabled=0 AND d.status='PUBLISHED' AND d.published_version IS NOT NULL
-		  AND v.status='READY'`, args...).Scan(&rows).Error; err != nil {
+		WHERE d.id=? AND d.disabled=0 AND d.status='PUBLISHED' AND d.published_version=v.version
+		  AND d.epoch=v.epoch AND d.scope IN ('PUBLIC','SHOP_PUBLIC') AND v.status='READY' AND v.title IS NOT NULL`, args...).Scan(&rows).Error; err != nil {
 		return PublicView{}, err
 	}
 	if len(rows) != 1 {
 		return PublicView{}, ErrNotFound
 	}
 	row := rows[0]
-	return PublicView{ID: decimal(row.ID), Title: row.Title, Body: row.Body,
+	return PublicView{ID: decimal(row.ID), DocumentID: decimal(row.ID), Title: row.Title, Body: row.Body,
 		Version: row.PublishedVersion, Epoch: row.Epoch,
 		UpdateTime: row.CreateTime.In(zone()).Format("2006-01-02 15:04:05")}, nil
 }

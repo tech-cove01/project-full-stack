@@ -164,6 +164,10 @@ func decodeBody(c *gin.Context, target any) error {
 	if err := decoder.Decode(target); err != nil {
 		return ErrInput
 	}
+	var extra any
+	if err := decoder.Decode(&extra); !errors.Is(err, io.EOF) {
+		return ErrInput
+	}
 	return nil
 }
 

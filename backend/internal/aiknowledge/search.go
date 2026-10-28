@@ -6,6 +6,8 @@ import (
 	"math"
 	"sort"
 	"strings"
+
+	"github.com/cityloop/fullstack-go/internal/ai"
 )
 
 // Hit is one retrieved chunk of the currently published version. Version and
@@ -29,7 +31,7 @@ type Hit struct {
 func (service *Service) Search(ctx context.Context, query string, shopID *uint64,
 	limit int, minScore float64) ([]Hit, error) {
 	query = strings.TrimSpace(query)
-	if query == "" {
+	if query == "" || ai.SensitiveInput(query) {
 		return nil, ErrInput
 	}
 	if limit <= 0 || limit > 20 {
@@ -42,16 +44,12 @@ func (service *Service) Search(ctx context.Context, query string, shopID *uint64
 	if len(vectors) != 1 {
 		return nil, ErrUnsafe
 	}
-	where := `WHERE d.disabled=0 AND d.status='PUBLISHED' AND d.published_version=c.version
-		AND c.embedding_model=? AND c.embedding_dimension=?`
+	where := `WHERE d.disabled=0 AND d.status='PUBLISHED' AND d.published_version=c.version AND d.epoch=c.epoch
+		AND v.status='READY' AND v.epoch=c.epoch AND v.title IS NOT NULL AND c.embedding_model=? AND c.embedding_dimension=?`
 	args := []any{service.provider.Model(), service.provider.Dimension()}
-	if shopID == nil {
-		where += " AND d.scope<>? "
-		args = append(args, scopeShop)
-	} else {
-		where += " AND (d.scope<>? OR d.shop_id=?)"
-		args = append(args, scopeShop, *shopID)
-	}
+	scope, scopeArgs := publicScope(shopID)
+	where += " AND " + scope
+	args = append(args, scopeArgs...)
 	var rows []struct {
 		ChunkID    uint64
 		DocumentID uint64
@@ -64,9 +62,13 @@ func (service *Service) Search(ctx context.Context, query string, shopID *uint64
 		ShopID     *uint64
 	}
 	if err = service.db.WithContext(ctx).Raw(`SELECT c.id AS chunk_id,c.document_id,c.version,c.epoch,
-		c.content,c.embedding,d.title,d.scope,d.shop_id
-		FROM tb_ai_chunk c JOIN tb_ai_document d ON d.id=c.document_id `+where, args...).Scan(&rows).Error; err != nil {
+		c.content,c.embedding,v.title,d.scope,d.shop_id
+		FROM tb_ai_chunk c JOIN tb_ai_document d ON d.id=c.document_id
+		JOIN tb_ai_document_version v ON v.document_id=c.document_id AND v.version=c.version `+where+` LIMIT 2001`, args...).Scan(&rows).Error; err != nil {
 		return nil, err
+	}
+	if len(rows) > maxChunks {
+		return nil, ErrUnsafe
 	}
 	hits := make([]Hit, 0, len(rows))
 	for _, row := range rows {

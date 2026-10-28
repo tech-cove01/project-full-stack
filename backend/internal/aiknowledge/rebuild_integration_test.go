@@ -53,6 +53,7 @@ func TestIntegrationKnowledgeRebuild(t *testing.T) {
 	t.Cleanup(func() {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
+		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_audit_log WHERE merchant_id=?", merchant).Error
 		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_ai_chunk WHERE document_id=?", document).Error
 		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_ai_document_version WHERE document_id=?", document).Error
 		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_ai_document WHERE id=?", document).Error
@@ -157,8 +158,8 @@ func insertDocument(t *testing.T, resources *database.Resources, shop uint64, ti
 func insertVersion(t *testing.T, resources *database.Resources, document uint64, body string) {
 	t.Helper()
 	if err := resources.ORM.Exec(`INSERT INTO tb_ai_document_version
-		(document_id,version,epoch,body,content_hash,status,embedding_model,embedding_dimension)
-		VALUES (?,1,1,?,?,'READY','old-model',1)`, document, body, contentHash(body)).Error; err != nil {
+		(document_id,version,epoch,title,body,content_hash,status,embedding_model,embedding_dimension)
+		SELECT ?,1,1,title,?,?,'READY','old-model',1 FROM tb_ai_document WHERE id=?`, document, body, contentHash(body), document).Error; err != nil {
 		t.Fatal(err)
 	}
 }

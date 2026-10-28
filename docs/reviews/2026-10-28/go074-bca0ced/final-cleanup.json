@@ -1,0 +1,402 @@
+{
+  "passed": true,
+  "project": "project-full-stack-review074",
+  "recorded_at_utc": "2026-10-28T14:16:27Z",
+  "before": [
+    {
+      "name": "/project-full-stack-review074-mysql-1",
+      "image": "mysql:8.4",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 82667,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T14:00:55.617836937Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T14:16:14.140040501Z",
+              "End": "2026-10-28T14:16:14.206315914Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:17.20713222Z",
+              "End": "2026-10-28T14:16:17.269313311Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:20.270686689Z",
+              "End": "2026-10-28T14:16:20.343878255Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:23.345267867Z",
+              "End": "2026-10-28T14:16:23.410043044Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:26.4108922Z",
+              "End": "2026-10-28T14:16:26.473353488Z",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review074",
+      "service": "mysql",
+      "volumes": [
+        "project-full-stack-review074_go-mysql-data"
+      ],
+      "port_bindings": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3360"
+          }
+        ]
+      }
+    },
+    {
+      "name": "/project-full-stack-review074-redis-1",
+      "image": "redis:7.4-alpine",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 82634,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T14:00:55.579249997Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T14:16:13.456088665Z",
+              "End": "2026-10-28T14:16:13.499997695Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:16.500932005Z",
+              "End": "2026-10-28T14:16:16.541528147Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:19.542089105Z",
+              "End": "2026-10-28T14:16:19.584317199Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:22.585559216Z",
+              "End": "2026-10-28T14:16:22.626034639Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:25.627068281Z",
+              "End": "2026-10-28T14:16:25.667354406Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review074",
+      "service": "redis",
+      "volumes": [
+        "project-full-stack-review074_go-redis-data"
+      ],
+      "port_bindings": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6430"
+          }
+        ]
+      }
+    }
+  ],
+  "sql_counts": {
+    "owned_users": 0,
+    "owned_shops": 0,
+    "owned_merchants": 0,
+    "owned_orders": 0,
+    "owned_vouchers": 0,
+    "owned_documents": 0,
+    "trade_outbox_not_done": 0,
+    "community_outbox_not_done": 0,
+    "order_review_open": 0,
+    "consumer_parked": 0
+  },
+  "redis_key_counts": {
+    "login:token:*": 0,
+    "login:code:*": 0,
+    "ai:*": 0
+  },
+  "stream_length": 0,
+  "stream_pending": [
+    0,
+    null,
+    null,
+    null
+  ],
+  "free_ports": [
+    8130,
+    5230
+  ],
+  "after": [
+    {
+      "name": "/project-full-stack-review074-mysql-1",
+      "image": "mysql:8.4",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T14:00:55.617836937Z",
+        "FinishedAt": "2026-10-28T14:16:29.862031642Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 1,
+          "Log": [
+            {
+              "Start": "2026-10-28T14:16:17.20713222Z",
+              "End": "2026-10-28T14:16:17.269313311Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:20.270686689Z",
+              "End": "2026-10-28T14:16:20.343878255Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:23.345267867Z",
+              "End": "2026-10-28T14:16:23.410043044Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:26.4108922Z",
+              "End": "2026-10-28T14:16:26.473353488Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T14:16:29.473851484Z",
+              "End": "2026-10-28T14:16:29.533200179Z",
+              "ExitCode": 1,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review074",
+      "service": "mysql",
+      "volumes": [
+        "project-full-stack-review074_go-mysql-data"
+      ],
+      "port_bindings": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3360"
+          }
+        ]
+      }
+    },
+    {
+      "name": "/project-full-stack-review074-redis-1",
+      "image": "redis:7.4-alpine",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T14:00:55.579249997Z",
+        "FinishedAt": "2026-10-28T14:16:28.404828717Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T14:16:13.456088665Z",
+              "End": "2026-10-28T14:16:13.499997695Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:16.500932005Z",
+              "End": "2026-10-28T14:16:16.541528147Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:19.542089105Z",
+              "End": "2026-10-28T14:16:19.584317199Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:22.585559216Z",
+              "End": "2026-10-28T14:16:22.626034639Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T14:16:25.627068281Z",
+              "End": "2026-10-28T14:16:25.667354406Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review074",
+      "service": "redis",
+      "volumes": [
+        "project-full-stack-review074_go-redis-data"
+      ],
+      "port_bindings": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6430"
+          }
+        ]
+      }
+    }
+  ],
+  "volumes_retained": true,
+  "commands": [
+    {
+      "command": [
+        "D:/MySQL/Install/bin/mysql.exe",
+        "--protocol=TCP",
+        "--host=127.0.0.1",
+        "--port=3360",
+        "--user=fullstack",
+        "--batch",
+        "--skip-column-names",
+        "project_full_stack_go"
+      ],
+      "exit_code": 0,
+      "stdout": "owned_users\t0\nowned_shops\t0\nowned_merchants\t0\nowned_orders\t0\nowned_vouchers\t0\nowned_documents\t0\ntrade_outbox_not_done\t0\ncommunity_outbox_not_done\t0\norder_review_open\t0\nconsumer_parked\t0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review074-redis-1",
+        "redis-cli",
+        "--scan",
+        "--pattern",
+        "login:token:*"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review074-redis-1",
+        "redis-cli",
+        "--scan",
+        "--pattern",
+        "login:code:*"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review074-redis-1",
+        "redis-cli",
+        "--scan",
+        "--pattern",
+        "ai:*"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review074-redis-1",
+        "redis-cli",
+        "XLEN",
+        "stream.orders"
+      ],
+      "exit_code": 0,
+      "stdout": "0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review074-redis-1",
+        "redis-cli",
+        "--json",
+        "XPENDING",
+        "stream.orders",
+        "g1"
+      ],
+      "exit_code": 0,
+      "stdout": "[0,null,null,null]\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "stop",
+        "--timeout",
+        "20",
+        "project-full-stack-review074-mysql-1",
+        "project-full-stack-review074-redis-1"
+      ],
+      "exit_code": 0,
+      "stdout": "project-full-stack-review074-mysql-1\nproject-full-stack-review074-redis-1\n",
+      "stderr": ""
+    }
+  ]
+}

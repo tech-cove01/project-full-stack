@@ -1,0 +1,41 @@
+{
+  "task": "GO-074-source-scope-stub",
+  "passed": true,
+  "checks": [
+    "actual API is ready in explicitly non-paid stub mode",
+    "actual authenticated SSE finishes through Vue reader",
+    "real SSE contains versioned SHOP_PUBLIC source and live detail route",
+    "real SSE contains versioned PUBLIC source and live detail route",
+    "actual SHOP_PUBLIC card opens current version and correct scope/body",
+    "actual PUBLIC card opens current version and correct scope/body"
+  ],
+  "cleanup": true,
+  "provider": "stub; UI/source protocol only, no model quality claim",
+  "fixture": {
+    "users": [
+      "9007207980496593",
+      "9007207980496594"
+    ],
+    "merchant": "9007207980496595",
+    "shop": "9007207980496596",
+    "documents": [
+      "19",
+      "20"
+    ]
+  },
+  "sources": [
+    {
+      "documentId": "19",
+      "scope": "SHOP_PUBLIC",
+      "version": 1,
+      "href": "/ai/knowledge/19?version=1"
+    },
+    {
+      "documentId": "20",
+      "scope": "PUBLIC",
+      "version": 1,
+      "href": "/ai/knowledge/20?version=1"
+    }
+  ],
+  "recordedAt": "2026-10-28T14:12:16.238Z"
+}

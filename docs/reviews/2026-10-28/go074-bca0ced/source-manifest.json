@@ -1,0 +1,93 @@
+{
+  "delivery_commit": "bca0cedea475430b02ab991e1df30ef3c297c1b9",
+  "integrated_function_commit": "ad49718361605cf793d936cb85721398f47fb245",
+  "review_function_commit": "03d7a547b436b63adaedff3e793b699462f6dd54",
+  "files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "1f5c692b1e46502e2661af1fd654fb7ae5fdc0db446384382c6498a48a50852d"
+    },
+    {
+      "path": "compose.go.yaml",
+      "sha256": "6c6d90f2b8c19cba5a221c3827b5472fc3c3a1942b185fbcc6f9a8cba4770b03"
+    },
+    {
+      "path": "backend/internal/aitool/tool.go",
+      "sha256": "0b219964e82ef8c681fd413ab831f1c6c4309aed0cf4150e074bb7e3fab610ae"
+    },
+    {
+      "path": "backend/internal/aitool/review_integration_test.go",
+      "sha256": "7aef01761d1f785f5311cfda38abe94c5cf50158af999faed049d6b582b64a6c"
+    },
+    {
+      "path": "backend/internal/aichat/assistant.go",
+      "sha256": "a8ab1f1330001de39824f2144ce85e012aa08c93245fb9284571c25c87323ede"
+    },
+    {
+      "path": "backend/internal/aichat/turn_integration_test.go",
+      "sha256": "c2446234137280bd7043a384b0e3637047e69119802e3289abaeb8acb9f9494c"
+    },
+    {
+      "path": "backend/internal/aiknowledge/service.go",
+      "sha256": "c2254e0636300dd3da41799868a1e06099ce4ed1bee9295804ad1969849ed187"
+    },
+    {
+      "path": "backend/internal/aiknowledge/review_integration_test.go",
+      "sha256": "f02af56e6e4e18ec56c39d2e0e210ae9a6519ed1a7a375f3392eeb68ed0cfba7"
+    },
+    {
+      "path": "frontend/src/App.vue",
+      "sha256": "a30222827526b565472e1e10a40d82a7a10b1695ba1072d91ec2fd9ad3ba213d"
+    },
+    {
+      "path": "frontend/src/views/NoteView.vue",
+      "sha256": "768109baace26810f0c73c26f9755841bf09288ff7c4c693acd65f563f8ae25c"
+    },
+    {
+      "path": "frontend/src/views/AssistantView.vue",
+      "sha256": "edece27b44a6ef74dfcb56f2eb8bc6ec32862e2b1394ad94ae1893dc4da8fc7e"
+    },
+    {
+      "path": "frontend/src/views/PublicKnowledgeView.vue",
+      "sha256": "a5401ed7190eb210f7148c0d694133b3bd5418fbc26a835bac87f673e15f9c35"
+    },
+    {
+      "path": "frontend/src/views/MerchantView.vue",
+      "sha256": "08b0cc73fce32aa2a1b57541c6a0f041fad37b896b5dd5a2004a5721bbdbc5de"
+    },
+    {
+      "path": "frontend/package-lock.json",
+      "sha256": "7ea6242b9382b41f2c5b6f6a958ff65bf3045a37c20f7387af89bee766f40385"
+    },
+    {
+      "path": "backend/go.mod",
+      "sha256": "574393eeb02a035641cf8532384ffc4756af1e6cd83914ccbb938b231aee9fe4"
+    },
+    {
+      "path": "backend/go.sum",
+      "sha256": "7f4e2fbc1ca6b4a315a65f45e8c61b85480f5caebfc1bf95c0263d7ea83b6b00"
+    },
+    {
+      "path": "scripts/go-merchant-orders-ui-smoke.mjs",
+      "sha256": "422ae8fce3e1b9d5866a083439ed7d0cef48598fcb87d19d55cdae48d0925315"
+    },
+    {
+      "path": "scripts/go-ai-tools-ui-smoke.mjs",
+      "sha256": "0f2803ee4d17916b60c99607e02cc2e7c3df78b659bdc782533b4383080ec028"
+    },
+    {
+      "path": "scripts/go-ai-provider-ui-smoke.mjs",
+      "sha256": "82879058c6ab86dc5f3e1abf43335cb818f54bbf0430bfc012cd03521c5f22d3"
+    },
+    {
+      "path": "scripts/lib/sse-reader-observer.mjs",
+      "sha256": "bef029c7a429e8148bfd2ab266b7edc96ac9f5c7e6d7d7621aed0eb4099bfe61"
+    }
+  ],
+  "binary": {
+    "name": "api-initial.exe",
+    "sha256": "c68dc7a36f0a6d1bba3affe1c31cc0abdc4fd12e923875e4affe6d850c599ddf",
+    "build_info": "D:\\妗岄潰\\The ALL\\agent\\project\\code\\.reviews\\go074-bca0ced\\api-initial.exe: go1.27.0\n\tpath\tgithub.com/cityloop/fullstack-go/cmd/api\n\tmod\tgithub.com/cityloop/fullstack-go\t(devel)\t\n\tdep\tfilippo.io/edwards25519\tv1.1.0\th1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=\n\tdep\tgithub.com/cespare/xxhash/v2\tv2.3.0\th1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=\n\tdep\tgithub.com/dgryski/go-rendezvous\tv0.0.0-20200823014737-9f7001d12a5f\th1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=\n\tdep\tgithub.com/gabriel-vasile/mimetype\tv1.4.8\th1:FfZ3gj38NjllZIeJAmMhr+qKL8Wu+nOoI3GqacKw1NM=\n\tdep\tgithub.com/gin-contrib/sse\tv1.1.0\th1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w=\n\tdep\tgithub.com/gin-gonic/gin\tv1.11.0\th1:OW/6PLjyusp2PPXtyxKHU0RbX6I/l28FTdDlae5ueWk=\n\tdep\tgithub.com/go-playground/locales\tv0.14.1\th1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=\n\tdep\tgithub.com/go-playground/universal-translator\tv0.18.1\th1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=\n\tdep\tgithub.com/go-playground/validator/v10\tv10.27.0\th1:w8+XrWVMhGkxOaaowyKH35gFydVHOvC0/uWoy2Fzwn4=\n\tdep\tgithub.com/go-sql-driver/mysql\tv1.8.1\th1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=\n\tdep\tgithub.com/goccy/go-yaml\tv1.18.0\th1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=\n\tdep\tgithub.com/jinzhu/inflection\tv1.0.0\th1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=\n\tdep\tgithub.com/jinzhu/now\tv1.1.5\th1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=\n\tdep\tgithub.com/klauspost/compress\tv1.15.9\th1:wKRjX6JRtDdrE9qwa4b/Cip7ACOshUI4smpCQanqjSY=\n\tdep\tgithub.com/leodido/go-urn\tv1.4.0\th1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.20\th1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=\n\tdep\tgithub.com/pelletier/go-toml/v2\tv2.2.4\th1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=\n\tdep\tgithub.com/pierrec/lz4/v4\tv4.1.15\th1:MO0/ucJhngq7299dKLwIMtgTfbkoSPF6AoMYDd8Q4q0=\n\tdep\tgithub.com/quic-go/qpack\tv0.5.1\th1:giqksBPnT/HDtZ6VhtFKgoLOWmlyo9Ei6u9PqzIMbhI=\n\tdep\tgithub.com/quic-go/quic-go\tv0.54.0\th1:6s1YB9QotYI6Ospeiguknbp2Znb/jZYjZLRXn9kMQBg=\n\tdep\tgithub.com/redis/go-redis/v9\tv9.17.0\th1:K6E+ZlYN95KSMmZeEQPbU/c++wfmEvfFB17yEAq/VhM=\n\tdep\tgithub.com/segmentio/kafka-go\tv0.4.47\th1:IqziR4pA3vrZq7YdRxaT3w1/5fvIH5qpCwstUanQQB0=\n\tdep\tgithub.com/ugorji/go/codec\tv1.3.0\th1:Qd2W2sQawAfG8XSvzwhBeoGq71zXOC/Q1E9y/wUcsUA=\n\tdep\tgolang.org/x/crypto\tv0.40.0\th1:r4x+VvoG5Fm+eJcxMaY8CQM7Lb0l1lsmjGBQ6s8BfKM=\n\tdep\tgolang.org/x/net\tv0.42.0\th1:jzkYrhi3YQWD6MLBJcsklgQsoAcw89EcZbJw8Z614hs=\n\tdep\tgolang.org/x/sys\tv0.35.0\th1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=\n\tdep\tgolang.org/x/text\tv0.27.0\th1:4fGWRpyh641NLlecmyl4LOe6yDdfaYNrGb2zdfo4JV4=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.9\th1:w2gp2mA27hUeUzj9Ex9FBjsBm40zfaDtEWow293U7Iw=\n\tdep\tgorm.io/driver/mysql\tv1.6.0\th1:eNbLmNTpPpTOVZi8MMxCi2aaIm0ZpInbORNXDwyLGvg=\n\tdep\tgorm.io/gorm\tv1.31.1\th1:7CA8FTFz/gRfgqgpeKIBcervUn3xSyPUmr6B2WXJ7kg=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=windows\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=bca0cedea475430b02ab991e1df30ef3c297c1b9\n\tbuild\tvcs.time=2026-10-28T12:25:49Z\n\tbuild\tvcs.modified=true\n"
+  },
+  "note": "API binary was built at delivery bca0ced with local review artifacts/UI changes (vcs.modified=true); no backend source changed in QA1/QA2/QA3. The current product files match integrated ad49718."
+}

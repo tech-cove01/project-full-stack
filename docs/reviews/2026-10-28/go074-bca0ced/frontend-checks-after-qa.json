@@ -1,0 +1,26 @@
+[
+  {
+    "name": "frontend-build-after-qa",
+    "command": [
+      "npm.cmd",
+      "--prefix",
+      "frontend",
+      "run",
+      "build"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 9.171
+  },
+  {
+    "name": "frontend-format-after-qa",
+    "command": [
+      "npm.cmd",
+      "--prefix",
+      "frontend",
+      "run",
+      "format:check"
+    ],
+    "exit_code": 1,
+    "elapsed_seconds": 2.41
+  }
+]

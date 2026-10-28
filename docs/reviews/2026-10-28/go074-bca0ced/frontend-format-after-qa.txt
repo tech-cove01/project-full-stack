@@ -1,0 +1,7 @@
+
+> project-full-stack-web@0.1.0 format:check
+> prettier --check src vite.config.ts tsconfig.json package.json index.html
+
+Checking formatting...
+[warn] src/App.vue
+[warn] Code style issues found in the above file. Run Prettier with --write to fix.

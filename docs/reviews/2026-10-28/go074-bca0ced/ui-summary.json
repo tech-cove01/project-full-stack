@@ -1,0 +1,49 @@
+{
+  "baseline": "bca0ced",
+  "applicationChanges": [
+    "frontend/src/App.vue (parent QA1 navigation plus scoped prettier)",
+    "frontend/src/views/NoteView.vue (QA2 compose loading reset)"
+  ],
+  "results": {
+    "merchant-initial.json": {
+      "passed": true,
+      "checks": 34,
+      "cleanup": true,
+      "sha256": "ed299ad3b936185956fcb8d12fa369f14c9f9e01c9d2157ca40022c0de85ee07"
+    },
+    "tools-initial.json": {
+      "passed": true,
+      "checks": 23,
+      "cleanup": true,
+      "sha256": "7493fb87c6238afc0058aeb88388a618d10a9a8cfe2d82b09a6d321ffceac933"
+    },
+    "note-nav-before-fix.json": {
+      "passed": false,
+      "checks": 2,
+      "cleanup": true,
+      "sha256": "9b4e1bf82a17cef0751b891239ff52f4b8278c9671c15f80d4840e78e23cbe4b"
+    },
+    "note-nav-after-fix.json": {
+      "passed": true,
+      "checks": 3,
+      "cleanup": true,
+      "sha256": "67724974f915d0c26ec0ec047b66496735aa1864e9666be4a8aad477580e88e1"
+    },
+    "source-scope-stub-initial.json": {
+      "passed": true,
+      "checks": 6,
+      "cleanup": true,
+      "sha256": "cf183819deb7c65118d4fb103ba16b671ccc18698f27c68aabeab0566da92921"
+    }
+  },
+  "localScripts": {
+    "note-nav.mjs": {
+      "path": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go074-bca0ced\\note-nav.mjs",
+      "sha256": "a7045fa658e2b326bf81663a460e0f488e1b2a69d42af39a1cb6cd8936401a99"
+    },
+    "source-scope.mjs": {
+      "path": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go074-bca0ced\\source-scope.mjs",
+      "sha256": "d0e3c6035fa56c7e847b64cdfd2cb02660d31db15f22223abff6f1d037ec046f"
+    }
+  }
+}

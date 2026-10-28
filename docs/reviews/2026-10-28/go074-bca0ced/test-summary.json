@@ -1,0 +1,568 @@
+{
+  "unit-initial": {
+    "integration_counts": {
+      "entry_skip": 58
+    },
+    "per_package": {
+      "github.com/cityloop/fullstack-go/internal/auth": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/aitool": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/communityprojection": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/activity": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/activitypub": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/communityrelay": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/aichat": {
+        "entry_skip": 9
+      },
+      "github.com/cityloop/fullstack-go/internal/merchant": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/merchantorder": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/note": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/aiknowledge": {
+        "entry_skip": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/orderstream": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/notesearch": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/order": {
+        "entry_skip": 3
+      },
+      "github.com/cityloop/fullstack-go/internal/communitycache": {
+        "entry_skip": 8
+      },
+      "github.com/cityloop/fullstack-go/internal/orderadmission": {
+        "entry_skip": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/ordercomp": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/communityconsumer": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/orderreview": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/ordertimeout": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/outbox": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/shop": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/social": {
+        "entry_skip": 5
+      }
+    },
+    "skips": [
+      "TestIntegrationAuth",
+      "TestIntegrationReviewActivityTool",
+      "TestIntegrationProjectionRepository",
+      "TestIntegrationProjectionRecovery",
+      "TestIntegrationActivity",
+      "TestIntegrationReconcileUnreadStream",
+      "TestIntegrationGate",
+      "TestIntegrationPublication",
+      "TestIntegrationCommunityRelay",
+      "TestIntegrationExhaustedLeaseDoesNotBlockQueue",
+      "TestIntegrationDedupeAndLock",
+      "TestIntegrationRealProviderEvaluation",
+      "TestIntegrationRealProviderHTTPLifecycle",
+      "TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay",
+      "TestIntegrationReviewHTTPIdentityAndDTO",
+      "TestIntegrationReviewKnowledgeLifecycle",
+      "TestIntegrationReviewTurnFences",
+      "TestIntegrationReviewBudgetReplayAndFailure",
+      "TestIntegrationAssistantTurn",
+      "TestIntegrationMerchant",
+      "TestIntegrationBatchTrade",
+      "TestIntegrationNotePublishAndDetail",
+      "TestIntegrationPublicationRequiresDurableEvent",
+      "TestIntegrationIndexCompatibility",
+      "TestIntegrationKnowledgeRebuild",
+      "TestIntegrationReviewKnowledgeAuthorizationAndVersions",
+      "TestIntegrationReviewKnowledgeListBoundary",
+      "TestIntegrationOrderStream",
+      "TestIntegrationPublicNoteSearch",
+      "TestIntegrationSearchSync",
+      "TestIntegrationOrder",
+      "TestIntegrationCancel",
+      "TestIntegrationPay",
+      "TestIntegrationLikeBitmap",
+      "TestIntegrationNoteCountsCache",
+      "TestIntegrationLocalLayerAbsorbsHotKey",
+      "TestIntegrationCountLoadCannotUndoInvalidation",
+      "TestIntegrationCancelledCountWaiterReturnsIndependently",
+      "TestIntegrationLikeProjectionEmptyRebuild",
+      "TestIntegrationLikeRebuildLocksFactSnapshot",
+      "TestIntegrationLikeProjectionFences",
+      "TestIntegrationAdmission",
+      "TestIntegrationAdmissionClockBoundary",
+      "TestIntegrationOrderID",
+      "TestIntegrationAcceptedRecovery",
+      "TestIntegrationRestoreValidation",
+      "TestIntegrationCommunityFlow",
+      "TestIntegrationCommunityConsumer",
+      "TestIntegrationReviewInterruptedReplay",
+      "TestIntegrationTimeoutScan",
+      "TestIntegrationTimeoutLifecycle",
+      "TestIntegrationOutbox",
+      "TestIntegrationShop",
+      "TestIntegrationConcurrentFirstFollow",
+      "TestIntegrationFollowAndFeed",
+      "TestIntegrationExpectedStateLike",
+      "TestIntegrationCommunityProjectionQueries",
+      "TestIntegrationLikeProjectionCannotReplaceFacts"
+    ],
+    "failed_tests": [
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleChatHTTPPayloadAndUsage"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleEmbeddingsReorderBatchesAndUsage"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/missing_row"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/negative_index"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/wrong_dimensions"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/zero_vector"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/null_vector"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/null_component"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/float32_overflow"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/trailing_json"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/missing_index"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/out_of_range"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/infinite"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/null_response"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/valid_numeric_zero"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/duplicate_index"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses/later_batch_fails"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsBadEmbeddingResponses"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/refusal"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/multimodal"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/malformed"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/filtered"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/tool_finish"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/tool_payload"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/blank"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/empty"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/trailing"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/truncated_answer"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/wrong_role"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/missing_index"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/missing_finish"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/function_payload"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/301"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/307"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/400"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/401"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/404"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/429"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/500"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/503"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_declared"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_chunked"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_answer"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/invalid_utf8"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleHTTPFailuresAreSanitizedAndNotRetried"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleCancellationDeadlineAndRecovery/cancel"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleCancellationDeadlineAndRecovery/deadline"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientMappingVersionAndAtomicAlias"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientRejectsConflictsFailuresAndUnownedAlias/conflict"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientRejectsConflictsFailuresAndUnownedAlias/false-success"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientRejectsConflictsFailuresAndUnownedAlias/bad-version"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientRejectsConflictsFailuresAndUnownedAlias/unavailable"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientRejectsConflictsFailuresAndUnownedAlias"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientSearchQueryAndPartialFailure/valid"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientSearchQueryAndPartialFailure/expired"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientSearchQueryAndPartialFailure"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/notesearch",
+        "test": "TestClientDeadlineAndRedirect"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleCancellationDeadlineAndRecovery/provider_timeout"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleCancellationDeadlineAndRecovery"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/ai",
+        "test": "TestCompatibleConcurrencyAdmissionIsBoundedAndCancelable"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/platform/app",
+        "test": "TestShutdownDrainsAcceptedRequestBeforeClosingResources"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/platform/app",
+        "test": "TestShutdownDeadlineForcesCloseAndCancelsHandler"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/platform/app",
+        "test": "TestUnexpectedListenerFailureDrainsActiveRequestBeforeClosingResources"
+      }
+    ]
+  },
+  "unit-network": {
+    "integration_counts": {
+      "entry_skip": 58
+    },
+    "per_package": {
+      "github.com/cityloop/fullstack-go/internal/activity": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/activitypub": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/aichat": {
+        "entry_skip": 9
+      },
+      "github.com/cityloop/fullstack-go/internal/aiknowledge": {
+        "entry_skip": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/auth": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/aitool": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/communitycache": {
+        "entry_skip": 8
+      },
+      "github.com/cityloop/fullstack-go/internal/merchant": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/communityconsumer": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/communityprojection": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/note": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/merchantorder": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/communityrelay": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/orderadmission": {
+        "entry_skip": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/ordercomp": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/orderreview": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/outbox": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/order": {
+        "entry_skip": 3
+      },
+      "github.com/cityloop/fullstack-go/internal/ordertimeout": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/orderstream": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/notesearch": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/social": {
+        "entry_skip": 5
+      },
+      "github.com/cityloop/fullstack-go/internal/shop": {
+        "entry_skip": 1
+      }
+    },
+    "skips": [
+      "TestIntegrationActivity",
+      "TestIntegrationReconcileUnreadStream",
+      "TestIntegrationGate",
+      "TestIntegrationPublication",
+      "TestIntegrationDedupeAndLock",
+      "TestIntegrationRealProviderEvaluation",
+      "TestIntegrationRealProviderHTTPLifecycle",
+      "TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay",
+      "TestIntegrationReviewHTTPIdentityAndDTO",
+      "TestIntegrationReviewKnowledgeLifecycle",
+      "TestIntegrationReviewTurnFences",
+      "TestIntegrationReviewBudgetReplayAndFailure",
+      "TestIntegrationAssistantTurn",
+      "TestIntegrationIndexCompatibility",
+      "TestIntegrationKnowledgeRebuild",
+      "TestIntegrationReviewKnowledgeAuthorizationAndVersions",
+      "TestIntegrationReviewKnowledgeListBoundary",
+      "TestIntegrationAuth",
+      "TestIntegrationReviewActivityTool",
+      "TestIntegrationLikeBitmap",
+      "TestIntegrationNoteCountsCache",
+      "TestIntegrationLocalLayerAbsorbsHotKey",
+      "TestIntegrationCountLoadCannotUndoInvalidation",
+      "TestIntegrationCancelledCountWaiterReturnsIndependently",
+      "TestIntegrationLikeProjectionEmptyRebuild",
+      "TestIntegrationLikeRebuildLocksFactSnapshot",
+      "TestIntegrationLikeProjectionFences",
+      "TestIntegrationMerchant",
+      "TestIntegrationCommunityFlow",
+      "TestIntegrationCommunityConsumer",
+      "TestIntegrationProjectionRepository",
+      "TestIntegrationProjectionRecovery",
+      "TestIntegrationNotePublishAndDetail",
+      "TestIntegrationPublicationRequiresDurableEvent",
+      "TestIntegrationBatchTrade",
+      "TestIntegrationCommunityRelay",
+      "TestIntegrationExhaustedLeaseDoesNotBlockQueue",
+      "TestIntegrationAdmission",
+      "TestIntegrationAdmissionClockBoundary",
+      "TestIntegrationOrderID",
+      "TestIntegrationAcceptedRecovery",
+      "TestIntegrationRestoreValidation",
+      "TestIntegrationReviewInterruptedReplay",
+      "TestIntegrationOutbox",
+      "TestIntegrationOrder",
+      "TestIntegrationCancel",
+      "TestIntegrationPay",
+      "TestIntegrationTimeoutScan",
+      "TestIntegrationTimeoutLifecycle",
+      "TestIntegrationOrderStream",
+      "TestIntegrationPublicNoteSearch",
+      "TestIntegrationSearchSync",
+      "TestIntegrationConcurrentFirstFollow",
+      "TestIntegrationFollowAndFeed",
+      "TestIntegrationExpectedStateLike",
+      "TestIntegrationCommunityProjectionQueries",
+      "TestIntegrationLikeProjectionCannotReplaceFacts",
+      "TestIntegrationShop"
+    ],
+    "failed_tests": []
+  },
+  "integration-initial": {
+    "integration_counts": {
+      "subgroup_pass": 49,
+      "entry_pass": 14,
+      "entry_skip": 2
+    },
+    "per_package": {
+      "github.com/cityloop/fullstack-go/internal/aitool": {
+        "subgroup_pass": 4,
+        "entry_pass": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/aiknowledge": {
+        "subgroup_pass": 18,
+        "entry_pass": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/aichat": {
+        "entry_pass": 7,
+        "entry_skip": 2,
+        "subgroup_pass": 10
+      },
+      "github.com/cityloop/fullstack-go/internal/merchant": {
+        "subgroup_pass": 11,
+        "entry_pass": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/merchantorder": {
+        "subgroup_pass": 6,
+        "entry_pass": 1
+      }
+    },
+    "skips": [
+      "TestIntegrationRealProviderEvaluation",
+      "TestIntegrationRealProviderHTTPLifecycle"
+    ],
+    "failed_tests": []
+  }
+}

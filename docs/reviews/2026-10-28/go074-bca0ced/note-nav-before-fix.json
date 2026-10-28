@@ -1,0 +1,21 @@
+{
+  "task": "GO-074-QA1/QA2",
+  "passed": false,
+  "checks": [
+    "anonymous entry is hidden and direct compose URL requires login with return path",
+    "logged-in primary navigation opens the usable compose form"
+  ],
+  "cleanup": true,
+  "fixtureUser": "9400014073873858",
+  "failure": {
+    "phase": "QA2 pending detail to compose",
+    "kind": "TimeoutError",
+    "message": "Note navigation assertion failed; inspect masked screenshot and phase"
+  },
+  "failureState": {
+    "path": "/notes/new",
+    "skeletonCount": 1,
+    "formCount": 0
+  },
+  "recordedAt": "2026-10-28T14:08:27.824Z"
+}

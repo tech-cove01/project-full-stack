@@ -1,0 +1,1 @@
+{"passed":true,"checks":6,"cleanup":true,"output":"D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go074-bca0ced\\worktree\\docs\\reviews\\2026-10-28\\go074-bca0ced\\source-scope-stub-initial.json"}

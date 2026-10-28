@@ -1,0 +1,57 @@
+[
+  {
+    "name": "frontend-ci-initial",
+    "command": [
+      "npm.cmd",
+      "--prefix",
+      "frontend",
+      "ci"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 27.531
+  },
+  {
+    "name": "frontend-build-initial",
+    "command": [
+      "npm.cmd",
+      "--prefix",
+      "frontend",
+      "run",
+      "build"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 11.8
+  },
+  {
+    "name": "frontend-format-initial",
+    "command": [
+      "npm.cmd",
+      "--prefix",
+      "frontend",
+      "run",
+      "format:check"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 4.354
+  },
+  {
+    "name": "merchant-syntax-initial",
+    "command": [
+      "node",
+      "--check",
+      "scripts/go-merchant-orders-ui-smoke.mjs"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.231
+  },
+  {
+    "name": "tools-syntax-initial",
+    "command": [
+      "node",
+      "--check",
+      "scripts/go-ai-tools-ui-smoke.mjs"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 0.152
+  }
+]

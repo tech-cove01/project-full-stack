@@ -1,0 +1,9 @@
+{
+  "ports": {
+    "3360": "free",
+    "6430": "free",
+    "8130": "free",
+    "5230": "free"
+  },
+  "container_names_preexisting": false
+}

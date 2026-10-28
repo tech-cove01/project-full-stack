@@ -1,0 +1,2 @@
+CI YAML parsed; jobs=backend-go,backend,frontend,community-kafka
+GO-072 remote CI and Linux race: NOT RUN

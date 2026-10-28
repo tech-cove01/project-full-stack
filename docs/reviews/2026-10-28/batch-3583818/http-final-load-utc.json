@@ -1,0 +1,54 @@
+{
+  "task": "GO-070",
+  "kind": "seckill-load",
+  "passed": true,
+  "stock": 5,
+  "users": 30,
+  "checks": [
+    "the merchant can publish the load activity",
+    "the activity is ACTIVE with a ready gate",
+    "exactly 5 of 30 requests may be accepted (got 5)",
+    "every other request is rejected instead of queued",
+    "the durable orders must match the accepted count (5)",
+    "the database stock must be zero (0)",
+    "the Redis stock must be zero (0)",
+    "the Redis acceptance map must hold 5 rows (5)",
+    "every accepted request owns a different order id"
+  ],
+  "published": {
+    "id": "9400013575703234",
+    "shopId": "9400013575703218",
+    "shopName": "load-04659c1c",
+    "title": "load-04659c1c",
+    "payValue": "1900",
+    "actualValue": "2500",
+    "totalStock": 5,
+    "stock": 5,
+    "publishStatus": "ACTIVE",
+    "publishVersion": 1,
+    "ready": true,
+    "beginTime": "2026-10-28 13:36:01",
+    "endTime": "2026-10-28 15:36:01",
+    "redeemBeginTime": "2026-10-28 13:36:01",
+    "redeemEndTime": "2026-10-28 16:36:01"
+  },
+  "accepted": 5,
+  "rejected": 25,
+  "samples": [
+    {
+      "status": 200,
+      "errorMsg": "库存不足"
+    },
+    {
+      "status": 200,
+      "errorMsg": "库存不足"
+    },
+    {
+      "status": 200,
+      "errorMsg": "库存不足"
+    }
+  ],
+  "voucherId": "9400013575703234",
+  "orders": 5,
+  "redisStock": 0
+}

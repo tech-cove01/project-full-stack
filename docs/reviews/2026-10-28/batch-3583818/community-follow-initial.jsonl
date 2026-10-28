@@ -1,0 +1,9 @@
+{"Time":"2026-10-28T14:19:58.4887128+08:00","Action":"start","Package":"github.com/cityloop/fullstack-go/internal/social"}
+{"Time":"2026-10-28T14:20:03.0921735+08:00","Action":"run","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationConcurrentFirstFollow"}
+{"Time":"2026-10-28T14:20:03.0921735+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationConcurrentFirstFollow","Output":"=== RUN   TestIntegrationConcurrentFirstFollow\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:20:03.1658881+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationConcurrentFirstFollow","Output":"    follow_review_integration_test.go:40: initial unfollow is an unchanged state, not a new version: {AuthorID:27 Following:false Version:1 FollowerCount:0} \u003cnil\u003e\n","OutputType":"error"}
+{"Time":"2026-10-28T14:20:03.2022152+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationConcurrentFirstFollow","Output":"--- FAIL: TestIntegrationConcurrentFirstFollow (0.11s)\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:20:03.2022152+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationConcurrentFirstFollow","Elapsed":0.11}
+{"Time":"2026-10-28T14:20:03.2022152+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Output":"FAIL\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:20:03.2077545+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Output":"FAIL\tgithub.com/cityloop/fullstack-go/internal/social\t4.719s\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:20:03.2077545+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/social","Elapsed":4.719}

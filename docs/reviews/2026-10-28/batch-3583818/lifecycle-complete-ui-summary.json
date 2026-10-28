@@ -1,0 +1,8 @@
+{
+  "label": "lifecycle-complete",
+  "base": "358381843d0fe5efb98dfb75cac34c089f0777b8",
+  "runs": [],
+  "shutdown": [],
+  "passed": false,
+  "failure": "RuntimeError: review port occupied"
+}

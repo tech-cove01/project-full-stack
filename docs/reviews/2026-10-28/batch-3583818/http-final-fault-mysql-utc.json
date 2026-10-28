@@ -1,0 +1,22 @@
+{
+  "task": "GO-070",
+  "kind": "mysql-fault",
+  "passed": true,
+  "checks": [
+    "the merchant can publish the activity",
+    "the activity is ACTIVE with a ready gate",
+    "the accepted message enters the Stream",
+    "the message stays pending while the database is down",
+    "the entry is still pending after several retries",
+    "the accepted request must end in a durable outcome (orders=1, reviews=0)",
+    "the entry is acknowledged once a durable outcome exists (pending 0)"
+  ],
+  "orderId": "1793169376773183",
+  "streamEntry": "1793169380762-0",
+  "pendingDuringOutage": 1,
+  "pendingAfterRetries": 1,
+  "orders": 1,
+  "reviews": 0,
+  "pendingFinal": 0,
+  "voucherId": "9400013575703236"
+}

@@ -1,0 +1,47 @@
+{
+  "label": "http-final",
+  "base": "358381843d0fe5efb98dfb75cac34c089f0777b8",
+  "runs": [
+    {
+      "name": "http-final-flows-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 22,
+      "cleanup": []
+    },
+    {
+      "name": "http-final-load-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 9,
+      "cleanup": null
+    },
+    {
+      "name": "http-final-fault-redis-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 6,
+      "cleanup": null
+    },
+    {
+      "name": "http-final-fault-mysql-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 7,
+      "cleanup": null
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

@@ -1,0 +1,26 @@
+{
+  "passed": true,
+  "checks": [
+    "note composer renders a native editable title control",
+    "publishing through Vue creates the exact author-owned note",
+    "Vue like writes the current user fact",
+    "following author populates the real Feed with both notes",
+    "late like state for the previous note cannot replace the next note state",
+    "merchant UI creates publishes and rebuilds the current FAQ",
+    "assistant honestly identifies usable stub mode",
+    "real stub SSE renders the published FAQ answer and its citation",
+    "no uncaught browser exceptions in the exercised community merchant and AI pages"
+  ],
+  "cleanup": true,
+  "zone": "UTC",
+  "capabilities": {
+    "chatModel": "stub-lexical",
+    "embeddingDimensions": 256,
+    "embeddingModel": "stub-lexical",
+    "enabled": true,
+    "mode": "stub",
+    "ready": true,
+    "reason": "当前仅启用确定性 stub，未验证真实模型质量"
+  },
+  "step": "merchant knowledge and assistant"
+}

@@ -1,0 +1,33 @@
+{
+  "label": "lifecycle-final",
+  "base": "358381843d0fe5efb98dfb75cac34c089f0777b8",
+  "runs": [
+    {
+      "name": "lifecycle-final-lifecycle-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 26,
+      "cleanup": true
+    },
+    {
+      "name": "lifecycle-final-lifecycle-shanghai",
+      "exit": 0,
+      "passed": true,
+      "checks": 26,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

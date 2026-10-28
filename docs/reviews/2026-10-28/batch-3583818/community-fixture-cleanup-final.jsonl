@@ -1,0 +1,8 @@
+{"Time":"2026-10-28T14:31:40.2228799+08:00","Action":"start","Package":"github.com/cityloop/fullstack-go/internal/social"}
+{"Time":"2026-10-28T14:31:47.9390187+08:00","Action":"run","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationFollowAndFeed"}
+{"Time":"2026-10-28T14:31:47.9390187+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationFollowAndFeed","Output":"=== RUN   TestIntegrationFollowAndFeed\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:31:48.2467913+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationFollowAndFeed","Output":"--- PASS: TestIntegrationFollowAndFeed (0.31s)\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:31:48.2467913+08:00","Action":"pass","Package":"github.com/cityloop/fullstack-go/internal/social","Test":"TestIntegrationFollowAndFeed","Elapsed":0.31}
+{"Time":"2026-10-28T14:31:48.2467913+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Output":"PASS\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:31:48.2518256+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/social","Output":"ok  \tgithub.com/cityloop/fullstack-go/internal/social\t8.028s\n"}
+{"Time":"2026-10-28T14:31:48.2518256+08:00","Action":"pass","Package":"github.com/cityloop/fullstack-go/internal/social","Elapsed":8.029}

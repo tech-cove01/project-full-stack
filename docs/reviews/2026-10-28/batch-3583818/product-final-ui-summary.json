@@ -1,0 +1,27 @@
+{
+  "label": "product-final",
+  "base": "358381843d0fe5efb98dfb75cac34c089f0777b8",
+  "runs": [
+    {
+      "name": "product-final-product-utc",
+      "exit": 1,
+      "passed": false,
+      "checks": 6,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": false,
+  "failure": "RuntimeError: browser checks failed"
+}

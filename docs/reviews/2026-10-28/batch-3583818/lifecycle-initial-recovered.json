@@ -1,0 +1,9 @@
+{
+  "provenance": "Recovered from actual tool stdout; first lifecycle-final JSON/summary was overwritten when the same label was reused. This is reconstructed metadata, not the original raw JSON. Original failure screenshot remains masked.",
+  "passed": false,
+  "checks_completed": 16,
+  "zone": "UTC",
+  "step": "real Vue cancel and safe repeated operations",
+  "cause": "Old GO-031 script asserted Redis compensation stayed deferred; GO-033 now completes it. Updated test requires stock/eligibility restoration and a different re-purchase ID.",
+  "cleanup": true
+}

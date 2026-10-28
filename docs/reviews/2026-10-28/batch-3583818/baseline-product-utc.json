@@ -1,0 +1,14 @@
+{
+  "passed": false,
+  "checks": [
+    "note composer renders a native editable title control"
+  ],
+  "cleanup": true,
+  "zone": "UTC",
+  "capabilities": {
+    "enabled": true,
+    "mode": "stub"
+  },
+  "step": "native community controls",
+  "failure": "locator.fill: Timeout 30000ms exceeded."
+}

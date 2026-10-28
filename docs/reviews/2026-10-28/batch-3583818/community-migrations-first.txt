@@ -1,0 +1,6 @@
+apply 003-trade
+apply 004-ai
+apply 005-order-review
+apply 006-community
+apply 007-feed-index
+migrations applied

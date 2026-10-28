@@ -1,0 +1,86 @@
+[
+  {
+    "sha": "e1e65960b3c849c7af9ae26d019b5cef79d6c21f",
+    "subject": "fix(GO-032-QA1): lock current merchant authorization for writes"
+  },
+  {
+    "sha": "342c2b7df71e18e84b537249a0be875e0e7a48f6",
+    "subject": "fix(GO-033-QA1): deliver rejected reservations and fence stock compensation"
+  },
+  {
+    "sha": "899264fdba6d9d735ee6adb6e238f09c886542a0",
+    "subject": "fix(GO-033-QA2): block unresolved work and retry rebuilds safely"
+  },
+  {
+    "sha": "243030a61236c9644fda379808fd904013678c0f",
+    "subject": "fix(GO-033-QA3): replay interrupted reviews with verified ownership"
+  },
+  {
+    "sha": "dd242a2ee7fa1ea939f98b50ac38273bf939ab60",
+    "subject": "test(GO-032-033-QA): verify real authorization and recovery windows"
+  },
+  {
+    "sha": "06936d4cdfd9beb7f8e6f3e0a2632c7242c4b2d5",
+    "subject": "fix(GO-040-QA): freeze public knowledge and lock authorized version changes"
+  },
+  {
+    "sha": "407214a0f474ecb4e110edcbe4e044a5b5650291",
+    "subject": "fix(GO-041-QA1): query current public activities and return usable tool cards"
+  },
+  {
+    "sha": "6f7945da4df5a9e06010b42a00208778b52ac3eb",
+    "subject": "fix(GO-041-042-QA): revalidate AI identity knowledge and replay terminals"
+  },
+  {
+    "sha": "20eedf5cd90fdebab6c08b78d909c4d25cb9a626",
+    "subject": "fix(GO-050-QA): publish notes and durable events in one transaction"
+  },
+  {
+    "sha": "c5eec9af1639f3f19e26ba87bf2ad672ad9e402d",
+    "subject": "fix(GO-051-QA): initialize relationship state without false events"
+  },
+  {
+    "sha": "b7278b1e809d40bbf17e88b427bff8e74ace1f43",
+    "subject": "fix(GO-053-062-QA): preserve like facts and rebuild versioned complete projections"
+  },
+  {
+    "sha": "723888045fc85d225b5042c455416397ed7a92df",
+    "subject": "fix(GO-060-QA): fence stale cache loaders and cancel waiting readers"
+  },
+  {
+    "sha": "716c9a0ffa0b6a0d6a1b683ba09bbd9c3281589a",
+    "subject": "fix(GO-052-QA): park expired exhausted leases without blocking delivery"
+  },
+  {
+    "sha": "16314a672ca99070f6c5c56616050e5943039f2c",
+    "subject": "fix(UI-QA1): render community controls and isolate per-resource state"
+  },
+  {
+    "sha": "4d5591313a5f9840bf1a539c96d956deee8fb23f",
+    "subject": "fix(UI-QA2): fence AI streams by session and conversation lifetime"
+  },
+  {
+    "sha": "ac92e69253bd485685c26e281629c1e9e2bb309b",
+    "subject": "test(UI-QA): verify real community knowledge and cited assistant pages"
+  },
+  {
+    "sha": "b8e89b78dd299630e310234827f1ed1bc32b6461",
+    "subject": "ci(REVIEW-QA): include durable review tests and frontend formatting"
+  },
+  {
+    "sha": "4accf61d6c5f8ae9ff25751343f1bacf9a312b5e",
+    "subject": "fix(GO-041-QA2): keep business IDs distinct from credential-shaped input"
+  },
+  {
+    "sha": "6ae3cb62b960e61ff0838f5a8d94721ffaaae18e",
+    "subject": "fix(UI-QA3): maintain published FAQs and verify completed compensation"
+  },
+  {
+    "sha": "a43e176152b16a3e463d70d19e270ce26aca2ef6",
+    "subject": "fix(GO-070-QA): retain exact fixture IDs and report drill boundaries"
+  },
+  {
+    "sha": "3c962a50b63033c0d6cd0cb04c259ebccf0abe9d",
+    "subject": "docs: require one independent defect per commit"
+  }
+]

@@ -1,0 +1,2 @@
+community_outbox	like_facts	follow_facts	own_users	own_notes
+0	0	0	0	0

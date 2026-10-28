@@ -1,0 +1,47 @@
+{
+  "task": "GO-070",
+  "passed": true,
+  "flows": {
+    "trade": {
+      "activityId": "9400013575703233",
+      "orderId": "653706709784592395",
+      "orderStatus": 3,
+      "auditActions": 5
+    },
+    "community": {
+      "noteId": "27",
+      "likes": 1,
+      "feedItems": 1
+    },
+    "ai": {
+      "documentId": "22",
+      "conversationId": "5e47c001dd77a4194dbcb79df93ec773",
+      "sources": 1
+    }
+  },
+  "checks": [
+    "the merchant can publish an activity (200 )",
+    "the activity becomes ACTIVE with a ready gate",
+    "the seckill request is accepted",
+    "the accepted order becomes a durable pending row",
+    "the shopper can pay the order",
+    "the paid order exposes its redeem token to its owner",
+    "the merchant can redeem the order",
+    "the first redemption is not a replay",
+    "the redemption is visible in the audit trail",
+    "a shopper can publish a note",
+    "the note shows the expected-state like",
+    "a user can follow an author",
+    "the follower can like the note",
+    "the followed note appears in the follow feed",
+    "the feed reports the caller's own like",
+    "the merchant can create a FAQ draft",
+    "the FAQ can be published",
+    "a conversation can be opened",
+    "the turn starts with a meta event",
+    "the answer cites published sources",
+    "the turn answers",
+    "the turn closes with a done event"
+  ],
+  "cleanup": []
+}

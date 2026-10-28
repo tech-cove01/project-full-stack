@@ -1,0 +1,33 @@
+{
+  "root_counts": {
+    "product_users": 0,
+    "product_notes": 0,
+    "product_documents": 0,
+    "unresolved_trade_events": 0,
+    "pending_community_events": 0,
+    "pending_stream": 0
+  },
+  "recovered_activity_events": [
+    "ACTIVITY:9400013575703234:0:PREPARE",
+    "ACTIVITY:9400013575703234:1:OPEN",
+    "ACTIVITY:9400013575703235:0:PREPARE",
+    "ACTIVITY:9400013575703235:1:OPEN",
+    "ACTIVITY:9400013575703236:0:PREPARE",
+    "ACTIVITY:9400013575703236:1:OPEN"
+  ],
+  "recovered_early_blog_events": [
+    "NOTE:1:1:PUBLISHED",
+    "NOTE:2:1:PUBLISHED",
+    "NOTE:3:1:PUBLISHED",
+    "NOTE:4:1:PUBLISHED",
+    "NOTE:5:1:PUBLISHED",
+    "NOTE:6:1:PUBLISHED",
+    "NOTE:7:1:PUBLISHED",
+    "NOTE:8:1:PUBLISHED",
+    "NOTE:25:1:PUBLISHED",
+    "NOTE:26:1:PUBLISHED"
+  ],
+  "removed_exact_drill_stream_entries": 8,
+  "passed": true,
+  "boundary": "Dedicated review server only; historical seeded rows and counters preserved. Expiring caches and private Kafka topics are retained."
+}

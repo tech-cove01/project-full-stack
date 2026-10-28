@@ -1,0 +1,9 @@
+{"Time":"2026-10-28T14:15:12.9154671+08:00","Action":"start","Package":"github.com/cityloop/fullstack-go/internal/orderreview"}
+{"Time":"2026-10-28T14:15:17.4868945+08:00","Action":"run","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Test":"TestIntegrationReviewInterruptedReplay"}
+{"Time":"2026-10-28T14:15:17.4868945+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Test":"TestIntegrationReviewInterruptedReplay","Output":"=== RUN   TestIntegrationReviewInterruptedReplay\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:15:17.5756289+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Test":"TestIntegrationReviewInterruptedReplay","Output":"    review_integration_test.go:48: another owner's review row was treated as durable evidence\n","OutputType":"error"}
+{"Time":"2026-10-28T14:15:17.5914058+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Test":"TestIntegrationReviewInterruptedReplay","Output":"--- FAIL: TestIntegrationReviewInterruptedReplay (0.10s)\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:15:17.5914058+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Test":"TestIntegrationReviewInterruptedReplay","Elapsed":0.1}
+{"Time":"2026-10-28T14:15:17.5914058+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Output":"FAIL\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:15:17.5971301+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Output":"FAIL\tgithub.com/cityloop/fullstack-go/internal/orderreview\t4.682s\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:15:17.5971301+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/orderreview","Elapsed":4.682}

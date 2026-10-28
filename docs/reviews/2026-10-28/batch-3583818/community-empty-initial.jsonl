@@ -1,0 +1,9 @@
+{"Time":"2026-10-28T14:19:19.1215188+08:00","Action":"start","Package":"github.com/cityloop/fullstack-go/internal/communitycache"}
+{"Time":"2026-10-28T14:19:20.2002607+08:00","Action":"run","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Test":"TestIntegrationLikeProjectionEmptyRebuild"}
+{"Time":"2026-10-28T14:19:20.200767+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Test":"TestIntegrationLikeProjectionEmptyRebuild","Output":"=== RUN   TestIntegrationLikeProjectionEmptyRebuild\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:19:20.2415658+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Test":"TestIntegrationLikeProjectionEmptyRebuild","Output":"    projection_review_integration_test.go:22: completed zero-like rebuild must be present with zero count: 0 false \u003cnil\u003e\n","OutputType":"error"}
+{"Time":"2026-10-28T14:19:20.254157+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Test":"TestIntegrationLikeProjectionEmptyRebuild","Output":"--- FAIL: TestIntegrationLikeProjectionEmptyRebuild (0.05s)\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:19:20.2547103+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Test":"TestIntegrationLikeProjectionEmptyRebuild","Elapsed":0.05}
+{"Time":"2026-10-28T14:19:20.2547103+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Output":"FAIL\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:19:20.2590237+08:00","Action":"output","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Output":"FAIL\tgithub.com/cityloop/fullstack-go/internal/communitycache\t1.137s\n","OutputType":"frame"}
+{"Time":"2026-10-28T14:19:20.2590237+08:00","Action":"fail","Package":"github.com/cityloop/fullstack-go/internal/communitycache","Elapsed":1.138}

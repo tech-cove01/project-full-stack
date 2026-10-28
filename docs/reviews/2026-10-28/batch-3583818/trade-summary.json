@@ -1,0 +1,83 @@
+{
+  "trade-initial.jsonl": {
+    "failed_tests": [
+      "TestIntegrationRestoreValidation/fractional_stock",
+      "TestIntegrationRestoreValidation/negative_stock",
+      "TestIntegrationRestoreValidation/noncanonical_stock",
+      "TestIntegrationRestoreValidation/missing_max",
+      "TestIntegrationRestoreValidation/invalid_max",
+      "TestIntegrationRestoreValidation/fractional_max",
+      "TestIntegrationRestoreValidation/invalid_release",
+      "TestIntegrationRestoreValidation/old_event_does_not_release_new_acceptance",
+      "TestIntegrationRestoreValidation",
+      "TestIntegrationBatchTrade/redeem_cannot_use_a_revoked_membership_after_precheck",
+      "TestIntegrationBatchTrade/refund_cannot_use_a_revoked_membership_after_precheck",
+      "TestIntegrationBatchTrade/durable_rejection_is_claimed_and_compensated_once",
+      "TestIntegrationBatchTrade/rebuild_blocks_unapplied_rejection",
+      "TestIntegrationBatchTrade"
+    ],
+    "passed_packages": [],
+    "integration_groups": 0
+  },
+  "trade-final-first.jsonl": {
+    "failed_tests": [],
+    "passed_packages": [
+      "merchantorder",
+      "ordercomp"
+    ],
+    "integration_groups": 12
+  },
+  "recovery-initial.jsonl": {
+    "failed_tests": [
+      "TestIntegrationBatchTrade/rebuild_can_retry_after_redis_rewrite_and_db_audit_rollback",
+      "TestIntegrationBatchTrade",
+      "TestIntegrationReviewInterruptedReplay"
+    ],
+    "passed_packages": [],
+    "integration_groups": 0
+  },
+  "review-binding-initial.jsonl": {
+    "failed_tests": [
+      "TestIntegrationReviewInterruptedReplay"
+    ],
+    "passed_packages": [],
+    "integration_groups": 0
+  },
+  "rebuild-retry-baseline.jsonl": {
+    "failed_tests": [
+      "TestIntegrationBatchTrade/rebuild_can_retry_after_redis_rewrite_and_db_audit_rollback",
+      "TestIntegrationBatchTrade"
+    ],
+    "passed_packages": [],
+    "integration_groups": 0
+  },
+  "trade-final.jsonl": {
+    "failed_tests": [],
+    "passed_packages": [
+      "merchantorder",
+      "ordercomp",
+      "orderreview",
+      "outbox",
+      "activity",
+      "order",
+      "orderstream",
+      "ordertimeout"
+    ],
+    "integration_groups": 76
+  },
+  "reconcile-no-group-initial.jsonl": {
+    "failed_tests": [
+      "TestIntegrationReconcileUnreadStream"
+    ],
+    "passed_packages": [],
+    "integration_groups": 0
+  },
+  "reconcile-final.jsonl": {
+    "failed_tests": [],
+    "passed_packages": [
+      "activity",
+      "merchantorder"
+    ],
+    "integration_groups": 6
+  }
+}

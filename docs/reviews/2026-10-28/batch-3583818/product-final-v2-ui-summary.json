@@ -1,0 +1,33 @@
+{
+  "label": "product-final-v2",
+  "base": "358381843d0fe5efb98dfb75cac34c089f0777b8",
+  "runs": [
+    {
+      "name": "product-final-v2-product-utc",
+      "exit": 0,
+      "passed": true,
+      "checks": 10,
+      "cleanup": true
+    },
+    {
+      "name": "product-final-v2-product-shanghai",
+      "exit": 0,
+      "passed": true,
+      "checks": 10,
+      "cleanup": true
+    }
+  ],
+  "shutdown": [
+    {
+      "name": "vite",
+      "exit": 3221225786,
+      "forced": false
+    },
+    {
+      "name": "api",
+      "exit": 0,
+      "forced": false
+    }
+  ],
+  "passed": true
+}

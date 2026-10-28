@@ -1,0 +1,136 @@
+{
+  "observations": [
+    {
+      "at": "2026-10-28T11:12:38.181004+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:38.638997+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:39.068282+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:39.506893+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:39.982682+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:40.485943+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:40.941919+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:41.389164+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:41.841394+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:42.292407+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:42.733158+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:43.188581+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:43.619413+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:44.081239+00:00",
+      "oldPingExit": 0,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:44.538848+00:00",
+      "oldPingExit": 0,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:44.980160+00:00",
+      "oldPingExit": 0,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:45.430628+00:00",
+      "oldPingExit": 0,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:45.887719+00:00",
+      "oldPingExit": 0,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:46.336460+00:00",
+      "oldPingExit": 0,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:46.812235+00:00",
+      "oldPingExit": 0,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:47.316078+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:47.808169+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:48.234008+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:48.647886+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:49.098631+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 1
+    },
+    {
+      "at": "2026-10-28T11:12:49.619734+00:00",
+      "oldPingExit": 1,
+      "tcpSchemaProbeExit": 0
+    }
+  ],
+  "falsePositiveObserved": true,
+  "finalReady": true
+}

@@ -16,7 +16,9 @@ services:
       - go-mysql-data:/var/lib/mysql
       - ./infra/mysql:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      # The first-boot temporary server accepts socket pings before TCP/schema
+      # initialization completes. Gate migration/startup on the application path.
+      test: ["CMD-SHELL", "mysql --protocol=TCP -h127.0.0.1 -u\"$${MYSQL_USER}\" -p\"$${MYSQL_PASSWORD}\" \"$${MYSQL_DATABASE}\" -e 'SELECT 1 FROM tb_shop LIMIT 1' >/dev/null 2>&1"]
       interval: 3s
       timeout: 3s
       retries: 40

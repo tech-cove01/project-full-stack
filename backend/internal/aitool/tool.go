@@ -150,7 +150,7 @@ func (service *Service) recentOrders(ctx context.Context, userID uint64) (*Resul
 		}
 		text += "。"
 	}
-	return &Result{Kind: KindOrders, Text: text, Card: map[string]any{"orders": orders}}, nil
+	return &Result{Kind: KindOrders, Text: text, Card: map[string]any{"type": "orders", "items": orders, "orders": orders}}, nil
 }
 
 func (service *Service) oneOrder(ctx context.Context, userID uint64, orderID string) (*Result, error) {
@@ -170,7 +170,8 @@ func (service *Service) oneOrder(ctx context.Context, userID uint64, orderID str
 	row := rows[0]
 	return &Result{Kind: KindOrder, Text: "订单状态：" + statusMessage(row.Status) + "。",
 		Card: map[string]any{
-			"id": strconv.FormatInt(row.ID, 10), "status": row.Status,
+			"type": "order",
+			"id":   strconv.FormatInt(row.ID, 10), "status": row.Status,
 			"statusText": statusMessage(row.Status), "payAmount": strconv.FormatUint(row.PayAmount, 10),
 			"createTime": display(&row.CreateAt), "payTime": display(row.PayTime), "useTime": display(row.UseTime),
 		}}, nil
@@ -189,10 +190,10 @@ func (service *Service) activity(ctx context.Context, activityID string) (*Resul
 		EndTime   time.Time
 		Status    string
 	}
-	if err = service.db.WithContext(ctx).Raw(`SELECT sv.voucher_id AS id,v.title,sv.pay_value,
+	if err = service.db.WithContext(ctx).Raw(`SELECT sv.voucher_id AS id,v.title,v.pay_value,
 		sv.begin_time,sv.end_time,sv.publish_status AS status
 		FROM tb_seckill_voucher sv JOIN tb_voucher v ON v.id=sv.voucher_id
-		WHERE sv.voucher_id=? AND v.status=1`, id).Scan(&rows).Error; err != nil {
+		WHERE sv.voucher_id=? AND v.status=1 AND sv.publish_status='ACTIVE'`, id).Scan(&rows).Error; err != nil {
 		return nil, err
 	}
 	if len(rows) != 1 {
@@ -200,7 +201,7 @@ func (service *Service) activity(ctx context.Context, activityID string) (*Resul
 	}
 	row := rows[0]
 	return &Result{Kind: KindActivity, Text: "活动：" + row.Title + "。",
-		Card: map[string]any{"id": strconv.FormatUint(row.ID, 10), "title": row.Title,
+		Card: map[string]any{"type": "activities", "items": []map[string]any{{"id": strconv.FormatUint(row.ID, 10), "title": row.Title, "payValue": strconv.FormatUint(row.PayValue, 10), "status": row.Status}}, "id": strconv.FormatUint(row.ID, 10), "title": row.Title,
 			"payValue": strconv.FormatUint(row.PayValue, 10), "status": row.Status,
 			"beginTime": display(&row.BeginTime), "endTime": display(&row.EndTime)}}, nil
 }
@@ -223,5 +224,5 @@ func (service *Service) shop(ctx context.Context, shopID string) (*Result, error
 	}
 	row := rows[0]
 	return &Result{Kind: KindShop, Text: "门店：" + row.Name + "。",
-		Card: map[string]any{"id": strconv.FormatUint(row.ID, 10), "name": row.Name, "address": row.Address}}, nil
+		Card: map[string]any{"type": "shops", "items": []map[string]any{{"id": strconv.FormatUint(row.ID, 10), "name": row.Name, "address": row.Address}}, "id": strconv.FormatUint(row.ID, 10), "name": row.Name, "address": row.Address}}, nil
 }

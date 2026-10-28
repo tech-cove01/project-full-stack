@@ -74,6 +74,9 @@ onBeforeUnmount(() => {
             >AI 助手</RouterLink
           >
           <RouterLink v-if="auth.loggedIn" to="/feed" active-class="active">关注动态</RouterLink>
+          <RouterLink v-if="auth.loggedIn" to="/notes/new" active-class="active"
+            >发布笔记</RouterLink
+          >
           <RouterLink v-if="auth.loggedIn" to="/orders" active-class="active">我的订单</RouterLink>
           <RouterLink
             v-if="lastOrder && auth.loggedIn"

@@ -56,13 +56,20 @@ func TestIntegrationExpectedStateLike(t *testing.T) {
 	t.Cleanup(func() {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
-		_ = resources.Redis.Del(cleanupCtx, "community:likes:"+noteID).Err()
+		_ = resources.Redis.Del(cleanupCtx, "community:likes:"+noteID, "community:likes:versions:"+noteID).Err()
 	})
 
+	if initial, err := service.SetLike(ctx, userID, noteID, false); err != nil || initial.Version != 0 || initial.Liked {
+		t.Fatalf("initial unlike is an unchanged state: %+v %v", initial, err)
+	}
 	if _, err = service.SetLike(ctx, userID, noteID, true); err != nil {
 		t.Fatalf("like failed: %v", err)
 	}
-	// The bitmap projection must follow the committed fact.
+	// Incremental updates alone cannot prove the projection includes all users.
+	if _, err = bitmap.RebuildFromDatabase(ctx, resources.ORM, note); err != nil {
+		t.Fatal(err)
+	}
+	// A locked snapshot makes the projection complete before its count is used.
 	if count, present, err := bitmap.Count(ctx, note); err != nil || !present || count != 1 {
 		exists, _ := resources.Redis.Exists(ctx, "community:likes:"+noteID).Result()
 		t.Fatalf("the bitmap must hold the committed like: count=%d present=%v err=%v user=%d note=%d exists=%d",
@@ -70,7 +77,7 @@ func TestIntegrationExpectedStateLike(t *testing.T) {
 	}
 	state, err := service.LikeState(ctx, userID, noteID)
 	if err != nil || state.Likes != 1 {
-		t.Fatalf("the state read must use the bitmap: %+v %v", state, err)
+		t.Fatalf("the state read must use the committed facts: %+v %v", state, err)
 	}
 	// Repeating the same state must not bump the version or the counter.
 	state, err = service.SetLike(ctx, userID, noteID, true)

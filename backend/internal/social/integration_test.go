@@ -41,8 +41,12 @@ func TestIntegrationFollowAndFeed(t *testing.T) {
 		defer stop()
 		_ = resources.ORM.WithContext(cleanupCtx).Exec(
 			"DELETE FROM tb_community_outbox WHERE aggregate_id=?", strconv.FormatUint(author, 10)).Error
+		_ = resources.ORM.WithContext(cleanupCtx).Exec(`DELETE FROM tb_community_outbox
+			WHERE aggregate_type='BLOG' AND aggregate_id IN (SELECT CAST(id AS CHAR) FROM tb_blog WHERE user_id=?)`, author).Error
 		_ = resources.ORM.WithContext(cleanupCtx).Exec(
 			"DELETE FROM tb_follow WHERE user_id IN (?,?)", follower, author).Error
+		_ = resources.ORM.WithContext(cleanupCtx).Exec(`DELETE FROM tb_blog_like
+			WHERE blog_id IN (SELECT id FROM tb_blog WHERE user_id=?)`, author).Error
 		_ = resources.ORM.WithContext(cleanupCtx).Exec(
 			"DELETE FROM tb_blog WHERE user_id=?", author).Error
 		_ = resources.ORM.WithContext(cleanupCtx).Exec(

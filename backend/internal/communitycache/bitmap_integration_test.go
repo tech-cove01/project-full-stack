@@ -35,28 +35,31 @@ func TestIntegrationLikeBitmap(t *testing.T) {
 	t.Cleanup(func() {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
-		_ = resources.Redis.Del(cleanupCtx, likesKey(noteID)).Err()
+		_ = resources.Redis.Del(cleanupCtx, likesKey(noteID), versionsKey(noteID)).Err()
 		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_blog WHERE id=?", noteID).Error
 	})
 
 	if count, present, err := bitmap.Count(ctx, noteID); err != nil || present || count != 0 {
 		t.Fatalf("an absent bitmap must report present=false, got %d %v %v", count, present, err)
 	}
-	if _, err = bitmap.Mark(ctx, noteID, 7, true); err != nil {
+	if _, err = bitmap.Mark(ctx, noteID, 7, true, 1); err != nil {
 		t.Fatal(err)
 	}
 	count, present, err := bitmap.Count(ctx, noteID)
-	if err != nil || !present || count != 1 {
-		t.Fatalf("one like must be counted once: %d %v %v", count, present, err)
+	if err != nil || present || count != 0 {
+		t.Fatalf("an incremental-only set has no complete snapshot: %d %v %v", count, present, err)
+	}
+	if _, err = bitmap.Rebuild(ctx, noteID, []Fact{{UserID: 7, Active: 1, Version: 1}}); err != nil {
+		t.Fatal(err)
 	}
 	// Repeating the state must not add a second bit.
-	if _, err = bitmap.Mark(ctx, noteID, 7, true); err != nil {
+	if _, err = bitmap.Mark(ctx, noteID, 7, true, 1); err != nil {
 		t.Fatal(err)
 	}
 	if count, _, _ = bitmap.Count(ctx, noteID); count != 1 {
 		t.Fatalf("a repeated like must stay at one, got %d", count)
 	}
-	if _, err = bitmap.Mark(ctx, noteID, 7, false); err != nil {
+	if _, err = bitmap.Mark(ctx, noteID, 7, false, 2); err != nil {
 		t.Fatal(err)
 	}
 	if count, _, _ = bitmap.Count(ctx, noteID); count != 0 {
@@ -64,7 +67,7 @@ func TestIntegrationLikeBitmap(t *testing.T) {
 	}
 
 	// A rebuild replaces the projection with the authoritative rows.
-	written, err := bitmap.Rebuild(ctx, noteID, []uint64{11, 12, 13})
+	written, err := bitmap.Rebuild(ctx, noteID, []Fact{{11, 1, 1}, {12, 1, 1}, {13, 1, 1}})
 	if err != nil || written != 3 {
 		t.Fatalf("rebuild must write three bits: %d %v", written, err)
 	}
@@ -72,17 +75,32 @@ func TestIntegrationLikeBitmap(t *testing.T) {
 		t.Fatalf("the rebuilt bitmap must hold three bits, got %d", count)
 	}
 	// A rebuild with fewer rows must drop the old bits.
-	if _, err = bitmap.Rebuild(ctx, noteID, []uint64{11}); err != nil {
+	if _, err = bitmap.Rebuild(ctx, noteID, []Fact{{11, 1, 2}}); err != nil {
 		t.Fatal(err)
 	}
 	if count, _, _ = bitmap.Count(ctx, noteID); count != 1 {
 		t.Fatalf("a rebuild must replace the previous bits, got %d", count)
 	}
 	// A user id beyond the 32-bit offset limit is skipped instead of failing.
-	if changed, err := bitmap.Mark(ctx, noteID, 0, true); err == nil || changed {
+	if changed, err := bitmap.Mark(ctx, noteID, 0, true, 1); err == nil || changed {
 		t.Fatalf("a zero user id must be reported: %v %v", changed, err)
 	}
 	if count, _, _ = bitmap.Count(ctx, noteID); count != 1 {
 		t.Fatalf("a skipped id must not change the count, got %d", count)
+	}
+	if changed, err := bitmap.Mark(ctx, noteID, 11, false, 1); err != nil || changed {
+		t.Fatalf("delayed old version must be ignored: %v %v", changed, err)
+	}
+	if count, _, _ = bitmap.Count(ctx, noteID); count != 1 {
+		t.Fatal("old unlike rewrote a newer snapshot")
+	}
+	if _, err = bitmap.Rebuild(ctx, noteID, []Fact{{11, 0, 3}}); err != nil {
+		t.Fatal(err)
+	}
+	if changed, err := bitmap.Mark(ctx, noteID, 11, true, 2); err != nil || changed {
+		t.Fatalf("inactive snapshot must retain a version fence: %v %v", changed, err)
+	}
+	if count, present, err = bitmap.Count(ctx, noteID); err != nil || !present || count != 0 {
+		t.Fatalf("zero snapshot lost completeness: %d %v %v", count, present, err)
 	}
 }

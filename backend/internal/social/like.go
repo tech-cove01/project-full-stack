@@ -60,6 +60,9 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 			wanted = 1
 		}
 		if existing.ID == 0 {
+			if wanted == 0 {
+				return nil
+			}
 			if err := tx.WithContext(ctx).Exec(`INSERT INTO tb_blog_like
 				(blog_id,user_id,active,version) VALUES (?,?,?,1)`, note, user, wanted).Error; err != nil {
 				return err
@@ -110,15 +113,19 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	if service.counts != nil {
 		_ = service.counts.Invalidate(ctx, note)
 	}
-	// The bitmap is updated after the commit: a failure leaves MySQL authoritative
-	// and the next recount repairs the projection.
-	if service.likes != nil {
-		if _, markErr := service.likes.Mark(ctx, note, user, liked); markErr != nil {
+	state, err := service.LikeState(ctx, userID, noteID)
+	if err != nil {
+		return LikeState{}, err
+	}
+	// Read the current committed relation, not the original requested state. The
+	// projection version fences a delayed completion behind a later unlike.
+	if service.likes != nil && state.Version > 0 {
+		if _, markErr := service.likes.Mark(ctx, note, user, state.Liked, state.Version); markErr != nil {
 			// The projection is repairable, but the failure must be visible.
 			slog.Warn("like bitmap update failed", "note_id", note, "user_id", user, "error", markErr)
 		}
 	}
-	return service.LikeState(ctx, userID, noteID)
+	return state, nil
 }
 
 func likeEventID(note, user uint64, version int) string {
@@ -161,17 +168,8 @@ func (service *Service) LikeState(ctx context.Context, userID, noteID string) (L
 	}
 	state := LikeState{NoteID: strconv.FormatUint(note, 10), Liked: row.Active == 1,
 		Version: row.Version, Likes: row.Liked}
-	// Prefer the bitmap projection; an absent key falls back to the cached/own value.
-	if service.likes != nil {
-		if count, ok, err := service.likes.Count(ctx, note); err == nil && ok {
-			state.Likes = count
-			return state, nil
-		}
-	}
-	if service.counts != nil {
-		if cached, err := service.counts.Get(ctx, note); err == nil {
-			state.Likes = cached.Likes
-		}
-	}
+	// This query already loaded the authoritative public count. A recently reset
+	// set may contain only the newest changed user, so never replace the fact with
+	// a partial or stale projection. Feed caching remains independently bounded.
 	return state, nil
 }

@@ -1,0 +1,778 @@
+{
+  "passed": true,
+  "project": "project-full-stack-review076",
+  "recorded_at_utc": "2026-10-28T11:27:49Z",
+  "before": [
+    {
+      "name": "project-full-stack-review076-mysql-1",
+      "id": "434b47d69f572ffae19762e8ed8e6883d94e648267584060e5c06ce8677a3851",
+      "image": "mysql:8.4",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 32430,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:06:28.000676444Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:37.13466658Z",
+              "End": "2026-10-28T11:27:37.186165471Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:40.187181001Z",
+              "End": "2026-10-28T11:27:40.243439166Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:43.173839195Z",
+              "End": "2026-10-28T11:27:43.259793712Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:46.261467495Z",
+              "End": "2026-10-28T11:27:46.309470559Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:49.31060042Z",
+              "End": "2026-10-28T11:27:49.363420188Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "mysql",
+      "port_bindings": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3350"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-mysql-data"
+      ]
+    },
+    {
+      "name": "project-full-stack-review076-redis-1",
+      "id": "c9bcf6db3fd2b8f843abf467def8859b23bdb3bddb17698a35099cab62fc0a0f",
+      "image": "redis:7.4-alpine",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 32329,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:06:27.965157613Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:36.704688591Z",
+              "End": "2026-10-28T11:27:36.751166963Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:39.752192367Z",
+              "End": "2026-10-28T11:27:39.79928093Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:42.729102924Z",
+              "End": "2026-10-28T11:27:42.780285793Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:45.78187258Z",
+              "End": "2026-10-28T11:27:45.824884302Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:48.826169155Z",
+              "End": "2026-10-28T11:27:48.870805711Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "redis",
+      "port_bindings": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6420"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-redis-data"
+      ]
+    },
+    {
+      "name": "project-full-stack-review076-kafka-1",
+      "id": "5d5228332e8cfcd929a21233fd107cbb4b8f106b8161b351d49a8be309d67a70",
+      "image": "apache/kafka:3.9.0",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 32446,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:06:28.005726765Z",
+        "FinishedAt": "0001-01-01T00:00:00Z",
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:16.023155256Z",
+              "End": "2026-10-28T11:27:18.039555151Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:23.040522591Z",
+              "End": "2026-10-28T11:27:25.025118467Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:30.026481261Z",
+              "End": "2026-10-28T11:27:32.061211558Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:37.062564116Z",
+              "End": "2026-10-28T11:27:39.21006373Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:44.140387865Z",
+              "End": "2026-10-28T11:27:46.61503747Z",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "kafka",
+      "port_bindings": {
+        "9092/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9114"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-kafka-data",
+        "d5955edbe66dbab707c0a431e1637b7760d905c23edef6717bda7c742e66bf54",
+        "02686e55d5b291d43005641b4e88460bdce9da6d9ae82a6f15370dabff85faa0"
+      ]
+    },
+    {
+      "name": "project-full-stack-review076-elasticsearch-1",
+      "id": "8b9210f671512f91c4850ab17287e6f944d5189ca4b376726daa258f76fc5b14",
+      "image": "docker.elastic.co/elasticsearch/elasticsearch:8.19.23",
+      "state": {
+        "Status": "running",
+        "Running": true,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 21318,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:18:54.251851848Z",
+        "FinishedAt": "2026-10-28T11:18:37.149287998Z",
+        "Health": {
+          "Status": "healthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:27.37172384Z",
+              "End": "2026-10-28T11:27:27.422232697Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:32.422906694Z",
+              "End": "2026-10-28T11:27:32.474699088Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:37.476072064Z",
+              "End": "2026-10-28T11:27:37.540279355Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:42.470853577Z",
+              "End": "2026-10-28T11:27:42.528733476Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:47.530477473Z",
+              "End": "2026-10-28T11:27:47.584467106Z",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "elasticsearch",
+      "port_bindings": {
+        "9200/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9214"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-search-data"
+      ]
+    }
+  ],
+  "sql_counts": {
+    "owned_user": 0,
+    "owned_shop": 0,
+    "owned_merchant": 0,
+    "owned_note": 0,
+    "owned_search_state": 0,
+    "owned_note_projection": 0,
+    "community_not_done": 0,
+    "consumer_parked": 0,
+    "sql_public_note_total": 0,
+    "search_state_total": 0
+  },
+  "redis_key_counts": {
+    "login:token:*": 0,
+    "login:code:*": 0,
+    "ai:*": 0
+  },
+  "order_stream_length": 1,
+  "order_stream_pending": [
+    0,
+    null,
+    null,
+    null
+  ],
+  "kafka_group_offsets": [
+    {
+      "group": "community.follow-v1",
+      "topic": "community.events",
+      "partition": 0,
+      "committed": "30",
+      "log_end": "30",
+      "lag": "0"
+    },
+    {
+      "group": "community.feed-v1",
+      "topic": "community.events",
+      "partition": 0,
+      "committed": "30",
+      "log_end": "30",
+      "lag": "0"
+    },
+    {
+      "group": "community.search-v1",
+      "topic": "community.events",
+      "partition": 0,
+      "committed": "30",
+      "log_end": "30",
+      "lag": "0"
+    }
+  ],
+  "es_count": {
+    "count": 0,
+    "_shards": {
+      "total": 1,
+      "successful": 1,
+      "skipped": 0,
+      "failed": 0
+    }
+  },
+  "es_alias": {
+    "review-notes-v1-build-b8cfd768adeeb71b": {
+      "aliases": {
+        "review-notes-v1": {
+          "is_write_index": true
+        }
+      }
+    }
+  },
+  "api_and_vite_stopped": [
+    {
+      "port": 8116,
+      "reusable": true
+    },
+    {
+      "port": 5216,
+      "reusable": true
+    }
+  ],
+  "after": [
+    {
+      "name": "project-full-stack-review076-mysql-1",
+      "id": "434b47d69f572ffae19762e8ed8e6883d94e648267584060e5c06ce8677a3851",
+      "image": "mysql:8.4",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:06:28.000676444Z",
+        "FinishedAt": "2026-10-28T11:27:59.984765121Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 1,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:46.261467495Z",
+              "End": "2026-10-28T11:27:46.309470559Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:49.31060042Z",
+              "End": "2026-10-28T11:27:49.363420188Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:52.365022572Z",
+              "End": "2026-10-28T11:27:52.4241877Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:55.424773687Z",
+              "End": "2026-10-28T11:27:55.471909328Z",
+              "ExitCode": 0,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\nmysqld is alive\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:58.472603027Z",
+              "End": "2026-10-28T11:27:58.519496848Z",
+              "ExitCode": 1,
+              "Output": "mysqladmin: [Warning] Using a password on the command line interface can be insecure.\n"
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "mysql",
+      "port_bindings": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3350"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-mysql-data"
+      ]
+    },
+    {
+      "name": "project-full-stack-review076-redis-1",
+      "id": "c9bcf6db3fd2b8f843abf467def8859b23bdb3bddb17698a35099cab62fc0a0f",
+      "image": "redis:7.4-alpine",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:06:27.965157613Z",
+        "FinishedAt": "2026-10-28T11:27:58.146244643Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:45.78187258Z",
+              "End": "2026-10-28T11:27:45.824884302Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:48.826169155Z",
+              "End": "2026-10-28T11:27:48.870805711Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:51.87216094Z",
+              "End": "2026-10-28T11:27:51.917886543Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:54.918491774Z",
+              "End": "2026-10-28T11:27:54.966907388Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-28T11:27:57.968419065Z",
+              "End": "2026-10-28T11:27:58.016107434Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "redis",
+      "port_bindings": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6420"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-redis-data"
+      ]
+    },
+    {
+      "name": "project-full-stack-review076-kafka-1",
+      "id": "5d5228332e8cfcd929a21233fd107cbb4b8f106b8161b351d49a8be309d67a70",
+      "image": "apache/kafka:3.9.0",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 143,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:06:28.005726765Z",
+        "FinishedAt": "2026-10-28T11:27:59.233726172Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 1,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:30.026481261Z",
+              "End": "2026-10-28T11:27:32.061211558Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:37.062564116Z",
+              "End": "2026-10-28T11:27:39.21006373Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:44.140387865Z",
+              "End": "2026-10-28T11:27:46.61503747Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:51.615832081Z",
+              "End": "2026-10-28T11:27:54.011640086Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:59.012595417Z",
+              "End": "2026-10-28T11:27:59.216833476Z",
+              "ExitCode": 137,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "kafka",
+      "port_bindings": {
+        "9092/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9114"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-kafka-data",
+        "d5955edbe66dbab707c0a431e1637b7760d905c23edef6717bda7c742e66bf54",
+        "02686e55d5b291d43005641b4e88460bdce9da6d9ae82a6f15370dabff85faa0"
+      ]
+    },
+    {
+      "name": "project-full-stack-review076-elasticsearch-1",
+      "id": "8b9210f671512f91c4850ab17287e6f944d5189ca4b376726daa258f76fc5b14",
+      "image": "docker.elastic.co/elasticsearch/elasticsearch:8.19.23",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 143,
+        "Error": "",
+        "StartedAt": "2026-10-28T11:18:54.251851848Z",
+        "FinishedAt": "2026-10-28T11:28:00.552064206Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-28T11:27:37.476072064Z",
+              "End": "2026-10-28T11:27:37.540279355Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:42.470853577Z",
+              "End": "2026-10-28T11:27:42.528733476Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:47.530477473Z",
+              "End": "2026-10-28T11:27:47.584467106Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:52.586187711Z",
+              "End": "2026-10-28T11:27:52.757267795Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-28T11:27:57.75876245Z",
+              "End": "2026-10-28T11:27:57.811831136Z",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "project": "project-full-stack-review076",
+      "service": "elasticsearch",
+      "port_bindings": {
+        "9200/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9214"
+          }
+        ]
+      },
+      "named_volumes": [
+        "project-full-stack-review076_go-search-data"
+      ]
+    }
+  ],
+  "volumes_retained": true,
+  "commands": [
+    {
+      "command": [
+        "D:/MySQL/Install/bin/mysql.exe",
+        "--protocol=TCP",
+        "--host=127.0.0.1",
+        "--port=3350",
+        "--user=fullstack",
+        "--batch",
+        "--skip-column-names",
+        "project_full_stack_go"
+      ],
+      "exit_code": 0,
+      "stdout": "owned_user\t0\nowned_shop\t0\nowned_merchant\t0\nowned_note\t0\nowned_search_state\t0\nowned_note_projection\t0\ncommunity_not_done\t0\nconsumer_parked\t0\nsql_public_note_total\t0\nsearch_state_total\t0\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-redis-1",
+        "redis-cli",
+        "--scan",
+        "--pattern",
+        "login:token:*"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-redis-1",
+        "redis-cli",
+        "--scan",
+        "--pattern",
+        "login:code:*"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-redis-1",
+        "redis-cli",
+        "--scan",
+        "--pattern",
+        "ai:*"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-redis-1",
+        "redis-cli",
+        "XLEN",
+        "stream.orders"
+      ],
+      "exit_code": 0,
+      "stdout": "1\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-redis-1",
+        "redis-cli",
+        "--json",
+        "XPENDING",
+        "stream.orders",
+        "g1"
+      ],
+      "exit_code": 0,
+      "stdout": "[0,null,null,null]\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-kafka-1",
+        "/opt/kafka/bin/kafka-consumer-groups.sh",
+        "--bootstrap-server",
+        "localhost:9094",
+        "--describe",
+        "--group",
+        "community.follow-v1"
+      ],
+      "exit_code": 0,
+      "stdout": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          30              30              0               -               -               -",
+      "stderr": "\nConsumer group 'community.follow-v1' has no active members.\n"
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-kafka-1",
+        "/opt/kafka/bin/kafka-consumer-groups.sh",
+        "--bootstrap-server",
+        "localhost:9094",
+        "--describe",
+        "--group",
+        "community.feed-v1"
+      ],
+      "exit_code": 0,
+      "stdout": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          30              30              0               -               -               -",
+      "stderr": "\nConsumer group 'community.feed-v1' has no active members.\n"
+    },
+    {
+      "command": [
+        "docker",
+        "exec",
+        "project-full-stack-review076-kafka-1",
+        "/opt/kafka/bin/kafka-consumer-groups.sh",
+        "--bootstrap-server",
+        "localhost:9094",
+        "--describe",
+        "--group",
+        "community.search-v1"
+      ],
+      "exit_code": 0,
+      "stdout": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          30              30              0               -               -               -",
+      "stderr": "\nConsumer group 'community.search-v1' has no active members.\n"
+    },
+    {
+      "command": [
+        "docker",
+        "stop",
+        "--time",
+        "20",
+        "project-full-stack-review076-mysql-1",
+        "project-full-stack-review076-redis-1",
+        "project-full-stack-review076-kafka-1",
+        "project-full-stack-review076-elasticsearch-1"
+      ],
+      "exit_code": 0,
+      "stdout": "Flag --time has been deprecated, use --timeout instead\nproject-full-stack-review076-mysql-1\nproject-full-stack-review076-redis-1\nproject-full-stack-review076-kafka-1\nproject-full-stack-review076-elasticsearch-1\n",
+      "stderr": ""
+    }
+  ]
+}

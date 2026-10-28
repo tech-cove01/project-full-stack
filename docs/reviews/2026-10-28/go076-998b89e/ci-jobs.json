@@ -1,0 +1,565 @@
+{
+  "total_count": 4,
+  "jobs": [
+    {
+      "id": 122782795867,
+      "run_id": 40678468785,
+      "workflow_name": "build",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/runs/40678468785",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVVvvZM8AAAAclmzIWw",
+      "head_sha": "998b89e81bed42786d25d0cebbadb401fd506f70",
+      "url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/jobs/122782795867",
+      "html_url": "https://github.com/tech-cove01/project-full-stack/actions/runs/40678468785/job/122782795867",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-28T11:15:01Z",
+      "started_at": "2026-10-28T11:15:03Z",
+      "completed_at": "2026-10-28T11:17:16Z",
+      "name": "backend-go",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-28T11:15:04Z",
+          "completed_at": "2026-10-28T11:15:05Z"
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-28T11:15:05Z",
+          "completed_at": "2026-10-28T11:15:26Z"
+        },
+        {
+          "name": "Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-28T11:15:26Z",
+          "completed_at": "2026-10-28T11:15:33Z"
+        },
+        {
+          "name": "Run actions/setup-go@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-28T11:15:33Z",
+          "completed_at": "2026-10-28T11:15:50Z"
+        },
+        {
+          "name": "Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-28T11:15:50Z",
+          "completed_at": "2026-10-28T11:15:51Z"
+        },
+        {
+          "name": "Run go mod verify",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-28T11:15:51Z",
+          "completed_at": "2026-10-28T11:15:52Z"
+        },
+        {
+          "name": "Check formatting",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-28T11:15:52Z",
+          "completed_at": "2026-10-28T11:15:52Z"
+        },
+        {
+          "name": "Run go vet ./...",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-28T11:15:52Z",
+          "completed_at": "2026-10-28T11:15:56Z"
+        },
+        {
+          "name": "Run go test -race -count=1 ./...",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-28T11:15:56Z",
+          "completed_at": "2026-10-28T11:16:19Z"
+        },
+        {
+          "name": "Initialize isolated SQL schema",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 10,
+          "started_at": "2026-10-28T11:16:19Z",
+          "completed_at": "2026-10-28T11:16:19Z"
+        },
+        {
+          "name": "Auth against real MySQL and Redis",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-28T11:16:19Z",
+          "completed_at": "2026-10-28T11:16:22Z"
+        },
+        {
+          "name": "Apply versioned SQL to the isolated database",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-28T11:16:22Z",
+          "completed_at": "2026-10-28T11:16:24Z"
+        },
+        {
+          "name": "Shops against real MySQL",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-28T11:16:24Z",
+          "completed_at": "2026-10-28T11:16:27Z"
+        },
+        {
+          "name": "Merchant permissions against real MySQL and Redis",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-28T11:16:27Z",
+          "completed_at": "2026-10-28T11:16:29Z"
+        },
+        {
+          "name": "Activities and publication against real MySQL and Redis",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-28T11:16:29Z",
+          "completed_at": "2026-10-28T11:16:35Z"
+        },
+        {
+          "name": "Order admission persistence and recovery against real MySQL and Redis",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-28T11:16:35Z",
+          "completed_at": "2026-10-28T11:16:47Z"
+        },
+        {
+          "name": "Load the demo fixtures used by the community tests",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-28T11:16:47Z",
+          "completed_at": "2026-10-28T11:16:47Z"
+        },
+        {
+          "name": "Community, AI and knowledge against real MySQL and Redis",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 18,
+          "started_at": "2026-10-28T11:16:47Z",
+          "completed_at": "2026-10-28T11:17:01Z"
+        },
+        {
+          "name": "Merchant orders and compensation against real MySQL and Redis",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 19,
+          "started_at": "2026-10-28T11:17:01Z",
+          "completed_at": "2026-10-28T11:17:07Z"
+        },
+        {
+          "name": "Run go build -trimpath -o bin/api ./cmd/api",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 20,
+          "started_at": "2026-10-28T11:17:07Z",
+          "completed_at": "2026-10-28T11:17:10Z"
+        },
+        {
+          "name": "Run python3 ../scripts/go-bootstrap-smoke.py --binary bin/api --output bootstrap-result.json",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 21,
+          "started_at": "2026-10-28T11:17:10Z",
+          "completed_at": "2026-10-28T11:17:11Z"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 22,
+          "started_at": "2026-10-28T11:17:11Z",
+          "completed_at": "2026-10-28T11:17:12Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 41,
+          "started_at": "2026-10-28T11:17:12Z",
+          "completed_at": "2026-10-28T11:17:12Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 42,
+          "started_at": "2026-10-28T11:17:12Z",
+          "completed_at": "2026-10-28T11:17:13Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 43,
+          "started_at": "2026-10-28T11:17:13Z",
+          "completed_at": "2026-10-28T11:17:13Z"
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 44,
+          "started_at": "2026-10-28T11:17:13Z",
+          "completed_at": "2026-10-28T11:17:13Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 45,
+          "started_at": "2026-10-28T11:17:13Z",
+          "completed_at": "2026-10-28T11:17:13Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/check-runs/122782795867",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000663,
+      "runner_name": "GitHub Actions 1000000663",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 122782795968,
+      "run_id": 40678468785,
+      "workflow_name": "build",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/runs/40678468785",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVVvvZM8AAAAclmzIwA",
+      "head_sha": "998b89e81bed42786d25d0cebbadb401fd506f70",
+      "url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/jobs/122782795968",
+      "html_url": "https://github.com/tech-cove01/project-full-stack/actions/runs/40678468785/job/122782795968",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-28T11:15:01Z",
+      "started_at": "2026-10-28T11:15:03Z",
+      "completed_at": "2026-10-28T11:15:31Z",
+      "name": "frontend",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-28T11:15:04Z",
+          "completed_at": "2026-10-28T11:15:05Z"
+        },
+        {
+          "name": "Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-28T11:15:05Z",
+          "completed_at": "2026-10-28T11:15:12Z"
+        },
+        {
+          "name": "Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-28T11:15:12Z",
+          "completed_at": "2026-10-28T11:15:14Z"
+        },
+        {
+          "name": "Run npm ci",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-28T11:15:14Z",
+          "completed_at": "2026-10-28T11:15:20Z"
+        },
+        {
+          "name": "Run npm run build",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-28T11:15:20Z",
+          "completed_at": "2026-10-28T11:15:26Z"
+        },
+        {
+          "name": "Run npm run format:check",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-28T11:15:26Z",
+          "completed_at": "2026-10-28T11:15:28Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 11,
+          "started_at": "2026-10-28T11:15:28Z",
+          "completed_at": "2026-10-28T11:15:28Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-28T11:15:28Z",
+          "completed_at": "2026-10-28T11:15:28Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-28T11:15:28Z",
+          "completed_at": "2026-10-28T11:15:28Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/check-runs/122782795968",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000662,
+      "runner_name": "GitHub Actions 1000000662",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 122782796089,
+      "run_id": 40678468785,
+      "workflow_name": "build",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/runs/40678468785",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVVvvZM8AAAAclmzJOQ",
+      "head_sha": "998b89e81bed42786d25d0cebbadb401fd506f70",
+      "url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/jobs/122782796089",
+      "html_url": "https://github.com/tech-cove01/project-full-stack/actions/runs/40678468785/job/122782796089",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-28T11:15:01Z",
+      "started_at": "2026-10-28T11:15:03Z",
+      "completed_at": "2026-10-28T11:17:15Z",
+      "name": "community-kafka",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-28T11:15:03Z",
+          "completed_at": "2026-10-28T11:15:05Z"
+        },
+        {
+          "name": "Initialize containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-28T11:15:05Z",
+          "completed_at": "2026-10-28T11:16:06Z"
+        },
+        {
+          "name": "Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-28T11:16:06Z",
+          "completed_at": "2026-10-28T11:16:12Z"
+        },
+        {
+          "name": "Run actions/setup-go@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-28T11:16:12Z",
+          "completed_at": "2026-10-28T11:16:26Z"
+        },
+        {
+          "name": "Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-28T11:16:26Z",
+          "completed_at": "2026-10-28T11:16:28Z"
+        },
+        {
+          "name": "Initialize isolated SQL schema",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-28T11:16:28Z",
+          "completed_at": "2026-10-28T11:16:35Z"
+        },
+        {
+          "name": "Apply versioned SQL to the isolated database",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-28T11:16:35Z",
+          "completed_at": "2026-10-28T11:16:37Z"
+        },
+        {
+          "name": "Community events and note search against real dependencies",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-28T11:16:37Z",
+          "completed_at": "2026-10-28T11:17:10Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-28T11:17:10Z",
+          "completed_at": "2026-10-28T11:17:11Z"
+        },
+        {
+          "name": "Post Run actions/setup-go@v6",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 14,
+          "started_at": "2026-10-28T11:17:11Z",
+          "completed_at": "2026-10-28T11:17:11Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 15,
+          "started_at": "2026-10-28T11:17:11Z",
+          "completed_at": "2026-10-28T11:17:11Z"
+        },
+        {
+          "name": "Stop containers",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 16,
+          "started_at": "2026-10-28T11:17:11Z",
+          "completed_at": "2026-10-28T11:17:12Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 17,
+          "started_at": "2026-10-28T11:17:12Z",
+          "completed_at": "2026-10-28T11:17:12Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/check-runs/122782796089",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000664,
+      "runner_name": "GitHub Actions 1000000664",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    },
+    {
+      "id": 122782796145,
+      "run_id": 40678468785,
+      "workflow_name": "build",
+      "head_branch": "main",
+      "run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/runs/40678468785",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOVVvvZM8AAAAclmzJcQ",
+      "head_sha": "998b89e81bed42786d25d0cebbadb401fd506f70",
+      "url": "https://api.github.com/repos/tech-cove01/project-full-stack/actions/jobs/122782796145",
+      "html_url": "https://github.com/tech-cove01/project-full-stack/actions/runs/40678468785/job/122782796145",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-28T11:15:01Z",
+      "started_at": "2026-10-28T11:15:03Z",
+      "completed_at": "2026-10-28T11:15:40Z",
+      "name": "backend",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-28T11:15:04Z",
+          "completed_at": "2026-10-28T11:15:05Z"
+        },
+        {
+          "name": "Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-28T11:15:05Z",
+          "completed_at": "2026-10-28T11:15:13Z"
+        },
+        {
+          "name": "Run actions/setup-java@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-28T11:15:13Z",
+          "completed_at": "2026-10-28T11:15:15Z"
+        },
+        {
+          "name": "Run mvn -B -ntp -f pom.xml verify",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-28T11:15:15Z",
+          "completed_at": "2026-10-28T11:15:38Z"
+        },
+        {
+          "name": "Post Run actions/setup-java@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 7,
+          "started_at": "2026-10-28T11:15:38Z",
+          "completed_at": "2026-10-28T11:15:38Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v5",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 8,
+          "started_at": "2026-10-28T11:15:38Z",
+          "completed_at": "2026-10-28T11:15:39Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-28T11:15:39Z",
+          "completed_at": "2026-10-28T11:15:39Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/tech-cove01/project-full-stack/check-runs/122782796145",
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "runner_id": 1000000665,
+      "runner_name": "GitHub Actions 1000000665",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions"
+    }
+  ]
+}

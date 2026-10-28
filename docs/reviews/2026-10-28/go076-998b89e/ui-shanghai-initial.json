@@ -1,0 +1,61 @@
+{
+  "task": "GO-076",
+  "passed": true,
+  "checks": [
+    "13 actual authenticated publications become searchable through the running event pipeline",
+    "anonymous navigation opens the public search route before the dynamic note route",
+    "first real browser page exposes ten results and an opaque next cursor without an exact total",
+    "greater-than-2^53 author IDs remain exact decimal strings in all first-page cards",
+    "two pages match independent MySQL publication-time/ID order without duplicates or missing notes",
+    "shop filter preserves a greater-than-2^53 ID exactly and restricts results to that shop",
+    "shareable URL preserves keyword, canonical shop ID and sorting",
+    "reload restores filters and a fresh first page from the shared URL",
+    "shop navigation retains the exact large string ID",
+    "Chinese content-only search finds the public note independently of title words",
+    "title and content markup remain escaped text and execute no handler",
+    "a public search result opens its real note detail",
+    "no-match search shows an explicit empty state",
+    "invalid new input immediately clears old results and pagination",
+    "noncanonical store input is rejected without retaining old results",
+    "editing filters aborts the pending request and cannot restore stale results or cursors",
+    "an expired owned snapshot is rejected by the actual API",
+    "expired pagination clears stale results and the unusable cursor",
+    "restart performs a real first-page request with a new snapshot",
+    "actual network failure shows the friendly unavailable state",
+    "retry performs a real successful request without mocked JSON",
+    "load-more transport failure preserves already displayed notes",
+    "load-more retry resumes the failed cursor instead of skipping a page",
+    "normal search UI contains product text without implementation details",
+    "no uncaught browser exceptions in the exercised search flow"
+  ],
+  "cleanup": true,
+  "fixture": {
+    "user": "9007203727463193",
+    "shops": [
+      "9007203727463194",
+      "9007203727463195"
+    ],
+    "notes": [
+      "1793185775001135523",
+      "1793185775001135524",
+      "1793185775001135525",
+      "1793185775001135526",
+      "1793185775001135527",
+      "1793185775001135528",
+      "1793185775001135529",
+      "1793185775001135530",
+      "1793185775001135531",
+      "1793185775001135532",
+      "1793185775001135533",
+      "1793185775001135534",
+      "1793185775001135535"
+    ]
+  },
+  "browserTimezone": "Asia/Shanghai",
+  "offsetBarrier": {
+    "groups": 3,
+    "partitions": 3,
+    "caughtUp": true
+  },
+  "recordedAt": "2026-10-28T11:15:39.329Z"
+}

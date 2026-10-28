@@ -1,0 +1,203 @@
+{
+  "task": "GO-076c",
+  "passed": true,
+  "checks": [
+    "the exact dedicated ES container is running before fault injection",
+    "the dedicated Kafka container is running",
+    "the browser and trace are anonymous and contain no authenticated setup requests",
+    "two actual pre-outage publications are visible in the real Vue page",
+    "physical stop leaves only the explicitly named ES container stopped without OOM",
+    "the real browser receives actual HTTP 503 while ES is physically stopped",
+    "the product shows a friendly retry state and clears stale search results",
+    "publication and both existing consumer groups continue; search retains two durable recovery records",
+    "all three Kafka groups have zero uncommitted lag after durable parking; recovery backlog is the two parked records",
+    "actual publish/admit/persist/pay/redeem/audit trading passes nine checks with ES physically stopped",
+    "restarting the same ES container preserves the original write generation",
+    "pre-outage document persists after the physical restart",
+    "pre-outage document persists after the physical restart",
+    "exact replay resolves both failures and materializes each of the four note events once",
+    "the actual alias contains exactly four unique owned documents",
+    "the existing retry button fetches real successful results after recovery without mocked JSON",
+    "controlled failure replay changes no Kafka offsets"
+  ],
+  "fixture": {
+    "user": "1793185775001135524",
+    "merchant": "9400902348218134",
+    "shop": "9400902348218136",
+    "notes": [
+      "1793185775001135549",
+      "1793185775001135550",
+      "1793185775001135551",
+      "1793185775001135552"
+    ]
+  },
+  "cleanup": true,
+  "esRestored": true,
+  "phases": [
+    {
+      "name": "verify-dedicated-running-dependencies",
+      "at": "2026-10-28T11:18:20.569Z"
+    },
+    {
+      "name": "publish-two-before-outage",
+      "at": "2026-10-28T11:18:21.860Z"
+    },
+    {
+      "name": "stop-only-dedicated-ES-container",
+      "at": "2026-10-28T11:18:34.578Z"
+    },
+    {
+      "name": "publish-during-physical-outage-and-park",
+      "at": "2026-10-28T11:18:38.632Z"
+    },
+    {
+      "name": "actual-trading-while-ES-stays-stopped",
+      "at": "2026-10-28T11:18:49.672Z"
+    },
+    {
+      "name": "restart-same-container-and-replay-owned-sources",
+      "at": "2026-10-28T11:18:53.767Z"
+    }
+  ],
+  "failures": [],
+  "initialES": {
+    "running": true,
+    "oom": false,
+    "exitCode": 0,
+    "health": "healthy"
+  },
+  "initialGeneration": "review-notes-v1-build-b8cfd768adeeb71b",
+  "initialOffsets": [
+    {
+      "group": "community.follow-v1",
+      "partition": 0,
+      "committed": "28",
+      "logEnd": "28",
+      "lag": "0"
+    },
+    {
+      "group": "community.feed-v1",
+      "partition": 0,
+      "committed": "28",
+      "logEnd": "28",
+      "lag": "0"
+    },
+    {
+      "group": "community.search-v1",
+      "partition": 0,
+      "committed": "28",
+      "logEnd": "28",
+      "lag": "0"
+    }
+  ],
+  "stoppedES": {
+    "running": false,
+    "oom": false,
+    "exitCode": 143,
+    "health": "unhealthy"
+  },
+  "outage": {
+    "facts": 4,
+    "deliveredOutbox": 4,
+    "followReceipts": 4,
+    "feedApplied": 4,
+    "searchApplied": 2,
+    "parkedRecoveryRecords": 2,
+    "sourceCoordinates": [
+      {
+        "topic": "community.events",
+        "partition": 0,
+        "offset": "28"
+      },
+      {
+        "topic": "community.events",
+        "partition": 0,
+        "offset": "29"
+      }
+    ],
+    "committedOffsets": [
+      {
+        "group": "community.follow-v1",
+        "partition": 0,
+        "committed": "30",
+        "logEnd": "30",
+        "lag": "0"
+      },
+      {
+        "group": "community.feed-v1",
+        "partition": 0,
+        "committed": "30",
+        "logEnd": "30",
+        "lag": "0"
+      },
+      {
+        "group": "community.search-v1",
+        "partition": 0,
+        "committed": "30",
+        "logEnd": "30",
+        "lag": "0"
+      }
+    ]
+  },
+  "trade": {
+    "exitCode": 0,
+    "passed": true,
+    "checks": 9,
+    "orderStatus": 3
+  },
+  "recoveredGeneration": "review-notes-v1-build-b8cfd768adeeb71b",
+  "recovery": {
+    "parked": 0,
+    "resolved": 2,
+    "applied": 4
+  },
+  "recoveredOffsets": [
+    {
+      "group": "community.follow-v1",
+      "partition": 0,
+      "committed": "30",
+      "logEnd": "30",
+      "lag": "0"
+    },
+    {
+      "group": "community.feed-v1",
+      "partition": 0,
+      "committed": "30",
+      "logEnd": "30",
+      "lag": "0"
+    },
+    {
+      "group": "community.search-v1",
+      "partition": 0,
+      "committed": "30",
+      "logEnd": "30",
+      "lag": "0"
+    }
+  ],
+  "cleanupOffsets": [
+    {
+      "group": "community.follow-v1",
+      "partition": 0,
+      "committed": "30",
+      "logEnd": "30",
+      "lag": "0"
+    },
+    {
+      "group": "community.feed-v1",
+      "partition": 0,
+      "committed": "30",
+      "logEnd": "30",
+      "lag": "0"
+    },
+    {
+      "group": "community.search-v1",
+      "partition": 0,
+      "committed": "30",
+      "logEnd": "30",
+      "lag": "0"
+    }
+  ],
+  "ownedRowsRemaining": 0,
+  "cleanupErrors": [],
+  "recordedAt": "2026-10-28T11:20:05.869Z"
+}

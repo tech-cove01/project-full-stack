@@ -1,0 +1,229 @@
+{
+  "unit-initial.txt": {
+    "all_counts": {
+      "subgroup_pass": 200,
+      "entry_pass": 157,
+      "entry_skip": 58
+    },
+    "integration_counts": {
+      "entry_skip": 58
+    },
+    "packages": {
+      "github.com/cityloop/fullstack-go/cmd/api": "skip",
+      "github.com/cityloop/fullstack-go/cmd/community-projector": "skip",
+      "github.com/cityloop/fullstack-go/cmd/note-search": "skip",
+      "github.com/cityloop/fullstack-go/cmd/recount": "skip",
+      "github.com/cityloop/fullstack-go/cmd/review": "skip",
+      "github.com/cityloop/fullstack-go/internal/ai": "pass",
+      "github.com/cityloop/fullstack-go/internal/aiknowledge": "pass",
+      "github.com/cityloop/fullstack-go/internal/activitypub": "pass",
+      "github.com/cityloop/fullstack-go/internal/activity": "pass",
+      "github.com/cityloop/fullstack-go/internal/aichat": "pass",
+      "github.com/cityloop/fullstack-go/internal/aitool": "pass",
+      "github.com/cityloop/fullstack-go/internal/communityconsumer": "pass",
+      "github.com/cityloop/fullstack-go/internal/communitycache": "pass",
+      "github.com/cityloop/fullstack-go/internal/communityprojection": "pass",
+      "github.com/cityloop/fullstack-go/internal/merchant": "pass",
+      "github.com/cityloop/fullstack-go/internal/auth": "pass",
+      "github.com/cityloop/fullstack-go/internal/communityrelay": "pass",
+      "github.com/cityloop/fullstack-go/internal/merchantorder": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/config": "pass",
+      "github.com/cityloop/fullstack-go/internal/order": "pass",
+      "github.com/cityloop/fullstack-go/internal/note": "pass",
+      "github.com/cityloop/fullstack-go/internal/notesearch": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/database": "pass",
+      "github.com/cityloop/fullstack-go/internal/orderadmission": "pass",
+      "github.com/cityloop/fullstack-go/internal/ordercomp": "pass",
+      "github.com/cityloop/fullstack-go/internal/ordertimeout": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/httpapi": "pass",
+      "github.com/cityloop/fullstack-go/internal/orderstream": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/app": "pass",
+      "github.com/cityloop/fullstack-go/internal/shop": "pass",
+      "github.com/cityloop/fullstack-go/internal/outbox": "pass",
+      "github.com/cityloop/fullstack-go/internal/social": "pass",
+      "github.com/cityloop/fullstack-go/internal/orderreview": "pass"
+    },
+    "integration_per_package": {
+      "github.com/cityloop/fullstack-go/internal/aiknowledge": {
+        "entry_skip": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/activitypub": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/aichat": {
+        "entry_skip": 9
+      },
+      "github.com/cityloop/fullstack-go/internal/activity": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/aitool": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/communityconsumer": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/communitycache": {
+        "entry_skip": 8
+      },
+      "github.com/cityloop/fullstack-go/internal/communityprojection": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/merchant": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/auth": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/communityrelay": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/merchantorder": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/order": {
+        "entry_skip": 3
+      },
+      "github.com/cityloop/fullstack-go/internal/note": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/notesearch": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/orderadmission": {
+        "entry_skip": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/ordercomp": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/ordertimeout": {
+        "entry_skip": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/orderstream": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/shop": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/outbox": {
+        "entry_skip": 1
+      },
+      "github.com/cityloop/fullstack-go/internal/social": {
+        "entry_skip": 5
+      },
+      "github.com/cityloop/fullstack-go/internal/orderreview": {
+        "entry_skip": 1
+      }
+    },
+    "skips": [
+      "TestIntegrationIndexCompatibility",
+      "TestIntegrationKnowledgeRebuild",
+      "TestIntegrationReviewKnowledgeAuthorizationAndVersions",
+      "TestIntegrationReviewKnowledgeListBoundary",
+      "TestIntegrationGate",
+      "TestIntegrationPublication",
+      "TestIntegrationDedupeAndLock",
+      "TestIntegrationRealProviderEvaluation",
+      "TestIntegrationActivity",
+      "TestIntegrationReconcileUnreadStream",
+      "TestIntegrationRealProviderHTTPLifecycle",
+      "TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay",
+      "TestIntegrationReviewHTTPIdentityAndDTO",
+      "TestIntegrationReviewKnowledgeLifecycle",
+      "TestIntegrationReviewTurnFences",
+      "TestIntegrationReviewBudgetReplayAndFailure",
+      "TestIntegrationAssistantTurn",
+      "TestIntegrationReviewActivityTool",
+      "TestIntegrationCommunityFlow",
+      "TestIntegrationCommunityConsumer",
+      "TestIntegrationLikeBitmap",
+      "TestIntegrationNoteCountsCache",
+      "TestIntegrationLocalLayerAbsorbsHotKey",
+      "TestIntegrationCountLoadCannotUndoInvalidation",
+      "TestIntegrationCancelledCountWaiterReturnsIndependently",
+      "TestIntegrationLikeProjectionEmptyRebuild",
+      "TestIntegrationLikeRebuildLocksFactSnapshot",
+      "TestIntegrationLikeProjectionFences",
+      "TestIntegrationProjectionRepository",
+      "TestIntegrationProjectionRecovery",
+      "TestIntegrationMerchant",
+      "TestIntegrationAuth",
+      "TestIntegrationCommunityRelay",
+      "TestIntegrationExhaustedLeaseDoesNotBlockQueue",
+      "TestIntegrationBatchTrade",
+      "TestIntegrationOrder",
+      "TestIntegrationCancel",
+      "TestIntegrationPay",
+      "TestIntegrationNotePublishAndDetail",
+      "TestIntegrationPublicationRequiresDurableEvent",
+      "TestIntegrationPublicNoteSearch",
+      "TestIntegrationSearchSync",
+      "TestIntegrationAdmission",
+      "TestIntegrationAdmissionClockBoundary",
+      "TestIntegrationOrderID",
+      "TestIntegrationAcceptedRecovery",
+      "TestIntegrationRestoreValidation",
+      "TestIntegrationTimeoutScan",
+      "TestIntegrationTimeoutLifecycle",
+      "TestIntegrationOrderStream",
+      "TestIntegrationShop",
+      "TestIntegrationOutbox",
+      "TestIntegrationConcurrentFirstFollow",
+      "TestIntegrationFollowAndFeed",
+      "TestIntegrationExpectedStateLike",
+      "TestIntegrationCommunityProjectionQueries",
+      "TestIntegrationLikeProjectionCannotReplaceFacts",
+      "TestIntegrationReviewInterruptedReplay"
+    ]
+  },
+  "integration-initial.txt": {
+    "all_counts": {
+      "entry_pass": 66,
+      "subgroup_pass": 121,
+      "entry_skip": 2
+    },
+    "integration_counts": {
+      "subgroup_pass": 77,
+      "entry_pass": 22,
+      "entry_skip": 2
+    },
+    "packages": {
+      "github.com/cityloop/fullstack-go/internal/notesearch": "pass",
+      "github.com/cityloop/fullstack-go/internal/communityconsumer": "pass",
+      "github.com/cityloop/fullstack-go/internal/communityprojection": "pass",
+      "github.com/cityloop/fullstack-go/internal/social": "pass",
+      "github.com/cityloop/fullstack-go/internal/aiknowledge": "pass",
+      "github.com/cityloop/fullstack-go/internal/aichat": "pass"
+    },
+    "integration_per_package": {
+      "github.com/cityloop/fullstack-go/internal/notesearch": {
+        "subgroup_pass": 10,
+        "entry_pass": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/communityconsumer": {
+        "entry_pass": 2,
+        "subgroup_pass": 6
+      },
+      "github.com/cityloop/fullstack-go/internal/communityprojection": {
+        "subgroup_pass": 14,
+        "entry_pass": 2
+      },
+      "github.com/cityloop/fullstack-go/internal/social": {
+        "entry_pass": 5,
+        "subgroup_pass": 20
+      },
+      "github.com/cityloop/fullstack-go/internal/aiknowledge": {
+        "subgroup_pass": 17,
+        "entry_pass": 4
+      },
+      "github.com/cityloop/fullstack-go/internal/aichat": {
+        "entry_pass": 7,
+        "entry_skip": 2,
+        "subgroup_pass": 10
+      }
+    },
+    "skips": [
+      "TestIntegrationRealProviderEvaluation",
+      "TestIntegrationRealProviderHTTPLifecycle"
+    ]
+  }
+}

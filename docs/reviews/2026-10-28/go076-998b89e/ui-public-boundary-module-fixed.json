@@ -1,0 +1,12 @@
+{
+  "task": "GO-076-public-boundary-review",
+  "passed": true,
+  "checks": [
+    "synthetic session canary exists before submitting the public search",
+    "public search omits Authorization and Cookie even with a stored canary, and receives actual HTTP 200",
+    "duplicate keyword URL parameters show validation with no search request or retained results",
+    "correcting the duplicated URL produces a fresh real search and canonical single keyword URL"
+  ],
+  "fixtureType": "no business writes; synthetic localStorage canary only",
+  "recordedAt": "2026-10-28T11:17:22.491Z"
+}

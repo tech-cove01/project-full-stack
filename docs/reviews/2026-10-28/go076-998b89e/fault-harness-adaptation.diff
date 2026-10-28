@@ -1,0 +1,33 @@
+--- scripts/go-note-search-fault.mjs@998b89e
++++ local/review-fault.mjs
+@@ -15,15 +15,15 @@
+ const API = process.env.API_BASE.replace(/\/$/, ''), WEB = process.env.WEB_BASE.replace(/\/$/, '')
+ const ES = process.env.ES_URL.replace(/\/$/, ''), INDEX = process.env.ES_INDEX
+ const esContainer = process.env.ES_CONTAINER, kafkaContainer = process.env.KAFKA_CONTAINER, topic = process.env.KAFKA_TOPIC
+-assert.equal(esContainer, 'project-full-stack-go076-elasticsearch-1', 'only the dedicated GO076 ES container may be stopped')
+-assert.equal(kafkaContainer, 'project-full-stack-go076-kafka-1', 'only the dedicated GO076 Kafka container may be inspected')
+-for (const [raw, port] of [[API, '8086'], [WEB, '5176'], [ES, '9202']]) {
++assert.equal(esContainer, 'project-full-stack-review076-elasticsearch-1', 'only the dedicated GO076 ES container may be stopped')
++assert.equal(kafkaContainer, 'project-full-stack-review076-kafka-1', 'only the dedicated GO076 Kafka container may be inspected')
++for (const [raw, port] of [[API, '8116'], [WEB, '5216'], [ES, '9214']]) {
+   const url = new URL(raw)
+   assert.ok(url.protocol === 'http:' && url.hostname === '127.0.0.1' && url.port === port && url.pathname === '/' && !url.search && !url.hash && !url.username && !url.password, 'explicit dedicated loopback endpoints required')
+ }
+-assert.equal(process.env.MYSQL_HOST, '127.0.0.1'); assert.equal(process.env.MYSQL_PORT, '3332')
+-assert.equal(process.env.REDIS_HOST, '127.0.0.1'); assert.equal(process.env.REDIS_PORT, '6404')
+-assert.equal(INDEX, 'community-notes-v1'); assert.equal(topic, 'community.events')
++assert.equal(process.env.MYSQL_HOST, '127.0.0.1'); assert.equal(process.env.MYSQL_PORT, '3350')
++assert.equal(process.env.REDIS_HOST, '127.0.0.1'); assert.equal(process.env.REDIS_PORT, '6420')
++assert.equal(INDEX, 'review-notes-v1'); assert.equal(topic, 'community.events')
+ const out = resolve(process.env.FAULT_EVIDENCE_DIR)
+ const previousFiles = await readdir(out).catch(error => { if (error.code === 'ENOENT') return []; throw error })
+ assert.equal(previousFiles.length, 0, 'choose a new evidence directory; retain prior failed rounds')
+@@ -47,7 +47,7 @@
+ }
+ function inspect(name, service) {
+   const labels = JSON.parse(docker(['inspect', '--format', '{{json .Config.Labels}}', name]))
+-  assert.equal(labels['com.docker.compose.project'], 'project-full-stack-go076')
++  assert.equal(labels['com.docker.compose.project'], 'project-full-stack-review076')
+   assert.equal(labels['com.docker.compose.service'], service)
+   const state = JSON.parse(docker(['inspect', '--format', '{{json .State}}', name]))
+   return { running: state.Running, oom: state.OOMKilled, exitCode: state.ExitCode, health: state.Health?.Status || 'none' }

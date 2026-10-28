@@ -1,0 +1,1 @@
+{"passed":true,"checks":25,"cleanup":true,"output":"D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go076-998b89e\\worktree\\docs\\reviews\\2026-10-28\\go076-998b89e\\ui-shanghai-initial.json"}

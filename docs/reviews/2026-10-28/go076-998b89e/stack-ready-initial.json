@@ -1,0 +1,15 @@
+{
+  "ready": true,
+  "api": "http://127.0.0.1:8116",
+  "web": "http://127.0.0.1:5216",
+  "children": [
+    {
+      "name": "api",
+      "pid": 47404
+    },
+    {
+      "name": "vite",
+      "pid": 49112
+    }
+  ]
+}

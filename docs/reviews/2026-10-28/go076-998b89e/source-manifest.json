@@ -1,0 +1,122 @@
+{
+  "verified_commit": "998b89e81bed42786d25d0cebbadb401fd506f70",
+  "scope": "GO-076 delivery only; main branch next-step edits are excluded",
+  "files": [
+    {
+      "path": "backend/internal/notesearch/client.go",
+      "sha256": "8e5147d5832c2a877aadeb081a491ea6288d6cd09113c23cf9e11d45e5252799"
+    },
+    {
+      "path": "backend/internal/notesearch/client_test.go",
+      "sha256": "878d3855d1aab25e4d5d825c79c8f0c0473a91205a421423d71f33dba6c57451"
+    },
+    {
+      "path": "backend/internal/notesearch/http.go",
+      "sha256": "09cf432788c332d7039952f264faa0b2664dc851e5d16de4c09e8b02ce988ed7"
+    },
+    {
+      "path": "backend/internal/notesearch/http_test.go",
+      "sha256": "f6d894b24bbac05700ffbb53d4a53ec8540fc20e4daacf7877216037366924b2"
+    },
+    {
+      "path": "backend/internal/notesearch/rebuild.go",
+      "sha256": "28414a01b47297cb4ef8bf14c90d7ae5167ea1b19fedb459ed6b190769009670"
+    },
+    {
+      "path": "backend/internal/notesearch/search_integration_test.go",
+      "sha256": "3d8ad53b0ecf510067d11ef1aed40ecfbd9d3467634cd375db31e50692798f01"
+    },
+    {
+      "path": "backend/internal/notesearch/service.go",
+      "sha256": "2e96b3e2603b1beded625580c5287f0af489f19e159b7bbe4a71691902afe802"
+    },
+    {
+      "path": "backend/internal/notesearch/service_test.go",
+      "sha256": "001e65edb7582a43e695c54abbd7cc76ef0dc534b8007cec269ce0d85ef5316a"
+    },
+    {
+      "path": "backend/internal/notesearch/sync.go",
+      "sha256": "910bae03654bd2987e27f6c10e55e9d7f2057736e06ba8898126a579b43e2737"
+    },
+    {
+      "path": "backend/internal/notesearch/sync_integration_test.go",
+      "sha256": "784c4cf4d83bc702d72eb6b9eba42d1a9059461de60c00bd852b577ddea53ba8"
+    },
+    {
+      "path": "backend/internal/notesearch/sync_test.go",
+      "sha256": "e996ca76e9bec0564fd034a0e7dc32f7833306a1b62b6bee60b7ea85629dba10"
+    },
+    {
+      "path": "backend/internal/platform/app/app.go",
+      "sha256": "b948c629a645bb80ca2b04bf5a1fa80add90ada1e4ae18432ad44a09a77e48cc"
+    },
+    {
+      "path": "backend/internal/platform/app/search.go",
+      "sha256": "94b90517836aebe46402667c198b1db84fdfafaeaef505054db6cd3bd8c74ce2"
+    },
+    {
+      "path": "backend/internal/platform/config/search.go",
+      "sha256": "4a9943ffb680a00404d70034f8b43095c3d525fcb6cc4159fb853d696f53bc45"
+    },
+    {
+      "path": "backend/internal/communityconsumer/worker.go",
+      "sha256": "2d50aa7bb6461d6a8fc2b8342f446bd24c67933f82d1811abeee764116b4dc95"
+    },
+    {
+      "path": "backend/cmd/note-search/main.go",
+      "sha256": "b84838d49b895da0883f1faadb851436e50281ea56517a3335debb3e021e1821"
+    },
+    {
+      "path": "infra/mysql/migrations/012-note-search.sql",
+      "sha256": "08e92cf649788cf7695920a246b08a70f5fcec92d977ee7bb01d8c2ca04a53b9"
+    },
+    {
+      "path": "compose.go.yaml",
+      "sha256": "127335e19a80ef10f6d730eff852de0be5acf4d8d9c3d03c3688f02aa0788078"
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "59f046d49c613cb0d06b0df0bcc0a1d210d1e5299e5a68e58220613e78d89667"
+    },
+    {
+      "path": "frontend/src/views/NoteSearchView.vue",
+      "sha256": "1d3060677d6cd7e8ad38b9a5159681387fe9a405733df89da81c4650d968d6b8"
+    },
+    {
+      "path": "frontend/src/api.ts",
+      "sha256": "3875b1348b650bd24412a4d096f798b848a001d5c42adb6cf404ef230ee3a363"
+    },
+    {
+      "path": "frontend/src/types.ts",
+      "sha256": "5244de8756a38bfec40dccc6d41a70bed3e2a27c839da0a043f554eb1ba673b0"
+    },
+    {
+      "path": "frontend/src/router.ts",
+      "sha256": "356b2ac266f622bf6b1b7a0e7e8c75c6b14e9df58e67e60990c9107553b074a9"
+    },
+    {
+      "path": "frontend/src/App.vue",
+      "sha256": "9035449aa302f01287094fc84070bf4a4926dc57a6666c4c8ca5be03cc7676e7"
+    },
+    {
+      "path": "scripts/go-note-search-ui-smoke.mjs",
+      "sha256": "ab90c0a9dd855ece988fd25d8149a311c522c2ea51ba6fa8aa46e6b6d66c2855"
+    },
+    {
+      "path": "scripts/go-note-search-fault.mjs",
+      "sha256": "dc78833c0808ede58b56748007e44102aefda0fbf99c4c3fc842bf62fc991564"
+    }
+  ],
+  "binaries": [
+    {
+      "name": "api-initial.exe",
+      "sha256": "f53e7e043ceb018d80d9af70f7b9c9b8a32d20acea0d648a43e22c1fc30679b7",
+      "build_info": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go076-998b89e\\api-initial.exe: go1.27.0\n\tpath\tgithub.com/cityloop/fullstack-go/cmd/api\n\tmod\tgithub.com/cityloop/fullstack-go\t(devel)\t\n\tdep\tfilippo.io/edwards25519\tv1.1.0\th1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=\n\tdep\tgithub.com/cespare/xxhash/v2\tv2.3.0\th1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=\n\tdep\tgithub.com/dgryski/go-rendezvous\tv0.0.0-20200823014737-9f7001d12a5f\th1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=\n\tdep\tgithub.com/gabriel-vasile/mimetype\tv1.4.8\th1:FfZ3gj38NjllZIeJAmMhr+qKL8Wu+nOoI3GqacKw1NM=\n\tdep\tgithub.com/gin-contrib/sse\tv1.1.0\th1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w=\n\tdep\tgithub.com/gin-gonic/gin\tv1.11.0\th1:OW/6PLjyusp2PPXtyxKHU0RbX6I/l28FTdDlae5ueWk=\n\tdep\tgithub.com/go-playground/locales\tv0.14.1\th1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=\n\tdep\tgithub.com/go-playground/universal-translator\tv0.18.1\th1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=\n\tdep\tgithub.com/go-playground/validator/v10\tv10.27.0\th1:w8+XrWVMhGkxOaaowyKH35gFydVHOvC0/uWoy2Fzwn4=\n\tdep\tgithub.com/go-sql-driver/mysql\tv1.8.1\th1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=\n\tdep\tgithub.com/goccy/go-yaml\tv1.18.0\th1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=\n\tdep\tgithub.com/jinzhu/inflection\tv1.0.0\th1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=\n\tdep\tgithub.com/jinzhu/now\tv1.1.5\th1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=\n\tdep\tgithub.com/klauspost/compress\tv1.15.9\th1:wKRjX6JRtDdrE9qwa4b/Cip7ACOshUI4smpCQanqjSY=\n\tdep\tgithub.com/leodido/go-urn\tv1.4.0\th1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.20\th1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=\n\tdep\tgithub.com/pelletier/go-toml/v2\tv2.2.4\th1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=\n\tdep\tgithub.com/pierrec/lz4/v4\tv4.1.15\th1:MO0/ucJhngq7299dKLwIMtgTfbkoSPF6AoMYDd8Q4q0=\n\tdep\tgithub.com/quic-go/qpack\tv0.5.1\th1:giqksBPnT/HDtZ6VhtFKgoLOWmlyo9Ei6u9PqzIMbhI=\n\tdep\tgithub.com/quic-go/quic-go\tv0.54.0\th1:6s1YB9QotYI6Ospeiguknbp2Znb/jZYjZLRXn9kMQBg=\n\tdep\tgithub.com/redis/go-redis/v9\tv9.17.0\th1:K6E+ZlYN95KSMmZeEQPbU/c++wfmEvfFB17yEAq/VhM=\n\tdep\tgithub.com/segmentio/kafka-go\tv0.4.47\th1:IqziR4pA3vrZq7YdRxaT3w1/5fvIH5qpCwstUanQQB0=\n\tdep\tgithub.com/ugorji/go/codec\tv1.3.0\th1:Qd2W2sQawAfG8XSvzwhBeoGq71zXOC/Q1E9y/wUcsUA=\n\tdep\tgolang.org/x/crypto\tv0.40.0\th1:r4x+VvoG5Fm+eJcxMaY8CQM7Lb0l1lsmjGBQ6s8BfKM=\n\tdep\tgolang.org/x/net\tv0.42.0\th1:jzkYrhi3YQWD6MLBJcsklgQsoAcw89EcZbJw8Z614hs=\n\tdep\tgolang.org/x/sys\tv0.35.0\th1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=\n\tdep\tgolang.org/x/text\tv0.27.0\th1:4fGWRpyh641NLlecmyl4LOe6yDdfaYNrGb2zdfo4JV4=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.9\th1:w2gp2mA27hUeUzj9Ex9FBjsBm40zfaDtEWow293U7Iw=\n\tdep\tgorm.io/driver/mysql\tv1.6.0\th1:eNbLmNTpPpTOVZi8MMxCi2aaIm0ZpInbORNXDwyLGvg=\n\tdep\tgorm.io/gorm\tv1.31.1\th1:7CA8FTFz/gRfgqgpeKIBcervUn3xSyPUmr6B2WXJ7kg=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=windows\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=998b89e81bed42786d25d0cebbadb401fd506f70\n\tbuild\tvcs.time=2026-10-28T11:03:17Z\n\tbuild\tvcs.modified=true\n"
+    },
+    {
+      "name": "note-search-initial.exe",
+      "sha256": "4437605d034da4576899aaf9761395689b62045a8aeec42594fe7d84c6b3d847",
+      "build_info": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go076-998b89e\\note-search-initial.exe: go1.27.0\n\tpath\tgithub.com/cityloop/fullstack-go/cmd/note-search\n\tmod\tgithub.com/cityloop/fullstack-go\t(devel)\t\n\tdep\tfilippo.io/edwards25519\tv1.1.0\th1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=\n\tdep\tgithub.com/cespare/xxhash/v2\tv2.3.0\th1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=\n\tdep\tgithub.com/dgryski/go-rendezvous\tv0.0.0-20200823014737-9f7001d12a5f\th1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=\n\tdep\tgithub.com/gabriel-vasile/mimetype\tv1.4.8\th1:FfZ3gj38NjllZIeJAmMhr+qKL8Wu+nOoI3GqacKw1NM=\n\tdep\tgithub.com/gin-contrib/sse\tv1.1.0\th1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w=\n\tdep\tgithub.com/gin-gonic/gin\tv1.11.0\th1:OW/6PLjyusp2PPXtyxKHU0RbX6I/l28FTdDlae5ueWk=\n\tdep\tgithub.com/go-playground/locales\tv0.14.1\th1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=\n\tdep\tgithub.com/go-playground/universal-translator\tv0.18.1\th1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=\n\tdep\tgithub.com/go-playground/validator/v10\tv10.27.0\th1:w8+XrWVMhGkxOaaowyKH35gFydVHOvC0/uWoy2Fzwn4=\n\tdep\tgithub.com/go-sql-driver/mysql\tv1.8.1\th1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=\n\tdep\tgithub.com/goccy/go-yaml\tv1.18.0\th1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=\n\tdep\tgithub.com/jinzhu/inflection\tv1.0.0\th1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=\n\tdep\tgithub.com/jinzhu/now\tv1.1.5\th1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=\n\tdep\tgithub.com/leodido/go-urn\tv1.4.0\th1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=\n\tdep\tgithub.com/mattn/go-isatty\tv0.0.20\th1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=\n\tdep\tgithub.com/pelletier/go-toml/v2\tv2.2.4\th1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=\n\tdep\tgithub.com/quic-go/qpack\tv0.5.1\th1:giqksBPnT/HDtZ6VhtFKgoLOWmlyo9Ei6u9PqzIMbhI=\n\tdep\tgithub.com/quic-go/quic-go\tv0.54.0\th1:6s1YB9QotYI6Ospeiguknbp2Znb/jZYjZLRXn9kMQBg=\n\tdep\tgithub.com/redis/go-redis/v9\tv9.17.0\th1:K6E+ZlYN95KSMmZeEQPbU/c++wfmEvfFB17yEAq/VhM=\n\tdep\tgithub.com/ugorji/go/codec\tv1.3.0\th1:Qd2W2sQawAfG8XSvzwhBeoGq71zXOC/Q1E9y/wUcsUA=\n\tdep\tgolang.org/x/crypto\tv0.40.0\th1:r4x+VvoG5Fm+eJcxMaY8CQM7Lb0l1lsmjGBQ6s8BfKM=\n\tdep\tgolang.org/x/net\tv0.42.0\th1:jzkYrhi3YQWD6MLBJcsklgQsoAcw89EcZbJw8Z614hs=\n\tdep\tgolang.org/x/sys\tv0.35.0\th1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=\n\tdep\tgolang.org/x/text\tv0.27.0\th1:4fGWRpyh641NLlecmyl4LOe6yDdfaYNrGb2zdfo4JV4=\n\tdep\tgoogle.golang.org/protobuf\tv1.36.9\th1:w2gp2mA27hUeUzj9Ex9FBjsBm40zfaDtEWow293U7Iw=\n\tdep\tgorm.io/driver/mysql\tv1.6.0\th1:eNbLmNTpPpTOVZi8MMxCi2aaIm0ZpInbORNXDwyLGvg=\n\tdep\tgorm.io/gorm\tv1.31.1\th1:7CA8FTFz/gRfgqgpeKIBcervUn3xSyPUmr6B2WXJ7kg=\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tCGO_ENABLED=1\n\tbuild\tCGO_CFLAGS=\n\tbuild\tCGO_CPPFLAGS=\n\tbuild\tCGO_CXXFLAGS=\n\tbuild\tCGO_LDFLAGS=\n\tbuild\tGOARCH=amd64\n\tbuild\tGOOS=windows\n\tbuild\tGOAMD64=v1\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=998b89e81bed42786d25d0cebbadb401fd506f70\n\tbuild\tvcs.time=2026-10-28T11:03:17Z\n\tbuild\tvcs.modified=true\n"
+    }
+  ]
+}

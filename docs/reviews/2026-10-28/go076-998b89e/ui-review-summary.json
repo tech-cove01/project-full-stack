@@ -1,0 +1,35 @@
+{
+  "ui-shanghai-initial.json": {
+    "passed": true,
+    "check_count": 25,
+    "cleanup": true,
+    "offsetBarrier": {
+      "groups": 3,
+      "partitions": 3,
+      "caughtUp": true
+    },
+    "sha256": "cd977adcbc8c74a50641b1c0c07598b81d979efc44e3f4479225d040a2aab901"
+  },
+  "ui-utc-initial.json": {
+    "passed": true,
+    "check_count": 25,
+    "cleanup": true,
+    "offsetBarrier": {
+      "groups": 3,
+      "partitions": 3,
+      "caughtUp": true
+    },
+    "sha256": "3ab8f4632e2c97f3e1339c52439bfaf338fb72d8005791e9191a1d6fe406f506"
+  },
+  "ui-public-boundary-module-fixed.json": {
+    "passed": true,
+    "check_count": 4,
+    "cleanup": null,
+    "offsetBarrier": null,
+    "sha256": "fd11e32acc135411d6c172d49a45c670e34bca6c816d9e5db092d364bd1cbd2e"
+  },
+  "supplemental_script": {
+    "path": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go076-998b89e\\ui-public-boundary.mjs",
+    "sha256": "8332cced5ad0553ee6bf5ee781c1dd2817f6732392ba04cda1211e6c8569544d"
+  }
+}

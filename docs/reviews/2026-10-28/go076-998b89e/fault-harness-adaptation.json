@@ -1,0 +1,52 @@
+{
+  "source_sha256": "dc78833c0808ede58b56748007e44102aefda0fbf99c4c3fc842bf62fc991564",
+  "review_copy_sha256": "55e49f470ae75b7fd229eb66be5a7814ebe1ba0da7c26201b848d6a8b9606977",
+  "changes": [
+    {
+      "from": "'project-full-stack-go076-elasticsearch-1'",
+      "to": "'project-full-stack-review076-elasticsearch-1'",
+      "count": 1
+    },
+    {
+      "from": "'project-full-stack-go076-kafka-1'",
+      "to": "'project-full-stack-review076-kafka-1'",
+      "count": 1
+    },
+    {
+      "from": "'project-full-stack-go076'",
+      "to": "'project-full-stack-review076'",
+      "count": 1
+    },
+    {
+      "from": "'8086'",
+      "to": "'8116'",
+      "count": 1
+    },
+    {
+      "from": "'5176'",
+      "to": "'5216'",
+      "count": 1
+    },
+    {
+      "from": "'9202'",
+      "to": "'9214'",
+      "count": 1
+    },
+    {
+      "from": "'3332'",
+      "to": "'3350'",
+      "count": 1
+    },
+    {
+      "from": "'6404'",
+      "to": "'6420'",
+      "count": 1
+    },
+    {
+      "from": "'community-notes-v1'",
+      "to": "'review-notes-v1'",
+      "count": 1
+    }
+  ],
+  "scope": "Only fixed container/project/port/alias assertions changed for this independent review. Safety assertions retained."
+}

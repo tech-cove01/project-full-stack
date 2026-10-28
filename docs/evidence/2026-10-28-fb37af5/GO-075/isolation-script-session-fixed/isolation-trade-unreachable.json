@@ -1,0 +1,24 @@
+{
+  "task": "GO-070",
+  "passed": true,
+  "flows": {
+    "trade": {
+      "activityId": "1013",
+      "orderId": "653749225665855497",
+      "orderStatus": 3,
+      "auditActions": 5
+    }
+  },
+  "checks": [
+    "the merchant can publish an activity (200 )",
+    "the activity becomes ACTIVE with a ready gate",
+    "the seckill request is accepted",
+    "the accepted order becomes a durable pending row",
+    "the shopper can pay the order",
+    "the paid order exposes its redeem token to its owner",
+    "the merchant can redeem the order",
+    "the first redemption is not a replay",
+    "the redemption is visible in the audit trail"
+  ],
+  "cleanup": []
+}

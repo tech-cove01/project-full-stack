@@ -50,6 +50,7 @@ const error = ref('')
 const loadingPage = ref(true)
 const log = ref<HTMLElement>()
 let controller: AbortController | undefined
+let conversationGeneration = 0
 
 const stages: Record<string, string> = {
   retrieving: '正在检索已发布规则',
@@ -65,10 +66,20 @@ async function scrollToEnd() {
 }
 
 async function newConversation() {
-  if (conversation.value) {
-    await api.deleteConversation(conversation.value.id).catch(() => {})
+  const generation = ++conversationGeneration
+  controller?.abort()
+  controller = undefined
+  loading.value = false
+  stage.value = ''
+  const previous = conversation.value
+  conversation.value = null
+  messages.value = []
+  if (previous) {
+    await api.deleteConversation(previous.id).catch(() => {})
   }
+  if (generation !== conversationGeneration) return
   const { data } = await api.createConversation(selectedShop.value || undefined)
+  if (generation !== conversationGeneration) return
   conversation.value = data
   messages.value = []
   await scrollToEnd()
@@ -109,13 +120,18 @@ async function send() {
   messages.value.push({ role: 'user', text, time: new Date().toLocaleString() })
   const assistant: ChatMessage = { role: 'assistant', text: '', pending: true }
   messages.value.push(assistant)
-  await scrollToEnd()
-
-  controller = new AbortController()
+  const active = new AbortController()
+  controller = active
+  const token = localStorage.getItem(TOKEN_KEY)
+  const conversationId = conversation.value.id
+  const current = () =>
+    controller === active && !active.signal.aborted && localStorage.getItem(TOKEN_KEY) === token
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined
   try {
-    const token = localStorage.getItem(TOKEN_KEY)
+    await scrollToEnd()
+    if (!current()) return
     const response = await fetch(
-      apiBase + '/ai/conversations/' + encodeURIComponent(conversation.value.id) + '/messages',
+      apiBase + '/ai/conversations/' + encodeURIComponent(conversationId) + '/messages',
       {
         method: 'POST',
         headers: {
@@ -127,9 +143,14 @@ async function send() {
           message: text,
           shopId: selectedShop.value || undefined,
         }),
-        signal: controller.signal,
+        signal: active.signal,
       },
     )
+    if (!current()) return
+    if (response.status === 401 && localStorage.getItem(TOKEN_KEY) === token) {
+      localStorage.removeItem(TOKEN_KEY)
+      window.dispatchEvent(new CustomEvent('auth-expired'))
+    }
     if (!response.ok) {
       let message = 'AI 请求未完成（' + response.status + '）'
       try {
@@ -144,16 +165,18 @@ async function send() {
       return
     }
     if (!response.body) throw new Error('浏览器不支持流式响应。')
-    const reader = response.body.getReader()
+    reader = response.body.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
     let finished = false
     while (!finished) {
       const { done, value } = await reader.read()
+      if (!current()) return
       if (done) break
       buffer += decoder.decode(value, { stream: true })
       let index
       while ((index = buffer.indexOf('\n\n')) >= 0) {
+        if (!current()) return
         const block = buffer.slice(0, index)
         buffer = buffer.slice(index + 2)
         let event = 'message'
@@ -178,6 +201,8 @@ async function send() {
           assistant.text = data?.text || ''
           assistant.pending = false
         } else if (event === 'error') {
+          assistant.sources = []
+          assistant.tool = undefined
           assistant.text = data?.message || '请求未完成'
           assistant.pending = false
           error.value = assistant.text
@@ -187,6 +212,7 @@ async function send() {
           finished = true
         }
         await scrollToEnd()
+        if (!current()) return
       }
     }
     if (assistant.pending) {
@@ -194,6 +220,7 @@ async function send() {
       if (!assistant.text) assistant.text = '连接已中断，结果未确认。'
     }
   } catch (cause) {
+    if (controller !== active || localStorage.getItem(TOKEN_KEY) !== token) return
     if ((cause as Error).name === 'AbortError') {
       assistant.pending = false
       assistant.text = assistant.text || '已停止本次查询。'
@@ -204,10 +231,13 @@ async function send() {
       error.value = assistant.text
     }
   } finally {
-    loading.value = false
-    stage.value = ''
-    controller = undefined
-    await scrollToEnd()
+    await reader?.cancel().catch(() => {})
+    if (controller === active) {
+      loading.value = false
+      stage.value = ''
+      controller = undefined
+      await scrollToEnd()
+    }
   }
 }
 
@@ -226,9 +256,24 @@ function sourceLink(source: AiSource) {
 }
 
 onMounted(() => {
+  window.addEventListener('storage', onSessionChanged)
   void load()
 })
-onBeforeUnmount(() => controller?.abort())
+function onSessionChanged(event: StorageEvent) {
+  if (event.key !== TOKEN_KEY) return
+  conversationGeneration++
+  controller?.abort()
+  controller = undefined
+  conversation.value = null
+  messages.value = []
+  loading.value = false
+  stage.value = ''
+}
+onBeforeUnmount(() => {
+  conversationGeneration++
+  controller?.abort()
+  window.removeEventListener('storage', onSessionChanged)
+})
 </script>
 
 <template>
@@ -268,6 +313,13 @@ onBeforeUnmount(() => controller?.abort())
       type="error"
       :closable="false"
       show-icon
+      class="space-bottom"
+    />
+    <el-alert
+      v-if="capabilities?.ready && capabilities.mode === 'stub'"
+      :title="capabilities.reason || '当前为确定性演示模式，未接入真实模型。'"
+      type="warning"
+      :closable="false"
       class="space-bottom"
     />
     <el-skeleton v-if="loadingPage" :rows="6" animated />

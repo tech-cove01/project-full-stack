@@ -81,7 +81,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			order.Register(routes, orders, identity)
 		}),
 		ReadHeaderTimeout: 5 * time.Second, ReadTimeout: 15 * time.Second,
-		WriteTimeout: 30 * time.Second, IdleTimeout: 60 * time.Second,
+		WriteTimeout: 60 * time.Second, IdleTimeout: 60 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 	// Workers use process lifetime, never a request context. Persistent outbox

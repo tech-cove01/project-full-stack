@@ -1,0 +1,32 @@
+{
+  "task": "GO-072",
+  "recordedAt": "2026-10-28T07:38:09.4138583Z",
+  "databaseVerification": "cleanup-db.txt",
+  "ownHTTPProcess": "bootstrap exited 0 without forced cleanup; ephemeral port rebindable",
+  "privateTopicAndGroupCleanup": "each consumer fixture verifies exact private topic/group cleanup; shared community.events untouched",
+  "containers": [
+    {
+      "oomKilled": false,
+      "name": "project-full-stack-go072-mysql-1",
+      "exitCode": 0,
+      "state": "exited"
+    },
+    {
+      "oomKilled": false,
+      "name": "project-full-stack-go072-redis-1",
+      "exitCode": 0,
+      "state": "exited"
+    },
+    {
+      "oomKilled": false,
+      "name": "project-full-stack-go072-kafka-1",
+      "exitCode": 143,
+      "state": "exited"
+    }
+  ],
+  "kafkaExitBoundary": "143 observed after docker compose stop (SIGTERM); no OOM and no forced kill requested. Not described as exit 0.",
+  "stopCommand": "docker compose -f compose.go.yaml -p project-full-stack-go072 --profile kafka stop --timeout 60 mysql redis kafka",
+  "volumes": "preserved",
+  "untouchedServices": "Existing project-full-stack-go 3308/6380, original full-stack 3307/6379 and CRM services remained running.",
+  "survivingDerivedRows": "Rebuild test may leave projections of original demo facts; these are derived data in the dedicated volume, not test user rows or unapplied consumer failures."
+}

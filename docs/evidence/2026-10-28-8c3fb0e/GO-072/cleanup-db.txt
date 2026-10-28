@@ -1,0 +1,7 @@
+owned_users	0
+owned_merchant	0
+owned_repo_notes	0
+pending_outbox	0
+consumer_failures	0
+new_receipts	0
+remaining_facts_follow	0

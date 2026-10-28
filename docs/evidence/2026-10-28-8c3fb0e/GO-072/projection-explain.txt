@@ -1,0 +1,4 @@
+id	select_type	table	partitions	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	tb_community_follow_projection	NULL	ref	idx_community_follow_reverse	idx_community_follow_reverse	9	const,const	1	100.00	Using index
+id	select_type	table	partitions	type	possible_keys	key	key_len	ref	rows	filtered	Extra
+1	SIMPLE	tb_community_note_projection	NULL	ref	idx_community_note_author_time	idx_community_note_author_time	8	const	1	100.00	Backward index scan; Using index

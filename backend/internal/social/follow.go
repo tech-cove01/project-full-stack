@@ -28,12 +28,14 @@ type Relationship struct {
 	Following     bool   `json:"following"`
 	Version       int    `json:"version"`
 	FollowerCount int64  `json:"followerCount"`
+	Source        string `json:"source,omitempty"`
 }
 
 type Service struct {
-	db     *gorm.DB
-	counts *communitycache.Cache
-	likes  *communitycache.Likes
+	db          *gorm.DB
+	counts      *communitycache.Cache
+	likes       *communitycache.Likes
+	projections bool
 }
 
 func NewService(db *gorm.DB) *Service { return &Service{db: db} }
@@ -160,20 +162,44 @@ func (service *Service) Relationship(ctx context.Context, userID, authorID strin
 	if err != nil {
 		return Relationship{}, err
 	}
+	if service.projections {
+		var result Relationship
+		err = service.readSnapshot(ctx, func(reader *Service) error {
+			var queryErr error
+			result, queryErr = reader.relationship(ctx, user, author)
+			return queryErr
+		})
+		return result, err
+	}
+	return service.relationship(ctx, user, author)
+}
+
+func (service *Service) relationship(ctx context.Context, user, author uint64) (Relationship, error) {
 	var row struct {
 		ID      uint64
 		Active  int
 		Version int
 	}
-	if err = service.db.WithContext(ctx).Raw(`SELECT id,active,version FROM tb_follow
+	if err := service.db.WithContext(ctx).Raw(`SELECT id,active,version FROM tb_follow
 		WHERE user_id=? AND follow_user_id=?`, user, author).Scan(&row).Error; err != nil {
 		return Relationship{}, err
 	}
 	var count int64
-	if err = service.db.WithContext(ctx).Raw(`SELECT COUNT(*) FROM tb_follow
-		WHERE follow_user_id=? AND active=1`, author).Scan(&count).Error; err != nil {
-		return Relationship{}, err
+	source := sourceDatabase
+	if service.projections {
+		if projected, complete := service.projectedFollowerCount(ctx, author); complete {
+			count, source = projected, sourceProjection
+		}
+		if err := ctx.Err(); err != nil {
+			return Relationship{}, err
+		}
+	}
+	if source == sourceDatabase {
+		if err := service.db.WithContext(ctx).Raw(`SELECT COUNT(*) FROM tb_follow
+			WHERE follow_user_id=? AND active=1`, author).Scan(&count).Error; err != nil {
+			return Relationship{}, err
+		}
 	}
 	return Relationship{AuthorID: strconv.FormatUint(author, 10), Following: row.Active == 1,
-		Version: row.Version, FollowerCount: count}, nil
+		Version: row.Version, FollowerCount: count, Source: source}, nil
 }

@@ -1,0 +1,5 @@
+gofmt -l owned social files: PASS (empty output)
+ok  	github.com/cityloop/fullstack-go/internal/social	0.272s
+go test -count=1 ./internal/social: PASS (GO_INTEGRATION=0)
+go vet ./internal/social: PASS
+go build ./internal/social: PASS

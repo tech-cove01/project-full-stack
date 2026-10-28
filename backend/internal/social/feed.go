@@ -40,6 +40,7 @@ type FeedItem struct {
 type FeedPage struct {
 	Items      []FeedItem `json:"items"`
 	NextCursor *Cursor    `json:"nextCursor,omitempty"`
+	Source     string     `json:"source,omitempty"`
 }
 
 func zone() *time.Location {
@@ -84,16 +85,30 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		}
 		cursorAt, cursorKey = parsed, key
 	}
+	if service.projections {
+		var result FeedPage
+		err = service.readSnapshot(ctx, func(reader *Service) error {
+			var queryErr error
+			result, queryErr = reader.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
+			return queryErr
+		})
+		return result, err
+	}
+	return service.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
+}
+
+func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time.Time,
+	cursorKey uint64, hasCursor bool, limit int) (FeedPage, error) {
 	// Two steps on purpose: a join makes MySQL sort the whole joined set
 	// (Using temporary; Using filesort). Reading the author ids first lets the
 	// note query scan idx_blog_feed backwards and stop at the page limit.
 	authors := make([]uint64, 0)
-	if err = service.db.WithContext(ctx).Raw(`SELECT follow_user_id FROM tb_follow
+	if err := service.db.WithContext(ctx).Raw(`SELECT follow_user_id FROM tb_follow
 		WHERE user_id=? AND active=1`, user).Scan(&authors).Error; err != nil {
 		return FeedPage{}, err
 	}
 	if len(authors) == 0 {
-		return FeedPage{Items: []FeedItem{}}, nil
+		return FeedPage{Items: []FeedItem{}, Source: sourceDatabase}, nil
 	}
 	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(authors)), ",")
 	where := ` WHERE b.status='PUBLISHED' AND b.user_id IN (` + placeholders + `)`
@@ -101,6 +116,11 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 	for _, author := range authors {
 		args = append(args, author)
 	}
+	// The catalog only narrows candidates. The current relation and public-state
+	// predicates remain in the final, pre-LIMIT SQL authorization boundary.
+	where += ` AND EXISTS(SELECT 1 FROM tb_follow f
+		WHERE f.user_id=? AND f.follow_user_id=b.user_id AND f.active=1)`
+	args = append(args, user)
 	if hasCursor {
 		where += " AND (b.create_time < ? OR (b.create_time = ? AND b.id < ?))"
 		args = append(args, cursorAt, cursorAt, cursorKey)
@@ -120,11 +140,30 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 	}, 0, limit)
 	// One join assembles the shop label for the whole page instead of querying it
 	// per card; the feed still scans idx_blog_feed for the ordered page.
-	if err = service.db.WithContext(ctx).Raw(`SELECT b.id,b.user_id,b.shop_id,s.name AS shop_name,
-		b.title,b.images,b.content,b.liked,b.comments,b.create_time
-		FROM tb_blog b LEFT JOIN tb_shop s ON s.id=b.shop_id`+where+
-		` ORDER BY b.create_time DESC,b.id DESC LIMIT ?`, args...).Scan(&rows).Error; err != nil {
-		return FeedPage{}, err
+	projected := service.projections && service.feedCatalogComplete(ctx, authors)
+	query := func(useCatalog bool) error {
+		catalog := ""
+		if useCatalog {
+			catalog = ` INNER JOIN tb_community_note_projection p ON p.note_id=b.id
+				AND p.author_id=b.user_id AND p.version=b.publish_version
+				AND p.published_at=b.create_time`
+		}
+		return service.db.WithContext(ctx).Raw(`SELECT b.id,b.user_id,b.shop_id,s.name AS shop_name,
+			b.title,b.images,b.content,b.liked,b.comments,b.create_time
+			FROM tb_blog b LEFT JOIN tb_shop s ON s.id=b.shop_id`+catalog+where+
+			` ORDER BY b.create_time DESC,b.id DESC LIMIT ?`, args...).Scan(&rows).Error
+	}
+	if err := query(projected); err != nil {
+		if !projected || ctx.Err() != nil {
+			return FeedPage{}, err
+		}
+		// Projection availability is optional even after a successful completeness
+		// check. Retry only the read against the same authoritative snapshot.
+		rows = rows[:0]
+		projected = false
+		if err = query(false); err != nil {
+			return FeedPage{}, err
+		}
 	}
 	// One query for the caller's own likes, not one per card.
 	liked := make(map[uint64]bool, len(rows))
@@ -140,7 +179,7 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 			likeArgs = append(likeArgs, id)
 		}
 		likedIDs := make([]uint64, 0)
-		if err = service.db.WithContext(ctx).Raw(`SELECT blog_id FROM tb_blog_like
+		if err := service.db.WithContext(ctx).Raw(`SELECT blog_id FROM tb_blog_like
 			WHERE user_id=? AND active=1 AND blog_id IN (`+likePlaceholders+`)`,
 			likeArgs...).Scan(&likedIDs).Error; err != nil {
 			return FeedPage{}, err
@@ -186,7 +225,10 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		}
 		items = append(items, item)
 	}
-	page := FeedPage{Items: items}
+	page := FeedPage{Items: items, Source: sourceDatabase}
+	if projected {
+		page.Source = sourceProjection
+	}
 	if len(items) == limit {
 		last := items[len(items)-1]
 		page.NextCursor = &Cursor{PublishedAt: last.CreateTime, ID: last.ID}

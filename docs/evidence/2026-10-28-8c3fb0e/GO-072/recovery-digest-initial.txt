@@ -1,0 +1,8 @@
+=== RUN   TestIntegrationProjectionRecovery
+=== RUN   TestIntegrationProjectionRecovery/nil_and_empty_poison_bytes_keep_one_immutable_digest
+    runtime_integration_test.go:85: equivalent empty bytes changed the parked content hash
+--- FAIL: TestIntegrationProjectionRecovery (0.08s)
+    --- FAIL: TestIntegrationProjectionRecovery/nil_and_empty_poison_bytes_keep_one_immutable_digest (0.03s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/communityprojection	2.115s
+FAIL

@@ -1,0 +1,14 @@
+=== RUN   TestIntegrationProjectionRecovery
+=== RUN   TestIntegrationProjectionRecovery/nil_and_empty_poison_bytes_keep_one_immutable_digest
+=== RUN   TestIntegrationProjectionRecovery/park_preserves_poison_bytes_and_repeated_coordinates_require_identical_content
+=== RUN   TestIntegrationProjectionRecovery/replay_effect_and_resolution_roll_back_together_then_retry
+=== RUN   TestIntegrationProjectionRecovery/missing_note_fact_recovers_from_original_record_without_changing_offsets
+=== RUN   TestIntegrationProjectionRecovery/rebuild_fences_application_preserves_receipts_and_accepts_matching_bootstrap_event
+--- PASS: TestIntegrationProjectionRecovery (0.53s)
+    --- PASS: TestIntegrationProjectionRecovery/nil_and_empty_poison_bytes_keep_one_immutable_digest (0.03s)
+    --- PASS: TestIntegrationProjectionRecovery/park_preserves_poison_bytes_and_repeated_coordinates_require_identical_content (0.03s)
+    --- PASS: TestIntegrationProjectionRecovery/replay_effect_and_resolution_roll_back_together_then_retry (0.08s)
+    --- PASS: TestIntegrationProjectionRecovery/missing_note_fact_recovers_from_original_record_without_changing_offsets (0.07s)
+    --- PASS: TestIntegrationProjectionRecovery/rebuild_fences_application_preserves_receipts_and_accepts_matching_bootstrap_event (0.24s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communityprojection	2.584s

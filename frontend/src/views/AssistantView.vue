@@ -65,6 +65,14 @@ async function scrollToEnd() {
   if (log.value) log.value.scrollTop = log.value.scrollHeight
 }
 
+function shopToolLink(item: { id: string; href?: unknown }): string {
+  if (typeof item.href === 'string') {
+    const match = /^\/shops\/([1-9]\d*)(?:[?#].*)?$/.exec(item.href)
+    if (match?.[1] === item.id) return item.href
+  }
+  return '/shops/' + item.id
+}
+
 async function newConversation() {
   const generation = ++conversationGeneration
   controller?.abort()
@@ -390,12 +398,11 @@ onBeforeUnmount(() => {
                 <RouterLink
                   v-for="item in message.tool.items || []"
                   :key="item.id"
-                  :to="item.href || '/'"
+                  :to="shopToolLink(item)"
                   class="tool-row"
                 >
                   <span>{{ item.name }}</span>
-                  <span>{{ item.area }}</span>
-                  <span>{{ item.score }} 分</span>
+                  <span>{{ item.address }}</span>
                 </RouterLink>
               </template>
             </div>

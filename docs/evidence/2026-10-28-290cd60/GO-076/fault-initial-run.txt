@@ -1,0 +1,7 @@
+{"phase":"verify-dedicated-running-dependencies","checks":0}
+{"phase":"publish-two-before-outage","checks":2}
+{"phase":"stop-only-dedicated-ES-container","checks":4}
+{"phase":"publish-during-physical-outage-and-park","checks":7}
+{"phase":"actual-trading-while-ES-stays-stopped","checks":9}
+{"phase":"restart-same-container-and-replay-owned-sources","checks":10}
+{"passed":true,"checks":17,"cleanup":true,"esRestored":true}

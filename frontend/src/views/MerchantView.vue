@@ -50,8 +50,8 @@ onBeforeUnmount(() => controller?.abort())
   <div class="page-top merchant-actions">
     <el-button type="primary" :loading="loading" @click="load">刷新授权</el-button>
     <RouterLink to="/merchant/activities"><el-button>活动管理</el-button></RouterLink>
-    <el-button disabled>订单与核销 · 稍后开放</el-button>
-    <el-button disabled>公开规则 · 稍后开放</el-button>
+    <RouterLink to="/merchant/orders"><el-button>订单与核销</el-button></RouterLink>
+    <RouterLink to="/merchant/knowledge"><el-button>公开规则</el-button></RouterLink>
   </div>
   <el-alert
     v-if="error"

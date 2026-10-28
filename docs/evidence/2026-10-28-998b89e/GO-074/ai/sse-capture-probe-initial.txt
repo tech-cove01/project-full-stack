@@ -1,0 +1,9 @@
+<anonymous_script>:1
+
+
+SyntaxError: Unexpected end of JSON input
+    at JSON.parse (<anonymous>)
+    at Server.<anonymous> (file:///D:/%E6%A1%8C%E9%9D%A2/The%20ALL/agent/project/code/project-full-stack/docs/evidence/2026-10-28-998b89e/GO-074/ai/sse-capture-probe.mjs:13:21)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+Node.js v24.15.0

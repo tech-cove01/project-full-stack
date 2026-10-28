@@ -1,0 +1,113 @@
+{
+  "task": "GO-074b",
+  "passed": false,
+  "cleanup": true,
+  "checks": [
+    "fresh bounded observation journal starts empty",
+    "actual capabilities identify configured real Provider",
+    "blank input keeps empty state and sends no model turn"
+  ],
+  "turns": [
+    {
+      "case": "grounded",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [],
+      "answer": "",
+      "sources": [],
+      "tool": null,
+      "bodyUnavailableAfterAbort": true,
+      "durationMs": 1510
+    }
+  ],
+  "fixture": {
+    "users": [
+      "9007205483984893",
+      "9007205483984894",
+      "9007205483984895"
+    ],
+    "merchant": "9007205483984896",
+    "shop": "9007205483984897",
+    "voucher": "9007205483984898",
+    "orders": [
+      "9007205483984899",
+      "9007205483984900"
+    ],
+    "documents": [
+      "5",
+      "6"
+    ]
+  },
+  "screenshots": [
+    "empty.png",
+    "failure.png"
+  ],
+  "provider": {
+    "maxCalls": 12,
+    "maxObservedTokens": 20000,
+    "cost": "unknown until observed usage is reviewed; cancelled settlement may be unknown",
+    "observations": [
+      {
+        "id": 1,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 29,
+          "outputTokens": 0,
+          "totalTokens": 29
+        }
+      },
+      {
+        "id": 2,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 15,
+          "outputTokens": 0,
+          "totalTokens": 15
+        }
+      },
+      {
+        "id": 3,
+        "operation": "chat",
+        "model": "qwen3.8-flash",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 213,
+          "outputTokens": 29,
+          "totalTokens": 242
+        }
+      }
+    ],
+    "calls": 3,
+    "knownTokens": 286,
+    "unknownUsage": 0
+  },
+  "failures": [
+    {
+      "phase": "real-assistant-empty-and-sources",
+      "kind": "AssertionError",
+      "message": "Verification failed; authentication and driver diagnostics omitted"
+    }
+  ],
+  "capabilities": {
+    "mode": "openai-compatible",
+    "chatModel": "qwen3.8-flash",
+    "embeddingModel": "text-embedding-v4",
+    "embeddingDimensions": 1536
+  },
+  "ownedAiKeysRemaining": 0,
+  "ownedRowsRemaining": 0,
+  "cleanupErrors": [],
+  "recordedAt": "2026-10-28T11:27:37.647Z",
+  "durationMs": 5950
+}

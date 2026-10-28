@@ -1,0 +1,11 @@
+{
+  "startedAt": "2026-10-28T11:21:02.492Z",
+  "recordedAt": "2026-10-28T11:22:34.269Z",
+  "upstream": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "maxPaidRequests": 12,
+  "accepted": 0,
+  "requests": [],
+  "contentsPersisted": false,
+  "credentialsPersisted": false,
+  "notes": "Usage is only what completed upstream JSON reports. Cancelled requests may incur unobserved charges. This is request-count control, not a global currency/token budget."
+}

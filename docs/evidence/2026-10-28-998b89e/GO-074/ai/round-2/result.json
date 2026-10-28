@@ -1,0 +1,478 @@
+{
+  "task": "GO-074b",
+  "passed": true,
+  "cleanup": true,
+  "checks": [
+    "bounded journal matches explicit settled continuation baseline",
+    "actual capabilities identify configured real Provider",
+    "blank input keeps empty state and sends no model turn",
+    "actual SSE completes grounded",
+    "Vue renders completed answer grounded",
+    "real model answer is grounded in two hours and five yuan",
+    "current merchant-public source is returned",
+    "PUBLIC and SHOP_PUBLIC source cards display distinct correct labels",
+    "actual source click opens correct public version and scope SHOP_PUBLIC",
+    "actual source click opens correct public version and scope PUBLIC",
+    "actual SSE completes own-order",
+    "Vue renders completed answer own-order",
+    "own order card matches actual SQL pending status and amount",
+    "Vue own-order card displays current status and monetary amount",
+    "actual SSE completes foreign-order",
+    "Vue renders completed answer foreign-order",
+    "foreign order is hidden without private tool card",
+    "Vue foreign-order rejection exposes no private tool card",
+    "read-only order and cross-user denial make no paid provider calls",
+    "other user cannot read current user conversation",
+    "actual SSE completes unknown",
+    "Vue renders completed answer unknown",
+    "unsupported pet policy is explicitly unknown",
+    "Vue stop aborts a real in-flight transparent upstream request",
+    "cancelled turn persists no assistant and refunds logical daily budget",
+    "actual SSE completes recovery",
+    "Vue renders completed answer recovery",
+    "same Vue conversation successfully recovers after stop",
+    "recovery adds exactly one completed assistant history message",
+    "actual SSE completes disabled-knowledge",
+    "Vue renders completed answer disabled-knowledge",
+    "disabled FAQ does not return through old conversation memory or sources",
+    "disabled old source detail is no longer publicly readable",
+    "all assistant flows leave both business orders unchanged",
+    "no uncaught browser exceptions in actual AI flow"
+  ],
+  "turns": [
+    {
+      "case": "grounded",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "sources",
+        "status",
+        "answer",
+        "done"
+      ],
+      "answer": "根据公开规则，晴川咖啡的消费顾客可在东侧停车场免费停车**两小时**。超过两小时后，每小时收费**五元**。",
+      "sources": [
+        {
+          "documentId": "7",
+          "title": "GO074AI-0ff4a00d 晴川咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "version": 1,
+          "href": "/ai/knowledge/7?version=1",
+          "excerpt": "晴川咖啡的公开停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。"
+        },
+        {
+          "documentId": "8",
+          "title": "GO074AI-0ff4a00d 平台公开规则",
+          "scope": "PUBLIC",
+          "version": 1,
+          "href": "/ai/knowledge/8?version=1",
+          "excerpt": "晴川咖啡的公开停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。"
+        }
+      ],
+      "tool": null,
+      "readFailed": false,
+      "captureError": false,
+      "durationMs": 2054
+    },
+    {
+      "case": "own-order",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "tool_result",
+        "answer",
+        "done"
+      ],
+      "answer": "订单状态：待支付。",
+      "sources": [],
+      "tool": {
+        "type": "order",
+        "status": 1,
+        "payAmount": "2500",
+        "id": "{ownOrder}"
+      },
+      "readFailed": false,
+      "captureError": false,
+      "durationMs": 47
+    },
+    {
+      "case": "foreign-order",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "answer",
+        "done"
+      ],
+      "answer": "没有找到这个订单。",
+      "sources": [],
+      "tool": null,
+      "readFailed": false,
+      "captureError": false,
+      "durationMs": 33
+    },
+    {
+      "case": "unknown",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "sources",
+        "status",
+        "answer",
+        "done"
+      ],
+      "answer": "根据现有证据，仅查询到晴川咖啡的停车规则，未查到关于是否允许携带宠物的信息。",
+      "sources": [
+        {
+          "documentId": "7",
+          "title": "GO074AI-0ff4a00d 晴川咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "version": 1,
+          "href": "/ai/knowledge/7?version=1",
+          "excerpt": "晴川咖啡的公开停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。"
+        }
+      ],
+      "tool": null,
+      "readFailed": false,
+      "captureError": false,
+      "durationMs": 1053
+    },
+    {
+      "case": "cancel",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "sources",
+        "status"
+      ],
+      "answer": "",
+      "sources": [
+        {
+          "documentId": "7",
+          "title": "GO074AI-0ff4a00d 晴川咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "version": 1,
+          "href": "/ai/knowledge/7?version=1",
+          "excerpt": "晴川咖啡的公开停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。"
+        }
+      ],
+      "tool": null,
+      "readFailed": true,
+      "captureError": false,
+      "durationMs": 375
+    },
+    {
+      "case": "recovery",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "sources",
+        "status",
+        "answer",
+        "done"
+      ],
+      "answer": "根据公开规则，晴川咖啡消费顾客可在东侧停车场免费停车**两小时**。",
+      "sources": [
+        {
+          "documentId": "7",
+          "title": "GO074AI-0ff4a00d 晴川咖啡停车规则",
+          "scope": "SHOP_PUBLIC",
+          "version": 1,
+          "href": "/ai/knowledge/7?version=1",
+          "excerpt": "晴川咖啡的公开停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。"
+        }
+      ],
+      "tool": null,
+      "readFailed": false,
+      "captureError": false,
+      "durationMs": 1466
+    },
+    {
+      "case": "disabled-knowledge",
+      "method": "POST",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "answer",
+        "done"
+      ],
+      "answer": "没有查到可以支持这个问题的已发布规则，我不能凭空承诺优惠、退款或门店规则。",
+      "sources": [],
+      "tool": null,
+      "readFailed": false,
+      "captureError": false,
+      "durationMs": 53
+    }
+  ],
+  "fixture": {
+    "users": [
+      "9007206215679993",
+      "9007206215679994",
+      "9007206215679995"
+    ],
+    "merchant": "9007206215679996",
+    "shop": "9007206215679997",
+    "voucher": "9007206215679998",
+    "orders": [
+      "9007206215679999",
+      "9007206215680000"
+    ],
+    "documents": [
+      "7",
+      "8"
+    ]
+  },
+  "screenshots": [
+    "empty.png",
+    "grounded-sources.png",
+    "read-only-tools.png",
+    "stopped.png",
+    "disabled-knowledge.png"
+  ],
+  "provider": {
+    "baselineCalls": 3,
+    "maxCalls": 12,
+    "maxObservedTokens": 20000,
+    "cost": "unknown until observed usage is reviewed; cancelled settlement may be unknown",
+    "baselineObservations": [
+      {
+        "id": 1,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 29,
+          "outputTokens": 0,
+          "totalTokens": 29
+        }
+      },
+      {
+        "id": 2,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 15,
+          "outputTokens": 0,
+          "totalTokens": 15
+        }
+      },
+      {
+        "id": 3,
+        "operation": "chat",
+        "model": "qwen3.8-flash",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 213,
+          "outputTokens": 29,
+          "totalTokens": 242
+        }
+      }
+    ],
+    "observations": [
+      {
+        "id": 1,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 29,
+          "outputTokens": 0,
+          "totalTokens": 29
+        }
+      },
+      {
+        "id": 2,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 15,
+          "outputTokens": 0,
+          "totalTokens": 15
+        }
+      },
+      {
+        "id": 3,
+        "operation": "chat",
+        "model": "qwen3.8-flash",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 213,
+          "outputTokens": 29,
+          "totalTokens": 242
+        }
+      },
+      {
+        "id": 4,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 29,
+          "outputTokens": 0,
+          "totalTokens": 29
+        }
+      },
+      {
+        "id": 5,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 15,
+          "outputTokens": 0,
+          "totalTokens": 15
+        }
+      },
+      {
+        "id": 6,
+        "operation": "chat",
+        "model": "qwen3.8-flash",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 211,
+          "outputTokens": 28,
+          "totalTokens": 239
+        }
+      },
+      {
+        "id": 7,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 9,
+          "outputTokens": 0,
+          "totalTokens": 9
+        }
+      },
+      {
+        "id": 8,
+        "operation": "chat",
+        "model": "qwen3.8-flash",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 195,
+          "outputTokens": 24,
+          "totalTokens": 219
+        }
+      },
+      {
+        "id": 9,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 24,
+          "outputTokens": 0,
+          "totalTokens": 24
+        }
+      },
+      {
+        "id": 10,
+        "operation": "chat",
+        "model": "qwen3.8-flash",
+        "status": "client_cancelled",
+        "clientCancelled": true,
+        "usage": {
+          "known": false
+        }
+      },
+      {
+        "id": 11,
+        "operation": "embedding",
+        "model": "text-embedding-v4",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 9,
+          "outputTokens": 0,
+          "totalTokens": 9
+        }
+      },
+      {
+        "id": 12,
+        "operation": "chat",
+        "model": "qwen3.8-flash",
+        "status": "completed",
+        "clientCancelled": false,
+        "usage": {
+          "known": true,
+          "inputTokens": 207,
+          "outputTokens": 18,
+          "totalTokens": 225
+        }
+      }
+    ],
+    "calls": 12,
+    "currentRoundCalls": 9,
+    "knownTokens": 1055,
+    "unknownUsage": 1
+  },
+  "instrumentation": "Test-only observer attaches read callbacks to bytes consumed by Vue; original fetch/read promises, Response, reader and read results are preserved. No tee or extra read; small callback overhead is present.",
+  "failures": [],
+  "capabilities": {
+    "mode": "openai-compatible",
+    "chatModel": "qwen3.8-flash",
+    "embeddingModel": "text-embedding-v4",
+    "embeddingDimensions": 1536
+  },
+  "cancel": {
+    "observationId": 10,
+    "assistantBefore": 4,
+    "assistantAfter": 4,
+    "logicalBudgetBefore": 4,
+    "logicalBudgetAfter": 4,
+    "usageKnown": false
+  },
+  "ownedAiKeysRemaining": 0,
+  "ownedRowsRemaining": 0,
+  "cleanupErrors": [],
+  "recordedAt": "2026-10-28T11:48:26.897Z",
+  "durationMs": 11541
+}

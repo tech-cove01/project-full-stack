@@ -1,0 +1,17 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: passive capture failed for fast
+    at file:///D:/%E6%A1%8C%E9%9D%A2/The%20ALL/agent/project/code/project-full-stack/docs/evidence/2026-10-28-998b89e/GO-074/ai/sse-capture-probe.mjs:33:12
+    at runNextTicks (node:internal/process/task_queues:65:5)
+    at process.processTimers (node:internal/timers:538:9) {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

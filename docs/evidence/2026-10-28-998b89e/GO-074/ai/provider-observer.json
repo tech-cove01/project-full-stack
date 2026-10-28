@@ -1,0 +1,216 @@
+{
+  "startedAt": "2026-10-28T11:23:24.643Z",
+  "recordedAt": "2026-10-28T11:50:03.366Z",
+  "upstream": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+  "maxPaidRequests": 12,
+  "accepted": 12,
+  "requests": [
+    {
+      "id": 1,
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "startedAt": "2026-10-28T11:27:31.980Z",
+      "requestBytes": 215,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 29,
+        "total_tokens": 29
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 456,
+      "finishedAt": "2026-10-28T11:27:32.437Z"
+    },
+    {
+      "id": 2,
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "startedAt": "2026-10-28T11:27:35.260Z",
+      "requestBytes": 152,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 15,
+        "total_tokens": 15
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 409,
+      "finishedAt": "2026-10-28T11:27:35.670Z"
+    },
+    {
+      "id": 3,
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "startedAt": "2026-10-28T11:27:35.717Z",
+      "requestBytes": 930,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 213,
+        "completion_tokens": 29,
+        "total_tokens": 242
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 971,
+      "finishedAt": "2026-10-28T11:27:36.689Z"
+    },
+    {
+      "id": 4,
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "startedAt": "2026-10-28T11:48:15.645Z",
+      "requestBytes": 215,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 29,
+        "total_tokens": 29
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 293,
+      "finishedAt": "2026-10-28T11:48:15.939Z"
+    },
+    {
+      "id": 5,
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "startedAt": "2026-10-28T11:48:18.632Z",
+      "requestBytes": 152,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 15,
+        "total_tokens": 15
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 174,
+      "finishedAt": "2026-10-28T11:48:18.808Z"
+    },
+    {
+      "id": 6,
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "startedAt": "2026-10-28T11:48:18.850Z",
+      "requestBytes": 930,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 211,
+        "completion_tokens": 28,
+        "total_tokens": 239
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 1768,
+      "finishedAt": "2026-10-28T11:48:20.619Z"
+    },
+    {
+      "id": 7,
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "startedAt": "2026-10-28T11:48:22.684Z",
+      "requestBytes": 122,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 9,
+        "total_tokens": 9
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 262,
+      "finishedAt": "2026-10-28T11:48:22.947Z"
+    },
+    {
+      "id": 8,
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "startedAt": "2026-10-28T11:48:22.976Z",
+      "requestBytes": 767,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 195,
+        "completion_tokens": 24,
+        "total_tokens": 219
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 698,
+      "finishedAt": "2026-10-28T11:48:23.675Z"
+    },
+    {
+      "id": 9,
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "startedAt": "2026-10-28T11:48:23.857Z",
+      "requestBytes": 200,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 24,
+        "total_tokens": 24
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 284,
+      "finishedAt": "2026-10-28T11:48:24.142Z"
+    },
+    {
+      "id": 10,
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "startedAt": "2026-10-28T11:48:24.170Z",
+      "requestBytes": 930,
+      "stream": false,
+      "status": "client_cancelled",
+      "usage": null,
+      "clientCancelled": true,
+      "durationMs": 38,
+      "finishedAt": "2026-10-28T11:48:24.210Z"
+    },
+    {
+      "id": 11,
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "startedAt": "2026-10-28T11:48:24.385Z",
+      "requestBytes": 125,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 9,
+        "total_tokens": 9
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 303,
+      "finishedAt": "2026-10-28T11:48:24.690Z"
+    },
+    {
+      "id": 12,
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "startedAt": "2026-10-28T11:48:24.719Z",
+      "requestBytes": 902,
+      "stream": false,
+      "status": "completed",
+      "usage": {
+        "prompt_tokens": 207,
+        "completion_tokens": 18,
+        "total_tokens": 225
+      },
+      "clientCancelled": false,
+      "httpStatus": 200,
+      "durationMs": 1069,
+      "finishedAt": "2026-10-28T11:48:25.790Z"
+    }
+  ],
+  "contentsPersisted": false,
+  "credentialsPersisted": false,
+  "notes": "Usage is only what completed upstream JSON reports. Cancelled requests may incur unobserved charges. This is request-count control, not a global currency/token budget."
+}

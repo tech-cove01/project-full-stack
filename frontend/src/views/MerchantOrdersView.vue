@@ -55,6 +55,11 @@ const canManage = computed(() =>
     (merchant) => merchant.role === 'OWNER' || merchant.role === 'MANAGER',
   ),
 )
+function canManageShop(shopId: string) {
+  return shops.value.some(
+    (shop) => shop.id === shopId && (shop.role === 'OWNER' || shop.role === 'MANAGER'),
+  )
+}
 const labels: Record<number, string> = {
   1: '待支付',
   2: '已支付',
@@ -268,7 +273,7 @@ onBeforeUnmount(() => controller?.abort())
       <el-table-column label="操作" width="140">
         <template #default="{ row }">
           <el-button
-            v-if="canManage && row.status === 2"
+            v-if="canManageShop(row.shopId) && row.status === 2"
             link
             type="danger"
             :loading="refundingId === row.id"

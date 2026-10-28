@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElButton, ElEmpty, ElImage, ElInput, ElMessage, ElSkeleton } from 'element-plus'
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/input/style/css'
 import 'element-plus/es/components/image/style/css'
@@ -31,10 +31,11 @@ const canFollow = computed(
 )
 let controller: AbortController | undefined
 
-async function loadRelationship() {
-  if (!canFollow.value || !note.value) return
+async function loadRelationship(target: Note, active: AbortController) {
+  if (!auth.loggedIn || auth.user?.id === target.userId) return
   try {
-    const { data } = await api.relationship(note.value.userId)
+    const { data } = await api.relationship(target.userId, active.signal)
+    if (active.signal.aborted || controller !== active || note.value?.id !== target.id) return
     following.value = data.following
     followerCount.value = data.followerCount
   } catch {
@@ -42,10 +43,11 @@ async function loadRelationship() {
   }
 }
 
-async function loadLike() {
-  if (!auth.loggedIn || !note.value) return
+async function loadLike(target: Note, active: AbortController) {
+  if (!auth.loggedIn) return
   try {
-    const { data } = await api.noteLike(note.value.id)
+    const { data } = await api.noteLike(target.id, active.signal)
+    if (active.signal.aborted || controller !== active || note.value?.id !== target.id) return
     likeState.value = data
   } catch {
     // A like-state read failure must not hide the note itself.
@@ -54,29 +56,35 @@ async function loadLike() {
 
 async function toggleLike() {
   if (!note.value || likeLoading.value) return
+  const target = note.value.id
+  const active = controller
   likeLoading.value = true
   try {
-    const { data } = await api.setLike(note.value.id, !(likeState.value?.liked ?? false))
+    const { data } = await api.setLike(target, !(likeState.value?.liked ?? false))
+    if (active?.signal.aborted || controller !== active || note.value?.id !== target) return
     likeState.value = data
   } catch (cause) {
-    ElMessage.error(errorMessage(cause))
+    if (!active?.signal.aborted && controller === active) ElMessage.error(errorMessage(cause))
   } finally {
-    likeLoading.value = false
+    if (controller === active) likeLoading.value = false
   }
 }
 
 async function toggleFollow() {
   if (!note.value || followLoading.value) return
+  const target = note.value
+  const active = controller
   followLoading.value = true
   try {
-    const { data } = await api.setFollow(note.value.userId, !following.value)
+    const { data } = await api.setFollow(target.userId, !following.value)
+    if (active?.signal.aborted || controller !== active || note.value?.id !== target.id) return
     following.value = data.following
     followerCount.value = data.followerCount
     ElMessage.success(data.following ? '已关注该作者' : '已取消关注')
   } catch (cause) {
-    ElMessage.error(errorMessage(cause))
+    if (!active?.signal.aborted && controller === active) ElMessage.error(errorMessage(cause))
   } finally {
-    followLoading.value = false
+    if (controller === active) followLoading.value = false
   }
 }
 
@@ -90,11 +98,17 @@ async function loadNote() {
   controller = active
   loading.value = true
   error.value = ''
+  note.value = null
+  likeState.value = null
+  following.value = false
+  followerCount.value = 0
+  likeLoading.value = false
+  followLoading.value = false
   try {
     const { data } = await api.note(String(route.params.id), active.signal)
     if (active.signal.aborted) return
     note.value = data
-    await Promise.all([loadRelationship(), loadLike()])
+    await Promise.all([loadRelationship(data, active), loadLike(data, active)])
   } catch (cause) {
     if (!active.signal.aborted) {
       error.value = errorMessage(cause)
@@ -141,6 +155,7 @@ async function submit() {
 watch(
   () => route.fullPath,
   () => {
+    controller?.abort()
     error.value = ''
     if (isCompose.value) {
       form.value.shopId = String(route.query.shopId || '')
@@ -149,15 +164,10 @@ watch(
       void loadNote()
     }
   },
+  { immediate: true },
 )
 
-onMounted(() => {
-  if (isCompose.value) {
-    form.value.shopId = String(route.query.shopId || '')
-  } else {
-    void loadNote()
-  }
-})
+onBeforeUnmount(() => controller?.abort())
 </script>
 
 <template>

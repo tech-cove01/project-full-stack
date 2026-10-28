@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { ElButton, ElEmpty, ElSkeleton } from 'element-plus'
 import { RouterLink } from 'vue-router'
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/empty/style/css'
@@ -49,6 +50,7 @@ async function load(reset: boolean) {
 }
 
 onMounted(() => void load(true))
+onBeforeUnmount(() => controller?.abort())
 </script>
 
 <template>

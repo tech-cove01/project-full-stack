@@ -96,6 +96,13 @@ func (service *Service) SetFollow(ctx context.Context, userID, authorID string, 
 		return Relationship{}, ErrNotFound
 	}
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		// A missing row has no record lock under READ COMMITTED. Materialize an
+		// inactive version-zero pair first: the unique key serializes simultaneous
+		// first follows without turning harmless repeats into duplicate-key 500s.
+		if err := tx.Exec(`INSERT INTO tb_follow(user_id,follow_user_id,active,version)
+			VALUES (?,?,0,0) ON DUPLICATE KEY UPDATE id=id`, user, author).Error; err != nil {
+			return err
+		}
 		var current struct {
 			ID      uint64
 			Active  int
@@ -110,17 +117,7 @@ func (service *Service) SetFollow(ctx context.Context, userID, authorID string, 
 			wanted = 1
 		}
 		if current.ID == 0 {
-			version := 1
-			if err := tx.WithContext(ctx).Exec(`INSERT INTO tb_follow
-				(user_id,follow_user_id,active,version) VALUES (?,?,?,?)`,
-				user, author, wanted, version).Error; err != nil {
-				return err
-			}
-			return enqueue(ctx, tx, eventID(user, author, version), "FOLLOW",
-				strconv.FormatUint(author, 10), version, "FOLLOW_CHANGED",
-				map[string]any{"userId": strconv.FormatUint(user, 10),
-					"followUserId": strconv.FormatUint(author, 10),
-					"active":       strconv.FormatBool(follow), "version": version})
+			return ErrUnsafe
 		}
 		if current.Active == wanted {
 			// Repeating the current state must not bump the version, otherwise the

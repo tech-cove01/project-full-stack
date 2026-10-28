@@ -31,12 +31,15 @@ type Message struct {
 	Text        string   `json:"text"`
 	CitationIDs []string `json:"citationIds,omitempty"`
 	CreateTime  string   `json:"createTime"`
+	Time        string   `json:"time"`
 }
 
 type Conversation struct {
-	ID         string  `json:"id"`
-	ShopID     *string `json:"shopId,omitempty"`
-	CreateTime string  `json:"createTime"`
+	ID         string    `json:"id"`
+	ShopID     *string   `json:"shopId,omitempty"`
+	CreateTime string    `json:"createTime"`
+	CreatedAt  string    `json:"createdAt"`
+	Messages   []Message `json:"messages"`
 }
 
 type Conversations struct{ redis *redis.Client }
@@ -81,7 +84,7 @@ func (store *Conversations) Create(ctx context.Context, userID uint64, shopID *u
 	created := now()
 	key := keyConversation(userID, id)
 	values := map[string]any{"createTime": created, "updatedAt": created}
-	conversation := Conversation{ID: id, CreateTime: created}
+	conversation := Conversation{ID: id, CreateTime: created, CreatedAt: created, Messages: make([]Message, 0)}
 	if shopID != nil {
 		shop := strconv.FormatUint(*shopID, 10)
 		values["shopId"] = shop
@@ -94,6 +97,25 @@ func (store *Conversations) Create(ctx context.Context, userID uint64, shopID *u
 		return Conversation{}, err
 	}
 	return conversation, nil
+}
+
+func (store *Conversations) Get(ctx context.Context, userID uint64, id string) (Conversation, error) {
+	raw, err := store.redis.HGetAll(ctx, keyConversation(userID, id)).Result()
+	if err != nil {
+		return Conversation{}, err
+	}
+	if len(raw) == 0 {
+		return Conversation{}, ErrNotFound
+	}
+	messages, err := store.History(ctx, userID, id)
+	if err != nil {
+		return Conversation{}, err
+	}
+	result := Conversation{ID: id, CreateTime: raw["createTime"], CreatedAt: raw["createTime"], Messages: messages}
+	if value := raw["shopId"]; value != "" {
+		result.ShopID = &value
+	}
+	return result, nil
 }
 
 func (store *Conversations) Exists(ctx context.Context, userID uint64, id string) (bool, error) {
@@ -140,6 +162,7 @@ func (store *Conversations) Delete(ctx context.Context, userID uint64, id string
 // Append drops the message when the conversation was deleted meanwhile.
 func (store *Conversations) Append(ctx context.Context, userID uint64, id string, message Message) error {
 	message.CreateTime = now()
+	message.Time = message.CreateTime
 	encoded, err := json.Marshal(message)
 	if err != nil {
 		return err

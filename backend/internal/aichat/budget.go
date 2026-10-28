@@ -46,37 +46,66 @@ func NewBudgetWithLimits(client *redis.Client, perMinute, daily int) *Budget {
 var budgetScript = redis.NewScript(`
 local rateKey, dailyKey = KEYS[1], KEYS[2]
 local minuteLimit, dailyLimit = tonumber(ARGV[1]), tonumber(ARGV[2])
-local rate = redis.call('INCR', rateKey)
-if rate == 1 then redis.call('EXPIRE', rateKey, 60) end
-if rate > minuteLimit then return -1 end
-local daily = redis.call('INCR', dailyKey)
-if daily == 1 then redis.call('EXPIRE', dailyKey, 172800) end
-if daily > dailyLimit then return -2 end
+local values={}
+for i=1,2 do
+ local kind=redis.call('TYPE',KEYS[i]).ok
+ if kind~='none' and kind~='string' then return redis.error_reply('invalid AI budget type') end
+ local raw=redis.call('GET',KEYS[i])
+ if raw and (not string.match(raw,'^%d+$') or #raw>9) then return redis.error_reply('invalid AI budget value') end
+ values[i]=tonumber(raw or '0')
+end
+if values[1]>=minuteLimit then return -1 end
+if values[2]>=dailyLimit then return -2 end
+local rate=redis.call('INCR',rateKey)
+if rate==1 then redis.call('EXPIRE',rateKey,60) end
+local daily=redis.call('INCR',dailyKey)
+if daily==1 then redis.call('EXPIRE',dailyKey,172800) end
 return 1
 `)
+
+var refundBudgetScript = redis.NewScript(`
+for i=1,2 do
+ if redis.call('TYPE',KEYS[i]).ok=='string' then
+  local raw=redis.call('GET',KEYS[i]);local value=tonumber(raw)
+  if value and value>0 and value==math.floor(value) then redis.call('DECR',KEYS[i]) end
+ end
+end
+return 1`)
 
 // Allow counts one request. A nil budget allows everything, which keeps local
 // tests free of Redis while production always attaches one.
 func (budget *Budget) Allow(ctx context.Context, userID uint64) error {
+	_, err := budget.Reserve(ctx, userID)
+	return err
+}
+
+// Reserve returns an exact-key release for a failed logical turn. Replays do
+// not call it; success retains the count. This is not a provider billing claim.
+func (budget *Budget) Reserve(ctx context.Context, userID uint64) (func(), error) {
 	if budget == nil || budget.redis == nil {
-		return nil
+		return func() {}, nil
 	}
 	minute := time.Now().Format("200601021504")
 	day := time.Now().In(zoneForBudget()).Format("20060102")
 	user := strconv.FormatUint(userID, 10)
+	keys := []string{"ai:rate:" + user + ":" + minute, "ai:budget:" + user + ":" + day}
 	result, err := budgetScript.Run(ctx, budget.redis,
-		[]string{"ai:rate:" + user + ":" + minute, "ai:budget:" + user + ":" + day},
+		keys,
 		budget.perMinute, budget.daily).Int()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	switch result {
 	case -1:
-		return ErrRateLimited
+		return nil, ErrRateLimited
 	case -2:
-		return ErrBudgetExhausted
+		return nil, ErrBudgetExhausted
 	default:
-		return nil
+		return func() {
+			cleanup, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+			defer cancel()
+			_ = refundBudgetScript.Run(cleanup, budget.redis, keys).Err()
+		}, nil
 	}
 }
 

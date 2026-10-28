@@ -64,7 +64,8 @@ func TestIntegrationAssistantTurn(t *testing.T) {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
 		_ = resources.Redis.Del(cleanupCtx,
-			keyConversation(9001, conversation.ID), keyMessages(9001, conversation.ID)).Err()
+			keyConversation(9001, conversation.ID), keyMessages(9001, conversation.ID),
+			lockKey(9001, conversation.ID), dedupeKey(9001, conversation.ID, "client-1"), dedupeKey(9001, conversation.ID, "client-2")).Err()
 	})
 
 	var events []string
@@ -160,8 +161,8 @@ func insertPublished(t *testing.T, resources *database.Resources, stub *ai.Stub,
 		t.Fatal(err)
 	}
 	if err = resources.ORM.WithContext(ctx).Exec(`INSERT INTO tb_ai_document_version
-		(document_id,version,epoch,body,content_hash,status,embedding_model,embedding_dimension)
-		VALUES (?,1,1,?,?, 'READY',?,?)`, id, body, strings.Repeat("0", 64),
+		(document_id,version,epoch,title,body,content_hash,status,embedding_model,embedding_dimension)
+		VALUES (?,1,1,?,?,?, 'READY',?,?)`, id, title, body, strings.Repeat("0", 64),
 		stub.Model(), stub.Dimension()).Error; err != nil {
 		t.Fatal("version insert failed")
 	}

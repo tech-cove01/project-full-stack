@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -19,8 +20,12 @@ import (
 func Register(routes gin.IRouter, conversations *Conversations, assistant *Assistant,
 	mode string, identity *auth.Service) {
 	routes.GET("/ai/capabilities", func(c *gin.Context) {
+		model, dimension := "", 0
+		if assistant != nil && assistant.provider != nil {
+			model, dimension = assistant.provider.Model(), assistant.provider.Dimension()
+		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: map[string]any{
-			"enabled": true, "mode": mode,
+			"enabled": assistant != nil, "ready": assistant != nil, "mode": mode, "reason": "当前仅启用确定性 stub，未验证真实模型质量", "chatModel": model, "embeddingModel": model, "embeddingDimensions": dimension,
 		}})
 	})
 	routes.POST("/ai/conversations", auth.RequireLogin(identity), func(c *gin.Context) {
@@ -62,7 +67,7 @@ func Register(routes gin.IRouter, conversations *Conversations, assistant *Assis
 		}
 		ctx, cancel := requestContext(c)
 		defer cancel()
-		messages, err := conversations.History(ctx, userID, c.Param("id"))
+		messages, err := conversations.Get(ctx, userID, c.Param("id"))
 		if err != nil {
 			writeError(c, err)
 			return
@@ -100,6 +105,11 @@ func Register(routes gin.IRouter, conversations *Conversations, assistant *Assis
 		}
 		ctx, cancel := requestContext(c)
 		defer cancel()
+		token := strings.TrimPrefix(c.GetHeader("authorization"), "Bearer ")
+		ctx = context.WithValue(ctx, sessionGuardKey{}, func(checkCtx context.Context) bool {
+			user, err := identity.Resolve(checkCtx, token)
+			return err == nil && user != nil && user.ID == strconv.FormatUint(userID, 10)
+		})
 		exists, err := conversations.Exists(ctx, userID, c.Param("id"))
 		if err != nil {
 			writeError(c, err)
@@ -151,6 +161,10 @@ func decodeBody(c *gin.Context, target any) error {
 	decoder := json.NewDecoder(io.LimitReader(c.Request.Body, 16384))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(target); err != nil && !errors.Is(err, io.EOF) {
+		return ErrInput
+	}
+	var extra any
+	if err := decoder.Decode(&extra); !errors.Is(err, io.EOF) {
 		return ErrInput
 	}
 	return nil

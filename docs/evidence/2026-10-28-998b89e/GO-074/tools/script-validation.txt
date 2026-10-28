@@ -1,0 +1,4 @@
+node --check scripts/go-ai-tools-ui-smoke.mjs: exit 0
+prettier --check scripts/go-ai-tools-ui-smoke.mjs: exit 0
+Checking formatting...
+All matched files use Prettier code style!

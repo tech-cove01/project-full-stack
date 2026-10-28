@@ -1,0 +1,170 @@
+{
+  "task": "GO-074c",
+  "passed": true,
+  "cleanup": true,
+  "checks": [
+    "tools browser run is explicitly configured stub without a real Provider",
+    "real SSE completes activity-stock-3",
+    "Go deterministic tool branch avoids knowledge/generation stages for activity-stock-3",
+    "actual activity card has current string stock3, exact cents and its shop link",
+    "real order admission and persistence reduce MySQL and Redis inventory from3 to2",
+    "real SSE completes activity-stock-2",
+    "Go deterministic tool branch avoids knowledge/generation stages for activity-stock-2",
+    "same conversation uses a new message and refreshes string activity stock2 without replaying stock3",
+    "activity tool detail href preserves the exact shop string ID",
+    "actual activity card click opens the associated shop detail",
+    "real SSE completes shop-card",
+    "Go deterministic tool branch avoids knowledge/generation stages for shop-card",
+    "actual shops DTO exposes public name/address and the exact large ID",
+    "shops card displays no invented score or missing fields",
+    "missing shops DTO href falls back to its exact greater-than-2^53 shop path",
+    "actual shops fallback link opens the expected shop detail",
+    "real SSE completes unknown-shop",
+    "Go deterministic tool branch avoids knowledge/generation stages for unknown-shop",
+    "unknown 门店 has an explicit deterministic refusal without a new card or link",
+    "real SSE completes unknown-activity",
+    "Go deterministic tool branch avoids knowledge/generation stages for unknown-activity",
+    "unknown 活动 has an explicit deterministic refusal without a new card or link",
+    "tool page flow has no uncaught browser errors"
+  ],
+  "turns": [
+    {
+      "case": "activity-stock-3",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "tool_result",
+        "answer",
+        "done"
+      ],
+      "stages": [
+        "tool"
+      ],
+      "tool": {
+        "type": "activities",
+        "items": [
+          {
+            "id": "9007206215679999",
+            "shopId": "9007206678540896",
+            "title": "GO074Tfc5b1cd834-活动",
+            "stock": "3",
+            "payValue": "1900",
+            "href": "/shops/9007206678540896"
+          }
+        ]
+      },
+      "answer": "活动：GO074Tfc5b1cd834-活动。",
+      "captureError": false
+    },
+    {
+      "case": "activity-stock-2",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "tool_result",
+        "answer",
+        "done"
+      ],
+      "stages": [
+        "tool"
+      ],
+      "tool": {
+        "type": "activities",
+        "items": [
+          {
+            "id": "9007206215679999",
+            "shopId": "9007206678540896",
+            "title": "GO074Tfc5b1cd834-活动",
+            "stock": "2",
+            "payValue": "1900",
+            "href": "/shops/9007206678540896"
+          }
+        ]
+      },
+      "answer": "活动：GO074Tfc5b1cd834-活动。",
+      "captureError": false
+    },
+    {
+      "case": "shop-card",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "tool_result",
+        "answer",
+        "done"
+      ],
+      "stages": [
+        "tool"
+      ],
+      "tool": {
+        "type": "shops",
+        "items": [
+          {
+            "id": "9007206678540896",
+            "name": "GO074Tfc5b1cd834-门店",
+            "address": "桂花路88号合成地址-GO074Tfc5b1cd834"
+          }
+        ]
+      },
+      "answer": "门店：GO074Tfc5b1cd834-门店。",
+      "captureError": false
+    },
+    {
+      "case": "unknown-shop",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "answer",
+        "done"
+      ],
+      "stages": [
+        "tool"
+      ],
+      "tool": null,
+      "answer": "没有找到这个门店。",
+      "captureError": false
+    },
+    {
+      "case": "unknown-activity",
+      "authorizationPresent": true,
+      "httpStatus": 200,
+      "events": [
+        "meta",
+        "status",
+        "answer",
+        "done"
+      ],
+      "stages": [
+        "tool"
+      ],
+      "tool": null,
+      "answer": "没有找到这个活动。",
+      "captureError": false
+    }
+  ],
+  "providerBoundary": "Configured stub only; all questions use actual Go AITool early-return paths, no knowledge publication/retrieval/generation or real Provider calls. This is not model-quality evidence.",
+  "sameConversationRefresh": true,
+  "workerBarrier": {
+    "ownedMessages": 1,
+    "pending": 0,
+    "unfinishedOutbox": 0,
+    "unresolvedReview": 0
+  },
+  "fixture": {
+    "owner": "9007206678540893",
+    "buyer": "9007206678540894",
+    "merchant": "9007206678540895",
+    "shop": "9007206678540896",
+    "voucher": "9007206215679999",
+    "order": "653792879713452033"
+  },
+  "recordedAt": "2026-10-28T12:10:20.627Z"
+}

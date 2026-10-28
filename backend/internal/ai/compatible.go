@@ -290,8 +290,9 @@ func (provider *Compatible) embedBatch(ctx context.Context, texts []string) (vec
 	}
 	var response struct {
 		Data []struct {
-			Index     *int      `json:"index"`
-			Embedding []float32 `json:"embedding"`
+			Index *int `json:"index"`
+			// Pointers preserve JSON null instead of silently decoding it as 0.
+			Embedding []*float32 `json:"embedding"`
 		} `json:"data"`
 		Usage wireUsage `json:"usage"`
 	}
@@ -307,17 +308,19 @@ func (provider *Compatible) embedBatch(ctx context.Context, texts []string) (vec
 		if item.Index == nil || *item.Index < 0 || *item.Index >= len(texts) || vectors[*item.Index] != nil || len(item.Embedding) != provider.Dimension() {
 			return nil, invalidResponse()
 		}
+		vector := make([]float32, len(item.Embedding))
 		var norm float64
-		for _, value := range item.Embedding {
-			if math.IsNaN(float64(value)) || math.IsInf(float64(value), 0) {
+		for index, value := range item.Embedding {
+			if value == nil || math.IsNaN(float64(*value)) || math.IsInf(float64(*value), 0) {
 				return nil, invalidResponse()
 			}
-			norm += float64(value) * float64(value)
+			vector[index] = *value
+			norm += float64(*value) * float64(*value)
 		}
 		if norm == 0 {
 			return nil, invalidResponse()
 		}
-		vectors[*item.Index] = item.Embedding
+		vectors[*item.Index] = vector
 	}
 	if ctx.Err() != nil {
 		return nil, contextError(ctx.Err())

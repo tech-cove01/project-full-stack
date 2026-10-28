@@ -1,0 +1,10 @@
+--- FAIL: TestCompatibleRejectsBadEmbeddingResponses (0.01s)
+    --- FAIL: TestCompatibleRejectsBadEmbeddingResponses/null_component (0.01s)
+        compatible_test.go:207: invalid vectors must not escape: <nil>
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/ai	1.552s
+--- FAIL: TestParseVectorRejectsMalformedEmbeddings (0.00s)
+    search_test.go:21: embedding "[1,null]" must be rejected
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aiknowledge	2.931s
+FAIL

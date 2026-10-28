@@ -12,7 +12,11 @@ func TestParseVectorRejectsMalformedEmbeddings(t *testing.T) {
 	if err != nil || len(vector) != 3 || math.Abs(float64(vector[1])-0.25) > 1e-6 {
 		t.Fatalf("valid vector rejected: %v %v", vector, err)
 	}
-	for _, raw := range []string{"", "[]", "not-json", `{"0":0.1}`, "null", "[0,0]", "[1e100]"} {
+	vector, err = parseVector("[1,0,-3]")
+	if err != nil || len(vector) != 3 || vector[1] != 0 {
+		t.Fatal("a numeric zero component is valid in a nonzero vector")
+	}
+	for _, raw := range []string{"", "[]", "not-json", `{"0":0.1}`, "null", "[0,0]", "[1e100]", "[1,null]"} {
 		if _, err = parseVector(raw); err == nil {
 			t.Fatalf("embedding %q must be rejected", raw)
 		}

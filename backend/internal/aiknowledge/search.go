@@ -155,9 +155,18 @@ func (service *Service) Search(ctx context.Context, query string, shopID *uint64
 
 // parseVector accepts the JSON array stored in tb_ai_chunk.embedding.
 func parseVector(raw string) ([]float32, error) {
-	var vector []float32
-	if err := json.Unmarshal([]byte(raw), &vector); err != nil {
+	// Preserve JSON null as nil: decoding directly into float32 accepts null
+	// as zero, which would silently change malformed persisted vectors.
+	var components []*float32
+	if err := json.Unmarshal([]byte(raw), &components); err != nil {
 		return nil, err
+	}
+	vector := make([]float32, len(components))
+	for index, component := range components {
+		if component == nil {
+			return nil, ErrUnsafe
+		}
+		vector[index] = *component
 	}
 	if !usableVector(vector) {
 		return nil, ErrUnsafe

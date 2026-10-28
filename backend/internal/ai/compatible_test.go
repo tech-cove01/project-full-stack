@@ -195,6 +195,7 @@ func TestCompatibleRejectsBadEmbeddingResponses(t *testing.T) {
 		"wrong dimensions": `{"data":[{"index":0,"embedding":[1,2]}]}`,
 		"zero vector":      `{"data":[{"index":0,"embedding":[0,0,0]}]}`,
 		"null vector":      `{"data":[{"index":0,"embedding":null}]}`,
+		"null component":   `{"data":[{"index":0,"embedding":[1,null,3]}]}`,
 		"float32 overflow": `{"data":[{"index":0,"embedding":[1e60,2,3]}]}`,
 		"infinite":         `{"data":[{"index":0,"embedding":[NaN,2,3]}]}`,
 		"trailing json":    `{"data":[{"index":0,"embedding":[1,2,3]}]} {}`,
@@ -207,6 +208,15 @@ func TestCompatibleRejectsBadEmbeddingResponses(t *testing.T) {
 			}
 		})
 	}
+	t.Run("valid numeric zero", func(t *testing.T) {
+		provider := fixtureProvider(t, func(w http.ResponseWriter, _ *http.Request) {
+			_, _ = io.WriteString(w, `{"data":[{"index":0,"embedding":[1,0,-3]}]}`)
+		})
+		vectors, err := provider.Embed(context.Background(), []string{"规则"})
+		if err != nil || !reflect.DeepEqual(vectors, [][]float32{{1, 0, -3}}) {
+			t.Fatal("a numeric zero component is valid in a nonzero vector")
+		}
+	})
 	t.Run("duplicate index", func(t *testing.T) {
 		provider := fixtureProvider(t, func(w http.ResponseWriter, _ *http.Request) {
 			_, _ = io.WriteString(w, `{"data":[{"index":0,"embedding":[1,2,3]},{"index":0,"embedding":[2,3,4]}]}`)

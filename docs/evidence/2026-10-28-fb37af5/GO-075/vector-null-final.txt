@@ -1,0 +1,2 @@
+ok  	github.com/cityloop/fullstack-go/internal/ai	2.144s
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	3.498s

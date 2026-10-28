@@ -8,6 +8,7 @@
 **/.vite/
 **/coverage/
 backend-go/bin/
+backend/bin/
 **/uploads/
 **/logs/
 scripts/load/.p2-*.json

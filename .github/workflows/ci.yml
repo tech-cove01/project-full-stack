@@ -109,7 +109,7 @@ jobs:
           GO_INTEGRATION: '1'
           GIN_MODE: release
       - name: Merchant orders and compensation against real MySQL and Redis
-        run: go test -race -count=1 -p 1 -v ./internal/merchantorder ./internal/ordercomp
+        run: go test -race -count=1 -p 1 -v ./internal/merchantorder ./internal/ordercomp ./internal/orderreview
         env:
           GO_INTEGRATION: '1'
           GIN_MODE: release
@@ -153,6 +153,7 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run build
+      - run: npm run format:check
 
   community-kafka:
     runs-on: ubuntu-latest

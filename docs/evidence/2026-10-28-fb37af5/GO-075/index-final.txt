@@ -1,0 +1,16 @@
+=== RUN   TestIntegrationIndexCompatibility
+=== RUN   TestIntegrationIndexCompatibility/changed_model_is_not_empty_success
+=== RUN   TestIntegrationIndexCompatibility/wrong_dimension_is_not_partial_success
+=== RUN   TestIntegrationIndexCompatibility/invalid_vector_requires_rebuild
+=== RUN   TestIntegrationIndexCompatibility/version_metadata_must_match_chunks
+=== RUN   TestIntegrationIndexCompatibility/valid_index_queries_once_and_other_shop_is_excluded
+=== RUN   TestIntegrationIndexCompatibility/missing_chunks_is_unready
+--- PASS: TestIntegrationIndexCompatibility (0.21s)
+    --- PASS: TestIntegrationIndexCompatibility/changed_model_is_not_empty_success (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/wrong_dimension_is_not_partial_success (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/invalid_vector_requires_rebuild (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/version_metadata_must_match_chunks (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/valid_index_queries_once_and_other_shop_is_excluded (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/missing_chunks_is_unready (0.01s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	5.299s

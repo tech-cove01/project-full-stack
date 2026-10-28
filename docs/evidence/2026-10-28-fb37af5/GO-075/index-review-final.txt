@@ -1,0 +1,22 @@
+=== RUN   TestIntegrationIndexCompatibility
+=== RUN   TestIntegrationIndexCompatibility/changed_model_is_not_empty_success
+=== RUN   TestIntegrationIndexCompatibility/wrong_dimension_is_not_partial_success
+=== RUN   TestIntegrationIndexCompatibility/invalid_vector_requires_rebuild
+=== RUN   TestIntegrationIndexCompatibility/version_metadata_must_match_chunks
+=== RUN   TestIntegrationIndexCompatibility/valid_index_queries_once_and_other_shop_is_excluded
+    index_identity_integration_test.go:119: valid index failed
+=== RUN   TestIntegrationIndexCompatibility/anonymous_search_rejects_disable_during_embedding
+=== RUN   TestIntegrationIndexCompatibility/one_missing_chunk_is_unready
+=== RUN   TestIntegrationIndexCompatibility/missing_chunks_is_unready
+--- FAIL: TestIntegrationIndexCompatibility (0.25s)
+    --- PASS: TestIntegrationIndexCompatibility/changed_model_is_not_empty_success (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/wrong_dimension_is_not_partial_success (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/invalid_vector_requires_rebuild (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/version_metadata_must_match_chunks (0.02s)
+    --- FAIL: TestIntegrationIndexCompatibility/valid_index_queries_once_and_other_shop_is_excluded (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/anonymous_search_rejects_disable_during_embedding (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/one_missing_chunk_is_unready (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/missing_chunks_is_unready (0.01s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aiknowledge	2.273s
+FAIL

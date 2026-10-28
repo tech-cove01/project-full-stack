@@ -1,0 +1,8 @@
+=== RUN   TestIntegrationIndexCompatibility
+=== RUN   TestIntegrationIndexCompatibility/changed_model_is_not_empty_success
+    index_identity_integration_test.go:55: incompatible index must reject before paid query: rejected=false calls=1
+--- FAIL: TestIntegrationIndexCompatibility (0.16s)
+    --- FAIL: TestIntegrationIndexCompatibility/changed_model_is_not_empty_success (0.01s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aiknowledge	7.022s
+FAIL

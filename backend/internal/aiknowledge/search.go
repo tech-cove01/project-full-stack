@@ -37,48 +37,87 @@ func (service *Service) Search(ctx context.Context, query string, shopID *uint64
 	if limit <= 0 || limit > 20 {
 		limit = 5
 	}
-	vectors, err := service.provider.Embed(ctx, []string{query})
+	before, err := service.Snapshot(ctx, shopID)
 	if err != nil {
 		return nil, err
 	}
-	if len(vectors) != 1 {
-		return nil, ErrUnsafe
-	}
-	where := `WHERE d.disabled=0 AND d.status='PUBLISHED' AND d.published_version=c.version AND d.epoch=c.epoch
-		AND v.status='READY' AND v.epoch=c.epoch AND v.title IS NOT NULL AND c.embedding_model=? AND c.embedding_dimension=?`
-	args := []any{service.provider.Model(), service.provider.Dimension()}
+	where := `WHERE d.disabled=0 AND d.status='PUBLISHED'`
 	scope, scopeArgs := publicScope(shopID)
 	where += " AND " + scope
-	args = append(args, scopeArgs...)
 	var rows []struct {
-		ChunkID    uint64
-		DocumentID uint64
-		Version    int
-		Epoch      int64
-		Content    string
-		Embedding  string
-		Title      string
-		Scope      string
-		ShopID     *uint64
+		ChunkID            uint64
+		DocumentID         uint64
+		Version            int
+		Epoch              int64
+		Content            string
+		Embedding          string
+		Title              string
+		Scope              string
+		ShopID             *uint64
+		EmbeddingModel     string
+		EmbeddingDimension int
+		VersionModel       string
+		VersionDimension   int
+		VersionStatus      string
+		VersionEpoch       int64
+		VersionBody        string
+		Ordinal            int
 	}
-	if err = service.db.WithContext(ctx).Raw(`SELECT c.id AS chunk_id,c.document_id,c.version,c.epoch,
-		c.content,c.embedding,v.title,d.scope,d.shop_id
-		FROM tb_ai_chunk c JOIN tb_ai_document d ON d.id=c.document_id
-		JOIN tb_ai_document_version v ON v.document_id=c.document_id AND v.version=c.version `+where+` LIMIT 2001`, args...).Scan(&rows).Error; err != nil {
+	if err := service.db.WithContext(ctx).Raw(`SELECT c.id AS chunk_id,d.id AS document_id,d.published_version AS version,d.epoch,
+		c.content,c.embedding,v.title,d.scope,d.shop_id,c.embedding_model,c.embedding_dimension,
+		v.embedding_model AS version_model,v.embedding_dimension AS version_dimension,v.status AS version_status,v.epoch AS version_epoch,v.body AS version_body,c.ordinal
+		FROM tb_ai_document d LEFT JOIN tb_ai_document_version v ON v.document_id=d.id AND v.version=d.published_version
+		LEFT JOIN tb_ai_chunk c ON c.document_id=d.id AND c.version=d.published_version AND c.epoch=d.epoch `+where+` LIMIT 2001`, scopeArgs...).Scan(&rows).Error; err != nil {
 		return nil, err
 	}
 	if len(rows) > maxChunks {
 		return nil, ErrUnsafe
 	}
-	hits := make([]Hit, 0, len(rows))
-	for _, row := range rows {
-		vector, err := parseVector(row.Embedding)
-		if err != nil || len(vector) != len(vectors[0]) {
-			// A chunk whose vector no longer matches the active model is skipped
-			// rather than scored with a meaningless similarity.
-			continue
+	// Validate the whole selected scope before buying a query embedding. An
+	// incompatible or incomplete index cannot masquerade as empty/partial hits.
+	stored := make([][]float32, len(rows))
+	expected := make(map[uint64][]string)
+	ordinals := make(map[uint64]map[int]bool)
+	for i, row := range rows {
+		if row.ChunkID == 0 || row.Version < 1 || row.VersionStatus != "READY" || row.Title == "" || row.VersionEpoch != row.Epoch ||
+			row.EmbeddingModel != ai.IndexModel(service.provider) || row.EmbeddingDimension != service.provider.Dimension() ||
+			row.VersionModel != row.EmbeddingModel || row.VersionDimension != row.EmbeddingDimension {
+			return nil, ErrUnsafe
 		}
-		score := cosine(vectors[0], vector)
+		pieces, ok := expected[row.DocumentID]
+		if !ok {
+			pieces = chunks(row.VersionBody)
+			expected[row.DocumentID] = pieces
+			ordinals[row.DocumentID] = make(map[int]bool)
+		}
+		if row.Ordinal < 0 || row.Ordinal >= len(pieces) || ordinals[row.DocumentID][row.Ordinal] || row.Content != pieces[row.Ordinal] {
+			return nil, ErrUnsafe
+		}
+		ordinals[row.DocumentID][row.Ordinal] = true
+		vector, err := parseVector(row.Embedding)
+		if err != nil || len(vector) != service.provider.Dimension() {
+			return nil, ErrUnsafe
+		}
+		stored[i] = vector
+	}
+	for doc, pieces := range expected {
+		if len(ordinals[doc]) != len(pieces) {
+			return nil, ErrUnsafe
+		}
+	}
+	if len(rows) == 0 {
+		return []Hit{}, nil
+	}
+	vectors, err := service.provider.Embed(ctx, []string{query})
+	if err != nil {
+		return nil, err
+	}
+	if len(vectors) != 1 || len(vectors[0]) != service.provider.Dimension() || !usableVector(vectors[0]) {
+		return nil, ErrUnsafe
+	}
+	hits := make([]Hit, 0, len(rows))
+	for i, row := range rows {
+		score := cosine(vectors[0], stored[i])
 		if score < minScore {
 			continue
 		}
@@ -99,6 +138,18 @@ func (service *Service) Search(ctx context.Context, query string, shopID *uint64
 	if len(hits) > limit {
 		hits = hits[:limit]
 	}
+	// Embedding can take seconds. Recheck after that external boundary so the
+	// anonymous search route cannot return rules disabled during generation.
+	after, err := service.Snapshot(ctx, shopID)
+	if err != nil {
+		return nil, err
+	}
+	if before != after {
+		return nil, ErrUnsafe
+	}
+	if err = service.Validate(ctx, hits, shopID); err != nil {
+		return nil, err
+	}
 	return hits, nil
 }
 
@@ -108,10 +159,21 @@ func parseVector(raw string) ([]float32, error) {
 	if err := json.Unmarshal([]byte(raw), &vector); err != nil {
 		return nil, err
 	}
-	if len(vector) == 0 {
+	if !usableVector(vector) {
 		return nil, ErrUnsafe
 	}
 	return vector, nil
+}
+
+func usableVector(vector []float32) bool {
+	var norm float64
+	for _, value := range vector {
+		if math.IsNaN(float64(value)) || math.IsInf(float64(value), 0) {
+			return false
+		}
+		norm += float64(value) * float64(value)
+	}
+	return norm > 0
 }
 
 // cosine is safe for both normalized and unnormalized vectors; a zero vector

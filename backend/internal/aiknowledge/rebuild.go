@@ -59,7 +59,7 @@ func (service *Service) Rebuild(ctx context.Context, userID, documentID string) 
 	if len(vectors) != len(pieces) {
 		return View{}, ErrUnsafe
 	}
-	model, dimension := service.provider.Model(), service.provider.Dimension()
+	model, dimension := ai.IndexModel(service.provider), service.provider.Dimension()
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		document, membership, err := service.authorize(ctx, tx, userID, id)
 		if err != nil {

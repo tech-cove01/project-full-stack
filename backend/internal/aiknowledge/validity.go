@@ -6,6 +6,8 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"strconv"
+
+	"github.com/cityloop/fullstack-go/internal/ai"
 )
 
 const maxChunks = 2000
@@ -34,7 +36,7 @@ func (service *Service) Snapshot(ctx context.Context, shopID *uint64) (string, e
 		return "", err
 	}
 	sum := sha256.Sum256(encoded)
-	return service.provider.Model() + ":" + strconv.Itoa(service.provider.Dimension()) + ":" + hex.EncodeToString(sum[:]), nil
+	return ai.IndexModel(service.provider) + ":" + strconv.Itoa(service.provider.Dimension()) + ":" + hex.EncodeToString(sum[:]), nil
 }
 
 func publicScope(shop *uint64) (string, []any) {
@@ -50,7 +52,7 @@ func (service *Service) Validate(ctx context.Context, hits []Hit, shop *uint64) 
 	where, args := publicScope(shop)
 	for _, hit := range hits {
 		var count int64
-		values := []any{hit.ChunkID, hit.DocumentID, hit.Version, hit.Epoch, service.provider.Model(), service.provider.Dimension()}
+		values := []any{hit.ChunkID, hit.DocumentID, hit.Version, hit.Epoch, ai.IndexModel(service.provider), service.provider.Dimension()}
 		values = append(values, args...)
 		err := service.db.WithContext(ctx).Raw(`SELECT COUNT(*) FROM tb_ai_chunk c
  JOIN tb_ai_document d ON d.id=c.document_id

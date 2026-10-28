@@ -1,0 +1,6 @@
+=== RUN   TestIntegrationIndexCompatibility
+    index_identity_integration_test.go:79: multi-chunk fixture required
+--- FAIL: TestIntegrationIndexCompatibility (0.16s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aiknowledge	2.322s
+FAIL

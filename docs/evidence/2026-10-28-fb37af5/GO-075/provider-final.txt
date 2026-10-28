@@ -1,0 +1,146 @@
+=== RUN   TestCompatibleConfiguration
+=== RUN   TestCompatibleConfiguration/dimension_excessive
+=== RUN   TestCompatibleConfiguration/timeout_zero
+=== RUN   TestCompatibleConfiguration/timeout_excessive
+=== RUN   TestCompatibleConfiguration/chat_blank
+=== RUN   TestCompatibleConfiguration/embedding_invalid
+=== RUN   TestCompatibleConfiguration/dimension_zero
+=== RUN   TestCompatibleConfiguration/output_zero
+=== RUN   TestCompatibleConfiguration/output_excessive
+=== RUN   TestCompatibleConfiguration/key_blank
+=== RUN   TestCompatibleConfiguration/key_newline
+=== RUN   TestCompatibleConfiguration/key_long
+--- PASS: TestCompatibleConfiguration (0.00s)
+    --- PASS: TestCompatibleConfiguration/dimension_excessive (0.00s)
+    --- PASS: TestCompatibleConfiguration/timeout_zero (0.00s)
+    --- PASS: TestCompatibleConfiguration/timeout_excessive (0.00s)
+    --- PASS: TestCompatibleConfiguration/chat_blank (0.00s)
+    --- PASS: TestCompatibleConfiguration/embedding_invalid (0.00s)
+    --- PASS: TestCompatibleConfiguration/dimension_zero (0.00s)
+    --- PASS: TestCompatibleConfiguration/output_zero (0.00s)
+    --- PASS: TestCompatibleConfiguration/output_excessive (0.00s)
+    --- PASS: TestCompatibleConfiguration/key_blank (0.00s)
+    --- PASS: TestCompatibleConfiguration/key_newline (0.00s)
+    --- PASS: TestCompatibleConfiguration/key_long (0.00s)
+=== RUN   TestCompatibleChatHTTPPayloadAndUsage
+--- PASS: TestCompatibleChatHTTPPayloadAndUsage (0.01s)
+=== RUN   TestCompatibleEmbeddingsReorderBatchesAndUsage
+--- PASS: TestCompatibleEmbeddingsReorderBatchesAndUsage (0.00s)
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/null_response
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/missing_index
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/negative_index
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/zero_vector
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/missing_row
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/out_of_range
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/wrong_dimensions
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/null_vector
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/float32_overflow
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/infinite
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/trailing_json
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/duplicate_index
+=== RUN   TestCompatibleRejectsBadEmbeddingResponses/later_batch_fails
+--- PASS: TestCompatibleRejectsBadEmbeddingResponses (0.03s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/null_response (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/missing_index (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/negative_index (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/zero_vector (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/missing_row (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/out_of_range (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/wrong_dimensions (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/null_vector (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/float32_overflow (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/infinite (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/trailing_json (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/duplicate_index (0.00s)
+    --- PASS: TestCompatibleRejectsBadEmbeddingResponses/later_batch_fails (0.00s)
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/truncated_answer
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/filtered
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/tool_finish
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/missing_finish
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/function_payload
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/empty
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/wrong_role
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/missing_index
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/tool_payload
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/refusal
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/blank
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/multimodal
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/malformed
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/trailing
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_missing
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_negative
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_mismatch
+=== RUN   TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_partial
+--- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown (0.02s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/truncated_answer (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/filtered (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/tool_finish (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/missing_finish (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/function_payload (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/empty (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/wrong_role (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/missing_index (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/tool_payload (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/refusal (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/blank (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/multimodal (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/malformed (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/trailing (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_missing (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_negative (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_mismatch (0.00s)
+    --- PASS: TestCompatibleRejectsIncompleteChatAndReportsUsageUnknown/usage_partial (0.00s)
+=== RUN   TestCompatibleInputBoundsAvoidHTTPAndObservation
+--- PASS: TestCompatibleInputBoundsAvoidHTTPAndObservation (0.00s)
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/301
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/307
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/400
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/401
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/404
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/429
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/500
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/503
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_declared
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_chunked
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_answer
+=== RUN   TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/invalid_utf8
+--- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried (0.03s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/301 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/307 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/400 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/401 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/404 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/429 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/500 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/503 (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_declared (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_chunked (0.01s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/oversize_answer (0.00s)
+    --- PASS: TestCompatibleHTTPFailuresAreSanitizedAndNotRetried/invalid_utf8 (0.00s)
+=== RUN   TestCompatibleCancellationDeadlineAndRecovery
+=== RUN   TestCompatibleCancellationDeadlineAndRecovery/cancel
+=== RUN   TestCompatibleCancellationDeadlineAndRecovery/deadline
+=== RUN   TestCompatibleCancellationDeadlineAndRecovery/provider_timeout
+--- PASS: TestCompatibleCancellationDeadlineAndRecovery (0.20s)
+    --- PASS: TestCompatibleCancellationDeadlineAndRecovery/cancel (0.00s)
+    --- PASS: TestCompatibleCancellationDeadlineAndRecovery/deadline (0.04s)
+    --- PASS: TestCompatibleCancellationDeadlineAndRecovery/provider_timeout (0.15s)
+=== RUN   TestCompatibleIndexModelBindsVectorSpaceOnly
+--- PASS: TestCompatibleIndexModelBindsVectorSpaceOnly (0.00s)
+=== RUN   TestCompatibleConcurrencyAdmissionIsBoundedAndCancelable
+--- PASS: TestCompatibleConcurrencyAdmissionIsBoundedAndCancelable (0.03s)
+=== RUN   TestSensitiveInputKeepsDecimalBusinessIDs
+--- PASS: TestSensitiveInputKeepsDecimalBusinessIDs (0.00s)
+=== RUN   TestSensitiveInputStillRejectsCredentials
+--- PASS: TestSensitiveInputStillRejectsCredentials (0.00s)
+=== RUN   TestStubEmbeddingIsDeterministicAndNormalized
+--- PASS: TestStubEmbeddingIsDeterministicAndNormalized (0.00s)
+=== RUN   TestStubRejectsEmptyInputAndTinyDimensions
+--- PASS: TestStubRejectsEmptyInputAndTinyDimensions (0.00s)
+=== RUN   TestStubModeAndModelAreReportedAsStub
+--- PASS: TestStubModeAndModelAreReportedAsStub (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/ai	1.912s

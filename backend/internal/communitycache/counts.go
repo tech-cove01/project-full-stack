@@ -34,6 +34,10 @@ type Cache struct {
 
 	mu       sync.Mutex
 	inflight map[uint64]*flight
+	// Publication and invalidation share an ordering boundary. An old database
+	// load must not recreate a cache value after a completed mutation invalidates it.
+	publication chan struct{}
+	generation  uint64
 
 	localMu  sync.Mutex
 	local    map[uint64]localEntry
@@ -41,9 +45,41 @@ type Cache struct {
 }
 
 type flight struct {
-	wg    sync.WaitGroup
-	value Counts
-	err   error
+	done       chan struct{}
+	generation uint64
+	value      Counts
+	err        error
+}
+
+func (cache *Cache) acquirePublication(ctx context.Context) error {
+	select {
+	case cache.publication <- struct{}{}:
+		return nil
+	case <-ctx.Done():
+		return ctx.Err()
+	}
+}
+
+func (cache *Cache) epoch(ctx context.Context) (uint64, error) {
+	if err := cache.acquirePublication(ctx); err != nil {
+		return 0, err
+	}
+	defer func() { <-cache.publication }()
+	return cache.generation, nil
+}
+
+func (cache *Cache) publish(ctx context.Context, noteID uint64, value Counts, epoch uint64, toRedis bool) {
+	if cache.acquirePublication(ctx) != nil {
+		return
+	}
+	defer func() { <-cache.publication }()
+	if cache.generation != epoch {
+		return
+	}
+	if toRedis {
+		cache.write(ctx, noteID, value)
+	}
+	cache.writeLocal(noteID, value)
 }
 
 type localEntry struct {
@@ -52,7 +88,7 @@ type localEntry struct {
 }
 
 func New(client *redis.Client, db *gorm.DB) *Cache {
-	return &Cache{redis: client, db: db, inflight: make(map[uint64]*flight),
+	return &Cache{redis: client, db: db, inflight: make(map[uint64]*flight), publication: make(chan struct{}, 1),
 		local: make(map[uint64]localEntry), localTTL: defaultLocalTTL}
 }
 
@@ -146,33 +182,45 @@ func (cache *Cache) loadOne(ctx context.Context, noteID uint64) (Counts, error) 
 // Get serves one note with a singleflight so a burst on the same key performs a
 // single database read. A miss caused by a concurrent delete simply reloads.
 func (cache *Cache) Get(ctx context.Context, noteID uint64) (Counts, error) {
+	if err := ctx.Err(); err != nil {
+		return Counts{}, err
+	}
+	epoch, err := cache.epoch(ctx)
+	if err != nil {
+		return Counts{}, err
+	}
 	if value, ok := cache.readLocal(noteID); ok {
 		return value, nil
 	}
 	if value, ok := cache.read(ctx, noteID); ok {
-		cache.writeLocal(noteID, value)
+		cache.publish(ctx, noteID, value, epoch, false)
 		return value, nil
 	}
 	cache.mu.Lock()
-	if existing, ok := cache.inflight[noteID]; ok {
+	if existing, ok := cache.inflight[noteID]; ok && existing.generation == epoch {
 		cache.mu.Unlock()
-		existing.wg.Wait()
-		return existing.value, existing.err
+		select {
+		case <-ctx.Done():
+			return Counts{}, ctx.Err()
+		case <-existing.done:
+			return existing.value, existing.err
+		}
 	}
-	entry := &flight{}
-	entry.wg.Add(1)
+	entry := &flight{done: make(chan struct{}), generation: epoch}
 	cache.inflight[noteID] = entry
 	cache.mu.Unlock()
 	defer func() {
 		cache.mu.Lock()
-		delete(cache.inflight, noteID)
+		if cache.inflight[noteID] == entry {
+			delete(cache.inflight, noteID)
+		}
 		cache.mu.Unlock()
-		entry.wg.Done()
+		close(entry.done)
 	}()
 	// Another goroutine may have filled the cache between the first read and
 	// winning the flight; prefer the cached value over a second query.
 	if value, ok := cache.read(ctx, noteID); ok {
-		cache.writeLocal(noteID, value)
+		cache.publish(ctx, noteID, value, epoch, false)
 		entry.value = value
 		return value, nil
 	}
@@ -181,8 +229,7 @@ func (cache *Cache) Get(ctx context.Context, noteID uint64) (Counts, error) {
 		entry.err = err
 		return Counts{}, err
 	}
-	cache.write(ctx, noteID, value)
-	cache.writeLocal(noteID, value)
+	cache.publish(ctx, noteID, value, epoch, true)
 	entry.value = value
 	return value, nil
 }
@@ -191,6 +238,13 @@ func (cache *Cache) Get(ctx context.Context, noteID uint64) (Counts, error) {
 // the feed path: batching already removes the N+1, so it does not also need
 // per-key flights.
 func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (map[uint64]Counts, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	epoch, err := cache.epoch(ctx)
+	if err != nil {
+		return nil, err
+	}
 	result := make(map[uint64]Counts, len(noteIDs))
 	if len(noteIDs) == 0 {
 		return result, nil
@@ -222,7 +276,7 @@ func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (map[uint64]C
 			var value Counts
 			if json.Unmarshal([]byte(text), &value) == nil {
 				result[remaining[index]] = value
-				cache.writeLocal(remaining[index], value)
+				cache.publish(ctx, remaining[index], value, epoch, false)
 				continue
 			}
 		}
@@ -252,14 +306,18 @@ func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (map[uint64]C
 	for _, row := range rows {
 		value := Counts{Likes: row.Liked, Comments: row.Comments}
 		result[row.ID] = value
-		cache.write(ctx, row.ID, value)
-		cache.writeLocal(row.ID, value)
+		cache.publish(ctx, row.ID, value, epoch, true)
 	}
 	return result, nil
 }
 
 // Invalidate drops both layers after a mutation so the next read rebuilds them.
 func (cache *Cache) Invalidate(ctx context.Context, noteID uint64) error {
+	if err := cache.acquirePublication(ctx); err != nil {
+		return err
+	}
+	defer func() { <-cache.publication }()
+	cache.generation++
 	cache.dropLocal(noteID)
 	return cache.redis.Del(ctx, key(noteID)).Err()
 }

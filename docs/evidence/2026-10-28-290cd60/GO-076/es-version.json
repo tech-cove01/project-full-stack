@@ -1,0 +1,6 @@
+{
+  "version": "8.19.23",
+  "cluster": "docker-cluster",
+  "distribution": "default",
+  "lucene": "9.12.2"
+}

@@ -33,6 +33,26 @@ services:
       timeout: 3s
       retries: 20
 
+  # Opt-in search instance; CJK analysis is built in, with no plugin download.
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.23
+    profiles: ["search"]
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.ml.enabled: "false"
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    mem_limit: 1g
+    ports:
+      - "127.0.0.1:${GO_ES_PORT:-9202}:9200"
+    volumes:
+      - go-search-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s' >/dev/null || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 40
+
   # Opt-in single-node KRaft broker. `docker compose -f compose.go.yaml --profile kafka up -d`
   # The application treats an empty KAFKA_BROKERS as "relay disabled", so the
   # default profile stays a two-container local environment.
@@ -74,3 +94,4 @@ volumes:
   go-mysql-data:
   go-redis-data:
   go-kafka-data:
+  go-search-data:

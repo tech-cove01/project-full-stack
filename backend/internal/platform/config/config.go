@@ -44,6 +44,7 @@ type Config struct {
 	Redis           Redis
 	Kafka           Kafka
 	AI              AI
+	Search          Search
 	Location        *time.Location
 	StartupTimeout  time.Duration
 	ProbeTimeout    time.Duration
@@ -165,6 +166,7 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		cfg.Kafka.Topic = topic
 	}
 	cfg.AI = loadAI(lookup)
+	cfg.Search = loadSearch(lookup)
 	return cfg, nil
 }
 

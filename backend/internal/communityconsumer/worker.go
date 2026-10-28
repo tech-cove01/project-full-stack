@@ -53,9 +53,9 @@ func NewWorker(brokers []string, topic, projection string, processor Processor) 
 }
 
 // Only tests in this package choose private topics and groups. Production
-// callers cannot accidentally share offsets between the two projections.
+// callers cannot accidentally share offsets between independent projections.
 func newWorkerWithGroup(brokers []string, topic, projection, group string, processor Processor) (*Worker, error) {
-	if projection != "follow-v1" && projection != "feed-v1" {
+	if projection != "follow-v1" && projection != "feed-v1" && projection != "search-v1" {
 		return nil, errors.New("unsupported community projection")
 	}
 	if processor == nil || len(brokers) == 0 || strings.TrimSpace(topic) == "" || strings.TrimSpace(group) == "" {

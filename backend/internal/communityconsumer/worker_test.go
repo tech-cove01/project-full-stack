@@ -295,7 +295,7 @@ func TestApplyTimeoutIsBoundedAndLogsDoNotExposeDiagnostic(t *testing.T) {
 
 func TestConstructorUsesSeparateStableSynchronousGroupsAndRejectsUnknownProjection(t *testing.T) {
 	processor := processorFuncs{}
-	for _, projection := range []string{"follow-v1", "feed-v1"} {
+	for _, projection := range []string{"follow-v1", "feed-v1", "search-v1"} {
 		worker, err := NewWorker([]string{"127.0.0.1:9092"}, "community.events", projection, processor)
 		if err != nil {
 			t.Fatal("supported projection was rejected")

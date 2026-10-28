@@ -1,0 +1,18 @@
+=== RUN   TestIntegrationSearchSync
+=== RUN   TestIntegrationSearchSync/duplicate-and-old-versions-use-current-published-fact
+=== RUN   TestIntegrationSearchSync/ES-success-before-SQL-rollback-redelivers-once
+=== RUN   TestIntegrationSearchSync/ES-unreachable-parks-and-replays-original-source
+=== RUN   TestIntegrationSearchSync/rebuild-snapshot-and-waiting-incremental-converge
+=== RUN   TestIntegrationSearchSync/irrelevant-known-events-have-durable-ignored-receipts
+=== RUN   TestIntegrationSearchSync/Kafka-worker-commits-only-indexed-or-durably-parked-records
+=== RUN   TestIntegrationSearchSync/alias-activation-before-SQL-rollback-is-reconciled-by-rebuild
+--- PASS: TestIntegrationSearchSync (3.08s)
+    --- PASS: TestIntegrationSearchSync/duplicate-and-old-versions-use-current-published-fact (0.20s)
+    --- PASS: TestIntegrationSearchSync/ES-success-before-SQL-rollback-redelivers-once (0.09s)
+    --- PASS: TestIntegrationSearchSync/ES-unreachable-parks-and-replays-original-source (0.09s)
+    --- PASS: TestIntegrationSearchSync/rebuild-snapshot-and-waiting-incremental-converge (0.57s)
+    --- PASS: TestIntegrationSearchSync/irrelevant-known-events-have-durable-ignored-receipts (0.03s)
+    --- PASS: TestIntegrationSearchSync/Kafka-worker-commits-only-indexed-or-durably-parked-records (0.51s)
+    --- PASS: TestIntegrationSearchSync/alias-activation-before-SQL-rollback-is-reconciled-by-rebuild (0.84s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/notesearch	5.479s

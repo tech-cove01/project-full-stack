@@ -1,0 +1,14 @@
+=== RUN   TestIntegrationSearchSync
+=== RUN   TestIntegrationSearchSync/duplicate-and-old-versions-use-current-published-fact
+=== RUN   TestIntegrationSearchSync/ES-success-before-SQL-rollback-redelivers-once
+=== RUN   TestIntegrationSearchSync/ES-unreachable-parks-and-replays-original-source
+=== RUN   TestIntegrationSearchSync/rebuild-snapshot-and-waiting-incremental-converge
+=== RUN   TestIntegrationSearchSync/Kafka-worker-commits-only-indexed-or-durably-parked-records
+--- PASS: TestIntegrationSearchSync (7.41s)
+    --- PASS: TestIntegrationSearchSync/duplicate-and-old-versions-use-current-published-fact (0.20s)
+    --- PASS: TestIntegrationSearchSync/ES-success-before-SQL-rollback-redelivers-once (0.27s)
+    --- PASS: TestIntegrationSearchSync/ES-unreachable-parks-and-replays-original-source (0.15s)
+    --- PASS: TestIntegrationSearchSync/rebuild-snapshot-and-waiting-incremental-converge (0.49s)
+    --- PASS: TestIntegrationSearchSync/Kafka-worker-commits-only-indexed-or-durably-parked-records (5.73s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/notesearch	9.998s

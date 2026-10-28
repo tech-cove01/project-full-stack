@@ -1,0 +1,3 @@
+ok  	github.com/cityloop/fullstack-go/internal/notesearch	2.093s
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	2.060s
+?   	github.com/cityloop/fullstack-go/cmd/note-search	[no test files]

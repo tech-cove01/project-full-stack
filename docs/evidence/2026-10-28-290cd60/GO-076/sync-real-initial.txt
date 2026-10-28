@@ -1,0 +1,5 @@
+FAIL	github.com/cityloop/fullstack-go/internal/notesearch [build failed]
+# github.com/cityloop/fullstack-go/internal/notesearch [github.com/cityloop/fullstack-go/internal/notesearch.test]
+internal\notesearch\sync_integration_test.go:24:2: "gorm.io/driver/mysql" imported as gormmysql and not used
+internal\notesearch\sync_integration_test.go:26:2: "gorm.io/gorm/logger" imported and not used
+FAIL

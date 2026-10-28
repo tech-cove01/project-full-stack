@@ -27,6 +27,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
 	"github.com/cityloop/fullstack-go/internal/note"
+	"github.com/cityloop/fullstack-go/internal/notesearch"
 	"github.com/cityloop/fullstack-go/internal/order"
 	"github.com/cityloop/fullstack-go/internal/ordercomp"
 	"github.com/cityloop/fullstack-go/internal/orderreview"
@@ -52,6 +53,11 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		return fmt.Errorf("listen HTTP API: %w", err)
 	}
 	orders := order.NewService(resources.ORM, resources.Redis, cfg.OrderPayTimeout)
+	searchClient := configuredSearch(cfg.Search)
+	if searchClient != nil {
+		defer searchClient.CloseIdleConnections()
+	}
+	noteSearch := notesearch.NewService(resources.ORM, searchClient)
 	// One provider instance is shared so indexing and retrieval always speak the
 	// same model; a model switch requires rebuilding the chunk vectors.
 	embedder, capabilities := configuredAI(cfg.AI)
@@ -73,6 +79,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			merchantorder.Register(routes, merchantorder.NewService(resources.ORM), identity)
 			aiknowledge.Register(routes, knowledge, identity)
 			note.Register(routes, note.NewService(resources.ORM), identity)
+			notesearch.Register(routes, noteSearch)
 			social.Register(routes,
 				social.NewService(resources.ORM).
 					WithProjections().
@@ -116,6 +123,16 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			}
 			// Run closes the Kafka reader before startBackground releases DB pools.
 			// Defer also covers assembly failure before background work starts.
+			defer func() { _ = consumer.Close() }()
+			workers = append(workers, consumer.Run)
+		}
+		if searchClient != nil {
+			consumer, err := communityconsumer.NewWorker(cfg.Kafka.Brokers, cfg.Kafka.Topic, notesearch.Projection, notesearch.NewSync(resources.ORM, searchClient))
+			if err != nil {
+				_ = listener.Close()
+				_ = resources.Close()
+				return errors.New("note search consumer configuration is invalid")
+			}
 			defer func() { _ = consumer.Close() }()
 			workers = append(workers, consumer.Run)
 		}

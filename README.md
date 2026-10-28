@@ -13,7 +13,7 @@
 | 商家工作台 | OWNER/MANAGER/STAFF 逐门店权限，活动与订单管理、核销、退款和审计查询 |
 | 业务 AI | 公开规则检索与来源、本人订单只读查询、隔离会话、FAQ 版本维护和 SSE；当前为确定性 stub 演示 |
 | 探店社区 | 笔记发布、期望状态点赞、关注关系与复合游标 Feed |
-| 可靠性与性能 | 事务 outbox、补偿与受控重建，社区事件投递 Kafka，批量计数缓存与单进程回源合并；持续容量仍待测量 |
+| 可靠性与性能 | 事务 outbox、补偿与受控重建，社区 Kafka 投递与关注/Feed目录消费投影、持久失败重放，批量计数缓存与单进程回源合并；持续容量仍待测量 |
 
 模拟支付与退款不接真实资金通道。AI 没有交易写工具，实时库存和订单由服务端按当前身份查询。
 
@@ -24,7 +24,7 @@
 | 前端 | Vue 3、TypeScript、Vite、Vue Router、Pinia、Element Plus |
 | 后端 | Go、Gin、GORM、go-redis/v9 |
 | 数据与缓存 | MySQL 8.4、Redis 7.4、有界本地 TTL 缓存、并发回源合并、Lua |
-| 异步 | 订单 Redis Stream、事务 outbox；社区 Kafka 投递（消费端投影待实现） |
+| 异步 | 订单 Redis Stream、事务 outbox；社区 Kafka 至少一次投递与独立关注/Feed目录投影 |
 | AI | Chat/Embedding Provider 接口与 stub、小规模精确向量检索、MySQL 知识持久化；真实 Provider 待接入 |
 | 验证与运行 | go test/httptest、k6、Docker Compose、GitHub Actions |
 

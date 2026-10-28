@@ -1,0 +1,5 @@
+=== RUN   TestIntegrationCommunityConsumer
+    integration_test.go:326: KAFKA_BROKERS is not configured
+--- SKIP: TestIntegrationCommunityConsumer (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	1.969s

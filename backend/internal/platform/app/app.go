@@ -22,6 +22,8 @@ import (
 	"github.com/cityloop/fullstack-go/internal/aitool"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/communitycache"
+	"github.com/cityloop/fullstack-go/internal/communityconsumer"
+	"github.com/cityloop/fullstack-go/internal/communityprojection"
 	"github.com/cityloop/fullstack-go/internal/communityrelay"
 	"github.com/cityloop/fullstack-go/internal/merchant"
 	"github.com/cityloop/fullstack-go/internal/merchantorder"
@@ -71,6 +73,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			note.Register(routes, note.NewService(resources.ORM), identity)
 			social.Register(routes,
 				social.NewService(resources.ORM).
+					WithProjections().
 					WithCounts(communitycache.New(resources.Redis, resources.ORM)).
 					WithLikes(communitycache.NewLikes(resources.Redis)), identity)
 			assistant := aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder).
@@ -98,6 +101,19 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		relay := communityrelay.NewWorker(resources.ORM, cfg.Kafka.Brokers, cfg.Kafka.Topic)
 		defer func() { _ = relay.Close() }()
 		workers = append(workers, relay.Run)
+		projection := communityprojection.NewRuntime(communityprojection.New(resources.ORM))
+		for _, name := range []string{communityprojection.Follow, communityprojection.Feed} {
+			consumer, err := communityconsumer.NewWorker(cfg.Kafka.Brokers, cfg.Kafka.Topic, name, projection)
+			if err != nil {
+				_ = listener.Close()
+				_ = resources.Close()
+				return errors.New("community consumer configuration is invalid")
+			}
+			// Run closes the Kafka reader before startBackground releases DB pools.
+			// Defer also covers assembly failure before background work starts.
+			defer func() { _ = consumer.Close() }()
+			workers = append(workers, consumer.Run)
+		}
 	}
 	owned := startBackground(ctx, resources, workers...)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())

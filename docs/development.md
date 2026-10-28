@@ -94,7 +94,11 @@ cd backend && go run ./cmd/api     # 默认 127.0.0.1:8082
 npm --prefix frontend run dev       # 前端代理到 Go API
 ```
 
-社区事件投递需要 Kafka 时：`docker compose -f compose.go.yaml --profile kafka up -d kafka`，并设置 `KAFKA_BROKERS=127.0.0.1:9092`。
+社区事件投递及消费投影需要 Kafka 时：`docker compose -f compose.go.yaml --profile kafka up -d kafka`，并设置 `KAFKA_BROKERS=127.0.0.1:9092`。先运行版本迁移（含009—011），再启API；两个消费者使用稳定的 `community.follow-v1` / `community.feed-v1` group，不与交易Stream共用协议。空broker配置同时停用社区relay和这两个消费者。
+
+关注关系公开计数和Feed目录完整时使用投影，响应中的 `source=projection` 表示相应读模型参与；本人状态、内容及可见范围仍由DB事实决定。不完整、历史无事件或可选查询故障时 `source=database`，不会把缺失投影当作空数据。
+
+在 `backend/` 用 `go run ./cmd/community-projector stats follow-v1` 查看收据/停车状态；`replay <projection> <topic> <partition> <offset>` 精确重放原失败记录；`rebuild follow-v1` 或 `rebuild feed-v1` 原子重建该环境的整张派生模型。命令不修改事实或Kafkaoffset，重放失败保持PARKED。命令与限制详见 [GO-072恢复说明](evidence/2026-10-28-8c3fb0e/GO-072/recovery-report.md)。
 
 ## Java 基线环境与启动（历史参考）
 

@@ -1,0 +1,29 @@
+=== RUN   TestIntegrationCommunityConsumer
+=== RUN   TestIntegrationCommunityConsumer/follow_duplicate_and_reverse_versions_commit_broker_offset_without_reverting_v3
+    integration_test.go:296: cannot seed exact consumer fixture
+    integration_test.go:101: cleanup=exact SQL fixture/private Kafka topic/private groups; shared community.events untouched
+=== RUN   TestIntegrationCommunityConsumer/feed_duplicate_and_reverse_publication_versions_keep_one_current_catalog_row
+    integration_test.go:308: cannot seed exact consumer fixture
+    integration_test.go:101: cleanup=exact SQL fixture/private Kafka topic/private groups; shared community.events untouched
+=== RUN   TestIntegrationCommunityConsumer/committed_effect_before_offset_context_cancel_restarts_same_group_and_replays_once
+    integration_test.go:321: cannot seed exact consumer fixture
+    integration_test.go:101: cleanup=exact SQL fixture/private Kafka topic/private groups; shared community.events untouched
+=== RUN   TestIntegrationCommunityConsumer/closed_db_pool_cannot_apply_park_or_commit_and_healthy_recovery_parks_then_replays
+    integration_test.go:357: cannot seed exact consumer fixture
+    integration_test.go:101: cleanup=exact SQL fixture/private Kafka topic/private groups; shared community.events untouched
+=== RUN   TestIntegrationCommunityConsumer/oversized_header_poison_parks_and_one_blocked_group_does_not_stop_the_other
+    integration_test.go:394: cannot seed exact consumer fixture
+    integration_test.go:101: cleanup=exact SQL fixture/private Kafka topic/private groups; shared community.events untouched
+=== RUN   TestIntegrationCommunityConsumer/missing_publication_fact_parks_then_controlled_replay_applies_and_resolves_atomically
+    integration_test.go:434: cannot seed exact consumer fixture
+    integration_test.go:101: cleanup=exact SQL fixture/private Kafka topic/private groups; shared community.events untouched
+--- FAIL: TestIntegrationCommunityConsumer (0.53s)
+    --- FAIL: TestIntegrationCommunityConsumer/follow_duplicate_and_reverse_versions_commit_broker_offset_without_reverting_v3 (0.05s)
+    --- FAIL: TestIntegrationCommunityConsumer/feed_duplicate_and_reverse_publication_versions_keep_one_current_catalog_row (0.11s)
+    --- FAIL: TestIntegrationCommunityConsumer/committed_effect_before_offset_context_cancel_restarts_same_group_and_replays_once (0.22s)
+    --- FAIL: TestIntegrationCommunityConsumer/closed_db_pool_cannot_apply_park_or_commit_and_healthy_recovery_parks_then_replays (0.05s)
+    --- FAIL: TestIntegrationCommunityConsumer/oversized_header_poison_parks_and_one_blocked_group_does_not_stop_the_other (0.03s)
+    --- FAIL: TestIntegrationCommunityConsumer/missing_publication_fact_parks_then_controlled_replay_applies_and_resolves_atomically (0.04s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/communityconsumer	11.071s
+FAIL

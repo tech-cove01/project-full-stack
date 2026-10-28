@@ -1,0 +1,24 @@
+=== RUN   TestCommitFollowsDurableApplyInSourceOrder
+--- PASS: TestCommitFollowsDurableApplyInSourceOrder (0.00s)
+=== RUN   TestThreeFailedAppliesRequireDurableParkAndNeverSkipAnUnprovedMessage
+--- PASS: TestThreeFailedAppliesRequireDurableParkAndNeverSkipAnUnprovedMessage (0.00s)
+=== RUN   TestCommitFailureRetriesOnlyCurrentCommitBeforeFetchingLaterOffsets
+--- PASS: TestCommitFailureRetriesOnlyCurrentCommitBeforeFetchingLaterOffsets (0.00s)
+=== RUN   TestCancellationAfterDurableEffectBeforeCommitReplaysWithoutSecondEffect
+--- PASS: TestCancellationAfterDurableEffectBeforeCommitReplaysWithoutSecondEffect (0.00s)
+=== RUN   TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce
+=== RUN   TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce/read
+=== RUN   TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce/apply
+=== RUN   TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce/retry
+2026/10/28 14:55:52 WARN community projection will retry projection=follow-v1
+--- PASS: TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce (0.06s)
+    --- PASS: TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce/read (0.00s)
+    --- PASS: TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce/apply (0.00s)
+    --- PASS: TestRunCancellationBoundsReadWorkAndRetryAndClosesReaderOnce/retry (0.06s)
+=== RUN   TestApplyTimeoutIsBoundedAndLogsDoNotExposeDiagnostic
+--- PASS: TestApplyTimeoutIsBoundedAndLogsDoNotExposeDiagnostic (0.03s)
+=== RUN   TestConstructorUsesSeparateStableSynchronousGroupsAndRejectsUnknownProjection
+--- PASS: TestConstructorUsesSeparateStableSynchronousGroupsAndRejectsUnknownProjection (0.01s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	2.406s
+testExit=0 vetExit=0 gofmtEmpty=True

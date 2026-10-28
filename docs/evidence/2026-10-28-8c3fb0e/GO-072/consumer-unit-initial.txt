@@ -1,0 +1,9 @@
+FAIL	github.com/cityloop/fullstack-go/internal/communityconsumer [build failed]
+# github.com/cityloop/fullstack-go/internal/communityprojection
+internal\communityprojection\runtime.go:65:58: undefined: gorm
+internal\communityprojection\runtime.go:85:58: undefined: gorm
+FAIL
+# github.com/cityloop/fullstack-go/internal/communityprojection
+internal\communityprojection\runtime.go:65:58: undefined: gorm
+internal\communityprojection\runtime.go:85:58: undefined: gorm
+testExit=1 vetExit=1 gofmtEmpty=True

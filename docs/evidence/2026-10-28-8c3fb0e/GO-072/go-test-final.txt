@@ -1,0 +1,31 @@
+?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/community-projector	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/recount	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/review	[no test files]
+ok  	github.com/cityloop/fullstack-go/internal/activity	19.630s
+ok  	github.com/cityloop/fullstack-go/internal/activitypub	10.017s
+ok  	github.com/cityloop/fullstack-go/internal/ai	0.720s
+ok  	github.com/cityloop/fullstack-go/internal/aichat	12.092s
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	14.379s
+ok  	github.com/cityloop/fullstack-go/internal/aitool	1.084s
+ok  	github.com/cityloop/fullstack-go/internal/auth	16.284s
+ok  	github.com/cityloop/fullstack-go/internal/communitycache	19.865s
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	19.887s
+ok  	github.com/cityloop/fullstack-go/internal/communityprojection	1.048s
+ok  	github.com/cityloop/fullstack-go/internal/communityrelay	21.250s
+ok  	github.com/cityloop/fullstack-go/internal/merchant	30.346s
+ok  	github.com/cityloop/fullstack-go/internal/merchantorder	11.286s
+ok  	github.com/cityloop/fullstack-go/internal/note	13.901s
+ok  	github.com/cityloop/fullstack-go/internal/order	11.289s
+ok  	github.com/cityloop/fullstack-go/internal/orderadmission	24.041s
+ok  	github.com/cityloop/fullstack-go/internal/ordercomp	26.150s
+ok  	github.com/cityloop/fullstack-go/internal/orderreview	30.533s
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	17.706s
+ok  	github.com/cityloop/fullstack-go/internal/ordertimeout	26.264s
+ok  	github.com/cityloop/fullstack-go/internal/outbox	30.568s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	15.455s
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	20.251s
+ok  	github.com/cityloop/fullstack-go/internal/platform/database	30.324s
+ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	30.646s
+ok  	github.com/cityloop/fullstack-go/internal/shop	26.129s
+ok  	github.com/cityloop/fullstack-go/internal/social	26.149s

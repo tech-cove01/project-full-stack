@@ -202,6 +202,18 @@ jobs:
         options: >-
           --health-cmd="/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"
           --health-interval=10s --health-timeout=5s --health-retries=30
+      elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:8.19.23
+        env:
+          discovery.type: single-node
+          xpack.security.enabled: 'false'
+          xpack.ml.enabled: 'false'
+          ES_JAVA_OPTS: -Xms512m -Xmx512m
+        ports: ['9202:9200']
+        options: >-
+          --memory=1g
+          --health-cmd="curl -fsS 'http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=3s' >/dev/null"
+          --health-interval=5s --health-timeout=5s --health-retries=40
     env:
       GO_ENV: development
       MYSQL_HOST: 127.0.0.1
@@ -212,6 +224,8 @@ jobs:
       REDIS_HOST: 127.0.0.1
       REDIS_PORT: '6380'
       KAFKA_BROKERS: 127.0.0.1:9092
+      ES_URL: http://127.0.0.1:9202
+      ES_INDEX: community-notes-v1
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-go@v6
@@ -239,7 +253,7 @@ jobs:
           SH
           chmod +x "$RUNNER_TEMP/mysql-go"
           MYSQL_BIN="$RUNNER_TEMP/mysql-go" node ../scripts/migrate.mjs
-      - name: Community events against a real broker
-        run: go test -race -count=1 -p 1 -v ./internal/communityrelay ./internal/communityconsumer
+      - name: Community events and note search against real dependencies
+        run: go test -race -count=1 -p 1 -v ./internal/communityrelay ./internal/communityconsumer ./internal/notesearch
         env:
           GO_INTEGRATION: '1'

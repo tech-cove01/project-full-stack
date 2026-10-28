@@ -1,0 +1,1 @@
+PASS: text evidence has no full-phone, 32-hex session or 64-hex redemption credential pattern; browser trace/HAR disabled

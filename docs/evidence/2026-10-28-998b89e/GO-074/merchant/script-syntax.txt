@@ -1,0 +1,1 @@
+PASS: node --check scripts/go-merchant-orders-ui-smoke.mjs

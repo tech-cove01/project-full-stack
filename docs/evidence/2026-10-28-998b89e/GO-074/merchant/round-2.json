@@ -1,0 +1,1021 @@
+{
+  "task": "GO-074a",
+  "acceptance": [
+    "FIN-05",
+    "GO-020",
+    "GO-032"
+  ],
+  "passed": false,
+  "checks": [
+    "direct and proxied API identify the same Go revision",
+    "ten orders are paid through real publication/admission/Stream/payment APIs",
+    "OWNER sees A1/A2 and management audit, without B orders"
+  ],
+  "denials": [],
+  "network": [
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/health/live",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/code",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/login",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/code",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/login",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/code",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/login",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/code",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/login",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/code",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/login",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/code",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/user/login",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/merchant/activities",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/seckill/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "GET",
+      "path": "/voucher-order/:id",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "isolated Go identity and explicit owned role fixture",
+      "method": "POST",
+      "path": "/voucher-order/:id/pay",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "GET",
+      "path": "/api/user/me",
+      "status": 200,
+      "boundary": "actual-browser"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "GET",
+      "path": "/api/merchant/workspace",
+      "status": 200,
+      "boundary": "actual-browser"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "GET",
+      "path": "/api/merchant/workspace",
+      "status": 200,
+      "boundary": "actual-browser"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "GET",
+      "path": "/api/merchant/orders",
+      "status": 200,
+      "boundary": "actual-browser"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "GET",
+      "path": "/api/merchant/audits",
+      "status": 200,
+      "boundary": "actual-browser"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "POST",
+      "path": "/user/logout",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "POST",
+      "path": "/user/logout",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "POST",
+      "path": "/user/logout",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "POST",
+      "path": "/user/logout",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "POST",
+      "path": "/user/logout",
+      "status": 200,
+      "boundary": "node-real-api"
+    },
+    {
+      "step": "owner natural navigation and A scope",
+      "method": "POST",
+      "path": "/user/logout",
+      "status": 200,
+      "boundary": "node-real-api"
+    }
+  ],
+  "cleanup": true,
+  "browserTimezone": "Asia/Shanghai",
+  "privacy": "No trace/HAR; network metadata only; screenshot inputs masked",
+  "step": "owner natural navigation and A scope",
+  "service": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "go074-qa2-worktree"
+  },
+  "action": "select authorized redemption shop",
+  "failure": "Merchant UI verification failed; inspect the safe step and masked screenshot.",
+  "failureCategory": "TimeoutError",
+  "workerBarrier": {
+    "ownedMessages": 10,
+    "pendingBeforeCleanup": 0,
+    "unfinishedOutbox": 0,
+    "unresolvedReview": 0
+  },
+  "fixture": {
+    "users": {
+      "owner": "9007269234449993",
+      "manager": "9007269234449994",
+      "staff": "9007269234449995",
+      "mixed": "9007269234449996",
+      "otherOwner": "9007269234449997",
+      "buyer": "9007269234449998"
+    },
+    "merchants": [
+      "9007269234450093",
+      "9007269234450094"
+    ],
+    "shops": [
+      "9007269234450193",
+      "9007269234450194",
+      "9007269234450195",
+      "9007269234450196"
+    ],
+    "members": [
+      "9007269234450293",
+      "9007269234450294",
+      "9007269234450295",
+      "9007269234450296",
+      "9007269234450297",
+      "9007269234450298"
+    ],
+    "activities": [
+      "1013",
+      "1014",
+      "1015",
+      "1016",
+      "1017",
+      "1018",
+      "1019",
+      "1020",
+      "1021",
+      "1022"
+    ],
+    "orders": [
+      {
+        "id": "653781270416850955",
+        "voucher": "1013",
+        "shopIndex": 0,
+        "label": "owner-redeem"
+      },
+      {
+        "id": "653781274711818252",
+        "voucher": "1014",
+        "shopIndex": 0,
+        "label": "staff-redeem"
+      },
+      {
+        "id": "653781279006785549",
+        "voucher": "1015",
+        "shopIndex": 0,
+        "label": "owner-refund"
+      },
+      {
+        "id": "653781283301752846",
+        "voucher": "1016",
+        "shopIndex": 0,
+        "label": "scope-denied"
+      },
+      {
+        "id": "653781287596720143",
+        "voucher": "1017",
+        "shopIndex": 0,
+        "label": "member-denied"
+      },
+      {
+        "id": "653781291891687440",
+        "voucher": "1018",
+        "shopIndex": 1,
+        "label": "manager-redeem"
+      },
+      {
+        "id": "653781296186654737",
+        "voucher": "1019",
+        "shopIndex": 1,
+        "label": "manager-refund"
+      },
+      {
+        "id": "653781304776589330",
+        "voucher": "1020",
+        "shopIndex": 1,
+        "label": "cross-denied"
+      },
+      {
+        "id": "653781309071556627",
+        "voucher": "1021",
+        "shopIndex": 2,
+        "label": "mixed-redeem"
+      },
+      {
+        "id": "653781313366523924",
+        "voucher": "1022",
+        "shopIndex": 2,
+        "label": "mixed-refund-denied"
+      }
+    ]
+  },
+  "recordedAt": "2026-10-28T11:26:01.440Z"
+}

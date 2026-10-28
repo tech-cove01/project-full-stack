@@ -69,6 +69,7 @@ onBeforeUnmount(() => {
             >探索附近</RouterLink
           >
           <RouterLink to="/merchant" active-class="active">商家工作台</RouterLink>
+          <RouterLink to="/notes/search" active-class="active">搜索笔记</RouterLink>
           <RouterLink v-if="auth.loggedIn" to="/assistant" active-class="active"
             >AI 助手</RouterLink
           >

@@ -1,0 +1,44 @@
+{
+  "task": "GO-076",
+  "passed": false,
+  "checks": [
+    "13 actual authenticated publications become searchable through the running event pipeline",
+    "anonymous navigation opens the public search route before the dynamic note route",
+    "first real browser page exposes ten results and an opaque next cursor without an exact total",
+    "greater-than-2^53 author IDs remain exact decimal strings in all first-page cards",
+    "two pages match independent MySQL publication-time/ID order without duplicates or missing notes",
+    "shop filter preserves a greater-than-2^53 ID exactly and restricts results to that shop",
+    "shareable URL preserves keyword, canonical shop ID and sorting",
+    "reload restores filters and a fresh first page from the shared URL",
+    "shop navigation retains the exact large string ID",
+    "Chinese content-only search finds the public note independently of title words",
+    "title and content markup remain escaped text and execute no handler"
+  ],
+  "cleanup": false,
+  "fixture": {
+    "user": "9007203432002293",
+    "shops": [
+      "9007203432002294",
+      "9007203432002295"
+    ],
+    "notes": [
+      "1793182381286046315",
+      "1793182381286046316",
+      "1793182381286046317",
+      "1793182381286046318",
+      "1793182381286046319",
+      "1793182381286046320",
+      "1793182381286046321",
+      "1793182381286046322",
+      "1793182381286046323",
+      "1793182381286046324",
+      "1793182381286046325",
+      "1793182381286046326",
+      "1793182381286046327"
+    ]
+  },
+  "browserTimezone": "Asia/Shanghai",
+  "failure": "a public search result opens its real note detail",
+  "cleanupFailure": "Cleanup failed at source receipts; retained fixture IDs are recorded for controlled recovery",
+  "recordedAt": "2026-10-28T10:32:16.055Z"
+}

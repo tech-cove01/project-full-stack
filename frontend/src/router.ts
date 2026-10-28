@@ -33,6 +33,11 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/notes/search',
+      name: 'note-search',
+      component: () => import('./views/NoteSearchView.vue'),
+    },
+    {
       path: '/notes/:id',
       name: 'note',
       component: () => import('./views/NoteView.vue'),

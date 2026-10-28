@@ -10,6 +10,8 @@ import type {
   MerchantOrder,
   MerchantWorkspace,
   Note,
+  NoteSearchPage,
+  NoteSearchSort,
   OrderStatus,
   Relationship,
   PublicKnowledge,
@@ -232,6 +234,16 @@ export const api = {
     }),
   note: (id: string, signal?: AbortSignal) =>
     request<Note>(`/notes/${encodeURIComponent(id)}`, { signal }),
+  searchNotes: (
+    params: { q: string; shopId?: string; sort?: NoteSearchSort; cursor?: string; limit?: number },
+    signal?: AbortSignal,
+  ) => {
+    const query = new URLSearchParams({ q: params.q, limit: String(params.limit ?? 10) })
+    if (params.shopId) query.set('shopId', params.shopId)
+    if (params.sort) query.set('sort', params.sort)
+    if (params.cursor) query.set('cursor', params.cursor)
+    return request<NoteSearchPage>(`/notes/search?${query.toString()}`, { signal }, null)
+  },
   setLike: (noteId: string, liked: boolean) =>
     request<LikeState>(`/notes/${encodeURIComponent(noteId)}/like`, {
       method: 'PUT',

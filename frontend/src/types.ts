@@ -151,6 +151,23 @@ export interface Note {
   updateTime: string
 }
 
+export type NoteSearchSort = 'relevance' | 'recent'
+
+export interface NoteSearchItem {
+  id: string
+  userId: string
+  shopId?: string
+  title: string
+  content: string
+  images: string[]
+  createTime: string
+}
+
+export interface NoteSearchPage {
+  items: NoteSearchItem[]
+  nextCursor?: string
+}
+
 export interface LikeState {
   noteId: string
   liked: boolean

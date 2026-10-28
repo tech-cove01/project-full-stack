@@ -1,0 +1,9 @@
+=== RUN   TestIntegrationCommunityFlow
+    flow_integration_test.go:308: stage=http-to-kafka-dual-projection topic=community.go072.it.a90165b090d77d13 note/follow/like=3 followNextOffset=3 feedNextOffset=3 receiptsEach=3 apply/ignore=1/2 source=projection startedAt=2026-10-28T07:16:06.2557612Z brokerConfirmedAt=2026-10-28T07:16:07.2526884Z observedAt=2026-10-28T07:16:07.4448514Z observedElapsedMs=1189
+    flow_integration_test.go:325: stage=historical-gap current-public-notes=2 catalog-notes=1 source=database no-note-omitted=true
+    flow_integration_test.go:349: stage=current-unfollow-guard-before-consume-and-recovery topic=community.go072.it.a90165b090d77d13 laggingGraphVersion=1 committedFactVersion=2 feedBefore=[] graphAfter=inactive/v2 followNextOffset=4 feedNextOffset=4
+    flow_integration_test.go:350: stage=final-accounting ownedOutboxPending=0 ownedParked=0 receiptsEach=4 firstConfirmedAt=2026-10-28T07:16:07.2526884Z completedAt=2026-10-28T07:16:07.9226471Z totalObservedElapsedMs=1666 measurement=functional-observation-not-throughput-or-SLA
+    integration_test.go:105: cleanup=exact SQL fixture/private Kafka topic/private groups; shared community.events untouched
+--- PASS: TestIntegrationCommunityFlow (2.73s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	6.302s

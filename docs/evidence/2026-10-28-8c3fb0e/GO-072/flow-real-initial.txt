@@ -1,0 +1,6 @@
+=== RUN   TestIntegrationCommunityFlow
+    flow_integration_test.go:40: cannot reserve consumer integration lock
+--- FAIL: TestIntegrationCommunityFlow (0.01s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/communityconsumer	0.296s
+FAIL

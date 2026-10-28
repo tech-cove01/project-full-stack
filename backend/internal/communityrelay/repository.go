@@ -56,8 +56,12 @@ func (repository *Repository) Claim(ctx context.Context) (*Event, error) {
 		}
 		event := rows[0]
 		if event.Attempts >= maxAttempts {
-			// Parked by a previous worker; NeedsReview already moved it, so skip.
-			return nil
+			// A process can stop on its eighth attempt before writing the retry or
+			// terminal state. Park that expired lease durably rather than selecting
+			// the same head row forever and starving every later event.
+			return tx.Exec(`UPDATE tb_community_outbox SET delivery_status='NEEDS_REVIEW',
+				lease_until=NULL,last_error='delivery lease expired at retry limit'
+				WHERE id=?`, event.ID).Error
 		}
 		if err := tx.Exec(`UPDATE tb_community_outbox
 			SET delivery_status='PROCESSING', attempts=attempts+1,

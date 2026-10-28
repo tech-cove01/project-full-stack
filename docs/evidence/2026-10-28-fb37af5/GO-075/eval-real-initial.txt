@@ -1,0 +1,4 @@
+=== RUN   TestIntegrationRealProviderEvaluation
+--- PASS: TestIntegrationRealProviderEvaluation (51.39s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/aichat	51.595s

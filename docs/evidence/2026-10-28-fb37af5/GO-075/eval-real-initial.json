@@ -1,0 +1,2544 @@
+{
+  "task": "GO-075c",
+  "realProvider": true,
+  "protocolPassed": true,
+  "manualReviewRequired": true,
+  "Mode": "openai-compatible",
+  "ChatModel": "qwen3.8-flash",
+  "EmbeddingModel": "text-embedding-v4",
+  "Dimensions": 1536,
+  "TopK": 5,
+  "MaxOutputTokens": 400,
+  "MaxCalls": 90,
+  "MinScore": 0.5,
+  "MaxObservedTokens": 150000,
+  "StartedAt": "2026-10-28T09:06:39Z",
+  "CompletedAt": "2026-10-28T09:07:30Z",
+  "UpstreamTTFT": "N/A (buffered upstream Chat)",
+  "Cost": "unknown: token usage is observed; invoice and cancellation settlement are not available",
+  "Calls": 70,
+  "ObservedTokens": 7258,
+  "UnknownUsage": false,
+  "Observations": [
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 560640400,
+      "usage": {
+        "inputTokens": 20,
+        "outputTokens": 0,
+        "totalTokens": 20,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 189417100,
+      "usage": {
+        "inputTokens": 39,
+        "outputTokens": 0,
+        "totalTokens": 39,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 191400400,
+      "usage": {
+        "inputTokens": 32,
+        "outputTokens": 0,
+        "totalTokens": 32,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 371440500,
+      "usage": {
+        "inputTokens": 31,
+        "outputTokens": 0,
+        "totalTokens": 31,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 593328800,
+      "usage": {
+        "inputTokens": 29,
+        "outputTokens": 0,
+        "totalTokens": 29,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 189831200,
+      "usage": {
+        "inputTokens": 35,
+        "outputTokens": 0,
+        "totalTokens": 35,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 163377700,
+      "usage": {
+        "inputTokens": 28,
+        "outputTokens": 0,
+        "totalTokens": 28,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 183856400,
+      "usage": {
+        "inputTokens": 24,
+        "outputTokens": 0,
+        "totalTokens": 24,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 183105400,
+      "usage": {
+        "inputTokens": 22,
+        "outputTokens": 0,
+        "totalTokens": 22,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 197679600,
+      "usage": {
+        "inputTokens": 23,
+        "outputTokens": 0,
+        "totalTokens": 23,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 188282500,
+      "usage": {
+        "inputTokens": 25,
+        "outputTokens": 0,
+        "totalTokens": 25,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 205983400,
+      "usage": {
+        "inputTokens": 27,
+        "outputTokens": 0,
+        "totalTokens": 27,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 217633000,
+      "usage": {
+        "inputTokens": 11,
+        "outputTokens": 0,
+        "totalTokens": 11,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1151868900,
+      "usage": {
+        "inputTokens": 270,
+        "outputTokens": 23,
+        "totalTokens": 293,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 221813300,
+      "usage": {
+        "inputTokens": 13,
+        "outputTokens": 0,
+        "totalTokens": 13,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1229388900,
+      "usage": {
+        "inputTokens": 322,
+        "outputTokens": 36,
+        "totalTokens": 358,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 175842300,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 0,
+        "totalTokens": 14,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1104307800,
+      "usage": {
+        "inputTokens": 324,
+        "outputTokens": 32,
+        "totalTokens": 356,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 697831200,
+      "usage": {
+        "inputTokens": 17,
+        "outputTokens": 0,
+        "totalTokens": 17,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 980678800,
+      "usage": {
+        "inputTokens": 330,
+        "outputTokens": 33,
+        "totalTokens": 363,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 182360800,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 0,
+        "totalTokens": 12,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 625323400,
+      "usage": {
+        "inputTokens": 320,
+        "outputTokens": 14,
+        "totalTokens": 334,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 194773900,
+      "usage": {
+        "inputTokens": 11,
+        "outputTokens": 0,
+        "totalTokens": 11,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1366417700,
+      "usage": {
+        "inputTokens": 302,
+        "outputTokens": 40,
+        "totalTokens": 342,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 189931500,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 0,
+        "totalTokens": 14,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1327592900,
+      "usage": {
+        "inputTokens": 177,
+        "outputTokens": 55,
+        "totalTokens": 232,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 198429300,
+      "usage": {
+        "inputTokens": 13,
+        "outputTokens": 0,
+        "totalTokens": 13,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 2085620000,
+      "usage": {
+        "inputTokens": 175,
+        "outputTokens": 17,
+        "totalTokens": 192,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 198193400,
+      "usage": {
+        "inputTokens": 13,
+        "outputTokens": 0,
+        "totalTokens": 13,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 970765400,
+      "usage": {
+        "inputTokens": 168,
+        "outputTokens": 23,
+        "totalTokens": 191,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 191852000,
+      "usage": {
+        "inputTokens": 13,
+        "outputTokens": 0,
+        "totalTokens": 13,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1202943900,
+      "usage": {
+        "inputTokens": 168,
+        "outputTokens": 14,
+        "totalTokens": 182,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 246074500,
+      "usage": {
+        "inputTokens": 13,
+        "outputTokens": 0,
+        "totalTokens": 13,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1292310200,
+      "usage": {
+        "inputTokens": 179,
+        "outputTokens": 22,
+        "totalTokens": 201,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 195972100,
+      "usage": {
+        "inputTokens": 14,
+        "outputTokens": 0,
+        "totalTokens": 14,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 961504600,
+      "usage": {
+        "inputTokens": 179,
+        "outputTokens": 23,
+        "totalTokens": 202,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 202606700,
+      "usage": {
+        "inputTokens": 11,
+        "outputTokens": 0,
+        "totalTokens": 11,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 3905950800,
+      "usage": {
+        "inputTokens": 173,
+        "outputTokens": 24,
+        "totalTokens": 197,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 198722000,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 0,
+        "totalTokens": 12,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1096129100,
+      "usage": {
+        "inputTokens": 166,
+        "outputTokens": 25,
+        "totalTokens": 191,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 306195400,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 944779600,
+      "usage": {
+        "inputTokens": 171,
+        "outputTokens": 3,
+        "totalTokens": 174,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 181060500,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1156253100,
+      "usage": {
+        "inputTokens": 167,
+        "outputTokens": 14,
+        "totalTokens": 181,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 266762300,
+      "usage": {
+        "inputTokens": 8,
+        "outputTokens": 0,
+        "totalTokens": 8,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 870228900,
+      "usage": {
+        "inputTokens": 160,
+        "outputTokens": 14,
+        "totalTokens": 174,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 195221400,
+      "usage": {
+        "inputTokens": 13,
+        "outputTokens": 0,
+        "totalTokens": 13,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 767654500,
+      "usage": {
+        "inputTokens": 177,
+        "outputTokens": 16,
+        "totalTokens": 193,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 199248900,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 4255224900,
+      "usage": {
+        "inputTokens": 169,
+        "outputTokens": 28,
+        "totalTokens": 197,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 184519300,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 0,
+        "totalTokens": 10,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 797900200,
+      "usage": {
+        "inputTokens": 176,
+        "outputTokens": 12,
+        "totalTokens": 188,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 200318800,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 0,
+        "totalTokens": 10,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 991326400,
+      "usage": {
+        "inputTokens": 171,
+        "outputTokens": 17,
+        "totalTokens": 188,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 207225000,
+      "usage": {
+        "inputTokens": 10,
+        "outputTokens": 0,
+        "totalTokens": 10,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 858888900,
+      "usage": {
+        "inputTokens": 175,
+        "outputTokens": 14,
+        "totalTokens": 189,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 161811900,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 0,
+        "totalTokens": 12,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 983995600,
+      "usage": {
+        "inputTokens": 318,
+        "outputTokens": 30,
+        "totalTokens": 348,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 183286300,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 0,
+        "totalTokens": 12,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1391382100,
+      "usage": {
+        "inputTokens": 335,
+        "outputTokens": 32,
+        "totalTokens": 367,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 212539300,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 2034249800,
+      "usage": {
+        "inputTokens": 169,
+        "outputTokens": 25,
+        "totalTokens": 194,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 287487300,
+      "usage": {
+        "inputTokens": 29,
+        "outputTokens": 0,
+        "totalTokens": 29,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 166434700,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 676223400,
+      "usage": {
+        "inputTokens": 180,
+        "outputTokens": 14,
+        "totalTokens": 194,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 176739200,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 782142200,
+      "usage": {
+        "inputTokens": 171,
+        "outputTokens": 12,
+        "totalTokens": 183,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 165899300,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 851237500,
+      "usage": {
+        "inputTokens": 144,
+        "outputTokens": 15,
+        "totalTokens": 159,
+        "known": true
+      }
+    },
+    {
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 174767900,
+      "usage": {
+        "inputTokens": 12,
+        "outputTokens": 0,
+        "totalTokens": 12,
+        "known": true
+      }
+    }
+  ],
+  "Results": [
+    {
+      "ID": "K01",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "这里的模拟支付真的会扣银行卡的钱吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P01",
+          "expectedContains": [
+            "不会",
+            "扣"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P01",
+              "version": 1,
+              "title": "模拟支付说明",
+              "excerpt": "平台支付仅用于演示，模拟支付不会真实扣款，也不会向银行卡发起交易。",
+              "score": 0.821
+            },
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.53
+            },
+            {
+              "seedKey": "P02",
+              "version": 1,
+              "title": "抢券受理与成单",
+              "excerpt": "抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。用户应查询受理结果，只有结果为CREATED才代表订单已创建。",
+              "score": 0.518
+            },
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.509
+            }
+          ],
+          "answer": "不会。根据平台规则，模拟支付仅用于演示，不会真实扣款，也不会向银行卡发起交易。",
+          "firstPhaseMs": 5,
+          "firstAnswerMs": 1531,
+          "totalMs": 1555,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K02",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "抢券返回受理编号就说明已经买到了吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P02",
+          "expectedContains": [
+            "不代表",
+            "创建"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P02",
+              "version": 1,
+              "title": "抢券受理与成单",
+              "excerpt": "抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。用户应查询受理结果，只有结果为CREATED才代表订单已创建。",
+              "score": 0.872
+            },
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.73
+            },
+            {
+              "seedKey": "P04",
+              "version": 1,
+              "title": "退款后的购买限制",
+              "excerpt": "已支付的券在核销前退款后，不可以重新购买同一个活动。退款完成不恢复该用户对同一活动的购买资格。",
+              "score": 0.7
+            },
+            {
+              "seedKey": "P05",
+              "version": 1,
+              "title": "核销后的退款限制",
+              "excerpt": "已经到店核销的券不能退款。尚未核销且符合有效期条件的已支付券可以通过正常业务页面申请退款。",
+              "score": 0.687
+            },
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.598
+            }
+          ],
+          "answer": "不是。抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。只有查询受理结果为 **CREATED** 时，才代表订单已创建。",
+          "firstPhaseMs": 6,
+          "firstAnswerMs": 1618,
+          "totalMs": 1632,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K03",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "未支付的券取消以后还能重新买同一场吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P03",
+          "expectedContains": [
+            "可以",
+            "库存"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.884
+            },
+            {
+              "seedKey": "P04",
+              "version": 1,
+              "title": "退款后的购买限制",
+              "excerpt": "已支付的券在核销前退款后，不可以重新购买同一个活动。退款完成不恢复该用户对同一活动的购买资格。",
+              "score": 0.853
+            },
+            {
+              "seedKey": "P05",
+              "version": 1,
+              "title": "核销后的退款限制",
+              "excerpt": "已经到店核销的券不能退款。尚未核销且符合有效期条件的已支付券可以通过正常业务页面申请退款。",
+              "score": 0.709
+            },
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.596
+            },
+            {
+              "seedKey": "P02",
+              "version": 1,
+              "title": "抢券受理与成单",
+              "excerpt": "抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。用户应查询受理结果，只有结果为CREATED才代表订单已创建。",
+              "score": 0.593
+            }
+          ],
+          "answer": "可以。根据规则，未支付的券取消或超时关闭后，只要该活动仍在销售期内且有剩余库存，您就可以重新购买同一场次的券。",
+          "firstPhaseMs": 3,
+          "firstAnswerMs": 1436,
+          "totalMs": 1452,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K04",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "付过款的券退掉后，还能再买同一场吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P04",
+          "expectedContains": [
+            "不",
+            "重新"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P04",
+              "version": 1,
+              "title": "退款后的购买限制",
+              "excerpt": "已支付的券在核销前退款后，不可以重新购买同一个活动。退款完成不恢复该用户对同一活动的购买资格。",
+              "score": 0.856
+            },
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.841
+            },
+            {
+              "seedKey": "P05",
+              "version": 1,
+              "title": "核销后的退款限制",
+              "excerpt": "已经到店核销的券不能退款。尚未核销且符合有效期条件的已支付券可以通过正常业务页面申请退款。",
+              "score": 0.732
+            },
+            {
+              "seedKey": "P02",
+              "version": 1,
+              "title": "抢券受理与成单",
+              "excerpt": "抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。用户应查询受理结果，只有结果为CREATED才代表订单已创建。",
+              "score": 0.595
+            },
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.583
+            }
+          ],
+          "answer": "根据平台规则，已支付的券在核销前退款后，**不可以**重新购买同一个活动。退款完成后不会恢复该用户对同一活动的购买资格。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1809,
+          "totalMs": 1822,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K05",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "已经到店核销的券还可以退吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P05",
+          "expectedContains": [
+            "不能",
+            "退款"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P05",
+              "version": 1,
+              "title": "核销后的退款限制",
+              "excerpt": "已经到店核销的券不能退款。尚未核销且符合有效期条件的已支付券可以通过正常业务页面申请退款。",
+              "score": 0.898
+            },
+            {
+              "seedKey": "P04",
+              "version": 1,
+              "title": "退款后的购买限制",
+              "excerpt": "已支付的券在核销前退款后，不可以重新购买同一个活动。退款完成不恢复该用户对同一活动的购买资格。",
+              "score": 0.774
+            },
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.737
+            },
+            {
+              "seedKey": "P02",
+              "version": 1,
+              "title": "抢券受理与成单",
+              "excerpt": "抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。用户应查询受理结果，只有结果为CREATED才代表订单已创建。",
+              "score": 0.602
+            },
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.558
+            }
+          ],
+          "answer": "不可以。根据规则，已经到店核销的券不能退款。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 934,
+          "totalMs": 948,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K06",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "AI助手能够直接帮我支付或退款吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P06",
+          "expectedContains": [
+            "不能",
+            "页面"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.73
+            },
+            {
+              "seedKey": "P01",
+              "version": 1,
+              "title": "模拟支付说明",
+              "excerpt": "平台支付仅用于演示，模拟支付不会真实扣款，也不会向银行卡发起交易。",
+              "score": 0.608
+            },
+            {
+              "seedKey": "P04",
+              "version": 1,
+              "title": "退款后的购买限制",
+              "excerpt": "已支付的券在核销前退款后，不可以重新购买同一个活动。退款完成不恢复该用户对同一活动的购买资格。",
+              "score": 0.568
+            },
+            {
+              "seedKey": "P05",
+              "version": 1,
+              "title": "核销后的退款限制",
+              "excerpt": "已经到店核销的券不能退款。尚未核销且符合有效期条件的已支付券可以通过正常业务页面申请退款。",
+              "score": 0.568
+            },
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.519
+            }
+          ],
+          "answer": "不能。根据平台规则，AI助手只能查询公开规则和本人实时数据，无法执行下单、支付、取消、核销或退款等操作。您需要通过正常业务页面自行完成这些操作。",
+          "firstPhaseMs": 3,
+          "firstAnswerMs": 1771,
+          "totalMs": 1805,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K07",
+      "Group": "knowledge",
+      "LexicalCandidate": false,
+      "Steps": [
+        {
+          "question": "松风咖啡停车能免费多久，超时怎么收费？",
+          "selectedShop": 0,
+          "expectedGolden": "A1-P",
+          "expectedContains": [
+            "两小时",
+            "五元"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-P",
+              "version": 1,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。",
+              "score": 0.92
+            },
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.747
+            }
+          ],
+          "answer": "根据证据 [1]，松风咖啡的停车规则如下：\n\n*   **免费时长**：消费顾客可在东侧停车场免费停车 **2 小时**。\n*   **超时收费**：超过 2 小时后，每小时收费 **5 元**。",
+          "firstPhaseMs": 11,
+          "firstAnswerMs": 1665,
+          "totalMs": 1677,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": false
+        }
+      ]
+    },
+    {
+      "ID": "K08",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "松风咖啡周末去喝咖啡要提前多久预约？",
+          "selectedShop": 0,
+          "expectedGolden": "A1-R",
+          "expectedContains": [
+            "一天",
+            "预约"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.927
+            },
+            {
+              "seedKey": "A1-P",
+              "version": 1,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。",
+              "score": 0.771
+            }
+          ],
+          "answer": "根据证据[1]，松风咖啡周六和周日到店需要提前一天预约。",
+          "firstPhaseMs": 6,
+          "firstAnswerMs": 2401,
+          "totalMs": 2410,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K09",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "青禾食堂停车有没有免费时长，收费多少？",
+          "selectedShop": 1,
+          "expectedGolden": "A2-P",
+          "expectedContains": [
+            "三元",
+            "免费"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A2-P",
+              "version": 1,
+              "title": "青禾食堂停车规则",
+              "excerpt": "青禾食堂的停车规则：西侧停车场每小时三元，不提供免费停车时长。",
+              "score": 0.94
+            },
+            {
+              "seedKey": "A2-R",
+              "version": 1,
+              "title": "青禾食堂预约规则",
+              "excerpt": "青禾食堂的预约规则：日常用餐不需要预约，六人及以上聚餐需要提前两天预约。",
+              "score": 0.788
+            }
+          ],
+          "answer": "根据证据[1]，青禾食堂西侧停车场**不提供免费停车时长**。收费标准为**每小时三元**。",
+          "firstPhaseMs": 3,
+          "firstAnswerMs": 1261,
+          "totalMs": 1269,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K10",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "青禾食堂六个人聚餐要提前几天预约？",
+          "selectedShop": 1,
+          "expectedGolden": "A2-R",
+          "expectedContains": [
+            "两天",
+            "预约"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A2-R",
+              "version": 1,
+              "title": "青禾食堂预约规则",
+              "excerpt": "青禾食堂的预约规则：日常用餐不需要预约，六人及以上聚餐需要提前两天预约。",
+              "score": 0.949
+            },
+            {
+              "seedKey": "A2-P",
+              "version": 1,
+              "title": "青禾食堂停车规则",
+              "excerpt": "青禾食堂的停车规则：西侧停车场每小时三元，不提供免费停车时长。",
+              "score": 0.697
+            }
+          ],
+          "answer": "根据证据，青禾食堂六人及以上聚餐需要提前两天预约。",
+          "firstPhaseMs": 3,
+          "firstAnswerMs": 1491,
+          "totalMs": 1500,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K11",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "城市书房安静看书在几楼？能打电话吗？",
+          "selectedShop": 2,
+          "expectedGolden": "B1-R",
+          "expectedContains": [
+            "二楼",
+            "电话"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "B1-R",
+              "version": 1,
+              "title": "城市书房安静阅读区",
+              "excerpt": "城市书房的安静阅读区位于二楼，二楼不能接听电话；需要通话的读者请前往一楼休息区。",
+              "score": 0.902
+            },
+            {
+              "seedKey": "B1-M",
+              "version": 1,
+              "title": "城市书房会员借阅规则",
+              "excerpt": "城市书房普通会员每次最多借阅三本书，借期为十四天；会员资格不包含任何购书折扣。",
+              "score": 0.664
+            }
+          ],
+          "answer": "城市书房安静阅读区位于二楼。该区域不能接听电话，如需通话请前往一楼休息区。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1640,
+          "totalMs": 1650,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "K12",
+      "Group": "knowledge",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "城市书房普通会员一次能借几本书，借多久？",
+          "selectedShop": 2,
+          "expectedGolden": "B1-M",
+          "expectedContains": [
+            "三本",
+            "十四天"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "B1-M",
+              "version": 1,
+              "title": "城市书房会员借阅规则",
+              "excerpt": "城市书房普通会员每次最多借阅三本书，借期为十四天；会员资格不包含任何购书折扣。",
+              "score": 0.941
+            },
+            {
+              "seedKey": "B1-R",
+              "version": 1,
+              "title": "城市书房安静阅读区",
+              "excerpt": "城市书房的安静阅读区位于二楼，二楼不能接听电话；需要通话的读者请前往一楼休息区。",
+              "score": 0.629
+            }
+          ],
+          "answer": "根据证据[1]，城市书房普通会员每次最多借阅**三本书**，借期为**十四天**。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1250,
+          "totalMs": 1259,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "N01",
+      "Group": "unknown",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "松风咖啡有生日蛋糕配送服务吗？",
+          "selectedShop": 0,
+          "expectedRefusal": true,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.707
+            },
+            {
+              "seedKey": "A1-P",
+              "version": 1,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。",
+              "score": 0.681
+            }
+          ],
+          "answer": "根据现有证据，未查到松风咖啡提供生日蛋糕配送服务的相关信息。目前仅提供了预约规则和停车规则。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 4214,
+          "totalMs": 4225,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "N02",
+      "Group": "unknown",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "青禾食堂的儿童餐使用什么品牌的牛奶？",
+          "selectedShop": 1,
+          "expectedRefusal": true,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A2-R",
+              "version": 1,
+              "title": "青禾食堂预约规则",
+              "excerpt": "青禾食堂的预约规则：日常用餐不需要预约，六人及以上聚餐需要提前两天预约。",
+              "score": 0.657
+            },
+            {
+              "seedKey": "A2-P",
+              "version": 1,
+              "title": "青禾食堂停车规则",
+              "excerpt": "青禾食堂的停车规则：西侧停车场每小时三元，不提供免费停车时长。",
+              "score": 0.656
+            }
+          ],
+          "answer": "没有查到。现有证据仅包含青禾食堂的预约规则和停车规则，未提及儿童餐使用的牛奶品牌信息。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1401,
+          "totalMs": 1411,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "N03",
+      "Group": "unknown",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "城市书房允许带宠物进入吗？",
+          "selectedShop": 2,
+          "expectedRefusal": true,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "B1-R",
+              "version": 1,
+              "title": "城市书房安静阅读区",
+              "excerpt": "城市书房的安静阅读区位于二楼，二楼不能接听电话；需要通话的读者请前往一楼休息区。",
+              "score": 0.703
+            },
+            {
+              "seedKey": "B1-M",
+              "version": 1,
+              "title": "城市书房会员借阅规则",
+              "excerpt": "城市书房普通会员每次最多借阅三本书，借期为十四天；会员资格不包含任何购书折扣。",
+              "score": 0.683
+            }
+          ],
+          "answer": "没有查到。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1353,
+          "totalMs": 1363,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "N04",
+      "Group": "unknown",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "松风咖啡春节期间是否正常营业？",
+          "selectedShop": 0,
+          "expectedRefusal": true,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.774
+            },
+            {
+              "seedKey": "A1-P",
+              "version": 1,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。",
+              "score": 0.753
+            }
+          ],
+          "answer": "根据现有证据，未查到松风咖啡春节期间是否正常营业的信息。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1434,
+          "totalMs": 1442,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "N05",
+      "Group": "unknown",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "青禾食堂有没有无障碍卫生间？",
+          "selectedShop": 1,
+          "expectedRefusal": true,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A2-R",
+              "version": 1,
+              "title": "青禾食堂预约规则",
+              "excerpt": "青禾食堂的预约规则：日常用餐不需要预约，六人及以上聚餐需要提前两天预约。",
+              "score": 0.773
+            },
+            {
+              "seedKey": "A2-P",
+              "version": 1,
+              "title": "青禾食堂停车规则",
+              "excerpt": "青禾食堂的停车规则：西侧停车场每小时三元，不提供免费停车时长。",
+              "score": 0.772
+            }
+          ],
+          "answer": "根据现有证据，未查到青禾食堂是否有无障碍卫生间的相关信息。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1240,
+          "totalMs": 1249,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "N06",
+      "Group": "unknown",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "城市书房现在正在售卖哪几款限量签名书？",
+          "selectedShop": 2,
+          "expectedRefusal": true,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "B1-M",
+              "version": 1,
+              "title": "城市书房会员借阅规则",
+              "excerpt": "城市书房普通会员每次最多借阅三本书，借期为十四天；会员资格不包含任何购书折扣。",
+              "score": 0.665
+            },
+            {
+              "seedKey": "B1-R",
+              "version": 1,
+              "title": "城市书房安静阅读区",
+              "excerpt": "城市书房的安静阅读区位于二楼，二楼不能接听电话；需要通话的读者请前往一楼休息区。",
+              "score": 0.617
+            }
+          ],
+          "answer": "根据现有证据，未查到城市书房目前售卖的限量签名书信息。",
+          "firstPhaseMs": 3,
+          "firstAnswerMs": 1067,
+          "totalMs": 1076,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "T01",
+      "Group": "tool",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "查询我的订单",
+          "selectedShop": 0,
+          "expectedRefusal": false,
+          "expectedTool": "orders",
+          "expectedStatus": 1,
+          "events": [
+            "meta",
+            "status",
+            "tool_result",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "你最近有 1 个订单，其中 1 个待支付。",
+          "tool": "orders",
+          "toolStatus": 1,
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 19,
+          "totalMs": 22,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "T02",
+      "Group": "tool",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "查询订单 {ownOrder}",
+          "selectedShop": 0,
+          "expectedRefusal": false,
+          "expectedTool": "order",
+          "expectedStatus": 1,
+          "events": [
+            "meta",
+            "status",
+            "tool_result",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "订单状态：待支付。",
+          "tool": "order",
+          "toolStatus": 1,
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 19,
+          "totalMs": 22,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "T03",
+      "Group": "tool",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "查询订单 {otherOrder}",
+          "selectedShop": 0,
+          "expectedContains": [
+            "没有找到"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "没有找到这个订单。",
+          "firstPhaseMs": 6,
+          "firstAnswerMs": 20,
+          "totalMs": 23,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "T04",
+      "Group": "tool",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "查询活动 {activity}",
+          "selectedShop": 0,
+          "expectedRefusal": false,
+          "expectedTool": "activities",
+          "expectedPayValue": "2500",
+          "events": [
+            "meta",
+            "status",
+            "tool_result",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "活动：GO075合成活动。",
+          "tool": "activities",
+          "toolPayValue": "2500",
+          "firstPhaseMs": 5,
+          "firstAnswerMs": 21,
+          "totalMs": 24,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "T05",
+      "Group": "tool",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "查询门店 {shop}",
+          "selectedShop": 0,
+          "expectedContains": [
+            "松风咖啡"
+          ],
+          "expectedRefusal": false,
+          "expectedTool": "shops",
+          "events": [
+            "meta",
+            "status",
+            "tool_result",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "门店：松风咖啡-GO075-aca36231。",
+          "tool": "shops",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 19,
+          "totalMs": 21,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "T06",
+      "Group": "tool",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "查询订单 {ownOrder}",
+          "selectedShop": 0,
+          "fixtureAction": "pay",
+          "expectedRefusal": false,
+          "expectedTool": "order",
+          "expectedStatus": 2,
+          "events": [
+            "meta",
+            "status",
+            "tool_result",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "订单状态：已支付，待核销。",
+          "tool": "order",
+          "toolStatus": 2,
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 17,
+          "totalMs": 19,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "M01",
+      "Group": "multi",
+      "LexicalCandidate": false,
+      "Steps": [
+        {
+          "question": "松风咖啡停车能免费多久？",
+          "selectedShop": 0,
+          "expectedGolden": "A1-P",
+          "expectedContains": [
+            "两小时"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-P",
+              "version": 1,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。",
+              "score": 0.926
+            },
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.764
+            }
+          ],
+          "answer": "根据松风咖啡的停车规则，消费顾客可在东侧停车场免费停车**两小时**。超过两小时后，每小时收费五元。",
+          "firstPhaseMs": 3,
+          "firstAnswerMs": 4548,
+          "totalMs": 4557,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        },
+        {
+          "question": "那青禾食堂停车能免费多久？",
+          "selectedShop": 1,
+          "expectedGolden": "A2-P",
+          "expectedContains": [
+            "三元",
+            "免费"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A2-P",
+              "version": 1,
+              "title": "青禾食堂停车规则",
+              "excerpt": "青禾食堂的停车规则：西侧停车场每小时三元，不提供免费停车时长。",
+              "score": 0.888
+            },
+            {
+              "seedKey": "A2-R",
+              "version": 1,
+              "title": "青禾食堂预约规则",
+              "excerpt": "青禾食堂的预约规则：日常用餐不需要预约，六人及以上聚餐需要提前两天预约。",
+              "score": 0.754
+            }
+          ],
+          "answer": "根据证据显示，青禾食堂不提供免费停车时长。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1085,
+          "totalMs": 1095,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": false
+        }
+      ]
+    },
+    {
+      "ID": "M02",
+      "Group": "multi",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "松风咖啡周末要提前多久预约？",
+          "selectedShop": 0,
+          "expectedGolden": "A1-R",
+          "expectedContains": [
+            "一天"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.932
+            },
+            {
+              "seedKey": "A1-P",
+              "version": 1,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。",
+              "score": 0.753
+            }
+          ],
+          "answer": "根据证据[1]，松风咖啡周六和周日到店需要提前一天预约。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1293,
+          "totalMs": 1302,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        },
+        {
+          "question": "青禾食堂六人聚餐呢？",
+          "selectedShop": 1,
+          "expectedGolden": "A2-R",
+          "expectedContains": [
+            "两天"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A2-R",
+              "version": 1,
+              "title": "青禾食堂预约规则",
+              "excerpt": "青禾食堂的预约规则：日常用餐不需要预约，六人及以上聚餐需要提前两天预约。",
+              "score": 0.829
+            },
+            {
+              "seedKey": "A2-P",
+              "version": 1,
+              "title": "青禾食堂停车规则",
+              "excerpt": "青禾食堂的停车规则：西侧停车场每小时三元，不提供免费停车时长。",
+              "score": 0.672
+            }
+          ],
+          "answer": "根据证据，青禾食堂六人及以上聚餐需要提前两天预约。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1171,
+          "totalMs": 1181,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "M03",
+      "Group": "multi",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "未支付的券取消后可以重买吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P03",
+          "expectedContains": [
+            "可以"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.881
+            },
+            {
+              "seedKey": "P04",
+              "version": 1,
+              "title": "退款后的购买限制",
+              "excerpt": "已支付的券在核销前退款后，不可以重新购买同一个活动。退款完成不恢复该用户对同一活动的购买资格。",
+              "score": 0.838
+            },
+            {
+              "seedKey": "P05",
+              "version": 1,
+              "title": "核销后的退款限制",
+              "excerpt": "已经到店核销的券不能退款。尚未核销且符合有效期条件的已支付券可以通过正常业务页面申请退款。",
+              "score": 0.759
+            },
+            {
+              "seedKey": "P02",
+              "version": 1,
+              "title": "抢券受理与成单",
+              "excerpt": "抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。用户应查询受理结果，只有结果为CREATED才代表订单已创建。",
+              "score": 0.619
+            },
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.603
+            }
+          ],
+          "answer": "可以。根据规则，尚未支付的券被取消或超时关闭后，可以重新购买同一个活动，但需满足销售期和剩余库存条件。",
+          "firstPhaseMs": 5,
+          "firstAnswerMs": 1293,
+          "totalMs": 1309,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        },
+        {
+          "question": "如果已经付款，退款后还可以重买吗？",
+          "selectedShop": 0,
+          "expectedGolden": "P04",
+          "expectedContains": [
+            "不",
+            "重新"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "P04",
+              "version": 1,
+              "title": "退款后的购买限制",
+              "excerpt": "已支付的券在核销前退款后，不可以重新购买同一个活动。退款完成不恢复该用户对同一活动的购买资格。",
+              "score": 0.799
+            },
+            {
+              "seedKey": "P03",
+              "version": 1,
+              "title": "未支付取消后重买",
+              "excerpt": "尚未支付的券被用户取消或超时关闭后，可以重新购买同一个活动；重新购买仍需满足销售期和剩余库存条件。",
+              "score": 0.74
+            },
+            {
+              "seedKey": "P05",
+              "version": 1,
+              "title": "核销后的退款限制",
+              "excerpt": "已经到店核销的券不能退款。尚未核销且符合有效期条件的已支付券可以通过正常业务页面申请退款。",
+              "score": 0.691
+            },
+            {
+              "seedKey": "P06",
+              "version": 1,
+              "title": "AI助手的业务操作边界",
+              "excerpt": "AI助手只能查询公开规则和本人实时数据，不能执行下单、支付、取消、核销或退款。用户必须通过正常业务页面完成这些操作。",
+              "score": 0.576
+            },
+            {
+              "seedKey": "P02",
+              "version": 1,
+              "title": "抢券受理与成单",
+              "excerpt": "抢券接口返回受理编号只代表请求已进入异步队列，不代表已经成单。用户应查询受理结果，只有结果为CREATED才代表订单已创建。",
+              "score": 0.521
+            }
+          ],
+          "answer": "根据规则，已支付的券在核销前退款后，**不可以**重新购买同一个活动。退款完成后不会恢复该用户对同一活动的购买资格。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 1743,
+          "totalMs": 1757,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "M04",
+      "Group": "multi",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "查询订单 {ownOrder}",
+          "selectedShop": 0,
+          "expectedRefusal": false,
+          "expectedTool": "order",
+          "expectedStatus": 2,
+          "events": [
+            "meta",
+            "status",
+            "tool_result",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "订单状态：已支付，待核销。",
+          "tool": "order",
+          "toolStatus": 2,
+          "firstPhaseMs": 3,
+          "firstAnswerMs": 14,
+          "totalMs": 16,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        },
+        {
+          "question": "再查订单 {ownOrder}",
+          "selectedShop": 0,
+          "fixtureAction": "cancel",
+          "expectedRefusal": false,
+          "expectedTool": "order",
+          "expectedStatus": 4,
+          "events": [
+            "meta",
+            "status",
+            "tool_result",
+            "answer",
+            "done"
+          ],
+          "sources": null,
+          "answer": "订单状态：已取消。",
+          "tool": "order",
+          "toolStatus": 4,
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 17,
+          "totalMs": 20,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "M05",
+      "Group": "multi",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "松风咖啡的停车免费多久？",
+          "selectedShop": 0,
+          "expectedGolden": "A1-P",
+          "expectedContains": [
+            "两小时"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-P",
+              "version": 1,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的停车规则：消费顾客可在东侧停车场免费停车两小时，超过两小时每小时收五元。",
+              "score": 0.94
+            },
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.778
+            }
+          ],
+          "answer": "根据证据[1]，松风咖啡的停车规则显示：消费顾客可在东侧停车场免费停车**两小时**。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 2328,
+          "totalMs": 2336,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        },
+        {
+          "question": "松风咖啡的停车免费多久？",
+          "selectedShop": 0,
+          "fixtureAction": "publishParking",
+          "expectedGolden": "A1-P",
+          "expectedContains": [
+            "四小时"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "A1-P",
+              "version": 2,
+              "title": "松风咖啡停车规则",
+              "excerpt": "松风咖啡的最新停车规则：顾客在东侧停车场可免费停车四小时，超过四小时每小时收五元。",
+              "score": 0.924
+            },
+            {
+              "seedKey": "A1-R",
+              "version": 1,
+              "title": "松风咖啡预约规则",
+              "excerpt": "松风咖啡的预约规则：周六和周日到店需要提前一天预约，工作日不需要预约。",
+              "score": 0.778
+            }
+          ],
+          "answer": "根据最新规则，松风咖啡东侧停车场可免费停车四小时。",
+          "firstPhaseMs": 4,
+          "firstAnswerMs": 953,
+          "totalMs": 967,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        }
+      ]
+    },
+    {
+      "ID": "M06",
+      "Group": "multi",
+      "LexicalCandidate": true,
+      "Steps": [
+        {
+          "question": "城市书房安静阅读在几楼？",
+          "selectedShop": 2,
+          "expectedGolden": "B1-R",
+          "expectedContains": [
+            "二楼"
+          ],
+          "expectedRefusal": false,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "B1-R",
+              "version": 1,
+              "title": "城市书房安静阅读区",
+              "excerpt": "城市书房的安静阅读区位于二楼，二楼不能接听电话；需要通话的读者请前往一楼休息区。",
+              "score": 0.889
+            },
+            {
+              "seedKey": "B1-M",
+              "version": 1,
+              "title": "城市书房会员借阅规则",
+              "excerpt": "城市书房普通会员每次最多借阅三本书，借期为十四天；会员资格不包含任何购书折扣。",
+              "score": 0.669
+            }
+          ],
+          "answer": "根据证据，城市书房的安静阅读区位于二楼。",
+          "firstPhaseMs": 6,
+          "firstAnswerMs": 1070,
+          "totalMs": 1081,
+          "goldenHit": true,
+          "refusalCandidate": false,
+          "lexicalCandidate": true
+        },
+        {
+          "question": "城市书房安静阅读在几楼？",
+          "selectedShop": 2,
+          "fixtureAction": "disableReading",
+          "expectedRefusal": true,
+          "events": [
+            "meta",
+            "status",
+            "sources",
+            "status",
+            "answer",
+            "done"
+          ],
+          "sources": [
+            {
+              "seedKey": "B1-M",
+              "version": 1,
+              "title": "城市书房会员借阅规则",
+              "excerpt": "城市书房普通会员每次最多借阅三本书，借期为十四天；会员资格不包含任何购书折扣。",
+              "score": 0.669
+            }
+          ],
+          "answer": "根据现有证据，无法查到城市书房安静阅读区域所在的楼层信息。",
+          "firstPhaseMs": 5,
+          "firstAnswerMs": 1099,
+          "totalMs": 1106,
+          "goldenHit": true,
+          "refusalCandidate": true,
+          "lexicalCandidate": true
+        }
+      ]
+    }
+  ],
+  "KnowledgeHit": 12,
+  "RecallAt5": 1,
+  "HitAt5": 1,
+  "LexicalCandidates": {
+    "knowledge": 11,
+    "multi": 5,
+    "tool": 6,
+    "unknown": 6
+  },
+  "RestartDocumentEmbeddingCalls": 0,
+  "RestartStoredVectorHit": true,
+  "BusinessInvariant": true,
+  "DraftCanaryExcluded": true
+}

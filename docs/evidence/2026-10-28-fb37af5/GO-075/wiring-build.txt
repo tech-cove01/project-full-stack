@@ -1,0 +1,1 @@
+PASS: go build ./internal/platform/app ./cmd/api

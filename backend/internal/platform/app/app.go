@@ -16,7 +16,6 @@ import (
 
 	"github.com/cityloop/fullstack-go/internal/activity"
 	"github.com/cityloop/fullstack-go/internal/activitypub"
-	"github.com/cityloop/fullstack-go/internal/ai"
 	"github.com/cityloop/fullstack-go/internal/aichat"
 	"github.com/cityloop/fullstack-go/internal/aiknowledge"
 	"github.com/cityloop/fullstack-go/internal/aitool"
@@ -55,8 +54,11 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	orders := order.NewService(resources.ORM, resources.Redis, cfg.OrderPayTimeout)
 	// One provider instance is shared so indexing and retrieval always speak the
 	// same model; a model switch requires rebuilding the chunk vectors.
-	embedder := ai.NewStub(256)
-	knowledge := aiknowledge.NewService(resources.ORM, embedder)
+	embedder, capabilities := configuredAI(cfg.AI)
+	if pool, ok := embedder.(interface{ CloseIdleConnections() }); ok {
+		defer pool.CloseIdleConnections()
+	}
+	knowledge := aiknowledge.NewService(resources.ORM, embedder).WithRetrieval(cfg.AI.TopK, cfg.AI.MinScore)
 	conversations := aichat.NewConversations(resources.Redis)
 	// The consumer parks an unresolved outcome in tb_order_review before it may
 	// acknowledge the Stream entry; the replay command owns the recovery.
@@ -76,10 +78,13 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 					WithProjections().
 					WithCounts(communitycache.New(resources.Redis, resources.ORM)).
 					WithLikes(communitycache.NewLikes(resources.Redis)), identity)
-			assistant := aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder).
-				WithGuards(aichat.NewDedupe(resources.Redis), aichat.NewLock(resources.Redis)).
-				WithBudget(aichat.NewBudget(resources.Redis))
-			aichat.Register(routes, conversations, assistant, embedder.Mode(), identity)
+			var assistant *aichat.Assistant
+			if capabilities.Ready {
+				assistant = aichat.NewAssistant(conversations, knowledge, aitool.NewService(resources.ORM), embedder).
+					WithGuards(aichat.NewDedupe(resources.Redis), aichat.NewLock(resources.Redis)).
+					WithBudget(aichat.NewBudget(resources.Redis)).WithRetrieval(cfg.AI.TopK, cfg.AI.MinScore)
+			}
+			aichat.Register(routes, conversations, assistant, capabilities.Mode, identity, capabilities)
 			activity.Register(routes, activity.NewService(resources.ORM, resources.Redis), identity)
 			order.Register(routes, orders, identity)
 		}),

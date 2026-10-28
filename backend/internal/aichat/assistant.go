@@ -56,6 +56,8 @@ type Assistant struct {
 	knowledge     *aiknowledge.Service
 	tools         *aitool.Service
 	provider      ai.Provider
+	topK          int
+	minScore      float64
 	dedupe        *Dedupe
 	lock          *Lock
 	budget        *Budget
@@ -63,7 +65,20 @@ type Assistant struct {
 
 func NewAssistant(conversations *Conversations, knowledge *aiknowledge.Service,
 	tools *aitool.Service, provider ai.Provider) *Assistant {
-	return &Assistant{conversations: conversations, knowledge: knowledge, tools: tools, provider: provider}
+	return &Assistant{conversations: conversations, knowledge: knowledge, tools: tools, provider: provider,
+		topK: 5, minScore: 0.18}
+}
+
+// WithRetrieval sets deployment-specific retrieval limits. They are server
+// settings, never client-controlled scope or permission claims.
+func (assistant *Assistant) WithRetrieval(topK int, minScore float64) *Assistant {
+	if topK >= 1 && topK <= 20 {
+		assistant.topK = topK
+	}
+	if minScore >= 0 && minScore <= 1 {
+		assistant.minScore = minScore
+	}
+	return assistant
 }
 
 // WithGuards attaches the optional turn guards. Tests can build an assistant
@@ -198,7 +213,7 @@ func (assistant *Assistant) respond(ctx context.Context, current *turn, shopID *
 		map[string]any{"stage": "retrieving"}); err != nil || !ok {
 		return "", nil, err
 	}
-	hits, err := assistant.knowledge.Search(ctx, message, shopID, 5, 0.18)
+	hits, err := assistant.knowledge.Search(ctx, message, shopID, assistant.topK, assistant.minScore)
 	if err != nil {
 		return "", nil, err
 	}

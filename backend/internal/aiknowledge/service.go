@@ -76,13 +76,27 @@ type PublicView struct {
 type Service struct {
 	db       *gorm.DB
 	provider ai.Provider
+	topK     int
+	minScore float64
 }
 
 func NewService(db *gorm.DB, provider ai.Provider) *Service {
 	if provider == nil {
 		provider = ai.NewStub(256)
 	}
-	return &Service{db: db, provider: provider}
+	return &Service{db: db, provider: provider, topK: 5, minScore: minScore}
+}
+
+// WithRetrieval controls the public search defaults without changing public
+// document visibility or allowing request input to lower the score threshold.
+func (service *Service) WithRetrieval(topK int, score float64) *Service {
+	if topK >= 1 && topK <= 20 {
+		service.topK = topK
+	}
+	if score >= 0 && score <= 1 {
+		service.minScore = score
+	}
+	return service
 }
 
 type documentRow struct {

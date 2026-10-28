@@ -1,0 +1,4 @@
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.167s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	2.242s
+ok  	github.com/cityloop/fullstack-go/internal/aichat	0.251s
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	0.228s

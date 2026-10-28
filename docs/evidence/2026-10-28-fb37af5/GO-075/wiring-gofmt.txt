@@ -1,0 +1,1 @@
+PASS: no gofmt differences in GO-075b owned Go files

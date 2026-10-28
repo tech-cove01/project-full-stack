@@ -113,7 +113,7 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 			}
 			shop = &parsed
 		}
-		limit := 5
+		limit := service.topK
 		if raw := c.Query("limit"); raw != "" {
 			parsed, err := strconv.Atoi(raw)
 			if err != nil || parsed <= 0 || parsed > 20 {
@@ -124,7 +124,7 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		}
 		ctx, cancel := requestContext(c)
 		defer cancel()
-		hits, err := service.Search(ctx, c.Query("q"), shop, limit, minScore)
+		hits, err := service.Search(ctx, c.Query("q"), shop, limit, service.minScore)
 		if err != nil {
 			writeError(c, err)
 			return

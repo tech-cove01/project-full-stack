@@ -43,6 +43,7 @@ type Config struct {
 	MySQL           MySQL
 	Redis           Redis
 	Kafka           Kafka
+	AI              AI
 	Location        *time.Location
 	StartupTimeout  time.Duration
 	ProbeTimeout    time.Duration
@@ -163,6 +164,7 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		}
 		cfg.Kafka.Topic = topic
 	}
+	cfg.AI = loadAI(lookup)
 	return cfg, nil
 }
 

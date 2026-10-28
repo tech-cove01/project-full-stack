@@ -13,22 +13,37 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/cityloop/fullstack-go/internal/ai"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
 )
 
+// Capabilities reports local configuration readiness. It deliberately does not
+// probe a paid provider at startup or claim the remote endpoint is healthy.
+type Capabilities struct {
+	Enabled             bool   `json:"enabled"`
+	Ready               bool   `json:"ready"`
+	Mode                string `json:"mode"`
+	Reason              string `json:"reason"`
+	ChatModel           string `json:"chatModel"`
+	EmbeddingModel      string `json:"embeddingModel"`
+	EmbeddingDimensions int    `json:"embeddingDimensions"`
+	ProviderHealth      string `json:"providerHealth"`
+}
+
 func Register(routes gin.IRouter, conversations *Conversations, assistant *Assistant,
-	mode string, identity *auth.Service) {
+	mode string, identity *auth.Service, metadata ...Capabilities) {
+	caps := defaultCapabilities(assistant, mode)
+	if len(metadata) > 0 {
+		caps = metadata[0]
+	}
+	if assistant == nil || assistant.provider == nil || conversations == nil {
+		caps.Ready = false
+	}
 	routes.GET("/ai/capabilities", func(c *gin.Context) {
-		model, dimension := "", 0
-		if assistant != nil && assistant.provider != nil {
-			model, dimension = assistant.provider.Model(), assistant.provider.Dimension()
-		}
-		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: map[string]any{
-			"enabled": assistant != nil, "ready": assistant != nil, "mode": mode, "reason": "当前仅启用确定性 stub，未验证真实模型质量", "chatModel": model, "embeddingModel": model, "embeddingDimensions": dimension,
-		}})
+		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: caps})
 	})
-	routes.POST("/ai/conversations", auth.RequireLogin(identity), func(c *gin.Context) {
+	routes.POST("/ai/conversations", auth.RequireLogin(identity), requireReady(caps.Ready), func(c *gin.Context) {
 		var body struct {
 			ShopID string `json:"shopId"`
 		}
@@ -59,7 +74,7 @@ func Register(routes gin.IRouter, conversations *Conversations, assistant *Assis
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: conversation})
 	})
-	routes.GET("/ai/conversations/:id", auth.RequireLogin(identity), func(c *gin.Context) {
+	routes.GET("/ai/conversations/:id", auth.RequireLogin(identity), requireReady(caps.Ready), func(c *gin.Context) {
 		userID, ok := currentUser(c)
 		if !ok {
 			unauthorized(c)
@@ -74,7 +89,7 @@ func Register(routes gin.IRouter, conversations *Conversations, assistant *Assis
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: messages})
 	})
-	routes.DELETE("/ai/conversations/:id", auth.RequireLogin(identity), func(c *gin.Context) {
+	routes.DELETE("/ai/conversations/:id", auth.RequireLogin(identity), requireReady(caps.Ready), func(c *gin.Context) {
 		userID, ok := currentUser(c)
 		if !ok {
 			unauthorized(c)
@@ -88,7 +103,7 @@ func Register(routes gin.IRouter, conversations *Conversations, assistant *Assis
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true})
 	})
-	routes.POST("/ai/conversations/:id/messages", auth.RequireLogin(identity), func(c *gin.Context) {
+	routes.POST("/ai/conversations/:id/messages", auth.RequireLogin(identity), requireReady(caps.Ready), func(c *gin.Context) {
 		var body struct {
 			ClientMessageID string `json:"clientMessageId"`
 			Message         string `json:"message"`
@@ -139,6 +154,35 @@ func Register(routes gin.IRouter, conversations *Conversations, assistant *Assis
 			_ = emit("error", map[string]any{"code": codeOf(err), "message": messageOf(err)})
 		}
 	})
+}
+
+func defaultCapabilities(assistant *Assistant, mode string) Capabilities {
+	caps := Capabilities{Mode: mode, Reason: "AI 未启用", ProviderHealth: "not_applicable"}
+	if assistant == nil || assistant.provider == nil {
+		return caps
+	}
+	caps.Enabled, caps.Ready = true, true
+	caps.EmbeddingModel, caps.EmbeddingDimensions = assistant.provider.Model(), assistant.provider.Dimension()
+	if chat, ok := assistant.provider.(interface{ ChatModel() string }); ok {
+		caps.ChatModel = chat.ChatModel()
+	} else if mode == "stub" {
+		caps.ChatModel = assistant.provider.Model()
+	}
+	if mode == "stub" {
+		caps.Reason = "当前为确定性 stub，仅验证协议，不代表真实模型质量"
+	} else {
+		caps.Reason = "真实 Provider 已配置；远端可用性在请求时确认"
+		caps.ProviderHealth = "unchecked"
+	}
+	return caps
+}
+
+func requireReady(ready bool) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !ready {
+			writeError(c, ai.ErrNotConfigured)
+		}
+	}
 }
 
 func requestContext(c *gin.Context) (context.Context, context.CancelFunc) {

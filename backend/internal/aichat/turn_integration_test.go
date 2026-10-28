@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -71,8 +72,16 @@ func TestIntegrationAssistantTurn(t *testing.T) {
 	var events []string
 	var answerText string
 	var cached bool
+	var sourceHref string
 	emit := func(event string, data any) error {
 		events = append(events, event)
+		if event == "sources" {
+			for _, source := range data.([]map[string]any) {
+				if source["documentId"] == strconv.FormatUint(documentID, 10) {
+					sourceHref, _ = source["href"].(string)
+				}
+			}
+		}
 		if values, ok := data.(map[string]any); ok {
 			if event == "answer" {
 				answerText, _ = values["text"].(string)
@@ -94,6 +103,9 @@ func TestIntegrationAssistantTurn(t *testing.T) {
 	}
 	if !strings.Contains(answerText, "核销") {
 		t.Fatalf("a grounded answer must quote the evidence, got %q", answerText)
+	}
+	if sourceHref != "/ai/knowledge/"+strconv.FormatUint(documentID, 10)+"?version=1" {
+		t.Fatal("citation href must match the Vue public knowledge route")
 	}
 	if cached {
 		t.Fatal("the first turn must not be a cached replay")

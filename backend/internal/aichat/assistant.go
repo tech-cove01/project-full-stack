@@ -231,7 +231,7 @@ func (assistant *Assistant) respond(ctx context.Context, current *turn, shopID *
 		source := map[string]any{
 			"citationId": citation, "chunkId": strconv.FormatUint(hit.ChunkID, 10), "documentId": strconv.FormatUint(hit.DocumentID, 10),
 			"version": hit.Version, "title": hit.Title, "scope": hit.Scope,
-			"excerpt": excerpt(hit.Content), "score": round(hit.Score), "href": "/knowledge/" + strconv.FormatUint(hit.DocumentID, 10) + "?version=" + strconv.Itoa(hit.Version),
+			"excerpt": excerpt(hit.Content), "score": round(hit.Score), "href": "/ai/knowledge/" + strconv.FormatUint(hit.DocumentID, 10) + "?version=" + strconv.Itoa(hit.Version),
 		}
 		if hit.ShopID != nil {
 			source["shopId"] = *hit.ShopID

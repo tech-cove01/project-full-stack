@@ -1,0 +1,6 @@
+=== RUN   TestIntegrationAssistantTurn
+    turn_integration_test.go:108: citation href must match the Vue public knowledge route
+--- FAIL: TestIntegrationAssistantTurn (0.58s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aichat	4.077s
+FAIL

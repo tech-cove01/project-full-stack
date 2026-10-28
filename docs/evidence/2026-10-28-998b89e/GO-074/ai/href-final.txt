@@ -1,0 +1,4 @@
+=== RUN   TestIntegrationAssistantTurn
+--- PASS: TestIntegrationAssistantTurn (0.28s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/aichat	2.560s

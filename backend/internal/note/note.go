@@ -4,6 +4,7 @@ package note
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -134,7 +135,19 @@ func (service *Service) Create(ctx context.Context, userID string, request Creat
 		if result.Error != nil {
 			return result.Error
 		}
-		return tx.Raw("SELECT LAST_INSERT_ID() AS id").Scan(&id).Error
+		if err := tx.Raw("SELECT LAST_INSERT_ID() AS id").Scan(&id).Error; err != nil {
+			return err
+		}
+		if id == 0 {
+			return ErrNotFound
+		}
+		body, err := json.Marshal(map[string]any{"noteId": strconv.FormatUint(id, 10), "authorId": strconv.FormatUint(user, 10), "publishVersion": 1})
+		if err != nil {
+			return err
+		}
+		return tx.Exec(`INSERT INTO tb_community_outbox
+			(event_id,aggregate_type,aggregate_id,aggregate_version,event_type,payload)
+			VALUES (?,'BLOG',?,1,'NOTE_PUBLISHED',?)`, "NOTE:"+strconv.FormatUint(id, 10)+":1:PUBLISHED", strconv.FormatUint(id, 10), string(body)).Error
 	})
 	if err != nil {
 		return View{}, err

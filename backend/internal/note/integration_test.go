@@ -50,6 +50,7 @@ func TestIntegrationNotePublishAndDetail(t *testing.T) {
 	t.Cleanup(func() {
 		cleanupCtx, stop := context.WithTimeout(context.Background(), 5*time.Second)
 		defer stop()
+		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_community_outbox WHERE aggregate_type='BLOG' AND aggregate_id=?", view.ID).Error
 		_ = resources.ORM.WithContext(cleanupCtx).Exec("DELETE FROM tb_blog WHERE id=?", view.ID).Error
 	})
 	if view.Status != "PUBLISHED" || view.PublishVersion != 1 || len(view.Images) != 1 {

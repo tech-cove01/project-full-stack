@@ -158,6 +158,7 @@ watch(
     controller?.abort()
     error.value = ''
     if (isCompose.value) {
+      loading.value = false
       form.value.shopId = String(route.query.shopId || '')
       note.value = null
     } else {

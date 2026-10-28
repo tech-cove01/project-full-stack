@@ -376,9 +376,16 @@ try {
   check(cancellations.every(value => value.status === 'fulfilled' && value.value.status === 200 && value.value.body.data?.orderStatus === 4)
     && sql(`SELECT version FROM tb_voucher_order WHERE id=${cancelled.order}`) === '1'
     && sql(`SELECT stock FROM tb_seckill_voucher WHERE voucher_id=${cancelled.voucher}`) === '10', 'repeated cancellation stays at one version and restores DB inventory only once')
-  check((await api(`/voucher-order/${cancelled.order}/pay`, token, 'POST')).status === 409
-    && await redis('GET', `seckill:stock:${cancelled.voucher}`) === '9'
-    && await redis('SISMEMBER', `seckill:order:${cancelled.voucher}`, users[1]) === 1, 'payment on cancelled order conflicts while Redis compensation remains explicitly deferred')
+  check((await api(`/voucher-order/${cancelled.order}/pay`, token, 'POST')).status === 409, 'payment on the old cancelled order remains a conflict')
+  await eventually(async () => await redis('GET', `seckill:stock:${cancelled.voucher}`) === '10'
+    && await redis('SISMEMBER', `seckill:order:${cancelled.voucher}`, users[1]) === 0
+    && await redis('HGET', `seckill:accepted:${cancelled.voucher}`, users[1]) === null,
+  Boolean, 'durable cancellation compensation did not restore stock and release the old reservation')
+  const repurchased = await api(`/voucher-order/seckill/${cancelled.voucher}`, token, 'POST')
+  check(repurchased.body.success && canonicalID(repurchased.body.data, orderMax)
+    && repurchased.body.data !== cancelled.order, 'after compensation the same buyer can receive a new order ID')
+  orderIDs.add(repurchased.body.data)
+  await waitCreated(token, repurchased.body.data)
   await screenshot(page, '-cancelled')
 
   report.step = 'deadline clock fixture and DB scanner without Redis reminders'

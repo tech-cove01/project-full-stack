@@ -259,22 +259,19 @@ onBeforeUnmount(() => controller?.abort())
       </el-table-column>
       <el-table-column label="版本 / 索引" width="150">
         <template #default="{ row }">
-          v{{ row.latestVersion || '-' }} · {{ row.latestStatus || '未发布' }}
+          v{{ row.latestVersion || row.publishedVersion || '-' }} ·
+          {{ row.latestStatus || (row.publishedVersion ? 'READY' : '未发布') }}
           <div v-if="row.latestError" class="muted">{{ row.latestError }}</div>
         </template>
       </el-table-column>
       <el-table-column prop="updateTime" label="更新时间" width="170" />
       <el-table-column label="操作" width="300">
         <template #default="{ row }">
-          <el-button
-            v-if="canManage && !row.publishedVersion && !row.disabled"
-            link
-            type="primary"
-            @click="openEdit(row)"
+          <el-button v-if="canManage && !row.disabled" link type="primary" @click="openEdit(row)"
             >编辑</el-button
           >
           <el-button
-            v-if="canManage && !row.publishedVersion && !row.disabled"
+            v-if="canManage && !row.disabled"
             link
             type="primary"
             :loading="submitting"
@@ -282,7 +279,7 @@ onBeforeUnmount(() => controller?.abort())
             >发布</el-button
           >
           <el-button
-            v-if="canManage && row.publishedVersion"
+            v-if="canManage && row.publishedVersion && !row.disabled"
             link
             :loading="submitting"
             @click="rebuild(row)"

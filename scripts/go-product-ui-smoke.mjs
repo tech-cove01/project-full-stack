@@ -168,7 +168,7 @@ try {
         DELETE FROM tb_ai_document_version WHERE document_id IN(SELECT id FROM tb_ai_document WHERE shop_id=${shop});
         DELETE FROM tb_ai_document WHERE shop_id=${shop};
         DELETE FROM tb_audit_log WHERE merchant_id=${merchant};
-        DELETE FROM tb_community_outbox WHERE (aggregate_type IN('NOTE','LIKE') AND aggregate_id IN (${blogIDs})) OR (aggregate_type='FOLLOW' AND aggregate_id IN (${reader},${author}));
+        DELETE FROM tb_community_outbox WHERE (aggregate_type IN('BLOG','NOTE','LIKE') AND aggregate_id IN (${blogIDs})) OR (aggregate_type='FOLLOW' AND aggregate_id IN (${reader},${author}));
         DELETE FROM tb_blog_like WHERE blog_id IN(${blogIDs}); DELETE FROM tb_blog WHERE id IN(${blogIDs});
         DELETE FROM tb_follow WHERE user_id IN(${ids.join(',')}) OR follow_user_id IN(${ids.join(',')});
         DELETE FROM tb_merchant_member WHERE id=${member}; DELETE FROM tb_shop WHERE id=${shop}; DELETE FROM tb_merchant WHERE id=${merchant}; DELETE FROM tb_user WHERE id IN(${ids.join(',')}); COMMIT;`)
@@ -176,6 +176,7 @@ try {
     } catch { clean = false }
   }
   report.cleanup = clean
+  report.fixture = { users: ids, shopId: shop, noteIds: notes, documentIds: documents }
   if (!clean) { report.passed = false; process.exitCode = 1 }
   await writeFile(output, JSON.stringify(report, null, 2) + '\n')
   process.stdout.write(JSON.stringify({ passed: report.passed, checks: report.checks.length, cleanup: report.cleanup }) + '\n')

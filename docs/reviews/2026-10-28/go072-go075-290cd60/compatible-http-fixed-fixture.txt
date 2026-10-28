@@ -1,0 +1,100 @@
+=== RUN   TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /ai/capabilities          --> github.com/cityloop/fullstack-go/internal/aichat.Register.func1 (1 handlers)
+[GIN-debug] POST   /ai/conversations         --> github.com/cityloop/fullstack-go/internal/aichat.Register.func2 (3 handlers)
+[GIN-debug] GET    /ai/conversations/:id     --> github.com/cityloop/fullstack-go/internal/aichat.Register.func3 (3 handlers)
+[GIN-debug] DELETE /ai/conversations/:id     --> github.com/cityloop/fullstack-go/internal/aichat.Register.func4 (3 handlers)
+[GIN-debug] POST   /ai/conversations/:id/messages --> github.com/cityloop/fullstack-go/internal/aichat.Register.func5 (3 handlers)
+    review_compatible_http_integration_test.go:161: client cancellation did not reach upstream and finish the handler
+2026/10/28 18:18:18 httptest.Server blocked in Close after 5 seconds, waiting for connections:
+  *net.TCPConn 0x15b2d48f2de8 127.0.0.1:61103 in state active
+panic: test timed out after 45s
+	running tests:
+		TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay (45s)
+
+goroutine 130 [running]:
+testing.(*M).startAlarm.func1()
+	C:/Program Files/Go/src/testing/testing.go:2959 +0x34a
+created by time.goFunc
+	C:/Program Files/Go/src/time/sleep.go:182 +0x2d
+
+goroutine 1 [chan receive]:
+testing.(*T).Run(0x15b2d48eea00, {0x7ff63a60b937?, 0x15b2d4cdfaa8?}, 0x7ff63b371520)
+	C:/Program Files/Go/src/testing/testing.go:2266 +0x4d2
+testing.runTests.func1(0x15b2d48eea00)
+	C:/Program Files/Go/src/testing/testing.go:2742 +0x37
+testing.tRunner(0x15b2d48eea00, 0x15b2d4cdfbc8)
+	C:/Program Files/Go/src/testing/testing.go:2193 +0xc3
+testing.runTests({0x7ff63a5f3af7, 0x20}, {0x7ff63a60664f, 0x30}, 0x15b2d48f6cc0, {0x7ff63b4050f8, 0x12, 0x12}, {0xc2b090df9af4d098, 0xa7ac32e5d, ...})
+	C:/Program Files/Go/src/testing/testing.go:2740 +0x505
+testing.(*M).Run(0x15b2d4b9f220)
+	C:/Program Files/Go/src/testing/testing.go:2600 +0x6af
+main.main()
+	_testmain.go:80 +0x9b
+
+goroutine 8 [chan receive]:
+github.com/redis/go-redis/v9/internal/pool.startGlobalTimeCache.func1(0x15b2d4928620)
+	C:/Users/19083/go/pkg/mod/github.com/redis/go-redis/v9@v9.17.0/internal/pool/global_time_cache.go:48 +0x9e
+created by github.com/redis/go-redis/v9/internal/pool.startGlobalTimeCache in goroutine 1
+	C:/Users/19083/go/pkg/mod/github.com/redis/go-redis/v9@v9.17.0/internal/pool/global_time_cache.go:44 +0x176
+
+goroutine 9 [sync.WaitGroup.Wait]:
+sync.runtime_SemacquireWaitGroup(0x0?, 0x0?)
+	C:/Program Files/Go/src/runtime/sema.go:114 +0x2e
+sync.(*WaitGroup).Wait(0x15b2d4a321b0)
+	C:/Program Files/Go/src/sync/waitgroup.go:206 +0x85
+net/http/httptest.(*Server).Close(0x15b2d4a32140)
+	C:/Program Files/Go/src/net/http/httptest/server.go:524 +0x28f
+testing.(*common).Cleanup.func1()
+	C:/Program Files/Go/src/testing/testing.go:1460 +0x109
+testing.(*common).runCleanup(0x15b2d48eec00, 0x0?)
+	C:/Program Files/Go/src/testing/testing.go:1820 +0xea
+testing.tRunner.func2()
+	C:/Program Files/Go/src/testing/testing.go:2187 +0x25
+runtime.Goexit()
+	C:/Program Files/Go/src/runtime/panic.go:694 +0x54
+testing.(*common).FailNow(0x15b2d48eec00)
+	C:/Program Files/Go/src/testing/testing.go:1106 +0x4a
+testing.(*common).Fatal(0x15b2d48eec00, {0x15b2d4fc7f38?, 0x7ff63a5dc835?, 0x0?})
+	C:/Program Files/Go/src/testing/testing.go:1364 +0x54
+github.com/cityloop/fullstack-go/internal/aichat.TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay(0x15b2d48eec00)
+	D:/桌面/The ALL/agent/project/code/.reviews/go072-go075-290cd60/worktree/backend/internal/aichat/review_compatible_http_integration_test.go:161 +0x1828
+testing.tRunner(0x15b2d48eec00, 0x7ff63b371520)
+	C:/Program Files/Go/src/testing/testing.go:2193 +0xc3
+created by testing.(*T).Run in goroutine 1
+	C:/Program Files/Go/src/testing/testing.go:2258 +0x4b4
+
+goroutine 10 [select]:
+database/sql.(*DB).connectionOpener(0x15b2d4c365b0, {0x7ff63b366eb0, 0x15b2d4b7acd0})
+	C:/Program Files/Go/src/database/sql/sql.go:1266 +0x89
+created by database/sql.OpenDB in goroutine 9
+	C:/Program Files/Go/src/database/sql/sql.go:846 +0x135
+
+goroutine 11 [select]:
+github.com/go-sql-driver/mysql.(*mysqlConn).startWatcher.func1()
+	C:/Users/19083/go/pkg/mod/github.com/go-sql-driver/mysql@v1.8.1/connection.go:628 +0x9a
+created by github.com/go-sql-driver/mysql.(*mysqlConn).startWatcher in goroutine 9
+	C:/Users/19083/go/pkg/mod/github.com/go-sql-driver/mysql@v1.8.1/connection.go:625 +0x105
+
+goroutine 18 [select]:
+database/sql.(*DB).connectionCleaner(0x15b2d4c365b0, 0x0?)
+	C:/Program Files/Go/src/database/sql/sql.go:1109 +0x9e
+created by database/sql.(*DB).startCleanerLocked in goroutine 9
+	C:/Program Files/Go/src/database/sql/sql.go:1096 +0x109
+
+goroutine 12 [chan receive]:
+github.com/cityloop/fullstack-go/internal/aichat.TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay.func2({0x7ff63b3656e8, 0x15b2d4d90000}, 0x15b2d4af2000)
+	D:/桌面/The ALL/agent/project/code/.reviews/go072-go075-290cd60/worktree/backend/internal/aichat/review_compatible_http_integration_test.go:66 +0x256
+net/http.HandlerFunc.ServeHTTP(0x7ff639bdb700?, {0x7ff63b3656e8?, 0x15b2d4d90000?}, 0x15b2d4a43ae8?)
+	C:/Program Files/Go/src/net/http/server.go:2338 +0x29
+net/http.serverHandler.ServeHTTP({0x10?}, {0x7ff63b3656e8?, 0x15b2d4d90000?}, 0x1?)
+	C:/Program Files/Go/src/net/http/server.go:3413 +0x8e
+net/http.(*conn).serve(0x15b2d49fcab0, {0x7ff63b366e78, 0x15b2d4c35140})
+	C:/Program Files/Go/src/net/http/server.go:2137 +0x6dc
+created by net/http.(*Server).Serve in goroutine 22
+	C:/Program Files/Go/src/net/http/server.go:3581 +0x4fd
+FAIL	github.com/cityloop/fullstack-go/internal/aichat	47.158s
+FAIL

@@ -1,0 +1,15 @@
+=== RUN   TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /ai/capabilities          --> github.com/cityloop/fullstack-go/internal/aichat.Register.func1 (1 handlers)
+[GIN-debug] POST   /ai/conversations         --> github.com/cityloop/fullstack-go/internal/aichat.Register.func2 (3 handlers)
+[GIN-debug] GET    /ai/conversations/:id     --> github.com/cityloop/fullstack-go/internal/aichat.Register.func3 (3 handlers)
+[GIN-debug] DELETE /ai/conversations/:id     --> github.com/cityloop/fullstack-go/internal/aichat.Register.func4 (3 handlers)
+[GIN-debug] POST   /ai/conversations/:id/messages --> github.com/cityloop/fullstack-go/internal/aichat.Register.func5 (3 handlers)
+    review_compatible_http_integration_test.go:145: request never reached the compatible Chat HTTP server
+--- FAIL: TestIntegrationReviewCompatibleHTTPAbortRetryAndReplay (20.09s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/aichat	22.707s
+FAIL

@@ -1,0 +1,14 @@
+{
+  "ai_keys": 0,
+  "login_sessions": 0,
+  "login_codes": 0,
+  "stream_exists": 1,
+  "stream_length": 3,
+  "stream_groups": [
+    {
+      "name": "g1",
+      "pending": 0
+    }
+  ],
+  "scope": "Dedicated review project only; retained stream history/caches are not flushed."
+}

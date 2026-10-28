@@ -1,0 +1,26 @@
+{
+  "containers": [
+    {
+      "name": "project-full-stack-review7275-mysql-1",
+      "status": "exited",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false
+    },
+    {
+      "name": "project-full-stack-review7275-redis-1",
+      "status": "exited",
+      "running": false,
+      "exit_code": 0,
+      "oom_killed": false
+    },
+    {
+      "name": "project-full-stack-review7275-kafka-1",
+      "status": "exited",
+      "running": false,
+      "exit_code": 143,
+      "oom_killed": false
+    }
+  ],
+  "volumes": "retained"
+}

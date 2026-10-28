@@ -1,0 +1,28 @@
+command: go test -count=1 -run ^TestKafkaTopicReservedNames$ -v ./internal/platform/config
+exit_code: 1
+
+=== RUN   TestKafkaTopicReservedNames
+=== RUN   TestKafkaTopicReservedNames/reject_.
+    config_test.go:62: reserved dot-only Kafka topic must fail during configuration loading
+=== RUN   TestKafkaTopicReservedNames/reject_..
+    config_test.go:62: reserved dot-only Kafka topic must fail during configuration loading
+=== RUN   TestKafkaTopicReservedNames/reject__._
+    config_test.go:62: reserved dot-only Kafka topic must fail during configuration loading
+=== RUN   TestKafkaTopicReservedNames/reject__.._
+    config_test.go:62: reserved dot-only Kafka topic must fail during configuration loading
+=== RUN   TestKafkaTopicReservedNames/accept_community.events
+=== RUN   TestKafkaTopicReservedNames/accept_.events
+=== RUN   TestKafkaTopicReservedNames/accept_community..events
+=== RUN   TestKafkaTopicReservedNames/accept_...
+--- FAIL: TestKafkaTopicReservedNames (0.00s)
+    --- FAIL: TestKafkaTopicReservedNames/reject_. (0.00s)
+    --- FAIL: TestKafkaTopicReservedNames/reject_.. (0.00s)
+    --- FAIL: TestKafkaTopicReservedNames/reject__._ (0.00s)
+    --- FAIL: TestKafkaTopicReservedNames/reject__.._ (0.00s)
+    --- PASS: TestKafkaTopicReservedNames/accept_community.events (0.00s)
+    --- PASS: TestKafkaTopicReservedNames/accept_.events (0.00s)
+    --- PASS: TestKafkaTopicReservedNames/accept_community..events (0.00s)
+    --- PASS: TestKafkaTopicReservedNames/accept_... (0.00s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/platform/config	1.367s
+FAIL

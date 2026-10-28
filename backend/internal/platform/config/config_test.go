@@ -52,6 +52,30 @@ func TestKafkaIsOptionalButValidatedWhenPresent(t *testing.T) {
 	}
 }
 
+func TestKafkaTopicReservedNames(t *testing.T) {
+	for _, topic := range []string{".", "..", " . ", " .. "} {
+		t.Run("reject_"+topic, func(t *testing.T) {
+			values := validEnvironment()
+			values["KAFKA_BROKERS"] = "127.0.0.1:9092"
+			values["KAFKA_TOPIC"] = topic
+			if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "KAFKA_TOPIC") {
+				t.Fatal("reserved dot-only Kafka topic must fail during configuration loading")
+			}
+		})
+	}
+	for _, topic := range []string{"community.events", ".events", "community..events", "..."} {
+		t.Run("accept_"+topic, func(t *testing.T) {
+			values := validEnvironment()
+			values["KAFKA_BROKERS"] = "127.0.0.1:9092"
+			values["KAFKA_TOPIC"] = topic
+			cfg, err := fromMap(values)
+			if err != nil || cfg.Kafka.Topic != topic {
+				t.Fatal("legal dotted Kafka topic must retain its configured name")
+			}
+		})
+	}
+}
+
 func TestExplicitDependenciesAndSafeDefaults(t *testing.T) {
 	cfg, err := fromMap(validEnvironment())
 	if err != nil {

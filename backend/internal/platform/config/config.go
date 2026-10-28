@@ -160,8 +160,8 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	if value, ok := lookup("KAFKA_TOPIC"); ok {
 		topic := strings.TrimSpace(value)
-		if !topicPattern.MatchString(topic) {
-			return Config{}, fmt.Errorf("KAFKA_TOPIC must be 1-249 characters of letters, digits, dot, underscore or dash")
+		if !topicPattern.MatchString(topic) || topic == "." || topic == ".." {
+			return Config{}, fmt.Errorf("KAFKA_TOPIC must be 1-249 characters of letters, digits, dot, underscore or dash, and cannot be . or ..")
 		}
 		cfg.Kafka.Topic = topic
 	}

@@ -238,6 +238,16 @@ try {
 } catch (error) {
   report.error = String(error.message)
 } finally {
+  // Sessions outlive the synthetic SQL users unless explicitly revoked. Keep
+  // exact tokens only in this process and close them while the API is running.
+  for (const token of sessions.values()) {
+    try {
+      const logout = await api('POST', '/user/logout', undefined, token)
+      if (logout.status !== 200 || !logout.body?.success) report.cleanup.push('Owned session logout failed')
+    } catch {
+      report.cleanup.push('Owned session logout failed')
+    }
+  }
   cleanupFixtures(ids)
   if (report.cleanup.length) report.passed = false
 }

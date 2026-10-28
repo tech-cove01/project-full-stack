@@ -1,0 +1,252 @@
+{
+  "Task": "GO-075d",
+  "ChatModel": "qwen3.8-flash",
+  "EmbeddingModel": "text-embedding-v4",
+  "StartedAt": "2026-10-28T09:15:23Z",
+  "CompletedAt": "2026-10-28T09:15:35Z",
+  "Cost": "unknown: canceled/timed-out requests may be billed; observed usage is not an invoice",
+  "CancellationBoundary": "client abort propagates through actual loopback HTTP SSE to compatible net/http; remote settlement unknown",
+  "RealProvider": true,
+  "Passed": true,
+  "RealHTTPLogin": true,
+  "BusinessInvariant": true,
+  "Dimensions": 1536,
+  "MaxCalls": 10,
+  "Attempts": 9,
+  "UnknownUsage": 2,
+  "MaxObservedTokens": 20000,
+  "ObservedTokens": 415,
+  "Observations": [
+    {
+      "Case": "setup",
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 7135589900,
+      "usage": {
+        "inputTokens": 26,
+        "outputTokens": 0,
+        "totalTokens": 26,
+        "known": true
+      }
+    },
+    {
+      "Case": "client_abort",
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 458564800,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "Case": "client_abort",
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "cancelled",
+      "duration": 100554700,
+      "usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "known": false
+      }
+    },
+    {
+      "Case": "provider_deadline",
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 620643100,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "Case": "provider_deadline",
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "timeout",
+      "duration": 20516400,
+      "usage": {
+        "inputTokens": 0,
+        "outputTokens": 0,
+        "totalTokens": 0,
+        "known": false
+      }
+    },
+    {
+      "Case": "session_revoked",
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 233072600,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "Case": "session_revoked",
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1112021200,
+      "usage": {
+        "inputTokens": 152,
+        "outputTokens": 12,
+        "totalTokens": 164,
+        "known": true
+      }
+    },
+    {
+      "Case": "recovery",
+      "operation": "embedding",
+      "model": "text-embedding-v4",
+      "outcome": "success",
+      "duration": 481092300,
+      "usage": {
+        "inputTokens": 9,
+        "outputTokens": 0,
+        "totalTokens": 9,
+        "known": true
+      }
+    },
+    {
+      "Case": "recovery",
+      "operation": "chat",
+      "model": "qwen3.8-flash",
+      "outcome": "success",
+      "duration": 1064363800,
+      "usage": {
+        "inputTokens": 163,
+        "outputTokens": 26,
+        "totalTokens": 189,
+        "known": true
+      }
+    }
+  ],
+  "Results": [
+    {
+      "Case": "client_abort",
+      "ChatOutcome": "cancelled",
+      "Events": [
+        "meta",
+        "status",
+        "sources",
+        "status",
+        "error"
+      ],
+      "ChatEntered": true,
+      "ChatUsageKnown": false,
+      "ClientInterrupted": true,
+      "SessionRevoked": false,
+      "LeaseReleased": true,
+      "DedupeAbsent": true,
+      "Passed": true,
+      "StoredAssistantMessages": 0,
+      "Attempts": 2,
+      "TotalMS": 617,
+      "RateCount": 0,
+      "DailyCount": 0
+    },
+    {
+      "Case": "provider_deadline",
+      "ChatOutcome": "timeout",
+      "Events": [
+        "meta",
+        "status",
+        "sources",
+        "status",
+        "error"
+      ],
+      "ChatEntered": true,
+      "ChatUsageKnown": false,
+      "ClientInterrupted": false,
+      "SessionRevoked": false,
+      "LeaseReleased": true,
+      "DedupeAbsent": true,
+      "Passed": true,
+      "StoredAssistantMessages": 0,
+      "Attempts": 2,
+      "TotalMS": 696,
+      "RateCount": 0,
+      "DailyCount": 0
+    },
+    {
+      "Case": "session_revoked",
+      "ChatOutcome": "success",
+      "Events": [
+        "meta",
+        "status",
+        "sources",
+        "status",
+        "error"
+      ],
+      "ChatEntered": true,
+      "ChatUsageKnown": true,
+      "ClientInterrupted": false,
+      "SessionRevoked": true,
+      "LeaseReleased": true,
+      "DedupeAbsent": true,
+      "Passed": true,
+      "StoredAssistantMessages": 0,
+      "Attempts": 2,
+      "TotalMS": 1398,
+      "RateCount": 0,
+      "DailyCount": 0
+    },
+    {
+      "Case": "recovery",
+      "ChatOutcome": "success",
+      "Events": [
+        "meta",
+        "status",
+        "sources",
+        "status",
+        "answer",
+        "done"
+      ],
+      "ChatEntered": true,
+      "ChatUsageKnown": true,
+      "ClientInterrupted": false,
+      "SessionRevoked": false,
+      "LeaseReleased": true,
+      "DedupeAbsent": false,
+      "Passed": true,
+      "StoredAssistantMessages": 1,
+      "Attempts": 2,
+      "TotalMS": 1624,
+      "RateCount": 1,
+      "DailyCount": 1
+    },
+    {
+      "Case": "budget_reject",
+      "ChatOutcome": "",
+      "Events": [
+        "error"
+      ],
+      "ChatEntered": false,
+      "ChatUsageKnown": false,
+      "ClientInterrupted": false,
+      "SessionRevoked": false,
+      "LeaseReleased": true,
+      "DedupeAbsent": true,
+      "Passed": true,
+      "StoredAssistantMessages": 1,
+      "Attempts": 0,
+      "TotalMS": 6,
+      "RateCount": 1,
+      "DailyCount": 1
+    }
+  ]
+}

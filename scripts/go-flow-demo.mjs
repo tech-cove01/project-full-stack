@@ -71,30 +71,36 @@ async function login(phone) {
 // The insert and LAST_INSERT_ID() share one mysql call: a new process has its
 // own session, so the id would otherwise be lost.
 function seedMerchant() {
-  const merchantUser = Number(sql(`INSERT INTO tb_user (phone,password,nick_name,icon)
-    VALUES ('${phones[0]}','x','演示商家',''); SELECT LAST_INSERT_ID();`))
-  const shopper = Number(sql(`INSERT INTO tb_user (phone,password,nick_name,icon)
-    VALUES ('${phones[1]}','x','演示用户',''); SELECT LAST_INSERT_ID();`))
-  const merchant = Number(sql(`INSERT INTO tb_merchant (name,status)
-    VALUES ('演示商家-${suffix}','ACTIVE'); SELECT LAST_INSERT_ID();`))
-  const shop = Number(sql(`INSERT INTO tb_shop (merchant_id,name,type_id,images,address,x,y,open_hours)
-    VALUES (${merchant},'演示门店-${suffix}',1,'','演示地址',0,0,'09:00-21:00'); SELECT LAST_INSERT_ID();`))
+  const merchantUser = sql(`INSERT INTO tb_user (phone,password,nick_name,icon)
+    VALUES ('${phones[0]}','x','演示商家',''); SELECT LAST_INSERT_ID();`)
+  const shopper = sql(`INSERT INTO tb_user (phone,password,nick_name,icon)
+    VALUES ('${phones[1]}','x','演示用户',''); SELECT LAST_INSERT_ID();`)
+  const merchant = sql(`INSERT INTO tb_merchant (name,status)
+    VALUES ('演示商家-${suffix}','ACTIVE'); SELECT LAST_INSERT_ID();`)
+  const shop = sql(`INSERT INTO tb_shop (merchant_id,name,type_id,images,address,x,y,open_hours)
+    VALUES (${merchant},'演示门店-${suffix}',1,'','演示地址',0,0,'09:00-21:00'); SELECT LAST_INSERT_ID();`)
   sql(`INSERT INTO tb_merchant_member (merchant_id,user_id,role_code,status)
        VALUES (${merchant},${merchantUser},'OWNER','ACTIVE')`)
   return { merchantUser, shopper, merchant, shop }
 }
 
 function cleanupFixtures(ids) {
+  const ownNotes = sql(`SELECT id FROM tb_blog WHERE shop_id=${ids.shop} OR user_id=${ids.shopper}`).split(/\s+/).filter(Boolean)
+  const ownVouchers = sql(`SELECT id FROM tb_voucher WHERE shop_id=${ids.shop}`).split(/\s+/).filter(Boolean)
+  const ownOrders = sql(`SELECT id FROM tb_voucher_order WHERE user_id=${ids.shopper}`).split(/\s+/).filter(Boolean)
+  const noteIDs = ownNotes.length ? ownNotes.join(',') : '0'
+  const voucherIDs = ownVouchers.length ? ownVouchers.join(',') : '0'
+  const orderIDs = ownOrders.length ? ownOrders.join(',') : '0'
   const statements = [
     `DELETE FROM tb_ai_chunk WHERE document_id IN (SELECT id FROM tb_ai_document WHERE shop_id=${ids.shop})`,
     `DELETE FROM tb_ai_document_version WHERE document_id IN (SELECT id FROM tb_ai_document WHERE shop_id=${ids.shop})`,
     `DELETE FROM tb_ai_document WHERE shop_id=${ids.shop}`,
-    `DELETE FROM tb_community_outbox WHERE aggregate_id IN (${ids.shop},${ids.shopper})`,
+    `DELETE FROM tb_community_outbox WHERE (aggregate_type IN('BLOG','NOTE','LIKE') AND aggregate_id IN (${noteIDs})) OR (aggregate_type='FOLLOW' AND aggregate_id IN (${ids.merchantUser},${ids.shopper}))`,
     `DELETE FROM tb_blog_like WHERE blog_id IN (SELECT id FROM tb_blog WHERE shop_id=${ids.shop})`,
     `DELETE FROM tb_blog WHERE shop_id=${ids.shop} OR user_id=${ids.shopper}`,
     `DELETE FROM tb_follow WHERE user_id=${ids.shopper} OR follow_user_id=${ids.shopper}`,
+    `DELETE FROM tb_outbox WHERE (aggregate_type='ACTIVITY' AND aggregate_id IN (${voucherIDs})) OR (aggregate_type IN ('ORDER','RESERVATION') AND aggregate_id IN (${orderIDs}))`,
     `DELETE FROM tb_voucher_order WHERE user_id=${ids.shopper}`,
-    `DELETE FROM tb_outbox WHERE aggregate_id IN (${ids.shop},${ids.shopper})`,
     `DELETE FROM tb_seckill_voucher WHERE voucher_id IN (SELECT id FROM tb_voucher WHERE shop_id=${ids.shop})`,
     `DELETE FROM tb_voucher WHERE shop_id=${ids.shop}`,
     `DELETE FROM tb_merchant_member WHERE user_id IN (${ids.merchantUser},${ids.shopper})`,
@@ -233,6 +239,7 @@ try {
   report.error = String(error.message)
 } finally {
   cleanupFixtures(ids)
+  if (report.cleanup.length) report.passed = false
 }
 await writeFile(output, JSON.stringify(report, null, 2) + '\n', 'utf8')
 console.log(JSON.stringify({ passed: report.passed, flows: report.flows, checks: report.checks.length, error: report.error || null }))

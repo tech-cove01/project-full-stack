@@ -80,12 +80,12 @@ const merchantPhone = `138${randomInt(10000000, 100000000)}`
 const userIDs = []
 const ids = {}
 try {
-  ids.merchantUser = Number(sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${merchantPhone}','x','m',''); SELECT LAST_INSERT_ID();`))
-  const merchant = Number(sql(`INSERT INTO tb_merchant (name,status) VALUES ('load-${suffix}','ACTIVE'); SELECT LAST_INSERT_ID();`))
-  const shop = Number(sql(`INSERT INTO tb_shop (merchant_id,name,type_id,images,address,x,y,open_hours) VALUES (${merchant},'load-${suffix}',1,'','addr',0,0,'09:00-21:00'); SELECT LAST_INSERT_ID();`))
+  ids.merchantUser = sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${merchantPhone}','x','m',''); SELECT LAST_INSERT_ID();`)
+  const merchant = sql(`INSERT INTO tb_merchant (name,status) VALUES ('load-${suffix}','ACTIVE'); SELECT LAST_INSERT_ID();`)
+  const shop = sql(`INSERT INTO tb_shop (merchant_id,name,type_id,images,address,x,y,open_hours) VALUES (${merchant},'load-${suffix}',1,'','addr',0,0,'09:00-21:00'); SELECT LAST_INSERT_ID();`)
   sql(`INSERT INTO tb_merchant_member (merchant_id,user_id,role_code,status) VALUES (${merchant},${ids.merchantUser},'OWNER','ACTIVE')`)
   for (const phone of phones) {
-    userIDs.push(Number(sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${phone}','x','u',''); SELECT LAST_INSERT_ID();`)))
+    userIDs.push(sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${phone}','x','u',''); SELECT LAST_INSERT_ID();`))
   }
   const owner = await login(merchantPhone)
   const begin = new Date(Date.now() - 3600_000).toISOString().replace(/\.\d{3}Z$/, '.000Z')

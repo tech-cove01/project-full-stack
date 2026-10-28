@@ -75,11 +75,11 @@ const merchantPhone = `138${randomInt(10000000, 100000000)}`
 const shopperPhone = `139${randomInt(10000000, 100000000)}`
 const ids = {}
 try {
-  ids.merchantUser = Number(sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${merchantPhone}','x','m',''); SELECT LAST_INSERT_ID();`))
-  ids.merchant = Number(sql(`INSERT INTO tb_merchant (name,status) VALUES ('fault-${suffix}','ACTIVE'); SELECT LAST_INSERT_ID();`))
-  ids.shop = Number(sql(`INSERT INTO tb_shop (merchant_id,name,type_id,images,address,x,y,open_hours) VALUES (${ids.merchant},'fault-${suffix}',1,'','addr',0,0,'09:00-21:00'); SELECT LAST_INSERT_ID();`))
+  ids.merchantUser = sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${merchantPhone}','x','m',''); SELECT LAST_INSERT_ID();`)
+  ids.merchant = sql(`INSERT INTO tb_merchant (name,status) VALUES ('fault-${suffix}','ACTIVE'); SELECT LAST_INSERT_ID();`)
+  ids.shop = sql(`INSERT INTO tb_shop (merchant_id,name,type_id,images,address,x,y,open_hours) VALUES (${ids.merchant},'fault-${suffix}',1,'','addr',0,0,'09:00-21:00'); SELECT LAST_INSERT_ID();`)
   sql(`INSERT INTO tb_merchant_member (merchant_id,user_id,role_code,status) VALUES (${ids.merchant},${ids.merchantUser},'OWNER','ACTIVE')`)
-  ids.shopper = Number(sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${shopperPhone}','x','u',''); SELECT LAST_INSERT_ID();`))
+  ids.shopper = sql(`INSERT INTO tb_user (phone,password,nick_name,icon) VALUES ('${shopperPhone}','x','u',''); SELECT LAST_INSERT_ID();`)
   const owner = await login(merchantPhone)
   const shopper = await login(shopperPhone)
   const begin = new Date(Date.now() - 3600_000).toISOString().replace(/\.\d{3}Z$/, '.000Z')
@@ -109,8 +109,9 @@ try {
   const added = redis('XADD', 'stream.orders', '*', 'id', String(orderId),
     'userId', String(ids.shopper), 'voucherId', String(voucherId))
   report.orderId = String(orderId)
+  report.fixtureBoundary = 'Direct Stream fixture for consumer outage recovery; this drill does not execute Lua admission or reserve Redis stock.'
   report.streamEntry = added
-  check(added.length > 0, 'the accepted message enters the Stream')
+  check(added.length > 0, 'the explicit consumer test message enters the isolated Stream')
   await new Promise(wait => setTimeout(wait, 5000))
   const pendingDuringOutage = Number(redis('XPENDING', 'stream.orders', 'g1').split('\n')[0] || 0)
   report.pendingDuringOutage = pendingDuringOutage

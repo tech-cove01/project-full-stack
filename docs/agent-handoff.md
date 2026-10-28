@@ -1,12 +1,12 @@
 # 给实现 agent 的 Go 迁移交接
 
-2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [开发入口](README.md) 维护，总路线只在 [implementation-plan.md](implementation-plan.md) 维护。
+2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
 ## 可直接交付的执行指令
 
 ~~~text
 请将 project-full-stack 的后端全面迁移至 Go，并补齐已确定的社区亮点。
-先读根 AGENTS.md、docs/README.md、docs/implementation-plan.md，
+先读根 AGENTS.md、STATUS.md、docs/implementation-plan.md，
 再读交易/AI/社区设计及对应验收，检查 HEAD、暂存/工作区和未跟踪文件。
 Java 参考点是 java-baseline-20261026 → 9f8c2b10839ef74556de0f55d19afc3ac215f9da，
 它不是全部独立验收通过的声明。

@@ -49,6 +49,10 @@ func (service *Service) Refund(ctx context.Context, userID, orderID, reason stri
 
 	var view View
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		authorizedMerchant, err := lockMutationMembership(ctx, tx, operator, locator.ShopID, true)
+		if err != nil {
+			return err
+		}
 		var binding struct{ UserID, VoucherID, ShopID uint64 }
 		if err := tx.Raw("SELECT user_id,voucher_id,shop_id FROM tb_voucher_order WHERE id=?", id).Scan(&binding).Error; err != nil {
 			return err
@@ -68,7 +72,7 @@ func (service *Service) Refund(ctx context.Context, userID, orderID, reason stri
 			binding.VoucherID).Scan(&activity).Error; err != nil {
 			return err
 		}
-		if activity.VoucherID == 0 || activity.MerchantID == 0 {
+		if activity.VoucherID == 0 || activity.MerchantID != authorizedMerchant {
 			return ErrUnsafe
 		}
 		var current struct {

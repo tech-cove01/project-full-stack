@@ -60,6 +60,10 @@ func (service *Service) Redeem(ctx context.Context, userID, shopID, token string
 
 	var result RedeemResult
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		authorizedMerchant, err := lockMutationMembership(ctx, tx, operator, shop, false)
+		if err != nil {
+			return err
+		}
 		var binding struct{ UserID, VoucherID, ShopID uint64 }
 		if err := tx.Raw("SELECT user_id,voucher_id,shop_id FROM tb_voucher_order WHERE id=?", locator.ID).Scan(&binding).Error; err != nil {
 			return err
@@ -79,7 +83,7 @@ func (service *Service) Redeem(ctx context.Context, userID, shopID, token string
 			binding.VoucherID).Scan(&activity).Error; err != nil {
 			return err
 		}
-		if activity.VoucherID == 0 || activity.MerchantID == 0 {
+		if activity.VoucherID == 0 || activity.MerchantID != authorizedMerchant {
 			return ErrUnsafe
 		}
 		var current struct {

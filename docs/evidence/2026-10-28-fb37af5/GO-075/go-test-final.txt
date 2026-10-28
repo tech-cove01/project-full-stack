@@ -1,0 +1,31 @@
+?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/community-projector	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/recount	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/review	[no test files]
+ok  	github.com/cityloop/fullstack-go/internal/activity	0.624s
+ok  	github.com/cityloop/fullstack-go/internal/activitypub	0.618s
+ok  	github.com/cityloop/fullstack-go/internal/ai	0.826s
+ok  	github.com/cityloop/fullstack-go/internal/aichat	0.508s
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	0.962s
+ok  	github.com/cityloop/fullstack-go/internal/aitool	0.823s
+ok  	github.com/cityloop/fullstack-go/internal/auth	0.668s
+ok  	github.com/cityloop/fullstack-go/internal/communitycache	0.912s
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	1.199s
+ok  	github.com/cityloop/fullstack-go/internal/communityprojection	0.885s
+ok  	github.com/cityloop/fullstack-go/internal/communityrelay	0.923s
+ok  	github.com/cityloop/fullstack-go/internal/merchant	0.794s
+ok  	github.com/cityloop/fullstack-go/internal/merchantorder	0.962s
+ok  	github.com/cityloop/fullstack-go/internal/note	1.068s
+ok  	github.com/cityloop/fullstack-go/internal/order	0.951s
+ok  	github.com/cityloop/fullstack-go/internal/orderadmission	0.885s
+ok  	github.com/cityloop/fullstack-go/internal/ordercomp	0.905s
+ok  	github.com/cityloop/fullstack-go/internal/orderreview	0.929s
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	0.933s
+ok  	github.com/cityloop/fullstack-go/internal/ordertimeout	0.960s
+ok  	github.com/cityloop/fullstack-go/internal/outbox	0.834s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	3.931s
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.445s
+ok  	github.com/cityloop/fullstack-go/internal/platform/database	0.484s
+ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	0.560s
+ok  	github.com/cityloop/fullstack-go/internal/shop	3.743s
+ok  	github.com/cityloop/fullstack-go/internal/social	1.911s

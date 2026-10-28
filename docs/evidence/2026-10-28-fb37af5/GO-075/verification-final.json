@@ -1,0 +1,134 @@
+{
+  "task": "GO-075",
+  "base": "fb37af549d5e8d0d3e5e3ed66a542fb7e99601eb",
+  "sourceSnapshot": "8286a707a9808598f95130e34cc2a1bce2037461",
+  "sourceFiles": [
+    {
+      "path": ".env.example",
+      "sha256": "9819963435bc18e6b3856d12887bf3865149934c2b3069ae9b15203539437fb9"
+    },
+    {
+      "path": "backend/.env.example",
+      "sha256": "8de48a8bed8dc5647f2736e3936b4f0a8f5fcac77429ebbd852a5e7c59b631eb"
+    },
+    {
+      "path": "backend/internal/ai/compatible.go",
+      "sha256": "dcf764f0292b0db041080a608e0c104cb6e91dd1a37797550ba18219b6bd3b3e"
+    },
+    {
+      "path": "backend/internal/ai/compatible_test.go",
+      "sha256": "3500757b057145b68f1caf41e0f59b6abeb4da7cc83f279d184153c60cec2116"
+    },
+    {
+      "path": "backend/internal/ai/index_model.go",
+      "sha256": "d93b83507cc794908285caee63d70de5ae728054bbea30c244fccda47260cfd2"
+    },
+    {
+      "path": "backend/internal/ai/observation.go",
+      "sha256": "2a315eee4db7f842cfdbf4f2011b188e55d7bda836cbcf1540cf4ec7ddb238e2"
+    },
+    {
+      "path": "backend/internal/aichat/assistant.go",
+      "sha256": "ca84784aadb838a29c3d94a58b1284c8e54b95c46b25d685512fa92602aa629f"
+    },
+    {
+      "path": "backend/internal/aichat/http.go",
+      "sha256": "bd80f39153c6e937ae6bcaff56ec63291138f71cf476bdc0062ef0b93c02a684"
+    },
+    {
+      "path": "backend/internal/aichat/http_test.go",
+      "sha256": "25f8a1debd0c51dbb5f3a4e16a3647b66b05df89f135e2dd04739a037589355c"
+    },
+    {
+      "path": "backend/internal/aichat/provider_eval_integration_test.go",
+      "sha256": "d292fdcb06f6d85073e9266d1d51aaf9e369c2987a5184f9cc5d191f38f4edfd"
+    },
+    {
+      "path": "backend/internal/aichat/provider_lifecycle_integration_test.go",
+      "sha256": "691cbfe868585b5e5e9ad567cfa45b57119554f3fffbbb449b8fe7ecc9353854"
+    },
+    {
+      "path": "backend/internal/aiknowledge/http.go",
+      "sha256": "a3dee0d958254273d2e67f9e132edc49e07dc8627fc54c03eee568b19f409028"
+    },
+    {
+      "path": "backend/internal/aiknowledge/index_identity_integration_test.go",
+      "sha256": "0c485575cf97c1076bca2ea2da9b2040f7f84763fd5eb5b52be272d8d724ed1a"
+    },
+    {
+      "path": "backend/internal/aiknowledge/publish.go",
+      "sha256": "a481a76588f70eb69eeb4308f7c95dace33a3f0dabea79d6e6c973f978239dcc"
+    },
+    {
+      "path": "backend/internal/aiknowledge/rebuild.go",
+      "sha256": "16ea465f74c31dc5fa947bc0912d4d4480ce6bf611393964c033fa75f0020b76"
+    },
+    {
+      "path": "backend/internal/aiknowledge/search.go",
+      "sha256": "d1125c46e44296842e66b59be19346db6b823df6d5141191e4f4d68a93369d99"
+    },
+    {
+      "path": "backend/internal/aiknowledge/search_test.go",
+      "sha256": "a724b89e3c779471d56d2e60176bad0b62d849fd9f0d82b0d0cf2c37444e073c"
+    },
+    {
+      "path": "backend/internal/aiknowledge/service.go",
+      "sha256": "2d79e89428f45f864770cdb6ef2f3bab447c8513ef2126566c0d6c086b2d10e6"
+    },
+    {
+      "path": "backend/internal/aiknowledge/validity.go",
+      "sha256": "92f101d1ed31c00b70013b8a264166eb62bfb42f72a53af240e5c0315a498f2d"
+    },
+    {
+      "path": "backend/internal/platform/app/ai.go",
+      "sha256": "6fd36d7a399fc3a5732454bf3bd35e2f4bf8032676367e0de9470a130b83aaf1"
+    },
+    {
+      "path": "backend/internal/platform/app/ai_test.go",
+      "sha256": "288bbee95e09f3788257ec492c722d1bce43e4e773f62e6e140b4800cc87b2df"
+    },
+    {
+      "path": "backend/internal/platform/app/app.go",
+      "sha256": "a4070ca267b34b7fe30b06b7d7a42d982ea71214a9244abc8701d3c4563c344e"
+    },
+    {
+      "path": "backend/internal/platform/config/ai.go",
+      "sha256": "b61a3c6e3c692eaa515be6e7c23ea7f2efb1878ab9e4832ff547d0f959b4380a"
+    },
+    {
+      "path": "backend/internal/platform/config/ai_test.go",
+      "sha256": "4f44dc1ca4d85f5f0c79c809080eaf222ff392f590639dba80c63bc57d8c28a0"
+    },
+    {
+      "path": "backend/internal/platform/config/config.go",
+      "sha256": "d726296cb65537f111245006094224e607c92f684916907cdae3ff927b2c6da0"
+    },
+    {
+      "path": "scripts/go-ai-isolation-smoke.py",
+      "sha256": "c96f6addcaa127078e019038a968e40c7d0607cf9dd1492103734dc250e1b8df"
+    },
+    {
+      "path": "scripts/go-flow-demo.mjs",
+      "sha256": "22894dd358edd169b77f67138f987afa4bb3d2dab41e28cbf115370cdbb5b187"
+    }
+  ],
+  "platform": "windows/amd64",
+  "goVersion": "go1.27.0",
+  "checks": {
+    "paidHTTPLifecycle": "PASS 5scenarios",
+    "gofmt": "PASS (no output)",
+    "linuxRace": "not run",
+    "paidQuality": "PASS fixed30set",
+    "frontend": "not run (no source change)",
+    "remoteCI": "not run",
+    "goTest": "PASS -count=1 ./...",
+    "vet": "PASS",
+    "goBuild": "PASS ./...",
+    "moduleVerify": "PASS"
+  },
+  "binary": {
+    "sha256": "e1176c6495aee38cc413273cb802cbdadb79bb310f69a7717d040d05a5dbcebc",
+    "path": "backend/bin/api-go075-final.exe",
+    "revision": "go075-33bdb4d"
+  }
+}

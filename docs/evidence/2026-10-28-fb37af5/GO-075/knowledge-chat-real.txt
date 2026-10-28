@@ -1,0 +1,90 @@
+=== RUN   TestIntegrationIndexCompatibility
+=== RUN   TestIntegrationIndexCompatibility/changed_model_is_not_empty_success
+=== RUN   TestIntegrationIndexCompatibility/wrong_dimension_is_not_partial_success
+=== RUN   TestIntegrationIndexCompatibility/invalid_vector_requires_rebuild
+=== RUN   TestIntegrationIndexCompatibility/version_metadata_must_match_chunks
+=== RUN   TestIntegrationIndexCompatibility/valid_index_queries_once_and_other_shop_is_excluded
+=== RUN   TestIntegrationIndexCompatibility/anonymous_search_rejects_disable_during_embedding
+=== RUN   TestIntegrationIndexCompatibility/one_missing_chunk_is_unready
+=== RUN   TestIntegrationIndexCompatibility/missing_chunks_is_unready
+--- PASS: TestIntegrationIndexCompatibility (0.31s)
+    --- PASS: TestIntegrationIndexCompatibility/changed_model_is_not_empty_success (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/wrong_dimension_is_not_partial_success (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/invalid_vector_requires_rebuild (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/version_metadata_must_match_chunks (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/valid_index_queries_once_and_other_shop_is_excluded (0.03s)
+    --- PASS: TestIntegrationIndexCompatibility/anonymous_search_rejects_disable_during_embedding (0.02s)
+    --- PASS: TestIntegrationIndexCompatibility/one_missing_chunk_is_unready (0.01s)
+    --- PASS: TestIntegrationIndexCompatibility/missing_chunks_is_unready (0.01s)
+=== RUN   TestIntegrationKnowledgeRebuild
+--- PASS: TestIntegrationKnowledgeRebuild (0.14s)
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/unauthorized_rebuild_never_calls_provider
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/disabled_rebuild_never_calls_provider
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_failure_retains_current_version
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/nonpublic_scope_is_never_a_public_source
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/revocation_during_indexing_rejects_commit
+=== RUN   TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_rebuild_disable_audits_and_old_version_hidden
+--- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions (0.33s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/unauthorized_rebuild_never_calls_provider (0.01s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/disabled_rebuild_never_calls_provider (0.02s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_failure_retains_current_version (0.01s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/nonpublic_scope_is_never_a_public_source (0.02s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/revocation_during_indexing_rejects_commit (0.04s)
+    --- PASS: TestIntegrationReviewKnowledgeAuthorizationAndVersions/publish_rebuild_disable_audits_and_old_version_hidden (0.12s)
+=== RUN   TestIntegrationReviewKnowledgeListBoundary
+=== RUN   TestIntegrationReviewKnowledgeListBoundary/manager_list_contains_editable_draft_body
+=== RUN   TestIntegrationReviewKnowledgeListBoundary/scoped_staff_reads_only_published_body
+=== RUN   TestIntegrationReviewKnowledgeListBoundary/unchanged_draft_save_is_a_noop
+--- PASS: TestIntegrationReviewKnowledgeListBoundary (0.15s)
+    --- PASS: TestIntegrationReviewKnowledgeListBoundary/manager_list_contains_editable_draft_body (0.00s)
+    --- PASS: TestIntegrationReviewKnowledgeListBoundary/scoped_staff_reads_only_published_body (0.00s)
+    --- PASS: TestIntegrationReviewKnowledgeListBoundary/unchanged_draft_save_is_a_noop (0.02s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	1.072s
+=== RUN   TestIntegrationDedupeAndLock
+--- PASS: TestIntegrationDedupeAndLock (0.11s)
+=== RUN   TestIntegrationRealProviderEvaluation
+    provider_eval_integration_test.go:34: set GO_INTEGRATION=1 and GO_REAL_AI=1 for bounded, paid real evaluation
+--- SKIP: TestIntegrationRealProviderEvaluation (0.00s)
+=== RUN   TestIntegrationReviewHTTPIdentityAndDTO
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /ai/capabilities          --> github.com/cityloop/fullstack-go/internal/aichat.Register.func1 (1 handlers)
+[GIN-debug] POST   /ai/conversations         --> github.com/cityloop/fullstack-go/internal/aichat.Register.func2 (3 handlers)
+[GIN-debug] GET    /ai/conversations/:id     --> github.com/cityloop/fullstack-go/internal/aichat.Register.func3 (3 handlers)
+[GIN-debug] DELETE /ai/conversations/:id     --> github.com/cityloop/fullstack-go/internal/aichat.Register.func4 (3 handlers)
+[GIN-debug] POST   /ai/conversations/:id/messages --> github.com/cityloop/fullstack-go/internal/aichat.Register.func5 (3 handlers)
+--- PASS: TestIntegrationReviewHTTPIdentityAndDTO (0.17s)
+=== RUN   TestIntegrationReviewKnowledgeLifecycle
+=== RUN   TestIntegrationReviewKnowledgeLifecycle/before-provider
+=== RUN   TestIntegrationReviewKnowledgeLifecycle/during-provider
+=== RUN   TestIntegrationReviewKnowledgeLifecycle/cached-replay
+=== RUN   TestIntegrationReviewKnowledgeLifecycle/history
+--- PASS: TestIntegrationReviewKnowledgeLifecycle (0.74s)
+    --- PASS: TestIntegrationReviewKnowledgeLifecycle/before-provider (0.11s)
+    --- PASS: TestIntegrationReviewKnowledgeLifecycle/during-provider (0.15s)
+    --- PASS: TestIntegrationReviewKnowledgeLifecycle/cached-replay (0.17s)
+    --- PASS: TestIntegrationReviewKnowledgeLifecycle/history (0.29s)
+=== RUN   TestIntegrationReviewTurnFences
+=== RUN   TestIntegrationReviewTurnFences/lease
+=== RUN   TestIntegrationReviewTurnFences/conversation
+=== RUN   TestIntegrationReviewTurnFences/identity
+=== RUN   TestIntegrationReviewTurnFences/cancellation
+--- PASS: TestIntegrationReviewTurnFences (0.52s)
+    --- PASS: TestIntegrationReviewTurnFences/lease (0.14s)
+    --- PASS: TestIntegrationReviewTurnFences/conversation (0.14s)
+    --- PASS: TestIntegrationReviewTurnFences/identity (0.11s)
+    --- PASS: TestIntegrationReviewTurnFences/cancellation (0.11s)
+=== RUN   TestIntegrationReviewBudgetReplayAndFailure
+=== RUN   TestIntegrationReviewBudgetReplayAndFailure/cached_tool_retries_do_not_consume_budget
+=== RUN   TestIntegrationReviewBudgetReplayAndFailure/failed_turn_refunds_logical_budget
+--- PASS: TestIntegrationReviewBudgetReplayAndFailure (0.30s)
+    --- PASS: TestIntegrationReviewBudgetReplayAndFailure/cached_tool_retries_do_not_consume_budget (0.06s)
+    --- PASS: TestIntegrationReviewBudgetReplayAndFailure/failed_turn_refunds_logical_budget (0.22s)
+=== RUN   TestIntegrationAssistantTurn
+--- PASS: TestIntegrationAssistantTurn (0.29s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/aichat	4.715s

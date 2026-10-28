@@ -123,6 +123,14 @@ node scripts/migrate.mjs
 
 AI 助手默认关闭；关闭时交易不受影响。配置 `AI_ENABLED=true` 和 `AI_PROVIDER=stub` 可用确定性组件验证知识发布、检索、工具和 SSE；配置 `AI_PROVIDER=openai-compatible` 与 `AI_API_KEY/AI_BASE_URL/AI_CHAT_MODEL/AI_EMBEDDING_MODEL/AI_EMBEDDING_DIMENSIONS` 才调用真实模型。Key 只放在后端环境，不写入前端或仓库。后端使用 `MYSQL_HOST/PORT/DATABASE/USER/PASSWORD`、`REDIS_HOST/PORT/PASSWORD/DATABASE` 环境变量。根目录 `.env` 仅由 Compose 自动读取，后端进程不会自动读取它。
 
+GO-075已接入真实兼容Provider。配置示例以`backend/.env.example`为准；百炼本轮实测`qwen3.8-flash`/`text-embedding-v4`、1536维、`AI_DISABLE_THINKING=true`、`AI_MIN_SCORE=0.5`，只发送合成公开FAQ。`AI_MAX_OUTPUT_TOKENS`限制单次输出，`AI_TOP_K/AI_MIN_SCORE`作用于公开检索与问答；`AI_CHAT_TIMEOUT_SECONDS`是Provider上限，仍受知识HTTP10秒、问答HTTP45秒及回合总期限约束。上游完整缓冲后，校验身份和知识，再发送单次answer；不声称上游token直传。AI配置缺失/错误不阻止核心API启动，远端失败在请求时返回明确失败；`ready`表示本地配置已就绪，`providerHealth=unchecked`不表示远端健康或质量已验收。
+
+向量持久身份由兼容endpoint、Embedding模型和维度决定，不包含Key或Chat配置。切换向量空间后旧索引明确不可用，须在商家知识页显式重建，不会自动付费重建整库。重启复用持久向量，查询embedding另计；显式重建仍调用Provider。只读公开知识详情与编辑草稿不依赖模型可用。真实调用费用、取消后的未知结算和有限集范围见[GO-075证据](evidence/2026-10-28-fb37af5/GO-075/report.md)。
+
+运行已有`node scripts/go-flow-demo.mjs all`或`ai`之前，在API进程显式设置`AI_ENABLED=true`、`AI_PROVIDER=stub`；默认关闭时这些AI演示应返回不可用。真实模型评测需同时显式开启`GO_INTEGRATION=1`及`GO_REAL_AI=1`，普通CI不调用付费Provider。复跑固定集与网络取消分别见[评测计划](evidence/2026-10-28-fb37af5/GO-075/eval-plan.md)、[生命周期计划](evidence/2026-10-28-fb37af5/GO-075/lifecycle-plan.md)，每次使用新的证据文件，Key从私有进程环境加载。
+
+核心交易隔离冒烟：在仓库根目录提供专用MySQL/Redis环境、预编译API路径`GO_AI_ISOLATION_BINARY`和新的空输出目录`GO_AI_ISOLATION_EVIDENCE`后，执行`python scripts/go-ai-isolation-smoke.py`。该脚本以AI关闭、缺Key、不可达配置分别启动API，并运行实际发布→成单→支付→核销→审计；不调用付费模型，也不代表持续AI失败并发负载。正常关闭API并保留各轮原始结果，交易演示结束时退出精确的自有登录session。
+
 应用默认使用 `dev`：返回模拟验证码并从演示数据库预热 Redis 活动库存与 GEO。预热使用 SETNX，不覆盖已有预约库存。部署时显式设置 `SPRING_PROFILES_ACTIVE=prod`、自己的连接参数和服务地址；真实短信服务尚未接入。
 
 Docker 未运行时，可以进行后端单元测试和前端构建，真实 API 联调需要 MySQL、Redis 就绪。

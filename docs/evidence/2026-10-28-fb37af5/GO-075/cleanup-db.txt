@@ -1,0 +1,8 @@
+owned_eval_users	0
+owned_demo_users	0
+owned_merchants	0
+remaining_ai_documents	0
+remaining_ai_chunks	0
+remaining_outbox	0
+remaining_orders	0
+remaining_review	0

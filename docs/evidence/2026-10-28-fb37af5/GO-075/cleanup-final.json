@@ -1,0 +1,30 @@
+{
+  "task": "GO-075",
+  "containers": [
+    {
+      "name": "/project-full-stack-go075-mysql-1",
+      "status": "exited",
+      "exitCode": 0,
+      "oom": false,
+      "image": "mysql:8.4",
+      "imageID": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34"
+    },
+    {
+      "name": "/project-full-stack-go075-redis-1",
+      "status": "exited",
+      "exitCode": 0,
+      "oom": false,
+      "image": "redis:7.4-alpine",
+      "imageID": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65"
+    }
+  ],
+  "volumesRetained": true,
+  "otherProjectContainersStopped": false,
+  "paidAttempts": 79,
+  "knownTokens": 7673,
+  "unknownUsageCalls": 2,
+  "knownListPriceEstimateCNY": "0.0071748",
+  "totalInvoiceCost": "unknown",
+  "finalBinaryRevision": "go075-33bdb4d",
+  "finalBinarySHA256": "e1176c6495aee38cc413273cb802cbdadb79bb310f69a7717d040d05a5dbcebc"
+}

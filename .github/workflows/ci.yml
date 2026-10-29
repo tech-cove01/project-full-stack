@@ -198,7 +198,9 @@ jobs:
           KAFKA_NUM_PARTITIONS: 1
           KAFKA_LOG_DIRS: /var/lib/kafka/data
           KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
-        ports: ['9092:9092']
+        # The GO-073 fresh-topic test uses the explicit dedicated port guard.
+        # Both mappings target this job's disposable broker; it advertises 9092.
+        ports: ['9092:9092', '9122:9092']
         options: >-
           --health-cmd="/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 >/dev/null 2>&1"
           --health-interval=10s --health-timeout=5s --health-retries=30
@@ -257,3 +259,8 @@ jobs:
         run: go test -race -count=1 -p 1 -v ./internal/communityrelay ./internal/communityconsumer ./internal/notesearch
         env:
           GO_INTEGRATION: '1'
+      - name: Consumer startup before first Kafka topic creation
+        run: go test -race -count=1 -run '^TestIntegration(FreshTopicStartsAllGroupsAndPreservesOffsets|UnavailableBrokerCancelsReadiness)$' -v ./internal/communityconsumer
+        env:
+          GO073_KAFKA_FRESH: '1'
+          KAFKA_BROKERS: 127.0.0.1:9122

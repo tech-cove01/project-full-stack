@@ -300,7 +300,10 @@ func TestConstructorUsesSeparateStableSynchronousGroupsAndRejectsUnknownProjecti
 		if err != nil {
 			t.Fatal("supported projection was rejected")
 		}
-		configuration := worker.reader.(*kafka.Reader).Config()
+		if worker.reader != nil || worker.readerConfig == nil {
+			t.Fatal("reader must be constructed only after topic metadata is ready")
+		}
+		configuration := *worker.readerConfig
 		if configuration.GroupID != "community."+projection || configuration.CommitInterval != 0 || configuration.StartOffset != kafka.FirstOffset || configuration.QueueCapacity != 1 {
 			t.Fatal("production offset/buffering configuration was not explicit")
 		}
@@ -313,5 +316,34 @@ func TestConstructorUsesSeparateStableSynchronousGroupsAndRejectsUnknownProjecti
 	}
 	if _, err := NewWorker([]string{""}, "community.events", "follow-v1", processor); err == nil {
 		t.Fatal("empty broker must return an error")
+	}
+}
+
+func TestTopicReadinessCancellationAndCloseDoNotStartReader(t *testing.T) {
+	worker, err := NewWorker([]string{"127.0.0.1:9123"}, "private.absent", "feed-v1", processorFuncs{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	entered := make(chan struct{})
+	worker.topicReady = func(ctx context.Context) bool { close(entered); <-ctx.Done(); return false }
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() { worker.Run(ctx); close(done) }()
+	select {
+	case <-entered:
+	case <-time.After(time.Second):
+		t.Fatal("readiness did not start")
+	}
+	cancel()
+	select {
+	case <-done:
+	case <-time.After(time.Second):
+		t.Fatal("cancellation blocked on readiness")
+	}
+	if worker.reader != nil {
+		t.Fatal("cancelled readiness started the reader")
+	}
+	if _, err := worker.Poll(context.Background()); !errors.Is(err, io.EOF) {
+		t.Fatalf("closed worker returned %v", err)
 	}
 }

@@ -1,0 +1,97 @@
+{
+  "task": "GO-073 events",
+  "durationSeconds": 180,
+  "prefix": "go073ead741487a74a",
+  "startedAt": "2026-10-29T07:33:46.588Z",
+  "notes": [
+    {
+      "id": "1",
+      "phase": "warmup",
+      "started": 1793259227217,
+      "completed": 1793259227243,
+      "like": true
+    },
+    {
+      "id": "2",
+      "phase": "warmup",
+      "started": 1793259228285,
+      "completed": 1793259228305,
+      "like": true
+    },
+    {
+      "id": "3",
+      "phase": "warmup",
+      "started": 1793259229344,
+      "completed": 1793259229365,
+      "like": true
+    },
+    {
+      "id": "4",
+      "phase": "warmup",
+      "started": 1793259230402,
+      "completed": 1793259230434,
+      "like": true
+    },
+    {
+      "id": "5",
+      "phase": "warmup",
+      "started": 1793259231464,
+      "completed": 1793259231489,
+      "like": true
+    },
+    {
+      "id": "6",
+      "phase": "warmup",
+      "started": 1793259232555,
+      "completed": 1793259232576,
+      "like": true
+    },
+    {
+      "id": "7",
+      "phase": "warmup",
+      "started": 1793259233608,
+      "completed": 1793259233634,
+      "like": true
+    },
+    {
+      "id": "8",
+      "phase": "warmup",
+      "started": 1793259234666,
+      "completed": 1793259234686,
+      "like": true
+    },
+    {
+      "id": "9",
+      "phase": "warmup",
+      "started": 1793259235709,
+      "completed": 1793259235728,
+      "like": true
+    },
+    {
+      "id": "10",
+      "phase": "warmup",
+      "started": 1793259236768,
+      "completed": 1793259236798,
+      "like": true
+    }
+  ],
+  "failures": [
+    {
+      "phase": "fatal",
+      "message": "timed out waiting for convergence"
+    }
+  ],
+  "snapshots": [],
+  "visibility": [],
+  "timings": {
+    "warmupStart": "2026-10-29T07:33:47.217Z"
+  },
+  "success": false,
+  "generation": [
+    "go073-event-notes-build-ef90bf7f0a0e0acc"
+  ],
+  "shopId": "1",
+  "userId": "3",
+  "logout": true,
+  "endedAt": "2026-10-29T07:35:57.991Z"
+}

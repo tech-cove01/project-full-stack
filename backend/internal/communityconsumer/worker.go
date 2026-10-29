@@ -33,14 +33,23 @@ type reader interface {
 }
 
 type Worker struct {
-	reader     reader
-	processor  Processor
-	projection string
-	pending    *kafka.Message
-	attempts   int
-	durable    bool
-	closeOnce  sync.Once
-	closeError error
+	reader       reader
+	readerMu     sync.Mutex
+	readerConfig *kafka.ReaderConfig
+	closed       bool
+	processor    Processor
+	projection   string
+	// A consumer must not join its group before the topic has partitions. In
+	// kafka-go 0.4.47 an empty initial assignment can race its partition watcher
+	// and stay empty after automatic topic creation.
+	topicReady    func(context.Context) bool
+	closeMetadata func()
+	ready         bool
+	pending       *kafka.Message
+	attempts      int
+	durable       bool
+	closeOnce     sync.Once
+	closeError    error
 
 	readTimeout, applyTimeout, commitTimeout, retryDelay time.Duration
 }
@@ -79,7 +88,27 @@ func newWorkerWithGroup(brokers []string, topic, projection, group string, proce
 	if configuration.Validate() != nil {
 		return nil, errors.New("invalid community consumer configuration")
 	}
-	return workerWithReader(kafka.NewReader(configuration), projection, processor), nil
+	// NewReader immediately starts the consumer-group goroutine.
+	worker := workerWithReader(nil, projection, processor)
+	worker.readerConfig = &configuration
+	transport := &kafka.Transport{DialTimeout: 2 * time.Second, IdleTimeout: time.Second, MetadataTTL: time.Second}
+	client := &kafka.Client{Addr: kafka.TCP(brokers...), Timeout: 2 * time.Second, Transport: transport}
+	worker.topicReady = func(ctx context.Context) bool {
+		// Metadata API explicitly disables broker-side auto-creation. The relay
+		// remains responsible for creating the configured topic on first write.
+		response, err := client.Metadata(ctx, &kafka.MetadataRequest{Topics: []string{topic}})
+		if err != nil || len(response.Topics) != 1 || response.Topics[0].Name != topic || response.Topics[0].Error != nil || len(response.Topics[0].Partitions) == 0 {
+			return false
+		}
+		for _, partition := range response.Topics[0].Partitions {
+			if partition.Error != nil || partition.Leader.Host == "" {
+				return false
+			}
+		}
+		return true
+	}
+	worker.closeMetadata = transport.CloseIdleConnections
+	return worker, nil
 }
 
 func workerWithReader(source reader, projection string, processor Processor) *Worker {
@@ -89,7 +118,18 @@ func workerWithReader(source reader, projection string, processor Processor) *Wo
 }
 
 func (worker *Worker) Close() error {
-	worker.closeOnce.Do(func() { worker.closeError = worker.reader.Close() })
+	worker.closeOnce.Do(func() {
+		worker.readerMu.Lock()
+		worker.closed = true
+		source := worker.reader
+		worker.readerMu.Unlock()
+		if source != nil {
+			worker.closeError = source.Close()
+		}
+		if worker.closeMetadata != nil {
+			worker.closeMetadata()
+		}
+	})
 	return worker.closeError
 }
 
@@ -127,6 +167,31 @@ func (worker *Worker) Run(ctx context.Context) {
 func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 	if err := ctx.Err(); err != nil {
 		return false, err
+	}
+	worker.readerMu.Lock()
+	closed := worker.closed
+	worker.readerMu.Unlock()
+	if closed {
+		return false, io.EOF
+	}
+	if !worker.ready && worker.topicReady != nil {
+		readyCtx, cancel := context.WithTimeout(ctx, worker.readTimeout)
+		ready := worker.topicReady(readyCtx)
+		cancel()
+		if err := ctx.Err(); err != nil {
+			return false, err
+		}
+		if !ready {
+			return false, nil
+		}
+		worker.readerMu.Lock()
+		if worker.closed {
+			worker.readerMu.Unlock()
+			return false, io.EOF
+		}
+		worker.reader = kafka.NewReader(*worker.readerConfig)
+		worker.readerMu.Unlock()
+		worker.ready = true
 	}
 	if worker.pending == nil {
 		readCtx, cancel := context.WithTimeout(ctx, worker.readTimeout)

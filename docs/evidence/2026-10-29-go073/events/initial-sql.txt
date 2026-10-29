@@ -1,0 +1,6 @@
+min_id	max_id	notes	liked
+1	10	10	10
+delivery_status	COUNT(*)
+DONE	20
+active_likes
+10

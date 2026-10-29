@@ -1,0 +1,3 @@
+
+GROUP               CONSUMER-ID                                                                                       HOST            CLIENT-ID                                                    #PARTITIONS     ASSIGNMENT
+community.search-v1 go073-event-api.exe@for_ever (github.com/segmentio/kafka-go)-b398c2ce-6cd7-467b-82c9-cff0140ac069 /192.168.112.1  go073-event-api.exe@for_ever (github.com/segmentio/kafka-go) 0               -

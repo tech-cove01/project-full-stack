@@ -1,0 +1,7 @@
+=== RUN   TestIntegrationFreshTopicStartsAllGroupsAndPreservesOffsets
+    fresh_topic_integration_test.go:30: owned topic=community.go073.fresh.0e89eed67d5960a3 groups=[community.go073.fresh.0e89eed67d5960a3.follow community.go073.fresh.0e89eed67d5960a3.feed community.go073.fresh.0e89eed67d5960a3.search]; no offsets reset or topics deleted
+    fresh_topic_integration_test.go:97: consumers created an absent topic before the producer
+--- FAIL: TestIntegrationFreshTopicStartsAllGroupsAndPreservesOffsets (4.04s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/communityconsumer	6.365s
+FAIL

@@ -1,0 +1,5 @@
+=== RUN   TestIntegrationFreshTopicStartsAllGroupsAndPreservesOffsets
+    fresh_topic_integration_test.go:30: owned topic=community.go073.fresh.92862d93cb630d6c groups=[community.go073.fresh.92862d93cb630d6c.follow community.go073.fresh.92862d93cb630d6c.feed community.go073.fresh.92862d93cb630d6c.search]; no offsets reset or topics deleted
+--- PASS: TestIntegrationFreshTopicStartsAllGroupsAndPreservesOffsets (4.61s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	6.795s

@@ -1,0 +1,30 @@
+
+
+  █ THRESHOLDS 
+
+    dropped_iterations
+    ✓ 'count>=0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    HTTP
+    http_req_duration..............: avg=12.97ms med=12.35ms p(95)=18.44ms p(99)=21.07ms max=21.73ms
+      { expected_response:true }...: avg=12.97ms med=12.35ms p(95)=18.44ms p(99)=21.07ms max=21.73ms
+    http_req_failed................: 0.00%  0 out of 11
+    http_reqs......................: 11     2.193753/s
+
+    EXECUTION
+    dropped_iterations.............: 0      0/s
+    iteration_duration.............: avg=16.67ms med=13.67ms p(95)=30.18ms p(99)=35.71ms max=37.09ms
+    iterations.....................: 11     2.193753/s
+    vus............................: 0      min=0       max=0 
+    vus_max........................: 40     min=40      max=40
+
+    NETWORK
+    data_received..................: 1.8 kB 366 B/s
+    data_sent......................: 1.8 kB 362 B/s
+
+
+
+

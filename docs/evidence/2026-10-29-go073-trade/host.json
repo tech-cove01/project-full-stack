@@ -1,0 +1,20 @@
+{
+  "computer": {
+    "Manufacturer": "ASUSTeK COMPUTER INC.",
+    "Model": "ROG Zephyrus M16 GU604VI_GU604VI",
+    "TotalPhysicalMemory": 33960505344
+  },
+  "cpu": {
+    "Name": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "NumberOfCores": 14,
+    "NumberOfLogicalProcessors": 20
+  },
+  "os": {
+    "Caption": "Microsoft Windows 11 专业版",
+    "Version": "10.0.26300",
+    "OSArchitecture": "64 位"
+  },
+  "node": "v24.15.0",
+  "go": "go version go1.27.0 windows/amd64",
+  "k6": "k6.exe v2.2.0 (commit/00a9a1b7f5, go1.26.5, windows/amd64)"
+}

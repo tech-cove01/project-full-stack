@@ -1,0 +1,217 @@
+{
+  "task": "GO-073",
+  "model": {
+    "rate": 2,
+    "warmSeconds": 2,
+    "stableSeconds": 3,
+    "users": 74,
+    "stock": 174
+  },
+  "started": "2026-10-29T07:38:55.910Z",
+  "passed": true,
+  "fixture": {
+    "fixtureName": "go073-927033279",
+    "ownerId": "4",
+    "merchantId": "4",
+    "shopId": "5",
+    "temporaryCredentialFile": "C:\\Users\\19083\\AppData\\Local\\Temp\\go073-trade-Xx1UFW\\sessions.json",
+    "activityId": "1003",
+    "actualUsers": 74,
+    "userIds": [
+      "5",
+      "6",
+      "11",
+      "14",
+      "16",
+      "10",
+      "13",
+      "15",
+      "20",
+      "18",
+      "24",
+      "7",
+      "8",
+      "22",
+      "9",
+      "23",
+      "19",
+      "12",
+      "21",
+      "17",
+      "26",
+      "25",
+      "27",
+      "28",
+      "29",
+      "30",
+      "31",
+      "32",
+      "33",
+      "34",
+      "36",
+      "40",
+      "38",
+      "42",
+      "35",
+      "44",
+      "39",
+      "37",
+      "43",
+      "41",
+      "49",
+      "45",
+      "46",
+      "48",
+      "47",
+      "50",
+      "51",
+      "53",
+      "57",
+      "52",
+      "59",
+      "60",
+      "55",
+      "61",
+      "54",
+      "62",
+      "64",
+      "56",
+      "63",
+      "58",
+      "68",
+      "65",
+      "66",
+      "70",
+      "67",
+      "69",
+      "73",
+      "72",
+      "71",
+      "74",
+      "75",
+      "76",
+      "77",
+      "78"
+    ]
+  },
+  "result": {
+    "loadStart": 1793259538122,
+    "loadEnd": 1793259545075,
+    "phases": {
+      "warm": {
+        "requests": 4,
+        "categories": {
+          "success": 4,
+          "sold_out": 0,
+          "duplicate": 0,
+          "other_business": 0,
+          "rate_limited": 0,
+          "system_error": 0
+        },
+        "repeatedSuccess": 0,
+        "uniqueAccepted": 4,
+        "durableOrders": 4,
+        "matchingUsers": 4,
+        "unresolved": 0,
+        "acceptanceToOrderRatio": 1,
+        "systemErrorRate": 0,
+        "admissionMs": {
+          "p95": 17.563,
+          "p99": 17.563
+        },
+        "acceptedAdmissionMs": {
+          "p95": 17.563,
+          "p99": 17.563
+        },
+        "observationDelayMs": {
+          "count": 4,
+          "negativeCount": 0,
+          "p95Raw": 938,
+          "p99Raw": 938,
+          "p95Clamped": 938,
+          "p99Clamped": 938
+        },
+        "cohortOrdersPerSecond": 2
+      },
+      "stable": {
+        "requests": 7,
+        "categories": {
+          "success": 7,
+          "sold_out": 0,
+          "duplicate": 0,
+          "other_business": 0,
+          "rate_limited": 0,
+          "system_error": 0
+        },
+        "repeatedSuccess": 0,
+        "uniqueAccepted": 7,
+        "durableOrders": 7,
+        "matchingUsers": 7,
+        "unresolved": 0,
+        "acceptanceToOrderRatio": 1,
+        "systemErrorRate": 0,
+        "admissionMs": {
+          "p95": 15.6037,
+          "p99": 15.6037
+        },
+        "acceptedAdmissionMs": {
+          "p95": 15.6037,
+          "p99": 15.6037
+        },
+        "observationDelayMs": {
+          "count": 7,
+          "negativeCount": 0,
+          "p95Raw": 946,
+          "p99Raw": 946,
+          "p95Clamped": 946,
+          "p99Clamped": 946
+        },
+        "cohortOrdersPerSecond": 2.3333333333333335
+      }
+    },
+    "droppedIterations": 0,
+    "poll": {
+      "count": 7,
+      "intervalP95Ms": 1009,
+      "intervalMaxMs": 1009,
+      "queryP95Ms": 171,
+      "queryMaxMs": 171
+    },
+    "stableWindow": {
+      "approximateStartFromFirstRequest": 1793259540299,
+      "durationSeconds": 3,
+      "stableCohortOrdersObserved": 6,
+      "stableCohortObservedPerSecond": 2
+    },
+    "reconciliation": {
+      "durableRows": 11,
+      "uniqueSuccessIds": 11,
+      "mysqlStock": 163,
+      "redisStock": 163,
+      "redisAccepted": 11,
+      "pending": [
+        0,
+        null,
+        null,
+        []
+      ],
+      "streamLength": 11,
+      "streamGroups": [
+        {
+          "name": "g1",
+          "consumers": 1,
+          "pending": 0,
+          "last-delivered-id": "1793259543353-0",
+          "entries-read": 11,
+          "lag": 0
+        }
+      ],
+      "reviews": 0,
+      "rejections": 0,
+      "unexpectedOrderIds": 0
+    }
+  },
+  "reconciliationPassed": true,
+  "measurementUsable": true,
+  "finished": "2026-10-29T07:39:05.734Z"
+}

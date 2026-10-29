@@ -1,0 +1,40 @@
+2026-10-29 15:31:33+08:00 [Note] [Entrypoint]: Temporary server started.
+2026-10-29T07:31:32.958303Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+'/var/lib/mysql/mysql.sock' -> '/var/run/mysqld/mysqld.sock'
+2026-10-29 15:31:37+08:00 [Note] [Entrypoint]: Creating database project_full_stack_go
+2026-10-29 15:31:37+08:00 [Note] [Entrypoint]: Creating user fullstack
+2026-10-29 15:31:37+08:00 [Note] [Entrypoint]: Giving user fullstack access to schema project_full_stack_go
+
+2026-10-29 15:31:37+08:00 [Note] [Entrypoint]: /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/001-schema.sql
+
+
+2026-10-29 15:31:37+08:00 [Note] [Entrypoint]: /usr/local/bin/docker-entrypoint.sh: running /docker-entrypoint-initdb.d/002-demo-data.sql
+
+
+
+2026-10-29 15:31:37+08:00 [Note] [Entrypoint]: Stopping temporary server
+2026-10-29 15:31:38+08:00 [Note] [Entrypoint]: Temporary server stopped
+
+2026-10-29 15:31:38+08:00 [Note] [Entrypoint]: MySQL init process done. Ready for start up.
+
+2026-10-29T07:31:33.300362Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+2026-10-29T07:31:33.683568Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+2026-10-29T07:31:33.683620Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+2026-10-29T07:31:33.687413Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+2026-10-29T07:31:33.716746Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Socket: /var/run/mysqld/mysqlx.sock
+2026-10-29T07:31:33.717215Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.4.13'  socket: '/var/run/mysqld/mysqld.sock'  port: 0  MySQL Community Server - GPL.
+2026-10-29 15:31:37+08:00 [Warn] [Entrypoint]: /usr/local/bin/docker-entrypoint.sh: ignoring /docker-entrypoint-initdb.d/migrations
+2026-10-29T07:31:37.843793Z 15 [System] [MY-013172] [Server] Received SHUTDOWN from user root. Shutting down mysqld (Version: 8.4.13).
+2026-10-29T07:31:38.533132Z 0 [System] [MY-010910] [Server] /usr/sbin/mysqld: Shutdown complete (mysqld 8.4.13)  MySQL Community Server - GPL.
+2026-10-29T07:31:38.533173Z 0 [System] [MY-015016] [Server] MySQL Server - end.
+2026-10-29T07:31:38.861858Z 0 [System] [MY-015015] [Server] MySQL Server - start.
+2026-10-29T07:31:39.069645Z 0 [System] [MY-010116] [Server] /usr/sbin/mysqld (mysqld 8.4.13) starting as process 1
+2026-10-29T07:31:39.069652Z 0 [System] [MY-015150] [Server] Server version with update: '8.4.13.0'
+2026-10-29T07:31:39.076917Z 1 [System] [MY-013576] [InnoDB] InnoDB initialization has started.
+2026-10-29T07:31:39.325936Z 1 [System] [MY-013577] [InnoDB] InnoDB initialization has ended.
+2026-10-29T07:31:39.561265Z 0 [Warning] [MY-010068] [Server] CA certificate ca.pem is self signed.
+2026-10-29T07:31:39.561346Z 0 [System] [MY-013602] [Server] Channel mysql_main configured to support TLS. Encrypted connections are now supported for this channel.
+2026-10-29T07:31:39.568120Z 0 [Warning] [MY-011810] [Server] Insecure configuration for --pid-file: Location '/var/run/mysqld' in the path is accessible to all OS users. Consider choosing a different directory.
+2026-10-29T07:31:39.610395Z 0 [System] [MY-011323] [Server] X Plugin ready for connections. Bind-address: '::' port: 33060, socket: /var/run/mysqld/mysqlx.sock
+2026-10-29T07:31:39.610533Z 0 [System] [MY-010931] [Server] /usr/sbin/mysqld: ready for connections. Version: '8.4.13'  socket: '/var/run/mysqld/mysqld.sock'  port: 3306  MySQL Community Server - GPL.
+2026-10-29T07:47:17.774446Z 0 [System] [MY-013172] [Server] Received SHUTDOWN from user <via user signal>. Shutting down mysqld (Version: 8.4.13).

@@ -1,0 +1,2 @@
+/project-full-stack-go073-trade-mysql-1 image=mysql:8.4 imageId=sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34 finished=2026-10-29T07:47:18.954631077Z exit=137 oom=false
+/project-full-stack-go073-trade-redis-1 image=redis:7.4-alpine imageId=sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65 finished=2026-10-29T07:47:17.871624114Z exit=0 oom=false

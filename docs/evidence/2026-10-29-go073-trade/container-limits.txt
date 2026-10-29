@@ -1,0 +1,2 @@
+/project-full-stack-go073-trade-mysql-1 memory=0 nanoCpus=0 cpuQuota=0
+/project-full-stack-go073-trade-redis-1 memory=0 nanoCpus=0 cpuQuota=0

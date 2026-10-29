@@ -1,0 +1,12 @@
+[
+  {
+    "file": "go073-trade.mjs",
+    "Algorithm": "SHA256",
+    "Hash": "F9DE10837EF8E0B2C1911D212E4553279F98065F4FBAA3ABDD8F0746F6CC82D3"
+  },
+  {
+    "file": "go073-trade.js",
+    "Algorithm": "SHA256",
+    "Hash": "E76FF6296DEB63156C38207B36181A8FB80C69EAAE7B45F981BA43207C12CE48"
+  }
+]

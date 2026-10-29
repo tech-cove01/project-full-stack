@@ -1,0 +1,31 @@
+{
+  "task": "GO-073",
+  "model": {
+    "rate": 2,
+    "warmSeconds": 2,
+    "stableSeconds": 3,
+    "users": 74,
+    "stock": 174
+  },
+  "started": "2026-10-29T07:38:35.211Z",
+  "passed": false,
+  "fixture": {
+    "fixtureName": "go073-305502590",
+    "ownerId": "3",
+    "merchantId": "3",
+    "shopId": "4",
+    "temporaryCredentialFile": "C:\\Users\\19083\\AppData\\Local\\Temp\\go073-trade-E5HD1A\\sessions.json"
+  },
+  "error": "activity creation failed",
+  "recovery": {
+    "ownerIds": [
+      "3"
+    ],
+    "userIds": [],
+    "merchantIds": [
+      "3"
+    ],
+    "activityId": null
+  },
+  "finished": "2026-10-29T07:38:36.609Z"
+}

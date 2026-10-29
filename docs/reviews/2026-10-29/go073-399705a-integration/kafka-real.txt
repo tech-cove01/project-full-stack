@@ -1,0 +1,11 @@
+=== RUN   TestIntegrationFreshTopicStartsAllGroupsAndPreservesOffsets
+    fresh_topic_integration_test.go:30: owned topic=community.go073.fresh.8b44d2f91f850890 groups=[community.go073.fresh.8b44d2f91f850890.follow community.go073.fresh.8b44d2f91f850890.feed community.go073.fresh.8b44d2f91f850890.search]; no offsets reset or topics deleted
+--- PASS: TestIntegrationFreshTopicStartsAllGroupsAndPreservesOffsets (10.42s)
+=== RUN   TestIntegrationUnavailableBrokerCancelsReadiness
+--- PASS: TestIntegrationUnavailableBrokerCancelsReadiness (0.30s)
+=== RUN   TestConstructorUsesSeparateStableSynchronousGroupsAndRejectsUnknownProjection
+--- PASS: TestConstructorUsesSeparateStableSynchronousGroupsAndRejectsUnknownProjection (0.00s)
+=== RUN   TestTopicReadinessCancellationAndCloseDoNotStartReader
+--- PASS: TestTopicReadinessCancellationAndCloseDoNotStartReader (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	28.048s

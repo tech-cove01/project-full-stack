@@ -1,0 +1,16 @@
+
+GROUP                                         TOPIC                                  PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
+
+Consumer group 'community.go073.fresh.8b44d2f91f850890.follow' has no active members.
+community.go073.fresh.8b44d2f91f850890.follow community.go073.fresh.8b44d2f91f850890 0          2               2               0               -               -               -
+
+Consumer group 'community.go073.fresh.8b44d2f91f850890.feed' has no active members.
+
+GROUP                                       TOPIC                                  PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
+community.go073.fresh.8b44d2f91f850890.feed community.go073.fresh.8b44d2f91f850890 0          2               2               0               -               -               -
+
+
+Consumer group 'community.go073.fresh.8b44d2f91f850890.search' has no active members.
+GROUP                                         TOPIC                                  PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID
+community.go073.fresh.8b44d2f91f850890.search community.go073.fresh.8b44d2f91f850890 0          2               2               0               -               -               -
+community.go073.fresh.8b44d2f91f850890:0:2

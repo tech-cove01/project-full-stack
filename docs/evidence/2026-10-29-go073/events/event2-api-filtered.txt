@@ -1,0 +1,21 @@
+{"time":"2026-10-29T15:48:40.8167972+08:00","level":"INFO","msg":"Go API ready","service":"project-full-stack-go","runtime":"go","version":"unknown","address":"127.0.0.1:8123"}
+2026/10/29 15:52:24 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:24 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:24 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:25 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:25 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:25 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:25 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:26 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:26 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:26 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:26 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:27 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:27 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:27 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:27 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:28 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:28 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:28 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:28 WARN community projection will retry projection=search-v1
+2026/10/29 15:52:29 WARN community projection will retry projection=search-v1

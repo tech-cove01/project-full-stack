@@ -1,0 +1,30 @@
+{
+  "files": [
+    "docs/evidence/2026-10-29-go073/events/event2-api-filtered.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-binary-info.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-binary-sha256.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-commands.md",
+    "docs/evidence/2026-10-29-go073/events/event2-images.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-migrate.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-offset-sampler.py",
+    "docs/evidence/2026-10-29-go073/events/event2-rebuild.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-report.md",
+    "docs/evidence/2026-10-29-go073/events/event2-script-sha256.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-script.mjs",
+    "docs/evidence/2026-10-29-go073/events/event2-stop.txt",
+    "docs/evidence/2026-10-29-go073/events/event2-summary.json",
+    "docs/evidence/2026-10-29-go073/events/offset-samples-2.json",
+    "docs/evidence/2026-10-29-go073/events/remeasure-plan.md",
+    "docs/evidence/2026-10-29-go073/events/run-2.json",
+    "scripts/go073-event-analyze.py",
+    "scripts/go073-event-measure.mjs",
+    "scripts/go073-event-offset-sampler.py"
+  ],
+  "patterns": {
+    "full_phone": 0,
+    "bearer_token": 0,
+    "provider_key": 0
+  },
+  "passed": true,
+  "scope": "limited pattern scan, not proof of absence of every secret; local Compose development password is intentionally documented"
+}

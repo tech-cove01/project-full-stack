@@ -1,0 +1,4 @@
+/project-full-stack-go073-event2-mysql-1 mysql:8.4 sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34
+/project-full-stack-go073-event2-redis-1 redis:7.4-alpine sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65
+/project-full-stack-go073-event2-kafka-1 apache/kafka:3.9.0 sha256:2956061ba5d3388af8eb3148200f385ccba13ef75bc0eb6dcca5827ebd2d36d4
+/project-full-stack-go073-event2-elasticsearch-1 docker.elastic.co/elasticsearch/elasticsearch:8.19.23 sha256:c8ec58306c7c7b426362a2feb04cc42652e71483b8601591132ef9d583e303b7

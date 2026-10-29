@@ -1,0 +1,9 @@
+
+Algorithm : SHA256
+Hash      : 5E3E0DD6C2762D4E146F6332845DF487BC7179AC708BA43D2480D5BAAC24E540
+Path      : D:\桌面\The ALL\agent\project\code\project-full-stack\backend\bin\go073-event2-api.exe
+
+Algorithm : SHA256
+Hash      : DA6136BCD649A8AF034993A44DD535A44A77107F2FDBC8FADEAEAFFC384E31DB
+Path      : D:\桌面\The ALL\agent\project\code\project-full-stack\backend\bin\go073-event2-search.exe
+

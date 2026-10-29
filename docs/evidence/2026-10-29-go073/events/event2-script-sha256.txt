@@ -1,0 +1,9 @@
+
+Algorithm : SHA256
+Hash      : 6D6969569610365B9B23D2FB3E71F4B960D944B7D11F30F2B030E0EEA6634160
+Path      : D:\桌面\The ALL\agent\project\code\project-full-stack\docs\evidence\2026-10-29-go073\events\event2-script.mjs
+
+Algorithm : SHA256
+Hash      : 45FFF393C7399FD4DE1313A34187FEDC0DB70CF8DE3195B6C87B08FE519962BA
+Path      : D:\桌面\The ALL\agent\project\code\project-full-stack\docs\evidence\2026-10-29-go073\events\event2-offset-sampler.py
+

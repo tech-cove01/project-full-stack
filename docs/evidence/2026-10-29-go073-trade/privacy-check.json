@@ -1,0 +1,17 @@
+{
+  "filesScanned": 45,
+  "hits": [
+    {
+      "file": "migration-rerun.txt",
+      "category": "credential_words",
+      "count": 1,
+      "lines": [
+        9
+      ]
+    }
+  ],
+  "limits": [
+    "Pattern scan only; token comparison impossible because temporary credential files were already removed.",
+    "The 32-hex scan excludes the known k6 empty root-group MD5 and does not detect all credential formats."
+  ]
+}

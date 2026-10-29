@@ -1,0 +1,2 @@
+/project-full-stack-go073-verifycache-mysql-1 running=false exit=0 oom=false project=project-full-stack-go073-verifycache
+/project-full-stack-go073-verifycache-redis-1 running=false exit=0 oom=false project=project-full-stack-go073-verifycache

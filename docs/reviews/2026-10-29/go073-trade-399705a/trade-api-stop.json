@@ -1,0 +1,7 @@
+{
+  "apiRunning": false,
+  "apiPid": 46560,
+  "temporaryCredentialDirectoryExists": false,
+  "temporaryCredentialFileExists": false,
+  "termination": "Stop-Process after executable-path check"
+}

@@ -1,0 +1,2 @@
+/project-full-stack-go073-verifytrade-mysql-1 running=false exit=0 oom=false project=project-full-stack-go073-verifytrade
+/project-full-stack-go073-verifytrade-redis-1 running=false exit=0 oom=false project=project-full-stack-go073-verifytrade

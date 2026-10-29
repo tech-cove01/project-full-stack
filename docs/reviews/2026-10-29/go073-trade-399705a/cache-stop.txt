@@ -1,0 +1,4 @@
+ Container project-full-stack-go073-verifycache-redis-1 Stopping 
+ Container project-full-stack-go073-verifycache-mysql-1 Stopping 
+ Container project-full-stack-go073-verifycache-redis-1 Stopped 
+ Container project-full-stack-go073-verifycache-mysql-1 Stopped 

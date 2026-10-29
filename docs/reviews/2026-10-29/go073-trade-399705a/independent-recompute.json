@@ -1,0 +1,21 @@
+{
+  "verifiedRequestCount": 976,
+  "stableCount": 901,
+  "matchingOrderAndUsers": 976,
+  "uniqueOrderAndRequestIndices": true,
+  "sqlPollAssociations": true,
+  "stableAdmissionP95Ms": 24.9932,
+  "stableAdmissionP99Ms": 57.4747,
+  "stableObservedDelayP95Ms": 1066,
+  "stableObservedDelayP99Ms": 1126,
+  "inventory": 169,
+  "dropped": 0,
+  "cacheDbQueries": {
+    "cold_single": 100,
+    "warm_l1_single": 0,
+    "cold_singleflight_32_callers": 20,
+    "cold_batch_32_keys": 20,
+    "cold_sequential_32_keys": 640
+  },
+  "cacheL1MaxEntries": 4096
+}

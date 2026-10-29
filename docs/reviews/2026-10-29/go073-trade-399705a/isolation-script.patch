@@ -1,0 +1,29 @@
+diff --git a/scripts/go073-trade.mjs "b/C:\\Users\\19083\\AppData\\Local\\Temp\\go073-review-trade-399705a\\trade.mjs"
+index f22ba75..6aff588 100644
+--- a/scripts/go073-trade.mjs
++++ "b/C:\\Users\\19083\\AppData\\Local\\Temp\\go073-review-trade-399705a\\trade.mjs"
+@@ -10,7 +10,7 @@ import net from 'node:net'
+ const required = ['MYSQL_HOST', 'MYSQL_PORT', 'MYSQL_DATABASE', 'MYSQL_USER', 'MYSQL_PASSWORD', 'REDIS_HOST', 'REDIS_PORT', 'API_BASE', 'GO073_EVIDENCE']
+ for (const key of required) if (!process.env[key]) throw new Error(`explicit ${key} required`)
+ if (process.env.MYSQL_HOST !== '127.0.0.1' || process.env.REDIS_HOST !== '127.0.0.1' || !/^http:\/\/127\.0\.0\.1:\d+$/.test(process.env.API_BASE)) throw new Error('loopback isolated services required')
+-if (process.env.MYSQL_PORT !== '3420' || process.env.REDIS_PORT !== '6520' || process.env.MYSQL_DATABASE !== 'project_full_stack_go' || process.env.API_BASE !== 'http://127.0.0.1:8220' || !/^go073-trade-[0-9a-f]{40}$/.test(process.env.GO073_REVISION || '')) throw new Error('dedicated GO-073 trade services and full revision required')
++if (process.env.MYSQL_PORT !== '3421' || process.env.REDIS_PORT !== '6521' || process.env.MYSQL_DATABASE !== 'project_full_stack_go' || process.env.API_BASE !== 'http://127.0.0.1:8221' || !/^go073-trade-[0-9a-f]{40}$/.test(process.env.GO073_REVISION || '')) throw new Error('dedicated GO-073 trade services and full revision required')
+ const rate = Number(process.env.GO073_RATE || 5)
+ const warmSeconds = Number(process.env.GO073_WARM_SECONDS || 15)
+ const stableSeconds = Number(process.env.GO073_STABLE_SECONDS || 180)
+@@ -92,12 +92,12 @@ async function redis(...parts) {
+ }
+ 
+ try {
+-  for (const [service, port, target] of [['mysql', '3420', '3306/tcp'], ['redis', '6520', '6379/tcp']]) {
+-    const inspect = await run('docker', ['inspect', `project-full-stack-go073-trade-${service}-1`, '--format', '{{json .Config.Labels}}|{{json .NetworkSettings.Ports}}|{{.State.Running}}'])
++  for (const [service, port, target] of [['mysql', '3421', '3306/tcp'], ['redis', '6521', '6379/tcp']]) {
++    const inspect = await run('docker', ['inspect', `project-full-stack-go073-verifytrade-${service}-1`, '--format', '{{json .Config.Labels}}|{{json .NetworkSettings.Ports}}|{{.State.Running}}'])
+     if (inspect.code !== 0) throw new Error('dedicated container inspect failed')
+     const [labelsRaw, portsRaw, running] = inspect.stdout.trim().split('|')
+     const labels = JSON.parse(labelsRaw), ports = JSON.parse(portsRaw)
+-    if (labels['com.docker.compose.project'] !== 'project-full-stack-go073-trade' || labels['com.docker.compose.service'] !== service || running !== 'true' || !ports[target]?.some(item => item.HostIp === '127.0.0.1' && item.HostPort === port)) throw new Error('dedicated container ownership or port mismatch')
++    if (labels['com.docker.compose.project'] !== 'project-full-stack-go073-verifytrade' || labels['com.docker.compose.service'] !== service || running !== 'true' || !ports[target]?.some(item => item.HostIp === '127.0.0.1' && item.HostPort === port)) throw new Error('dedicated container ownership or port mismatch')
+   }
+   const health = await api('GET', '/health/ready')
+   if (health.status !== 200 || health.body.status !== 'UP' || health.body.service !== 'project-full-stack-go' || health.body.version !== process.env.GO073_REVISION) throw new Error('dedicated API revision health mismatch')

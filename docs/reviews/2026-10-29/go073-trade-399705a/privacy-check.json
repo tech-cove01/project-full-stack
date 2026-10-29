@@ -1,0 +1,11 @@
+{
+  "filesScanned": 30,
+  "patterns": {
+    "phone": 0,
+    "bearer": 0,
+    "provider_key": 0,
+    "authorization_value": 0
+  },
+  "hitFiles": {},
+  "note": "Limited pattern scan; not a guarantee of all secret formats. Values are never printed."
+}

@@ -1,0 +1,14 @@
+{
+  "reviewBaseline": "399705a1fb92e5075192004c1cf1563f120dee47",
+  "buildHead": "cc60f5d640e0eeefd5768683ecde42bda8a4e67e",
+  "trackedBackendAndScriptChangesBetweenCommits": [],
+  "checkedPaths": [
+    "backend",
+    "scripts/go073-event-measure.mjs",
+    "scripts/go073-event-offset-sampler.py"
+  ],
+  "buildEvidence": "api-build.txt",
+  "buildMetadataModified": true,
+  "lateCheckBackendWorktree": [],
+  "scope": "commit-to-commit diff plus later worktree check; build-time worktree command produced no output"
+}

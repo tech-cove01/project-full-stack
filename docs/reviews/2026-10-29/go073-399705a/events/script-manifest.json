@@ -1,0 +1,53 @@
+{
+  "sourceHead": "399705a1fb92e5075192004c1cf1563f120dee47",
+  "project": "project-full-stack-go073-independent-events",
+  "ports": {
+    "mysql": 3431,
+    "redis": 6531,
+    "kafka": 9131,
+    "elasticsearch": 9231,
+    "api": 8231
+  },
+  "scripts": [
+    {
+      "original": "scripts\\go073-event-measure.mjs",
+      "copy": "docs\\reviews\\2026-10-29\\go073-399705a\\events\\measure.mjs",
+      "originalSha256": "6d6969569610365b9b23d2fb3e71f4b960d944b7d11f30f2b030e0eea6634160",
+      "copySha256": "9ee0ae805bb0728203f60b3d898b9ec15f1ae0cb83defbbbae703f1cd7c8ca4e",
+      "replacements": {
+        "project-full-stack-go073-event2": {
+          "to": "project-full-stack-go073-independent-events",
+          "count": 3
+        },
+        "3411": {
+          "to": "3431",
+          "count": 1
+        },
+        "6511": {
+          "to": "6531",
+          "count": 1
+        },
+        "8123": {
+          "to": "8231",
+          "count": 1
+        },
+        "9221": {
+          "to": "9231",
+          "count": 1
+        }
+      }
+    },
+    {
+      "original": "scripts\\go073-event-offset-sampler.py",
+      "copy": "docs\\reviews\\2026-10-29\\go073-399705a\\events\\offset-sampler.py",
+      "originalSha256": "45fff393c7399fd4de1313a34187fedc0db70cf8de3195b6c87b08fe519962ba",
+      "copySha256": "eed38958d4aa9f468b89185fea287bf9d4f44384d1fc8aafcd39371d2e644d12",
+      "replacements": {
+        "project-full-stack-go073-event2": {
+          "to": "project-full-stack-go073-independent-events",
+          "count": 2
+        }
+      }
+    }
+  ]
+}

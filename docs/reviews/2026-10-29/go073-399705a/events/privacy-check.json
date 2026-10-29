@@ -1,0 +1,9 @@
+{
+  "filesScanned": 19,
+  "matches": {
+    "phone": [],
+    "bearer": [],
+    "providerKey": []
+  },
+  "limitation": "finite regex scan cannot prove absence of all secrets"
+}

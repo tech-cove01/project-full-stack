@@ -1,0 +1,20 @@
+--- scripts\go073-event-measure.mjs
++++ docs\reviews\2026-10-29\go073-399705a\events\measure.mjs
+@@ -4,7 +4,7 @@
+ import { spawnSync } from 'node:child_process'
+ import { writeFileSync, existsSync } from 'node:fs'
+ 
+-const expected = { MYSQL_HOST: '127.0.0.1', MYSQL_PORT: '3411', MYSQL_DATABASE: 'project_full_stack_go', REDIS_HOST: '127.0.0.1', REDIS_PORT: '6511', API_BASE: 'http://127.0.0.1:8123', ES_URL: 'http://127.0.0.1:9221', ES_INDEX: 'go073-event-notes', KAFKA_TOPIC: 'community.events', KAFKA_CONTAINER: 'project-full-stack-go073-event2-kafka-1', ES_CONTAINER: 'project-full-stack-go073-event2-elasticsearch-1' }
++const expected = { MYSQL_HOST: '127.0.0.1', MYSQL_PORT: '3431', MYSQL_DATABASE: 'project_full_stack_go', REDIS_HOST: '127.0.0.1', REDIS_PORT: '6531', API_BASE: 'http://127.0.0.1:8231', ES_URL: 'http://127.0.0.1:9231', ES_INDEX: 'go073-event-notes', KAFKA_TOPIC: 'community.events', KAFKA_CONTAINER: 'project-full-stack-go073-independent-events-kafka-1', ES_CONTAINER: 'project-full-stack-go073-independent-events-elasticsearch-1' }
+ for (const [key, value] of Object.entries(expected)) assert.equal(process.env[key], value, `${key} must name the isolated GO-073 environment`)
+ assert.ok(process.env.MYSQL_USER && process.env.MYSQL_PASSWORD && process.env.GO_SEARCH_BINARY && process.env.EVENT_OUTPUT)
+ assert.ok(!existsSync(process.env.EVENT_OUTPUT), 'preserve prior output; choose a new file')
+@@ -23,7 +23,7 @@
+ }
+ function verifyContainer(name, service) {
+   const labels = JSON.parse(docker(['inspect', '--format', '{{json .Config.Labels}}', name]))
+-  assert.equal(labels['com.docker.compose.project'], 'project-full-stack-go073-event2')
++  assert.equal(labels['com.docker.compose.project'], 'project-full-stack-go073-independent-events')
+   assert.equal(labels['com.docker.compose.service'], service)
+ }
+ function sql(q) {

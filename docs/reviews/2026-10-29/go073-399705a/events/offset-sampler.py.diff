@@ -1,0 +1,20 @@
+--- scripts\go073-event-offset-sampler.py
++++ docs\reviews\2026-10-29\go073-399705a\events\offset-sampler.py
+@@ -6,7 +6,7 @@
+ from datetime import datetime, timezone
+ from pathlib import Path
+ 
+-container = 'project-full-stack-go073-event2-kafka-1'
++container = 'project-full-stack-go073-independent-events-kafka-1'
+ groups = ('community.follow-v1', 'community.feed-v1', 'community.search-v1')
+ output = Path(sys.argv[1])
+ if output.exists():
+@@ -25,7 +25,7 @@
+ 
+ 
+ labels = json.loads(run('inspect', '--format', '{{json .Config.Labels}}', container))
+-assert labels['com.docker.compose.project'] == 'project-full-stack-go073-event2'
++assert labels['com.docker.compose.project'] == 'project-full-stack-go073-independent-events'
+ assert labels['com.docker.compose.service'] == 'kafka'
+ report = {'startedAt': timestamp(), 'sampleIntervalSeconds': 20, 'samples': [], 'failures': []}
+ start = time.monotonic()

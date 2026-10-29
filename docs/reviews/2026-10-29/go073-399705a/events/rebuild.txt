@@ -1,0 +1,1 @@
+{"operation":"rebuild","projection":"search-v1","result":"committed"}

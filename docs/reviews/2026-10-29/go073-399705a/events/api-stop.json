@@ -1,0 +1,8 @@
+{
+  "pathMatched": true,
+  "exitCode": null,
+  "method": "Stop-Process",
+  "timeUtc": "2026-10-29T08:17:06.6415254Z",
+  "hasExited": true,
+  "pid": 43404
+}

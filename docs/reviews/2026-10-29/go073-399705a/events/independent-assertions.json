@@ -1,0 +1,20 @@
+{
+  "result": "PASS",
+  "uniqueNotes": 200,
+  "eventCount": 400,
+  "receiptCount": 1200,
+  "replayCount": 10,
+  "finalSearchVersions": 200,
+  "samplingCount": 7,
+  "reconciliation": {
+    "facts": 200,
+    "likeOrVersionMismatches": 0,
+    "wrongOutbox": 0,
+    "wrongReceipt": 0,
+    "stateVersions": 200,
+    "parked": 0,
+    "resolved": 10
+  },
+  "measureJsonSha256": "c125befe0e3ab9edd1d2f29fdfcbfbdf7694848a2a810dfeb3e29e6113656f78",
+  "offsetJsonSha256": "e70b956b6374e42cda7a1cdd882d1e726077def644c18fba49f3106aae89d0bf"
+}

@@ -1,0 +1,205 @@
+{
+  "stableActualElapsedMs": 179061,
+  "stablePublished": 180,
+  "stableLikes": 180,
+  "publishRequestLatencyMs": {
+    "count": 180,
+    "min": 17,
+    "p50": 25,
+    "p95": 35,
+    "p99": 51,
+    "max": 59
+  },
+  "visibleFirstPollUpperBoundMs": {
+    "count": 180,
+    "min": 1058,
+    "p50": 3076,
+    "p95": 5086,
+    "p99": 6080,
+    "max": 6081
+  },
+  "visibilityTailCount": 1,
+  "projectionLatencyMsFromDatabaseTimestamps": {
+    "NOTE_PUBLISHED/feed-v1/APPLIED": {
+      "count": 180,
+      "min": 33.0,
+      "p50": 160.0,
+      "p95": 386.0,
+      "p99": 744.0,
+      "max": 1394.0
+    },
+    "NOTE_PUBLISHED/follow-v1/IGNORED": {
+      "count": 180,
+      "min": 33.0,
+      "p50": 160.0,
+      "p95": 386.0,
+      "p99": 736.0,
+      "max": 1394.0
+    },
+    "NOTE_PUBLISHED/search-v1/APPLIED": {
+      "count": 180,
+      "min": 52.0,
+      "p50": 227.0,
+      "p95": 425.0,
+      "p99": 790.0,
+      "max": 1430.0
+    },
+    "LIKE_CHANGED/feed-v1/IGNORED": {
+      "count": 180,
+      "min": 42.0,
+      "p50": 216.0,
+      "p95": 397.0,
+      "p99": 761.0,
+      "max": 1398.0
+    },
+    "LIKE_CHANGED/follow-v1/IGNORED": {
+      "count": 180,
+      "min": 41.0,
+      "p50": 217.0,
+      "p95": 381.0,
+      "p99": 727.0,
+      "max": 1387.0
+    },
+    "LIKE_CHANGED/search-v1/IGNORED": {
+      "count": 180,
+      "min": 52.0,
+      "p50": 224.0,
+      "p95": 427.0,
+      "p99": 785.0,
+      "max": 1430.0
+    }
+  },
+  "lagSamples": {
+    "community.follow-v1": {
+      "count": 7,
+      "maxSampled": 0,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ]
+    },
+    "community.feed-v1": {
+      "count": 7,
+      "maxSampled": 1,
+      "values": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ]
+    },
+    "community.search-v1": {
+      "count": 7,
+      "maxSampled": 2,
+      "values": [
+        2,
+        2,
+        0,
+        1,
+        2,
+        2,
+        1
+      ]
+    }
+  },
+  "sampleIntervalSeconds": 20,
+  "sampleStartedAt": "2026-10-29T08:12:39.021820+00:00",
+  "sampleEndedAt": "2026-10-29T08:14:45.431004+00:00",
+  "stopRequestToParkedSnapshotMs": 15301.0,
+  "esRestartToHealthyMs": 28302.0,
+  "esRestartToVisibleAfterManualReplaysMs": 29920.0,
+  "snapshots": [
+    {
+      "label": "before-es-stop",
+      "at": "2026-10-29T08:15:40.711Z",
+      "offsets": {
+        "community.follow-v1": {
+          "partition": 0,
+          "committed": 380,
+          "end": 380,
+          "lag": 0
+        },
+        "community.feed-v1": {
+          "partition": 0,
+          "committed": 380,
+          "end": 380,
+          "lag": 0
+        },
+        "community.search-v1": {
+          "partition": 0,
+          "committed": 380,
+          "end": 380,
+          "lag": 0
+        }
+      },
+      "sql": "facts\t190\r\noutbox\tDONE\t380\r\nreceipt\tfeed-v1\tIGNORED\t190\r\nreceipt\tfeed-v1\tAPPLIED\t190\r\nreceipt\tfollow-v1\tIGNORED\t380\r\nreceipt\tsearch-v1\tIGNORED\t190\r\nreceipt\tsearch-v1\tAPPLIED\t190\r\nlike\t190\t190"
+    },
+    {
+      "label": "es-down-parked",
+      "at": "2026-10-29T08:15:56.012Z",
+      "offsets": {
+        "community.follow-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.feed-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.search-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        }
+      },
+      "sql": "facts\t200\r\noutbox\tDONE\t400\r\nreceipt\tfeed-v1\tIGNORED\t200\r\nreceipt\tfeed-v1\tAPPLIED\t200\r\nreceipt\tfollow-v1\tIGNORED\t400\r\nreceipt\tsearch-v1\tIGNORED\t200\r\nreceipt\tsearch-v1\tAPPLIED\t190\r\nfailure\tPARKED\t10\r\nlike\t200\t200"
+    },
+    {
+      "label": "recovered",
+      "at": "2026-10-29T08:16:32.410Z",
+      "offsets": {
+        "community.follow-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.feed-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.search-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        }
+      },
+      "sql": "facts\t200\r\noutbox\tDONE\t400\r\nreceipt\tfeed-v1\tIGNORED\t200\r\nreceipt\tfeed-v1\tAPPLIED\t200\r\nreceipt\tfollow-v1\tIGNORED\t400\r\nreceipt\tsearch-v1\tIGNORED\t200\r\nreceipt\tsearch-v1\tAPPLIED\t200\r\nfailure\tRESOLVED\t10\r\nlike\t200\t200"
+    }
+  ],
+  "reconciliation": {
+    "facts": 200,
+    "likeOrVersionMismatches": 0,
+    "wrongOutbox": 0,
+    "wrongReceipt": 0,
+    "stateVersions": 200,
+    "parked": 0,
+    "resolved": 10
+  }
+}

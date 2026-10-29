@@ -1,0 +1,162 @@
+{
+  "startedAt": "2026-10-29T08:12:39.021820+00:00",
+  "sampleIntervalSeconds": 20,
+  "samples": [
+    {
+      "iteration": 0,
+      "startedAt": "2026-10-29T08:12:39.021897+00:00",
+      "groups": {
+        "community.follow-v1": {
+          "startedAt": "2026-10-29T08:12:39.021907+00:00",
+          "endedAt": "2026-10-29T08:12:41.106507+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          34              34              0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.feed-v1": {
+          "startedAt": "2026-10-29T08:12:41.106578+00:00",
+          "endedAt": "2026-10-29T08:12:43.187215+00:00",
+          "raw": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          38              38              0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.search-v1": {
+          "startedAt": "2026-10-29T08:12:43.187239+00:00",
+          "endedAt": "2026-10-29T08:12:45.303155+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          42              44              2               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        }
+      },
+      "endedAt": "2026-10-29T08:12:45.303178+00:00"
+    },
+    {
+      "iteration": 1,
+      "startedAt": "2026-10-29T08:12:59.022348+00:00",
+      "groups": {
+        "community.follow-v1": {
+          "startedAt": "2026-10-29T08:12:59.022405+00:00",
+          "endedAt": "2026-10-29T08:13:01.021096+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          74              74              0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.feed-v1": {
+          "startedAt": "2026-10-29T08:13:01.021122+00:00",
+          "endedAt": "2026-10-29T08:13:03.151585+00:00",
+          "raw": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          78              78              0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.search-v1": {
+          "startedAt": "2026-10-29T08:13:03.151612+00:00",
+          "endedAt": "2026-10-29T08:13:05.522382+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          82              84              2               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        }
+      },
+      "endedAt": "2026-10-29T08:13:05.522407+00:00"
+    },
+    {
+      "iteration": 2,
+      "startedAt": "2026-10-29T08:13:19.021997+00:00",
+      "groups": {
+        "community.follow-v1": {
+          "startedAt": "2026-10-29T08:13:19.022031+00:00",
+          "endedAt": "2026-10-29T08:13:21.059743+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          114             114             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.feed-v1": {
+          "startedAt": "2026-10-29T08:13:21.059813+00:00",
+          "endedAt": "2026-10-29T08:13:23.105945+00:00",
+          "raw": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          118             118             0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.search-v1": {
+          "startedAt": "2026-10-29T08:13:23.105968+00:00",
+          "endedAt": "2026-10-29T08:13:25.131126+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          122             122             0               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        }
+      },
+      "endedAt": "2026-10-29T08:13:25.131154+00:00"
+    },
+    {
+      "iteration": 3,
+      "startedAt": "2026-10-29T08:13:39.022253+00:00",
+      "groups": {
+        "community.follow-v1": {
+          "startedAt": "2026-10-29T08:13:39.022286+00:00",
+          "endedAt": "2026-10-29T08:13:41.217424+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          154             154             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.feed-v1": {
+          "startedAt": "2026-10-29T08:13:41.217453+00:00",
+          "endedAt": "2026-10-29T08:13:43.226301+00:00",
+          "raw": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          158             158             0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.search-v1": {
+          "startedAt": "2026-10-29T08:13:43.226326+00:00",
+          "endedAt": "2026-10-29T08:13:45.233891+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          162             163             1               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        }
+      },
+      "endedAt": "2026-10-29T08:13:45.233914+00:00"
+    },
+    {
+      "iteration": 4,
+      "startedAt": "2026-10-29T08:13:59.022189+00:00",
+      "groups": {
+        "community.follow-v1": {
+          "startedAt": "2026-10-29T08:13:59.022211+00:00",
+          "endedAt": "2026-10-29T08:14:01.164881+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          194             194             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.feed-v1": {
+          "startedAt": "2026-10-29T08:14:01.164908+00:00",
+          "endedAt": "2026-10-29T08:14:03.317528+00:00",
+          "raw": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          198             199             1               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.search-v1": {
+          "startedAt": "2026-10-29T08:14:03.317552+00:00",
+          "endedAt": "2026-10-29T08:14:05.438606+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          202             204             2               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        }
+      },
+      "endedAt": "2026-10-29T08:14:05.438632+00:00"
+    },
+    {
+      "iteration": 5,
+      "startedAt": "2026-10-29T08:14:19.022117+00:00",
+      "groups": {
+        "community.follow-v1": {
+          "startedAt": "2026-10-29T08:14:19.022150+00:00",
+          "endedAt": "2026-10-29T08:14:21.265499+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          234             234             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.feed-v1": {
+          "startedAt": "2026-10-29T08:14:21.265527+00:00",
+          "endedAt": "2026-10-29T08:14:23.428065+00:00",
+          "raw": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          240             240             0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.search-v1": {
+          "startedAt": "2026-10-29T08:14:23.428089+00:00",
+          "endedAt": "2026-10-29T08:14:25.495375+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          242             244             2               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        }
+      },
+      "endedAt": "2026-10-29T08:14:25.495400+00:00"
+    },
+    {
+      "iteration": 6,
+      "startedAt": "2026-10-29T08:14:39.022243+00:00",
+      "groups": {
+        "community.follow-v1": {
+          "startedAt": "2026-10-29T08:14:39.022276+00:00",
+          "endedAt": "2026-10-29T08:14:41.087940+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          274             274             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.feed-v1": {
+          "startedAt": "2026-10-29T08:14:41.087964+00:00",
+          "endedAt": "2026-10-29T08:14:43.243440+00:00",
+          "raw": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          278             278             0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        },
+        "community.search-v1": {
+          "startedAt": "2026-10-29T08:14:43.243468+00:00",
+          "endedAt": "2026-10-29T08:14:45.430972+00:00",
+          "raw": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          282             283             1               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+        }
+      },
+      "endedAt": "2026-10-29T08:14:45.430996+00:00"
+    }
+  ],
+  "failures": [],
+  "endedAt": "2026-10-29T08:14:45.431004+00:00"
+}

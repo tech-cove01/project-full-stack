@@ -1,0 +1,3917 @@
+{
+  "task": "GO-073 events",
+  "durationSeconds": 180,
+  "prefix": "go073eca024e2b6027",
+  "startedAt": "2026-10-29T08:12:22.397Z",
+  "notes": [
+    {
+      "id": "1",
+      "phase": "warmup",
+      "started": 1793261542982,
+      "completed": 1793261543016,
+      "like": true
+    },
+    {
+      "id": "2",
+      "phase": "warmup",
+      "started": 1793261544053,
+      "completed": 1793261544080,
+      "like": true
+    },
+    {
+      "id": "3",
+      "phase": "warmup",
+      "started": 1793261545120,
+      "completed": 1793261545144,
+      "like": true
+    },
+    {
+      "id": "4",
+      "phase": "warmup",
+      "started": 1793261546174,
+      "completed": 1793261546218,
+      "like": true
+    },
+    {
+      "id": "5",
+      "phase": "warmup",
+      "started": 1793261547253,
+      "completed": 1793261547277,
+      "like": true
+    },
+    {
+      "id": "6",
+      "phase": "warmup",
+      "started": 1793261548310,
+      "completed": 1793261548338,
+      "like": true
+    },
+    {
+      "id": "7",
+      "phase": "warmup",
+      "started": 1793261549382,
+      "completed": 1793261549408,
+      "like": true
+    },
+    {
+      "id": "8",
+      "phase": "warmup",
+      "started": 1793261550449,
+      "completed": 1793261550472,
+      "like": true
+    },
+    {
+      "id": "9",
+      "phase": "warmup",
+      "started": 1793261551507,
+      "completed": 1793261551533,
+      "like": true
+    },
+    {
+      "id": "10",
+      "phase": "warmup",
+      "started": 1793261552561,
+      "completed": 1793261552582,
+      "like": true
+    },
+    {
+      "id": "11",
+      "phase": "stable",
+      "started": 1793261553760,
+      "completed": 1793261553784,
+      "like": true
+    },
+    {
+      "id": "12",
+      "phase": "stable",
+      "started": 1793261554767,
+      "completed": 1793261554800,
+      "like": true
+    },
+    {
+      "id": "13",
+      "phase": "stable",
+      "started": 1793261555769,
+      "completed": 1793261555794,
+      "like": true
+    },
+    {
+      "id": "14",
+      "phase": "stable",
+      "started": 1793261556764,
+      "completed": 1793261556789,
+      "like": true
+    },
+    {
+      "id": "15",
+      "phase": "stable",
+      "started": 1793261557769,
+      "completed": 1793261557801,
+      "like": true
+    },
+    {
+      "id": "16",
+      "phase": "stable",
+      "started": 1793261558766,
+      "completed": 1793261558785,
+      "like": true
+    },
+    {
+      "id": "17",
+      "phase": "stable",
+      "started": 1793261559764,
+      "completed": 1793261559786,
+      "like": true
+    },
+    {
+      "id": "18",
+      "phase": "stable",
+      "started": 1793261560763,
+      "completed": 1793261560783,
+      "like": true
+    },
+    {
+      "id": "19",
+      "phase": "stable",
+      "started": 1793261561769,
+      "completed": 1793261561791,
+      "like": true
+    },
+    {
+      "id": "20",
+      "phase": "stable",
+      "started": 1793261562771,
+      "completed": 1793261562790,
+      "like": true
+    },
+    {
+      "id": "21",
+      "phase": "stable",
+      "started": 1793261563760,
+      "completed": 1793261563782,
+      "like": true
+    },
+    {
+      "id": "22",
+      "phase": "stable",
+      "started": 1793261564764,
+      "completed": 1793261564787,
+      "like": true
+    },
+    {
+      "id": "23",
+      "phase": "stable",
+      "started": 1793261565768,
+      "completed": 1793261565785,
+      "like": true
+    },
+    {
+      "id": "24",
+      "phase": "stable",
+      "started": 1793261566760,
+      "completed": 1793261566781,
+      "like": true
+    },
+    {
+      "id": "25",
+      "phase": "stable",
+      "started": 1793261567768,
+      "completed": 1793261567787,
+      "like": true
+    },
+    {
+      "id": "26",
+      "phase": "stable",
+      "started": 1793261568762,
+      "completed": 1793261568782,
+      "like": true
+    },
+    {
+      "id": "27",
+      "phase": "stable",
+      "started": 1793261569770,
+      "completed": 1793261569793,
+      "like": true
+    },
+    {
+      "id": "28",
+      "phase": "stable",
+      "started": 1793261570764,
+      "completed": 1793261570783,
+      "like": true
+    },
+    {
+      "id": "29",
+      "phase": "stable",
+      "started": 1793261571766,
+      "completed": 1793261571784,
+      "like": true
+    },
+    {
+      "id": "30",
+      "phase": "stable",
+      "started": 1793261572764,
+      "completed": 1793261572783,
+      "like": true
+    },
+    {
+      "id": "31",
+      "phase": "stable",
+      "started": 1793261573770,
+      "completed": 1793261573791,
+      "like": true
+    },
+    {
+      "id": "32",
+      "phase": "stable",
+      "started": 1793261574765,
+      "completed": 1793261574787,
+      "like": true
+    },
+    {
+      "id": "33",
+      "phase": "stable",
+      "started": 1793261575768,
+      "completed": 1793261575787,
+      "like": true
+    },
+    {
+      "id": "34",
+      "phase": "stable",
+      "started": 1793261576761,
+      "completed": 1793261576780,
+      "like": true
+    },
+    {
+      "id": "35",
+      "phase": "stable",
+      "started": 1793261577766,
+      "completed": 1793261577787,
+      "like": true
+    },
+    {
+      "id": "36",
+      "phase": "stable",
+      "started": 1793261578762,
+      "completed": 1793261578781,
+      "like": true
+    },
+    {
+      "id": "37",
+      "phase": "stable",
+      "started": 1793261579769,
+      "completed": 1793261579789,
+      "like": true
+    },
+    {
+      "id": "38",
+      "phase": "stable",
+      "started": 1793261580765,
+      "completed": 1793261580790,
+      "like": true
+    },
+    {
+      "id": "39",
+      "phase": "stable",
+      "started": 1793261581766,
+      "completed": 1793261581796,
+      "like": true
+    },
+    {
+      "id": "40",
+      "phase": "stable",
+      "started": 1793261582771,
+      "completed": 1793261582797,
+      "like": true
+    },
+    {
+      "id": "41",
+      "phase": "stable",
+      "started": 1793261583765,
+      "completed": 1793261583791,
+      "like": true
+    },
+    {
+      "id": "42",
+      "phase": "stable",
+      "started": 1793261584767,
+      "completed": 1793261584790,
+      "like": true
+    },
+    {
+      "id": "43",
+      "phase": "stable",
+      "started": 1793261585761,
+      "completed": 1793261585788,
+      "like": true
+    },
+    {
+      "id": "44",
+      "phase": "stable",
+      "started": 1793261586763,
+      "completed": 1793261586796,
+      "like": true
+    },
+    {
+      "id": "45",
+      "phase": "stable",
+      "started": 1793261587761,
+      "completed": 1793261587780,
+      "like": true
+    },
+    {
+      "id": "46",
+      "phase": "stable",
+      "started": 1793261588762,
+      "completed": 1793261588821,
+      "like": true
+    },
+    {
+      "id": "47",
+      "phase": "stable",
+      "started": 1793261589764,
+      "completed": 1793261589784,
+      "like": true
+    },
+    {
+      "id": "48",
+      "phase": "stable",
+      "started": 1793261590769,
+      "completed": 1793261590788,
+      "like": true
+    },
+    {
+      "id": "49",
+      "phase": "stable",
+      "started": 1793261591770,
+      "completed": 1793261591796,
+      "like": true
+    },
+    {
+      "id": "50",
+      "phase": "stable",
+      "started": 1793261592760,
+      "completed": 1793261592779,
+      "like": true
+    },
+    {
+      "id": "51",
+      "phase": "stable",
+      "started": 1793261593763,
+      "completed": 1793261593783,
+      "like": true
+    },
+    {
+      "id": "52",
+      "phase": "stable",
+      "started": 1793261594762,
+      "completed": 1793261594799,
+      "like": true
+    },
+    {
+      "id": "53",
+      "phase": "stable",
+      "started": 1793261595764,
+      "completed": 1793261595784,
+      "like": true
+    },
+    {
+      "id": "54",
+      "phase": "stable",
+      "started": 1793261596765,
+      "completed": 1793261596788,
+      "like": true
+    },
+    {
+      "id": "55",
+      "phase": "stable",
+      "started": 1793261597765,
+      "completed": 1793261597795,
+      "like": true
+    },
+    {
+      "id": "56",
+      "phase": "stable",
+      "started": 1793261598762,
+      "completed": 1793261598788,
+      "like": true
+    },
+    {
+      "id": "57",
+      "phase": "stable",
+      "started": 1793261599769,
+      "completed": 1793261599795,
+      "like": true
+    },
+    {
+      "id": "58",
+      "phase": "stable",
+      "started": 1793261600766,
+      "completed": 1793261600790,
+      "like": true
+    },
+    {
+      "id": "59",
+      "phase": "stable",
+      "started": 1793261601769,
+      "completed": 1793261601801,
+      "like": true
+    },
+    {
+      "id": "60",
+      "phase": "stable",
+      "started": 1793261602768,
+      "completed": 1793261602797,
+      "like": true
+    },
+    {
+      "id": "61",
+      "phase": "stable",
+      "started": 1793261603762,
+      "completed": 1793261603787,
+      "like": true
+    },
+    {
+      "id": "62",
+      "phase": "stable",
+      "started": 1793261604765,
+      "completed": 1793261604796,
+      "like": true
+    },
+    {
+      "id": "63",
+      "phase": "stable",
+      "started": 1793261605768,
+      "completed": 1793261605794,
+      "like": true
+    },
+    {
+      "id": "64",
+      "phase": "stable",
+      "started": 1793261606767,
+      "completed": 1793261606788,
+      "like": true
+    },
+    {
+      "id": "65",
+      "phase": "stable",
+      "started": 1793261607763,
+      "completed": 1793261607788,
+      "like": true
+    },
+    {
+      "id": "66",
+      "phase": "stable",
+      "started": 1793261608771,
+      "completed": 1793261608797,
+      "like": true
+    },
+    {
+      "id": "67",
+      "phase": "stable",
+      "started": 1793261609762,
+      "completed": 1793261609786,
+      "like": true
+    },
+    {
+      "id": "68",
+      "phase": "stable",
+      "started": 1793261610762,
+      "completed": 1793261610794,
+      "like": true
+    },
+    {
+      "id": "69",
+      "phase": "stable",
+      "started": 1793261611765,
+      "completed": 1793261611788,
+      "like": true
+    },
+    {
+      "id": "70",
+      "phase": "stable",
+      "started": 1793261612763,
+      "completed": 1793261612787,
+      "like": true
+    },
+    {
+      "id": "71",
+      "phase": "stable",
+      "started": 1793261613766,
+      "completed": 1793261613801,
+      "like": true
+    },
+    {
+      "id": "72",
+      "phase": "stable",
+      "started": 1793261614762,
+      "completed": 1793261614793,
+      "like": true
+    },
+    {
+      "id": "73",
+      "phase": "stable",
+      "started": 1793261615763,
+      "completed": 1793261615785,
+      "like": true
+    },
+    {
+      "id": "74",
+      "phase": "stable",
+      "started": 1793261616760,
+      "completed": 1793261616785,
+      "like": true
+    },
+    {
+      "id": "75",
+      "phase": "stable",
+      "started": 1793261617763,
+      "completed": 1793261617787,
+      "like": true
+    },
+    {
+      "id": "76",
+      "phase": "stable",
+      "started": 1793261618763,
+      "completed": 1793261618785,
+      "like": true
+    },
+    {
+      "id": "77",
+      "phase": "stable",
+      "started": 1793261619760,
+      "completed": 1793261619787,
+      "like": true
+    },
+    {
+      "id": "78",
+      "phase": "stable",
+      "started": 1793261620766,
+      "completed": 1793261620793,
+      "like": true
+    },
+    {
+      "id": "79",
+      "phase": "stable",
+      "started": 1793261621761,
+      "completed": 1793261621785,
+      "like": true
+    },
+    {
+      "id": "80",
+      "phase": "stable",
+      "started": 1793261622762,
+      "completed": 1793261622805,
+      "like": true
+    },
+    {
+      "id": "81",
+      "phase": "stable",
+      "started": 1793261623763,
+      "completed": 1793261623788,
+      "like": true
+    },
+    {
+      "id": "82",
+      "phase": "stable",
+      "started": 1793261624768,
+      "completed": 1793261624799,
+      "like": true
+    },
+    {
+      "id": "83",
+      "phase": "stable",
+      "started": 1793261625762,
+      "completed": 1793261625787,
+      "like": true
+    },
+    {
+      "id": "84",
+      "phase": "stable",
+      "started": 1793261626761,
+      "completed": 1793261626788,
+      "like": true
+    },
+    {
+      "id": "85",
+      "phase": "stable",
+      "started": 1793261627768,
+      "completed": 1793261627793,
+      "like": true
+    },
+    {
+      "id": "86",
+      "phase": "stable",
+      "started": 1793261628769,
+      "completed": 1793261628791,
+      "like": true
+    },
+    {
+      "id": "87",
+      "phase": "stable",
+      "started": 1793261629764,
+      "completed": 1793261629786,
+      "like": true
+    },
+    {
+      "id": "88",
+      "phase": "stable",
+      "started": 1793261630765,
+      "completed": 1793261630816,
+      "like": true
+    },
+    {
+      "id": "89",
+      "phase": "stable",
+      "started": 1793261631764,
+      "completed": 1793261631786,
+      "like": true
+    },
+    {
+      "id": "90",
+      "phase": "stable",
+      "started": 1793261632770,
+      "completed": 1793261632793,
+      "like": true
+    },
+    {
+      "id": "91",
+      "phase": "stable",
+      "started": 1793261633766,
+      "completed": 1793261633791,
+      "like": true
+    },
+    {
+      "id": "92",
+      "phase": "stable",
+      "started": 1793261634774,
+      "completed": 1793261634809,
+      "like": true
+    },
+    {
+      "id": "93",
+      "phase": "stable",
+      "started": 1793261635771,
+      "completed": 1793261635801,
+      "like": true
+    },
+    {
+      "id": "94",
+      "phase": "stable",
+      "started": 1793261636767,
+      "completed": 1793261636792,
+      "like": true
+    },
+    {
+      "id": "95",
+      "phase": "stable",
+      "started": 1793261637761,
+      "completed": 1793261637800,
+      "like": true
+    },
+    {
+      "id": "96",
+      "phase": "stable",
+      "started": 1793261638765,
+      "completed": 1793261638796,
+      "like": true
+    },
+    {
+      "id": "97",
+      "phase": "stable",
+      "started": 1793261639763,
+      "completed": 1793261639791,
+      "like": true
+    },
+    {
+      "id": "98",
+      "phase": "stable",
+      "started": 1793261640769,
+      "completed": 1793261640801,
+      "like": true
+    },
+    {
+      "id": "99",
+      "phase": "stable",
+      "started": 1793261641763,
+      "completed": 1793261641793,
+      "like": true
+    },
+    {
+      "id": "100",
+      "phase": "stable",
+      "started": 1793261642764,
+      "completed": 1793261642789,
+      "like": true
+    },
+    {
+      "id": "101",
+      "phase": "stable",
+      "started": 1793261643761,
+      "completed": 1793261643788,
+      "like": true
+    },
+    {
+      "id": "102",
+      "phase": "stable",
+      "started": 1793261644763,
+      "completed": 1793261644787,
+      "like": true
+    },
+    {
+      "id": "103",
+      "phase": "stable",
+      "started": 1793261645762,
+      "completed": 1793261645784,
+      "like": true
+    },
+    {
+      "id": "104",
+      "phase": "stable",
+      "started": 1793261646772,
+      "completed": 1793261646801,
+      "like": true
+    },
+    {
+      "id": "105",
+      "phase": "stable",
+      "started": 1793261647761,
+      "completed": 1793261647781,
+      "like": true
+    },
+    {
+      "id": "106",
+      "phase": "stable",
+      "started": 1793261648768,
+      "completed": 1793261648792,
+      "like": true
+    },
+    {
+      "id": "107",
+      "phase": "stable",
+      "started": 1793261649767,
+      "completed": 1793261649796,
+      "like": true
+    },
+    {
+      "id": "108",
+      "phase": "stable",
+      "started": 1793261650763,
+      "completed": 1793261650785,
+      "like": true
+    },
+    {
+      "id": "109",
+      "phase": "stable",
+      "started": 1793261651766,
+      "completed": 1793261651791,
+      "like": true
+    },
+    {
+      "id": "110",
+      "phase": "stable",
+      "started": 1793261652762,
+      "completed": 1793261652787,
+      "like": true
+    },
+    {
+      "id": "111",
+      "phase": "stable",
+      "started": 1793261653762,
+      "completed": 1793261653790,
+      "like": true
+    },
+    {
+      "id": "112",
+      "phase": "stable",
+      "started": 1793261654760,
+      "completed": 1793261654785,
+      "like": true
+    },
+    {
+      "id": "113",
+      "phase": "stable",
+      "started": 1793261655766,
+      "completed": 1793261655792,
+      "like": true
+    },
+    {
+      "id": "114",
+      "phase": "stable",
+      "started": 1793261656770,
+      "completed": 1793261656803,
+      "like": true
+    },
+    {
+      "id": "115",
+      "phase": "stable",
+      "started": 1793261657765,
+      "completed": 1793261657788,
+      "like": true
+    },
+    {
+      "id": "116",
+      "phase": "stable",
+      "started": 1793261658764,
+      "completed": 1793261658792,
+      "like": true
+    },
+    {
+      "id": "117",
+      "phase": "stable",
+      "started": 1793261659765,
+      "completed": 1793261659798,
+      "like": true
+    },
+    {
+      "id": "118",
+      "phase": "stable",
+      "started": 1793261660760,
+      "completed": 1793261660785,
+      "like": true
+    },
+    {
+      "id": "119",
+      "phase": "stable",
+      "started": 1793261661761,
+      "completed": 1793261661786,
+      "like": true
+    },
+    {
+      "id": "120",
+      "phase": "stable",
+      "started": 1793261662765,
+      "completed": 1793261662793,
+      "like": true
+    },
+    {
+      "id": "121",
+      "phase": "stable",
+      "started": 1793261663765,
+      "completed": 1793261663790,
+      "like": true
+    },
+    {
+      "id": "122",
+      "phase": "stable",
+      "started": 1793261664772,
+      "completed": 1793261664796,
+      "like": true
+    },
+    {
+      "id": "123",
+      "phase": "stable",
+      "started": 1793261665763,
+      "completed": 1793261665791,
+      "like": true
+    },
+    {
+      "id": "124",
+      "phase": "stable",
+      "started": 1793261666763,
+      "completed": 1793261666799,
+      "like": true
+    },
+    {
+      "id": "125",
+      "phase": "stable",
+      "started": 1793261667769,
+      "completed": 1793261667794,
+      "like": true
+    },
+    {
+      "id": "126",
+      "phase": "stable",
+      "started": 1793261668768,
+      "completed": 1793261668799,
+      "like": true
+    },
+    {
+      "id": "127",
+      "phase": "stable",
+      "started": 1793261669762,
+      "completed": 1793261669784,
+      "like": true
+    },
+    {
+      "id": "128",
+      "phase": "stable",
+      "started": 1793261670764,
+      "completed": 1793261670789,
+      "like": true
+    },
+    {
+      "id": "129",
+      "phase": "stable",
+      "started": 1793261671765,
+      "completed": 1793261671789,
+      "like": true
+    },
+    {
+      "id": "130",
+      "phase": "stable",
+      "started": 1793261672761,
+      "completed": 1793261672793,
+      "like": true
+    },
+    {
+      "id": "131",
+      "phase": "stable",
+      "started": 1793261673765,
+      "completed": 1793261673791,
+      "like": true
+    },
+    {
+      "id": "132",
+      "phase": "stable",
+      "started": 1793261674761,
+      "completed": 1793261674788,
+      "like": true
+    },
+    {
+      "id": "133",
+      "phase": "stable",
+      "started": 1793261675767,
+      "completed": 1793261675793,
+      "like": true
+    },
+    {
+      "id": "134",
+      "phase": "stable",
+      "started": 1793261676760,
+      "completed": 1793261676787,
+      "like": true
+    },
+    {
+      "id": "135",
+      "phase": "stable",
+      "started": 1793261677768,
+      "completed": 1793261677793,
+      "like": true
+    },
+    {
+      "id": "136",
+      "phase": "stable",
+      "started": 1793261678764,
+      "completed": 1793261678797,
+      "like": true
+    },
+    {
+      "id": "137",
+      "phase": "stable",
+      "started": 1793261679763,
+      "completed": 1793261679794,
+      "like": true
+    },
+    {
+      "id": "138",
+      "phase": "stable",
+      "started": 1793261680767,
+      "completed": 1793261680791,
+      "like": true
+    },
+    {
+      "id": "139",
+      "phase": "stable",
+      "started": 1793261681763,
+      "completed": 1793261681793,
+      "like": true
+    },
+    {
+      "id": "140",
+      "phase": "stable",
+      "started": 1793261682764,
+      "completed": 1793261682787,
+      "like": true
+    },
+    {
+      "id": "141",
+      "phase": "stable",
+      "started": 1793261683765,
+      "completed": 1793261683791,
+      "like": true
+    },
+    {
+      "id": "142",
+      "phase": "stable",
+      "started": 1793261684763,
+      "completed": 1793261684791,
+      "like": true
+    },
+    {
+      "id": "143",
+      "phase": "stable",
+      "started": 1793261685769,
+      "completed": 1793261685797,
+      "like": true
+    },
+    {
+      "id": "144",
+      "phase": "stable",
+      "started": 1793261686765,
+      "completed": 1793261686798,
+      "like": true
+    },
+    {
+      "id": "145",
+      "phase": "stable",
+      "started": 1793261687764,
+      "completed": 1793261687796,
+      "like": true
+    },
+    {
+      "id": "146",
+      "phase": "stable",
+      "started": 1793261688768,
+      "completed": 1793261688789,
+      "like": true
+    },
+    {
+      "id": "147",
+      "phase": "stable",
+      "started": 1793261689768,
+      "completed": 1793261689796,
+      "like": true
+    },
+    {
+      "id": "148",
+      "phase": "stable",
+      "started": 1793261690764,
+      "completed": 1793261690793,
+      "like": true
+    },
+    {
+      "id": "149",
+      "phase": "stable",
+      "started": 1793261691766,
+      "completed": 1793261691789,
+      "like": true
+    },
+    {
+      "id": "150",
+      "phase": "stable",
+      "started": 1793261692767,
+      "completed": 1793261692790,
+      "like": true
+    },
+    {
+      "id": "151",
+      "phase": "stable",
+      "started": 1793261693766,
+      "completed": 1793261693800,
+      "like": true
+    },
+    {
+      "id": "152",
+      "phase": "stable",
+      "started": 1793261694764,
+      "completed": 1793261694786,
+      "like": true
+    },
+    {
+      "id": "153",
+      "phase": "stable",
+      "started": 1793261695766,
+      "completed": 1793261695788,
+      "like": true
+    },
+    {
+      "id": "154",
+      "phase": "stable",
+      "started": 1793261696770,
+      "completed": 1793261696805,
+      "like": true
+    },
+    {
+      "id": "155",
+      "phase": "stable",
+      "started": 1793261697768,
+      "completed": 1793261697798,
+      "like": true
+    },
+    {
+      "id": "156",
+      "phase": "stable",
+      "started": 1793261698763,
+      "completed": 1793261698790,
+      "like": true
+    },
+    {
+      "id": "157",
+      "phase": "stable",
+      "started": 1793261699762,
+      "completed": 1793261699784,
+      "like": true
+    },
+    {
+      "id": "158",
+      "phase": "stable",
+      "started": 1793261700766,
+      "completed": 1793261700797,
+      "like": true
+    },
+    {
+      "id": "159",
+      "phase": "stable",
+      "started": 1793261701762,
+      "completed": 1793261701786,
+      "like": true
+    },
+    {
+      "id": "160",
+      "phase": "stable",
+      "started": 1793261702767,
+      "completed": 1793261702788,
+      "like": true
+    },
+    {
+      "id": "161",
+      "phase": "stable",
+      "started": 1793261703769,
+      "completed": 1793261703797,
+      "like": true
+    },
+    {
+      "id": "162",
+      "phase": "stable",
+      "started": 1793261704765,
+      "completed": 1793261704787,
+      "like": true
+    },
+    {
+      "id": "163",
+      "phase": "stable",
+      "started": 1793261705767,
+      "completed": 1793261705792,
+      "like": true
+    },
+    {
+      "id": "164",
+      "phase": "stable",
+      "started": 1793261706763,
+      "completed": 1793261706800,
+      "like": true
+    },
+    {
+      "id": "165",
+      "phase": "stable",
+      "started": 1793261707768,
+      "completed": 1793261707791,
+      "like": true
+    },
+    {
+      "id": "166",
+      "phase": "stable",
+      "started": 1793261708767,
+      "completed": 1793261708794,
+      "like": true
+    },
+    {
+      "id": "167",
+      "phase": "stable",
+      "started": 1793261709763,
+      "completed": 1793261709796,
+      "like": true
+    },
+    {
+      "id": "168",
+      "phase": "stable",
+      "started": 1793261710760,
+      "completed": 1793261710789,
+      "like": true
+    },
+    {
+      "id": "169",
+      "phase": "stable",
+      "started": 1793261711767,
+      "completed": 1793261711788,
+      "like": true
+    },
+    {
+      "id": "170",
+      "phase": "stable",
+      "started": 1793261712760,
+      "completed": 1793261712794,
+      "like": true
+    },
+    {
+      "id": "171",
+      "phase": "stable",
+      "started": 1793261713768,
+      "completed": 1793261713798,
+      "like": true
+    },
+    {
+      "id": "172",
+      "phase": "stable",
+      "started": 1793261714768,
+      "completed": 1793261714794,
+      "like": true
+    },
+    {
+      "id": "173",
+      "phase": "stable",
+      "started": 1793261715763,
+      "completed": 1793261715796,
+      "like": true
+    },
+    {
+      "id": "174",
+      "phase": "stable",
+      "started": 1793261716761,
+      "completed": 1793261716791,
+      "like": true
+    },
+    {
+      "id": "175",
+      "phase": "stable",
+      "started": 1793261717768,
+      "completed": 1793261717798,
+      "like": true
+    },
+    {
+      "id": "176",
+      "phase": "stable",
+      "started": 1793261718768,
+      "completed": 1793261718795,
+      "like": true
+    },
+    {
+      "id": "177",
+      "phase": "stable",
+      "started": 1793261719765,
+      "completed": 1793261719789,
+      "like": true
+    },
+    {
+      "id": "178",
+      "phase": "stable",
+      "started": 1793261720760,
+      "completed": 1793261720787,
+      "like": true
+    },
+    {
+      "id": "179",
+      "phase": "stable",
+      "started": 1793261721764,
+      "completed": 1793261721793,
+      "like": true
+    },
+    {
+      "id": "180",
+      "phase": "stable",
+      "started": 1793261722761,
+      "completed": 1793261722788,
+      "like": true
+    },
+    {
+      "id": "181",
+      "phase": "stable",
+      "started": 1793261723766,
+      "completed": 1793261723791,
+      "like": true
+    },
+    {
+      "id": "182",
+      "phase": "stable",
+      "started": 1793261724762,
+      "completed": 1793261724790,
+      "like": true
+    },
+    {
+      "id": "183",
+      "phase": "stable",
+      "started": 1793261725765,
+      "completed": 1793261725789,
+      "like": true
+    },
+    {
+      "id": "184",
+      "phase": "stable",
+      "started": 1793261726761,
+      "completed": 1793261726786,
+      "like": true
+    },
+    {
+      "id": "185",
+      "phase": "stable",
+      "started": 1793261727767,
+      "completed": 1793261727791,
+      "like": true
+    },
+    {
+      "id": "186",
+      "phase": "stable",
+      "started": 1793261728773,
+      "completed": 1793261728799,
+      "like": true
+    },
+    {
+      "id": "187",
+      "phase": "stable",
+      "started": 1793261729767,
+      "completed": 1793261729794,
+      "like": true
+    },
+    {
+      "id": "188",
+      "phase": "stable",
+      "started": 1793261730764,
+      "completed": 1793261730791,
+      "like": true
+    },
+    {
+      "id": "189",
+      "phase": "stable",
+      "started": 1793261731762,
+      "completed": 1793261731794,
+      "like": true
+    },
+    {
+      "id": "190",
+      "phase": "stable",
+      "started": 1793261732761,
+      "completed": 1793261732785,
+      "like": true
+    },
+    {
+      "id": "191",
+      "phase": "outage",
+      "started": 1793261744225,
+      "completed": 1793261744272,
+      "like": true
+    },
+    {
+      "id": "192",
+      "phase": "outage",
+      "started": 1793261744302,
+      "completed": 1793261744327,
+      "like": true
+    },
+    {
+      "id": "193",
+      "phase": "outage",
+      "started": 1793261744356,
+      "completed": 1793261744381,
+      "like": true
+    },
+    {
+      "id": "194",
+      "phase": "outage",
+      "started": 1793261744408,
+      "completed": 1793261744430,
+      "like": true
+    },
+    {
+      "id": "195",
+      "phase": "outage",
+      "started": 1793261744462,
+      "completed": 1793261744488,
+      "like": true
+    },
+    {
+      "id": "196",
+      "phase": "outage",
+      "started": 1793261744518,
+      "completed": 1793261744547,
+      "like": true
+    },
+    {
+      "id": "197",
+      "phase": "outage",
+      "started": 1793261744683,
+      "completed": 1793261744717,
+      "like": true
+    },
+    {
+      "id": "198",
+      "phase": "outage",
+      "started": 1793261744756,
+      "completed": 1793261744786,
+      "like": true
+    },
+    {
+      "id": "199",
+      "phase": "outage",
+      "started": 1793261744816,
+      "completed": 1793261744858,
+      "like": true
+    },
+    {
+      "id": "200",
+      "phase": "outage",
+      "started": 1793261744904,
+      "completed": 1793261744961,
+      "like": true
+    }
+  ],
+  "failures": [],
+  "snapshots": [
+    {
+      "label": "before-es-stop",
+      "at": "2026-10-29T08:15:40.711Z",
+      "rawSQL": "facts\t190\r\noutbox\tDONE\t380\r\nreceipt\tfeed-v1\tIGNORED\t190\r\nreceipt\tfeed-v1\tAPPLIED\t190\r\nreceipt\tfollow-v1\tIGNORED\t380\r\nreceipt\tsearch-v1\tIGNORED\t190\r\nreceipt\tsearch-v1\tAPPLIED\t190\r\nlike\t190\t190",
+      "offsets": {
+        "community.follow-v1": "GROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          380             380             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)",
+        "community.feed-v1": "GROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          380             380             0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)",
+        "community.search-v1": "GROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          380             380             0               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+      },
+      "parsedOffsets": {
+        "community.follow-v1": {
+          "partition": 0,
+          "committed": 380,
+          "end": 380,
+          "lag": 0
+        },
+        "community.feed-v1": {
+          "partition": 0,
+          "committed": 380,
+          "end": 380,
+          "lag": 0
+        },
+        "community.search-v1": {
+          "partition": 0,
+          "committed": 380,
+          "end": 380,
+          "lag": 0
+        }
+      }
+    },
+    {
+      "label": "es-down-parked",
+      "at": "2026-10-29T08:15:56.012Z",
+      "rawSQL": "facts\t200\r\noutbox\tDONE\t400\r\nreceipt\tfeed-v1\tIGNORED\t200\r\nreceipt\tfeed-v1\tAPPLIED\t200\r\nreceipt\tfollow-v1\tIGNORED\t400\r\nreceipt\tsearch-v1\tIGNORED\t200\r\nreceipt\tsearch-v1\tAPPLIED\t190\r\nfailure\tPARKED\t10\r\nlike\t200\t200",
+      "offsets": {
+        "community.follow-v1": "GROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          400             400             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)",
+        "community.feed-v1": "GROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          400             400             0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)",
+        "community.search-v1": "GROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          400             400             0               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+      },
+      "parsedOffsets": {
+        "community.follow-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.feed-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.search-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        }
+      }
+    },
+    {
+      "label": "recovered",
+      "at": "2026-10-29T08:16:32.410Z",
+      "rawSQL": "facts\t200\r\noutbox\tDONE\t400\r\nreceipt\tfeed-v1\tIGNORED\t200\r\nreceipt\tfeed-v1\tAPPLIED\t200\r\nreceipt\tfollow-v1\tIGNORED\t400\r\nreceipt\tsearch-v1\tIGNORED\t200\r\nreceipt\tsearch-v1\tAPPLIED\t200\r\nfailure\tRESOLVED\t10\r\nlike\t200\t200",
+      "offsets": {
+        "community.follow-v1": "GROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          400             400             0               api.exe@for_ever (github.com/segmentio/kafka-go)-1eaff843-6f44-4dd3-9ae7-f054e0ec3859 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)",
+        "community.feed-v1": "GROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          400             400             0               api.exe@for_ever (github.com/segmentio/kafka-go)-56fd8b49-11fc-421e-b914-14a388548513 /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)",
+        "community.search-v1": "GROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID                                                                           HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          400             400             0               api.exe@for_ever (github.com/segmentio/kafka-go)-37211595-b898-4218-a7e6-33f3236be56c /192.168.208.1  api.exe@for_ever (github.com/segmentio/kafka-go)"
+      },
+      "parsedOffsets": {
+        "community.follow-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.feed-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        },
+        "community.search-v1": {
+          "partition": 0,
+          "committed": 400,
+          "end": 400,
+          "lag": 0
+        }
+      }
+    }
+  ],
+  "visibility": [
+    {
+      "id": "2",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 13793
+    },
+    {
+      "id": "1",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 14864
+    },
+    {
+      "id": "3",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 12726
+    },
+    {
+      "id": "4",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 11672
+    },
+    {
+      "id": "5",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 10593
+    },
+    {
+      "id": "6",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 9536
+    },
+    {
+      "id": "7",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 8464
+    },
+    {
+      "id": "8",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 7397
+    },
+    {
+      "id": "9",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 6339
+    },
+    {
+      "id": "10",
+      "phase": "warmup",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 5285
+    },
+    {
+      "id": "11",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 4086
+    },
+    {
+      "id": "12",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 3079
+    },
+    {
+      "id": "13",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 2077
+    },
+    {
+      "id": "14",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261557846,
+      "fromRequestStartMs": 1082
+    },
+    {
+      "id": "15",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261562842,
+      "fromRequestStartMs": 5073
+    },
+    {
+      "id": "16",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261562842,
+      "fromRequestStartMs": 4076
+    },
+    {
+      "id": "17",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261562842,
+      "fromRequestStartMs": 3078
+    },
+    {
+      "id": "18",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261562842,
+      "fromRequestStartMs": 2079
+    },
+    {
+      "id": "19",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261562842,
+      "fromRequestStartMs": 1073
+    },
+    {
+      "id": "20",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261567841,
+      "fromRequestStartMs": 5070
+    },
+    {
+      "id": "21",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261567841,
+      "fromRequestStartMs": 4081
+    },
+    {
+      "id": "22",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261567841,
+      "fromRequestStartMs": 3077
+    },
+    {
+      "id": "23",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261567841,
+      "fromRequestStartMs": 2073
+    },
+    {
+      "id": "25",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261572829,
+      "fromRequestStartMs": 5061
+    },
+    {
+      "id": "26",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261572829,
+      "fromRequestStartMs": 4067
+    },
+    {
+      "id": "24",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261572829,
+      "fromRequestStartMs": 6069
+    },
+    {
+      "id": "27",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261572829,
+      "fromRequestStartMs": 3059
+    },
+    {
+      "id": "28",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261572829,
+      "fromRequestStartMs": 2065
+    },
+    {
+      "id": "29",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261572829,
+      "fromRequestStartMs": 1063
+    },
+    {
+      "id": "30",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261577825,
+      "fromRequestStartMs": 5061
+    },
+    {
+      "id": "31",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261577825,
+      "fromRequestStartMs": 4055
+    },
+    {
+      "id": "32",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261577825,
+      "fromRequestStartMs": 3060
+    },
+    {
+      "id": "33",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261577825,
+      "fromRequestStartMs": 2057
+    },
+    {
+      "id": "34",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261577825,
+      "fromRequestStartMs": 1064
+    },
+    {
+      "id": "35",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261582832,
+      "fromRequestStartMs": 5066
+    },
+    {
+      "id": "36",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261582832,
+      "fromRequestStartMs": 4070
+    },
+    {
+      "id": "37",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261582832,
+      "fromRequestStartMs": 3063
+    },
+    {
+      "id": "38",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261582832,
+      "fromRequestStartMs": 2067
+    },
+    {
+      "id": "39",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261582832,
+      "fromRequestStartMs": 1066
+    },
+    {
+      "id": "40",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261587821,
+      "fromRequestStartMs": 5050
+    },
+    {
+      "id": "41",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261587821,
+      "fromRequestStartMs": 4056
+    },
+    {
+      "id": "42",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261587821,
+      "fromRequestStartMs": 3054
+    },
+    {
+      "id": "43",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261587821,
+      "fromRequestStartMs": 2060
+    },
+    {
+      "id": "44",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261587821,
+      "fromRequestStartMs": 1058
+    },
+    {
+      "id": "45",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261592822,
+      "fromRequestStartMs": 5061
+    },
+    {
+      "id": "46",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261592822,
+      "fromRequestStartMs": 4060
+    },
+    {
+      "id": "47",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261592822,
+      "fromRequestStartMs": 3058
+    },
+    {
+      "id": "48",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261592822,
+      "fromRequestStartMs": 2053
+    },
+    {
+      "id": "49",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261597851,
+      "fromRequestStartMs": 6081
+    },
+    {
+      "id": "50",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261597851,
+      "fromRequestStartMs": 5091
+    },
+    {
+      "id": "51",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261597851,
+      "fromRequestStartMs": 4088
+    },
+    {
+      "id": "52",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261597851,
+      "fromRequestStartMs": 3089
+    },
+    {
+      "id": "53",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261597851,
+      "fromRequestStartMs": 2087
+    },
+    {
+      "id": "54",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261602845,
+      "fromRequestStartMs": 6080
+    },
+    {
+      "id": "55",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261602845,
+      "fromRequestStartMs": 5080
+    },
+    {
+      "id": "56",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261602845,
+      "fromRequestStartMs": 4083
+    },
+    {
+      "id": "57",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261602845,
+      "fromRequestStartMs": 3076
+    },
+    {
+      "id": "58",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261602845,
+      "fromRequestStartMs": 2079
+    },
+    {
+      "id": "59",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261602845,
+      "fromRequestStartMs": 1076
+    },
+    {
+      "id": "60",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261607833,
+      "fromRequestStartMs": 5065
+    },
+    {
+      "id": "61",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261607833,
+      "fromRequestStartMs": 4071
+    },
+    {
+      "id": "62",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261607833,
+      "fromRequestStartMs": 3068
+    },
+    {
+      "id": "63",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261607833,
+      "fromRequestStartMs": 2065
+    },
+    {
+      "id": "64",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261607833,
+      "fromRequestStartMs": 1066
+    },
+    {
+      "id": "65",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261612832,
+      "fromRequestStartMs": 5069
+    },
+    {
+      "id": "66",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261612832,
+      "fromRequestStartMs": 4061
+    },
+    {
+      "id": "67",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261612832,
+      "fromRequestStartMs": 3070
+    },
+    {
+      "id": "68",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261612832,
+      "fromRequestStartMs": 2070
+    },
+    {
+      "id": "69",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261612832,
+      "fromRequestStartMs": 1067
+    },
+    {
+      "id": "70",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261617830,
+      "fromRequestStartMs": 5067
+    },
+    {
+      "id": "71",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261617830,
+      "fromRequestStartMs": 4064
+    },
+    {
+      "id": "72",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261617830,
+      "fromRequestStartMs": 3068
+    },
+    {
+      "id": "73",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261617830,
+      "fromRequestStartMs": 2067
+    },
+    {
+      "id": "74",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261617830,
+      "fromRequestStartMs": 1070
+    },
+    {
+      "id": "75",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261622848,
+      "fromRequestStartMs": 5085
+    },
+    {
+      "id": "76",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261622848,
+      "fromRequestStartMs": 4085
+    },
+    {
+      "id": "77",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261622848,
+      "fromRequestStartMs": 3088
+    },
+    {
+      "id": "78",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261622848,
+      "fromRequestStartMs": 2082
+    },
+    {
+      "id": "79",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261622848,
+      "fromRequestStartMs": 1087
+    },
+    {
+      "id": "80",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261627840,
+      "fromRequestStartMs": 5078
+    },
+    {
+      "id": "81",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261627840,
+      "fromRequestStartMs": 4077
+    },
+    {
+      "id": "82",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261627840,
+      "fromRequestStartMs": 3072
+    },
+    {
+      "id": "83",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261627840,
+      "fromRequestStartMs": 2078
+    },
+    {
+      "id": "84",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261627840,
+      "fromRequestStartMs": 1079
+    },
+    {
+      "id": "85",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261632841,
+      "fromRequestStartMs": 5073
+    },
+    {
+      "id": "86",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261632841,
+      "fromRequestStartMs": 4072
+    },
+    {
+      "id": "87",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261632841,
+      "fromRequestStartMs": 3077
+    },
+    {
+      "id": "88",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261632841,
+      "fromRequestStartMs": 2076
+    },
+    {
+      "id": "89",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261632841,
+      "fromRequestStartMs": 1077
+    },
+    {
+      "id": "90",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261637845,
+      "fromRequestStartMs": 5075
+    },
+    {
+      "id": "91",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261637845,
+      "fromRequestStartMs": 4079
+    },
+    {
+      "id": "92",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261637845,
+      "fromRequestStartMs": 3071
+    },
+    {
+      "id": "93",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261637845,
+      "fromRequestStartMs": 2074
+    },
+    {
+      "id": "94",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261637845,
+      "fromRequestStartMs": 1078
+    },
+    {
+      "id": "95",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261642831,
+      "fromRequestStartMs": 5070
+    },
+    {
+      "id": "96",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261642831,
+      "fromRequestStartMs": 4066
+    },
+    {
+      "id": "97",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261642831,
+      "fromRequestStartMs": 3068
+    },
+    {
+      "id": "98",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261642831,
+      "fromRequestStartMs": 2062
+    },
+    {
+      "id": "99",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261647830,
+      "fromRequestStartMs": 6067
+    },
+    {
+      "id": "100",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261647830,
+      "fromRequestStartMs": 5066
+    },
+    {
+      "id": "101",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261647830,
+      "fromRequestStartMs": 4069
+    },
+    {
+      "id": "102",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261647830,
+      "fromRequestStartMs": 3067
+    },
+    {
+      "id": "103",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261647830,
+      "fromRequestStartMs": 2068
+    },
+    {
+      "id": "104",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261647830,
+      "fromRequestStartMs": 1058
+    },
+    {
+      "id": "105",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261652828,
+      "fromRequestStartMs": 5067
+    },
+    {
+      "id": "106",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261652828,
+      "fromRequestStartMs": 4060
+    },
+    {
+      "id": "107",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261652828,
+      "fromRequestStartMs": 3061
+    },
+    {
+      "id": "108",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261652828,
+      "fromRequestStartMs": 2065
+    },
+    {
+      "id": "109",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261652828,
+      "fromRequestStartMs": 1062
+    },
+    {
+      "id": "110",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261657854,
+      "fromRequestStartMs": 5092
+    },
+    {
+      "id": "111",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261657854,
+      "fromRequestStartMs": 4092
+    },
+    {
+      "id": "112",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261657854,
+      "fromRequestStartMs": 3094
+    },
+    {
+      "id": "113",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261657854,
+      "fromRequestStartMs": 2088
+    },
+    {
+      "id": "114",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261657854,
+      "fromRequestStartMs": 1084
+    },
+    {
+      "id": "115",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261662851,
+      "fromRequestStartMs": 5086
+    },
+    {
+      "id": "116",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261662851,
+      "fromRequestStartMs": 4087
+    },
+    {
+      "id": "117",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261662851,
+      "fromRequestStartMs": 3086
+    },
+    {
+      "id": "118",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261662851,
+      "fromRequestStartMs": 2091
+    },
+    {
+      "id": "119",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261662851,
+      "fromRequestStartMs": 1090
+    },
+    {
+      "id": "120",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261667848,
+      "fromRequestStartMs": 5083
+    },
+    {
+      "id": "121",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261667848,
+      "fromRequestStartMs": 4083
+    },
+    {
+      "id": "122",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261667848,
+      "fromRequestStartMs": 3076
+    },
+    {
+      "id": "123",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261667848,
+      "fromRequestStartMs": 2085
+    },
+    {
+      "id": "124",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261672836,
+      "fromRequestStartMs": 6073
+    },
+    {
+      "id": "125",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261672836,
+      "fromRequestStartMs": 5067
+    },
+    {
+      "id": "126",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261672836,
+      "fromRequestStartMs": 4068
+    },
+    {
+      "id": "127",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261672836,
+      "fromRequestStartMs": 3074
+    },
+    {
+      "id": "128",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261672836,
+      "fromRequestStartMs": 2072
+    },
+    {
+      "id": "129",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261672836,
+      "fromRequestStartMs": 1071
+    },
+    {
+      "id": "130",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261677833,
+      "fromRequestStartMs": 5072
+    },
+    {
+      "id": "131",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261677833,
+      "fromRequestStartMs": 4068
+    },
+    {
+      "id": "132",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261677833,
+      "fromRequestStartMs": 3072
+    },
+    {
+      "id": "133",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261677833,
+      "fromRequestStartMs": 2066
+    },
+    {
+      "id": "134",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261677833,
+      "fromRequestStartMs": 1073
+    },
+    {
+      "id": "135",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261682836,
+      "fromRequestStartMs": 5068
+    },
+    {
+      "id": "136",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261682836,
+      "fromRequestStartMs": 4072
+    },
+    {
+      "id": "137",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261682836,
+      "fromRequestStartMs": 3073
+    },
+    {
+      "id": "138",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261682836,
+      "fromRequestStartMs": 2069
+    },
+    {
+      "id": "139",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261682836,
+      "fromRequestStartMs": 1073
+    },
+    {
+      "id": "140",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261687833,
+      "fromRequestStartMs": 5069
+    },
+    {
+      "id": "141",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261687833,
+      "fromRequestStartMs": 4068
+    },
+    {
+      "id": "142",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261687833,
+      "fromRequestStartMs": 3070
+    },
+    {
+      "id": "143",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261687833,
+      "fromRequestStartMs": 2064
+    },
+    {
+      "id": "144",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261687833,
+      "fromRequestStartMs": 1068
+    },
+    {
+      "id": "145",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261692827,
+      "fromRequestStartMs": 5063
+    },
+    {
+      "id": "146",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261692827,
+      "fromRequestStartMs": 4059
+    },
+    {
+      "id": "147",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261692827,
+      "fromRequestStartMs": 3059
+    },
+    {
+      "id": "148",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261692827,
+      "fromRequestStartMs": 2063
+    },
+    {
+      "id": "149",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261692827,
+      "fromRequestStartMs": 1061
+    },
+    {
+      "id": "150",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261697851,
+      "fromRequestStartMs": 5084
+    },
+    {
+      "id": "151",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261697851,
+      "fromRequestStartMs": 4085
+    },
+    {
+      "id": "152",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261697851,
+      "fromRequestStartMs": 3087
+    },
+    {
+      "id": "153",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261697851,
+      "fromRequestStartMs": 2085
+    },
+    {
+      "id": "154",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261697851,
+      "fromRequestStartMs": 1081
+    },
+    {
+      "id": "155",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261702823,
+      "fromRequestStartMs": 5055
+    },
+    {
+      "id": "156",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261702823,
+      "fromRequestStartMs": 4060
+    },
+    {
+      "id": "157",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261702823,
+      "fromRequestStartMs": 3061
+    },
+    {
+      "id": "158",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261702823,
+      "fromRequestStartMs": 2057
+    },
+    {
+      "id": "159",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261702823,
+      "fromRequestStartMs": 1061
+    },
+    {
+      "id": "160",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261707842,
+      "fromRequestStartMs": 5075
+    },
+    {
+      "id": "161",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261707842,
+      "fromRequestStartMs": 4073
+    },
+    {
+      "id": "162",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261707842,
+      "fromRequestStartMs": 3077
+    },
+    {
+      "id": "163",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261707842,
+      "fromRequestStartMs": 2075
+    },
+    {
+      "id": "164",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261707842,
+      "fromRequestStartMs": 1079
+    },
+    {
+      "id": "165",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261712844,
+      "fromRequestStartMs": 5076
+    },
+    {
+      "id": "166",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261712844,
+      "fromRequestStartMs": 4077
+    },
+    {
+      "id": "167",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261712844,
+      "fromRequestStartMs": 3081
+    },
+    {
+      "id": "168",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261712844,
+      "fromRequestStartMs": 2084
+    },
+    {
+      "id": "172",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261717839,
+      "fromRequestStartMs": 3071
+    },
+    {
+      "id": "173",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261717839,
+      "fromRequestStartMs": 2076
+    },
+    {
+      "id": "169",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261717839,
+      "fromRequestStartMs": 6072
+    },
+    {
+      "id": "170",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261717839,
+      "fromRequestStartMs": 5079
+    },
+    {
+      "id": "171",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261717839,
+      "fromRequestStartMs": 4071
+    },
+    {
+      "id": "174",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261722828,
+      "fromRequestStartMs": 6067
+    },
+    {
+      "id": "175",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261722828,
+      "fromRequestStartMs": 5060
+    },
+    {
+      "id": "176",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261722828,
+      "fromRequestStartMs": 4060
+    },
+    {
+      "id": "177",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261722828,
+      "fromRequestStartMs": 3063
+    },
+    {
+      "id": "178",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261722828,
+      "fromRequestStartMs": 2068
+    },
+    {
+      "id": "179",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261722828,
+      "fromRequestStartMs": 1064
+    },
+    {
+      "id": "180",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261727833,
+      "fromRequestStartMs": 5072
+    },
+    {
+      "id": "181",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261727833,
+      "fromRequestStartMs": 4067
+    },
+    {
+      "id": "182",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261727833,
+      "fromRequestStartMs": 3071
+    },
+    {
+      "id": "183",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261727833,
+      "fromRequestStartMs": 2068
+    },
+    {
+      "id": "184",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261727833,
+      "fromRequestStartMs": 1072
+    },
+    {
+      "id": "185",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261732821,
+      "fromRequestStartMs": 5054
+    },
+    {
+      "id": "186",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261732821,
+      "fromRequestStartMs": 4048
+    },
+    {
+      "id": "187",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261732821,
+      "fromRequestStartMs": 3054
+    },
+    {
+      "id": "188",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261732821,
+      "fromRequestStartMs": 2057
+    },
+    {
+      "id": "189",
+      "phase": "stable",
+      "observationPhase": "stable",
+      "version": 1,
+      "observedAt": 1793261732821,
+      "fromRequestStartMs": 1059
+    },
+    {
+      "id": "190",
+      "phase": "stable",
+      "observationPhase": "tail",
+      "version": 1,
+      "observedAt": 1793261734143,
+      "fromRequestStartMs": 1382
+    }
+  ],
+  "timings": {
+    "warmupStart": "2026-10-29T08:12:22.982Z",
+    "warmupEnd": "2026-10-29T08:12:33.760Z",
+    "stableStart": "2026-10-29T08:12:33.760Z",
+    "stableEnd": "2026-10-29T08:15:32.821Z",
+    "stableElapsedMs": 179061,
+    "stopRequested": "2026-10-29T08:15:40.711Z",
+    "stopped": "2026-10-29T08:15:44.225Z",
+    "startRequested": "2026-10-29T08:15:56.012Z",
+    "esHealthy": "2026-10-29T08:16:24.314Z",
+    "converged": "2026-10-29T08:16:25.932Z"
+  },
+  "success": true,
+  "generation": [
+    "go073-event-notes-build-7e4dfa160c898d1f"
+  ],
+  "shopId": "1",
+  "userId": "3",
+  "replays": [
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "380",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "382",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "384",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "386",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "388",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "390",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "392",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "394",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "396",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    },
+    {
+      "topic": "community.events",
+      "partition": "0",
+      "offset": "398",
+      "output": "{\"operation\":\"replay\",\"projection\":\"search-v1\",\"result\":\"committed\"}"
+    }
+  ],
+  "visibleFinal": [
+    {
+      "id": "2",
+      "version": 1
+    },
+    {
+      "id": "1",
+      "version": 1
+    },
+    {
+      "id": "3",
+      "version": 1
+    },
+    {
+      "id": "4",
+      "version": 1
+    },
+    {
+      "id": "25",
+      "version": 1
+    },
+    {
+      "id": "26",
+      "version": 1
+    },
+    {
+      "id": "17",
+      "version": 1
+    },
+    {
+      "id": "18",
+      "version": 1
+    },
+    {
+      "id": "19",
+      "version": 1
+    },
+    {
+      "id": "20",
+      "version": 1
+    },
+    {
+      "id": "21",
+      "version": 1
+    },
+    {
+      "id": "22",
+      "version": 1
+    },
+    {
+      "id": "23",
+      "version": 1
+    },
+    {
+      "id": "24",
+      "version": 1
+    },
+    {
+      "id": "42",
+      "version": 1
+    },
+    {
+      "id": "43",
+      "version": 1
+    },
+    {
+      "id": "44",
+      "version": 1
+    },
+    {
+      "id": "45",
+      "version": 1
+    },
+    {
+      "id": "46",
+      "version": 1
+    },
+    {
+      "id": "38",
+      "version": 1
+    },
+    {
+      "id": "39",
+      "version": 1
+    },
+    {
+      "id": "40",
+      "version": 1
+    },
+    {
+      "id": "41",
+      "version": 1
+    },
+    {
+      "id": "47",
+      "version": 1
+    },
+    {
+      "id": "48",
+      "version": 1
+    },
+    {
+      "id": "50",
+      "version": 1
+    },
+    {
+      "id": "51",
+      "version": 1
+    },
+    {
+      "id": "52",
+      "version": 1
+    },
+    {
+      "id": "53",
+      "version": 1
+    },
+    {
+      "id": "54",
+      "version": 1
+    },
+    {
+      "id": "55",
+      "version": 1
+    },
+    {
+      "id": "49",
+      "version": 1
+    },
+    {
+      "id": "56",
+      "version": 1
+    },
+    {
+      "id": "57",
+      "version": 1
+    },
+    {
+      "id": "58",
+      "version": 1
+    },
+    {
+      "id": "59",
+      "version": 1
+    },
+    {
+      "id": "82",
+      "version": 1
+    },
+    {
+      "id": "83",
+      "version": 1
+    },
+    {
+      "id": "84",
+      "version": 1
+    },
+    {
+      "id": "85",
+      "version": 1
+    },
+    {
+      "id": "86",
+      "version": 1
+    },
+    {
+      "id": "87",
+      "version": 1
+    },
+    {
+      "id": "88",
+      "version": 1
+    },
+    {
+      "id": "89",
+      "version": 1
+    },
+    {
+      "id": "90",
+      "version": 1
+    },
+    {
+      "id": "99",
+      "version": 1
+    },
+    {
+      "id": "100",
+      "version": 1
+    },
+    {
+      "id": "96",
+      "version": 1
+    },
+    {
+      "id": "97",
+      "version": 1
+    },
+    {
+      "id": "101",
+      "version": 1
+    },
+    {
+      "id": "91",
+      "version": 1
+    },
+    {
+      "id": "92",
+      "version": 1
+    },
+    {
+      "id": "93",
+      "version": 1
+    },
+    {
+      "id": "94",
+      "version": 1
+    },
+    {
+      "id": "95",
+      "version": 1
+    },
+    {
+      "id": "98",
+      "version": 1
+    },
+    {
+      "id": "122",
+      "version": 1
+    },
+    {
+      "id": "123",
+      "version": 1
+    },
+    {
+      "id": "124",
+      "version": 1
+    },
+    {
+      "id": "125",
+      "version": 1
+    },
+    {
+      "id": "126",
+      "version": 1
+    },
+    {
+      "id": "127",
+      "version": 1
+    },
+    {
+      "id": "128",
+      "version": 1
+    },
+    {
+      "id": "129",
+      "version": 1
+    },
+    {
+      "id": "121",
+      "version": 1
+    },
+    {
+      "id": "130",
+      "version": 1
+    },
+    {
+      "id": "131",
+      "version": 1
+    },
+    {
+      "id": "132",
+      "version": 1
+    },
+    {
+      "id": "133",
+      "version": 1
+    },
+    {
+      "id": "145",
+      "version": 1
+    },
+    {
+      "id": "146",
+      "version": 1
+    },
+    {
+      "id": "147",
+      "version": 1
+    },
+    {
+      "id": "148",
+      "version": 1
+    },
+    {
+      "id": "150",
+      "version": 1
+    },
+    {
+      "id": "151",
+      "version": 1
+    },
+    {
+      "id": "143",
+      "version": 1
+    },
+    {
+      "id": "144",
+      "version": 1
+    },
+    {
+      "id": "149",
+      "version": 1
+    },
+    {
+      "id": "152",
+      "version": 1
+    },
+    {
+      "id": "153",
+      "version": 1
+    },
+    {
+      "id": "154",
+      "version": 1
+    },
+    {
+      "id": "172",
+      "version": 1
+    },
+    {
+      "id": "173",
+      "version": 1
+    },
+    {
+      "id": "164",
+      "version": 1
+    },
+    {
+      "id": "165",
+      "version": 1
+    },
+    {
+      "id": "166",
+      "version": 1
+    },
+    {
+      "id": "167",
+      "version": 1
+    },
+    {
+      "id": "168",
+      "version": 1
+    },
+    {
+      "id": "169",
+      "version": 1
+    },
+    {
+      "id": "170",
+      "version": 1
+    },
+    {
+      "id": "171",
+      "version": 1
+    },
+    {
+      "id": "5",
+      "version": 1
+    },
+    {
+      "id": "6",
+      "version": 1
+    },
+    {
+      "id": "7",
+      "version": 1
+    },
+    {
+      "id": "8",
+      "version": 1
+    },
+    {
+      "id": "9",
+      "version": 1
+    },
+    {
+      "id": "10",
+      "version": 1
+    },
+    {
+      "id": "11",
+      "version": 1
+    },
+    {
+      "id": "12",
+      "version": 1
+    },
+    {
+      "id": "13",
+      "version": 1
+    },
+    {
+      "id": "14",
+      "version": 1
+    },
+    {
+      "id": "15",
+      "version": 1
+    },
+    {
+      "id": "16",
+      "version": 1
+    },
+    {
+      "id": "27",
+      "version": 1
+    },
+    {
+      "id": "28",
+      "version": 1
+    },
+    {
+      "id": "30",
+      "version": 1
+    },
+    {
+      "id": "31",
+      "version": 1
+    },
+    {
+      "id": "29",
+      "version": 1
+    },
+    {
+      "id": "32",
+      "version": 1
+    },
+    {
+      "id": "33",
+      "version": 1
+    },
+    {
+      "id": "34",
+      "version": 1
+    },
+    {
+      "id": "35",
+      "version": 1
+    },
+    {
+      "id": "36",
+      "version": 1
+    },
+    {
+      "id": "37",
+      "version": 1
+    },
+    {
+      "id": "60",
+      "version": 1
+    },
+    {
+      "id": "61",
+      "version": 1
+    },
+    {
+      "id": "62",
+      "version": 1
+    },
+    {
+      "id": "63",
+      "version": 1
+    },
+    {
+      "id": "64",
+      "version": 1
+    },
+    {
+      "id": "65",
+      "version": 1
+    },
+    {
+      "id": "66",
+      "version": 1
+    },
+    {
+      "id": "67",
+      "version": 1
+    },
+    {
+      "id": "68",
+      "version": 1
+    },
+    {
+      "id": "73",
+      "version": 1
+    },
+    {
+      "id": "74",
+      "version": 1
+    },
+    {
+      "id": "75",
+      "version": 1
+    },
+    {
+      "id": "76",
+      "version": 1
+    },
+    {
+      "id": "78",
+      "version": 1
+    },
+    {
+      "id": "79",
+      "version": 1
+    },
+    {
+      "id": "80",
+      "version": 1
+    },
+    {
+      "id": "81",
+      "version": 1
+    },
+    {
+      "id": "69",
+      "version": 1
+    },
+    {
+      "id": "70",
+      "version": 1
+    },
+    {
+      "id": "71",
+      "version": 1
+    },
+    {
+      "id": "72",
+      "version": 1
+    },
+    {
+      "id": "77",
+      "version": 1
+    },
+    {
+      "id": "102",
+      "version": 1
+    },
+    {
+      "id": "103",
+      "version": 1
+    },
+    {
+      "id": "104",
+      "version": 1
+    },
+    {
+      "id": "105",
+      "version": 1
+    },
+    {
+      "id": "106",
+      "version": 1
+    },
+    {
+      "id": "107",
+      "version": 1
+    },
+    {
+      "id": "108",
+      "version": 1
+    },
+    {
+      "id": "109",
+      "version": 1
+    },
+    {
+      "id": "110",
+      "version": 1
+    },
+    {
+      "id": "111",
+      "version": 1
+    },
+    {
+      "id": "112",
+      "version": 1
+    },
+    {
+      "id": "113",
+      "version": 1
+    },
+    {
+      "id": "114",
+      "version": 1
+    },
+    {
+      "id": "115",
+      "version": 1
+    },
+    {
+      "id": "116",
+      "version": 1
+    },
+    {
+      "id": "117",
+      "version": 1
+    },
+    {
+      "id": "118",
+      "version": 1
+    },
+    {
+      "id": "119",
+      "version": 1
+    },
+    {
+      "id": "120",
+      "version": 1
+    },
+    {
+      "id": "134",
+      "version": 1
+    },
+    {
+      "id": "135",
+      "version": 1
+    },
+    {
+      "id": "136",
+      "version": 1
+    },
+    {
+      "id": "137",
+      "version": 1
+    },
+    {
+      "id": "138",
+      "version": 1
+    },
+    {
+      "id": "139",
+      "version": 1
+    },
+    {
+      "id": "140",
+      "version": 1
+    },
+    {
+      "id": "141",
+      "version": 1
+    },
+    {
+      "id": "142",
+      "version": 1
+    },
+    {
+      "id": "155",
+      "version": 1
+    },
+    {
+      "id": "156",
+      "version": 1
+    },
+    {
+      "id": "157",
+      "version": 1
+    },
+    {
+      "id": "158",
+      "version": 1
+    },
+    {
+      "id": "159",
+      "version": 1
+    },
+    {
+      "id": "160",
+      "version": 1
+    },
+    {
+      "id": "161",
+      "version": 1
+    },
+    {
+      "id": "162",
+      "version": 1
+    },
+    {
+      "id": "163",
+      "version": 1
+    },
+    {
+      "id": "174",
+      "version": 1
+    },
+    {
+      "id": "175",
+      "version": 1
+    },
+    {
+      "id": "176",
+      "version": 1
+    },
+    {
+      "id": "177",
+      "version": 1
+    },
+    {
+      "id": "178",
+      "version": 1
+    },
+    {
+      "id": "179",
+      "version": 1
+    },
+    {
+      "id": "180",
+      "version": 1
+    },
+    {
+      "id": "181",
+      "version": 1
+    },
+    {
+      "id": "182",
+      "version": 1
+    },
+    {
+      "id": "183",
+      "version": 1
+    },
+    {
+      "id": "184",
+      "version": 1
+    },
+    {
+      "id": "185",
+      "version": 1
+    },
+    {
+      "id": "186",
+      "version": 1
+    },
+    {
+      "id": "187",
+      "version": 1
+    },
+    {
+      "id": "188",
+      "version": 1
+    },
+    {
+      "id": "189",
+      "version": 1
+    },
+    {
+      "id": "190",
+      "version": 1
+    },
+    {
+      "id": "191",
+      "version": 1
+    },
+    {
+      "id": "192",
+      "version": 1
+    },
+    {
+      "id": "193",
+      "version": 1
+    },
+    {
+      "id": "194",
+      "version": 1
+    },
+    {
+      "id": "195",
+      "version": 1
+    },
+    {
+      "id": "196",
+      "version": 1
+    },
+    {
+      "id": "197",
+      "version": 1
+    },
+    {
+      "id": "198",
+      "version": 1
+    },
+    {
+      "id": "199",
+      "version": 1
+    },
+    {
+      "id": "200",
+      "version": 1
+    }
+  ],
+  "reconciliation": {
+    "facts": 200,
+    "likeOrVersionMismatches": 0,
+    "wrongOutbox": 0,
+    "wrongReceipt": 0,
+    "stateVersions": 200,
+    "parked": 0,
+    "resolved": 10
+  },
+  "projectionLatencyRaw": "NOTE:1:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t2272000\tfeed-v1\tAPPLIED\t5414000\r\nNOTE:1:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t2272000\tfollow-v1\tIGNORED\t5421000\r\nNOTE:1:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t2272000\tsearch-v1\tAPPLIED\t5522000\r\nLIKE:1:3:1\tLIKE_CHANGED\tDONE\t2287000\tfeed-v1\tIGNORED\t5421000\r\nLIKE:1:3:1\tLIKE_CHANGED\tDONE\t2287000\tfollow-v1\tIGNORED\t5414000\r\nLIKE:1:3:1\tLIKE_CHANGED\tDONE\t2287000\tsearch-v1\tIGNORED\t5518000\r\nNOTE:2:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t174000\tfeed-v1\tAPPLIED\t4316000\r\nNOTE:2:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t174000\tfollow-v1\tIGNORED\t4315000\r\nNOTE:2:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t174000\tsearch-v1\tAPPLIED\t4413000\r\nLIKE:2:3:1\tLIKE_CHANGED\tDONE\t184000\tfeed-v1\tIGNORED\t4331000\r\nLIKE:2:3:1\tLIKE_CHANGED\tDONE\t184000\tfollow-v1\tIGNORED\t4331000\r\nLIKE:2:3:1\tLIKE_CHANGED\tDONE\t184000\tsearch-v1\tIGNORED\t4404000\r\nNOTE:3:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t285000\tfeed-v1\tAPPLIED\t3407000\r\nNOTE:3:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t285000\tfollow-v1\tIGNORED\t3400000\r\nNOTE:3:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t285000\tsearch-v1\tAPPLIED\t3536000\r\nLIKE:3:3:1\tLIKE_CHANGED\tDONE\t298000\tfeed-v1\tIGNORED\t3417000\r\nLIKE:3:3:1\tLIKE_CHANGED\tDONE\t298000\tfollow-v1\tIGNORED\t3397000\r\nLIKE:3:3:1\tLIKE_CHANGED\tDONE\t298000\tsearch-v1\tIGNORED\t3543000\r\nNOTE:4:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t122000\tfeed-v1\tAPPLIED\t2430000\r\nNOTE:4:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t122000\tfollow-v1\tIGNORED\t2411000\r\nNOTE:4:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t122000\tsearch-v1\tAPPLIED\t2581000\r\nLIKE:4:3:1\tLIKE_CHANGED\tDONE\t131000\tfeed-v1\tIGNORED\t2436000\r\nLIKE:4:3:1\tLIKE_CHANGED\tDONE\t131000\tfollow-v1\tIGNORED\t2409000\r\nLIKE:4:3:1\tLIKE_CHANGED\tDONE\t131000\tsearch-v1\tIGNORED\t2588000\r\nNOTE:5:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t155000\tfeed-v1\tAPPLIED\t1476000\r\nNOTE:5:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t155000\tfollow-v1\tIGNORED\t1435000\r\nNOTE:5:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t155000\tsearch-v1\tAPPLIED\t1643000\r\nLIKE:5:3:1\tLIKE_CHANGED\tDONE\t171000\tfeed-v1\tIGNORED\t1485000\r\nLIKE:5:3:1\tLIKE_CHANGED\tDONE\t171000\tfollow-v1\tIGNORED\t1445000\r\nLIKE:5:3:1\tLIKE_CHANGED\tDONE\t171000\tsearch-v1\tIGNORED\t1641000\r\nNOTE:6:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t201000\tfeed-v1\tAPPLIED\t514000\r\nNOTE:6:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t201000\tfollow-v1\tIGNORED\t470000\r\nNOTE:6:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t201000\tsearch-v1\tAPPLIED\t685000\r\nLIKE:6:3:1\tLIKE_CHANGED\tDONE\t214000\tfeed-v1\tIGNORED\t531000\r\nLIKE:6:3:1\tLIKE_CHANGED\tDONE\t214000\tfollow-v1\tIGNORED\t458000\r\nLIKE:6:3:1\tLIKE_CHANGED\tDONE\t214000\tsearch-v1\tIGNORED\t674000\r\nNOTE:7:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t39000\tfeed-v1\tAPPLIED\t45000\r\nNOTE:7:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t39000\tfollow-v1\tIGNORED\t45000\r\nNOTE:7:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t39000\tsearch-v1\tAPPLIED\t81000\r\nLIKE:7:3:1\tLIKE_CHANGED\tDONE\t54000\tfeed-v1\tIGNORED\t59000\r\nLIKE:7:3:1\tLIKE_CHANGED\tDONE\t54000\tfollow-v1\tIGNORED\t60000\r\nLIKE:7:3:1\tLIKE_CHANGED\tDONE\t54000\tsearch-v1\tIGNORED\t84000\r\nNOTE:8:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t85000\tfeed-v1\tAPPLIED\t248000\r\nNOTE:8:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t85000\tfollow-v1\tIGNORED\t247000\r\nNOTE:8:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t85000\tsearch-v1\tAPPLIED\t288000\r\nLIKE:8:3:1\tLIKE_CHANGED\tDONE\t91000\tfeed-v1\tIGNORED\t251000\r\nLIKE:8:3:1\tLIKE_CHANGED\tDONE\t91000\tfollow-v1\tIGNORED\t238000\r\nLIKE:8:3:1\tLIKE_CHANGED\tDONE\t91000\tsearch-v1\tIGNORED\t285000\r\nNOTE:9:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t107000\tfeed-v1\tAPPLIED\t111000\r\nNOTE:9:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t107000\tfollow-v1\tIGNORED\t112000\r\nNOTE:9:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t107000\tsearch-v1\tAPPLIED\t135000\r\nLIKE:9:3:1\tLIKE_CHANGED\tDONE\t122000\tfeed-v1\tIGNORED\t129000\r\nLIKE:9:3:1\tLIKE_CHANGED\tDONE\t122000\tfollow-v1\tIGNORED\t129000\r\nLIKE:9:3:1\tLIKE_CHANGED\tDONE\t122000\tsearch-v1\tIGNORED\t137000\r\nNOTE:10:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tfeed-v1\tAPPLIED\t320000\r\nNOTE:10:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tfollow-v1\tIGNORED\t320000\r\nNOTE:10:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tsearch-v1\tAPPLIED\t360000\r\nLIKE:10:3:1\tLIKE_CHANGED\tDONE\t169000\tfeed-v1\tIGNORED\t328000\r\nLIKE:10:3:1\tLIKE_CHANGED\tDONE\t169000\tfollow-v1\tIGNORED\t321000\r\nLIKE:10:3:1\tLIKE_CHANGED\tDONE\t169000\tsearch-v1\tIGNORED\t359000\r\nNOTE:11:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t52000\tfeed-v1\tAPPLIED\t57000\r\nNOTE:11:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t52000\tfollow-v1\tIGNORED\t57000\r\nNOTE:11:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t52000\tsearch-v1\tAPPLIED\t86000\r\nLIKE:11:3:1\tLIKE_CHANGED\tDONE\t68000\tfeed-v1\tIGNORED\t74000\r\nLIKE:11:3:1\tLIKE_CHANGED\tDONE\t68000\tfollow-v1\tIGNORED\t74000\r\nLIKE:11:3:1\tLIKE_CHANGED\tDONE\t68000\tsearch-v1\tIGNORED\t83000\r\nNOTE:12:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t141000\tfeed-v1\tAPPLIED\t305000\r\nNOTE:12:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t141000\tfollow-v1\tIGNORED\t311000\r\nNOTE:12:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t141000\tsearch-v1\tAPPLIED\t351000\r\nLIKE:12:3:1\tLIKE_CHANGED\tDONE\t148000\tfeed-v1\tIGNORED\t310000\r\nLIKE:12:3:1\tLIKE_CHANGED\tDONE\t148000\tfollow-v1\tIGNORED\t305000\r\nLIKE:12:3:1\tLIKE_CHANGED\tDONE\t148000\tsearch-v1\tIGNORED\t343000\r\nNOTE:13:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t59000\tfeed-v1\tAPPLIED\t62000\r\nNOTE:13:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t59000\tfollow-v1\tIGNORED\t63000\r\nNOTE:13:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t59000\tsearch-v1\tAPPLIED\t91000\r\nLIKE:13:3:1\tLIKE_CHANGED\tDONE\t65000\tfeed-v1\tIGNORED\t69000\r\nLIKE:13:3:1\tLIKE_CHANGED\tDONE\t65000\tfollow-v1\tIGNORED\t69000\r\nLIKE:13:3:1\tLIKE_CHANGED\tDONE\t65000\tsearch-v1\tIGNORED\t71000\r\nNOTE:14:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t197000\tfeed-v1\tAPPLIED\t328000\r\nNOTE:14:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t197000\tfollow-v1\tIGNORED\t326000\r\nNOTE:14:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t197000\tsearch-v1\tAPPLIED\t360000\r\nLIKE:14:3:1\tLIKE_CHANGED\tDONE\t205000\tfeed-v1\tIGNORED\t329000\r\nLIKE:14:3:1\tLIKE_CHANGED\tDONE\t205000\tfollow-v1\tIGNORED\t316000\r\nLIKE:14:3:1\tLIKE_CHANGED\tDONE\t205000\tsearch-v1\tIGNORED\t356000\r\nNOTE:15:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t88000\tfeed-v1\tAPPLIED\t95000\r\nNOTE:15:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t88000\tfollow-v1\tIGNORED\t94000\r\nNOTE:15:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t88000\tsearch-v1\tAPPLIED\t124000\r\nLIKE:15:3:1\tLIKE_CHANGED\tDONE\t110000\tfeed-v1\tIGNORED\t114000\r\nLIKE:15:3:1\tLIKE_CHANGED\tDONE\t110000\tfollow-v1\tIGNORED\t114000\r\nLIKE:15:3:1\tLIKE_CHANGED\tDONE\t110000\tsearch-v1\tIGNORED\t116000\r\nNOTE:16:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t202000\tfeed-v1\tAPPLIED\t368000\r\nNOTE:16:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t202000\tfollow-v1\tIGNORED\t364000\r\nNOTE:16:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t202000\tsearch-v1\tAPPLIED\t398000\r\nLIKE:16:3:1\tLIKE_CHANGED\tDONE\t219000\tfeed-v1\tIGNORED\t377000\r\nLIKE:16:3:1\tLIKE_CHANGED\tDONE\t219000\tfollow-v1\tIGNORED\t361000\r\nLIKE:16:3:1\tLIKE_CHANGED\tDONE\t219000\tsearch-v1\tIGNORED\t396000\r\nNOTE:17:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t101000\tfeed-v1\tAPPLIED\t106000\r\nNOTE:17:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t101000\tfollow-v1\tIGNORED\t106000\r\nNOTE:17:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t101000\tsearch-v1\tAPPLIED\t130000\r\nLIKE:17:3:1\tLIKE_CHANGED\tDONE\t104000\tfeed-v1\tIGNORED\t109000\r\nLIKE:17:3:1\tLIKE_CHANGED\tDONE\t104000\tfollow-v1\tIGNORED\t109000\r\nLIKE:17:3:1\tLIKE_CHANGED\tDONE\t104000\tsearch-v1\tIGNORED\t121000\r\nNOTE:18:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t182000\tfeed-v1\tAPPLIED\t343000\r\nNOTE:18:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t182000\tfollow-v1\tIGNORED\t342000\r\nNOTE:18:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t182000\tsearch-v1\tAPPLIED\t376000\r\nLIKE:18:3:1\tLIKE_CHANGED\tDONE\t188000\tfeed-v1\tIGNORED\t342000\r\nLIKE:18:3:1\tLIKE_CHANGED\tDONE\t188000\tfollow-v1\tIGNORED\t332000\r\nLIKE:18:3:1\tLIKE_CHANGED\tDONE\t188000\tsearch-v1\tIGNORED\t367000\r\nNOTE:19:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t61000\tfeed-v1\tAPPLIED\t68000\r\nNOTE:19:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t61000\tfollow-v1\tIGNORED\t68000\r\nNOTE:19:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t61000\tsearch-v1\tAPPLIED\t93000\r\nLIKE:19:3:1\tLIKE_CHANGED\tDONE\t65000\tfeed-v1\tIGNORED\t71000\r\nLIKE:19:3:1\tLIKE_CHANGED\tDONE\t65000\tfollow-v1\tIGNORED\t72000\r\nLIKE:19:3:1\tLIKE_CHANGED\tDONE\t65000\tsearch-v1\tIGNORED\t86000\r\nNOTE:20:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t136000\tfeed-v1\tAPPLIED\t306000\r\nNOTE:20:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t136000\tfollow-v1\tIGNORED\t309000\r\nNOTE:20:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t136000\tsearch-v1\tAPPLIED\t352000\r\nLIKE:20:3:1\tLIKE_CHANGED\tDONE\t138000\tfeed-v1\tIGNORED\t319000\r\nLIKE:20:3:1\tLIKE_CHANGED\tDONE\t138000\tfollow-v1\tIGNORED\t305000\r\nLIKE:20:3:1\tLIKE_CHANGED\tDONE\t138000\tsearch-v1\tIGNORED\t348000\r\nNOTE:21:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t224000\tfeed-v1\tAPPLIED\t230000\r\nNOTE:21:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t224000\tfollow-v1\tIGNORED\t230000\r\nNOTE:21:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t224000\tsearch-v1\tAPPLIED\t252000\r\nLIKE:21:3:1\tLIKE_CHANGED\tDONE\t227000\tfeed-v1\tIGNORED\t234000\r\nLIKE:21:3:1\tLIKE_CHANGED\tDONE\t227000\tfollow-v1\tIGNORED\t234000\r\nLIKE:21:3:1\tLIKE_CHANGED\tDONE\t227000\tsearch-v1\tIGNORED\t243000\r\nNOTE:22:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tfeed-v1\tAPPLIED\t111000\r\nNOTE:22:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tfollow-v1\tIGNORED\t111000\r\nNOTE:22:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tsearch-v1\tAPPLIED\t138000\r\nLIKE:22:3:1\tLIKE_CHANGED\tDONE\t115000\tfeed-v1\tIGNORED\t122000\r\nLIKE:22:3:1\tLIKE_CHANGED\tDONE\t115000\tfollow-v1\tIGNORED\t122000\r\nLIKE:22:3:1\tLIKE_CHANGED\tDONE\t115000\tsearch-v1\tIGNORED\t136000\r\nNOTE:23:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t192000\tfeed-v1\tAPPLIED\t368000\r\nNOTE:23:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t192000\tfollow-v1\tIGNORED\t368000\r\nNOTE:23:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t192000\tsearch-v1\tAPPLIED\t474000\r\nLIKE:23:3:1\tLIKE_CHANGED\tDONE\t196000\tfeed-v1\tIGNORED\t457000\r\nLIKE:23:3:1\tLIKE_CHANGED\tDONE\t196000\tfollow-v1\tIGNORED\t450000\r\nLIKE:23:3:1\tLIKE_CHANGED\tDONE\t196000\tsearch-v1\tIGNORED\t467000\r\nNOTE:24:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t68000\tfeed-v1\tAPPLIED\t75000\r\nNOTE:24:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t68000\tfollow-v1\tIGNORED\t75000\r\nNOTE:24:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t68000\tsearch-v1\tAPPLIED\t99000\r\nLIKE:24:3:1\tLIKE_CHANGED\tDONE\t78000\tfeed-v1\tIGNORED\t83000\r\nLIKE:24:3:1\tLIKE_CHANGED\tDONE\t78000\tfollow-v1\tIGNORED\t83000\r\nLIKE:24:3:1\tLIKE_CHANGED\tDONE\t78000\tsearch-v1\tIGNORED\t94000\r\nNOTE:25:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t150000\tfeed-v1\tAPPLIED\t305000\r\nNOTE:25:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t150000\tfollow-v1\tIGNORED\t305000\r\nNOTE:25:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t150000\tsearch-v1\tAPPLIED\t348000\r\nLIKE:25:3:1\tLIKE_CHANGED\tDONE\t140000\tfeed-v1\tIGNORED\t304000\r\nLIKE:25:3:1\tLIKE_CHANGED\tDONE\t140000\tfollow-v1\tIGNORED\t297000\r\nLIKE:25:3:1\tLIKE_CHANGED\tDONE\t140000\tsearch-v1\tIGNORED\t328000\r\nNOTE:26:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t28000\tfeed-v1\tAPPLIED\t33000\r\nNOTE:26:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t28000\tfollow-v1\tIGNORED\t33000\r\nNOTE:26:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t28000\tsearch-v1\tAPPLIED\t52000\r\nLIKE:26:3:1\tLIKE_CHANGED\tDONE\t38000\tfeed-v1\tIGNORED\t46000\r\nLIKE:26:3:1\tLIKE_CHANGED\tDONE\t38000\tfollow-v1\tIGNORED\t46000\r\nLIKE:26:3:1\tLIKE_CHANGED\tDONE\t38000\tsearch-v1\tIGNORED\t52000\r\nNOTE:27:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t109000\tfeed-v1\tAPPLIED\t268000\r\nNOTE:27:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t109000\tfollow-v1\tIGNORED\t271000\r\nNOTE:27:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t109000\tsearch-v1\tAPPLIED\t300000\r\nLIKE:27:3:1\tLIKE_CHANGED\tDONE\t116000\tfeed-v1\tIGNORED\t279000\r\nLIKE:27:3:1\tLIKE_CHANGED\tDONE\t116000\tfollow-v1\tIGNORED\t272000\r\nLIKE:27:3:1\tLIKE_CHANGED\tDONE\t116000\tsearch-v1\tIGNORED\t299000\r\nNOTE:28:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t191000\tfeed-v1\tAPPLIED\t197000\r\nNOTE:28:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t191000\tfollow-v1\tIGNORED\t196000\r\nNOTE:28:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t191000\tsearch-v1\tAPPLIED\t223000\r\nLIKE:28:3:1\tLIKE_CHANGED\tDONE\t200000\tfeed-v1\tIGNORED\t207000\r\nLIKE:28:3:1\tLIKE_CHANGED\tDONE\t200000\tfollow-v1\tIGNORED\t207000\r\nLIKE:28:3:1\tLIKE_CHANGED\tDONE\t200000\tsearch-v1\tIGNORED\t224000\r\nNOTE:29:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tfeed-v1\tAPPLIED\t80000\r\nNOTE:29:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tfollow-v1\tIGNORED\t80000\r\nNOTE:29:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tsearch-v1\tAPPLIED\t101000\r\nLIKE:29:3:1\tLIKE_CHANGED\tDONE\t81000\tfeed-v1\tIGNORED\t85000\r\nLIKE:29:3:1\tLIKE_CHANGED\tDONE\t81000\tfollow-v1\tIGNORED\t87000\r\nLIKE:29:3:1\tLIKE_CHANGED\tDONE\t81000\tsearch-v1\tIGNORED\t96000\r\nNOTE:30:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t189000\tfeed-v1\tAPPLIED\t316000\r\nNOTE:30:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t189000\tfollow-v1\tIGNORED\t319000\r\nNOTE:30:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t189000\tsearch-v1\tAPPLIED\t346000\r\nLIKE:30:3:1\tLIKE_CHANGED\tDONE\t188000\tfeed-v1\tIGNORED\t316000\r\nLIKE:30:3:1\tLIKE_CHANGED\tDONE\t188000\tfollow-v1\tIGNORED\t308000\r\nLIKE:30:3:1\tLIKE_CHANGED\tDONE\t188000\tsearch-v1\tIGNORED\t339000\r\nNOTE:31:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t51000\tfeed-v1\tAPPLIED\t56000\r\nNOTE:31:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t51000\tfollow-v1\tIGNORED\t56000\r\nNOTE:31:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t51000\tsearch-v1\tAPPLIED\t75000\r\nLIKE:31:3:1\tLIKE_CHANGED\tDONE\t60000\tfeed-v1\tIGNORED\t65000\r\nLIKE:31:3:1\tLIKE_CHANGED\tDONE\t60000\tfollow-v1\tIGNORED\t65000\r\nLIKE:31:3:1\tLIKE_CHANGED\tDONE\t60000\tsearch-v1\tIGNORED\t71000\r\nNOTE:32:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t140000\tfeed-v1\tAPPLIED\t304000\r\nNOTE:32:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t140000\tfollow-v1\tIGNORED\t304000\r\nNOTE:32:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t140000\tsearch-v1\tAPPLIED\t338000\r\nLIKE:32:3:1\tLIKE_CHANGED\tDONE\t146000\tfeed-v1\tIGNORED\t311000\r\nLIKE:32:3:1\tLIKE_CHANGED\tDONE\t146000\tfollow-v1\tIGNORED\t299000\r\nLIKE:32:3:1\tLIKE_CHANGED\tDONE\t146000\tsearch-v1\tIGNORED\t333000\r\nNOTE:33:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t218000\tfeed-v1\tAPPLIED\t224000\r\nNOTE:33:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t218000\tfollow-v1\tIGNORED\t224000\r\nNOTE:33:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t218000\tsearch-v1\tAPPLIED\t248000\r\nLIKE:33:3:1\tLIKE_CHANGED\tDONE\t226000\tfeed-v1\tIGNORED\t233000\r\nLIKE:33:3:1\tLIKE_CHANGED\tDONE\t226000\tfollow-v1\tIGNORED\t233000\r\nLIKE:33:3:1\tLIKE_CHANGED\tDONE\t226000\tsearch-v1\tIGNORED\t245000\r\nNOTE:34:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t102000\tfeed-v1\tAPPLIED\t108000\r\nNOTE:34:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t102000\tfollow-v1\tIGNORED\t108000\r\nNOTE:34:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t102000\tsearch-v1\tAPPLIED\t134000\r\nLIKE:34:3:1\tLIKE_CHANGED\tDONE\t107000\tfeed-v1\tIGNORED\t115000\r\nLIKE:34:3:1\tLIKE_CHANGED\tDONE\t107000\tfollow-v1\tIGNORED\t115000\r\nLIKE:34:3:1\tLIKE_CHANGED\tDONE\t107000\tsearch-v1\tIGNORED\t127000\r\nNOTE:35:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t171000\tfeed-v1\tAPPLIED\t338000\r\nNOTE:35:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t171000\tfollow-v1\tIGNORED\t336000\r\nNOTE:35:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t171000\tsearch-v1\tAPPLIED\t368000\r\nLIKE:35:3:1\tLIKE_CHANGED\tDONE\t172000\tfeed-v1\tIGNORED\t337000\r\nLIKE:35:3:1\tLIKE_CHANGED\tDONE\t172000\tfollow-v1\tIGNORED\t325000\r\nLIKE:35:3:1\tLIKE_CHANGED\tDONE\t172000\tsearch-v1\tIGNORED\t363000\r\nNOTE:36:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t51000\tfeed-v1\tAPPLIED\t56000\r\nNOTE:36:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t51000\tfollow-v1\tIGNORED\t56000\r\nNOTE:36:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t51000\tsearch-v1\tAPPLIED\t78000\r\nLIKE:36:3:1\tLIKE_CHANGED\tDONE\t53000\tfeed-v1\tIGNORED\t57000\r\nLIKE:36:3:1\tLIKE_CHANGED\tDONE\t53000\tfollow-v1\tIGNORED\t56000\r\nLIKE:36:3:1\tLIKE_CHANGED\tDONE\t53000\tsearch-v1\tIGNORED\t68000\r\nNOTE:37:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tfeed-v1\tAPPLIED\t283000\r\nNOTE:37:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tfollow-v1\tIGNORED\t281000\r\nNOTE:37:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tsearch-v1\tAPPLIED\t317000\r\nLIKE:37:3:1\tLIKE_CHANGED\tDONE\t128000\tfeed-v1\tIGNORED\t283000\r\nLIKE:37:3:1\tLIKE_CHANGED\tDONE\t128000\tfollow-v1\tIGNORED\t273000\r\nLIKE:37:3:1\tLIKE_CHANGED\tDONE\t128000\tsearch-v1\tIGNORED\t311000\r\nNOTE:38:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t203000\tfeed-v1\tAPPLIED\t210000\r\nNOTE:38:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t203000\tfollow-v1\tIGNORED\t210000\r\nNOTE:38:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t203000\tsearch-v1\tAPPLIED\t233000\r\nLIKE:38:3:1\tLIKE_CHANGED\tDONE\t212000\tfeed-v1\tIGNORED\t216000\r\nLIKE:38:3:1\tLIKE_CHANGED\tDONE\t212000\tfollow-v1\tIGNORED\t217000\r\nLIKE:38:3:1\tLIKE_CHANGED\tDONE\t212000\tsearch-v1\tIGNORED\t222000\r\nNOTE:39:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t80000\tfeed-v1\tAPPLIED\t85000\r\nNOTE:39:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t80000\tfollow-v1\tIGNORED\t85000\r\nNOTE:39:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t80000\tsearch-v1\tAPPLIED\t107000\r\nLIKE:39:3:1\tLIKE_CHANGED\tDONE\t86000\tfeed-v1\tIGNORED\t91000\r\nLIKE:39:3:1\tLIKE_CHANGED\tDONE\t86000\tfollow-v1\tIGNORED\t90000\r\nLIKE:39:3:1\tLIKE_CHANGED\tDONE\t86000\tsearch-v1\tIGNORED\t97000\r\nNOTE:40:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t160000\tfeed-v1\tAPPLIED\t328000\r\nNOTE:40:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t160000\tfollow-v1\tIGNORED\t329000\r\nNOTE:40:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t160000\tsearch-v1\tAPPLIED\t357000\r\nLIKE:40:3:1\tLIKE_CHANGED\tDONE\t164000\tfeed-v1\tIGNORED\t332000\r\nLIKE:40:3:1\tLIKE_CHANGED\tDONE\t164000\tfollow-v1\tIGNORED\t324000\r\nLIKE:40:3:1\tLIKE_CHANGED\tDONE\t164000\tsearch-v1\tIGNORED\t348000\r\nNOTE:41:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t49000\tfeed-v1\tAPPLIED\t56000\r\nNOTE:41:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t49000\tfollow-v1\tIGNORED\t56000\r\nNOTE:41:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t49000\tsearch-v1\tAPPLIED\t78000\r\nLIKE:41:3:1\tLIKE_CHANGED\tDONE\t46000\tfeed-v1\tIGNORED\t54000\r\nLIKE:41:3:1\tLIKE_CHANGED\tDONE\t46000\tfollow-v1\tIGNORED\t53000\r\nLIKE:41:3:1\tLIKE_CHANGED\tDONE\t46000\tsearch-v1\tIGNORED\t65000\r\nNOTE:42:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t132000\tfeed-v1\tAPPLIED\t294000\r\nNOTE:42:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t132000\tfollow-v1\tIGNORED\t296000\r\nNOTE:42:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t132000\tsearch-v1\tAPPLIED\t331000\r\nLIKE:42:3:1\tLIKE_CHANGED\tDONE\t138000\tfeed-v1\tIGNORED\t297000\r\nLIKE:42:3:1\tLIKE_CHANGED\tDONE\t138000\tfollow-v1\tIGNORED\t286000\r\nLIKE:42:3:1\tLIKE_CHANGED\tDONE\t138000\tsearch-v1\tIGNORED\t325000\r\nNOTE:43:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t225000\tfeed-v1\tAPPLIED\t231000\r\nNOTE:43:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t225000\tfollow-v1\tIGNORED\t230000\r\nNOTE:43:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t225000\tsearch-v1\tAPPLIED\t251000\r\nLIKE:43:3:1\tLIKE_CHANGED\tDONE\t228000\tfeed-v1\tIGNORED\t232000\r\nLIKE:43:3:1\tLIKE_CHANGED\tDONE\t228000\tfollow-v1\tIGNORED\t232000\r\nLIKE:43:3:1\tLIKE_CHANGED\tDONE\t228000\tsearch-v1\tIGNORED\t241000\r\nNOTE:44:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t94000\tfeed-v1\tAPPLIED\t100000\r\nNOTE:44:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t94000\tfollow-v1\tIGNORED\t100000\r\nNOTE:44:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t94000\tsearch-v1\tAPPLIED\t134000\r\nLIKE:44:3:1\tLIKE_CHANGED\tDONE\t100000\tfeed-v1\tIGNORED\t107000\r\nLIKE:44:3:1\tLIKE_CHANGED\tDONE\t100000\tfollow-v1\tIGNORED\t108000\r\nLIKE:44:3:1\tLIKE_CHANGED\tDONE\t100000\tsearch-v1\tIGNORED\t127000\r\nNOTE:45:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t210000\tfeed-v1\tAPPLIED\t353000\r\nNOTE:45:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t210000\tfollow-v1\tIGNORED\t355000\r\nNOTE:45:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t210000\tsearch-v1\tAPPLIED\t405000\r\nLIKE:45:3:1\tLIKE_CHANGED\tDONE\t215000\tfeed-v1\tIGNORED\t362000\r\nLIKE:45:3:1\tLIKE_CHANGED\tDONE\t215000\tfollow-v1\tIGNORED\t356000\r\nLIKE:45:3:1\tLIKE_CHANGED\tDONE\t215000\tsearch-v1\tIGNORED\t395000\r\nNOTE:46:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tfeed-v1\tAPPLIED\t58000\r\nNOTE:46:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tfollow-v1\tIGNORED\t56000\r\nNOTE:46:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tsearch-v1\tAPPLIED\t77000\r\nLIKE:46:3:1\tLIKE_CHANGED\tDONE\t51000\tfeed-v1\tIGNORED\t60000\r\nLIKE:46:3:1\tLIKE_CHANGED\tDONE\t51000\tfollow-v1\tIGNORED\t59000\r\nLIKE:46:3:1\tLIKE_CHANGED\tDONE\t51000\tsearch-v1\tIGNORED\t67000\r\nNOTE:47:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t162000\tfeed-v1\tAPPLIED\t336000\r\nNOTE:47:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t162000\tfollow-v1\tIGNORED\t335000\r\nNOTE:47:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t162000\tsearch-v1\tAPPLIED\t365000\r\nLIKE:47:3:1\tLIKE_CHANGED\tDONE\t165000\tfeed-v1\tIGNORED\t344000\r\nLIKE:47:3:1\tLIKE_CHANGED\tDONE\t165000\tfollow-v1\tIGNORED\t331000\r\nLIKE:47:3:1\tLIKE_CHANGED\tDONE\t165000\tsearch-v1\tIGNORED\t357000\r\nNOTE:48:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t30000\tfeed-v1\tAPPLIED\t34000\r\nNOTE:48:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t30000\tfollow-v1\tIGNORED\t35000\r\nNOTE:48:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t30000\tsearch-v1\tAPPLIED\t55000\r\nLIKE:48:3:1\tLIKE_CHANGED\tDONE\t36000\tfeed-v1\tIGNORED\t42000\r\nLIKE:48:3:1\tLIKE_CHANGED\tDONE\t36000\tfollow-v1\tIGNORED\t41000\r\nLIKE:48:3:1\tLIKE_CHANGED\tDONE\t36000\tsearch-v1\tIGNORED\t52000\r\nNOTE:49:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tfeed-v1\tAPPLIED\t274000\r\nNOTE:49:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tfollow-v1\tIGNORED\t273000\r\nNOTE:49:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tsearch-v1\tAPPLIED\t304000\r\nLIKE:49:3:1\tLIKE_CHANGED\tDONE\t116000\tfeed-v1\tIGNORED\t277000\r\nLIKE:49:3:1\tLIKE_CHANGED\tDONE\t116000\tfollow-v1\tIGNORED\t263000\r\nLIKE:49:3:1\tLIKE_CHANGED\tDONE\t116000\tsearch-v1\tIGNORED\t294000\r\nNOTE:50:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t199000\tfeed-v1\tAPPLIED\t205000\r\nNOTE:50:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t199000\tfollow-v1\tIGNORED\t205000\r\nNOTE:50:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t199000\tsearch-v1\tAPPLIED\t234000\r\nLIKE:50:3:1\tLIKE_CHANGED\tDONE\t221000\tfeed-v1\tIGNORED\t228000\r\nLIKE:50:3:1\tLIKE_CHANGED\tDONE\t221000\tfollow-v1\tIGNORED\t227000\r\nLIKE:50:3:1\tLIKE_CHANGED\tDONE\t221000\tsearch-v1\tIGNORED\t237000\r\nNOTE:51:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tfeed-v1\tAPPLIED\t110000\r\nNOTE:51:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tfollow-v1\tIGNORED\t110000\r\nNOTE:51:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tsearch-v1\tAPPLIED\t133000\r\nLIKE:51:3:1\tLIKE_CHANGED\tDONE\t127000\tfeed-v1\tIGNORED\t132000\r\nLIKE:51:3:1\tLIKE_CHANGED\tDONE\t127000\tfollow-v1\tIGNORED\t132000\r\nLIKE:51:3:1\tLIKE_CHANGED\tDONE\t127000\tsearch-v1\tIGNORED\t134000\r\nNOTE:52:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t201000\tfeed-v1\tAPPLIED\t377000\r\nNOTE:52:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t201000\tfollow-v1\tIGNORED\t372000\r\nNOTE:52:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t201000\tsearch-v1\tAPPLIED\t407000\r\nLIKE:52:3:1\tLIKE_CHANGED\tDONE\t203000\tfeed-v1\tIGNORED\t386000\r\nLIKE:52:3:1\tLIKE_CHANGED\tDONE\t203000\tfollow-v1\tIGNORED\t367000\r\nLIKE:52:3:1\tLIKE_CHANGED\tDONE\t203000\tsearch-v1\tIGNORED\t401000\r\nNOTE:53:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t90000\tfeed-v1\tAPPLIED\t97000\r\nNOTE:53:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t90000\tfollow-v1\tIGNORED\t95000\r\nNOTE:53:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t90000\tsearch-v1\tAPPLIED\t121000\r\nLIKE:53:3:1\tLIKE_CHANGED\tDONE\t103000\tfeed-v1\tIGNORED\t109000\r\nLIKE:53:3:1\tLIKE_CHANGED\tDONE\t103000\tfollow-v1\tIGNORED\t109000\r\nLIKE:53:3:1\tLIKE_CHANGED\tDONE\t103000\tsearch-v1\tIGNORED\t121000\r\nNOTE:54:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t185000\tfeed-v1\tAPPLIED\t347000\r\nNOTE:54:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t185000\tfollow-v1\tIGNORED\t347000\r\nNOTE:54:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t185000\tsearch-v1\tAPPLIED\t388000\r\nLIKE:54:3:1\tLIKE_CHANGED\tDONE\t190000\tfeed-v1\tIGNORED\t357000\r\nLIKE:54:3:1\tLIKE_CHANGED\tDONE\t190000\tfollow-v1\tIGNORED\t345000\r\nLIKE:54:3:1\tLIKE_CHANGED\tDONE\t190000\tsearch-v1\tIGNORED\t386000\r\nNOTE:55:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t69000\tfeed-v1\tAPPLIED\t77000\r\nNOTE:55:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t69000\tfollow-v1\tIGNORED\t77000\r\nNOTE:55:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t69000\tsearch-v1\tAPPLIED\t109000\r\nLIKE:55:3:1\tLIKE_CHANGED\tDONE\t80000\tfeed-v1\tIGNORED\t85000\r\nLIKE:55:3:1\tLIKE_CHANGED\tDONE\t80000\tfollow-v1\tIGNORED\t85000\r\nLIKE:55:3:1\tLIKE_CHANGED\tDONE\t80000\tsearch-v1\tIGNORED\t105000\r\nNOTE:56:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t190000\tfeed-v1\tAPPLIED\t342000\r\nNOTE:56:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t190000\tfollow-v1\tIGNORED\t342000\r\nNOTE:56:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t190000\tsearch-v1\tAPPLIED\t390000\r\nLIKE:56:3:1\tLIKE_CHANGED\tDONE\t198000\tfeed-v1\tIGNORED\t340000\r\nLIKE:56:3:1\tLIKE_CHANGED\tDONE\t198000\tfollow-v1\tIGNORED\t327000\r\nLIKE:56:3:1\tLIKE_CHANGED\tDONE\t198000\tsearch-v1\tIGNORED\t376000\r\nNOTE:57:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t83000\tfeed-v1\tAPPLIED\t88000\r\nNOTE:57:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t83000\tfollow-v1\tIGNORED\t88000\r\nNOTE:57:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t83000\tsearch-v1\tAPPLIED\t120000\r\nLIKE:57:3:1\tLIKE_CHANGED\tDONE\t104000\tfeed-v1\tIGNORED\t110000\r\nLIKE:57:3:1\tLIKE_CHANGED\tDONE\t104000\tfollow-v1\tIGNORED\t110000\r\nLIKE:57:3:1\tLIKE_CHANGED\tDONE\t104000\tsearch-v1\tIGNORED\t124000\r\nNOTE:58:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t204000\tfeed-v1\tAPPLIED\t374000\r\nNOTE:58:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t204000\tfollow-v1\tIGNORED\t382000\r\nNOTE:58:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t204000\tsearch-v1\tAPPLIED\t413000\r\nLIKE:58:3:1\tLIKE_CHANGED\tDONE\t217000\tfeed-v1\tIGNORED\t394000\r\nLIKE:58:3:1\tLIKE_CHANGED\tDONE\t217000\tfollow-v1\tIGNORED\t378000\r\nLIKE:58:3:1\tLIKE_CHANGED\tDONE\t217000\tsearch-v1\tIGNORED\t407000\r\nNOTE:59:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t97000\tfeed-v1\tAPPLIED\t105000\r\nNOTE:59:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t97000\tfollow-v1\tIGNORED\t104000\r\nNOTE:59:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t97000\tsearch-v1\tAPPLIED\t135000\r\nLIKE:59:3:1\tLIKE_CHANGED\tDONE\t113000\tfeed-v1\tIGNORED\t119000\r\nLIKE:59:3:1\tLIKE_CHANGED\tDONE\t113000\tfollow-v1\tIGNORED\t120000\r\nLIKE:59:3:1\tLIKE_CHANGED\tDONE\t113000\tsearch-v1\tIGNORED\t125000\r\nNOTE:60:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t195000\tfeed-v1\tAPPLIED\t367000\r\nNOTE:60:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t195000\tfollow-v1\tIGNORED\t373000\r\nNOTE:60:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t195000\tsearch-v1\tAPPLIED\t396000\r\nLIKE:60:3:1\tLIKE_CHANGED\tDONE\t206000\tfeed-v1\tIGNORED\t365000\r\nLIKE:60:3:1\tLIKE_CHANGED\tDONE\t206000\tfollow-v1\tIGNORED\t358000\r\nLIKE:60:3:1\tLIKE_CHANGED\tDONE\t206000\tsearch-v1\tIGNORED\t391000\r\nNOTE:61:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfeed-v1\tAPPLIED\t117000\r\nNOTE:61:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfollow-v1\tIGNORED\t117000\r\nNOTE:61:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tsearch-v1\tAPPLIED\t146000\r\nLIKE:61:3:1\tLIKE_CHANGED\tDONE\t127000\tfeed-v1\tIGNORED\t134000\r\nLIKE:61:3:1\tLIKE_CHANGED\tDONE\t127000\tfollow-v1\tIGNORED\t134000\r\nLIKE:61:3:1\tLIKE_CHANGED\tDONE\t127000\tsearch-v1\tIGNORED\t141000\r\nNOTE:62:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t226000\tfeed-v1\tAPPLIED\t375000\r\nNOTE:62:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t226000\tfollow-v1\tIGNORED\t372000\r\nNOTE:62:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t226000\tsearch-v1\tAPPLIED\t412000\r\nLIKE:62:3:1\tLIKE_CHANGED\tDONE\t232000\tfeed-v1\tIGNORED\t377000\r\nLIKE:62:3:1\tLIKE_CHANGED\tDONE\t232000\tfollow-v1\tIGNORED\t362000\r\nLIKE:62:3:1\tLIKE_CHANGED\tDONE\t232000\tsearch-v1\tIGNORED\t412000\r\nNOTE:63:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tfeed-v1\tAPPLIED\t122000\r\nNOTE:63:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tfollow-v1\tIGNORED\t122000\r\nNOTE:63:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tsearch-v1\tAPPLIED\t150000\r\nLIKE:63:3:1\tLIKE_CHANGED\tDONE\t127000\tfeed-v1\tIGNORED\t132000\r\nLIKE:63:3:1\tLIKE_CHANGED\tDONE\t127000\tfollow-v1\tIGNORED\t132000\r\nLIKE:63:3:1\tLIKE_CHANGED\tDONE\t127000\tsearch-v1\tIGNORED\t138000\r\nNOTE:64:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t215000\tfeed-v1\tAPPLIED\t386000\r\nNOTE:64:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t215000\tfollow-v1\tIGNORED\t383000\r\nNOTE:64:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t215000\tsearch-v1\tAPPLIED\t412000\r\nLIKE:64:3:1\tLIKE_CHANGED\tDONE\t229000\tfeed-v1\tIGNORED\t397000\r\nLIKE:64:3:1\tLIKE_CHANGED\tDONE\t229000\tfollow-v1\tIGNORED\t377000\r\nLIKE:64:3:1\tLIKE_CHANGED\tDONE\t229000\tsearch-v1\tIGNORED\t413000\r\nNOTE:65:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t117000\tfeed-v1\tAPPLIED\t121000\r\nNOTE:65:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t117000\tfollow-v1\tIGNORED\t121000\r\nNOTE:65:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t117000\tsearch-v1\tAPPLIED\t148000\r\nLIKE:65:3:1\tLIKE_CHANGED\tDONE\t139000\tfeed-v1\tIGNORED\t146000\r\nLIKE:65:3:1\tLIKE_CHANGED\tDONE\t139000\tfollow-v1\tIGNORED\t145000\r\nLIKE:65:3:1\tLIKE_CHANGED\tDONE\t139000\tsearch-v1\tIGNORED\t148000\r\nNOTE:66:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tfeed-v1\tAPPLIED\t386000\r\nNOTE:66:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tfollow-v1\tIGNORED\t378000\r\nNOTE:66:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tsearch-v1\tAPPLIED\t410000\r\nLIKE:66:3:1\tLIKE_CHANGED\tDONE\t221000\tfeed-v1\tIGNORED\t387000\r\nLIKE:66:3:1\tLIKE_CHANGED\tDONE\t221000\tfollow-v1\tIGNORED\t361000\r\nLIKE:66:3:1\tLIKE_CHANGED\tDONE\t221000\tsearch-v1\tIGNORED\t403000\r\nNOTE:67:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t122000\tfeed-v1\tAPPLIED\t131000\r\nNOTE:67:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t122000\tfollow-v1\tIGNORED\t131000\r\nNOTE:67:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t122000\tsearch-v1\tAPPLIED\t162000\r\nLIKE:67:3:1\tLIKE_CHANGED\tDONE\t140000\tfeed-v1\tIGNORED\t144000\r\nLIKE:67:3:1\tLIKE_CHANGED\tDONE\t140000\tfollow-v1\tIGNORED\t144000\r\nLIKE:67:3:1\tLIKE_CHANGED\tDONE\t140000\tsearch-v1\tIGNORED\t160000\r\nNOTE:68:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfeed-v1\tAPPLIED\t382000\r\nNOTE:68:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfollow-v1\tIGNORED\t386000\r\nNOTE:68:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tsearch-v1\tAPPLIED\t416000\r\nLIKE:68:3:1\tLIKE_CHANGED\tDONE\t229000\tfeed-v1\tIGNORED\t378000\r\nLIKE:68:3:1\tLIKE_CHANGED\tDONE\t229000\tfollow-v1\tIGNORED\t372000\r\nLIKE:68:3:1\tLIKE_CHANGED\tDONE\t229000\tsearch-v1\tIGNORED\t406000\r\nNOTE:69:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t121000\tfeed-v1\tAPPLIED\t130000\r\nNOTE:69:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t121000\tfollow-v1\tIGNORED\t130000\r\nNOTE:69:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t121000\tsearch-v1\tAPPLIED\t157000\r\nLIKE:69:3:1\tLIKE_CHANGED\tDONE\t133000\tfeed-v1\tIGNORED\t140000\r\nLIKE:69:3:1\tLIKE_CHANGED\tDONE\t133000\tfollow-v1\tIGNORED\t138000\r\nLIKE:69:3:1\tLIKE_CHANGED\tDONE\t133000\tsearch-v1\tIGNORED\t146000\r\nNOTE:70:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t229000\tfeed-v1\tAPPLIED\t394000\r\nNOTE:70:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t229000\tfollow-v1\tIGNORED\t388000\r\nNOTE:70:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t229000\tsearch-v1\tAPPLIED\t429000\r\nLIKE:70:3:1\tLIKE_CHANGED\tDONE\t241000\tfeed-v1\tIGNORED\t395000\r\nLIKE:70:3:1\tLIKE_CHANGED\tDONE\t241000\tfollow-v1\tIGNORED\t379000\r\nLIKE:70:3:1\tLIKE_CHANGED\tDONE\t241000\tsearch-v1\tIGNORED\t427000\r\nNOTE:71:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t116000\tfeed-v1\tAPPLIED\t122000\r\nNOTE:71:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t116000\tfollow-v1\tIGNORED\t122000\r\nNOTE:71:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t116000\tsearch-v1\tAPPLIED\t149000\r\nLIKE:71:3:1\tLIKE_CHANGED\tDONE\t122000\tfeed-v1\tIGNORED\t126000\r\nLIKE:71:3:1\tLIKE_CHANGED\tDONE\t122000\tfollow-v1\tIGNORED\t126000\r\nLIKE:71:3:1\tLIKE_CHANGED\tDONE\t122000\tsearch-v1\tIGNORED\t136000\r\nNOTE:72:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t240000\tfeed-v1\tAPPLIED\t382000\r\nNOTE:72:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t240000\tfollow-v1\tIGNORED\t383000\r\nNOTE:72:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t240000\tsearch-v1\tAPPLIED\t425000\r\nLIKE:72:3:1\tLIKE_CHANGED\tDONE\t242000\tfeed-v1\tIGNORED\t379000\r\nLIKE:72:3:1\tLIKE_CHANGED\tDONE\t242000\tfollow-v1\tIGNORED\t371000\r\nLIKE:72:3:1\tLIKE_CHANGED\tDONE\t242000\tsearch-v1\tIGNORED\t416000\r\nNOTE:73:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t137000\tfeed-v1\tAPPLIED\t146000\r\nNOTE:73:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t137000\tfollow-v1\tIGNORED\t146000\r\nNOTE:73:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t137000\tsearch-v1\tAPPLIED\t177000\r\nLIKE:73:3:1\tLIKE_CHANGED\tDONE\t151000\tfeed-v1\tIGNORED\t158000\r\nLIKE:73:3:1\tLIKE_CHANGED\tDONE\t151000\tfollow-v1\tIGNORED\t156000\r\nLIKE:73:3:1\tLIKE_CHANGED\tDONE\t151000\tsearch-v1\tIGNORED\t177000\r\nNOTE:74:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t35000\tfeed-v1\tAPPLIED\t40000\r\nNOTE:74:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t35000\tfollow-v1\tIGNORED\t44000\r\nNOTE:74:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t35000\tsearch-v1\tAPPLIED\t71000\r\nLIKE:74:3:1\tLIKE_CHANGED\tDONE\t59000\tfeed-v1\tIGNORED\t64000\r\nLIKE:74:3:1\tLIKE_CHANGED\tDONE\t59000\tfollow-v1\tIGNORED\t64000\r\nLIKE:74:3:1\tLIKE_CHANGED\tDONE\t59000\tsearch-v1\tIGNORED\t66000\r\nNOTE:75:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tfeed-v1\tAPPLIED\t298000\r\nNOTE:75:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tfollow-v1\tIGNORED\t305000\r\nNOTE:75:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tsearch-v1\tAPPLIED\t333000\r\nLIKE:75:3:1\tLIKE_CHANGED\tDONE\t145000\tfeed-v1\tIGNORED\t308000\r\nLIKE:75:3:1\tLIKE_CHANGED\tDONE\t145000\tfollow-v1\tIGNORED\t296000\r\nLIKE:75:3:1\tLIKE_CHANGED\tDONE\t145000\tsearch-v1\tIGNORED\t324000\r\nNOTE:76:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfeed-v1\tAPPLIED\t228000\r\nNOTE:76:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfollow-v1\tIGNORED\t228000\r\nNOTE:76:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tsearch-v1\tAPPLIED\t253000\r\nLIKE:76:3:1\tLIKE_CHANGED\tDONE\t237000\tfeed-v1\tIGNORED\t242000\r\nLIKE:76:3:1\tLIKE_CHANGED\tDONE\t237000\tfollow-v1\tIGNORED\t242000\r\nLIKE:76:3:1\tLIKE_CHANGED\tDONE\t237000\tsearch-v1\tIGNORED\t251000\r\nNOTE:77:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t128000\tfeed-v1\tAPPLIED\t134000\r\nNOTE:77:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t128000\tfollow-v1\tIGNORED\t134000\r\nNOTE:77:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t128000\tsearch-v1\tAPPLIED\t166000\r\nLIKE:77:3:1\tLIKE_CHANGED\tDONE\t142000\tfeed-v1\tIGNORED\t149000\r\nLIKE:77:3:1\tLIKE_CHANGED\tDONE\t142000\tfollow-v1\tIGNORED\t149000\r\nLIKE:77:3:1\tLIKE_CHANGED\tDONE\t142000\tsearch-v1\tIGNORED\t161000\r\nNOTE:78:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfeed-v1\tAPPLIED\t412000\r\nNOTE:78:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfollow-v1\tIGNORED\t412000\r\nNOTE:78:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tsearch-v1\tAPPLIED\t439000\r\nLIKE:78:3:1\tLIKE_CHANGED\tDONE\t238000\tfeed-v1\tIGNORED\t418000\r\nLIKE:78:3:1\tLIKE_CHANGED\tDONE\t238000\tfollow-v1\tIGNORED\t407000\r\nLIKE:78:3:1\tLIKE_CHANGED\tDONE\t238000\tsearch-v1\tIGNORED\t440000\r\nNOTE:79:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t130000\tfeed-v1\tAPPLIED\t140000\r\nNOTE:79:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t130000\tfollow-v1\tIGNORED\t140000\r\nNOTE:79:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t130000\tsearch-v1\tAPPLIED\t171000\r\nLIKE:79:3:1\tLIKE_CHANGED\tDONE\t144000\tfeed-v1\tIGNORED\t152000\r\nLIKE:79:3:1\tLIKE_CHANGED\tDONE\t144000\tfollow-v1\tIGNORED\t152000\r\nLIKE:79:3:1\tLIKE_CHANGED\tDONE\t144000\tsearch-v1\tIGNORED\t164000\r\nNOTE:80:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t234000\tfeed-v1\tAPPLIED\t391000\r\nNOTE:80:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t234000\tfollow-v1\tIGNORED\t388000\r\nNOTE:80:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t234000\tsearch-v1\tAPPLIED\t415000\r\nLIKE:80:3:1\tLIKE_CHANGED\tDONE\t249000\tfeed-v1\tIGNORED\t393000\r\nLIKE:80:3:1\tLIKE_CHANGED\tDONE\t249000\tfollow-v1\tIGNORED\t381000\r\nLIKE:80:3:1\tLIKE_CHANGED\tDONE\t249000\tsearch-v1\tIGNORED\t413000\r\nNOTE:81:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t154000\tfeed-v1\tAPPLIED\t160000\r\nNOTE:81:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t154000\tfollow-v1\tIGNORED\t160000\r\nNOTE:81:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t154000\tsearch-v1\tAPPLIED\t191000\r\nLIKE:81:3:1\tLIKE_CHANGED\tDONE\t175000\tfeed-v1\tIGNORED\t181000\r\nLIKE:81:3:1\tLIKE_CHANGED\tDONE\t175000\tfollow-v1\tIGNORED\t181000\r\nLIKE:81:3:1\tLIKE_CHANGED\tDONE\t175000\tsearch-v1\tIGNORED\t188000\r\nNOTE:82:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t56000\tfeed-v1\tAPPLIED\t62000\r\nNOTE:82:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t56000\tfollow-v1\tIGNORED\t61000\r\nNOTE:82:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t56000\tsearch-v1\tAPPLIED\t87000\r\nLIKE:82:3:1\tLIKE_CHANGED\tDONE\t71000\tfeed-v1\tIGNORED\t74000\r\nLIKE:82:3:1\tLIKE_CHANGED\tDONE\t71000\tfollow-v1\tIGNORED\t75000\r\nLIKE:82:3:1\tLIKE_CHANGED\tDONE\t71000\tsearch-v1\tIGNORED\t77000\r\nNOTE:83:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t178000\tfeed-v1\tAPPLIED\t325000\r\nNOTE:83:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t178000\tfollow-v1\tIGNORED\t332000\r\nNOTE:83:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t178000\tsearch-v1\tAPPLIED\t364000\r\nLIKE:83:3:1\tLIKE_CHANGED\tDONE\t190000\tfeed-v1\tIGNORED\t332000\r\nLIKE:83:3:1\tLIKE_CHANGED\tDONE\t190000\tfollow-v1\tIGNORED\t325000\r\nLIKE:83:3:1\tLIKE_CHANGED\tDONE\t190000\tsearch-v1\tIGNORED\t359000\r\nNOTE:84:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tfeed-v1\tAPPLIED\t81000\r\nNOTE:84:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tfollow-v1\tIGNORED\t82000\r\nNOTE:84:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tsearch-v1\tAPPLIED\t112000\r\nLIKE:84:3:1\tLIKE_CHANGED\tDONE\t89000\tfeed-v1\tIGNORED\t93000\r\nLIKE:84:3:1\tLIKE_CHANGED\tDONE\t89000\tfollow-v1\tIGNORED\t93000\r\nLIKE:84:3:1\tLIKE_CHANGED\tDONE\t89000\tsearch-v1\tIGNORED\t104000\r\nNOTE:85:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t181000\tfeed-v1\tAPPLIED\t336000\r\nNOTE:85:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t181000\tfollow-v1\tIGNORED\t337000\r\nNOTE:85:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t181000\tsearch-v1\tAPPLIED\t376000\r\nLIKE:85:3:1\tLIKE_CHANGED\tDONE\t189000\tfeed-v1\tIGNORED\t344000\r\nLIKE:85:3:1\tLIKE_CHANGED\tDONE\t189000\tfollow-v1\tIGNORED\t333000\r\nLIKE:85:3:1\tLIKE_CHANGED\tDONE\t189000\tsearch-v1\tIGNORED\t367000\r\nNOTE:86:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tfeed-v1\tAPPLIED\t79000\r\nNOTE:86:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tfollow-v1\tIGNORED\t79000\r\nNOTE:86:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t75000\tsearch-v1\tAPPLIED\t106000\r\nLIKE:86:3:1\tLIKE_CHANGED\tDONE\t97000\tfeed-v1\tIGNORED\t102000\r\nLIKE:86:3:1\tLIKE_CHANGED\tDONE\t97000\tfollow-v1\tIGNORED\t102000\r\nLIKE:86:3:1\tLIKE_CHANGED\tDONE\t97000\tsearch-v1\tIGNORED\t105000\r\nNOTE:87:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t181000\tfeed-v1\tAPPLIED\t347000\r\nNOTE:87:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t181000\tfollow-v1\tIGNORED\t351000\r\nNOTE:87:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t181000\tsearch-v1\tAPPLIED\t377000\r\nLIKE:87:3:1\tLIKE_CHANGED\tDONE\t192000\tfeed-v1\tIGNORED\t358000\r\nLIKE:87:3:1\tLIKE_CHANGED\tDONE\t192000\tfollow-v1\tIGNORED\t349000\r\nLIKE:87:3:1\tLIKE_CHANGED\tDONE\t192000\tsearch-v1\tIGNORED\t377000\r\nNOTE:88:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t72000\tfeed-v1\tAPPLIED\t81000\r\nNOTE:88:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t72000\tfollow-v1\tIGNORED\t82000\r\nNOTE:88:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t72000\tsearch-v1\tAPPLIED\t111000\r\nLIKE:88:3:1\tLIKE_CHANGED\tDONE\t86000\tfeed-v1\tIGNORED\t90000\r\nLIKE:88:3:1\tLIKE_CHANGED\tDONE\t86000\tfollow-v1\tIGNORED\t90000\r\nLIKE:88:3:1\tLIKE_CHANGED\tDONE\t86000\tsearch-v1\tIGNORED\t533000\r\nNOTE:89:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t209000\tfeed-v1\tAPPLIED\t368000\r\nNOTE:89:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t209000\tfollow-v1\tIGNORED\t368000\r\nNOTE:89:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t209000\tsearch-v1\tAPPLIED\t425000\r\nLIKE:89:3:1\tLIKE_CHANGED\tDONE\t222000\tfeed-v1\tIGNORED\t376000\r\nLIKE:89:3:1\tLIKE_CHANGED\tDONE\t222000\tfollow-v1\tIGNORED\t361000\r\nLIKE:89:3:1\tLIKE_CHANGED\tDONE\t222000\tsearch-v1\tIGNORED\t418000\r\nNOTE:90:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t90000\tfeed-v1\tAPPLIED\t94000\r\nNOTE:90:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t90000\tfollow-v1\tIGNORED\t95000\r\nNOTE:90:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t90000\tsearch-v1\tAPPLIED\t123000\r\nLIKE:90:3:1\tLIKE_CHANGED\tDONE\t105000\tfeed-v1\tIGNORED\t111000\r\nLIKE:90:3:1\tLIKE_CHANGED\tDONE\t105000\tfollow-v1\tIGNORED\t110000\r\nLIKE:90:3:1\tLIKE_CHANGED\tDONE\t105000\tsearch-v1\tIGNORED\t116000\r\nNOTE:91:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t187000\tfeed-v1\tAPPLIED\t357000\r\nNOTE:91:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t187000\tfollow-v1\tIGNORED\t352000\r\nNOTE:91:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t187000\tsearch-v1\tAPPLIED\t381000\r\nLIKE:91:3:1\tLIKE_CHANGED\tDONE\t197000\tfeed-v1\tIGNORED\t358000\r\nLIKE:91:3:1\tLIKE_CHANGED\tDONE\t197000\tfollow-v1\tIGNORED\t343000\r\nLIKE:91:3:1\tLIKE_CHANGED\tDONE\t197000\tsearch-v1\tIGNORED\t380000\r\nNOTE:92:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t137000\tfeed-v1\tAPPLIED\t143000\r\nNOTE:92:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t137000\tfollow-v1\tIGNORED\t143000\r\nNOTE:92:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t137000\tsearch-v1\tAPPLIED\t175000\r\nLIKE:92:3:1\tLIKE_CHANGED\tDONE\t154000\tfeed-v1\tIGNORED\t158000\r\nLIKE:92:3:1\tLIKE_CHANGED\tDONE\t154000\tfollow-v1\tIGNORED\t159000\r\nLIKE:92:3:1\tLIKE_CHANGED\tDONE\t154000\tsearch-v1\tIGNORED\t170000\r\nNOTE:93:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tfeed-v1\tAPPLIED\t59000\r\nNOTE:93:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tfollow-v1\tIGNORED\t59000\r\nNOTE:93:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tsearch-v1\tAPPLIED\t82000\r\nLIKE:93:3:1\tLIKE_CHANGED\tDONE\t65000\tfeed-v1\tIGNORED\t69000\r\nLIKE:93:3:1\tLIKE_CHANGED\tDONE\t65000\tfollow-v1\tIGNORED\t69000\r\nLIKE:93:3:1\tLIKE_CHANGED\tDONE\t65000\tsearch-v1\tIGNORED\t74000\r\nNOTE:94:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t155000\tfeed-v1\tAPPLIED\t317000\r\nNOTE:94:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t155000\tfollow-v1\tIGNORED\t323000\r\nNOTE:94:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t155000\tsearch-v1\tAPPLIED\t344000\r\nLIKE:94:3:1\tLIKE_CHANGED\tDONE\t170000\tfeed-v1\tIGNORED\t322000\r\nLIKE:94:3:1\tLIKE_CHANGED\tDONE\t170000\tfollow-v1\tIGNORED\t318000\r\nLIKE:94:3:1\tLIKE_CHANGED\tDONE\t170000\tsearch-v1\tIGNORED\t343000\r\nNOTE:95:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t48000\tfeed-v1\tAPPLIED\t53000\r\nNOTE:95:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t48000\tfollow-v1\tIGNORED\t52000\r\nNOTE:95:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t48000\tsearch-v1\tAPPLIED\t78000\r\nLIKE:95:3:1\tLIKE_CHANGED\tDONE\t51000\tfeed-v1\tIGNORED\t56000\r\nLIKE:95:3:1\tLIKE_CHANGED\tDONE\t51000\tfollow-v1\tIGNORED\t56000\r\nLIKE:95:3:1\tLIKE_CHANGED\tDONE\t51000\tsearch-v1\tIGNORED\t64000\r\nNOTE:96:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t145000\tfeed-v1\tAPPLIED\t312000\r\nNOTE:96:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t145000\tfollow-v1\tIGNORED\t318000\r\nNOTE:96:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t145000\tsearch-v1\tAPPLIED\t345000\r\nLIKE:96:3:1\tLIKE_CHANGED\tDONE\t141000\tfeed-v1\tIGNORED\t306000\r\nLIKE:96:3:1\tLIKE_CHANGED\tDONE\t141000\tfollow-v1\tIGNORED\t299000\r\nLIKE:96:3:1\tLIKE_CHANGED\tDONE\t141000\tsearch-v1\tIGNORED\t345000\r\nNOTE:97:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t37000\tfeed-v1\tAPPLIED\t46000\r\nNOTE:97:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t37000\tfollow-v1\tIGNORED\t46000\r\nNOTE:97:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t37000\tsearch-v1\tAPPLIED\t76000\r\nLIKE:97:3:1\tLIKE_CHANGED\tDONE\t56000\tfeed-v1\tIGNORED\t62000\r\nLIKE:97:3:1\tLIKE_CHANGED\tDONE\t56000\tfollow-v1\tIGNORED\t62000\r\nLIKE:97:3:1\tLIKE_CHANGED\tDONE\t56000\tsearch-v1\tIGNORED\t68000\r\nNOTE:98:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t140000\tfeed-v1\tAPPLIED\t305000\r\nNOTE:98:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t140000\tfollow-v1\tIGNORED\t314000\r\nNOTE:98:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t140000\tsearch-v1\tAPPLIED\t340000\r\nLIKE:98:3:1\tLIKE_CHANGED\tDONE\t142000\tfeed-v1\tIGNORED\t309000\r\nLIKE:98:3:1\tLIKE_CHANGED\tDONE\t142000\tfollow-v1\tIGNORED\t300000\r\nLIKE:98:3:1\tLIKE_CHANGED\tDONE\t142000\tsearch-v1\tIGNORED\t340000\r\nNOTE:99:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t233000\tfeed-v1\tAPPLIED\t238000\r\nNOTE:99:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t233000\tfollow-v1\tIGNORED\t239000\r\nNOTE:99:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t233000\tsearch-v1\tAPPLIED\t266000\r\nLIKE:99:3:1\tLIKE_CHANGED\tDONE\t256000\tfeed-v1\tIGNORED\t260000\r\nLIKE:99:3:1\tLIKE_CHANGED\tDONE\t256000\tfollow-v1\tIGNORED\t261000\r\nLIKE:99:3:1\tLIKE_CHANGED\tDONE\t256000\tsearch-v1\tIGNORED\t262000\r\nNOTE:100:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t144000\tfeed-v1\tAPPLIED\t152000\r\nNOTE:100:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t144000\tfollow-v1\tIGNORED\t152000\r\nNOTE:100:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t144000\tsearch-v1\tAPPLIED\t183000\r\nLIKE:100:3:1\tLIKE_CHANGED\tDONE\t167000\tfeed-v1\tIGNORED\t170000\r\nLIKE:100:3:1\tLIKE_CHANGED\tDONE\t167000\tfollow-v1\tIGNORED\t170000\r\nLIKE:100:3:1\tLIKE_CHANGED\tDONE\t167000\tsearch-v1\tIGNORED\t177000\r\nNOTE:101:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tfeed-v1\tAPPLIED\t59000\r\nNOTE:101:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tfollow-v1\tIGNORED\t59000\r\nNOTE:101:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tsearch-v1\tAPPLIED\t85000\r\nLIKE:101:3:1\tLIKE_CHANGED\tDONE\t76000\tfeed-v1\tIGNORED\t83000\r\nLIKE:101:3:1\tLIKE_CHANGED\tDONE\t76000\tfollow-v1\tIGNORED\t83000\r\nLIKE:101:3:1\tLIKE_CHANGED\tDONE\t76000\tsearch-v1\tIGNORED\t85000\r\nNOTE:102:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t167000\tfeed-v1\tAPPLIED\t333000\r\nNOTE:102:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t167000\tfollow-v1\tIGNORED\t328000\r\nNOTE:102:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t167000\tsearch-v1\tAPPLIED\t364000\r\nLIKE:102:3:1\tLIKE_CHANGED\tDONE\t168000\tfeed-v1\tIGNORED\t339000\r\nLIKE:102:3:1\tLIKE_CHANGED\tDONE\t168000\tfollow-v1\tIGNORED\t319000\r\nLIKE:102:3:1\tLIKE_CHANGED\tDONE\t168000\tsearch-v1\tIGNORED\t362000\r\nNOTE:103:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tfeed-v1\tAPPLIED\t58000\r\nNOTE:103:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tfollow-v1\tIGNORED\t58000\r\nNOTE:103:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t54000\tsearch-v1\tAPPLIED\t84000\r\nLIKE:103:3:1\tLIKE_CHANGED\tDONE\t67000\tfeed-v1\tIGNORED\t72000\r\nLIKE:103:3:1\tLIKE_CHANGED\tDONE\t67000\tfollow-v1\tIGNORED\t72000\r\nLIKE:103:3:1\tLIKE_CHANGED\tDONE\t67000\tsearch-v1\tIGNORED\t76000\r\nNOTE:104:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t126000\tfeed-v1\tAPPLIED\t305000\r\nNOTE:104:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t126000\tfollow-v1\tIGNORED\t302000\r\nNOTE:104:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t126000\tsearch-v1\tAPPLIED\t330000\r\nLIKE:104:3:1\tLIKE_CHANGED\tDONE\t131000\tfeed-v1\tIGNORED\t306000\r\nLIKE:104:3:1\tLIKE_CHANGED\tDONE\t131000\tfollow-v1\tIGNORED\t292000\r\nLIKE:104:3:1\tLIKE_CHANGED\tDONE\t131000\tsearch-v1\tIGNORED\t324000\r\nNOTE:105:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t236000\tfeed-v1\tAPPLIED\t245000\r\nNOTE:105:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t236000\tfollow-v1\tIGNORED\t246000\r\nNOTE:105:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t236000\tsearch-v1\tAPPLIED\t273000\r\nLIKE:105:3:1\tLIKE_CHANGED\tDONE\t256000\tfeed-v1\tIGNORED\t260000\r\nLIKE:105:3:1\tLIKE_CHANGED\tDONE\t256000\tfollow-v1\tIGNORED\t260000\r\nLIKE:105:3:1\tLIKE_CHANGED\tDONE\t256000\tsearch-v1\tIGNORED\t263000\r\nNOTE:106:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tfeed-v1\tAPPLIED\t144000\r\nNOTE:106:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tfollow-v1\tIGNORED\t144000\r\nNOTE:106:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tsearch-v1\tAPPLIED\t202000\r\nLIKE:106:3:1\tLIKE_CHANGED\tDONE\t154000\tfeed-v1\tIGNORED\t162000\r\nLIKE:106:3:1\tLIKE_CHANGED\tDONE\t154000\tfollow-v1\tIGNORED\t162000\r\nLIKE:106:3:1\tLIKE_CHANGED\tDONE\t154000\tsearch-v1\tIGNORED\t205000\r\nNOTE:107:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tfeed-v1\tAPPLIED\t54000\r\nNOTE:107:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tfollow-v1\tIGNORED\t54000\r\nNOTE:107:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tsearch-v1\tAPPLIED\t79000\r\nLIKE:107:3:1\tLIKE_CHANGED\tDONE\t75000\tfeed-v1\tIGNORED\t82000\r\nLIKE:107:3:1\tLIKE_CHANGED\tDONE\t75000\tfollow-v1\tIGNORED\t82000\r\nLIKE:107:3:1\tLIKE_CHANGED\tDONE\t75000\tsearch-v1\tIGNORED\t85000\r\nNOTE:108:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t164000\tfeed-v1\tAPPLIED\t335000\r\nNOTE:108:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t164000\tfollow-v1\tIGNORED\t341000\r\nNOTE:108:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t164000\tsearch-v1\tAPPLIED\t368000\r\nLIKE:108:3:1\tLIKE_CHANGED\tDONE\t171000\tfeed-v1\tIGNORED\t346000\r\nLIKE:108:3:1\tLIKE_CHANGED\tDONE\t171000\tfollow-v1\tIGNORED\t336000\r\nLIKE:108:3:1\tLIKE_CHANGED\tDONE\t171000\tsearch-v1\tIGNORED\t363000\r\nNOTE:109:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t85000\tfeed-v1\tAPPLIED\t90000\r\nNOTE:109:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t85000\tfollow-v1\tIGNORED\t90000\r\nNOTE:109:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t85000\tsearch-v1\tAPPLIED\t113000\r\nLIKE:109:3:1\tLIKE_CHANGED\tDONE\t76000\tfeed-v1\tIGNORED\t80000\r\nLIKE:109:3:1\tLIKE_CHANGED\tDONE\t76000\tfollow-v1\tIGNORED\t80000\r\nLIKE:109:3:1\tLIKE_CHANGED\tDONE\t76000\tsearch-v1\tIGNORED\t82000\r\nNOTE:110:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t184000\tfeed-v1\tAPPLIED\t348000\r\nNOTE:110:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t184000\tfollow-v1\tIGNORED\t345000\r\nNOTE:110:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t184000\tsearch-v1\tAPPLIED\t371000\r\nLIKE:110:3:1\tLIKE_CHANGED\tDONE\t199000\tfeed-v1\tIGNORED\t355000\r\nLIKE:110:3:1\tLIKE_CHANGED\tDONE\t199000\tfollow-v1\tIGNORED\t339000\r\nLIKE:110:3:1\tLIKE_CHANGED\tDONE\t199000\tsearch-v1\tIGNORED\t373000\r\nNOTE:111:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t80000\tfeed-v1\tAPPLIED\t86000\r\nNOTE:111:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t80000\tfollow-v1\tIGNORED\t86000\r\nNOTE:111:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t80000\tsearch-v1\tAPPLIED\t115000\r\nLIKE:111:3:1\tLIKE_CHANGED\tDONE\t98000\tfeed-v1\tIGNORED\t106000\r\nLIKE:111:3:1\tLIKE_CHANGED\tDONE\t98000\tfollow-v1\tIGNORED\t106000\r\nLIKE:111:3:1\tLIKE_CHANGED\tDONE\t98000\tsearch-v1\tIGNORED\t113000\r\nNOTE:112:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t196000\tfeed-v1\tAPPLIED\t368000\r\nNOTE:112:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t196000\tfollow-v1\tIGNORED\t372000\r\nNOTE:112:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t196000\tsearch-v1\tAPPLIED\t399000\r\nLIKE:112:3:1\tLIKE_CHANGED\tDONE\t202000\tfeed-v1\tIGNORED\t379000\r\nLIKE:112:3:1\tLIKE_CHANGED\tDONE\t202000\tfollow-v1\tIGNORED\t364000\r\nLIKE:112:3:1\tLIKE_CHANGED\tDONE\t202000\tsearch-v1\tIGNORED\t395000\r\nNOTE:113:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t79000\tfeed-v1\tAPPLIED\t85000\r\nNOTE:113:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t79000\tfollow-v1\tIGNORED\t85000\r\nNOTE:113:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t79000\tsearch-v1\tAPPLIED\t116000\r\nLIKE:113:3:1\tLIKE_CHANGED\tDONE\t101000\tfeed-v1\tIGNORED\t107000\r\nLIKE:113:3:1\tLIKE_CHANGED\tDONE\t101000\tfollow-v1\tIGNORED\t107000\r\nLIKE:113:3:1\tLIKE_CHANGED\tDONE\t101000\tsearch-v1\tIGNORED\t111000\r\nNOTE:114:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t185000\tfeed-v1\tAPPLIED\t347000\r\nNOTE:114:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t185000\tfollow-v1\tIGNORED\t341000\r\nNOTE:114:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t185000\tsearch-v1\tAPPLIED\t374000\r\nLIKE:114:3:1\tLIKE_CHANGED\tDONE\t200000\tfeed-v1\tIGNORED\t355000\r\nLIKE:114:3:1\tLIKE_CHANGED\tDONE\t200000\tfollow-v1\tIGNORED\t337000\r\nLIKE:114:3:1\tLIKE_CHANGED\tDONE\t200000\tsearch-v1\tIGNORED\t372000\r\nNOTE:115:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t95000\tfeed-v1\tAPPLIED\t100000\r\nNOTE:115:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t95000\tfollow-v1\tIGNORED\t100000\r\nNOTE:115:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t95000\tsearch-v1\tAPPLIED\t125000\r\nLIKE:115:3:1\tLIKE_CHANGED\tDONE\t95000\tfeed-v1\tIGNORED\t105000\r\nLIKE:115:3:1\tLIKE_CHANGED\tDONE\t95000\tfollow-v1\tIGNORED\t105000\r\nLIKE:115:3:1\tLIKE_CHANGED\tDONE\t95000\tsearch-v1\tIGNORED\t112000\r\nNOTE:116:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t291000\tfeed-v1\tAPPLIED\t359000\r\nNOTE:116:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t291000\tfollow-v1\tIGNORED\t359000\r\nNOTE:116:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t291000\tsearch-v1\tAPPLIED\t492000\r\nLIKE:116:3:1\tLIKE_CHANGED\tDONE\t308000\tfeed-v1\tIGNORED\t465000\r\nLIKE:116:3:1\tLIKE_CHANGED\tDONE\t308000\tfollow-v1\tIGNORED\t358000\r\nLIKE:116:3:1\tLIKE_CHANGED\tDONE\t308000\tsearch-v1\tIGNORED\t490000\r\nNOTE:117:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t192000\tfeed-v1\tAPPLIED\t200000\r\nNOTE:117:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t192000\tfollow-v1\tIGNORED\t199000\r\nNOTE:117:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t192000\tsearch-v1\tAPPLIED\t227000\r\nLIKE:117:3:1\tLIKE_CHANGED\tDONE\t212000\tfeed-v1\tIGNORED\t218000\r\nLIKE:117:3:1\tLIKE_CHANGED\tDONE\t212000\tfollow-v1\tIGNORED\t218000\r\nLIKE:117:3:1\tLIKE_CHANGED\tDONE\t212000\tsearch-v1\tIGNORED\t221000\r\nNOTE:118:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t123000\tfeed-v1\tAPPLIED\t130000\r\nNOTE:118:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t123000\tfollow-v1\tIGNORED\t130000\r\nNOTE:118:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t123000\tsearch-v1\tAPPLIED\t162000\r\nLIKE:118:3:1\tLIKE_CHANGED\tDONE\t136000\tfeed-v1\tIGNORED\t140000\r\nLIKE:118:3:1\tLIKE_CHANGED\tDONE\t136000\tfollow-v1\tIGNORED\t140000\r\nLIKE:118:3:1\tLIKE_CHANGED\tDONE\t136000\tsearch-v1\tIGNORED\t155000\r\nNOTE:119:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t667000\tfeed-v1\tAPPLIED\t1394000\r\nNOTE:119:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t667000\tfollow-v1\tIGNORED\t1394000\r\nNOTE:119:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t667000\tsearch-v1\tAPPLIED\t1430000\r\nLIKE:119:3:1\tLIKE_CHANGED\tDONE\t679000\tfeed-v1\tIGNORED\t1398000\r\nLIKE:119:3:1\tLIKE_CHANGED\tDONE\t679000\tfollow-v1\tIGNORED\t1387000\r\nLIKE:119:3:1\tLIKE_CHANGED\tDONE\t679000\tsearch-v1\tIGNORED\t1430000\r\nNOTE:120:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t135000\tfeed-v1\tAPPLIED\t140000\r\nNOTE:120:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t135000\tfollow-v1\tIGNORED\t140000\r\nNOTE:120:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t135000\tsearch-v1\tAPPLIED\t175000\r\nLIKE:120:3:1\tLIKE_CHANGED\tDONE\t157000\tfeed-v1\tIGNORED\t165000\r\nLIKE:120:3:1\tLIKE_CHANGED\tDONE\t157000\tfollow-v1\tIGNORED\t163000\r\nLIKE:120:3:1\tLIKE_CHANGED\tDONE\t157000\tsearch-v1\tIGNORED\t166000\r\nNOTE:121:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t64000\tfeed-v1\tAPPLIED\t69000\r\nNOTE:121:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t64000\tfollow-v1\tIGNORED\t69000\r\nNOTE:121:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t64000\tsearch-v1\tAPPLIED\t100000\r\nLIKE:121:3:1\tLIKE_CHANGED\tDONE\t83000\tfeed-v1\tIGNORED\t88000\r\nLIKE:121:3:1\tLIKE_CHANGED\tDONE\t83000\tfollow-v1\tIGNORED\t87000\r\nLIKE:121:3:1\tLIKE_CHANGED\tDONE\t83000\tsearch-v1\tIGNORED\t91000\r\nNOTE:122:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t162000\tfeed-v1\tAPPLIED\t337000\r\nNOTE:122:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t162000\tfollow-v1\tIGNORED\t329000\r\nNOTE:122:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t162000\tsearch-v1\tAPPLIED\t380000\r\nLIKE:122:3:1\tLIKE_CHANGED\tDONE\t168000\tfeed-v1\tIGNORED\t352000\r\nLIKE:122:3:1\tLIKE_CHANGED\tDONE\t168000\tfollow-v1\tIGNORED\t319000\r\nLIKE:122:3:1\tLIKE_CHANGED\tDONE\t168000\tsearch-v1\tIGNORED\t369000\r\nNOTE:123:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t59000\tfeed-v1\tAPPLIED\t63000\r\nNOTE:123:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t59000\tfollow-v1\tIGNORED\t63000\r\nNOTE:123:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t59000\tsearch-v1\tAPPLIED\t90000\r\nLIKE:123:3:1\tLIKE_CHANGED\tDONE\t76000\tfeed-v1\tIGNORED\t82000\r\nLIKE:123:3:1\tLIKE_CHANGED\tDONE\t76000\tfollow-v1\tIGNORED\t81000\r\nLIKE:123:3:1\tLIKE_CHANGED\tDONE\t76000\tsearch-v1\tIGNORED\t88000\r\nNOTE:124:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tfeed-v1\tAPPLIED\t338000\r\nNOTE:124:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tfollow-v1\tIGNORED\t337000\r\nNOTE:124:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tsearch-v1\tAPPLIED\t369000\r\nLIKE:124:3:1\tLIKE_CHANGED\tDONE\t156000\tfeed-v1\tIGNORED\t329000\r\nLIKE:124:3:1\tLIKE_CHANGED\tDONE\t156000\tfollow-v1\tIGNORED\t312000\r\nLIKE:124:3:1\tLIKE_CHANGED\tDONE\t156000\tsearch-v1\tIGNORED\t347000\r\nNOTE:125:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t49000\tfeed-v1\tAPPLIED\t58000\r\nNOTE:125:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t49000\tfollow-v1\tIGNORED\t57000\r\nNOTE:125:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t49000\tsearch-v1\tAPPLIED\t89000\r\nLIKE:125:3:1\tLIKE_CHANGED\tDONE\t68000\tfeed-v1\tIGNORED\t73000\r\nLIKE:125:3:1\tLIKE_CHANGED\tDONE\t68000\tfollow-v1\tIGNORED\t72000\r\nLIKE:125:3:1\tLIKE_CHANGED\tDONE\t68000\tsearch-v1\tIGNORED\t82000\r\nNOTE:126:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t145000\tfeed-v1\tAPPLIED\t314000\r\nNOTE:126:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t145000\tfollow-v1\tIGNORED\t312000\r\nNOTE:126:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t145000\tsearch-v1\tAPPLIED\t354000\r\nLIKE:126:3:1\tLIKE_CHANGED\tDONE\t153000\tfeed-v1\tIGNORED\t314000\r\nLIKE:126:3:1\tLIKE_CHANGED\tDONE\t153000\tfollow-v1\tIGNORED\t301000\r\nLIKE:126:3:1\tLIKE_CHANGED\tDONE\t153000\tsearch-v1\tIGNORED\t346000\r\nNOTE:127:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tfeed-v1\tAPPLIED\t64000\r\nNOTE:127:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tfollow-v1\tIGNORED\t64000\r\nNOTE:127:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tsearch-v1\tAPPLIED\t92000\r\nLIKE:127:3:1\tLIKE_CHANGED\tDONE\t76000\tfeed-v1\tIGNORED\t81000\r\nLIKE:127:3:1\tLIKE_CHANGED\tDONE\t76000\tfollow-v1\tIGNORED\t81000\r\nLIKE:127:3:1\tLIKE_CHANGED\tDONE\t76000\tsearch-v1\tIGNORED\t84000\r\nNOTE:128:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tfeed-v1\tAPPLIED\t323000\r\nNOTE:128:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tfollow-v1\tIGNORED\t317000\r\nNOTE:128:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tsearch-v1\tAPPLIED\t356000\r\nLIKE:128:3:1\tLIKE_CHANGED\tDONE\t173000\tfeed-v1\tIGNORED\t339000\r\nLIKE:128:3:1\tLIKE_CHANGED\tDONE\t173000\tfollow-v1\tIGNORED\t314000\r\nLIKE:128:3:1\tLIKE_CHANGED\tDONE\t173000\tsearch-v1\tIGNORED\t352000\r\nNOTE:129:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tfeed-v1\tAPPLIED\t58000\r\nNOTE:129:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tfollow-v1\tIGNORED\t58000\r\nNOTE:129:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t50000\tsearch-v1\tAPPLIED\t90000\r\nLIKE:129:3:1\tLIKE_CHANGED\tDONE\t74000\tfeed-v1\tIGNORED\t79000\r\nLIKE:129:3:1\tLIKE_CHANGED\tDONE\t74000\tfollow-v1\tIGNORED\t78000\r\nLIKE:129:3:1\tLIKE_CHANGED\tDONE\t74000\tsearch-v1\tIGNORED\t83000\r\nNOTE:130:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t167000\tfeed-v1\tAPPLIED\t335000\r\nNOTE:130:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t167000\tfollow-v1\tIGNORED\t332000\r\nNOTE:130:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t167000\tsearch-v1\tAPPLIED\t357000\r\nLIKE:130:3:1\tLIKE_CHANGED\tDONE\t168000\tfeed-v1\tIGNORED\t330000\r\nLIKE:130:3:1\tLIKE_CHANGED\tDONE\t168000\tfollow-v1\tIGNORED\t315000\r\nLIKE:130:3:1\tLIKE_CHANGED\tDONE\t168000\tsearch-v1\tIGNORED\t346000\r\nNOTE:131:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tfeed-v1\tAPPLIED\t64000\r\nNOTE:131:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tfollow-v1\tIGNORED\t65000\r\nNOTE:131:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tsearch-v1\tAPPLIED\t94000\r\nLIKE:131:3:1\tLIKE_CHANGED\tDONE\t85000\tfeed-v1\tIGNORED\t90000\r\nLIKE:131:3:1\tLIKE_CHANGED\tDONE\t85000\tfollow-v1\tIGNORED\t90000\r\nLIKE:131:3:1\tLIKE_CHANGED\tDONE\t85000\tsearch-v1\tIGNORED\t92000\r\nNOTE:132:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t171000\tfeed-v1\tAPPLIED\t337000\r\nNOTE:132:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t171000\tfollow-v1\tIGNORED\t334000\r\nNOTE:132:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t171000\tsearch-v1\tAPPLIED\t363000\r\nLIKE:132:3:1\tLIKE_CHANGED\tDONE\t182000\tfeed-v1\tIGNORED\t345000\r\nLIKE:132:3:1\tLIKE_CHANGED\tDONE\t182000\tfollow-v1\tIGNORED\t324000\r\nLIKE:132:3:1\tLIKE_CHANGED\tDONE\t182000\tsearch-v1\tIGNORED\t361000\r\nNOTE:133:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t61000\tfeed-v1\tAPPLIED\t65000\r\nNOTE:133:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t61000\tfollow-v1\tIGNORED\t65000\r\nNOTE:133:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t61000\tsearch-v1\tAPPLIED\t94000\r\nLIKE:133:3:1\tLIKE_CHANGED\tDONE\t82000\tfeed-v1\tIGNORED\t88000\r\nLIKE:133:3:1\tLIKE_CHANGED\tDONE\t82000\tfollow-v1\tIGNORED\t87000\r\nLIKE:133:3:1\tLIKE_CHANGED\tDONE\t82000\tsearch-v1\tIGNORED\t92000\r\nNOTE:134:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t174000\tfeed-v1\tAPPLIED\t338000\r\nNOTE:134:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t174000\tfollow-v1\tIGNORED\t332000\r\nNOTE:134:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t174000\tsearch-v1\tAPPLIED\t367000\r\nLIKE:134:3:1\tLIKE_CHANGED\tDONE\t189000\tfeed-v1\tIGNORED\t353000\r\nLIKE:134:3:1\tLIKE_CHANGED\tDONE\t189000\tfollow-v1\tIGNORED\t331000\r\nLIKE:134:3:1\tLIKE_CHANGED\tDONE\t189000\tsearch-v1\tIGNORED\t370000\r\nNOTE:135:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t66000\tfeed-v1\tAPPLIED\t72000\r\nNOTE:135:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t66000\tfollow-v1\tIGNORED\t72000\r\nNOTE:135:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t66000\tsearch-v1\tAPPLIED\t100000\r\nLIKE:135:3:1\tLIKE_CHANGED\tDONE\t90000\tfeed-v1\tIGNORED\t95000\r\nLIKE:135:3:1\tLIKE_CHANGED\tDONE\t90000\tfollow-v1\tIGNORED\t95000\r\nLIKE:135:3:1\tLIKE_CHANGED\tDONE\t90000\tsearch-v1\tIGNORED\t100000\r\nNOTE:136:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t176000\tfeed-v1\tAPPLIED\t351000\r\nNOTE:136:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t176000\tfollow-v1\tIGNORED\t347000\r\nNOTE:136:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t176000\tsearch-v1\tAPPLIED\t377000\r\nLIKE:136:3:1\tLIKE_CHANGED\tDONE\t176000\tfeed-v1\tIGNORED\t346000\r\nLIKE:136:3:1\tLIKE_CHANGED\tDONE\t176000\tfollow-v1\tIGNORED\t333000\r\nLIKE:136:3:1\tLIKE_CHANGED\tDONE\t176000\tsearch-v1\tIGNORED\t366000\r\nNOTE:137:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t74000\tfeed-v1\tAPPLIED\t80000\r\nNOTE:137:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t74000\tfollow-v1\tIGNORED\t80000\r\nNOTE:137:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t74000\tsearch-v1\tAPPLIED\t121000\r\nLIKE:137:3:1\tLIKE_CHANGED\tDONE\t85000\tfeed-v1\tIGNORED\t94000\r\nLIKE:137:3:1\tLIKE_CHANGED\tDONE\t85000\tfollow-v1\tIGNORED\t91000\r\nLIKE:137:3:1\tLIKE_CHANGED\tDONE\t85000\tsearch-v1\tIGNORED\t118000\r\nNOTE:138:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t182000\tfeed-v1\tAPPLIED\t346000\r\nNOTE:138:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t182000\tfollow-v1\tIGNORED\t339000\r\nNOTE:138:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t182000\tsearch-v1\tAPPLIED\t390000\r\nLIKE:138:3:1\tLIKE_CHANGED\tDONE\t187000\tfeed-v1\tIGNORED\t347000\r\nLIKE:138:3:1\tLIKE_CHANGED\tDONE\t187000\tfollow-v1\tIGNORED\t325000\r\nLIKE:138:3:1\tLIKE_CHANGED\tDONE\t187000\tsearch-v1\tIGNORED\t378000\r\nNOTE:139:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t83000\tfeed-v1\tAPPLIED\t87000\r\nNOTE:139:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t83000\tfollow-v1\tIGNORED\t87000\r\nNOTE:139:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t83000\tsearch-v1\tAPPLIED\t112000\r\nLIKE:139:3:1\tLIKE_CHANGED\tDONE\t118000\tfeed-v1\tIGNORED\t123000\r\nLIKE:139:3:1\tLIKE_CHANGED\tDONE\t118000\tfollow-v1\tIGNORED\t123000\r\nLIKE:139:3:1\tLIKE_CHANGED\tDONE\t118000\tsearch-v1\tIGNORED\t124000\r\nNOTE:140:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t215000\tfeed-v1\tAPPLIED\t375000\r\nNOTE:140:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t215000\tfollow-v1\tIGNORED\t375000\r\nNOTE:140:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t215000\tsearch-v1\tAPPLIED\t401000\r\nLIKE:140:3:1\tLIKE_CHANGED\tDONE\t227000\tfeed-v1\tIGNORED\t382000\r\nLIKE:140:3:1\tLIKE_CHANGED\tDONE\t227000\tfollow-v1\tIGNORED\t368000\r\nLIKE:140:3:1\tLIKE_CHANGED\tDONE\t227000\tsearch-v1\tIGNORED\t400000\r\nNOTE:141:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfeed-v1\tAPPLIED\t117000\r\nNOTE:141:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfollow-v1\tIGNORED\t117000\r\nNOTE:141:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tsearch-v1\tAPPLIED\t147000\r\nLIKE:141:3:1\tLIKE_CHANGED\tDONE\t130000\tfeed-v1\tIGNORED\t136000\r\nLIKE:141:3:1\tLIKE_CHANGED\tDONE\t130000\tfollow-v1\tIGNORED\t136000\r\nLIKE:141:3:1\tLIKE_CHANGED\tDONE\t130000\tsearch-v1\tIGNORED\t142000\r\nNOTE:142:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t236000\tfeed-v1\tAPPLIED\t389000\r\nNOTE:142:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t236000\tfollow-v1\tIGNORED\t390000\r\nNOTE:142:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t236000\tsearch-v1\tAPPLIED\t425000\r\nLIKE:142:3:1\tLIKE_CHANGED\tDONE\t245000\tfeed-v1\tIGNORED\t389000\r\nLIKE:142:3:1\tLIKE_CHANGED\tDONE\t245000\tfollow-v1\tIGNORED\t378000\r\nLIKE:142:3:1\tLIKE_CHANGED\tDONE\t245000\tsearch-v1\tIGNORED\t420000\r\nNOTE:143:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t133000\tfeed-v1\tAPPLIED\t140000\r\nNOTE:143:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t133000\tfollow-v1\tIGNORED\t140000\r\nNOTE:143:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t133000\tsearch-v1\tAPPLIED\t166000\r\nLIKE:143:3:1\tLIKE_CHANGED\tDONE\t148000\tfeed-v1\tIGNORED\t154000\r\nLIKE:143:3:1\tLIKE_CHANGED\tDONE\t148000\tfollow-v1\tIGNORED\t154000\r\nLIKE:143:3:1\tLIKE_CHANGED\tDONE\t148000\tsearch-v1\tIGNORED\t159000\r\nNOTE:144:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t47000\tfeed-v1\tAPPLIED\t51000\r\nNOTE:144:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t47000\tfollow-v1\tIGNORED\t51000\r\nNOTE:144:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t47000\tsearch-v1\tAPPLIED\t80000\r\nLIKE:144:3:1\tLIKE_CHANGED\tDONE\t52000\tfeed-v1\tIGNORED\t56000\r\nLIKE:144:3:1\tLIKE_CHANGED\tDONE\t52000\tfollow-v1\tIGNORED\t56000\r\nLIKE:144:3:1\tLIKE_CHANGED\tDONE\t52000\tsearch-v1\tIGNORED\t61000\r\nNOTE:145:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t146000\tfeed-v1\tAPPLIED\t314000\r\nNOTE:145:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t146000\tfollow-v1\tIGNORED\t314000\r\nNOTE:145:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t146000\tsearch-v1\tAPPLIED\t339000\r\nLIKE:145:3:1\tLIKE_CHANGED\tDONE\t146000\tfeed-v1\tIGNORED\t324000\r\nLIKE:145:3:1\tLIKE_CHANGED\tDONE\t146000\tfollow-v1\tIGNORED\t303000\r\nLIKE:145:3:1\tLIKE_CHANGED\tDONE\t146000\tsearch-v1\tIGNORED\t338000\r\nNOTE:146:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t43000\tfeed-v1\tAPPLIED\t50000\r\nNOTE:146:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t43000\tfollow-v1\tIGNORED\t50000\r\nNOTE:146:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t43000\tsearch-v1\tAPPLIED\t76000\r\nLIKE:146:3:1\tLIKE_CHANGED\tDONE\t64000\tfeed-v1\tIGNORED\t69000\r\nLIKE:146:3:1\tLIKE_CHANGED\tDONE\t64000\tfollow-v1\tIGNORED\t69000\r\nLIKE:146:3:1\tLIKE_CHANGED\tDONE\t64000\tsearch-v1\tIGNORED\t72000\r\nNOTE:147:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tfeed-v1\tAPPLIED\t301000\r\nNOTE:147:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tfollow-v1\tIGNORED\t308000\r\nNOTE:147:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t138000\tsearch-v1\tAPPLIED\t335000\r\nLIKE:147:3:1\tLIKE_CHANGED\tDONE\t151000\tfeed-v1\tIGNORED\t308000\r\nLIKE:147:3:1\tLIKE_CHANGED\tDONE\t151000\tfollow-v1\tIGNORED\t300000\r\nLIKE:147:3:1\tLIKE_CHANGED\tDONE\t151000\tsearch-v1\tIGNORED\t333000\r\nNOTE:148:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tfeed-v1\tAPPLIED\t65000\r\nNOTE:148:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tfollow-v1\tIGNORED\t66000\r\nNOTE:148:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t60000\tsearch-v1\tAPPLIED\t98000\r\nLIKE:148:3:1\tLIKE_CHANGED\tDONE\t78000\tfeed-v1\tIGNORED\t84000\r\nLIKE:148:3:1\tLIKE_CHANGED\tDONE\t78000\tfollow-v1\tIGNORED\t83000\r\nLIKE:148:3:1\tLIKE_CHANGED\tDONE\t78000\tsearch-v1\tIGNORED\t174000\r\nNOTE:149:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t63000\tfeed-v1\tAPPLIED\t69000\r\nNOTE:149:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t63000\tfollow-v1\tIGNORED\t68000\r\nNOTE:149:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t63000\tsearch-v1\tAPPLIED\t97000\r\nLIKE:149:3:1\tLIKE_CHANGED\tDONE\t76000\tfeed-v1\tIGNORED\t88000\r\nLIKE:149:3:1\tLIKE_CHANGED\tDONE\t76000\tfollow-v1\tIGNORED\t82000\r\nLIKE:149:3:1\tLIKE_CHANGED\tDONE\t76000\tsearch-v1\tIGNORED\t94000\r\nNOTE:150:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t580000\tfeed-v1\tAPPLIED\t744000\r\nNOTE:150:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t580000\tfollow-v1\tIGNORED\t736000\r\nNOTE:150:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t580000\tsearch-v1\tAPPLIED\t790000\r\nLIKE:150:3:1\tLIKE_CHANGED\tDONE\t589000\tfeed-v1\tIGNORED\t761000\r\nLIKE:150:3:1\tLIKE_CHANGED\tDONE\t589000\tfollow-v1\tIGNORED\t727000\r\nLIKE:150:3:1\tLIKE_CHANGED\tDONE\t589000\tsearch-v1\tIGNORED\t785000\r\nNOTE:151:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t47000\tfeed-v1\tAPPLIED\t51000\r\nNOTE:151:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t47000\tfollow-v1\tIGNORED\t51000\r\nNOTE:151:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t47000\tsearch-v1\tAPPLIED\t76000\r\nLIKE:151:3:1\tLIKE_CHANGED\tDONE\t61000\tfeed-v1\tIGNORED\t66000\r\nLIKE:151:3:1\tLIKE_CHANGED\tDONE\t61000\tfollow-v1\tIGNORED\t66000\r\nLIKE:151:3:1\tLIKE_CHANGED\tDONE\t61000\tsearch-v1\tIGNORED\t72000\r\nNOTE:152:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tfeed-v1\tAPPLIED\t328000\r\nNOTE:152:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tfollow-v1\tIGNORED\t323000\r\nNOTE:152:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tsearch-v1\tAPPLIED\t353000\r\nLIKE:152:3:1\tLIKE_CHANGED\tDONE\t168000\tfeed-v1\tIGNORED\t335000\r\nLIKE:152:3:1\tLIKE_CHANGED\tDONE\t168000\tfollow-v1\tIGNORED\t318000\r\nLIKE:152:3:1\tLIKE_CHANGED\tDONE\t168000\tsearch-v1\tIGNORED\t347000\r\nNOTE:153:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t43000\tfeed-v1\tAPPLIED\t50000\r\nNOTE:153:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t43000\tfollow-v1\tIGNORED\t50000\r\nNOTE:153:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t43000\tsearch-v1\tAPPLIED\t86000\r\nLIKE:153:3:1\tLIKE_CHANGED\tDONE\t69000\tfeed-v1\tIGNORED\t73000\r\nLIKE:153:3:1\tLIKE_CHANGED\tDONE\t69000\tfollow-v1\tIGNORED\t73000\r\nLIKE:153:3:1\tLIKE_CHANGED\tDONE\t69000\tsearch-v1\tIGNORED\t84000\r\nNOTE:154:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tfeed-v1\tAPPLIED\t316000\r\nNOTE:154:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tfollow-v1\tIGNORED\t317000\r\nNOTE:154:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t156000\tsearch-v1\tAPPLIED\t348000\r\nLIKE:154:3:1\tLIKE_CHANGED\tDONE\t156000\tfeed-v1\tIGNORED\t314000\r\nLIKE:154:3:1\tLIKE_CHANGED\tDONE\t156000\tfollow-v1\tIGNORED\t298000\r\nLIKE:154:3:1\tLIKE_CHANGED\tDONE\t156000\tsearch-v1\tIGNORED\t331000\r\nNOTE:155:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t55000\tfeed-v1\tAPPLIED\t64000\r\nNOTE:155:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t55000\tfollow-v1\tIGNORED\t64000\r\nNOTE:155:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t55000\tsearch-v1\tAPPLIED\t97000\r\nLIKE:155:3:1\tLIKE_CHANGED\tDONE\t71000\tfeed-v1\tIGNORED\t77000\r\nLIKE:155:3:1\tLIKE_CHANGED\tDONE\t71000\tfollow-v1\tIGNORED\t78000\r\nLIKE:155:3:1\tLIKE_CHANGED\tDONE\t71000\tsearch-v1\tIGNORED\t84000\r\nNOTE:156:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t173000\tfeed-v1\tAPPLIED\t330000\r\nNOTE:156:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t173000\tfollow-v1\tIGNORED\t331000\r\nNOTE:156:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t173000\tsearch-v1\tAPPLIED\t367000\r\nLIKE:156:3:1\tLIKE_CHANGED\tDONE\t176000\tfeed-v1\tIGNORED\t329000\r\nLIKE:156:3:1\tLIKE_CHANGED\tDONE\t176000\tfollow-v1\tIGNORED\t324000\r\nLIKE:156:3:1\tLIKE_CHANGED\tDONE\t176000\tsearch-v1\tIGNORED\t357000\r\nNOTE:157:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t62000\tfeed-v1\tAPPLIED\t68000\r\nNOTE:157:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t62000\tfollow-v1\tIGNORED\t68000\r\nNOTE:157:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t62000\tsearch-v1\tAPPLIED\t97000\r\nLIKE:157:3:1\tLIKE_CHANGED\tDONE\t83000\tfeed-v1\tIGNORED\t86000\r\nLIKE:157:3:1\tLIKE_CHANGED\tDONE\t83000\tfollow-v1\tIGNORED\t86000\r\nLIKE:157:3:1\tLIKE_CHANGED\tDONE\t83000\tsearch-v1\tIGNORED\t91000\r\nNOTE:158:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t148000\tfeed-v1\tAPPLIED\t316000\r\nNOTE:158:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t148000\tfollow-v1\tIGNORED\t321000\r\nNOTE:158:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t148000\tsearch-v1\tAPPLIED\t346000\r\nLIKE:158:3:1\tLIKE_CHANGED\tDONE\t156000\tfeed-v1\tIGNORED\t322000\r\nLIKE:158:3:1\tLIKE_CHANGED\tDONE\t156000\tfollow-v1\tIGNORED\t313000\r\nLIKE:158:3:1\tLIKE_CHANGED\tDONE\t156000\tsearch-v1\tIGNORED\t341000\r\nNOTE:159:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t63000\tfeed-v1\tAPPLIED\t69000\r\nNOTE:159:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t63000\tfollow-v1\tIGNORED\t69000\r\nNOTE:159:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t63000\tsearch-v1\tAPPLIED\t93000\r\nLIKE:159:3:1\tLIKE_CHANGED\tDONE\t83000\tfeed-v1\tIGNORED\t88000\r\nLIKE:159:3:1\tLIKE_CHANGED\tDONE\t83000\tfollow-v1\tIGNORED\t88000\r\nLIKE:159:3:1\tLIKE_CHANGED\tDONE\t83000\tsearch-v1\tIGNORED\t89000\r\nNOTE:160:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t163000\tfeed-v1\tAPPLIED\t327000\r\nNOTE:160:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t163000\tfollow-v1\tIGNORED\t324000\r\nNOTE:160:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t163000\tsearch-v1\tAPPLIED\t350000\r\nLIKE:160:3:1\tLIKE_CHANGED\tDONE\t180000\tfeed-v1\tIGNORED\t342000\r\nLIKE:160:3:1\tLIKE_CHANGED\tDONE\t180000\tfollow-v1\tIGNORED\t322000\r\nLIKE:160:3:1\tLIKE_CHANGED\tDONE\t180000\tsearch-v1\tIGNORED\t356000\r\nNOTE:161:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t56000\tfeed-v1\tAPPLIED\t60000\r\nNOTE:161:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t56000\tfollow-v1\tIGNORED\t61000\r\nNOTE:161:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t56000\tsearch-v1\tAPPLIED\t90000\r\nLIKE:161:3:1\tLIKE_CHANGED\tDONE\t79000\tfeed-v1\tIGNORED\t84000\r\nLIKE:161:3:1\tLIKE_CHANGED\tDONE\t79000\tfollow-v1\tIGNORED\t85000\r\nLIKE:161:3:1\tLIKE_CHANGED\tDONE\t79000\tsearch-v1\tIGNORED\t87000\r\nNOTE:162:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t169000\tfeed-v1\tAPPLIED\t336000\r\nNOTE:162:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t169000\tfollow-v1\tIGNORED\t342000\r\nNOTE:162:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t169000\tsearch-v1\tAPPLIED\t367000\r\nLIKE:162:3:1\tLIKE_CHANGED\tDONE\t178000\tfeed-v1\tIGNORED\t345000\r\nLIKE:162:3:1\tLIKE_CHANGED\tDONE\t178000\tfollow-v1\tIGNORED\t334000\r\nLIKE:162:3:1\tLIKE_CHANGED\tDONE\t178000\tsearch-v1\tIGNORED\t366000\r\nNOTE:163:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t64000\tfeed-v1\tAPPLIED\t71000\r\nNOTE:163:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t64000\tfollow-v1\tIGNORED\t71000\r\nNOTE:163:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t64000\tsearch-v1\tAPPLIED\t97000\r\nLIKE:163:3:1\tLIKE_CHANGED\tDONE\t87000\tfeed-v1\tIGNORED\t92000\r\nLIKE:163:3:1\tLIKE_CHANGED\tDONE\t87000\tfollow-v1\tIGNORED\t92000\r\nLIKE:163:3:1\tLIKE_CHANGED\tDONE\t87000\tsearch-v1\tIGNORED\t94000\r\nNOTE:164:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t158000\tfeed-v1\tAPPLIED\t327000\r\nNOTE:164:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t158000\tfollow-v1\tIGNORED\t321000\r\nNOTE:164:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t158000\tsearch-v1\tAPPLIED\t348000\r\nLIKE:164:3:1\tLIKE_CHANGED\tDONE\t176000\tfeed-v1\tIGNORED\t326000\r\nLIKE:164:3:1\tLIKE_CHANGED\tDONE\t176000\tfollow-v1\tIGNORED\t311000\r\nLIKE:164:3:1\tLIKE_CHANGED\tDONE\t176000\tsearch-v1\tIGNORED\t343000\r\nNOTE:165:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t72000\tfeed-v1\tAPPLIED\t76000\r\nNOTE:165:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t72000\tfollow-v1\tIGNORED\t76000\r\nNOTE:165:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t72000\tsearch-v1\tAPPLIED\t101000\r\nLIKE:165:3:1\tLIKE_CHANGED\tDONE\t90000\tfeed-v1\tIGNORED\t97000\r\nLIKE:165:3:1\tLIKE_CHANGED\tDONE\t90000\tfollow-v1\tIGNORED\t97000\r\nLIKE:165:3:1\tLIKE_CHANGED\tDONE\t90000\tsearch-v1\tIGNORED\t101000\r\nNOTE:166:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t186000\tfeed-v1\tAPPLIED\t356000\r\nNOTE:166:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t186000\tfollow-v1\tIGNORED\t349000\r\nNOTE:166:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t186000\tsearch-v1\tAPPLIED\t386000\r\nLIKE:166:3:1\tLIKE_CHANGED\tDONE\t192000\tfeed-v1\tIGNORED\t370000\r\nLIKE:166:3:1\tLIKE_CHANGED\tDONE\t192000\tfollow-v1\tIGNORED\t353000\r\nLIKE:166:3:1\tLIKE_CHANGED\tDONE\t192000\tsearch-v1\tIGNORED\t385000\r\nNOTE:167:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t68000\tfeed-v1\tAPPLIED\t77000\r\nNOTE:167:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t68000\tfollow-v1\tIGNORED\t77000\r\nNOTE:167:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t68000\tsearch-v1\tAPPLIED\t107000\r\nLIKE:167:3:1\tLIKE_CHANGED\tDONE\t94000\tfeed-v1\tIGNORED\t98000\r\nLIKE:167:3:1\tLIKE_CHANGED\tDONE\t94000\tfollow-v1\tIGNORED\t98000\r\nLIKE:167:3:1\tLIKE_CHANGED\tDONE\t94000\tsearch-v1\tIGNORED\t126000\r\nNOTE:168:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t198000\tfeed-v1\tAPPLIED\t360000\r\nNOTE:168:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t198000\tfollow-v1\tIGNORED\t359000\r\nNOTE:168:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t198000\tsearch-v1\tAPPLIED\t419000\r\nLIKE:168:3:1\tLIKE_CHANGED\tDONE\t195000\tfeed-v1\tIGNORED\t337000\r\nLIKE:168:3:1\tLIKE_CHANGED\tDONE\t195000\tfollow-v1\tIGNORED\t327000\r\nLIKE:168:3:1\tLIKE_CHANGED\tDONE\t195000\tsearch-v1\tIGNORED\t401000\r\nNOTE:169:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tfeed-v1\tAPPLIED\t112000\r\nNOTE:169:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tfollow-v1\tIGNORED\t112000\r\nNOTE:169:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t105000\tsearch-v1\tAPPLIED\t139000\r\nLIKE:169:3:1\tLIKE_CHANGED\tDONE\t126000\tfeed-v1\tIGNORED\t129000\r\nLIKE:169:3:1\tLIKE_CHANGED\tDONE\t126000\tfollow-v1\tIGNORED\t129000\r\nLIKE:169:3:1\tLIKE_CHANGED\tDONE\t126000\tsearch-v1\tIGNORED\t136000\r\nNOTE:170:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t208000\tfeed-v1\tAPPLIED\t375000\r\nNOTE:170:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t208000\tfollow-v1\tIGNORED\t374000\r\nNOTE:170:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t208000\tsearch-v1\tAPPLIED\t407000\r\nLIKE:170:3:1\tLIKE_CHANGED\tDONE\t208000\tfeed-v1\tIGNORED\t376000\r\nLIKE:170:3:1\tLIKE_CHANGED\tDONE\t208000\tfollow-v1\tIGNORED\t358000\r\nLIKE:170:3:1\tLIKE_CHANGED\tDONE\t208000\tsearch-v1\tIGNORED\t395000\r\nNOTE:171:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfeed-v1\tAPPLIED\t116000\r\nNOTE:171:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfollow-v1\tIGNORED\t116000\r\nNOTE:171:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tsearch-v1\tAPPLIED\t147000\r\nLIKE:171:3:1\tLIKE_CHANGED\tDONE\t135000\tfeed-v1\tIGNORED\t139000\r\nLIKE:171:3:1\tLIKE_CHANGED\tDONE\t135000\tfollow-v1\tIGNORED\t139000\r\nLIKE:171:3:1\tLIKE_CHANGED\tDONE\t135000\tsearch-v1\tIGNORED\t152000\r\nNOTE:172:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t220000\tfeed-v1\tAPPLIED\t384000\r\nNOTE:172:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t220000\tfollow-v1\tIGNORED\t394000\r\nNOTE:172:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t220000\tsearch-v1\tAPPLIED\t422000\r\nLIKE:172:3:1\tLIKE_CHANGED\tDONE\t229000\tfeed-v1\tIGNORED\t382000\r\nLIKE:172:3:1\tLIKE_CHANGED\tDONE\t229000\tfollow-v1\tIGNORED\t385000\r\nLIKE:172:3:1\tLIKE_CHANGED\tDONE\t229000\tsearch-v1\tIGNORED\t417000\r\nNOTE:173:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tfeed-v1\tAPPLIED\t124000\r\nNOTE:173:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tfollow-v1\tIGNORED\t124000\r\nNOTE:173:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tsearch-v1\tAPPLIED\t150000\r\nLIKE:173:3:1\tLIKE_CHANGED\tDONE\t123000\tfeed-v1\tIGNORED\t128000\r\nLIKE:173:3:1\tLIKE_CHANGED\tDONE\t123000\tfollow-v1\tIGNORED\t128000\r\nLIKE:173:3:1\tLIKE_CHANGED\tDONE\t123000\tsearch-v1\tIGNORED\t140000\r\nNOTE:174:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t219000\tfeed-v1\tAPPLIED\t382000\r\nNOTE:174:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t219000\tfollow-v1\tIGNORED\t382000\r\nNOTE:174:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t219000\tsearch-v1\tAPPLIED\t412000\r\nLIKE:174:3:1\tLIKE_CHANGED\tDONE\t226000\tfeed-v1\tIGNORED\t390000\r\nLIKE:174:3:1\tLIKE_CHANGED\tDONE\t226000\tfollow-v1\tIGNORED\t374000\r\nLIKE:174:3:1\tLIKE_CHANGED\tDONE\t226000\tsearch-v1\tIGNORED\t402000\r\nNOTE:175:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t107000\tfeed-v1\tAPPLIED\t112000\r\nNOTE:175:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t107000\tfollow-v1\tIGNORED\t111000\r\nNOTE:175:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t107000\tsearch-v1\tAPPLIED\t136000\r\nLIKE:175:3:1\tLIKE_CHANGED\tDONE\t117000\tfeed-v1\tIGNORED\t121000\r\nLIKE:175:3:1\tLIKE_CHANGED\tDONE\t117000\tfollow-v1\tIGNORED\t122000\r\nLIKE:175:3:1\tLIKE_CHANGED\tDONE\t117000\tsearch-v1\tIGNORED\t125000\r\nNOTE:176:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tfeed-v1\tAPPLIED\t368000\r\nNOTE:176:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tfollow-v1\tIGNORED\t377000\r\nNOTE:176:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tsearch-v1\tAPPLIED\t420000\r\nLIKE:176:3:1\tLIKE_CHANGED\tDONE\t217000\tfeed-v1\tIGNORED\t368000\r\nLIKE:176:3:1\tLIKE_CHANGED\tDONE\t217000\tfollow-v1\tIGNORED\t365000\r\nLIKE:176:3:1\tLIKE_CHANGED\tDONE\t217000\tsearch-v1\tIGNORED\t409000\r\nNOTE:177:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t112000\tfeed-v1\tAPPLIED\t121000\r\nNOTE:177:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t112000\tfollow-v1\tIGNORED\t121000\r\nNOTE:177:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t112000\tsearch-v1\tAPPLIED\t150000\r\nLIKE:177:3:1\tLIKE_CHANGED\tDONE\t128000\tfeed-v1\tIGNORED\t134000\r\nLIKE:177:3:1\tLIKE_CHANGED\tDONE\t128000\tfollow-v1\tIGNORED\t133000\r\nLIKE:177:3:1\tLIKE_CHANGED\tDONE\t128000\tsearch-v1\tIGNORED\t150000\r\nNOTE:178:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t222000\tfeed-v1\tAPPLIED\t391000\r\nNOTE:178:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t222000\tfollow-v1\tIGNORED\t391000\r\nNOTE:178:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t222000\tsearch-v1\tAPPLIED\t420000\r\nLIKE:178:3:1\tLIKE_CHANGED\tDONE\t229000\tfeed-v1\tIGNORED\t397000\r\nLIKE:178:3:1\tLIKE_CHANGED\tDONE\t229000\tfollow-v1\tIGNORED\t380000\r\nLIKE:178:3:1\tLIKE_CHANGED\tDONE\t229000\tsearch-v1\tIGNORED\t417000\r\nNOTE:179:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tfeed-v1\tAPPLIED\t121000\r\nNOTE:179:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tfollow-v1\tIGNORED\t121000\r\nNOTE:179:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t115000\tsearch-v1\tAPPLIED\t143000\r\nLIKE:179:3:1\tLIKE_CHANGED\tDONE\t123000\tfeed-v1\tIGNORED\t127000\r\nLIKE:179:3:1\tLIKE_CHANGED\tDONE\t123000\tfollow-v1\tIGNORED\t128000\r\nLIKE:179:3:1\tLIKE_CHANGED\tDONE\t123000\tsearch-v1\tIGNORED\t136000\r\nNOTE:180:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t214000\tfeed-v1\tAPPLIED\t377000\r\nNOTE:180:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t214000\tfollow-v1\tIGNORED\t385000\r\nNOTE:180:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t214000\tsearch-v1\tAPPLIED\t425000\r\nLIKE:180:3:1\tLIKE_CHANGED\tDONE\t230000\tfeed-v1\tIGNORED\t385000\r\nLIKE:180:3:1\tLIKE_CHANGED\tDONE\t230000\tfollow-v1\tIGNORED\t383000\r\nLIKE:180:3:1\tLIKE_CHANGED\tDONE\t230000\tsearch-v1\tIGNORED\t428000\r\nNOTE:181:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfeed-v1\tAPPLIED\t116000\r\nNOTE:181:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tfollow-v1\tIGNORED\t116000\r\nNOTE:181:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t111000\tsearch-v1\tAPPLIED\t625000\r\nLIKE:181:3:1\tLIKE_CHANGED\tDONE\t606000\tfeed-v1\tIGNORED\t617000\r\nLIKE:181:3:1\tLIKE_CHANGED\tDONE\t606000\tfollow-v1\tIGNORED\t617000\r\nLIKE:181:3:1\tLIKE_CHANGED\tDONE\t606000\tsearch-v1\tIGNORED\t626000\r\nNOTE:182:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfeed-v1\tAPPLIED\t382000\r\nNOTE:182:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tfollow-v1\tIGNORED\t384000\r\nNOTE:182:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t223000\tsearch-v1\tAPPLIED\t419000\r\nLIKE:182:3:1\tLIKE_CHANGED\tDONE\t232000\tfeed-v1\tIGNORED\t385000\r\nLIKE:182:3:1\tLIKE_CHANGED\tDONE\t232000\tfollow-v1\tIGNORED\t378000\r\nLIKE:182:3:1\tLIKE_CHANGED\tDONE\t232000\tsearch-v1\tIGNORED\t418000\r\nNOTE:183:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t119000\tfeed-v1\tAPPLIED\t125000\r\nNOTE:183:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t119000\tfollow-v1\tIGNORED\t125000\r\nNOTE:183:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t119000\tsearch-v1\tAPPLIED\t156000\r\nLIKE:183:3:1\tLIKE_CHANGED\tDONE\t134000\tfeed-v1\tIGNORED\t138000\r\nLIKE:183:3:1\tLIKE_CHANGED\tDONE\t134000\tfollow-v1\tIGNORED\t138000\r\nLIKE:183:3:1\tLIKE_CHANGED\tDONE\t134000\tsearch-v1\tIGNORED\t144000\r\nNOTE:184:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t224000\tfeed-v1\tAPPLIED\t396000\r\nNOTE:184:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t224000\tfollow-v1\tIGNORED\t389000\r\nNOTE:184:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t224000\tsearch-v1\tAPPLIED\t425000\r\nLIKE:184:3:1\tLIKE_CHANGED\tDONE\t237000\tfeed-v1\tIGNORED\t398000\r\nLIKE:184:3:1\tLIKE_CHANGED\tDONE\t237000\tfollow-v1\tIGNORED\t381000\r\nLIKE:184:3:1\tLIKE_CHANGED\tDONE\t237000\tsearch-v1\tIGNORED\t418000\r\nNOTE:185:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tfeed-v1\tAPPLIED\t124000\r\nNOTE:185:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tfollow-v1\tIGNORED\t124000\r\nNOTE:185:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t118000\tsearch-v1\tAPPLIED\t151000\r\nLIKE:185:3:1\tLIKE_CHANGED\tDONE\t137000\tfeed-v1\tIGNORED\t142000\r\nLIKE:185:3:1\tLIKE_CHANGED\tDONE\t137000\tfollow-v1\tIGNORED\t142000\r\nLIKE:185:3:1\tLIKE_CHANGED\tDONE\t137000\tsearch-v1\tIGNORED\t147000\r\nNOTE:186:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t230000\tfeed-v1\tAPPLIED\t392000\r\nNOTE:186:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t230000\tfollow-v1\tIGNORED\t378000\r\nNOTE:186:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t230000\tsearch-v1\tAPPLIED\t439000\r\nLIKE:186:3:1\tLIKE_CHANGED\tDONE\t235000\tfeed-v1\tIGNORED\t406000\r\nLIKE:186:3:1\tLIKE_CHANGED\tDONE\t235000\tfollow-v1\tIGNORED\t381000\r\nLIKE:186:3:1\tLIKE_CHANGED\tDONE\t235000\tsearch-v1\tIGNORED\t429000\r\nNOTE:187:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t132000\tfeed-v1\tAPPLIED\t138000\r\nNOTE:187:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t132000\tfollow-v1\tIGNORED\t137000\r\nNOTE:187:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t132000\tsearch-v1\tAPPLIED\t261000\r\nLIKE:187:3:1\tLIKE_CHANGED\tDONE\t226000\tfeed-v1\tIGNORED\t231000\r\nLIKE:187:3:1\tLIKE_CHANGED\tDONE\t226000\tfollow-v1\tIGNORED\t231000\r\nLIKE:187:3:1\tLIKE_CHANGED\tDONE\t226000\tsearch-v1\tIGNORED\t252000\r\nNOTE:188:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t125000\tfeed-v1\tAPPLIED\t136000\r\nNOTE:188:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t125000\tfollow-v1\tIGNORED\t136000\r\nNOTE:188:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t125000\tsearch-v1\tAPPLIED\t175000\r\nLIKE:188:3:1\tLIKE_CHANGED\tDONE\t143000\tfeed-v1\tIGNORED\t161000\r\nLIKE:188:3:1\tLIKE_CHANGED\tDONE\t143000\tfollow-v1\tIGNORED\t158000\r\nLIKE:188:3:1\tLIKE_CHANGED\tDONE\t143000\tsearch-v1\tIGNORED\t172000\r\nNOTE:189:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t45000\tfeed-v1\tAPPLIED\t49000\r\nNOTE:189:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t45000\tfollow-v1\tIGNORED\t48000\r\nNOTE:189:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t45000\tsearch-v1\tAPPLIED\t77000\r\nLIKE:189:3:1\tLIKE_CHANGED\tDONE\t62000\tfeed-v1\tIGNORED\t66000\r\nLIKE:189:3:1\tLIKE_CHANGED\tDONE\t62000\tfollow-v1\tIGNORED\t67000\r\nLIKE:189:3:1\tLIKE_CHANGED\tDONE\t62000\tsearch-v1\tIGNORED\t68000\r\nNOTE:190:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tfeed-v1\tAPPLIED\t316000\r\nNOTE:190:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tfollow-v1\tIGNORED\t318000\r\nNOTE:190:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t166000\tsearch-v1\tAPPLIED\t351000\r\nLIKE:190:3:1\tLIKE_CHANGED\tDONE\t175000\tfeed-v1\tIGNORED\t334000\r\nLIKE:190:3:1\tLIKE_CHANGED\tDONE\t175000\tfollow-v1\tIGNORED\t321000\r\nLIKE:190:3:1\tLIKE_CHANGED\tDONE\t175000\tsearch-v1\tIGNORED\t351000\r\nNOTE:191:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tfeed-v1\tAPPLIED\t222000\r\nNOTE:191:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tfollow-v1\tIGNORED\t222000\r\nNOTE:191:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t216000\tsearch-v1\tAPPLIED\t40055000\r\nLIKE:191:3:1\tLIKE_CHANGED\tDONE\t212000\tfeed-v1\tIGNORED\t217000\r\nLIKE:191:3:1\tLIKE_CHANGED\tDONE\t212000\tfollow-v1\tIGNORED\t217000\r\nLIKE:191:3:1\tLIKE_CHANGED\tDONE\t212000\tsearch-v1\tIGNORED\t643000\r\nNOTE:192:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t230000\tfeed-v1\tAPPLIED\t234000\r\nNOTE:192:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t230000\tfollow-v1\tIGNORED\t234000\r\nNOTE:192:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t230000\tsearch-v1\tAPPLIED\t40109000\r\nLIKE:192:3:1\tLIKE_CHANGED\tDONE\t322000\tfeed-v1\tIGNORED\t328000\r\nLIKE:192:3:1\tLIKE_CHANGED\tDONE\t322000\tfollow-v1\tIGNORED\t328000\r\nLIKE:192:3:1\tLIKE_CHANGED\tDONE\t322000\tsearch-v1\tIGNORED\t1081000\r\nNOTE:193:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t340000\tfeed-v1\tAPPLIED\t344000\r\nNOTE:193:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t340000\tfollow-v1\tIGNORED\t344000\r\nNOTE:193:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t340000\tsearch-v1\tAPPLIED\t40174000\r\nLIKE:193:3:1\tLIKE_CHANGED\tDONE\t359000\tfeed-v1\tIGNORED\t364000\r\nLIKE:193:3:1\tLIKE_CHANGED\tDONE\t359000\tfollow-v1\tIGNORED\t364000\r\nLIKE:193:3:1\tLIKE_CHANGED\tDONE\t359000\tsearch-v1\tIGNORED\t1507000\r\nNOTE:194:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t380000\tfeed-v1\tAPPLIED\t383000\r\nNOTE:194:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t380000\tfollow-v1\tIGNORED\t383000\r\nNOTE:194:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t380000\tsearch-v1\tAPPLIED\t40245000\r\nLIKE:194:3:1\tLIKE_CHANGED\tDONE\t400000\tfeed-v1\tIGNORED\t406000\r\nLIKE:194:3:1\tLIKE_CHANGED\tDONE\t400000\tfollow-v1\tIGNORED\t406000\r\nLIKE:194:3:1\tLIKE_CHANGED\tDONE\t400000\tsearch-v1\tIGNORED\t1930000\r\nNOTE:195:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t416000\tfeed-v1\tAPPLIED\t420000\r\nNOTE:195:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t416000\tfollow-v1\tIGNORED\t420000\r\nNOTE:195:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t416000\tsearch-v1\tAPPLIED\t40319000\r\nLIKE:195:3:1\tLIKE_CHANGED\tDONE\t423000\tfeed-v1\tIGNORED\t429000\r\nLIKE:195:3:1\tLIKE_CHANGED\tDONE\t423000\tfollow-v1\tIGNORED\t429000\r\nLIKE:195:3:1\tLIKE_CHANGED\tDONE\t423000\tsearch-v1\tIGNORED\t2343000\r\nNOTE:196:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t457000\tfeed-v1\tAPPLIED\t461000\r\nNOTE:196:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t457000\tfollow-v1\tIGNORED\t462000\r\nNOTE:196:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t457000\tsearch-v1\tAPPLIED\t40391000\r\nLIKE:196:3:1\tLIKE_CHANGED\tDONE\t466000\tfeed-v1\tIGNORED\t470000\r\nLIKE:196:3:1\tLIKE_CHANGED\tDONE\t466000\tfollow-v1\tIGNORED\t470000\r\nLIKE:196:3:1\tLIKE_CHANGED\tDONE\t466000\tsearch-v1\tIGNORED\t2766000\r\nNOTE:197:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t374000\tfeed-v1\tAPPLIED\t378000\r\nNOTE:197:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t374000\tfollow-v1\tIGNORED\t379000\r\nNOTE:197:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t374000\tsearch-v1\tAPPLIED\t40347000\r\nLIKE:197:3:1\tLIKE_CHANGED\tDONE\t470000\tfeed-v1\tIGNORED\t475000\r\nLIKE:197:3:1\tLIKE_CHANGED\tDONE\t470000\tfollow-v1\tIGNORED\t475000\r\nLIKE:197:3:1\tLIKE_CHANGED\tDONE\t470000\tsearch-v1\tIGNORED\t3070000\r\nNOTE:198:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t478000\tfeed-v1\tAPPLIED\t482000\r\nNOTE:198:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t478000\tfollow-v1\tIGNORED\t482000\r\nNOTE:198:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t478000\tsearch-v1\tAPPLIED\t40384000\r\nLIKE:198:3:1\tLIKE_CHANGED\tDONE\t495000\tfeed-v1\tIGNORED\t499000\r\nLIKE:198:3:1\tLIKE_CHANGED\tDONE\t495000\tfollow-v1\tIGNORED\t500000\r\nLIKE:198:3:1\tLIKE_CHANGED\tDONE\t495000\tsearch-v1\tIGNORED\t3484000\r\nNOTE:199:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t510000\tfeed-v1\tAPPLIED\t514000\r\nNOTE:199:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t510000\tfollow-v1\tIGNORED\t514000\r\nNOTE:199:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t510000\tsearch-v1\tAPPLIED\t40441000\r\nLIKE:199:3:1\tLIKE_CHANGED\tDONE\t502000\tfeed-v1\tIGNORED\t508000\r\nLIKE:199:3:1\tLIKE_CHANGED\tDONE\t502000\tfollow-v1\tIGNORED\t508000\r\nLIKE:199:3:1\tLIKE_CHANGED\tDONE\t502000\tsearch-v1\tIGNORED\t3889000\r\nNOTE:200:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t507000\tfeed-v1\tAPPLIED\t513000\r\nNOTE:200:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t507000\tfollow-v1\tIGNORED\t513000\r\nNOTE:200:1:PUBLISHED\tNOTE_PUBLISHED\tDONE\t507000\tsearch-v1\tAPPLIED\t40465000\r\nLIKE:200:3:1\tLIKE_CHANGED\tDONE\t499000\tfeed-v1\tIGNORED\t506000\r\nLIKE:200:3:1\tLIKE_CHANGED\tDONE\t499000\tfollow-v1\tIGNORED\t506000\r\nLIKE:200:3:1\tLIKE_CHANGED\tDONE\t499000\tsearch-v1\tIGNORED\t4271000",
+  "logout": true,
+  "endedAt": "2026-10-29T08:16:33.652Z"
+}

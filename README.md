@@ -39,6 +39,7 @@
 
 - [迁移与分阶段方案](docs/implementation-plan.md)：Go 任务、契约、隔离与切换。
 - [实现交接](docs/agent-handoff.md)：小任务、自验、独立 commit 与审查。
+- [本机录屏指南](docs/demo-recording.md)：独立环境、角色准备和约 8 分钟业务演示；[源码讲解](docs/source-walkthrough.md)按关键调用链解释取舍与边界。
 - [Windows 开发说明](docs/windows-development.md)：当前路线与历史环境记录。
 - [运行与接口](docs/development.md)：复用接口及历史 Java 启动方法。
 - [交易验收](docs/acceptance.md)、[社区亮点验收](docs/backend-highlights-acceptance.md)、[AI 验收](docs/ai-acceptance.md)。

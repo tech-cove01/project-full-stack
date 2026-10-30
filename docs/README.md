@@ -1,6 +1,8 @@
 # 当前进度与开发入口
 
-更新：2026-10-29。用户已确定全面改用 Go 后端，前端保留 Vue 3/TypeScript，数据库保留 MySQL。唯一任务状态入口为 [STATUS](../STATUS.md)，总路线见 [Go 迁移方案](implementation-plan.md)，实现者先读 [交接说明](agent-handoff.md)。各票详细记录保留交付时的范围与限制。
+更新：2026-10-30。用户已确定全面改用 Go 后端，前端保留 Vue 3/TypeScript，数据库保留 MySQL。唯一任务状态入口为 [STATUS](../STATUS.md)，总路线见 [Go 迁移方案](implementation-plan.md)，实现者先读 [交接说明](agent-handoff.md)。各票详细记录保留交付时的范围与限制。
+
+功能冻结后的材料入口：[本机录屏指南](demo-recording.md)、[源码讲解路线](source-walkthrough.md)。两份材料按实际源码校对，尚未生成视频，也不新增运行或核验结论。
 
 ## 当前事实
 

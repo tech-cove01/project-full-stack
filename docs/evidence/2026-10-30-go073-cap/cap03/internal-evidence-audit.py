@@ -20,6 +20,7 @@ REPO = BASE.parents[3]
 FINAL_API_SOURCE = '767c2fc8bdf1be08c5636143a71898eec25081a9'
 ORIGINAL_FIXTURE_SOURCE = '3db296dd0beedd6f85d06cf5479d707b0498ce7e'
 ORIGINAL_FIXTURE_MANIFEST_SHA256 = '7e3a9a9019c7fffc35dbbffd1c66f88ca65db2808faee1d263017698e2501754'
+API_METADATA_SUFFIX = ('docs', 'evidence', '2026-10-30-go073-cap', 'cap03', 'api-pool-fix.json')
 STATUS = (
     'Uptime Questions Queries Com_select Com_insert Com_update Com_delete '
     'Com_commit Com_stmt_execute Com_stmt_prepare Com_stmt_close '
@@ -55,6 +56,27 @@ def equal(left, right):
     return left == right
 
 
+def mapped_api_metadata_path(captured):
+    """Validate captured provenance lexically; never dereference its prefix."""
+    if not isinstance(captured, str) or not captured or '\0' in captured or '://' in captured:
+        raise ValueError('invalid captured API metadata path')
+    if captured.endswith(('/', '\\')):
+        raise ValueError('captured API metadata must name a file')
+    parts = [part for part in captured.replace('\\', '/').split('/') if part]
+    if any(part in ('.', '..') for part in parts):
+        raise ValueError('captured API metadata traversal rejected')
+    if any(':' in part and not (index == 0 and re.fullmatch('[A-Za-z]:', part))
+           for index, part in enumerate(parts)):
+        raise ValueError('captured API metadata path is not a filesystem path')
+    if tuple(parts[-len(API_METADATA_SUFFIX):]) != API_METADATA_SUFFIX:
+        raise ValueError('captured API metadata has an unexpected repository suffix')
+    # Only this known local evidence file is read, even in a relocated checkout.
+    local = BASE / API_METADATA_SUFFIX[-1]
+    if local.is_symlink() or not local.resolve().is_relative_to(BASE):
+        raise ValueError('local API metadata must stay inside the evidence directory')
+    return local
+
+
 def provenance(name, report, config, supervision, check, notes):
     source, revision = report.get('apiSourceSha'), report.get('apiExpectedRevision')
     result = {'status': 'legacy_without_API_provenance', 'api_source_sha': source,
@@ -82,9 +104,7 @@ def provenance(name, report, config, supervision, check, notes):
     check('command_fixture_source_matches_original', command['fixtureSourceSha'] == fixture['sourceSha'])
     check('command_PID_matches_sampled_API', command['apiPid'] == config['pid'] == supervision['api_pid'])
     check('command_workload_matches_result', all(command[key] == report[key] for key in ('mode', 'rate', 'seconds')))
-    metadata_path = Path(command['apiMetadataFile']).resolve()
-    if not metadata_path.is_relative_to(BASE):
-        raise ValueError('API metadata must be a public CAP03 evidence file')
+    metadata_path = mapped_api_metadata_path(command['apiMetadataFile'])
     metadata = read(metadata_path)
     metadata_hash = INPUTS[str(metadata_path.relative_to(REPO)).replace('\\', '/')]['sha256']
     check('API_metadata_bytes_match_command_hash', metadata_hash == command['apiMetadataSHA256'].lower())
@@ -92,7 +112,9 @@ def provenance(name, report, config, supervision, check, notes):
     check('API_metadata_revision_matches_result', metadata['expectedVersion'] == revision)
     check('API_metadata_PID_matches_samples', metadata['pid'] == config['pid'])
     result.update({'status': 'explicit_API_and_fixture_provenance',
+                   'API_metadata_captured_path': command['apiMetadataFile'],
                    'API_metadata_path': str(metadata_path.relative_to(REPO)).replace('\\', '/'),
+                   'API_metadata_mapping': 'fixed repository suffix mapped to current BASE; captured absolute prefix is not dereferenced',
                    'API_metadata_sha256': metadata_hash, 'api_pid': metadata['pid'],
                    'binary_sha256': metadata['sha256'], 'original_fixture_actual_sha256': fixture_hash})
     if source == FINAL_API_SOURCE:

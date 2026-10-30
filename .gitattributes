@@ -12,3 +12,17 @@ docs/evidence/2026-10-30-go073-cap/**/*.txt -text
 docs/evidence/2026-10-30-go073-cap/**/*.log -text
 docs/evidence/2026-10-30-go073-cap/**/*.gz binary
 docs/evidence/2026-10-30-go073-cap/**/*.pprof binary
+
+# CAP-06/07 captures retain their original bytes for cross-file hash audits.
+docs/evidence/2026-10-30-cap06/**/*.json -text
+docs/evidence/2026-10-30-cap06/**/*.ndjson -text
+docs/evidence/2026-10-30-cap06/**/*.txt -text
+docs/evidence/2026-10-30-cap06/**/*.log -text
+docs/evidence/2026-10-30-cap06/**/*.gz binary
+docs/evidence/2026-10-30-cap06/**/*.pprof binary
+docs/evidence/2026-10-30-cap07/**/*.json -text
+docs/evidence/2026-10-30-cap07/**/*.ndjson -text
+docs/evidence/2026-10-30-cap07/**/*.txt -text
+docs/evidence/2026-10-30-cap07/**/*.log -text
+docs/evidence/2026-10-30-cap07/**/*.gz binary
+docs/evidence/2026-10-30-cap07/**/*.pprof binary

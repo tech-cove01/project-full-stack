@@ -25,7 +25,7 @@
 
 启动前固定最多**3轮multi100/s、稳定180秒**诊断。`cap06-stage.py`以exclusive `diagnostic-slot-1/2/3.json`预约，失败启动也占名额；不能新tag无限重试。达到原SLO/资源预算就由原harness停止，完整失败保留。
 
-额外collector触发条件预固定：SQL或Redis全局WaitCount有正增量、累计WaitDuration增量至少100ms，或新完成slow trace总长至少200ms。保存触发前最多20秒（另有最多21样本上限）与触发后最多10秒的公开时间序列；整个stable时间序列持续落NDJSON，进程结束会截断后窗并注明。
+额外collector触发条件在首轮诊断前固定：单poll间SQL或Redis全局WaitCount增量至少10、累计WaitDuration增量至少100ms，或新完成slow trace总长至少200ms。较小正等待计数仍写入完整timeline，不为其消耗抓栈名额，以免早期少量排队占满旧T115秒级长尾的采证预算。保存触发前最多20秒（另有最多21样本上限）与触发后最多10秒的公开时间序列；整个stable时间序列持续落NDJSON，进程结束会截断后窗并注明。
 
 每轮goroutine **最多3次（包括失败尝试）**，最小间隔15秒；每次仅标准二进制goroutine profile，最多5MiB、3秒超时。capture前后核实本轮stable k6的PID/创建时刻/脚本/父子身份仍活；若抓取间退出，不称全段负载内。无CPU profile/native内存转储，不抓cmdline或环境。capacity响应2MiB上限，与32×256span的有界ring匹配。
 

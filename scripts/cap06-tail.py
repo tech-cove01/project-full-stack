@@ -74,7 +74,7 @@ def triggers(previous, current):
         left, right = previous.get(pool, {}), current.get(pool, {})
         count = right.get('wait_count', 0) - left.get('wait_count', 0)
         duration = right.get('wait_duration_ns', 0) - left.get('wait_duration_ns', 0)
-        if count > 0 or duration >= 100_000_000:
+        if count >= 10 or duration >= 100_000_000:
             reasons.append({'kind': pool + '_global_pool_wait_delta', 'count': count, 'duration_ns': duration,
                             'scope': 'whole API pool; not a per-request acquisition duration'})
     old_seq = previous.get('tail', {}).get('latest_sequence', 0)
@@ -118,7 +118,7 @@ def main():
               'script_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               'poll_interval_seconds': 1, 'pre_trigger_seconds': 20, 'post_trigger_seconds': 10,
               'maximum_goroutine_captures': 3, 'minimum_capture_spacing_seconds': 15,
-              'trigger_policy': 'positive SQL/Redis global wait-count delta, >=100ms cumulative wait delta, or new completed request trace >=200ms',
+              'trigger_policy': 'SQL/Redis global wait-count delta >=10, >=100ms cumulative wait delta, or new completed request trace >=200ms; smaller positive counts remain timeline evidence only',
               'diagnostic_only': True, 'captures': [], 'errors': [], 'stable_observed': False}
     before = deque(maxlen=21)
     windows = []
@@ -188,6 +188,10 @@ def main():
                 failed_polls += 1
             row['stable_alive_after_poll'] = alive(*stable)
             if diagnostic is not None:
+                row['observed_pool_wait_deltas'] = {
+                    pool: {field: diagnostic.get(pool, {}).get(field, 0) - previous.get(pool, {}).get(field, 0)
+                           for field in ('wait_count', 'wait_duration_ns')}
+                    for pool in ('sql', 'redis')} if previous else None
                 reasons = triggers(previous, diagnostic)
                 row['trigger_reasons'] = reasons
                 previous = diagnostic

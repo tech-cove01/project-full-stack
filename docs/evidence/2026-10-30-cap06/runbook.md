@@ -52,7 +52,7 @@ python -X utf8 scripts/cap06-stage.py --environment $cap06Private --api-metadata
 
 diagnostic严格multi100/180，最多三个exclusive slot，不因失败删slot或换目录绕限制。每轮原harness输出`<tag>-load`、资源/停止监督`<tag>-control`、额外触发采证`<tag>-diagnostic`。读取capacity结果、native summary、监督/资源及collector manifest分别判断，诊断轮不计正式成绩。约1秒额外轮询与profile有开销；collector任何poll失败退出非0，原partial证据保留，不变成0失败。
 
-触发后`goroutine-N.pprof`可在负载结束后用同实际API二进制执行`go tool pprof -top`，不要同时编译/profile重活干扰正式load。保留触发前后time series、observer fetch起止/时延和app时刻，不以sampler row.at代替所有观测真实时点。
+首轮诊断前触发门槛固定为单poll全局SQL/Redis WaitCount增量≥10或累计WaitDuration增量≥100ms、新slow trace≥200ms；较小正计数仍写timeline而不消耗抓栈名额。触发后`goroutine-N.pprof`可在负载结束后用同实际API二进制执行`go tool pprof -top`，不要同时编译/profile重活干扰正式load。保留触发前后time series、observer fetch起止/时延和app时刻，不以sampler row.at代替所有观测真实时点。
 
 ## 4. 修复后正式组与换API
 

@@ -1,0 +1,1005 @@
+{
+  "task": "CAP-06",
+  "at": "2026-10-30T10:18:12.245943+00:00",
+  "internal_only": true,
+  "original_tail_cause_confirmed": false,
+  "CAP06_closed": false,
+  "CAP07_implemented": false,
+  "script_sha256": "6f31434dee3b1cff96836b9b414f7171419d28e5696bc4a36de7fd1f0a37faa9",
+  "tool_sources": {
+    "1bed127a532307f2d24b03e1ef07e4b667bdfd59": {
+      "cap06-stage.py": "9fcc46e4f346f3046ec82885f266faa74f2055c60d757626ac7351e72026f682",
+      "cap06-tail.py": "0c694701ad5b58b527f58ebe895ae4ca2a4b2f22070fbf0442168ed813c3d51d",
+      "capacity-stage.py": "2f30385e62a8c4817ed74bcd9d4c93aeee6fa2e609bb0db5273196243fd209d6",
+      "capacity-resources.py": "6f438853ea211f0264e8f147680ae9eecd80e87f9be52abe5a383db179784135",
+      "go073-cap-read.mjs": "0335ea68479cae4a6fb4dacf6b4889ab94388dac875d04bac16705cd4d08addf"
+    },
+    "3904d7d51ec7ef51fcc37de266580b387cd7a94e": {
+      "cap06-stage.py": "9fcc46e4f346f3046ec82885f266faa74f2055c60d757626ac7351e72026f682",
+      "cap06-tail.py": "585dcc333386e63fe053d944402e6349dd49b5af036543714a378658d66a25f8",
+      "capacity-stage.py": "2f30385e62a8c4817ed74bcd9d4c93aeee6fa2e609bb0db5273196243fd209d6",
+      "capacity-resources.py": "6f438853ea211f0264e8f147680ae9eecd80e87f9be52abe5a383db179784135",
+      "go073-cap-read.mjs": "0335ea68479cae4a6fb4dacf6b4889ab94388dac875d04bac16705cd4d08addf"
+    }
+  },
+  "checks": [
+    {
+      "check": "baseline-off-probe:known_metadata_file",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:metadata_bytes_and_source",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:startup_identity_and_switch",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:attempted",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:completedHttpRequests",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:completed",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:successful",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:systemErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:httpErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:contentErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:dropped",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:complete_success",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:unknown_zero",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:allLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:allLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:successfulLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:successfulLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:source_and_fixture",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:recorded_tools",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:budget_result",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:complete_supervision",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-probe:access_counters_valid",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:known_metadata_file",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:metadata_bytes_and_source",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:startup_identity_and_switch",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:attempted",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:completedHttpRequests",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:completed",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:successful",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:systemErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:httpErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:contentErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:dropped",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:complete_success",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:unknown_zero",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:allLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:allLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:successfulLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:successfulLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:source_and_fixture",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:recorded_tools",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:budget_result",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:complete_supervision",
+      "passed": true
+    },
+    {
+      "check": "baseline-off-short25:access_counters_valid",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:known_metadata_file",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:metadata_bytes_and_source",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:startup_identity_and_switch",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:attempted",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:completedHttpRequests",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:completed",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:successful",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:systemErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:httpErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:contentErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:dropped",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:complete_success",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:unknown_zero",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:allLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:allLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:successfulLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:successfulLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:source_and_fixture",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:recorded_tools",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:budget_result",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:complete_supervision",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-probe:access_counters_valid",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:known_metadata_file",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:metadata_bytes_and_source",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:startup_identity_and_switch",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:attempted",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:completedHttpRequests",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:completed",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:successful",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:systemErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:httpErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:contentErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:dropped",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:complete_success",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:unknown_zero",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:allLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:allLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:successfulLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:successfulLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:source_and_fixture",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:recorded_tools",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:budget_result",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:complete_supervision",
+      "passed": true
+    },
+    {
+      "check": "baseline-on-short25:access_counters_valid",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:known_metadata_file",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:metadata_bytes_and_source",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:startup_identity_and_switch",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:attempted",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:completedHttpRequests",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:completed",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:successful",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:systemErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:httpErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:contentErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:dropped",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:complete_success",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:unknown_zero",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:allLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:allLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:successfulLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:successfulLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:source_and_fixture",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:recorded_tools",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:budget_result",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:complete_supervision",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:access_counters_valid",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:complete_collector",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:bounded_diagnostic",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:capture_hash",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-1:load_time_guards",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:known_metadata_file",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:metadata_bytes_and_source",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:startup_identity_and_switch",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:attempted",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:completedHttpRequests",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:completed",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:successful",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:systemErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:httpErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:contentErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:dropped",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:complete_success",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:unknown_zero",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:allLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:allLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:successfulLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:successfulLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:source_and_fixture",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:recorded_tools",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:budget_result",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:complete_supervision",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:access_counters_valid",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:complete_collector",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-2:bounded_diagnostic",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:known_metadata_file",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:metadata_bytes_and_source",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:startup_identity_and_switch",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:attempted",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:completedHttpRequests",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:completed",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:successful",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:systemErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:httpErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:contentErrors",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:dropped",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:complete_success",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:unknown_zero",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:allLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:allLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:successfulLatencyp(95)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:successfulLatencyp(99)",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:source_and_fixture",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:recorded_tools",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:budget_result",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:complete_supervision",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:access_counters_valid",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:complete_collector",
+      "passed": true
+    },
+    {
+      "check": "baseline-diag-3:bounded_diagnostic",
+      "passed": true
+    },
+    {
+      "check": "exact_three_reserved_rounds",
+      "passed": true
+    },
+    {
+      "check": "cleanup_complete",
+      "passed": true
+    }
+  ],
+  "failed_checks": [],
+  "stages": [
+    {
+      "stage": "baseline-off-probe",
+      "kind": "probe",
+      "attempted": 6,
+      "successful": 6,
+      "p95": 36.572675000000004,
+      "p99": 38.746535,
+      "resource_samples": 2,
+      "formal_CAP06D_result": false
+    },
+    {
+      "stage": "baseline-off-short25",
+      "kind": "probe",
+      "attempted": 376,
+      "successful": 376,
+      "p95": 35.9898,
+      "p99": 42.896475,
+      "resource_samples": 4,
+      "formal_CAP06D_result": false
+    },
+    {
+      "stage": "baseline-on-probe",
+      "kind": "probe",
+      "attempted": 5,
+      "successful": 5,
+      "p95": 65.14698,
+      "p99": 66.159876,
+      "resource_samples": 2,
+      "formal_CAP06D_result": false
+    },
+    {
+      "stage": "baseline-on-short25",
+      "kind": "probe",
+      "attempted": 376,
+      "successful": 376,
+      "p95": 34.674975,
+      "p99": 54.845175,
+      "resource_samples": 4,
+      "formal_CAP06D_result": false
+    },
+    {
+      "stage": "baseline-diag-1",
+      "kind": "diagnostic",
+      "attempted": 18001,
+      "successful": 18001,
+      "p95": 26.4453,
+      "p99": 43.7021,
+      "resource_samples": 37,
+      "formal_CAP06D_result": false,
+      "collector_polls": 183,
+      "captures": 1,
+      "sampled_fresh_slow_traces": 39
+    },
+    {
+      "stage": "baseline-diag-2",
+      "kind": "diagnostic",
+      "attempted": 18001,
+      "successful": 18001,
+      "p95": 29.2595,
+      "p99": 40.4513,
+      "resource_samples": 37,
+      "formal_CAP06D_result": false,
+      "collector_polls": 183,
+      "captures": 0,
+      "sampled_fresh_slow_traces": 0
+    },
+    {
+      "stage": "baseline-diag-3",
+      "kind": "diagnostic",
+      "attempted": 18000,
+      "successful": 18000,
+      "p95": 31.51600499999999,
+      "p99": 40.9272779999999,
+      "resource_samples": 37,
+      "formal_CAP06D_result": false,
+      "collector_polls": 182,
+      "captures": 0,
+      "sampled_fresh_slow_traces": 0
+    }
+  ],
+  "inputs": {
+    "docs/evidence/2026-10-30-cap06/fixture/fixture.json": {
+      "sha256": "31f9b9b4b9a43372cbb147ef6ae24a716d67f7619f8032919393464f7ac2bc2c",
+      "bytes": 91876
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/result.json": {
+      "sha256": "c308fadd30b608861444b5b7a62cd67f63ab33ef127b868ee38a526a3f67c2b2",
+      "bytes": 3094
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-probe-command.json": {
+      "sha256": "44c8135ba6374f133e887318edf17c05b48ae04320adf77478bc7b7e68724fc1",
+      "bytes": 1108
+    },
+    "docs/evidence/2026-10-30-cap06/api-baseline-off.json": {
+      "sha256": "3a89e5c11d94def04cfd130675145d96ed45aa39fc9eaffc500cf478ac019ab3",
+      "bytes": 657
+    },
+    "docs/evidence/2026-10-30-cap06/api-baseline-off-health.json": {
+      "sha256": "897a523a0489513e6ae2cf77a3ef129b452f17850eca3c1fdd2bf0798e1c58b5",
+      "bytes": 1569
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/stable-summary.json": {
+      "sha256": "a5cc72093d3690a1df77fd4a64941da89eb74b3789df78782af5430d91148ebb",
+      "bytes": 4801
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-probe-control/exit-status.json": {
+      "sha256": "3546aa7d8becd5be2d9fbf9877cf425b1838e581c6b82ed5e153666d1f0173d4",
+      "bytes": 982
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-probe-control/resources.ndjson": {
+      "sha256": "80c3c9395f5a5009e42cd0b852878459fa4a0e754d506f6208061f4223968632",
+      "bytes": 5386
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/access-delta.json": {
+      "sha256": "8e2dc9615cb31dd183691cae571304ca73a15a64846b59d7ade12c88cdfb007f",
+      "bytes": 5529
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/result.json": {
+      "sha256": "552bdb34eed7333db6da724770d5e63b9fad05e7f23a53714cb2ca1df5249316",
+      "bytes": 3135
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-short25-command.json": {
+      "sha256": "5127b9e76d36fa28ab9b10895bcb429abfa9fb4a5a7ef6c73571b3e02a9f2181",
+      "bytes": 1112
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/stable-summary.json": {
+      "sha256": "0284d81e60ae22d530baada75a5a16c4c6b479a15ef33ce7a1b02919bcc5053a",
+      "bytes": 4820
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-short25-control/exit-status.json": {
+      "sha256": "a05f0f39cf9a212c8eb499a496b517a86d70142548ee101407c7159e55dbc069",
+      "bytes": 983
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-short25-control/resources.ndjson": {
+      "sha256": "f6e7352d33b88dce5ab41eb7a5f47f963711e2997dd510d15bd6b7bbdec4fb7a",
+      "bytes": 9883
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/access-delta.json": {
+      "sha256": "d1f9cfc3bb009bf94664f7ac7ae6f6922df00777daba3b5c0c73c78a64e676c1",
+      "bytes": 5591
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/result.json": {
+      "sha256": "5645e02c3d0c2114d028bb43cb6d7a354157e2cdd760a709f5ab6f4709564527",
+      "bytes": 3068
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-probe-command.json": {
+      "sha256": "e04e7a41c705bb8d92ad9e5751c0da6299d48c2dab99b8d3d015b581f431e353",
+      "bytes": 1106
+    },
+    "docs/evidence/2026-10-30-cap06/api-baseline-on.json": {
+      "sha256": "be0702471c18461f9fa7641fcc4c97658262a5632e48b29d5763323b185d0c34",
+      "bytes": 655
+    },
+    "docs/evidence/2026-10-30-cap06/api-baseline-on-health.json": {
+      "sha256": "beeb2ba19c1421f06d656cf1d9bd50b619f9742abd91d6b7133e75ae439bb70f",
+      "bytes": 6806
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/stable-summary.json": {
+      "sha256": "bddca0dbfb2647ddc2118a9d59c551e64d4cd45df7a291e2eab9d4aa03f0e810",
+      "bytes": 4793
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-probe-control/exit-status.json": {
+      "sha256": "377974c0cdf876f779703b92b3a2050c89b08d4619d91d0256b3db70bbf7202c",
+      "bytes": 983
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-probe-control/resources.ndjson": {
+      "sha256": "7a270b7e5be3e66fdb948be5474caa588bf49a39f718dc992c19ef4a5453cdfc",
+      "bytes": 12217
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/access-delta.json": {
+      "sha256": "58174ce62987038a59f60a49c2268452e3ec769607071c169460746cb86b8108",
+      "bytes": 5607
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/result.json": {
+      "sha256": "916d2f4ea3edfecd71f59f01385ad05c3a76587977720476ed27c41e153e59ba",
+      "bytes": 3143
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-short25-command.json": {
+      "sha256": "9acf4bc8994e470ed098a0427fde789335b2ab54d56786b2e5f02228c0977401",
+      "bytes": 1110
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/stable-summary.json": {
+      "sha256": "99e40af2c23f928691b4846c237990c4396d461af53bec18c6d70fba084a8b48",
+      "bytes": 4814
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-short25-control/exit-status.json": {
+      "sha256": "3554bba678f94a64dad2c6f87515e925c3878a910af58978d8a0408b477646a2",
+      "bytes": 983
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-short25-control/resources.ndjson": {
+      "sha256": "95e141b264b5ebee4c7b75dae4f78e69a4b63b362b7695e0dd096e4286167017",
+      "bytes": 23833
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/access-delta.json": {
+      "sha256": "97db1593bb621cbde76549250df666dcc14b63037553d1f1ab2674b2f8fd90f8",
+      "bytes": 5674
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/result.json": {
+      "sha256": "123f9425fb968eda385b13e13ed00bff29fece50b60b24d7840ef92b9529c8b8",
+      "bytes": 3150
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-command.json": {
+      "sha256": "2fdac9091f3b30d56960faa27977ac69530e04496a0e259efe50d0bd9f523df9",
+      "bytes": 1111
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/stable-summary.json": {
+      "sha256": "b10a0d55573329b268b449189cd058c02c98fc5dc5d4186b4914e70b9ff92179",
+      "bytes": 4773
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/exit-status.json": {
+      "sha256": "2f37a5c1289340af0c353e833ab569c3500631372ec4e13b2097204f651b64f9",
+      "bytes": 984
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/resources.ndjson": {
+      "sha256": "9325e02ce16644c4c4a72b8255bde4005ee98950011180e78099b4596184e0d0",
+      "bytes": 500929
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/access-delta.json": {
+      "sha256": "50e63da4fff824d0c70edb17faf0bf8bb4da38da9703c96f9e0e4bf8ea49c06f",
+      "bytes": 5922
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/manifest.json": {
+      "sha256": "a5cff855da07b148c2fa8f61a1737082976374f5a4a23619d1957bc453e2ee9d",
+      "bytes": 3922
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/timeline.ndjson": {
+      "sha256": "d8e1452d6c7cc50f3152fb326b9f814a4a3eb0c87c9f450878c83b4dd7909b83",
+      "bytes": 2438230
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/result.json": {
+      "sha256": "271c38aad35b4d4f088ba29ba690dad941c2cd6a86c0adbde8009eab9cfc7327",
+      "bytes": 3144
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-command.json": {
+      "sha256": "b2d18852fbd786e98df6977d77a29bf9a34a9b477d634e2a9d63dd56c26e761d",
+      "bytes": 1111
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/stable-summary.json": {
+      "sha256": "9bfdf770d05538185324f152abb3c1b3cfed802a419798cd8cacc49febce3d8b",
+      "bytes": 4760
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/exit-status.json": {
+      "sha256": "5b5a5340319e1552a425ef86821548106335bfab317463fc616bdcb38b3afc9b",
+      "bytes": 985
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/resources.ndjson": {
+      "sha256": "96e558dd0d339c158a7b4253e38e30952e3737c9f700154b5327e4742e6d3e54",
+      "bytes": 2738373
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/access-delta.json": {
+      "sha256": "4f66f1f577c74b64ee0b1c1bacf55c8c4e99920cde338981ed94e13af4b61421",
+      "bytes": 5917
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/manifest.json": {
+      "sha256": "d054f360f23478d6d92e26832579d158b8d4b01137c4dce36233e953ac214d99",
+      "bytes": 1775
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/timeline.ndjson": {
+      "sha256": "97dc3668e11a9e71e5708f69aa2d29808579afefff60370571027ca2102857a0",
+      "bytes": 13513840
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/result.json": {
+      "sha256": "92aa727e65b305f7c1beec0e5914df919476bbb98231cce1a1d7ce7d231d8979",
+      "bytes": 3139
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-command.json": {
+      "sha256": "7f44721a06c9dc4b65913d2ec879fcfd748a774cc7fce6d4db1729f6cf965d06",
+      "bytes": 1111
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/stable-summary.json": {
+      "sha256": "d18caa5939b413790dd052443f774bf4c4b718e7531c817282411d2654cca7ce",
+      "bytes": 4937
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/exit-status.json": {
+      "sha256": "c5147a6f29dd43b7d505869f788220f84fd0c88621efc246e75ff6edbab919ee",
+      "bytes": 984
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/resources.ndjson": {
+      "sha256": "95ee6c8de11b3bb96dcc515f69926e5337a957754c2b750c746a11cd7db6a0d3",
+      "bytes": 2738613
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/access-delta.json": {
+      "sha256": "968e358e8e487e18023ef8e293e957ab171df653e240c2295f3803716d87a664",
+      "bytes": 5756
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/manifest.json": {
+      "sha256": "71ac93e5212cdc20514790caec3a5cf3e056d07001381b3624a0ac1c2595d488",
+      "bytes": 1778
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/timeline.ndjson": {
+      "sha256": "9e48819dc9ce4b086062dfb727179dcb0df8cdfbd2e60873207bc4cc6cd4396c",
+      "bytes": 13441405
+    },
+    "docs/evidence/2026-10-30-cap06/diagnostic-slot-1.json": {
+      "sha256": "1cfb7bf0d8eeb1556b816253e0cbb3498f697766e809b556c57e9e2eece429d3",
+      "bytes": 243
+    },
+    "docs/evidence/2026-10-30-cap06/diagnostic-slot-2.json": {
+      "sha256": "083f87f012a37769e4015b5753f7e94d5a563f2d165be2d9d60f63a15bf5b476",
+      "bytes": 243
+    },
+    "docs/evidence/2026-10-30-cap06/diagnostic-slot-3.json": {
+      "sha256": "30fb82d5c472341192117a1ff96780cb91518cbce37a05f403fc464dbee5eeaf",
+      "bytes": 243
+    },
+    "docs/evidence/2026-10-30-cap06/cleanup.json": {
+      "sha256": "6af516a8f17c7fe7bb97f764342348c7d55cf76e18a26b2f8cced76ba3bdf468",
+      "bytes": 3157
+    },
+    "docs/evidence/2026-10-30-cap06/environment.json": {
+      "sha256": "e1a79a8c84edc3a075a1f5737313060f4277003dbbbd38fb4529435f02cfdc6a",
+      "bytes": 5644
+    }
+  },
+  "limits": [
+    "Cross-checks saved native aggregates, not individual HTTP bodies or reconstructed quantiles.",
+    "HTTP capacity payload SHA records do not archive the original response encoding; not rehashed here.",
+    "Diagnostic rounds have extra observations and cannot substitute for CAP06D or overwrite the independent failure.",
+    "Request/store stages overlap and pool samples include background activity; no causal repair has been established."
+  ]
+}

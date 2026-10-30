@@ -1,0 +1,504 @@
+{
+  "task": "CAP-06B",
+  "at": "2026-10-30T10:14:38.265950+00:00",
+  "diagnosticRoundBudget": 3,
+  "diagnosticRoundsUsed": 3,
+  "allStageProcessesTerminal": true,
+  "formal06DAcceptanceClaimed": false,
+  "originalIndependentSecondsTailReproduced": false,
+  "rootCauseConfirmed": false,
+  "totalSuccessfulDiagnosticRequests": 54002,
+  "rounds": [
+    {
+      "round": 1,
+      "tag": "baseline-diag-1",
+      "apiSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "apiExpectedRevision": "capacity-bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "fixtureSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "fixtureManifestSHA256": "31f9b9b4b9a43372cbb147ef6ae24a716d67f7619f8032919393464f7ac2bc2c",
+      "rate": 100,
+      "plannedSeconds": 180,
+      "stableCommandStartedAt": 1793354453448,
+      "stableCommandEndedAt": 1793354636815,
+      "meetsDiagnosticWorkloadBudget": true,
+      "result": {
+        "attempted": 18001,
+        "completedHttpRequests": 18001,
+        "completed": 18001,
+        "incompleteOrUnclassified": 0,
+        "completedButUnclassified": 0,
+        "classificationCoverage": 1,
+        "successful": 18001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "targetOffers": 18000,
+        "actualOfferedRatio": 1.0000555555555555,
+        "issuedPerNominalSecond": 100.00555555555556,
+        "successfulPerNominalSecond": 100.00555555555556,
+        "systemErrorRate": 0,
+        "systemErrorRatePerCompleted": 0,
+        "allLatency": {
+          "p(99)": 43.7021,
+          "max": 242.1976,
+          "avg": 16.408877273484855,
+          "med": 14.6566,
+          "p(95)": 26.4453,
+          "thresholds": {
+            "p(95)<=200": false,
+            "p(99)<=500": false
+          }
+        },
+        "successfulLatency": {
+          "p(95)": 26.4453,
+          "p(99)": 43.7021,
+          "max": 242.1976,
+          "avg": 16.408877273484855,
+          "med": 14.6566
+        },
+        "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+        "k6Metrics": {
+          "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 4
+          },
+          "vusMax": {
+            "value": 256,
+            "min": 256,
+            "max": 256
+          },
+          "dataReceived": {
+            "count": 170212862,
+            "rate": 945549.2081704321
+          }
+        }
+      },
+      "resourceSamples": 37,
+      "completeResourceSamples": 37,
+      "extraCollectorSuccessfulPolls": 183,
+      "extraCollectorFailedPolls": 0,
+      "captures": [
+        {
+          "number": 1,
+          "at": "2026-10-30T10:03:41.912433+00:00",
+          "sample_sequence": 169,
+          "reasons": [
+            {
+              "kind": "sql_global_pool_wait_delta",
+              "count": 10,
+              "duration_ns": 154994900,
+              "scope": "whole API pool; not a per-request acquisition duration"
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 6,
+              "total_ns": 221590900
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 7,
+              "total_ns": 230474300
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 8,
+              "total_ns": 222864600
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 9,
+              "total_ns": 216068900
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 10,
+              "total_ns": 237745200
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 11,
+              "total_ns": 217442800
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 12,
+              "total_ns": 217096400
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 14,
+              "total_ns": 217447100
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 17,
+              "total_ns": 208976800
+            },
+            {
+              "kind": "completed_slow_trace",
+              "sequence": 18,
+              "total_ns": 207287700
+            }
+          ],
+          "stable_pid": 43332,
+          "stable_alive_before_capture": true,
+          "file": "goroutine-1.pprof",
+          "available": true,
+          "started_at": "2026-10-30T10:03:41.912450+00:00",
+          "finished_at": "2026-10-30T10:03:41.926214+00:00",
+          "elapsed_ms": 13.778499996988103,
+          "bytes": 6013,
+          "sha256": "e6e38638c97adf2a536e7b3458d6ced92993cbe75318d1262906d6b86a314620",
+          "stable_alive_after_capture": true,
+          "load_scope": "load was alive at both guards; exact profile sampling is not atomic"
+        }
+      ],
+      "currentStableSlowTraceCount": 39,
+      "maximumCurrentStableSlowTraceNs": 237745200,
+      "slowTraceFilter": "fully within stable command start/end; prior API ring entries excluded",
+      "sampledPoolDeltas": {
+        "sql": {
+          "wait_count": 10,
+          "wait_duration_ns": 154994900
+        },
+        "redis": {
+          "wait_count": 0,
+          "wait_duration_ns": 0
+        }
+      },
+      "sampledStageDeltas": {
+        "counts.cold_sql": {
+          "count": 462,
+          "total_ns": 1066701500,
+          "errors": 0,
+          "items": 1324
+        },
+        "counts.redis_write": {
+          "count": 1324,
+          "total_ns": 1314794000,
+          "errors": 0,
+          "items": 1324
+        },
+        "counts.redis_read": {
+          "count": 2580,
+          "total_ns": 2680749500,
+          "errors": 0,
+          "items": 51600
+        },
+        "counts.publication_wait": {
+          "count": 69589,
+          "total_ns": 140270800,
+          "errors": 0,
+          "items": 0
+        },
+        "counts.publication_hold": {
+          "count": 69589,
+          "total_ns": 1344526000,
+          "errors": 0,
+          "items": 0
+        }
+      },
+      "sourceFiles": {
+        "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/result.json": {
+          "bytes": 3150,
+          "sha256": "123f9425fb968eda385b13e13ed00bff29fece50b60b24d7840ef92b9529c8b8"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/exit-status.json": {
+          "bytes": 984,
+          "sha256": "2f37a5c1289340af0c353e833ab569c3500631372ec4e13b2097204f651b64f9"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/manifest.json": {
+          "bytes": 3922,
+          "sha256": "a5cff855da07b148c2fa8f61a1737082976374f5a4a23619d1957bc453e2ee9d"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/timeline.ndjson": {
+          "bytes": 2438230,
+          "sha256": "d8e1452d6c7cc50f3152fb326b9f814a4a3eb0c87c9f450878c83b4dd7909b83"
+        }
+      }
+    },
+    {
+      "round": 2,
+      "tag": "baseline-diag-2",
+      "apiSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "apiExpectedRevision": "capacity-bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "fixtureSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "fixtureManifestSHA256": "31f9b9b4b9a43372cbb147ef6ae24a716d67f7619f8032919393464f7ac2bc2c",
+      "rate": 100,
+      "plannedSeconds": 180,
+      "stableCommandStartedAt": 1793354729894,
+      "stableCommandEndedAt": 1793354912732,
+      "meetsDiagnosticWorkloadBudget": true,
+      "result": {
+        "attempted": 18001,
+        "completedHttpRequests": 18001,
+        "completed": 18001,
+        "incompleteOrUnclassified": 0,
+        "completedButUnclassified": 0,
+        "classificationCoverage": 1,
+        "successful": 18001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "targetOffers": 18000,
+        "actualOfferedRatio": 1.0000555555555555,
+        "issuedPerNominalSecond": 100.00555555555556,
+        "successfulPerNominalSecond": 100.00555555555556,
+        "systemErrorRate": 0,
+        "systemErrorRatePerCompleted": 0,
+        "allLatency": {
+          "avg": 17.088311554913712,
+          "med": 14.99,
+          "p(95)": 29.2595,
+          "p(99)": 40.4513,
+          "max": 76.5284,
+          "thresholds": {
+            "p(95)<=200": false,
+            "p(99)<=500": false
+          }
+        },
+        "successfulLatency": {
+          "avg": 17.088311554913712,
+          "med": 14.99,
+          "p(95)": 29.2595,
+          "p(99)": 40.4513,
+          "max": 76.5284
+        },
+        "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+        "k6Metrics": {
+          "vus": {
+            "value": 2,
+            "min": 1,
+            "max": 4
+          },
+          "vusMax": {
+            "value": 256,
+            "min": 256,
+            "max": 256
+          },
+          "dataReceived": {
+            "count": 170212862,
+            "rate": 945548.6319584841
+          }
+        }
+      },
+      "resourceSamples": 37,
+      "completeResourceSamples": 37,
+      "extraCollectorSuccessfulPolls": 183,
+      "extraCollectorFailedPolls": 0,
+      "captures": [],
+      "currentStableSlowTraceCount": 0,
+      "maximumCurrentStableSlowTraceNs": null,
+      "slowTraceFilter": "fully within stable command start/end; prior API ring entries excluded",
+      "sampledPoolDeltas": {
+        "sql": {
+          "wait_count": 0,
+          "wait_duration_ns": 0
+        },
+        "redis": {
+          "wait_count": 0,
+          "wait_duration_ns": 0
+        }
+      },
+      "sampledStageDeltas": {
+        "counts.cold_sql": {
+          "count": 435,
+          "total_ns": 1071123600,
+          "errors": 0,
+          "items": 1377
+        },
+        "counts.redis_write": {
+          "count": 1377,
+          "total_ns": 1501850000,
+          "errors": 0,
+          "items": 1377
+        },
+        "counts.redis_read": {
+          "count": 2577,
+          "total_ns": 2892731400,
+          "errors": 0,
+          "items": 51540
+        },
+        "counts.publication_wait": {
+          "count": 69526,
+          "total_ns": 799673000,
+          "errors": 0,
+          "items": 0
+        },
+        "counts.publication_hold": {
+          "count": 69526,
+          "total_ns": 1539323000,
+          "errors": 0,
+          "items": 0
+        }
+      },
+      "sourceFiles": {
+        "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/result.json": {
+          "bytes": 3144,
+          "sha256": "271c38aad35b4d4f088ba29ba690dad941c2cd6a86c0adbde8009eab9cfc7327"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/exit-status.json": {
+          "bytes": 985,
+          "sha256": "5b5a5340319e1552a425ef86821548106335bfab317463fc616bdcb38b3afc9b"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/manifest.json": {
+          "bytes": 1775,
+          "sha256": "d054f360f23478d6d92e26832579d158b8d4b01137c4dce36233e953ac214d99"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/timeline.ndjson": {
+          "bytes": 13513840,
+          "sha256": "97dc3668e11a9e71e5708f69aa2d29808579afefff60370571027ca2102857a0"
+        }
+      }
+    },
+    {
+      "round": 3,
+      "tag": "baseline-diag-3",
+      "apiSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "apiExpectedRevision": "capacity-bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "fixtureSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "fixtureManifestSHA256": "31f9b9b4b9a43372cbb147ef6ae24a716d67f7619f8032919393464f7ac2bc2c",
+      "rate": 100,
+      "plannedSeconds": 180,
+      "stableCommandStartedAt": 1793354987942,
+      "stableCommandEndedAt": 1793355169404,
+      "meetsDiagnosticWorkloadBudget": true,
+      "result": {
+        "attempted": 18000,
+        "completedHttpRequests": 18000,
+        "completed": 18000,
+        "incompleteOrUnclassified": 0,
+        "completedButUnclassified": 0,
+        "classificationCoverage": 1,
+        "successful": 18000,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "targetOffers": 18000,
+        "actualOfferedRatio": 1,
+        "issuedPerNominalSecond": 100,
+        "successfulPerNominalSecond": 100,
+        "systemErrorRate": 0,
+        "systemErrorRatePerCompleted": 0,
+        "allLatency": {
+          "p(95)": 31.51600499999999,
+          "p(99)": 40.9272779999999,
+          "max": 73.7404,
+          "avg": 17.58919206111116,
+          "med": 15.13815,
+          "thresholds": {
+            "p(95)<=200": false,
+            "p(99)<=500": false
+          }
+        },
+        "successfulLatency": {
+          "p(99)": 40.9272779999999,
+          "max": 73.7404,
+          "avg": 17.58919206111116,
+          "med": 15.13815,
+          "p(95)": 31.51600499999999
+        },
+        "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+        "k6Metrics": {
+          "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 5
+          },
+          "vusMax": {
+            "value": 256,
+            "min": 256,
+            "max": 256
+          },
+          "dataReceived": {
+            "count": 170203400,
+            "rate": 945547.7437520738
+          }
+        }
+      },
+      "resourceSamples": 37,
+      "completeResourceSamples": 37,
+      "extraCollectorSuccessfulPolls": 182,
+      "extraCollectorFailedPolls": 0,
+      "captures": [],
+      "currentStableSlowTraceCount": 0,
+      "maximumCurrentStableSlowTraceNs": null,
+      "slowTraceFilter": "fully within stable command start/end; prior API ring entries excluded",
+      "sampledPoolDeltas": {
+        "sql": {
+          "wait_count": 0,
+          "wait_duration_ns": 0
+        },
+        "redis": {
+          "wait_count": 0,
+          "wait_duration_ns": 0
+        }
+      },
+      "sampledStageDeltas": {
+        "counts.cold_sql": {
+          "count": 419,
+          "total_ns": 1005862000,
+          "errors": 0,
+          "items": 1369
+        },
+        "counts.redis_write": {
+          "count": 1369,
+          "total_ns": 1351396500,
+          "errors": 0,
+          "items": 1369
+        },
+        "counts.redis_read": {
+          "count": 2588,
+          "total_ns": 2983698100,
+          "errors": 0,
+          "items": 51760
+        },
+        "counts.publication_wait": {
+          "count": 69756,
+          "total_ns": 129156300,
+          "errors": 0,
+          "items": 0
+        },
+        "counts.publication_hold": {
+          "count": 69756,
+          "total_ns": 1383736400,
+          "errors": 0,
+          "items": 0
+        }
+      },
+      "sourceFiles": {
+        "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/result.json": {
+          "bytes": 3139,
+          "sha256": "92aa727e65b305f7c1beec0e5914df919476bbb98231cce1a1d7ce7d231d8979"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/exit-status.json": {
+          "bytes": 984,
+          "sha256": "c5147a6f29dd43b7d505869f788220f84fd0c88621efc246e75ff6edbab919ee"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/manifest.json": {
+          "bytes": 1778,
+          "sha256": "71ac93e5212cdc20514790caec3a5cf3e056d07001381b3624a0ac1c2595d488"
+        },
+        "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/timeline.ndjson": {
+          "bytes": 13441405,
+          "sha256": "9e48819dc9ce4b086062dfb727179dcb0df8cdfbd2e60873207bc4cc6cd4396c"
+        }
+      }
+    }
+  ],
+  "cleanup": {
+    "complete": true,
+    "sessionsBefore": 32,
+    "sessionsAfter": 0
+  },
+  "limits": [
+    "Three diagnostics satisfy workload budgets but include extra 1Hz observation; they are not the formal 06D group.",
+    "No attributable original seconds-long failure reproduced; a short <=238ms fact/SQL cluster in round1 is a separate observation.",
+    "All pool/stage deltas are collector sample endpoint intervals, not exact per-request or atomic stable-window attribution.",
+    "No fourth round, CAP07 work or unsupported optimization performed by this harness agent."
+  ]
+}

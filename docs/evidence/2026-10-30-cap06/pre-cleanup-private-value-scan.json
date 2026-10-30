@@ -1,0 +1,19 @@
+{
+  "at": "2026-10-30T10:13:45.959432+00:00",
+  "scope": "all existing public files under this CAP06 evidence root; exact 32 current reader tokens plus dedicated observer password before private deletion",
+  "filesChecked": 188,
+  "uniquePrivateValuesCompared": 33,
+  "matchingFiles": [],
+  "allSevenStagesTerminal": [
+    "baseline-off-probe",
+    "baseline-off-short25",
+    "baseline-on-probe",
+    "baseline-on-short25",
+    "baseline-diag-1",
+    "baseline-diag-2",
+    "baseline-diag-3"
+  ],
+  "allThreeCollectorsTerminal": true,
+  "diagnosticSlotsUsed": 3,
+  "secretValuesExported": false
+}

@@ -1,0 +1,78 @@
+{
+  "verified_freeze_commit": "0f185a558acf70ffcf60d05882d66db5a6b946db",
+  "checked_on": "2026-10-30",
+  "mode": "Offline independent recomputation of archived 2026-10-29 raw evidence; no new load or live database observation",
+  "trade": {
+    "accepted_total": 976,
+    "stable_unique_accepted_and_matched": 901,
+    "duration_ms_p95": 24.9932,
+    "duration_ms_p99": 57.4747,
+    "first_observed_after_response_ms_p95": 1066,
+    "first_observed_after_response_ms_p99": 1126,
+    "stock_calculated": 169,
+    "stream_samples": [
+      {
+        "at": 1793261452012,
+        "pending": 0,
+        "lag": 0,
+        "lastDeliveredId": "1793261449286-0"
+      }
+    ]
+  },
+  "events": {
+    "existing_summary_exact_match": true,
+    "stable_notes": 180,
+    "stable_likes": 180,
+    "stable_elapsed_ms": 179061,
+    "total_unique_notes": 200,
+    "manual_replays": 10,
+    "prior_per_row_assertions": {
+      "result": "PASS",
+      "uniqueNotes": 200,
+      "eventCount": 400,
+      "receiptCount": 1200,
+      "replayCount": 10,
+      "finalSearchVersions": 200,
+      "samplingCount": 7,
+      "reconciliation": {
+        "facts": 200,
+        "likeOrVersionMismatches": 0,
+        "wrongOutbox": 0,
+        "wrongReceipt": 0,
+        "stateVersions": 200,
+        "parked": 0,
+        "resolved": 10
+      },
+      "measureJsonSha256": "c125befe0e3ab9edd1d2f29fdfcbfbdf7694848a2a810dfeb3e29e6113656f78",
+      "offsetJsonSha256": "e70b956b6374e42cda7a1cdd882d1e726077def644c18fba49f3106aae89d0bf"
+    },
+    "recovery_ms_including_start_manual_replay_refresh": 29920.0
+  },
+  "raw_hashes": [
+    {
+      "path": "docs/reviews/2026-10-29/go073-trade-399705a/stable/requests.json",
+      "sha256": "153c786c0202df9bdbf3949102055c0eef2d4ad223bddf33eb71f271d26929e2"
+    },
+    {
+      "path": "docs/reviews/2026-10-29/go073-trade-399705a/stable/orders.json",
+      "sha256": "fa583f834309fc057d8017b1561987be66ad5fd65e2b5246e67c3aac56d81d5a"
+    },
+    {
+      "path": "docs/reviews/2026-10-29/go073-trade-399705a/stable/result.json",
+      "sha256": "280df63086faf7e9bfea5d17516fc71a464b57efd9b1bc5add090aca149e09df"
+    },
+    {
+      "path": "docs/reviews/2026-10-29/go073-trade-399705a/stable/settle.json",
+      "sha256": "fcfb42ad7c06f21f60f348f48cff7bce6387a8607edd10be72e5fbd0ea6108d3"
+    },
+    {
+      "path": "docs/reviews/2026-10-29/go073-399705a/events/independent-run.json",
+      "sha256": "c125befe0e3ab9edd1d2f29fdfcbfbdf7694848a2a810dfeb3e29e6113656f78"
+    },
+    {
+      "path": "docs/reviews/2026-10-29/go073-399705a/events/independent-offsets.json",
+      "sha256": "fbd451c380dc1575f99f0880d3a8243eedb4f6790398e9e932b3dc453b1d417a"
+    }
+  ],
+  "archive_hash_note": "The nested prior_per_row_assertions preserves historical hashes. Its offsetJsonSha256 was recorded with CRLF; this Git checkout uses LF. Restoring CRLF reproduces that historical hash exactly. raw_hashes records this checkout's actual bytes; JSON data is unchanged."
+}

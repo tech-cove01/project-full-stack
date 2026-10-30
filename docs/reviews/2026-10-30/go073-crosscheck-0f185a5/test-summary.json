@@ -1,0 +1,14 @@
+{
+  "top_level_pass": 8,
+  "subgroup_pass": 3,
+  "skipped_not_executed": [
+    "TestIntegrationCommunityFlow",
+    "TestIntegrationFreshTopicStartsAllGroupsAndPreservesOffsets",
+    "TestIntegrationUnavailableBrokerCancelsReadiness",
+    "TestIntegrationCommunityConsumer"
+  ],
+  "failed": [],
+  "source_commit": "0f185a558acf70ffcf60d05882d66db5a6b946db",
+  "source_sha256": "fe4602baff24f9140903b1d003c770819f7e0b5eeab3153438d93534e7300d5d",
+  "production_delta_since_3e53a18": "backend/internal/communityconsumer/worker.go | 85 ++++++++++++++++++++++++----\n 1 file changed, 75 insertions(+), 10 deletions(-)"
+}

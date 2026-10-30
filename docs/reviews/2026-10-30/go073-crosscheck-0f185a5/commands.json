@@ -1,0 +1,37 @@
+[
+  {
+    "name": "format",
+    "command": [
+      "gofmt",
+      "-l",
+      "internal/communityconsumer"
+    ],
+    "exit_code": 0,
+    "seconds": 1.57,
+    "log": "format.txt"
+  },
+  {
+    "name": "vet",
+    "command": [
+      "go",
+      "vet",
+      "./internal/communityconsumer"
+    ],
+    "exit_code": 0,
+    "seconds": 12.335,
+    "log": "vet.txt"
+  },
+  {
+    "name": "tests",
+    "command": [
+      "go",
+      "test",
+      "-count=1",
+      "-json",
+      "./internal/communityconsumer"
+    ],
+    "exit_code": 0,
+    "seconds": 10.474,
+    "log": "tests.txt"
+  }
+]

@@ -1,0 +1,41 @@
+{
+  "at": "2026-10-30T04:42:25.8331644Z",
+  "uptime_ms": 708544,
+  "pid": 68744,
+  "runtime": {
+    "goroutines": 25,
+    "gomaxprocs": 4,
+    "heap_alloc_bytes": 5441768,
+    "heap_sys_bytes": 15335424,
+    "heap_inuse_bytes": 7643136,
+    "total_alloc_bytes": 479340040,
+    "mallocs": 7154766,
+    "frees": 7108135,
+    "num_gc": 155,
+    "pause_total_ns": 39208400,
+    "last_gc_unix_ns": 1793335330181661500,
+    "gc_cpu_fraction": 0.00016204694125575186
+  },
+  "sql": {
+    "max_open_connections": 20,
+    "open_connections": 10,
+    "in_use": 0,
+    "idle": 10,
+    "wait_count": 0,
+    "wait_duration_ns": 0,
+    "max_idle_closed": 168,
+    "max_idle_time_closed": 0,
+    "max_lifetime_closed": 0
+  },
+  "redis": {
+    "hits": 95540,
+    "misses": 10,
+    "timeouts": 0,
+    "wait_count": 19451,
+    "wait_duration_ns": 9802425300,
+    "unusable": 0,
+    "total_connections": 10,
+    "idle_connections": 10,
+    "stale_connections": 0
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "all_sections_available": true,
+  "json_files_checked": 18,
+  "sections": 16,
+  "normalized_digest_rows": 38,
+  "lock_rows": 0,
+  "lock_wait_rows": 0,
+  "section_elapsed_ms_sum": 2846.43,
+  "sensitive_pattern_counts": {
+    "bearer": 0,
+    "provider_key": 0,
+    "password_value": 0
+  },
+  "profiles_requested": false,
+  "limitations": "finite pattern scan does not prove absence of all secret formats"
+}

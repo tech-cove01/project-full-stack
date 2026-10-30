@@ -1,0 +1,151 @@
+{
+  "source": "scripts/go073-cap-read.mjs",
+  "checks": [
+    {
+      "name": "complete_status_and_zero_are_valid",
+      "passed": true
+    },
+    {
+      "name": "missing_status_fails",
+      "passed": true
+    },
+    {
+      "name": "duplicate_status_fails",
+      "passed": true
+    },
+    {
+      "name": "negative_noninteger_and_unsafe_fail",
+      "passed": true
+    },
+    {
+      "name": "malformed_status_row_fails",
+      "passed": true
+    },
+    {
+      "name": "missing_and_duplicate_event_fail",
+      "passed": true
+    },
+    {
+      "name": "malformed_event_counter_fails",
+      "passed": true
+    },
+    {
+      "name": "monotonic_idle_snapshot_valid",
+      "passed": true
+    },
+    {
+      "name": "counter_decrease_fails",
+      "passed": true
+    },
+    {
+      "name": "uptime_decrease_fails",
+      "passed": true
+    },
+    {
+      "name": "uptime_mismatches_elapsed_fails",
+      "passed": true
+    },
+    {
+      "name": "statement_timer_decrease_fails",
+      "passed": true
+    },
+    {
+      "name": "actual_owned_mysql_show_and_event_probe",
+      "passed": true
+    }
+  ],
+  "actualProbe": "read-counter-probe.json",
+  "actualDelta": {
+    "globalCommands": {
+      "Uptime": 0,
+      "Questions": 8,
+      "Queries": 8,
+      "Com_select": 3,
+      "Com_insert": 0,
+      "Com_update": 0,
+      "Com_delete": 0,
+      "Com_commit": 0,
+      "Com_stmt_execute": 0,
+      "Com_stmt_prepare": 0,
+      "Com_stmt_close": 0,
+      "Com_stmt_reprepare": 0,
+      "Performance_schema_digest_lost": 0,
+      "Performance_schema_prepared_statements_lost": 0
+    },
+    "statementEvents": [
+      {
+        "event": "statement/com/Execute",
+        "count": 0,
+        "errors": 0,
+        "examined": 0,
+        "sent": 0,
+        "timerPicoseconds": "0"
+      },
+      {
+        "event": "statement/com/Prepare",
+        "count": 0,
+        "errors": 0,
+        "examined": 0,
+        "sent": 0,
+        "timerPicoseconds": "0"
+      },
+      {
+        "event": "statement/sql/commit",
+        "count": 0,
+        "errors": 0,
+        "examined": 0,
+        "sent": 0,
+        "timerPicoseconds": "0"
+      },
+      {
+        "event": "statement/sql/delete",
+        "count": 0,
+        "errors": 0,
+        "examined": 0,
+        "sent": 0,
+        "timerPicoseconds": "0"
+      },
+      {
+        "event": "statement/sql/insert",
+        "count": 0,
+        "errors": 0,
+        "examined": 0,
+        "sent": 0,
+        "timerPicoseconds": "0"
+      },
+      {
+        "event": "statement/sql/select",
+        "count": 3,
+        "errors": 0,
+        "examined": 16,
+        "sent": 9,
+        "timerPicoseconds": "2795708000"
+      },
+      {
+        "event": "statement/sql/update",
+        "count": 0,
+        "errors": 0,
+        "examined": 0,
+        "sent": 0,
+        "timerPicoseconds": "0"
+      }
+    ],
+    "sql": [],
+    "redis": {},
+    "scope": "whole isolated instance between sequential snapshots; includes API/background/helper/observer SQL and Redis commands, not per-endpoint or public-count cache DB loads",
+    "commandCountersOverlap": "Com_select and Com_stmt_execute overlap; report separately, never add them as SQL total",
+    "digestCoverage": "auxiliary only: binary prepared SQL is absent from this digest view; empty SQL digest delta does not mean no database access",
+    "publicCountDatabaseLoads": null,
+    "uptimeConsistent": true,
+    "statusElapsedMs": 344,
+    "statusUncertaintyMs": 2348,
+    "counterResets": false,
+    "lostDigestsDelta": 0,
+    "preparedStatementsLostDelta": 0,
+    "missingAfterDigests": []
+  },
+  "limitations": [
+    "parser and reset boundary checks only; no CAP03 HTTP workload",
+    "probe includes observer/background counts and does not verify per-endpoint counts"
+  ]
+}

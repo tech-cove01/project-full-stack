@@ -1,0 +1,18 @@
+{
+  "project": "project-full-stack-cap-opt-tests",
+  "container_id": "f5f7a43c80996489b854181eb9eec710abb9e6fba06bf7e96ee4a26ee8609b3c",
+  "read_only": true,
+  "no_business_calls": true,
+  "before": {
+    "statusRaw": "Com_commit\t194\nCom_delete\t406\nCom_insert\t517\nCom_select\t2512\nCom_stmt_close\t3463\nCom_stmt_execute\t3463\nCom_stmt_prepare\t3567\nCom_stmt_reprepare\t104\nCom_update\t229\nPerformance_schema_digest_lost\t0\nPerformance_schema_prepared_statements_lost\t0\nQueries\t11620\nQuestions\t4688\nUptime\t109",
+    "startedAt": 1793336159055,
+    "endedAt": 1793336159224,
+    "statementEventsRaw": "statement/com/Execute\t3463\t7049564399000\t4\t3841\t1847\nstatement/com/Prepare\t3463\t719191071000\t0\t0\t0\nstatement/sql/commit\t194\t811543904000\t0\t0\t0\nstatement/sql/delete\t0\t0\t0\t0\t0\nstatement/sql/insert\t12\t101241429000\t0\t0\t0\nstatement/sql/select\t190\t34025290000\t0\t188\t189\nstatement/sql/update\t0\t0\t0\t0\t0"
+  },
+  "after": {
+    "statusRaw": "Com_commit\t194\nCom_delete\t406\nCom_insert\t517\nCom_select\t2515\nCom_stmt_close\t3463\nCom_stmt_execute\t3463\nCom_stmt_prepare\t3567\nCom_stmt_reprepare\t104\nCom_update\t229\nPerformance_schema_digest_lost\t0\nPerformance_schema_prepared_statements_lost\t0\nQueries\t11628\nQuestions\t4696\nUptime\t109",
+    "startedAt": 1793336159394,
+    "endedAt": 1793336159573,
+    "statementEventsRaw": "statement/com/Execute\t3463\t7049564399000\t4\t3841\t1847\nstatement/com/Prepare\t3463\t719191071000\t0\t0\t0\nstatement/sql/commit\t194\t811543904000\t0\t0\t0\nstatement/sql/delete\t0\t0\t0\t0\t0\nstatement/sql/insert\t12\t101241429000\t0\t0\t0\nstatement/sql/select\t193\t36820998000\t0\t204\t198\nstatement/sql/update\t0\t0\t0\t0\t0"
+  }
+}

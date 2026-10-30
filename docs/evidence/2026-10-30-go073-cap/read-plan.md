@@ -29,7 +29,11 @@
 
 容量脚本不逐请求打印，不把 ID、URL 或用户 ID 做高基数 tag。每个响应校验 20 条 ID/作者/门店及零计数、本人的未点赞状态；有界 counter/trend 记录所有请求、成功请求、系统/HTTP/内容错误及全请求/成功延迟分布，最多每个 VU 输出一条不含凭据/body 的异常。没有逐响应 body 归档，完整分类不能离线重新解析 body；可复跑并检查验证逻辑。
 
-稳定阶段前后读取独立 MySQL `performance_schema.events_statements_summary_by_digest` 的单调摘要，不重置全局计数；记录 statements_digest 消费者和 digest_lost，若发生计数重置、摘要丢失/消失则不能声称精确 DB 次数。查询文本可区分 Feed 本体、关系/本人点赞、公共计数 IN 及后台查询；同一实例的后台扫描也会出现在原始增量中，需要逐类报告，不能把总数全归因接口。观察账号需要显式只读 performance_schema 权限；凭据仅从环境传入 MySQL 子进程，不写输出。
+稳定阶段前后通过 `SHOW GLOBAL STATUS` 保存原始行和完整的 `Questions/Queries/Uptime`、`Com_select/insert/update/delete/commit`、`Com_stmt_execute/prepare/close/reprepare` 及 instrumentation lost 计数，并读取 `events_statements_summary_global_by_event_name` 中 Execute/Prepare 和 SQL 类的全局统计。缺列、重复、无效整数直接失败；负增量、Uptime 与快照墙钟不一致、lost 增长或摘要消失均保留失败，不能填零或继续作精确次数声明。原始计数属于专用实例，包含 API、后台、观察器及 helper；快照逐条采集，端点开销和采样时间也在窗口内，不能把总数归因 Feed 单接口。`Com_select` 与 `Com_stmt_execute` 有重叠，分别报告，不能相加称 SQL 总数。
+
+`events_statements_summary_by_digest` 只作辅助：交易基线实查 MySQL 8.4.13 的二进制参数化 SQL 没有进入此摘要，但 `statement/com/Execute` 有真实计数；不能以空 digest 增量宣称没有访问 DB，更不能声称 HTTP 公共计数回源为 0。`publicCountDatabaseLoads` 明确记 `null`，本轮不从全局计数推缓存回源精确次数；既有函数级 20/640 对照保持其原范围。SHOW 计数和 P_S 事件计数分别保留，后台/观察器不做未经验证的精确扣除。`prepared_statements_instances` 的短期实例会在 close 时移除，前后两次快照不适合累计这类 SQL 的每语句次数。
+
+以上限制分别由 [MySQL 8.4 状态表说明](https://dev.mysql.com/doc/refman/8.4/en/performance-schema-status-variable-tables.html)、[prepared 实例生命周期](https://dev.mysql.com/doc/refman/8.4/en/performance-schema-prepared-statements-instances-table.html) 和[官方已知 digest 限制说明](https://bugs.mysql.com/bug.php?id=97496) 支持；旧 bug 说明与本次 8.4.13 实查分开记录，不扩大成所有版本结论。观察账号需要显式只读 performance_schema 权限和获取全局状态的适用权限；凭据仅从环境传入 MySQL 子进程，不写输出。
 
 Redis 使用 INFO commandstats 前后差，保留 hgetall/expire（鉴权）、mget/get/set（缓存）、xreadgroup 等背景命令的分类。INFO 采样本身、连接和后台命令有开销；不以总命令差直接声称每个请求的缓存命中率。根诊断观察器使用 8351 的 `GET /debug/capacity` 另取实际 API pool/runtime 时间序列，不把观察请求算入业务负载。
 
@@ -78,3 +82,9 @@ k6 inspect --include-system-env-vars scripts/load/go073-cap-read.js
 `k6 inspect` 使用操作系统临时目录中的合成输入 JSON（一个假读者、字符串 `static-not-a-credential`，不是登录凭据），进程环境为 `CAP_READ_INPUT=<该临时文件>`、`CAP_READ_RATE=25`、`CAP_READ_SECONDS=30`、`CAP_READ_MODE=hot`、`CAP_READ_PRE_VUS=64`、`CAP_READ_MAX_VUS=512`。实际解析结果为 `constant-arrival-rate`、25/s、30s、64 预分配 VU、512 最大 VU，九项阈值配置可解析；该次未调用 `k6 run` 或业务接口。检查后仅删除这次创建的精确临时文件和空目录。
 
 本阶段没有执行 `prepare/run/finish`、SQL/Redis 观测或任何真实负载，也没有创建/停止容器；因此尚无 HTTP、访问次数、资源或容量成绩。三个新文件已完成源码自审并交根 agent 审阅，真实短探针由根 agent 在新固定构建与专用环境准备后执行；发现运行问题需保留原始失败并追加修复。
+
+## 参数化 SQL 测量修复检查（2026-10-30 后续）
+
+交易首次受限档暴露了上述 prepared digest 盲区，CAP-03 启动前已修复计数快照。`node --check scripts/go073-cap-read.mjs` 与定向 `git diff --check` 退出 0；通过 VM 单独加载实际解析函数，检查缺列、重复、负数/非整数/超出精确整数范围、事件缺失、计数/计时回退以及 Uptime 与墙钟不一致等边界，共 [13 项检查](cap01/read-counter-checks.json)通过。未以替身结果作 HTTP 或容量证据。
+
+另在根 agent 已启动的隔离 `project-full-stack-cap-opt-tests` MySQL 3452 上，核验容器标签与 loopback 端口后仅做两轮只读 SHOW/事件统计快照，保存 [原始探针](cap01/read-counter-probe.json)。两轮均返回完整 14 条状态、7 类事件；真实解析与增量检查通过，探针窗口 `Questions/Queries` 各增 8、`Com_select` 增 3、`Com_stmt_execute` 增 0，反映观察器/后台活动。没有调用业务 API、运行 k6、改数据或 instrumentation；这仍不能证明 CAP-03 HTTP 测量通过，专用 read 环境短探针由根 agent 执行。

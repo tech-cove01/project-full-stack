@@ -98,18 +98,70 @@ async function loadFixture() {
 function parseCommands(text) {
   return Object.fromEntries(text.split(/\r?\n/).filter(x => x.startsWith('cmdstat_')).map(line => { const [name, values] = line.split(':'); return [name.slice(8), Object.fromEntries(values.split(',').map(kv => { const [k, v] = kv.split('='); return [k, Number(v)] }))] }))
 }
+const mysqlStatusNames = ['Uptime', 'Questions', 'Queries', 'Com_select', 'Com_insert', 'Com_update', 'Com_delete', 'Com_commit', 'Com_stmt_execute', 'Com_stmt_prepare', 'Com_stmt_close', 'Com_stmt_reprepare', 'Performance_schema_digest_lost', 'Performance_schema_prepared_statements_lost']
+const mysqlStatementEvents = ['statement/com/Execute', 'statement/com/Prepare', 'statement/sql/select', 'statement/sql/insert', 'statement/sql/update', 'statement/sql/delete', 'statement/sql/commit']
+function unsignedCounter(text) {
+  assert.match(text, /^(0|[1-9]\d*)$/, 'invalid unsigned counter')
+  const value = Number(text)
+  assert.ok(Number.isSafeInteger(value), 'counter exceeds exact integer range')
+  return value
+}
+function parseStatusRows(text) {
+  const rawRows = text.split(/\r?\n/).filter(Boolean).map(line => {
+    const fields = line.split('\t')
+    assert.equal(fields.length, 2, 'unexpected SHOW GLOBAL STATUS row')
+    return { name: fields[0], value: fields[1] }
+  })
+  const counters = {}
+  for (const { name, value } of rawRows) {
+    assert.ok(mysqlStatusNames.includes(name) && !Object.hasOwn(counters, name), 'unexpected or duplicate status counter')
+    counters[name] = unsignedCounter(value)
+  }
+  assert.deepEqual(Object.keys(counters).sort(), [...mysqlStatusNames].sort(), 'missing required SHOW GLOBAL STATUS counter')
+  return { rawRows, counters }
+}
+function parseStatementEvents(text) {
+  const rows = text.split(/\r?\n/).filter(Boolean).map(line => {
+    const fields = line.split('\t')
+    assert.equal(fields.length, 6, 'unexpected statement event row')
+    const [event, count, picoseconds, errors, examined, sent] = fields
+    assert.match(picoseconds, /^(0|[1-9]\d*)$/, 'invalid event timer')
+    return { event, count: unsignedCounter(count), picoseconds, errors: unsignedCounter(errors), examined: unsignedCounter(examined), sent: unsignedCounter(sent) }
+  })
+  assert.deepEqual(rows.map(x => x.event).sort(), [...mysqlStatementEvents].sort(), 'missing or duplicate statement event')
+  return rows
+}
 async function snapshot(label) {
   const started = Date.now()
   const digest = await sql(`SELECT DIGEST, DIGEST_TEXT, COUNT_STAR, SUM_TIMER_WAIT, SUM_ROWS_EXAMINED, SUM_ROWS_SENT FROM performance_schema.events_statements_summary_by_digest WHERE SCHEMA_NAME='${owned.database}' AND DIGEST IS NOT NULL AND DIGEST_TEXT NOT LIKE '%performance_schema%' ORDER BY DIGEST`, true)
-  const digestLost = Number((await sql("SHOW GLOBAL STATUS LIKE 'Performance_schema_digest_lost'", true)).split('\t')[1])
+  // P_S global_status omits Com_* counters. Binary prepared executions also do
+  // not populate our digest view; neither absence may be interpreted as zero.
+  const statusStartedAt = Date.now()
+  const showGlobalStatusRaw = await sql(`SHOW GLOBAL STATUS WHERE Variable_name IN (${mysqlStatusNames.map(name => `'${name}'`).join(',')})`, true)
+  const statusEndedAt = Date.now()
+  const globalStatus = { ...parseStatusRows(showGlobalStatusRaw), raw: showGlobalStatusRaw, startedAt: statusStartedAt, endedAt: statusEndedAt }
+  const eventRaw = await sql(`SELECT EVENT_NAME,COUNT_STAR,SUM_TIMER_WAIT,SUM_ERRORS,SUM_ROWS_EXAMINED,SUM_ROWS_SENT FROM performance_schema.events_statements_summary_global_by_event_name WHERE EVENT_NAME IN (${mysqlStatementEvents.map(name => `'${name}'`).join(',')}) ORDER BY EVENT_NAME`, true)
   const redisRaw = await redis('INFO', 'commandstats')
-  return { label, started, ended: Date.now(), digestLost, digests: digest.split(/\r?\n/).filter(Boolean).map(row => { const [digest, text, count, picoseconds, examined, sent] = row.split('\t'); return { digest, text, count: Number(count), picoseconds, examined: Number(examined), sent: Number(sent) } }), redis: parseCommands(redisRaw) }
+  return { label, started, ended: Date.now(), globalStatus, statementEvents: parseStatementEvents(eventRaw), statementEventsRaw: eventRaw, digestLost: globalStatus.counters.Performance_schema_digest_lost, digests: digest.split(/\r?\n/).filter(Boolean).map(row => { const [digest, text, count, picoseconds, examined, sent] = row.split('\t'); return { digest, text, count: unsignedCounter(count), picoseconds, examined: unsignedCounter(examined), sent: unsignedCounter(sent) } }), redis: parseCommands(redisRaw) }
 }
 function deltaSnapshots(before, after) {
   const old = new Map(before.digests.map(x => [x.digest, x]))
   const sql = after.digests.map(row => ({ ...row, count: row.count - (old.get(row.digest)?.count || 0), examined: row.examined - (old.get(row.digest)?.examined || 0), sent: row.sent - (old.get(row.digest)?.sent || 0), timerPicoseconds: String(BigInt(row.picoseconds) - BigInt(old.get(row.digest)?.picoseconds || '0')) }))
+  const globalCommands = Object.fromEntries(mysqlStatusNames.map(name => {
+    assert.ok(Object.hasOwn(before.globalStatus.counters, name) && Object.hasOwn(after.globalStatus.counters, name), 'missing snapshot status counter')
+    return [name, after.globalStatus.counters[name] - before.globalStatus.counters[name]]
+  }))
+  const statusElapsedMs = (after.globalStatus.startedAt + after.globalStatus.endedAt - before.globalStatus.startedAt - before.globalStatus.endedAt) / 2
+  const statusUncertaintyMs = 2000 + after.globalStatus.endedAt - after.globalStatus.startedAt + before.globalStatus.endedAt - before.globalStatus.startedAt
+  const uptimeConsistent = statusElapsedMs >= 0 && globalCommands.Uptime >= 0 && Math.abs(globalCommands.Uptime * 1000 - statusElapsedMs) <= statusUncertaintyMs
+  const priorEvents = new Map(before.statementEvents.map(row => [row.event, row]))
+  const statementEvents = after.statementEvents.map(row => {
+    const previous = priorEvents.get(row.event)
+    assert.ok(previous, 'statement event disappeared from snapshot')
+    return { event: row.event, count: row.count - previous.count, errors: row.errors - previous.errors, examined: row.examined - previous.examined, sent: row.sent - previous.sent, timerPicoseconds: String(BigInt(row.picoseconds) - BigInt(previous.picoseconds)) }
+  })
   const redis = Object.fromEntries(Object.entries(after.redis).map(([name, fields]) => [name, { calls: fields.calls - (before.redis[name]?.calls || 0), usec: fields.usec - (before.redis[name]?.usec || 0), failed: (fields.failed_calls || 0) - (before.redis[name]?.failed_calls || 0) }]))
-  return { sql: sql.filter(row => row.count > 0), redis: Object.fromEntries(Object.entries(redis).filter(([, values]) => values.calls > 0)), scope: 'same isolated instance between snapshots, includes background SQL and Redis commands; observers add INFO and connection overhead', counterResets: sql.some(x => x.count < 0) || Object.values(redis).some(x => x.calls < 0), lostDigestsDelta: after.digestLost - before.digestLost, missingAfterDigests: before.digests.filter(x => !after.digests.some(y => y.digest === x.digest)).map(x => x.digest) }
+  return { globalCommands, statementEvents, sql: sql.filter(row => row.count > 0), redis: Object.fromEntries(Object.entries(redis).filter(([, values]) => values.calls > 0)), scope: 'whole isolated instance between sequential snapshots; includes API/background/helper/observer SQL and Redis commands, not per-endpoint or public-count cache DB loads', commandCountersOverlap: 'Com_select and Com_stmt_execute overlap; report separately, never add them as SQL total', digestCoverage: 'auxiliary only: binary prepared SQL is absent from this digest view; empty SQL digest delta does not mean no database access', publicCountDatabaseLoads: null, uptimeConsistent, statusElapsedMs, statusUncertaintyMs, counterResets: !uptimeConsistent || Object.values(globalCommands).some(x => x < 0) || statementEvents.some(x => x.count < 0 || x.errors < 0 || x.examined < 0 || x.sent < 0 || BigInt(x.timerPicoseconds) < 0n) || sql.some(x => x.count < 0 || x.examined < 0 || x.sent < 0 || BigInt(x.timerPicoseconds) < 0n) || Object.values(redis).some(x => x.calls < 0 || x.usec < 0 || x.failed < 0), lostDigestsDelta: after.digestLost - before.digestLost, preparedStatementsLostDelta: globalCommands.Performance_schema_prepared_statements_lost, missingAfterDigests: before.digests.filter(x => !after.digests.some(y => y.digest === x.digest)).map(x => x.digest) }
 }
 
 await guard()
@@ -192,13 +244,13 @@ if (action === 'prepare') {
     const before = await snapshot('before-stable'); await writeFile(join(dir, 'before.json'), JSON.stringify(before, null, 2) + '\n')
     report.stableStartedAt = Date.now(); const stable = await runPhase('stable', seconds); report.stableExit = stable.code; report.stableExternalStop = stable.externalStop; report.stableEndedAt = Date.now(); report.stableCommandElapsedMs = report.stableEndedAt - report.stableStartedAt
     const after = await snapshot('after-stable'); const accessDelta = deltaSnapshots(before, after); await writeFile(join(dir, 'after.json'), JSON.stringify(after, null, 2) + '\n'); await writeFile(join(dir, 'access-delta.json'), JSON.stringify(accessDelta, null, 2) + '\n')
-    assert.ok(!accessDelta.counterResets && accessDelta.lostDigestsDelta === 0 && accessDelta.missingAfterDigests.length === 0, 'access counters reset or lost; no exact SQL count claim')
+    assert.ok(!accessDelta.counterResets && accessDelta.lostDigestsDelta === 0 && accessDelta.preparedStatementsLostDelta === 0 && accessDelta.missingAfterDigests.length === 0, 'access counters reset, uptime inconsistent or instrumentation lost; no valid access count claim')
     const summary = JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8')), metric = name => { const value = summary.metrics?.[name]; assert.ok(value, 'missing required metric: ' + name); return value }
     const attempted = metric('cap_read_attempted').count, successful = metric('cap_read_success').count, systemErrors = metric('cap_read_system_errors').count, contentErrors = metric('cap_read_content_errors').count, httpErrors = metric('cap_read_http_errors').count, dropped = metric('dropped_iterations').count
     const latency = metric('cap_read_all_ms'), successfulLatency = summary.metrics?.cap_read_success_ms || null
     assert.ok([attempted, successful, systemErrors, contentErrors, httpErrors, dropped, latency['p(95)'], latency['p(99)']].every(Number.isFinite), 'required metric value missing')
     report.result = { attempted, successful, systemErrors, contentErrors, httpErrors, dropped, targetOffers: rate * seconds, actualOfferedRatio: attempted / (rate * seconds), issuedPerNominalSecond: attempted / seconds, successfulPerNominalSecond: successful / seconds, systemErrorRate: systemErrors / attempted, allLatency: latency, successfulLatency, k6Metrics: { vus: summary.metrics?.vus, vusMax: summary.metrics?.vus_max, dataReceived: summary.metrics?.data_received } }
-    if (successful > 0) assert.ok(accessDelta.sql.some(row => row.count > 0 && row.text.includes('tb_blog') && row.text.startsWith('SELECT')), 'successful Feed requests lack observed statement digests; no DB count claim')
+    if (successful > 0) assert.ok(accessDelta.globalCommands.Com_select > 0 && accessDelta.globalCommands.Com_stmt_execute > 0 && accessDelta.statementEvents.some(row => row.event === 'statement/com/Execute' && row.count > 0), 'successful Feed stage lacks measured instance SQL executions; no access count claim')
     report.meetsBudget = report.stableExit === 0 && !report.stableExternalStop && attempted / (rate * seconds) >= .99 && dropped === 0 && systemErrors / attempted < .01 && contentErrors === 0 && httpErrors / attempted < .01 && latency['p(95)'] <= 200 && latency['p(99)'] <= 500
   } catch (error) { report.failure = error.message; report.meetsBudget = false }
   finally {

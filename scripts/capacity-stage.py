@@ -77,6 +77,9 @@ def main():
     control.mkdir()
     state = {'started_at': now(), 'mode': args.mode, 'api_pid': api.pid,
              'sampler_started': False, 'stop_signal': False, 'forced_owned_processes': [],
+             'generator_runtime_environment': {'GOMAXPROCS': os.environ.get('GOMAXPROCS'),
+                                               'GOMEMLIMIT': os.environ.get('GOMEMLIMIT'),
+                                               'scope': 'inherited by harness children; null means runtime default; API is a pre-existing process observed separately'},
              'errors': []}
     child = sampler = None
     owned_generator = None

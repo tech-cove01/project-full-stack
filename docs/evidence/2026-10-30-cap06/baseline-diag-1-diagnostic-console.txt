@@ -1,0 +1,1 @@
+{"task": "CAP-06B", "samples": 183, "captures": 1, "stableObserved": true, "errors": 0, "successfulPolls": 183, "failedPolls": 0, "coverageComplete": true}

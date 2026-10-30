@@ -26,3 +26,9 @@ docs/evidence/2026-10-30-cap07/**/*.txt -text
 docs/evidence/2026-10-30-cap07/**/*.log -text
 docs/evidence/2026-10-30-cap07/**/*.gz binary
 docs/evidence/2026-10-30-cap07/**/*.pprof binary
+docs/evidence/2026-10-30-cap08/**/*.json -text
+docs/evidence/2026-10-30-cap08/**/*.ndjson -text
+docs/evidence/2026-10-30-cap08/**/*.txt -text
+docs/evidence/2026-10-30-cap08/**/*.log -text
+docs/evidence/2026-10-30-cap08/**/*.gz binary
+docs/evidence/2026-10-30-cap08/**/*.pprof binary

@@ -1,0 +1,202 @@
+{
+  "at": "2026-10-30T08:11:06.024785+00:00",
+  "apiIdentity": {
+    "pid": 66376,
+    "created": 1793347500.1415403,
+    "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-3db296d\\backend\\bin\\cap-api.exe",
+    "binarySHA256": "ef29e9e3838b7ec8ffd1aca5b1a51848fbd8a020ca084228879481adc209bd69",
+    "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+    "expectedRevision": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e"
+  },
+  "windowsTerminateExit": 15,
+  "containers": [
+    {
+      "id": "010931c0cee6604686e6aa51b19537d757785b7129c2908ee0038e07cc321e89",
+      "name": "/project-full-stack-cap-trade-mysql-1",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-30T08:04:42.180465332Z",
+        "FinishedAt": "2026-10-30T08:11:05.349265324Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-30T08:10:50.824054837Z",
+              "End": "2026-10-30T08:10:50.886883862Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-30T08:10:53.888442509Z",
+              "End": "2026-10-30T08:10:53.950012762Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-30T08:10:56.951467577Z",
+              "End": "2026-10-30T08:10:57.014757157Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-30T08:11:00.016002885Z",
+              "End": "2026-10-30T08:11:00.078072441Z",
+              "ExitCode": 0,
+              "Output": ""
+            },
+            {
+              "Start": "2026-10-30T08:11:03.078743899Z",
+              "End": "2026-10-30T08:11:03.137531767Z",
+              "ExitCode": 0,
+              "Output": ""
+            }
+          ]
+        }
+      },
+      "labels": {
+        "com.docker.compose.config-hash": "24ac6f3d2b75633abe28ecfdb43b2ca6f964efd767bfa67ad2870507d1a2d07f",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "project-full-stack-cap-trade",
+        "com.docker.compose.project.config_files": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go073-cap-09b4921\\worktree\\compose.go.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go073-cap-09b4921\\worktree\\scripts\\load\\compose.capacity.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap-independent-6e6af1e78699\\trade-volumes.yaml",
+        "com.docker.compose.project.working_dir": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go073-cap-09b4921\\worktree",
+        "com.docker.compose.replace": "mysql-1",
+        "com.docker.compose.service": "mysql",
+        "com.docker.compose.version": "5.1.0"
+      },
+      "image": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "project-full-stack-cap-trade-independent-6e6af1e78699-mysql",
+          "Source": "/var/lib/docker/volumes/project-full-stack-cap-trade-independent-6e6af1e78699-mysql/_data",
+          "Destination": "/var/lib/mysql",
+          "Driver": "local",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": ""
+        },
+        {
+          "Type": "bind",
+          "Source": "/run/desktop/mnt/host/d/桌面/The ALL/agent/project/code/.reviews/go073-cap-09b4921/worktree/infra/mysql",
+          "Destination": "/docker-entrypoint-initdb.d",
+          "Mode": "ro",
+          "RW": false,
+          "Propagation": "rprivate"
+        }
+      ],
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3450"
+          }
+        ]
+      },
+      "nanoCPUs": 4000000000,
+      "memory": 2147483648
+    },
+    {
+      "id": "1ee6d88ba3ea4c171dfec410182315bfd1138db77a529f5cc8407b2638478625",
+      "name": "/project-full-stack-cap-trade-redis-1",
+      "state": {
+        "Status": "exited",
+        "Running": false,
+        "Paused": false,
+        "Restarting": false,
+        "OOMKilled": false,
+        "Dead": false,
+        "Pid": 0,
+        "ExitCode": 0,
+        "Error": "",
+        "StartedAt": "2026-10-30T08:04:42.177246542Z",
+        "FinishedAt": "2026-10-30T08:11:03.995337461Z",
+        "Health": {
+          "Status": "unhealthy",
+          "FailingStreak": 0,
+          "Log": [
+            {
+              "Start": "2026-10-30T08:10:51.241154329Z",
+              "End": "2026-10-30T08:10:51.283317904Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-30T08:10:54.284180004Z",
+              "End": "2026-10-30T08:10:54.324275964Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-30T08:10:57.325009701Z",
+              "End": "2026-10-30T08:10:57.365917952Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-30T08:11:00.366473923Z",
+              "End": "2026-10-30T08:11:00.405917392Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            },
+            {
+              "Start": "2026-10-30T08:11:03.406820959Z",
+              "End": "2026-10-30T08:11:03.449928446Z",
+              "ExitCode": 0,
+              "Output": "PONG\n"
+            }
+          ]
+        }
+      },
+      "labels": {
+        "com.docker.compose.config-hash": "65300e36d74100d11cd5f51bd617b101cf2033dcefb0fbbee2afeeaf694f5b08",
+        "com.docker.compose.container-number": "1",
+        "com.docker.compose.depends_on": "",
+        "com.docker.compose.image": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+        "com.docker.compose.oneoff": "False",
+        "com.docker.compose.project": "project-full-stack-cap-trade",
+        "com.docker.compose.project.config_files": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go073-cap-09b4921\\worktree\\compose.go.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go073-cap-09b4921\\worktree\\scripts\\load\\compose.capacity.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap-independent-6e6af1e78699\\trade-volumes.yaml",
+        "com.docker.compose.project.working_dir": "D:\\桌面\\The ALL\\agent\\project\\code\\.reviews\\go073-cap-09b4921\\worktree",
+        "com.docker.compose.replace": "redis-1",
+        "com.docker.compose.service": "redis",
+        "com.docker.compose.version": "5.1.0"
+      },
+      "image": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "project-full-stack-cap-trade-independent-6e6af1e78699-redis",
+          "Source": "/var/lib/docker/volumes/project-full-stack-cap-trade-independent-6e6af1e78699-redis/_data",
+          "Destination": "/data",
+          "Driver": "local",
+          "Mode": "rw",
+          "RW": true,
+          "Propagation": ""
+        }
+      ],
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6550"
+          }
+        ]
+      },
+      "nanoCPUs": 2000000000,
+      "memory": 536870912
+    }
+  ],
+  "privateCredentialsRemoved": true,
+  "volumesRetained": true
+}

@@ -1,0 +1,56 @@
+{
+  "pid": 66376,
+  "created": 1793347500.1415403,
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-3db296d\\backend\\bin\\cap-api.exe",
+  "binarySHA256": "ef29e9e3838b7ec8ffd1aca5b1a51848fbd8a020ca084228879481adc209bd69",
+  "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "expectedRevision": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "health": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e"
+  },
+  "diagnostics": {
+    "at": "2026-10-30T08:05:00.5345241Z",
+    "uptime_ms": 86,
+    "pid": 66376,
+    "runtime": {
+      "goroutines": 22,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 2900704,
+      "heap_sys_bytes": 7405568,
+      "heap_inuse_bytes": 4734976,
+      "total_alloc_bytes": 3958984,
+      "mallocs": 40180,
+      "frees": 16045,
+      "num_gc": 1,
+      "pause_total_ns": 542700,
+      "last_gc_unix_ns": 1793347500429392800,
+      "gc_cpu_fraction": 0.04004200614796908
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 4,
+      "in_use": 0,
+      "idle": 4,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 0,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 14,
+      "misses": 4,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 4,
+      "idle_connections": 4,
+      "stale_connections": 0
+    }
+  },
+  "at": "2026-10-30T08:05:00.535838+00:00"
+}

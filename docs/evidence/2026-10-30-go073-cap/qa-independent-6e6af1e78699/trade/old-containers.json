@@ -1,0 +1,186 @@
+[
+  {
+    "id": "dc2238575581f499b0a249bc754910223edf45bd440a6a7a7bf7209481e4f95d",
+    "name": "/project-full-stack-cap-trade-mysql-1",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-30T04:59:11.716244043Z",
+      "FinishedAt": "2026-10-30T05:37:37.390371396Z",
+      "Health": {
+        "Status": "unhealthy",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-10-30T05:37:22.830646547Z",
+            "End": "2026-10-30T05:37:22.889416143Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T05:37:25.889872985Z",
+            "End": "2026-10-30T05:37:25.955228948Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T05:37:28.954082345Z",
+            "End": "2026-10-30T05:37:29.020508296Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T05:37:32.021814771Z",
+            "End": "2026-10-30T05:37:32.082765132Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T05:37:35.083933859Z",
+            "End": "2026-10-30T05:37:35.150368434Z",
+            "ExitCode": 0,
+            "Output": ""
+          }
+        ]
+      }
+    },
+    "labels": {
+      "com.docker.compose.config-hash": "f6c6e5d0f0536f7485dfc58d89e444d225860c9f0692c1979c87eadb9b93b2a9",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "project-full-stack-cap-trade",
+      "com.docker.compose.project.config_files": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\compose.go.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\load\\compose.capacity.yaml",
+      "com.docker.compose.project.working_dir": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack",
+      "com.docker.compose.service": "mysql",
+      "com.docker.compose.version": "5.1.0"
+    },
+    "image": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+    "mounts": [
+      {
+        "Type": "volume",
+        "Name": "project-full-stack-cap-trade_go-mysql-data",
+        "Source": "/var/lib/docker/volumes/project-full-stack-cap-trade_go-mysql-data/_data",
+        "Destination": "/var/lib/mysql",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      },
+      {
+        "Type": "bind",
+        "Source": "/run/desktop/mnt/host/d/桌面/The ALL/agent/project/code/project-full-stack/infra/mysql",
+        "Destination": "/docker-entrypoint-initdb.d",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      }
+    ],
+    "ports": {
+      "3306/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "3450"
+        }
+      ]
+    },
+    "nanoCPUs": 4000000000,
+    "memory": 2147483648
+  },
+  {
+    "id": "fbd81776c4388ec6ac47817fe2f363dbbab663b7b2cf8974204e1bc1694d4294",
+    "name": "/project-full-stack-cap-trade-redis-1",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-30T04:59:11.707524104Z",
+      "FinishedAt": "2026-10-30T05:37:36.129228762Z",
+      "Health": {
+        "Status": "unhealthy",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-10-30T05:37:22.544480403Z",
+            "End": "2026-10-30T05:37:22.58855874Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T05:37:25.58919878Z",
+            "End": "2026-10-30T05:37:25.63241114Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T05:37:28.63264071Z",
+            "End": "2026-10-30T05:37:28.673271916Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T05:37:31.674841312Z",
+            "End": "2026-10-30T05:37:31.718814869Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T05:37:34.719424863Z",
+            "End": "2026-10-30T05:37:34.763113167Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          }
+        ]
+      }
+    },
+    "labels": {
+      "com.docker.compose.config-hash": "65300e36d74100d11cd5f51bd617b101cf2033dcefb0fbbee2afeeaf694f5b08",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "project-full-stack-cap-trade",
+      "com.docker.compose.project.config_files": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\compose.go.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\load\\compose.capacity.yaml",
+      "com.docker.compose.project.working_dir": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack",
+      "com.docker.compose.service": "redis",
+      "com.docker.compose.version": "5.1.0"
+    },
+    "image": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+    "mounts": [
+      {
+        "Type": "volume",
+        "Name": "project-full-stack-cap-trade_go-redis-data",
+        "Source": "/var/lib/docker/volumes/project-full-stack-cap-trade_go-redis-data/_data",
+        "Destination": "/data",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "ports": {
+      "6379/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "6550"
+        }
+      ]
+    },
+    "nanoCPUs": 2000000000,
+    "memory": 536870912
+  }
+]

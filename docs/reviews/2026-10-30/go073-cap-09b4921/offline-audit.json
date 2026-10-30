@@ -1,0 +1,101 @@
+{
+  "scope": "independent read-only archived evidence crosscheck; no live load",
+  "trade": [
+    {
+      "stage": "workers4-rate-30-hold-1",
+      "stableRequests": 5401,
+      "totalIDUserMatches": 5701,
+      "p95Ms": 12.4042,
+      "p99Ms": 16.1298,
+      "dropped": 0,
+      "rawCounters": {
+        "http_reqs": 5701,
+        "cap_requests": 5701,
+        "cap_system_errors": 0,
+        "cap_accepted": 5701
+      },
+      "lastThirdDB": 1800,
+      "lastThirdAccepted": 1800,
+      "lagNet": 0,
+      "sqlObservationIntervalMs": 59999
+    },
+    {
+      "stage": "workers4-rate-30-hold-2",
+      "stableRequests": 5401,
+      "totalIDUserMatches": 5701,
+      "p95Ms": 12.8033,
+      "p99Ms": 17.1614,
+      "dropped": 0,
+      "rawCounters": {
+        "http_reqs": 5701,
+        "cap_requests": 5701,
+        "cap_system_errors": 0,
+        "cap_accepted": 5701
+      },
+      "lastThirdDB": 1801,
+      "lastThirdAccepted": 1800,
+      "lagNet": 0,
+      "sqlObservationIntervalMs": 59999
+    },
+    {
+      "stage": "workers4-rate-35",
+      "stableRequests": 1576,
+      "totalIDUserMatches": 1927,
+      "p95Ms": 12.5058,
+      "p99Ms": 16.7988,
+      "dropped": 0,
+      "rawCounters": {
+        "http_reqs": 1927,
+        "cap_requests": 1927,
+        "cap_system_errors": 0,
+        "cap_accepted": 1927
+      },
+      "lastThirdDB": 427,
+      "lastThirdAccepted": 490,
+      "lagNet": 62,
+      "sqlObservationIntervalMs": 14000
+    }
+  ],
+  "read": [
+    {
+      "stage": "hold-fix-hot-200-180-a",
+      "successful": 36001,
+      "p95Ms": 25.3774,
+      "p99Ms": 43.4507,
+      "activeReaders": 1,
+      "activeCountKeys": 20,
+      "completeResourceSamples": 37,
+      "validCPUIntervals": 36
+    },
+    {
+      "stage": "hold-fix-hot-200-180-b",
+      "successful": 36000,
+      "p95Ms": 25.371439999999982,
+      "p99Ms": 68.0209470000001,
+      "activeReaders": 1,
+      "activeCountKeys": 20,
+      "completeResourceSamples": 37,
+      "validCPUIntervals": 36
+    },
+    {
+      "stage": "hold-fix-multi-100-180-a",
+      "successful": 18000,
+      "p95Ms": 89.151635,
+      "p99Ms": 188.78506399999984,
+      "activeReaders": 32,
+      "activeCountKeys": 640,
+      "completeResourceSamples": 37,
+      "validCPUIntervals": 36
+    },
+    {
+      "stage": "hold-fix-multi-100-180-b",
+      "successful": 18001,
+      "p95Ms": 17.5534,
+      "p99Ms": 21.8728,
+      "activeReaders": 32,
+      "activeCountKeys": 640,
+      "completeResourceSamples": 37,
+      "validCPUIntervals": 36
+    }
+  ]
+}

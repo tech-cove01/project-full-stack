@@ -1,0 +1,15 @@
+{
+  "helper_pid": 53712,
+  "k6_pid": 43652,
+  "k6_started_unix_ms": 1793347758281,
+  "model": {
+    "rate": 35,
+    "warmSeconds": 10,
+    "stableSeconds": 45,
+    "preAllocatedVUs": 20,
+    "maxVUs": 60,
+    "warmSlots": 395,
+    "availableUsers": 2015,
+    "initialStock": 2115
+  }
+}

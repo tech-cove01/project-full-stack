@@ -1,0 +1,40 @@
+{
+  "archives": [
+    {
+      "original": "trade\\trade30-hold-load\\k6-metrics.ndjson",
+      "originalBytes": 19966747,
+      "originalSHA256": "d2f33dd4e2cc730fd52db02060fac50fcf3da4894bfc6f80806ecc7a3a2f3d99",
+      "archive": "trade\\trade30-hold-load\\k6-metrics.ndjson.gz",
+      "archiveBytes": 679827,
+      "archiveSHA256": "f4ba3c0dd79f382a91d6c31a5c1f1f5203d0dc2059ae2e0c7216fdec485dd711",
+      "decompressedMatches": true,
+      "metadataRecoveredAfterLaterPreflightFailure": "earlier invocation verified original hash/size before removing owned raw file; later scan mistook public k6 empty-group MD5 for a bearer token shape"
+    },
+    {
+      "original": "trade\\trade35-neighbor-load\\k6-metrics.ndjson",
+      "originalBytes": 6733370,
+      "originalSHA256": "9c349810c36aa5090049bd42e7223b8c95382c113f3e81669bdf1fb531111d34",
+      "archive": "trade\\trade35-neighbor-load\\k6-metrics.ndjson.gz",
+      "archiveBytes": 231039,
+      "archiveSHA256": "2e2ce720fbb06cbe6289b21c15d379872e657e098ff373562c197837d7990f75",
+      "decompressedMatches": true,
+      "metadataRecoveredAfterLaterPreflightFailure": "earlier invocation verified original hash/size before removing owned raw file; later scan mistook public k6 empty-group MD5 for a bearer token shape"
+    }
+  ],
+  "credentialShapeScan": {
+    "files": 123,
+    "matchingFiles": [],
+    "excludedVerifiedNativeEmptyGroupDigests": 8,
+    "scope": "32-hex application token shape and authorization values, with native summary root_group.id empty-group MD5 excluded only when it is the sole match; private source token pools were already revoked and removed, so this is not an exact comparison against their former values"
+  },
+  "retainedOldAndNewVolumes": [
+    "project-full-stack-cap-read-independent-6e6af1e78699-mysql",
+    "project-full-stack-cap-read-independent-6e6af1e78699-redis",
+    "project-full-stack-cap-read_go-mysql-data",
+    "project-full-stack-cap-read_go-redis-data",
+    "project-full-stack-cap-trade-independent-6e6af1e78699-mysql",
+    "project-full-stack-cap-trade-independent-6e6af1e78699-redis",
+    "project-full-stack-cap-trade_go-mysql-data",
+    "project-full-stack-cap-trade_go-redis-data"
+  ]
+}

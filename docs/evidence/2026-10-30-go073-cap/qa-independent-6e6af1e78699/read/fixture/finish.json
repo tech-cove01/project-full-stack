@@ -1,0 +1,11 @@
+{
+  "at": "2026-10-30T08:22:55.270Z",
+  "logoutCount": 32,
+  "credentialFileRemoved": true,
+  "sqlFixtureRetained": true,
+  "apiSourceSha": "767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "apiExpectedRevision": "capacity-767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "fixtureSourceSha": "767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "fixtureExpectedRevision": "capacity-767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "fixtureManifestSHA256": "2c7b0ba89c850e1b369e74134d4468e221abf01b301feb81ed5dcada98ceac5f"
+}

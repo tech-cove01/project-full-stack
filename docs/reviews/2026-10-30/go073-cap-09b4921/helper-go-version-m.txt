@@ -1,0 +1,27 @@
+D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap-independent-6e6af1e78699\capacity-trade.exe: go1.27.0
+	path	github.com/cityloop/fullstack-go/cmd/capacity-trade
+	mod	github.com/cityloop/fullstack-go	(devel)	
+	dep	filippo.io/edwards25519	v1.1.0	h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+	dep	github.com/cespare/xxhash/v2	v2.3.0	h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
+	dep	github.com/dgryski/go-rendezvous	v0.0.0-20200823014737-9f7001d12a5f	h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=
+	dep	github.com/go-sql-driver/mysql	v1.8.1	h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
+	dep	github.com/jinzhu/inflection	v1.0.0	h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
+	dep	github.com/jinzhu/now	v1.1.5	h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
+	dep	github.com/redis/go-redis/v9	v9.17.0	h1:K6E+ZlYN95KSMmZeEQPbU/c++wfmEvfFB17yEAq/VhM=
+	dep	golang.org/x/text	v0.27.0	h1:4fGWRpyh641NLlecmyl4LOe6yDdfaYNrGb2zdfo4JV4=
+	dep	gorm.io/driver/mysql	v1.6.0	h1:eNbLmNTpPpTOVZi8MMxCi2aaIm0ZpInbORNXDwyLGvg=
+	dep	gorm.io/gorm	v1.31.1	h1:7CA8FTFz/gRfgqgpeKIBcervUn3xSyPUmr6B2WXJ7kg=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=windows
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=09b49211f81389fb4075396f318f8d4b48e30cf1
+	build	vcs.time=2026-10-30T07:47:38Z
+	build	vcs.modified=true

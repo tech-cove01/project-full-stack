@@ -1,0 +1,5 @@
+{
+  "poolFileRetained": true,
+  "revokedSessionKeys": 25001,
+  "sqlFixturesRetained": true
+}

@@ -1,0 +1,186 @@
+[
+  {
+    "id": "3528bc43fe4c67bbb3ad294eb339c7006c56e7e2118527dde2ccc13991890686",
+    "name": "/project-full-stack-cap-read-mysql-1",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-30T05:38:51.183654227Z",
+      "FinishedAt": "2026-10-30T07:38:15.783960793Z",
+      "Health": {
+        "Status": "unhealthy",
+        "FailingStreak": 1,
+        "Log": [
+          {
+            "Start": "2026-10-30T07:38:02.272915161Z",
+            "End": "2026-10-30T07:38:02.360485661Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T07:38:05.362009505Z",
+            "End": "2026-10-30T07:38:05.427877907Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T07:38:08.428562143Z",
+            "End": "2026-10-30T07:38:08.49302502Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T07:38:11.494578528Z",
+            "End": "2026-10-30T07:38:11.556631554Z",
+            "ExitCode": 0,
+            "Output": ""
+          },
+          {
+            "Start": "2026-10-30T07:38:14.558006865Z",
+            "End": "2026-10-30T07:38:14.632775467Z",
+            "ExitCode": 1,
+            "Output": ""
+          }
+        ]
+      }
+    },
+    "labels": {
+      "com.docker.compose.config-hash": "e55eacca5a4659cb0dba52ab5da2c4840688780dc0a6ca23051fdf610e73ef84",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "project-full-stack-cap-read",
+      "com.docker.compose.project.config_files": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\compose.go.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\load\\compose.capacity.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\load\\compose.capacity-read.yaml",
+      "com.docker.compose.project.working_dir": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack",
+      "com.docker.compose.service": "mysql",
+      "com.docker.compose.version": "5.1.0"
+    },
+    "image": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+    "mounts": [
+      {
+        "Type": "bind",
+        "Source": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\infra\\mysql",
+        "Destination": "/docker-entrypoint-initdb.d",
+        "Mode": "ro",
+        "RW": false,
+        "Propagation": "rprivate"
+      },
+      {
+        "Type": "volume",
+        "Name": "project-full-stack-cap-read_go-mysql-data",
+        "Source": "/var/lib/docker/volumes/project-full-stack-cap-read_go-mysql-data/_data",
+        "Destination": "/var/lib/mysql",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "ports": {
+      "3306/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "3451"
+        }
+      ]
+    },
+    "nanoCPUs": 4000000000,
+    "memory": 2147483648
+  },
+  {
+    "id": "178d1faad6b012a008bab7270470f0f8d70a3d16004480c04b86867a6661e996",
+    "name": "/project-full-stack-cap-read-redis-1",
+    "state": {
+      "Status": "exited",
+      "Running": false,
+      "Paused": false,
+      "Restarting": false,
+      "OOMKilled": false,
+      "Dead": false,
+      "Pid": 0,
+      "ExitCode": 0,
+      "Error": "",
+      "StartedAt": "2026-10-30T05:38:51.179469148Z",
+      "FinishedAt": "2026-10-30T07:38:13.586125504Z",
+      "Health": {
+        "Status": "unhealthy",
+        "FailingStreak": 0,
+        "Log": [
+          {
+            "Start": "2026-10-30T07:37:58.506584947Z",
+            "End": "2026-10-30T07:37:58.551642912Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T07:38:01.552266334Z",
+            "End": "2026-10-30T07:38:01.594882101Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T07:38:04.624454084Z",
+            "End": "2026-10-30T07:38:04.663680214Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T07:38:07.664116016Z",
+            "End": "2026-10-30T07:38:07.706686638Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          },
+          {
+            "Start": "2026-10-30T07:38:10.707975994Z",
+            "End": "2026-10-30T07:38:10.750016505Z",
+            "ExitCode": 0,
+            "Output": "PONG\n"
+          }
+        ]
+      }
+    },
+    "labels": {
+      "com.docker.compose.config-hash": "3145bb1eafae9889ffffa15b1b208976ccc3d1b0e3dcb7f8be4512e350d84d20",
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.depends_on": "",
+      "com.docker.compose.image": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "project-full-stack-cap-read",
+      "com.docker.compose.project.config_files": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\compose.go.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\load\\compose.capacity.yaml,D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\load\\compose.capacity-read.yaml",
+      "com.docker.compose.project.working_dir": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack",
+      "com.docker.compose.service": "redis",
+      "com.docker.compose.version": "5.1.0"
+    },
+    "image": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+    "mounts": [
+      {
+        "Type": "volume",
+        "Name": "project-full-stack-cap-read_go-redis-data",
+        "Source": "/var/lib/docker/volumes/project-full-stack-cap-read_go-redis-data/_data",
+        "Destination": "/data",
+        "Driver": "local",
+        "Mode": "rw",
+        "RW": true,
+        "Propagation": ""
+      }
+    ],
+    "ports": {
+      "6379/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "6551"
+        }
+      ]
+    },
+    "nanoCPUs": 2000000000,
+    "memory": 536870912
+  }
+]

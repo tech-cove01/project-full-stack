@@ -1,0 +1,21 @@
+{
+  "at": "2026-10-30T08:05:00.538094+00:00",
+  "cpuLogical": 20,
+  "cpuPhysical": 14,
+  "memoryTotal": 33960505344,
+  "dockerInfo": {
+    "ServerVersion": "29.3.1",
+    "NCPU": 20,
+    "MemTotal": 16572063744,
+    "OperatingSystem": "Docker Desktop",
+    "OSType": "linux",
+    "KernelVersion": "5.15.167.4-microsoft-standard-WSL2"
+  },
+  "runningContainers": "010931c0cee6 project-full-stack-cap-trade-mysql-1 Up 19 seconds (healthy)\n1ee6d88ba3ea project-full-stack-cap-trade-redis-1 Up 19 seconds (healthy)\n54c89c4d6146 crm-agent-services-clickhouse-1 Up 4 hours (healthy)\nd2e438ca0250 crm-agent-services-weknora-1 Up 46 hours\n3d031cc46574 crm-agent-services-seaweedfs-1 Up 46 hours\nf6fe0c184567 crm-agent-services-langfuse-web-1 Up 46 hours\n3258c2abe59c crm-agent-services-langfuse-worker-1 Up 46 hours\n6faca9a0df78 crm-agent-services-redis-1 Up 46 hours\nbdce54e784eb crm-agent-services-mem0-1 Up 46 hours\n621827ad7e0c crm-agent-services-postgres-1 Up 47 hours (healthy)\n554ae1e5805c supabase_storage_project-crm-local Up 47 hours (healthy)\n2cccdd9f11f5 supabase_rest_project-crm-local Up 47 hours\nb36629efcc8d supabase_realtime_project-crm-local Up 47 hours (healthy)\n38c730ecc8e8 supabase_auth_project-crm-local Up 47 hours (healthy)\n8151812f7623 supabase_kong_project-crm-local Up 47 hours (healthy)\ndb4420bedc6c supabase_db_project-crm-local Up 47 hours (healthy)\n",
+  "tools": {
+    "go": "go version go1.27.0 windows/amd64",
+    "k6": "k6.exe v2.2.0 (commit/00a9a1b7f5, go1.26.5, windows/amd64)",
+    "node": "v24.15.0",
+    "python": "Python 3.13.0"
+  }
+}

@@ -6,7 +6,7 @@
 
 ## 当前事实
 
-- 2026-10-30新增[GO-073-CAP容量总报告](evidence/2026-10-30-go073-cap/report.md)及[核验复跑入口](evidence/2026-10-30-go073-cap/qa-handoff.md)：交易30/s、Feed hot200/s与multi100/s均完成180秒两轮自测；必要优化、全部过载失败、原始散列与收尾分别留证。这是本机固定条件自测，外部独立核验及后续材料收口以根STATUS为准。
+- 2026-10-30新增[GO-073-CAP独立核验](reviews/2026-10-30/go073-cap-09b4921/report.md)：新卷交易30/s与Feed hot200/s各180秒通过，multi100/s约120秒因P99 1137ms超预算早停，下一步定位长尾。[原容量总报告](evidence/2026-10-30-go073-cap/report.md)的各两轮自测与全部失败保留；不与本次代表档混同，不称理论上限。当前动作以根STATUS为准。
 - Java 参考基线为 `9f8c2b10839ef74556de0f55d19afc3ac215f9da`，由标签 `java-baseline-20261026` 保留；冻结后不再新增 Java 功能。
 - `backend/`为Go，交易、核销退款/受控恢复、逐门店工作台、业务AI、社区和公开笔记搜索已按各票记录范围独立核验；GO-074含必要修复在ad49718范围通过。GO-073 已执行交易、缓存及事件链路的定速测量和恢复对账，并开展独立复跑；本轮范围与状态以根 [STATUS](../STATUS.md) 为准。交易独立复跑在 5 次/秒、180 秒稳定窗口内的 901 次请求均对应最终订单，事件测量为每秒一次发布和点赞；指定负载结果不代表饱和容量。[交易复跑报告](reviews/2026-10-29/go073-trade-399705a/report.md)、[事件测量报告](evidence/2026-10-29-go073/events/event2-report.md)记录口径及限制。
 - 精确提交 `399705a1fb92e5075192004c1cf1563f120dee47` 的 [远端 CI 四项作业](https://github.com/tech-cove01/project-full-stack/actions/runs/40839300797)通过，含 Linux race 和真实依赖；不自动覆盖后续提交。

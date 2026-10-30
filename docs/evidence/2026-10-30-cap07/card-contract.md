@@ -56,4 +56,4 @@ Redis键为`community:note-card:v1:<canonical ID>:<canonical version>`；payload
 
 `Stats()`只暴露固定计数/gauge，root挂到原loopback诊断，不进入产品响应：requests、l1_hits、redis_hits、miss_items、loads_started、flight_started、flight_joins、content_sql_batches、content_sql_rows、content_bytes、load_errors、oversize_uncached、redis_errors、invalid_payloads、busy_rejected、expired、evictions、inflight、active_loads、waiting_callers、l1_entries、l1_bytes，以及当前构建是否已启用coalescing。
 
-`content_sql_batches`在每次实际内容SQL尝试时增加（含失败），rows是实际返回行数，bytes是这些SQL行的title/content/原images UTF8字节量，不是SQL wire字节或RSS。hit/miss按每caller去重后的Ref计，载入/合并按在途批次计；这些计数与全实例SHOW/Redis访问量分开。并发gauge不是跨字段原子快照。正式效果及FC-01—08按既定A/B/有限阶梯留证，不据契约预测收益。
+`content_sql_batches`在每次实际内容SQL尝试时增加（含失败），rows是实际返回行数，bytes是这些SQL行的title/content/原images UTF8字节量，不是SQL wire字节或RSS。hit/miss按每caller去重后的Ref首次缓存检查计，排队后二查不重复累计caller hit；载入/合并按在途批次计。这些计数与全实例SHOW/Redis访问量分开。并发gauge不是跨字段原子快照。正式效果及FC-01—08按既定A/B/有限阶梯留证，不据契约预测收益。

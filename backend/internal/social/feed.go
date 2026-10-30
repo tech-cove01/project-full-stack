@@ -2,11 +2,13 @@ package social
 
 import (
 	"context"
+	"errors"
 	"strconv"
 	"strings"
 	"time"
 	_ "time/tzdata"
 
+	"github.com/cityloop/fullstack-go/internal/communitycards"
 	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
@@ -92,19 +94,48 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		cursorAt, cursorKey = parsed, key
 	}
 	var result FeedPage
+	var refs []communitycards.Ref
 	facts := taildiag.Begin(ctx, taildiag.FeedFacts, 0)
-	if service.projections {
+	read := func(reader *Service) error {
+		var queryErr error
+		result, refs, queryErr = reader.feedDirectory(ctx, user, cursorAt, cursorKey, hasCursor, limit, service.cards != nil)
+		return queryErr
+	}
+	if service.projections || service.cards != nil {
 		err = service.readSnapshot(ctx, func(reader *Service) error {
-			var queryErr error
-			result, queryErr = reader.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
-			return queryErr
+			return read(reader)
 		})
 	} else {
-		result, err = service.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
+		err = read(service)
 	}
 	facts.End(err != nil)
 	if err != nil {
 		return result, err
+	}
+	if service.cards != nil && len(refs) > 0 {
+		cards, loadErr := service.cards.GetMany(ctx, refs)
+		if errors.Is(loadErr, communitycards.ErrVersionChanged) || errors.Is(loadErr, communitycards.ErrBusy) {
+			// The old directory must never receive a different version's body.
+			// Retry the original full-field path once, in a new fact snapshot.
+			service.cardFallbacks.Add(1)
+			loadErr = service.readSnapshot(ctx, func(reader *Service) error {
+				var queryErr error
+				result, queryErr = reader.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
+				return queryErr
+			})
+		} else if loadErr == nil {
+			for index, ref := range refs {
+				card, ok := cards[ref]
+				if !ok {
+					return FeedPage{}, communitycards.ErrVersionChanged
+				}
+				result.Items[index].Title, result.Items[index].Content = card.Title, card.Content
+				result.Items[index].Images = card.Images
+			}
+		}
+		if loadErr != nil {
+			return FeedPage{}, loadErr
+		}
 	}
 	// Facts, authorization, own likes and the cursor are already fixed. Release
 	// the snapshot connection before a cold cache borrows from the same DB pool.
@@ -142,16 +173,22 @@ func (service *Service) withFeedCounts(ctx context.Context, page FeedPage) FeedP
 
 func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time.Time,
 	cursorKey uint64, hasCursor bool, limit int) (FeedPage, error) {
+	page, _, err := service.feedDirectory(ctx, user, cursorAt, cursorKey, hasCursor, limit, false)
+	return page, err
+}
+
+func (service *Service) feedDirectory(ctx context.Context, user uint64, cursorAt time.Time,
+	cursorKey uint64, hasCursor bool, limit int, narrow bool) (FeedPage, []communitycards.Ref, error) {
 	// Read the author catalog first to narrow candidates. The final SQL still
 	// verifies the current relation before LIMIT. Global-order and author-first
 	// indexes are alternatives; the actual plan can still join and sort.
 	authors := make([]uint64, 0)
 	if err := service.db.WithContext(ctx).Raw(`SELECT follow_user_id FROM tb_follow
 		WHERE user_id=? AND active=1`, user).Scan(&authors).Error; err != nil {
-		return FeedPage{}, err
+		return FeedPage{}, nil, err
 	}
 	if len(authors) == 0 {
-		return FeedPage{Items: []FeedItem{}, Source: sourceDatabase}, nil
+		return FeedPage{Items: []FeedItem{}, Source: sourceDatabase}, nil, nil
 	}
 	placeholders := strings.TrimSuffix(strings.Repeat("?,", len(authors)), ",")
 	where := ` WHERE b.status='PUBLISHED' AND b.user_id IN (` + placeholders + `)`
@@ -170,16 +207,17 @@ func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time
 	}
 	args = append(args, limit)
 	rows := make([]struct {
-		ID         uint64
-		UserID     uint64
-		ShopID     uint64
-		ShopName   *string
-		Title      string
-		Images     string
-		Content    string
-		Liked      uint64
-		Comments   uint64
-		CreateTime time.Time
+		ID             uint64
+		PublishVersion uint64
+		UserID         uint64
+		ShopID         uint64
+		ShopName       *string
+		Title          string
+		Images         string
+		Content        string
+		Liked          uint64
+		Comments       uint64
+		CreateTime     time.Time
 	}, 0, limit)
 	// One join assembles shop labels for the page. Index selection and sorting
 	// depend on the author distribution and must be checked in the actual plan.
@@ -191,21 +229,25 @@ func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time
 				AND p.author_id=b.user_id AND p.version=b.publish_version
 				AND p.published_at=b.create_time`
 		}
+		fragment := "b.title,b.images,b.content,"
+		if narrow {
+			fragment = "b.publish_version,"
+		}
 		return service.db.WithContext(ctx).Raw(`SELECT b.id,b.user_id,b.shop_id,s.name AS shop_name,
-			b.title,b.images,b.content,b.liked,b.comments,b.create_time
+			`+fragment+`b.liked,b.comments,b.create_time
 			FROM tb_blog b LEFT JOIN tb_shop s ON s.id=b.shop_id`+catalog+where+
 			` ORDER BY b.create_time DESC,b.id DESC LIMIT ?`, args...).Scan(&rows).Error
 	}
 	if err := query(projected); err != nil {
 		if !projected || ctx.Err() != nil {
-			return FeedPage{}, err
+			return FeedPage{}, nil, err
 		}
 		// Projection availability is optional even after a successful completeness
 		// check. Retry only the read against the same authoritative snapshot.
 		rows = rows[:0]
 		projected = false
 		if err = query(false); err != nil {
-			return FeedPage{}, err
+			return FeedPage{}, nil, err
 		}
 	}
 	// One query for the caller's own likes, not one per card.
@@ -225,14 +267,18 @@ func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time
 		if err := service.db.WithContext(ctx).Raw(`SELECT blog_id FROM tb_blog_like
 			WHERE user_id=? AND active=1 AND blog_id IN (`+likePlaceholders+`)`,
 			likeArgs...).Scan(&likedIDs).Error; err != nil {
-			return FeedPage{}, err
+			return FeedPage{}, nil, err
 		}
 		for _, id := range likedIDs {
 			liked[id] = true
 		}
 	}
 	items := make([]FeedItem, 0, len(rows))
+	refs := make([]communitycards.Ref, 0, len(rows))
 	for _, row := range rows {
+		if narrow {
+			refs = append(refs, communitycards.Ref{ID: row.ID, Version: row.PublishVersion})
+		}
 		images := make([]string, 0)
 		for _, image := range strings.Split(row.Images, ",") {
 			if image = strings.TrimSpace(image); image != "" {
@@ -260,5 +306,5 @@ func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time
 		last := items[len(items)-1]
 		page.NextCursor = &Cursor{PublishedAt: last.CreateTime, ID: last.ID}
 	}
-	return page, nil
+	return page, refs, nil
 }

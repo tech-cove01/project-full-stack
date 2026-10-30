@@ -1,0 +1,48 @@
+=== RUN   TestIntegrationFeedCardsHTTPColdHotAndFacts
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] PUT    /authors/:id/follow       --> github.com/cityloop/fullstack-go/internal/social.Register.func1 (2 handlers)
+[GIN-debug] PUT    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func2 (2 handlers)
+[GIN-debug] GET    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func3 (2 handlers)
+[GIN-debug] GET    /authors/:id/relationship --> github.com/cityloop/fullstack-go/internal/social.Register.func4 (2 handlers)
+[GIN-debug] GET    /feed/notes               --> github.com/cityloop/fullstack-go/internal/social.Register.func6 (3 handlers)
+--- PASS: TestIntegrationFeedCardsHTTPColdHotAndFacts (0.36s)
+=== RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure
+=== RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure/version
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] PUT    /authors/:id/follow       --> github.com/cityloop/fullstack-go/internal/social.Register.func1 (2 handlers)
+[GIN-debug] PUT    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func2 (2 handlers)
+[GIN-debug] GET    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func3 (2 handlers)
+[GIN-debug] GET    /authors/:id/relationship --> github.com/cityloop/fullstack-go/internal/social.Register.func4 (2 handlers)
+[GIN-debug] GET    /feed/notes               --> github.com/cityloop/fullstack-go/internal/social.Register.func6 (3 handlers)
+=== RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure/draft
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] PUT    /authors/:id/follow       --> github.com/cityloop/fullstack-go/internal/social.Register.func1 (2 handlers)
+[GIN-debug] PUT    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func2 (2 handlers)
+[GIN-debug] GET    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func3 (2 handlers)
+[GIN-debug] GET    /authors/:id/relationship --> github.com/cityloop/fullstack-go/internal/social.Register.func4 (2 handlers)
+[GIN-debug] GET    /feed/notes               --> github.com/cityloop/fullstack-go/internal/social.Register.func6 (3 handlers)
+=== RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure/database
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] PUT    /authors/:id/follow       --> github.com/cityloop/fullstack-go/internal/social.Register.func1 (2 handlers)
+[GIN-debug] PUT    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func2 (2 handlers)
+[GIN-debug] GET    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func3 (2 handlers)
+[GIN-debug] GET    /authors/:id/relationship --> github.com/cityloop/fullstack-go/internal/social.Register.func4 (2 handlers)
+[GIN-debug] GET    /feed/notes               --> github.com/cityloop/fullstack-go/internal/social.Register.func6 (3 handlers)
+--- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure (0.72s)
+    --- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure/version (0.24s)
+    --- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure/draft (0.25s)
+    --- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure/database (0.22s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/social	2.800s

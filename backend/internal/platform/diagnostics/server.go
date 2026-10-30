@@ -18,6 +18,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
+	"github.com/cityloop/fullstack-go/internal/communitycards"
 	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
@@ -74,6 +75,12 @@ type redisSnapshot struct {
 // commands. Port zero is supported by this lower-level constructor for tests;
 // process configuration requires an explicit nonzero port.
 func Start(address string, sqlPool *sql.DB, redisPool *redis.Client, timeout time.Duration, feed ...*taildiag.Recorder) (*Server, error) {
+	return StartWithCards(address, sqlPool, redisPool, timeout, nil, feed...)
+}
+
+// StartWithCards also samples the application card cache. Its fixed counters do
+// not require the optional Feed timing recorder and issue no backend commands.
+func StartWithCards(address string, sqlPool *sql.DB, redisPool *redis.Client, timeout time.Duration, cards *communitycards.Cache, feed ...*taildiag.Recorder) (*Server, error) {
 	host, _, err := net.SplitHostPort(address)
 	ip := net.ParseIP(host)
 	if err != nil || ip == nil || !ip.IsLoopback() || sqlPool == nil || redisPool == nil || timeout <= 0 {
@@ -83,7 +90,11 @@ func Start(address string, sqlPool *sql.DB, redisPool *redis.Client, timeout tim
 	if err != nil {
 		return nil, errors.New("listen isolated diagnostics failed")
 	}
-	return serve(listener, handler(sqlPool.Stats, redisPool.PoolStats, feed...), timeout), nil
+	var cardStats func() communitycards.Snapshot
+	if cards != nil {
+		cardStats = cards.Stats
+	}
+	return serve(listener, handlerWithCards(sqlPool.Stats, redisPool.PoolStats, cardStats, feed...), timeout), nil
 }
 
 func serve(listener net.Listener, routes http.Handler, timeout time.Duration) *Server {
@@ -115,6 +126,10 @@ func (server *Server) Close() error {
 }
 
 func handler(sqlStats func() sql.DBStats, redisStats func() *redis.PoolStats, feed ...*taildiag.Recorder) http.Handler {
+	return handlerWithCards(sqlStats, redisStats, nil, feed...)
+}
+
+func handlerWithCards(sqlStats func() sql.DBStats, redisStats func() *redis.PoolStats, cardStats func() communitycards.Snapshot, feed ...*taildiag.Recorder) http.Handler {
 	started := time.Now()
 	var observations *taildiag.Recorder
 	if len(feed) > 0 {
@@ -129,14 +144,19 @@ func handler(sqlStats func() sql.DBStats, redisStats func() *redis.PoolStats, fe
 		var memory runtime.MemStats
 		runtime.ReadMemStats(&memory)
 		db, red := sqlStats(), redisStats()
+		var cards communitycards.Snapshot
+		if cardStats != nil {
+			cards = cardStats()
+		}
 		body := struct {
-			At       string            `json:"at"`
-			UptimeMS int64             `json:"uptime_ms"`
-			PID      int               `json:"pid"`
-			Runtime  runtimeSnapshot   `json:"runtime"`
-			SQL      sqlSnapshot       `json:"sql"`
-			Redis    redisSnapshot     `json:"redis"`
-			Tail     taildiag.Snapshot `json:"tail"`
+			At       string                  `json:"at"`
+			UptimeMS int64                   `json:"uptime_ms"`
+			PID      int                     `json:"pid"`
+			Runtime  runtimeSnapshot         `json:"runtime"`
+			SQL      sqlSnapshot             `json:"sql"`
+			Redis    redisSnapshot           `json:"redis"`
+			Tail     taildiag.Snapshot       `json:"tail"`
+			Cards    communitycards.Snapshot `json:"cards"`
 		}{
 			At: time.Now().UTC().Format(time.RFC3339Nano), UptimeMS: time.Since(started).Milliseconds(), PID: os.Getpid(),
 			Runtime: runtimeSnapshot{runtime.NumGoroutine(), runtime.GOMAXPROCS(0), memory.HeapAlloc, memory.HeapSys, memory.HeapInuse,
@@ -145,6 +165,7 @@ func handler(sqlStats func() sql.DBStats, redisStats func() *redis.PoolStats, fe
 				db.MaxIdleClosed, db.MaxIdleTimeClosed, db.MaxLifetimeClosed},
 			Redis: redisSnapshot{red.Hits, red.Misses, red.Timeouts, red.WaitCount, red.WaitDurationNs, red.Unusable, red.TotalConns, red.IdleConns, red.StaleConns},
 			Tail:  observations.Snapshot(),
+			Cards: cards,
 		}
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(body)

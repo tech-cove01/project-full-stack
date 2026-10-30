@@ -14,6 +14,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 
+	"github.com/cityloop/fullstack-go/internal/communitycards"
 	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
@@ -65,6 +66,39 @@ func TestFeedTimingsAreDisabledByDefaultAndOnlyExposedOnPrivateSnapshot(t *testi
 		}
 		if recorder == nil && (len(body.Tail.Stages) != 0 || len(body.Tail.SlowTraces) != 0) {
 			t.Fatal("disabled timing must not report made-up measurements")
+		}
+	}
+}
+
+func TestCardsSnapshotIsFlatAndIndependentOfFeedTimings(t *testing.T) {
+	want := communitycards.Snapshot{Requests: 7, L1Hits: 3, RedisHits: 1, MissItems: 2, LoadsStarted: 1,
+		ContentSQLBatches: 1, ContentSQLRows: 2, ContentBytes: 91, L1Entries: 2, L1Bytes: 91}
+	for _, recorder := range []*taildiag.Recorder{nil, taildiag.New()} {
+		var calls int
+		routes := handlerWithCards(func() sql.DBStats { return sql.DBStats{} }, func() *redis.PoolStats { return &redis.PoolStats{} }, func() communitycards.Snapshot {
+			calls++
+			return want
+		}, recorder)
+		response := httptest.NewRecorder()
+		routes.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/debug/capacity", nil))
+		var body struct {
+			Tail  taildiag.Snapshot       `json:"tail"`
+			Cards communitycards.Snapshot `json:"cards"`
+		}
+		if response.Code != http.StatusOK || json.Unmarshal(response.Body.Bytes(), &body) != nil ||
+			body.Cards != want || calls != 1 || body.Tail.Enabled != (recorder != nil) {
+			t.Fatal("card counters were not independently sampled from the shared cache")
+		}
+		var raw struct {
+			Cards map[string]json.RawMessage `json:"cards"`
+		}
+		if json.Unmarshal(response.Body.Bytes(), &raw) != nil || raw.Cards["content_sql_batches"] == nil || raw.Cards["l1_hits"] == nil {
+			t.Fatal("cards must expose the fixed Snapshot fields without another wrapper")
+		}
+		for _, value := range raw.Cards {
+			if strings.HasPrefix(string(value), "{") || strings.HasPrefix(string(value), "[") {
+				t.Fatal("card observations must remain flat fixed counters")
+			}
 		}
 	}
 }

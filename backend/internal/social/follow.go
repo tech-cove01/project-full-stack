@@ -9,10 +9,12 @@ import (
 	"encoding/json"
 	"errors"
 	"strconv"
+	"sync/atomic"
 
 	"gorm.io/gorm"
 
 	"github.com/cityloop/fullstack-go/internal/communitycache"
+	"github.com/cityloop/fullstack-go/internal/communitycards"
 	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
@@ -33,14 +35,25 @@ type Relationship struct {
 }
 
 type Service struct {
-	db           *gorm.DB
-	counts       *communitycache.Cache
-	likes        *communitycache.Likes
-	projections  bool
-	observations *taildiag.Recorder
+	db            *gorm.DB
+	counts        *communitycache.Cache
+	cards         *communitycards.Cache
+	cardFallbacks *atomic.Uint64
+	likes         *communitycache.Likes
+	projections   bool
+	observations  *taildiag.Recorder
 }
 
-func NewService(db *gorm.DB) *Service { return &Service{db: db} }
+func NewService(db *gorm.DB) *Service { return &Service{db: db, cardFallbacks: new(atomic.Uint64)} }
+
+// WithCards caches only the versioned public fragment, after the fact snapshot.
+func (service *Service) WithCards(cache *communitycards.Cache) *Service {
+	service.cards = cache
+	return service
+}
+
+// CardFallbacks counts bounded full-fact retries, without user or note labels.
+func (service *Service) CardFallbacks() uint64 { return service.cardFallbacks.Load() }
 
 // WithDiagnostics only attaches the opt-in private Feed timing recorder.
 func (service *Service) WithDiagnostics(recorder *taildiag.Recorder) *Service {

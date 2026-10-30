@@ -21,6 +21,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/aitool"
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/communitycache"
+	"github.com/cityloop/fullstack-go/internal/communitycards"
 	"github.com/cityloop/fullstack-go/internal/communityconsumer"
 	"github.com/cityloop/fullstack-go/internal/communityprojection"
 	"github.com/cityloop/fullstack-go/internal/communityrelay"
@@ -49,6 +50,8 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	if err != nil {
 		return err
 	}
+	cards := communitycards.New(ctx, resources.Redis, resources.ORM)
+	owned := applicationResources{cards: cards, pools: resources}
 	var feedObservations *taildiag.Recorder
 	if cfg.FeedDiagnostics {
 		feedObservations = taildiag.New()
@@ -56,7 +59,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	}
 	listener, err := net.Listen("tcp", cfg.APIAddr)
 	if err != nil {
-		_ = resources.Close()
+		_ = owned.Close()
 		return fmt.Errorf("listen HTTP API: %w", err)
 	}
 	orders := order.NewService(resources.ORM, resources.Redis, cfg.OrderPayTimeout)
@@ -87,6 +90,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 				social.NewService(resources.ORM).
 					WithProjections().
 					WithDiagnostics(feedObservations).
+					WithCards(cards).
 					WithCounts(communitycache.New(resources.Redis, resources.ORM)).
 					WithLikes(communitycache.NewLikes(resources.Redis)), identity)
 			var assistant *aichat.Assistant
@@ -131,7 +135,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			consumer, err := communityconsumer.NewWorker(cfg.Kafka.Brokers, cfg.Kafka.Topic, name, projection)
 			if err != nil {
 				_ = listener.Close()
-				_ = resources.Close()
+				_ = owned.Close()
 				return errors.New("community consumer configuration is invalid")
 			}
 			// Run closes the Kafka reader before startBackground releases DB pools.
@@ -143,30 +147,31 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			consumer, err := communityconsumer.NewWorker(cfg.Kafka.Brokers, cfg.Kafka.Topic, notesearch.Projection, notesearch.NewSync(resources.ORM, searchClient))
 			if err != nil {
 				_ = listener.Close()
-				_ = resources.Close()
+				_ = owned.Close()
 				return errors.New("note search consumer configuration is invalid")
 			}
 			defer func() { _ = consumer.Close() }()
 			workers = append(workers, consumer.Run)
 		}
 	}
-	var observation io.Closer
 	if cfg.DiagnosticsAddr != "" {
-		observation, err = diagnostics.Start(cfg.DiagnosticsAddr, resources.SQL, resources.Redis, cfg.ShutdownTimeout, feedObservations)
+		observation, err := diagnostics.StartWithCards(cfg.DiagnosticsAddr, resources.SQL, resources.Redis, cfg.ShutdownTimeout, cards, feedObservations)
 		if err != nil {
 			_ = listener.Close()
-			_ = resources.Close()
+			_ = owned.Close()
 			return err
 		}
+		owned.diagnostics = observation
 		logger.Info("isolated capacity diagnostics enabled", "address", cfg.DiagnosticsAddr)
 	}
-	owned := startBackground(ctx, applicationResources{observation, resources}, workers...)
+	background := startBackground(ctx, owned, workers...)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String(), "order_stream_workers", cfg.OrderStreamWorkers)
-	return serve(ctx, server, listener, owned, cfg.ShutdownTimeout, logger)
+	return serve(ctx, server, listener, background, cfg.ShutdownTimeout, logger)
 }
 
 type applicationResources struct {
 	diagnostics io.Closer
+	cards       io.Closer
 	pools       io.Closer
 }
 
@@ -174,6 +179,9 @@ func (resources applicationResources) Close() error {
 	var err error
 	if resources.diagnostics != nil {
 		err = resources.diagnostics.Close()
+	}
+	if resources.cards != nil {
+		err = errors.Join(err, resources.cards.Close())
 	}
 	return errors.Join(err, resources.pools.Close())
 }

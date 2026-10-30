@@ -1,0 +1,6 @@
+{
+  "scope": "CAP07A2 no cross-caller merging; fresh controlled MySQL3452 Redis6552",
+  "relatedRealTestsExit": 0,
+  "at": "2026-10-30T11:03:38.5323927Z",
+  "vetExit": 0
+}

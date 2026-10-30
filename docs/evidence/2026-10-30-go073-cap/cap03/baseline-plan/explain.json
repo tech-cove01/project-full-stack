@@ -1,0 +1,112 @@
+{
+  "query_block": {
+    "select_id": 1,
+    "cost_info": {
+      "query_cost": "533.92"
+    },
+    "ordering_operation": {
+      "using_temporary_table": true,
+      "using_filesort": true,
+      "nested_loop": [
+        {
+          "table": {
+            "table_name": "f",
+            "access_type": "const",
+            "possible_keys": [
+              "uk_follow_pair",
+              "uk_follow",
+              "idx_follow_target"
+            ],
+            "key": "uk_follow_pair",
+            "used_key_parts": [
+              "user_id",
+              "follow_user_id"
+            ],
+            "key_length": "16",
+            "ref": [
+              "const",
+              "const"
+            ],
+            "rows_examined_per_scan": 1,
+            "rows_produced_per_join": 1,
+            "filtered": "100.00",
+            "cost_info": {
+              "read_cost": "0.00",
+              "eval_cost": "0.10",
+              "prefix_cost": "0.00",
+              "data_read_per_join": "40"
+            },
+            "used_columns": [
+              "user_id",
+              "follow_user_id",
+              "active"
+            ]
+          }
+        },
+        {
+          "table": {
+            "table_name": "b",
+            "access_type": "ref",
+            "possible_keys": [
+              "idx_blog_feed"
+            ],
+            "key": "idx_blog_feed",
+            "used_key_parts": [
+              "status"
+            ],
+            "key_length": "66",
+            "ref": [
+              "const"
+            ],
+            "rows_examined_per_scan": 3136,
+            "rows_produced_per_join": 313,
+            "filtered": "10.00",
+            "cost_info": {
+              "read_cost": "120.75",
+              "eval_cost": "31.36",
+              "prefix_cost": "434.35",
+              "data_read_per_join": "5M"
+            },
+            "used_columns": [
+              "id",
+              "shop_id",
+              "user_id",
+              "title",
+              "images",
+              "content",
+              "status",
+              "liked",
+              "comments",
+              "create_time"
+            ],
+            "attached_condition": "(`project_full_stack_go`.`b`.`user_id` = 3)"
+          }
+        },
+        {
+          "table": {
+            "table_name": "s",
+            "access_type": "ALL",
+            "possible_keys": [
+              "PRIMARY"
+            ],
+            "rows_examined_per_scan": 3,
+            "rows_produced_per_join": 940,
+            "filtered": "100.00",
+            "using_join_buffer": "hash join",
+            "cost_info": {
+              "read_cost": "5.49",
+              "eval_cost": "94.08",
+              "prefix_cost": "533.92",
+              "data_read_per_join": "5M"
+            },
+            "used_columns": [
+              "id",
+              "name"
+            ],
+            "attached_condition": "<if>(is_not_null_compl(s), (`project_full_stack_go`.`s`.`id` = `project_full_stack_go`.`b`.`shop_id`), true)"
+          }
+        }
+      ]
+    }
+  }
+}

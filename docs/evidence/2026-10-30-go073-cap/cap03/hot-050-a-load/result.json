@@ -1,0 +1,89 @@
+{
+  "task": "GO-073-CAP-03",
+  "mode": "hot",
+  "rate": 50,
+  "seconds": 30,
+  "warmSeconds": 10,
+  "warmRate": 25,
+  "preVUs": 64,
+  "maxVUs": 512,
+  "fixture": "capread-d736ef4960",
+  "fixtureSourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "pageSize": 20,
+  "activeReaders": 1,
+  "activeCountKeys": 20,
+  "thresholds": {
+    "actualOfferedRatioMin": 0.99,
+    "successfulFractionMin": 0.99,
+    "droppedMax": 0,
+    "systemErrorRateMaxExclusive": 0.01,
+    "p95MsMax": 200,
+    "p99MsMax": 500,
+    "successfulP95MsMax": 200,
+    "successfulP99MsMax": 500,
+    "contentErrorsMax": 0
+  },
+  "started": "2026-10-30T05:42:33.009Z",
+  "performanceSchemaConsumers": "events_statements_current\tYES\r\nstatements_digest\tYES",
+  "selectInstrument": "YES\tYES",
+  "scriptSHA256": {
+    "scripts/go073-cap-read.mjs": "ea3141278a3bbc77f462445f68889beeee5f7460677cdce9ccfa4c394f673503",
+    "scripts/load/go073-cap-read.js": "6742c95d73fc2aaa6868b3bcb986fc1ba9774b28a23133aa3249bbd60ddc82a7"
+  },
+  "warmExit": 0,
+  "warmExternalStop": null,
+  "stableStartedAt": 1793338965246,
+  "stableExit": 0,
+  "stableExternalStop": null,
+  "stableEndedAt": 1793338996433,
+  "stableCommandElapsedMs": 31187,
+  "result": {
+    "attempted": 1500,
+    "successful": 1500,
+    "systemErrors": 0,
+    "contentErrors": 0,
+    "httpErrors": 0,
+    "dropped": 0,
+    "targetOffers": 1500,
+    "actualOfferedRatio": 1,
+    "issuedPerNominalSecond": 50,
+    "successfulPerNominalSecond": 50,
+    "systemErrorRate": 0,
+    "allLatency": {
+      "med": 21.40305,
+      "p(95)": 25.635575,
+      "p(99)": 31.554094999999997,
+      "max": 39.9084,
+      "avg": 21.95631680000002,
+      "thresholds": {
+        "p(99)<=500": false,
+        "p(95)<=200": false
+      }
+    },
+    "successfulLatency": {
+      "avg": 21.95631680000002,
+      "med": 21.40305,
+      "p(95)": 25.635575,
+      "p(99)": 31.554094999999997,
+      "max": 39.9084
+    },
+    "k6Metrics": {
+      "vus": {
+        "value": 2,
+        "min": 1,
+        "max": 2
+      },
+      "vusMax": {
+        "value": 64,
+        "min": 64,
+        "max": 64
+      },
+      "dataReceived": {
+        "count": 14133000,
+        "rate": 470939.9196723047
+      }
+    }
+  },
+  "meetsBudget": true,
+  "finished": "2026-10-30T05:43:16.865Z"
+}

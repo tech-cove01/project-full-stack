@@ -1,0 +1,42 @@
+[
+  {
+    "rows": 6400,
+    "scope": "all",
+    "table": "tb_blog"
+  },
+  {
+    "rows": 6400,
+    "scope": "published",
+    "table": "tb_blog"
+  },
+  {
+    "rows": 200,
+    "scope": "hot_author_all",
+    "table": "tb_blog"
+  },
+  {
+    "rows": 200,
+    "scope": "hot_author_published",
+    "table": "tb_blog"
+  },
+  {
+    "rows": 32,
+    "scope": "all",
+    "table": "tb_follow"
+  },
+  {
+    "rows": 1,
+    "scope": "hot_reader_active",
+    "table": "tb_follow"
+  },
+  {
+    "rows": 3,
+    "scope": "all",
+    "table": "tb_shop"
+  },
+  {
+    "rows": 0,
+    "scope": "all",
+    "table": "tb_blog_like"
+  }
+]

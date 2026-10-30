@@ -1,0 +1,43 @@
+{
+  "at": "2026-10-30T05:06:56.8145213Z",
+  "status": "prepared-only-awaiting-root-release",
+  "runtimeDirectory": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap-read-2c79ddf4f58b",
+  "privateEnvFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap-read-2c79ddf4f58b\\env.private.json",
+  "project": "project-full-stack-cap-read",
+  "ports": {
+    "diagnostics": 8351,
+    "api": 8251,
+    "redis": 6551,
+    "mysql": 3451
+  },
+  "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "expectedVersion": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "apiBinary": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-3db296d\\backend\\bin\\cap-api.exe",
+  "goMaxProcs": 4,
+  "goMemLimit": "1GiB",
+  "orderStreamWorkers": 1,
+  "probe": {
+    "warmSeconds": 1,
+    "rate": 1,
+    "stableSeconds": 5,
+    "capacityClaim": false
+  },
+  "exploration": {
+    "modes": [
+      "hot",
+      "multi"
+    ],
+    "highestPassingHoldRounds": 2,
+    "stableSeconds": 30,
+    "highestPassingHoldSeconds": 180,
+    "extension": "only if measurable/passing/resource headroom: 800/1600, then narrow adjacent limit",
+    "rates": [
+      25,
+      50,
+      100,
+      200,
+      400
+    ]
+  },
+  "sensitiveValuesExported": false
+}

@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "command": "node scripts/go073-cap-read.mjs prepare",
+  "at": "2026-10-30T05:40:13.0073986Z"
+}

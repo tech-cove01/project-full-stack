@@ -1,0 +1,65 @@
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✓ 'p(95)<=200' p(95)=26.05ms
+    ✓ 'p(99)<=500' p(99)=29.45ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=251
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=251
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=22.49ms med=22ms    p(95)=26.05ms p(99)=29.45ms max=44.63ms
+    cap_read_attempted.............: 251    25.044762/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 0.00%  0 out of 251
+    cap_read_http_errors...........: 0      0/s
+    cap_read_success...............: 251    25.044762/s
+    cap_read_success_ms............: avg=22.49ms med=22ms    p(95)=26.05ms p(99)=29.45ms max=44.63ms
+    cap_read_system_error_ratio....: 0.00%  0 out of 251
+    cap_read_system_errors.........: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=22.49ms med=22ms    p(95)=26.05ms p(99)=29.45ms max=44.63ms
+      { expected_response:true }...: avg=22.49ms med=22ms    p(95)=26.05ms p(99)=29.45ms max=44.63ms
+    http_req_failed................: 0.00%  0 out of 251
+    http_reqs......................: 251    25.044762/s
+
+    EXECUTION
+    dropped_iterations.............: 0      0/s
+    iteration_duration.............: avg=22.98ms med=22.35ms p(95)=26.54ms p(99)=30.77ms max=47.49ms
+    iterations.....................: 251    25.044762/s
+    vus............................: 1      min=1        max=1 
+    vus_max........................: 64     min=64       max=64
+
+    NETWORK
+    data_received..................: 2.4 MB 236 kB/s
+    data_sent......................: 35 kB  3.5 kB/s
+
+
+

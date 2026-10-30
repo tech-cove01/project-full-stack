@@ -1,0 +1,53 @@
+{
+  "awaitingIndexRegression": true,
+  "formalReadLoadPaused": true,
+  "afterStage": "multi-175-a",
+  "diagnostics": {
+    "at": "2026-10-30T05:56:23.5301272Z",
+    "uptime_ms": 984301,
+    "pid": 45532,
+    "runtime": {
+      "goroutines": 25,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 14224752,
+      "heap_sys_bytes": 37584896,
+      "heap_inuse_bytes": 18079744,
+      "total_alloc_bytes": 2494009784,
+      "mallocs": 31952907,
+      "frees": 31856069,
+      "num_gc": 687,
+      "pause_total_ns": 50543700,
+      "last_gc_unix_ns": 1793339760212688400,
+      "gc_cpu_fraction": 0.000308479664825043
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 10,
+      "in_use": 0,
+      "idle": 10,
+      "wait_count": 4507,
+      "wait_duration_ns": 6581550843900,
+      "max_idle_closed": 36,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 58749,
+      "misses": 9,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 9,
+      "idle_connections": 9,
+      "stale_connections": 0
+    }
+  },
+  "at": "2026-10-30T05:56:23.5977720Z",
+  "health": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e"
+  }
+}

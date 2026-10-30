@@ -1,0 +1,7 @@
+tb_follow	0	PRIMARY	1	id	A	32	NULL	NULL		BTREE			YES	NULL
+tb_follow	0	uk_follow_pair	1	user_id	A	32	NULL	NULL		BTREE			YES	NULL
+tb_follow	0	uk_follow_pair	2	follow_user_id	A	32	NULL	NULL		BTREE			YES	NULL
+tb_follow	0	uk_follow	1	user_id	A	32	NULL	NULL		BTREE			YES	NULL
+tb_follow	0	uk_follow	2	follow_user_id	A	32	NULL	NULL		BTREE			YES	NULL
+tb_follow	1	idx_follow_target	1	follow_user_id	A	32	NULL	NULL		BTREE			YES	NULL
+tb_follow	1	idx_follow_target	2	active	A	32	NULL	NULL		BTREE			YES	NULL

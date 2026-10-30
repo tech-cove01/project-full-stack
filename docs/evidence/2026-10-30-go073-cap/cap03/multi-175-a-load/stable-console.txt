@@ -1,0 +1,115 @@
+time="2026-10-30T13:55:57+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:57+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":7,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:58+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:58+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":7,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:58+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:58+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":10,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:58+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:58+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":25,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:58+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:58+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":26,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:58+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:58+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":8,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:58+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:58+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":14,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":20,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":26,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":3,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":10,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":25,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":8,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:55:59+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:55:59+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":22,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":27,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":0,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="Request Failed" error="Get \"http://127.0.0.1:8251/feed/notes?limit=20\": request timeout"
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":12,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":24,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":29,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":31,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":4,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":12,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":11,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T13:56:00+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":9,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✗ 'p(95)<=200' p(95)=3.16s
+    ✗ 'p(99)<=500' p(99)=4.99s
+
+    cap_read_attempted
+    ✓ 'count>=0' count=1794
+
+    cap_read_completed
+    ✓ 'count>=0' count=1446
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✗ 'rate<0.01' rate=1.31%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=19
+
+    cap_read_success
+    ✓ 'count>=0' count=1427
+
+    cap_read_system_error_ratio
+    ✗ 'rate<0.01' rate=1.31%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=19
+
+    dropped_iterations
+    ✗ 'count==0' count=301
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=878.35ms med=489.06ms p(95)=3.16s p(99)=4.99s max=5s   
+    cap_read_attempted.............: 1794   149.640252/s
+    cap_read_completed.............: 1446   120.613046/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 1.31%  19 out of 1446
+    cap_read_http_errors...........: 19     1.584819/s
+    cap_read_success...............: 1427   119.028227/s
+    cap_read_success_ms............: avg=823.47ms med=475.88ms p(95)=2.95s p(99)=4.12s max=4.88s
+    cap_read_system_error_ratio....: 1.31%  19 out of 1446
+    cap_read_system_errors.........: 19     1.584819/s
+
+    HTTP
+    http_req_duration..............: avg=878.35ms med=489.06ms p(95)=3.16s p(99)=4.99s max=5s   
+      { expected_response:true }...: avg=823.47ms med=475.88ms p(95)=2.95s p(99)=4.12s max=4.88s
+    http_req_failed................: 1.31%  19 out of 1446
+    http_reqs......................: 1446   120.613046/s
+
+    EXECUTION
+    dropped_iterations.............: 301    25.106865/s
+    iteration_duration.............: avg=879.04ms med=489.77ms p(95)=3.16s p(99)=5s    max=5.02s
+    iterations.....................: 1446   120.613046/s
+    vus............................: 348    min=5          max=348
+    vus_max........................: 353    min=64         max=353
+
+    NETWORK
+    data_received..................: 14 MB  1.1 MB/s
+    data_sent......................: 248 kB 21 kB/s
+
+
+
+time="2026-10-30T13:56:01+08:00" level=error msg="thresholds on metrics 'cap_read_all_ms, cap_read_failure_ratio, cap_read_system_error_ratio, dropped_iterations' were crossed; at least one has abortOnFail enabled, stopping test prematurely"

@@ -1,0 +1,5 @@
+tb_blog_like	0	PRIMARY	1	id	A	0	NULL	NULL		BTREE			YES	NULL
+tb_blog_like	0	uk_blog_like	1	blog_id	A	0	NULL	NULL		BTREE			YES	NULL
+tb_blog_like	0	uk_blog_like	2	user_id	A	0	NULL	NULL		BTREE			YES	NULL
+tb_blog_like	1	idx_blog_like_user	1	user_id	A	0	NULL	NULL		BTREE			YES	NULL
+tb_blog_like	1	idx_blog_like_user	2	active	A	0	NULL	NULL		BTREE			YES	NULL

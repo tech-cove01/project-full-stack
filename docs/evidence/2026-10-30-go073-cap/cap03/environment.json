@@ -1,0 +1,62 @@
+{
+  "ownedContainerLimits": [
+    "/project-full-stack-cap-read-mysql-1|3528bc43fe4c67bbb3ad294eb339c7006c56e7e2118527dde2ccc13991890686|mysql:8.4|sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34|4000000000|2147483648|{\"3306/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"3451\"}]}",
+    "/project-full-stack-cap-read-redis-1|178d1faad6b012a008bab7270470f0f8d70a3d16004480c04b86867a6661e996|redis:7.4-alpine|sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65|2000000000|536870912|{\"6379/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"6551\"}]}"
+  ],
+  "mode": "Kafka/ES/AI disabled",
+  "at": "2026-10-30T05:40:00.1681342Z",
+  "toolVersions": {
+    "go": "go version go1.27.0 windows/amd64",
+    "k6": "k6.exe v2.2.0 (commit/00a9a1b7f5, go1.26.5, windows/amd64)",
+    "node": "v24.15.0"
+  },
+  "network": "10.253.51.0/24",
+  "os": {
+    "version": "10.0.26300",
+    "architecture": "64 位",
+    "caption": "Microsoft Windows 11 专业版"
+  },
+  "api": {
+    "pid": 45532,
+    "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-3db296d\\backend\\bin\\cap-api.exe",
+    "createdAtUtc": "2026-10-30T05:39:59.0763558Z",
+    "creationUnixMs": 1793338799076,
+    "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+    "expectedVersion": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+    "sha256": "ef29e9e3838b7ec8ffd1aca5b1a51848fbd8a020ca084228879481adc209bd69",
+    "goMaxProcs": 4,
+    "goMemLimit": "1GiB",
+    "orderStreamWorkers": 1
+  },
+  "hardware": {
+    "model": "ROG Zephyrus M16 GU604VI_GU604VI",
+    "logicalProcessors": 20,
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "physicalCores": 14,
+    "memoryBytes": 33960505344
+  },
+  "sharedHost": true,
+  "docker": {
+    "version": "29.3.1",
+    "cpus": 20,
+    "memoryBytes": 16572063744
+  },
+  "runningContainers": [
+    "project-full-stack-cap-read-mysql-1|Up About a minute (healthy)",
+    "project-full-stack-cap-read-redis-1|Up About a minute (healthy)",
+    "crm-agent-services-clickhouse-1|Up About an hour (healthy)",
+    "crm-agent-services-weknora-1|Up 44 hours",
+    "crm-agent-services-seaweedfs-1|Up 44 hours",
+    "crm-agent-services-langfuse-web-1|Up 44 hours",
+    "crm-agent-services-langfuse-worker-1|Up 44 hours",
+    "crm-agent-services-redis-1|Up 44 hours",
+    "crm-agent-services-mem0-1|Up 44 hours",
+    "crm-agent-services-postgres-1|Up 45 hours (healthy)",
+    "supabase_storage_project-crm-local|Up 45 hours (healthy)",
+    "supabase_rest_project-crm-local|Up 45 hours",
+    "supabase_realtime_project-crm-local|Up 45 hours (healthy)",
+    "supabase_auth_project-crm-local|Up 45 hours (healthy)",
+    "supabase_kong_project-crm-local|Up 45 hours (healthy)",
+    "supabase_db_project-crm-local|Up 45 hours (healthy)"
+  ]
+}

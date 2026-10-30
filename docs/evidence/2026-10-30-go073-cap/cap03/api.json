@@ -1,0 +1,12 @@
+{
+  "pid": 45532,
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-3db296d\\backend\\bin\\cap-api.exe",
+  "createdAtUtc": "2026-10-30T05:39:59.0763558Z",
+  "creationUnixMs": 1793338799076,
+  "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "expectedVersion": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "sha256": "ef29e9e3838b7ec8ffd1aca5b1a51848fbd8a020ca084228879481adc209bd69",
+  "goMaxProcs": 4,
+  "goMemLimit": "1GiB",
+  "orderStreamWorkers": 1
+}

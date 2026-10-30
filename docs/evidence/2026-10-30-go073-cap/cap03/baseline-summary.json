@@ -1,0 +1,939 @@
+{
+  "scope": "pre-index baseline exploration only, no 180-second sustained capacity claim",
+  "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "sameApiPid": 45532,
+  "fixtureNotes": 6400,
+  "authors": 32,
+  "readers": 32,
+  "pageSize": 20,
+  "schemaBefore013": true,
+  "stages": [
+    {
+      "stage": "hot-025-a",
+      "mode": "hot",
+      "targetRate": 25,
+      "plannedSeconds": 30,
+      "actualCommandMs": 31188,
+      "passedExplorationBudget": true,
+      "attempted": 751,
+      "nativeHttpCompleted": 751,
+      "classified": 751,
+      "success": 751,
+      "systemErrors": 0,
+      "httpErrors": 0,
+      "contentErrors": 0,
+      "unknown": 0,
+      "dropped": 0,
+      "allP95": 25.246000000000002,
+      "allP99": 29.540750000000003,
+      "successP95": 25.246000000000002,
+      "successP99": 29.540750000000003,
+      "resourceSamples": 7,
+      "completeSamples": 7,
+      "hostCpuMax": 21.6,
+      "apiCpuOneCoreMax": 12.2,
+      "k6CpuOneCoreMax": 5.6,
+      "mysqlCpuMax": 38.04,
+      "sqlWaitCountDelta": 0,
+      "sqlWaitDurationNsDelta": 0,
+      "sqlInUseMax": 1,
+      "mysqlGlobalDelta": {
+        "Uptime": 31,
+        "Questions": 6325,
+        "Queries": 13015,
+        "Com_select": 3372,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 1085,
+        "Com_stmt_execute": 3345,
+        "Com_stmt_prepare": 3345,
+        "Com_stmt_close": 3345,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "ping": {
+          "calls": 10,
+          "usec": 30,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 119,
+          "failed": 0
+        },
+        "type": {
+          "calls": 751,
+          "usec": 2979,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 751,
+          "usec": 1168,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 614,
+          "usec": 7360,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 307,
+          "usec": 4631,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 751,
+          "usec": 46366,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 15,
+          "usec": 222,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 751,
+          "usec": 3907,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 2253,
+          "usec": 4594,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "hot-050-a",
+      "mode": "hot",
+      "targetRate": 50,
+      "plannedSeconds": 30,
+      "actualCommandMs": 31187,
+      "passedExplorationBudget": true,
+      "attempted": 1500,
+      "nativeHttpCompleted": 1500,
+      "classified": 1500,
+      "success": 1500,
+      "systemErrors": 0,
+      "httpErrors": 0,
+      "contentErrors": 0,
+      "unknown": 0,
+      "dropped": 0,
+      "allP95": 25.635575,
+      "allP99": 31.554094999999997,
+      "successP95": 25.635575,
+      "successP99": 31.554094999999997,
+      "resourceSamples": 7,
+      "completeSamples": 7,
+      "hostCpuMax": 30.1,
+      "apiCpuOneCoreMax": 20.9,
+      "k6CpuOneCoreMax": 11.3,
+      "mysqlCpuMax": 69.26,
+      "sqlWaitCountDelta": 0,
+      "sqlWaitDurationNsDelta": 0,
+      "sqlInUseMax": 1,
+      "mysqlGlobalDelta": {
+        "Uptime": 31,
+        "Questions": 11566,
+        "Queries": 24248,
+        "Com_select": 6366,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 1835,
+        "Com_stmt_execute": 6341,
+        "Com_stmt_prepare": 6341,
+        "Com_stmt_close": 6341,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "ping": {
+          "calls": 11,
+          "usec": 15,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 104,
+          "failed": 0
+        },
+        "type": {
+          "calls": 1500,
+          "usec": 5943,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 1500,
+          "usec": 2372,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 616,
+          "usec": 7034,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 308,
+          "usec": 5039,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 1500,
+          "usec": 93446,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 15,
+          "usec": 219,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 1500,
+          "usec": 7901,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 4500,
+          "usec": 9266,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "hot-100-a",
+      "mode": "hot",
+      "targetRate": 100,
+      "plannedSeconds": 30,
+      "actualCommandMs": 32368,
+      "passedExplorationBudget": true,
+      "attempted": 3001,
+      "nativeHttpCompleted": 3001,
+      "classified": 3001,
+      "success": 3001,
+      "systemErrors": 0,
+      "httpErrors": 0,
+      "contentErrors": 0,
+      "unknown": 0,
+      "dropped": 0,
+      "allP95": 28.0739,
+      "allP99": 34.7627,
+      "successP95": 28.0739,
+      "successP99": 34.7627,
+      "resourceSamples": 7,
+      "completeSamples": 7,
+      "hostCpuMax": 43.9,
+      "apiCpuOneCoreMax": 37.2,
+      "k6CpuOneCoreMax": 13.8,
+      "mysqlCpuMax": 141.59,
+      "sqlWaitCountDelta": 0,
+      "sqlWaitDurationNsDelta": 0,
+      "sqlInUseMax": 3,
+      "mysqlGlobalDelta": {
+        "Uptime": 33,
+        "Questions": 22125,
+        "Queries": 46847,
+        "Com_select": 12388,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 3349,
+        "Com_stmt_execute": 12361,
+        "Com_stmt_prepare": 12361,
+        "Com_stmt_close": 12361,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "hello": {
+          "calls": 1,
+          "usec": 11,
+          "failed": 0
+        },
+        "ping": {
+          "calls": 11,
+          "usec": 16,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 90,
+          "failed": 0
+        },
+        "type": {
+          "calls": 3001,
+          "usec": 13543,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 3001,
+          "usec": 5021,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 636,
+          "usec": 7923,
+          "failed": 0
+        },
+        "set": {
+          "calls": 6,
+          "usec": 50,
+          "failed": 0
+        },
+        "client|setinfo": {
+          "calls": 2,
+          "usec": 1,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 318,
+          "usec": 5447,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 3001,
+          "usec": 201138,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 30,
+          "usec": 368,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 3001,
+          "usec": 16916,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 9003,
+          "usec": 19354,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "hot-200-a",
+      "mode": "hot",
+      "targetRate": 200,
+      "plannedSeconds": 30,
+      "actualCommandMs": 13181,
+      "passedExplorationBudget": false,
+      "attempted": 1902,
+      "nativeHttpCompleted": 1390,
+      "classified": 1390,
+      "success": 1241,
+      "systemErrors": 149,
+      "httpErrors": 149,
+      "contentErrors": 0,
+      "unknown": 512,
+      "dropped": 491,
+      "allP95": 5000.190989999999,
+      "allP99": 5000.640017,
+      "successP95": 3847.7981,
+      "successP99": 4684.684739999999,
+      "resourceSamples": 3,
+      "completeSamples": 3,
+      "hostCpuMax": 59.3,
+      "apiCpuOneCoreMax": 38.1,
+      "k6CpuOneCoreMax": 31.6,
+      "mysqlCpuMax": 427.32,
+      "sqlWaitCountDelta": 1572,
+      "sqlWaitDurationNsDelta": 1859011281100,
+      "sqlInUseMax": 20,
+      "mysqlGlobalDelta": {
+        "Uptime": 14,
+        "Questions": 9060,
+        "Queries": 19201,
+        "Com_select": 5091,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 1275,
+        "Com_stmt_execute": 5078,
+        "Com_stmt_prepare": 5083,
+        "Com_stmt_close": 5058,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "hello": {
+          "calls": 1,
+          "usec": 10,
+          "failed": 0
+        },
+        "ping": {
+          "calls": 4,
+          "usec": 20,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 97,
+          "failed": 0
+        },
+        "type": {
+          "calls": 1902,
+          "usec": 8811,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 1902,
+          "usec": 3787,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 264,
+          "usec": 3078,
+          "failed": 0
+        },
+        "client|setinfo": {
+          "calls": 2,
+          "usec": 3,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 132,
+          "usec": 2342,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 1902,
+          "usec": 149695,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 9,
+          "usec": 237,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 1902,
+          "usec": 13637,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 5706,
+          "usec": 14314,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "hot-150-a",
+      "mode": "hot",
+      "targetRate": 150,
+      "plannedSeconds": 30,
+      "actualCommandMs": 31174,
+      "passedExplorationBudget": true,
+      "attempted": 4501,
+      "nativeHttpCompleted": 4501,
+      "classified": 4501,
+      "success": 4501,
+      "systemErrors": 0,
+      "httpErrors": 0,
+      "contentErrors": 0,
+      "unknown": 0,
+      "dropped": 0,
+      "allP95": 30.6003,
+      "allP99": 37.6784,
+      "successP95": 30.6003,
+      "successP99": 37.6784,
+      "resourceSamples": 7,
+      "completeSamples": 7,
+      "hostCpuMax": 46.6,
+      "apiCpuOneCoreMax": 53.1,
+      "k6CpuOneCoreMax": 21.2,
+      "mysqlCpuMax": 232.23,
+      "sqlWaitCountDelta": 0,
+      "sqlWaitDurationNsDelta": 0,
+      "sqlInUseMax": 4,
+      "mysqlGlobalDelta": {
+        "Uptime": 32,
+        "Questions": 32580,
+        "Queries": 69270,
+        "Com_select": 18372,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 4836,
+        "Com_stmt_execute": 18345,
+        "Com_stmt_prepare": 18345,
+        "Com_stmt_close": 18345,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "ping": {
+          "calls": 11,
+          "usec": 29,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 96,
+          "failed": 0
+        },
+        "type": {
+          "calls": 4501,
+          "usec": 19688,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 4501,
+          "usec": 7565,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 612,
+          "usec": 7147,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 306,
+          "usec": 5280,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 4501,
+          "usec": 299608,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 15,
+          "usec": 207,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 4501,
+          "usec": 25780,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 13503,
+          "usec": 28765,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "hot-175-a",
+      "mode": "hot",
+      "targetRate": 175,
+      "plannedSeconds": 30,
+      "actualCommandMs": 13127,
+      "passedExplorationBudget": false,
+      "attempted": 1806,
+      "nativeHttpCompleted": 1465,
+      "classified": 1465,
+      "success": 1443,
+      "systemErrors": 22,
+      "httpErrors": 22,
+      "contentErrors": 0,
+      "unknown": 341,
+      "dropped": 288,
+      "allP95": 3142.937819999999,
+      "allP99": 5000.09074,
+      "successP95": 2748.9641199999996,
+      "successP99": 4301.659759999996,
+      "resourceSamples": 3,
+      "completeSamples": 3,
+      "hostCpuMax": 58.8,
+      "apiCpuOneCoreMax": 45.3,
+      "k6CpuOneCoreMax": 24.4,
+      "mysqlCpuMax": 417.21,
+      "sqlWaitCountDelta": 1145,
+      "sqlWaitDurationNsDelta": 832651213100,
+      "sqlInUseMax": 20,
+      "mysqlGlobalDelta": {
+        "Uptime": 14,
+        "Questions": 10502,
+        "Queries": 22285,
+        "Com_select": 5909,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 1505,
+        "Com_stmt_execute": 5896,
+        "Com_stmt_prepare": 5900,
+        "Com_stmt_close": 5883,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "hello": {
+          "calls": 1,
+          "usec": 9,
+          "failed": 0
+        },
+        "ping": {
+          "calls": 5,
+          "usec": 16,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 130,
+          "failed": 0
+        },
+        "type": {
+          "calls": 1806,
+          "usec": 8306,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 1806,
+          "usec": 3143,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 260,
+          "usec": 3194,
+          "failed": 0
+        },
+        "client|setinfo": {
+          "calls": 2,
+          "usec": 2,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 130,
+          "usec": 3845,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 1806,
+          "usec": 131521,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 9,
+          "usec": 134,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 1806,
+          "usec": 10273,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 5418,
+          "usec": 11921,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "hot-160-a",
+      "mode": "hot",
+      "targetRate": 160,
+      "plannedSeconds": 30,
+      "actualCommandMs": 31326,
+      "passedExplorationBudget": true,
+      "attempted": 4800,
+      "nativeHttpCompleted": 4800,
+      "classified": 4800,
+      "success": 4800,
+      "systemErrors": 0,
+      "httpErrors": 0,
+      "contentErrors": 0,
+      "unknown": 0,
+      "dropped": 0,
+      "allP95": 35.965435,
+      "allP99": 45.172952,
+      "successP95": 35.965435,
+      "successP99": 45.172952,
+      "resourceSamples": 7,
+      "completeSamples": 7,
+      "hostCpuMax": 60.7,
+      "apiCpuOneCoreMax": 62.8,
+      "k6CpuOneCoreMax": 49.7,
+      "mysqlCpuMax": 280.27,
+      "sqlWaitCountDelta": 0,
+      "sqlWaitDurationNsDelta": 0,
+      "sqlInUseMax": 5,
+      "mysqlGlobalDelta": {
+        "Uptime": 32,
+        "Questions": 34666,
+        "Queries": 73746,
+        "Com_select": 19565,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 5134,
+        "Com_stmt_execute": 19540,
+        "Com_stmt_prepare": 19540,
+        "Com_stmt_close": 19540,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "ping": {
+          "calls": 11,
+          "usec": 34,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 97,
+          "failed": 0
+        },
+        "type": {
+          "calls": 4800,
+          "usec": 23168,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 4800,
+          "usec": 8708,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 614,
+          "usec": 8454,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 307,
+          "usec": 5919,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 4800,
+          "usec": 347862,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 16,
+          "usec": 238,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 4800,
+          "usec": 29163,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 14400,
+          "usec": 33619,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "multi-150-a",
+      "mode": "multi",
+      "targetRate": 150,
+      "plannedSeconds": 30,
+      "actualCommandMs": 31235,
+      "passedExplorationBudget": true,
+      "attempted": 4501,
+      "nativeHttpCompleted": 4501,
+      "classified": 4501,
+      "success": 4501,
+      "systemErrors": 0,
+      "httpErrors": 0,
+      "contentErrors": 0,
+      "unknown": 0,
+      "dropped": 0,
+      "allP95": 37.4919,
+      "allP99": 61.1776,
+      "successP95": 37.4919,
+      "successP99": 61.1776,
+      "resourceSamples": 7,
+      "completeSamples": 7,
+      "hostCpuMax": 61.0,
+      "apiCpuOneCoreMax": 54.7,
+      "k6CpuOneCoreMax": 22.8,
+      "mysqlCpuMax": 286.98,
+      "sqlWaitCountDelta": 0,
+      "sqlWaitDurationNsDelta": 0,
+      "sqlInUseMax": 6,
+      "mysqlGlobalDelta": {
+        "Uptime": 32,
+        "Questions": 32579,
+        "Queries": 69265,
+        "Com_select": 18368,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 4834,
+        "Com_stmt_execute": 18343,
+        "Com_stmt_prepare": 18343,
+        "Com_stmt_close": 18343,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "ping": {
+          "calls": 10,
+          "usec": 28,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 195,
+          "failed": 0
+        },
+        "type": {
+          "calls": 4501,
+          "usec": 22920,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 4501,
+          "usec": 8239,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 614,
+          "usec": 8276,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 307,
+          "usec": 5582,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 4501,
+          "usec": 320846,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 469,
+          "usec": 9525,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 4501,
+          "usec": 26052,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 13503,
+          "usec": 31695,
+          "failed": 0
+        }
+      }
+    },
+    {
+      "stage": "multi-175-a",
+      "mode": "multi",
+      "targetRate": 175,
+      "plannedSeconds": 30,
+      "actualCommandMs": 13115,
+      "passedExplorationBudget": false,
+      "attempted": 1794,
+      "nativeHttpCompleted": 1446,
+      "classified": 1446,
+      "success": 1427,
+      "systemErrors": 19,
+      "httpErrors": 19,
+      "contentErrors": 0,
+      "unknown": 348,
+      "dropped": 301,
+      "allP95": 3161.648275,
+      "allP99": 4999.75721,
+      "successP95": 2953.627810000001,
+      "successP99": 4124.807464,
+      "resourceSamples": 3,
+      "completeSamples": 3,
+      "hostCpuMax": 55.5,
+      "apiCpuOneCoreMax": 37.8,
+      "k6CpuOneCoreMax": 31.6,
+      "mysqlCpuMax": 398.16,
+      "sqlWaitCountDelta": 1192,
+      "sqlWaitDurationNsDelta": 873324686500,
+      "sqlInUseMax": 20,
+      "mysqlGlobalDelta": {
+        "Uptime": 14,
+        "Questions": 10381,
+        "Queries": 22030,
+        "Com_select": 5842,
+        "Com_insert": 0,
+        "Com_update": 0,
+        "Com_delete": 0,
+        "Com_commit": 1482,
+        "Com_stmt_execute": 5829,
+        "Com_stmt_prepare": 5835,
+        "Com_stmt_close": 5814,
+        "Com_stmt_reprepare": 0,
+        "Performance_schema_digest_lost": 0,
+        "Performance_schema_prepared_statements_lost": 0
+      },
+      "redisDelta": {
+        "hello": {
+          "calls": 4,
+          "usec": 38,
+          "failed": 0
+        },
+        "ping": {
+          "calls": 5,
+          "usec": 14,
+          "failed": 0
+        },
+        "info": {
+          "calls": 1,
+          "usec": 109,
+          "failed": 0
+        },
+        "type": {
+          "calls": 1794,
+          "usec": 8767,
+          "failed": 0
+        },
+        "pttl": {
+          "calls": 1794,
+          "usec": 3093,
+          "failed": 0
+        },
+        "xreadgroup": {
+          "calls": 260,
+          "usec": 2990,
+          "failed": 0
+        },
+        "client|setinfo": {
+          "calls": 8,
+          "usec": 8,
+          "failed": 0
+        },
+        "xautoclaim": {
+          "calls": 130,
+          "usec": 2290,
+          "failed": 0
+        },
+        "evalsha": {
+          "calls": 1794,
+          "usec": 128594,
+          "failed": 0
+        },
+        "mget": {
+          "calls": 195,
+          "usec": 4063,
+          "failed": 0
+        },
+        "expire": {
+          "calls": 1794,
+          "usec": 11138,
+          "failed": 0
+        },
+        "hget": {
+          "calls": 5382,
+          "usec": 12425,
+          "failed": 0
+        }
+      }
+    }
+  ]
+}

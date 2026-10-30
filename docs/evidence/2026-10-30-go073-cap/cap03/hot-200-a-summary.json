@@ -1,0 +1,257 @@
+{
+  "stage": "hot-200-a",
+  "mode": "hot",
+  "rate": 200,
+  "seconds": 30,
+  "meetsBudget": false,
+  "failure": null,
+  "result": {
+    "attempted": 1902,
+    "successful": 1241,
+    "systemErrors": 149,
+    "contentErrors": 0,
+    "httpErrors": 149,
+    "dropped": 491,
+    "targetOffers": 6000,
+    "actualOfferedRatio": 0.317,
+    "issuedPerNominalSecond": 63.4,
+    "successfulPerNominalSecond": 41.36666666666667,
+    "systemErrorRate": 0.07833859095688749,
+    "allLatency": {
+      "p(95)": 5000.190989999999,
+      "p(99)": 5000.640017,
+      "max": 5006.194,
+      "avg": 1747.1945620143879,
+      "med": 1173.1254,
+      "thresholds": {
+        "p(95)<=200": true,
+        "p(99)<=500": true
+      }
+    },
+    "successfulLatency": {
+      "avg": 1356.6318852538286,
+      "med": 981.8409,
+      "p(95)": 3847.7981,
+      "p(99)": 4684.684739999999,
+      "max": 4988.5803
+    },
+    "k6Metrics": {
+      "vus": {
+        "min": 78,
+        "max": 512,
+        "value": 512
+      },
+      "vusMax": {
+        "value": 512,
+        "min": 78,
+        "max": 512
+      },
+      "dataReceived": {
+        "count": 11692924,
+        "rate": 974087.1149937932
+      }
+    }
+  },
+  "stableCommandElapsedMs": 13181,
+  "completionAudit": {
+    "attempted": 1902,
+    "completedHttpRequests": 1390,
+    "classified": 1390,
+    "incompleteOrUnclassified": 512,
+    "completedButUnclassified": 0,
+    "classifiedSource": "legacy cap_read_failure_ratio passes+fails; original files unchanged",
+    "systemErrorRatePerClassified": 0.10719424460431655
+  },
+  "supervisionOk": false,
+  "stopSignal": false,
+  "resources": {
+    "samples": 3,
+    "completeSamples": 3,
+    "samplerSha256": null,
+    "validCpuSamples": 2,
+    "observationErrors": [],
+    "firstSampleAt": "2026-10-30T05:46:20.663024+00:00",
+    "lastSampleAt": "2026-10-30T05:46:30.663965+00:00",
+    "firstSampleAfterStableSpawnMs": 1110.02392578125,
+    "stableProcessEndAfterLastSampleMs": 2070.034912109375,
+    "maxSampleGapMs": 5000.541015625,
+    "cpuScope": "sampler cpu_interval_valid intervals (at least one second); legacy samples exclude the first psutil priming interval; raw initial CPU retained separately",
+    "initialCpu": {
+      "host": 57.1,
+      "apiOneCore": 0.0,
+      "generatorOneCore": 0.0
+    },
+    "hostCpuPercentMax": 59.3,
+    "hostMemoryPercentMax": 78.2,
+    "apiCpuOneCorePercentMax": 38.1,
+    "apiRssBytesMax": 56864768,
+    "generatorCpuOneCorePercentMax": 31.6,
+    "generatorRssBytesMax": 212295680,
+    "containers": {
+      "project-full-stack-cap-read-mysql-1": {
+        "cpuPercentMax": 427.32,
+        "memoryPercentMax": 27.47
+      },
+      "project-full-stack-cap-read-redis-1": {
+        "cpuPercentMax": 8.8,
+        "memoryPercentMax": 1.91
+      }
+    },
+    "sqlSampledDelta": {
+      "wait_count": 1572,
+      "wait_duration_ns": 1859011281100
+    },
+    "redisSampledDelta": {
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "timeouts": 0
+    },
+    "runtimeSampledDelta": {
+      "num_gc": 13,
+      "pause_total_ns": 5264700,
+      "total_alloc_bytes": 104456328
+    },
+    "sqlInUseMax": 20,
+    "goGoroutinesMax": 1024
+  },
+  "mysqlGlobalDelta": {
+    "Uptime": 14,
+    "Questions": 9060,
+    "Queries": 19201,
+    "Com_select": 5091,
+    "Com_insert": 0,
+    "Com_update": 0,
+    "Com_delete": 0,
+    "Com_commit": 1275,
+    "Com_stmt_execute": 5078,
+    "Com_stmt_prepare": 5083,
+    "Com_stmt_close": 5058,
+    "Com_stmt_reprepare": 0,
+    "Performance_schema_digest_lost": 0,
+    "Performance_schema_prepared_statements_lost": 0
+  },
+  "mysqlEventDelta": [
+    {
+      "event": "statement/com/Execute",
+      "count": 5078,
+      "errors": 0,
+      "examined": 8116053,
+      "sent": 27798,
+      "timerPicoseconds": "136155907238000"
+    },
+    {
+      "event": "statement/com/Prepare",
+      "count": 5083,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "2321545771000"
+    },
+    {
+      "event": "statement/sql/commit",
+      "count": 1276,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "445374367000"
+    },
+    {
+      "event": "statement/sql/delete",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/insert",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/select",
+      "count": 13,
+      "errors": 0,
+      "examined": 141,
+      "sent": 74,
+      "timerPicoseconds": "10376359000"
+    },
+    {
+      "event": "statement/sql/update",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    }
+  ],
+  "redisDelta": {
+    "hello": {
+      "calls": 1,
+      "usec": 10,
+      "failed": 0
+    },
+    "ping": {
+      "calls": 4,
+      "usec": 20,
+      "failed": 0
+    },
+    "info": {
+      "calls": 1,
+      "usec": 97,
+      "failed": 0
+    },
+    "type": {
+      "calls": 1902,
+      "usec": 8811,
+      "failed": 0
+    },
+    "pttl": {
+      "calls": 1902,
+      "usec": 3787,
+      "failed": 0
+    },
+    "xreadgroup": {
+      "calls": 264,
+      "usec": 3078,
+      "failed": 0
+    },
+    "client|setinfo": {
+      "calls": 2,
+      "usec": 3,
+      "failed": 0
+    },
+    "xautoclaim": {
+      "calls": 132,
+      "usec": 2342,
+      "failed": 0
+    },
+    "evalsha": {
+      "calls": 1902,
+      "usec": 149695,
+      "failed": 0
+    },
+    "mget": {
+      "calls": 9,
+      "usec": 237,
+      "failed": 0
+    },
+    "expire": {
+      "calls": 1902,
+      "usec": 13637,
+      "failed": 0
+    },
+    "hget": {
+      "calls": 5706,
+      "usec": 14314,
+      "failed": 0
+    }
+  },
+  "counterResets": false,
+  "uptimeConsistent": true,
+  "scope": "whole isolated instance between sequential snapshots; includes API/background/helper/observer SQL and Redis commands, not per-endpoint or public-count cache DB loads",
+  "counterOverlap": "Com_select and Com_stmt_execute overlap; report separately, never add them as SQL total"
+}

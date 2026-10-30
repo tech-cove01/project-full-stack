@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-30T05:39:40.128063+00:00",
+  "containerId": "3528bc43fe4c67bbb3ad294eb339c7006c56e7e2118527dde2ccc13991890686",
+  "socketRootUsed": true,
+  "observerCreated": true,
+  "requestedGrants": [
+    "SELECT project_full_stack_go.*",
+    "SELECT performance_schema.*"
+  ],
+  "passwordKeptInPrivateEnvironment": true,
+  "exit": 0,
+  "rawDiagnosticSuppressed": true
+}

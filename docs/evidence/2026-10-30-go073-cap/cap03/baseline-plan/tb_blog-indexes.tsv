@@ -1,0 +1,4 @@
+tb_blog	0	PRIMARY	1	id	A	1	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_feed	1	status	A	1	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_feed	2	create_time	A	1	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_feed	3	id	A	1	NULL	NULL		BTREE			YES	NULL

@@ -1,0 +1,108 @@
+{
+  "task": "GO-073-CAP-03",
+  "scope": "one-shot read-only full no-cursor Feed database fallback main-query plan, between stages after hot100/30 and before hot200; not during measured workload",
+  "status": "complete",
+  "started_at": "2026-10-30T05:45:53.137117+00:00",
+  "ended_at": "2026-10-30T05:45:53.976165+00:00",
+  "project": "project-full-stack-cap-read",
+  "mysql_host": "127.0.0.1",
+  "mysql_port": 3451,
+  "database": "project_full_stack_go",
+  "container_id": "3528bc43fe4c67bbb3ad294eb339c7006c56e7e2118527dde2ccc13991890686",
+  "no_matching_read_k6_at_start": true,
+  "fixture": "capread-d736ef4960",
+  "public_parameters": {
+    "reader_id": "35",
+    "author_ids": [
+      "3"
+    ],
+    "limit": 20,
+    "cursor": null
+  },
+  "source_path": "backend/internal/social/feed.go",
+  "source_sha256": "ef029a80c4ac568b4d2814af8f3d3e853310a0c0930503f38b810d7e9368f1a6",
+  "retained_query_parts": [
+    "selected columns",
+    "author IN",
+    "current-relation EXISTS with active=1",
+    "LEFT JOIN shop",
+    "PUBLISHED status",
+    "ORDER BY create_time DESC,id DESC",
+    "LIMIT 20"
+  ],
+  "sections": [
+    {
+      "section": "current_followed_authors",
+      "started_at": "2026-10-30T05:45:53.137143+00:00",
+      "ended_at": "2026-10-30T05:45:53.232560+00:00",
+      "elapsed_ms": 95.43580000172369,
+      "available": true
+    },
+    {
+      "section": "explain_json",
+      "started_at": "2026-10-30T05:45:53.233993+00:00",
+      "ended_at": "2026-10-30T05:45:53.332500+00:00",
+      "elapsed_ms": 98.52609998779371,
+      "available": true
+    },
+    {
+      "section": "explain_analyze",
+      "started_at": "2026-10-30T05:45:53.333868+00:00",
+      "ended_at": "2026-10-30T05:45:53.452557+00:00",
+      "elapsed_ms": 118.70840002666228,
+      "available": true
+    },
+    {
+      "section": "tb_blog_indexes",
+      "started_at": "2026-10-30T05:45:53.454218+00:00",
+      "ended_at": "2026-10-30T05:45:53.554558+00:00",
+      "elapsed_ms": 100.36010001203977,
+      "available": true
+    },
+    {
+      "section": "tb_follow_indexes",
+      "started_at": "2026-10-30T05:45:53.555919+00:00",
+      "ended_at": "2026-10-30T05:45:53.657852+00:00",
+      "elapsed_ms": 101.9537000101991,
+      "available": true
+    },
+    {
+      "section": "tb_shop_indexes",
+      "started_at": "2026-10-30T05:45:53.659167+00:00",
+      "ended_at": "2026-10-30T05:45:53.763031+00:00",
+      "elapsed_ms": 103.88650000095367,
+      "available": true
+    },
+    {
+      "section": "tb_blog_like_indexes",
+      "started_at": "2026-10-30T05:45:53.764428+00:00",
+      "ended_at": "2026-10-30T05:45:53.861776+00:00",
+      "elapsed_ms": 97.3678000154905,
+      "available": true
+    },
+    {
+      "section": "row_counts",
+      "started_at": "2026-10-30T05:45:53.863100+00:00",
+      "ended_at": "2026-10-30T05:45:53.971751+00:00",
+      "elapsed_ms": 108.67110002436675,
+      "available": true
+    }
+  ],
+  "file_sha256": {
+    "explain-analyze.txt": "8c55be6e9f22ae5c8ad77e788638893c82bc0b3a2dcab1baaced602e2722d891",
+    "explain.json": "902ffd57193ecb0b411e1129d41bdbf165630040710219c4632d674d3040fa00",
+    "query.sql": "6b5ba2486df244f8beff13aac2bffdc2d3aa2f9ef9c240eb3b8451ad6546fb54",
+    "row-counts.json": "e22bb732e4d55dbdc3a549493cea7df05e00ff1f0f770107964171dd889d9274",
+    "tb_blog-indexes.tsv": "b0f5b25f856bc92bb2a98ea3eb1726ac91671ba370166c45ac48a386ac2719eb",
+    "tb_blog_like-indexes.tsv": "6f6a45fa65fc2e75317f7c70dcdc39a04f766686a88f6273783a79abd5c71146",
+    "tb_follow-indexes.tsv": "5c6f72424cd06804fbf2c01aac6c4ee7ac722b519bd335deabab70bd94c6da85",
+    "tb_shop-indexes.tsv": "795ab8b94d24b0422a70616dc47ef3ef0f91254fbb03eeb7f3a8f7f89f0c1367"
+  },
+  "limitations": [
+    "EXPLAIN ANALYZE executes one SELECT and row/index probes consume work; all run between load stages",
+    "plan matches database fallback, excluding optional community projection join and excluding auxiliary likes/count/cache/auth queries",
+    "single hot reader/author, current fixture and current optimizer state; not a throughput or per-request latency claim",
+    "no indexes, statistics, instrumentation, server settings or business rows changed",
+    "credentials loaded as UTF-8 from private runtime config; password passed only through MYSQL_PWD and never persisted"
+  ]
+}

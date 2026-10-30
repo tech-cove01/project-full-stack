@@ -1,0 +1,247 @@
+{
+  "stage": "hot-025-a",
+  "mode": "hot",
+  "rate": 25,
+  "seconds": 30,
+  "meetsBudget": true,
+  "failure": null,
+  "result": {
+    "attempted": 751,
+    "successful": 751,
+    "systemErrors": 0,
+    "contentErrors": 0,
+    "httpErrors": 0,
+    "dropped": 0,
+    "targetOffers": 750,
+    "actualOfferedRatio": 1.0013333333333334,
+    "issuedPerNominalSecond": 25.033333333333335,
+    "successfulPerNominalSecond": 25.033333333333335,
+    "systemErrorRate": 0,
+    "allLatency": {
+      "p(95)": 25.246000000000002,
+      "p(99)": 29.540750000000003,
+      "max": 41.0699,
+      "avg": 22.444557123834894,
+      "med": 22.0956,
+      "thresholds": {
+        "p(95)<=200": false,
+        "p(99)<=500": false
+      }
+    },
+    "successfulLatency": {
+      "p(99)": 29.540750000000003,
+      "max": 41.0699,
+      "avg": 22.444557123834894,
+      "med": 22.0956,
+      "p(95)": 25.246000000000002
+    },
+    "k6Metrics": {
+      "vus": {
+        "value": 1,
+        "min": 1,
+        "max": 1
+      },
+      "vusMax": {
+        "min": 64,
+        "max": 64,
+        "value": 64
+      },
+      "dataReceived": {
+        "count": 7075922,
+        "rate": 235684.50414226577
+      }
+    }
+  },
+  "stableCommandElapsedMs": 31188,
+  "completionAudit": {
+    "attempted": 751,
+    "completedHttpRequests": 751,
+    "classified": 751,
+    "incompleteOrUnclassified": 0,
+    "completedButUnclassified": 0,
+    "classifiedSource": "legacy cap_read_failure_ratio passes+fails; original files unchanged",
+    "systemErrorRatePerClassified": 0.0
+  },
+  "supervisionOk": true,
+  "stopSignal": false,
+  "resources": {
+    "samples": 7,
+    "completeSamples": 7,
+    "samplerSha256": null,
+    "validCpuSamples": 6,
+    "observationErrors": [],
+    "firstSampleAt": "2026-10-30T05:41:40.278789+00:00",
+    "lastSampleAt": "2026-10-30T05:42:10.282379+00:00",
+    "firstSampleAfterStableSpawnMs": 948.7890625,
+    "stableProcessEndAfterLastSampleMs": 235.62109375,
+    "maxSampleGapMs": 5000.794921875,
+    "cpuScope": "sampler cpu_interval_valid intervals (at least one second); legacy samples exclude the first psutil priming interval; raw initial CPU retained separately",
+    "initialCpu": {
+      "host": 32.6,
+      "apiOneCore": 0.0,
+      "generatorOneCore": 0.0
+    },
+    "hostCpuPercentMax": 21.6,
+    "hostMemoryPercentMax": 78.6,
+    "apiCpuOneCorePercentMax": 12.2,
+    "apiRssBytesMax": 30048256,
+    "generatorCpuOneCorePercentMax": 5.6,
+    "generatorRssBytesMax": 72368128,
+    "containers": {
+      "project-full-stack-cap-read-mysql-1": {
+        "cpuPercentMax": 38.04,
+        "memoryPercentMax": 24.81
+      },
+      "project-full-stack-cap-read-redis-1": {
+        "cpuPercentMax": 4.39,
+        "memoryPercentMax": 1.77
+      }
+    },
+    "sqlSampledDelta": {
+      "wait_count": 0,
+      "wait_duration_ns": 0
+    },
+    "redisSampledDelta": {
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "timeouts": 0
+    },
+    "runtimeSampledDelta": {
+      "num_gc": 24,
+      "pause_total_ns": 1603400,
+      "total_alloc_bytes": 70825224
+    },
+    "sqlInUseMax": 1,
+    "goGoroutinesMax": 84
+  },
+  "mysqlGlobalDelta": {
+    "Uptime": 31,
+    "Questions": 6325,
+    "Queries": 13015,
+    "Com_select": 3372,
+    "Com_insert": 0,
+    "Com_update": 0,
+    "Com_delete": 0,
+    "Com_commit": 1085,
+    "Com_stmt_execute": 3345,
+    "Com_stmt_prepare": 3345,
+    "Com_stmt_close": 3345,
+    "Com_stmt_reprepare": 0,
+    "Performance_schema_digest_lost": 0,
+    "Performance_schema_prepared_statements_lost": 0
+  },
+  "mysqlEventDelta": [
+    {
+      "event": "statement/com/Execute",
+      "count": 3346,
+      "errors": 0,
+      "examined": 4825926,
+      "sent": 16522,
+      "timerPicoseconds": "8327220594000"
+    },
+    {
+      "event": "statement/com/Prepare",
+      "count": 3346,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "579768074000"
+    },
+    {
+      "event": "statement/sql/commit",
+      "count": 1086,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "105018934000"
+    },
+    {
+      "event": "statement/sql/delete",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/insert",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/select",
+      "count": 27,
+      "errors": 0,
+      "examined": 145,
+      "sent": 83,
+      "timerPicoseconds": "5775889000"
+    },
+    {
+      "event": "statement/sql/update",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    }
+  ],
+  "redisDelta": {
+    "ping": {
+      "calls": 10,
+      "usec": 30,
+      "failed": 0
+    },
+    "info": {
+      "calls": 1,
+      "usec": 119,
+      "failed": 0
+    },
+    "type": {
+      "calls": 751,
+      "usec": 2979,
+      "failed": 0
+    },
+    "pttl": {
+      "calls": 751,
+      "usec": 1168,
+      "failed": 0
+    },
+    "xreadgroup": {
+      "calls": 614,
+      "usec": 7360,
+      "failed": 0
+    },
+    "xautoclaim": {
+      "calls": 307,
+      "usec": 4631,
+      "failed": 0
+    },
+    "evalsha": {
+      "calls": 751,
+      "usec": 46366,
+      "failed": 0
+    },
+    "mget": {
+      "calls": 15,
+      "usec": 222,
+      "failed": 0
+    },
+    "expire": {
+      "calls": 751,
+      "usec": 3907,
+      "failed": 0
+    },
+    "hget": {
+      "calls": 2253,
+      "usec": 4594,
+      "failed": 0
+    }
+  },
+  "counterResets": false,
+  "uptimeConsistent": true,
+  "scope": "whole isolated instance between sequential snapshots; includes API/background/helper/observer SQL and Redis commands, not per-endpoint or public-count cache DB loads",
+  "counterOverlap": "Com_select and Com_stmt_execute overlap; report separately, never add them as SQL total"
+}

@@ -1,0 +1,9 @@
+-> Limit: 20 row(s)  (actual time=11.3..11.3 rows=20 loops=1)
+    -> Sort: b.create_time DESC, b.id DESC, limit input to 20 row(s) per chunk  (actual time=11.3..11.3 rows=20 loops=1)
+        -> Stream results  (cost=99.6 rows=941) (actual time=1.2..11.1 rows=200 loops=1)
+            -> Left hash join (s.id = b.shop_id)  (cost=99.6 rows=941) (actual time=1.09..10.7 rows=200 loops=1)
+                -> Filter: (b.user_id = 3)  (cost=152 rows=314) (actual time=0.274..9.85 rows=200 loops=1)
+                    -> Index lookup on b using idx_blog_feed (status='PUBLISHED')  (cost=152 rows=3136) (actual time=0.0789..9.22 rows=6400 loops=1)
+                -> Hash
+                    -> Table scan on s  (cost=0.0185 rows=3) (actual time=0.0117..0.0134 rows=3 loops=1)
+

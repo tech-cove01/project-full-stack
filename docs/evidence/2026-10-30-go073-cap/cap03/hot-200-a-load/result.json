@@ -1,0 +1,89 @@
+{
+  "task": "GO-073-CAP-03",
+  "mode": "hot",
+  "rate": 200,
+  "seconds": 30,
+  "warmSeconds": 10,
+  "warmRate": 25,
+  "preVUs": 64,
+  "maxVUs": 512,
+  "fixture": "capread-d736ef4960",
+  "fixtureSourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "pageSize": 20,
+  "activeReaders": 1,
+  "activeCountKeys": 20,
+  "thresholds": {
+    "actualOfferedRatioMin": 0.99,
+    "successfulFractionMin": 0.99,
+    "droppedMax": 0,
+    "systemErrorRateMaxExclusive": 0.01,
+    "p95MsMax": 200,
+    "p99MsMax": 500,
+    "successfulP95MsMax": 200,
+    "successfulP99MsMax": 500,
+    "contentErrorsMax": 0
+  },
+  "started": "2026-10-30T05:46:07.230Z",
+  "performanceSchemaConsumers": "events_statements_current\tYES\r\nstatements_digest\tYES",
+  "selectInstrument": "YES\tYES",
+  "scriptSHA256": {
+    "scripts/go073-cap-read.mjs": "ea3141278a3bbc77f462445f68889beeee5f7460677cdce9ccfa4c394f673503",
+    "scripts/load/go073-cap-read.js": "6742c95d73fc2aaa6868b3bcb986fc1ba9774b28a23133aa3249bbd60ddc82a7"
+  },
+  "warmExit": 0,
+  "warmExternalStop": null,
+  "stableStartedAt": 1793339179553,
+  "stableExit": 99,
+  "stableExternalStop": null,
+  "stableEndedAt": 1793339192734,
+  "stableCommandElapsedMs": 13181,
+  "result": {
+    "attempted": 1902,
+    "successful": 1241,
+    "systemErrors": 149,
+    "contentErrors": 0,
+    "httpErrors": 149,
+    "dropped": 491,
+    "targetOffers": 6000,
+    "actualOfferedRatio": 0.317,
+    "issuedPerNominalSecond": 63.4,
+    "successfulPerNominalSecond": 41.36666666666667,
+    "systemErrorRate": 0.07833859095688749,
+    "allLatency": {
+      "p(95)": 5000.190989999999,
+      "p(99)": 5000.640017,
+      "max": 5006.194,
+      "avg": 1747.1945620143879,
+      "med": 1173.1254,
+      "thresholds": {
+        "p(95)<=200": true,
+        "p(99)<=500": true
+      }
+    },
+    "successfulLatency": {
+      "avg": 1356.6318852538286,
+      "med": 981.8409,
+      "p(95)": 3847.7981,
+      "p(99)": 4684.684739999999,
+      "max": 4988.5803
+    },
+    "k6Metrics": {
+      "vus": {
+        "min": 78,
+        "max": 512,
+        "value": 512
+      },
+      "vusMax": {
+        "value": 512,
+        "min": 78,
+        "max": 512
+      },
+      "dataReceived": {
+        "count": 11692924,
+        "rate": 974087.1149937932
+      }
+    }
+  },
+  "meetsBudget": false,
+  "finished": "2026-10-30T05:46:33.232Z"
+}

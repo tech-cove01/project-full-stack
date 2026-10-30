@@ -1,0 +1,24 @@
+{
+  "unrelatedPortDetailsOmitted": true,
+  "at": "2026-10-30T05:38:11.5124691Z",
+  "otherRunningContainerNames": [
+    "crm-agent-services-clickhouse-1",
+    "crm-agent-services-weknora-1",
+    "crm-agent-services-seaweedfs-1",
+    "crm-agent-services-langfuse-web-1",
+    "crm-agent-services-langfuse-worker-1",
+    "crm-agent-services-redis-1",
+    "crm-agent-services-mem0-1",
+    "crm-agent-services-postgres-1",
+    "supabase_storage_project-crm-local",
+    "supabase_rest_project-crm-local",
+    "supabase_realtime_project-crm-local",
+    "supabase_auth_project-crm-local",
+    "supabase_kong_project-crm-local",
+    "supabase_db_project-crm-local"
+  ],
+  "rootReleaseReceived": true,
+  "archiveCpuReleased": true,
+  "projectInitiallyAbsent": true,
+  "readPortsFree": true
+}

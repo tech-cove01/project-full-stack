@@ -4,3 +4,11 @@
 *.jpeg binary
 *.gif binary
 *.ico binary
+
+# Capacity captures are byte evidence; newline conversion would invalidate SHA256.
+docs/evidence/2026-10-30-go073-cap/**/*.json -text
+docs/evidence/2026-10-30-go073-cap/**/*.ndjson -text
+docs/evidence/2026-10-30-go073-cap/**/*.txt -text
+docs/evidence/2026-10-30-go073-cap/**/*.log -text
+docs/evidence/2026-10-30-go073-cap/**/*.gz binary
+docs/evidence/2026-10-30-go073-cap/**/*.pprof binary

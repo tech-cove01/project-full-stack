@@ -14,6 +14,8 @@ import re
 import subprocess
 import sys
 
+import psutil
+
 
 REPO = Path(__file__).resolve().parent.parent
 ROOT = REPO / 'docs/evidence/2026-10-30-cap07'
@@ -40,6 +42,33 @@ def save(path, value):
 
 def now():
     return dt.datetime.now(dt.timezone.utc).isoformat()
+
+
+def process_identity(pid):
+    process = psutil.Process(pid)
+    return {'pid': process.pid, 'creationUnixMs': process.create_time() * 1000, 'exe': process.exe()}
+
+
+def release_completed_lock(lock, owner, wrapper, stage_exit, control_exit):
+    """A stopped outer helper does not prove its supervised wrapper stopped."""
+    if (wrapper is None or wrapper.poll() is None or not stage_exit.is_file() or
+            not control_exit.is_file() or not (control_exit.parent / 'done.json').is_file()):
+        return False
+    try:
+        current, finished, supervision = read(lock), read(stage_exit), read(control_exit)
+        if (not supervision.get('ended_at') or type(supervision.get('harness_exit')) is not int or
+                type(supervision.get('sampler_started')) is not bool or
+                (supervision['sampler_started'] and type(supervision.get('sampler_exit')) is not int)):
+            return False
+        if (current.get('owner') != owner or current.get('wrapper', {}).get('pid') != wrapper.pid or
+                finished.get('wrapperPid') != wrapper.pid or finished.get('wrapperExited') is not True or
+                finished.get('capacityWrapperExit') != wrapper.returncode or
+                finished.get('tag') != current.get('stage')):
+            return False
+        lock.unlink()
+        return True
+    except (OSError, ValueError, AttributeError):
+        return False
 
 
 def records(root):
@@ -173,7 +202,11 @@ def main():
                CAP_STOP_FILE=str(control / 'stop.json'))
     # A crashed owner deliberately leaves this private lock for identity-reviewed recovery.
     lock = runtime / 'cap07-stage-active.private.json'
-    save(lock, {'pid': os.getpid(), 'stage': args.tag, 'at': now()})
+    owner = process_identity(os.getpid())
+    ownership = {'owner': owner, 'stage': args.tag, 'at': now(), 'wrapper': None}
+    save(lock, ownership)
+    wrapper = None
+    stage_exit = Path(str(stem) + '-stage-exit.json')
     try:
         save(ROOT / ('slot-' + slot + '.json'), {'stage': args.tag, 'at': now(), 'failedStartsConsumeSlot': True})
         save(command_file, {'task': 'CAP-07', 'kind': args.kind, 'variant': args.variant, 'tag': args.tag,
@@ -195,7 +228,18 @@ def main():
                    '--diagnostics', 'http://127.0.0.1:8351/debug/capacity', '--interval', '5',
                    '--max-seconds', '360', '--stop-grace-seconds', '90', '--',
                    'node', 'scripts/go073-cap-read.mjs', 'run']
-        result = subprocess.run(command, env=env)
+        wrapper = subprocess.Popen(command, env=env, creationflags=owned.FLAGS)
+        try:
+            ownership['wrapper'] = process_identity(wrapper.pid)
+        except psutil.NoSuchProcess:
+            assert wrapper.poll() is not None
+            ownership['wrapper'] = {'pid': wrapper.pid, 'alreadyExitedBeforeIdentityCapture': True}
+        # Keep the lock present throughout this atomic identity update. A crash
+        # leaves either the previous lock or the new lock, never an unlocked gap.
+        pending = lock.with_suffix('.pending')
+        save(pending, ownership)
+        pending.replace(lock)
+        wrapper_code = wrapper.wait()
         valid = False
         try:
             owned.api_identity(api, require_health=True)
@@ -207,13 +251,13 @@ def main():
             valid = True
         except Exception as error:
             save(Path(str(stem) + '-cards-error.json'), {'at': now(), 'class': type(error).__name__, 'detailsSuppressed': True})
-        save(Path(str(stem) + '-stage-exit.json'), {'task': 'CAP-07', 'kind': args.kind,
-             'capacityWrapperExit': result.returncode, 'cardsEvidenceValid': valid, 'finishedAt': now(),
+        save(stage_exit, {'task': 'CAP-07', 'kind': args.kind, 'tag': args.tag,
+             'wrapperPid': wrapper.pid, 'wrapperExited': wrapper.poll() is not None,
+             'capacityWrapperExit': wrapper_code, 'cardsEvidenceValid': valid, 'finishedAt': now(),
              'limits': 'Wrapper exit is supervision only. Read load/result.json, resource stop and cards evidence separately.'})
-        return result.returncode or (0 if valid else 1)
+        return wrapper_code or (0 if valid else 1)
     finally:
-        if read(lock)['pid'] == os.getpid() and read(lock)['stage'] == args.tag:
-            lock.unlink()
+        release_completed_lock(lock, owner, wrapper, stage_exit, control / 'exit-status.json')
 
 
 if __name__ == '__main__':

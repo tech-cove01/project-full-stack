@@ -1,0 +1,70 @@
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✓ 'p(95)<=200' p(95)=24.9ms
+    ✓ 'p(99)<=500' p(99)=63.89ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=14006
+
+    cap_read_completed
+    ✓ 'count>=0' count=13687
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=13687
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✗ 'count==0' count=351
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=21.63ms med=14.41ms p(95)=24.9ms  p(99)=63.89ms max=1.64s
+    cap_read_attempted.............: 14006  387.112281/s
+    cap_read_completed.............: 13687  378.29543/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 0.00%  0 out of 13687
+    cap_read_http_errors...........: 0      0/s
+    cap_read_success...............: 13687  378.29543/s
+    cap_read_success_ms............: avg=21.63ms med=14.41ms p(95)=24.9ms  p(99)=63.89ms max=1.64s
+    cap_read_system_error_ratio....: 0.00%  0 out of 13687
+    cap_read_system_errors.........: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=21.63ms med=14.41ms p(95)=24.9ms  p(99)=63.89ms max=1.64s
+      { expected_response:true }...: avg=21.63ms med=14.41ms p(95)=24.9ms  p(99)=63.89ms max=1.64s
+    http_req_failed................: 0.00%  0 out of 13687
+    http_reqs......................: 13687  378.29543/s
+
+    EXECUTION
+    dropped_iterations.............: 351    9.7013/s
+    iteration_duration.............: avg=22.09ms med=14.83ms p(95)=25.57ms p(99)=64.85ms max=1.64s
+    iterations.....................: 13687  378.29543/s
+    vus............................: 318    min=5          max=318
+    vus_max........................: 322    min=256        max=322
+
+    NETWORK
+    data_received..................: 129 MB 3.6 MB/s
+    data_sent......................: 1.9 MB 53 kB/s
+
+
+
+time="2026-10-30T14:33:48+08:00" level=error msg="thresholds on metrics 'dropped_iterations' were crossed; at least one has abortOnFail enabled, stopping test prematurely"

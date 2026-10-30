@@ -1,0 +1,12 @@
+{
+  "task": "CAP-08",
+  "startingSourceSha": "1de173517a54c3be46748779437b592f7bcdbc58",
+  "initialWorktreeClean": true,
+  "conservativeDevelopmentStartUTC": "2026-10-30T13:10:00Z",
+  "conservativeDevelopmentDeadlineUTC": "2026-10-30T17:10:00Z",
+  "budgetAccounting": "Conservative whole wall time is an upper bound on effective development; actual load and CI waits are recorded separately and never used to expand scope.",
+  "limits": {"controlledScenarios": 2, "diagnosticMulti100x180": 2, "evidenceBasedFixIterations": 2, "formalMulti100x180": 2, "formalHot200x180": 1},
+  "oldFailuresPreserved": true,
+  "businessChangesAtStart": false,
+  "firstSelectedGap": "HTTP card wait and independent app-owned shared-loader stages / oldest in-flight age are missing; this is observation wiring, not a proven B1 cause."
+}

@@ -1,0 +1,5 @@
+{
+  "command": "go vet ./internal/platform/config ./internal/platform/app ./internal/orderstream ./internal/order ./internal/orderreview",
+  "exit": 0,
+  "at": "2026-10-30T04:56:37.1975782Z"
+}

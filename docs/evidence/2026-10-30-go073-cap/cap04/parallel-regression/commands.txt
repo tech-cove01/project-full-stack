@@ -1,0 +1,6 @@
+GO_INTEGRATION=1; GO_ENV=development; MYSQL_HOST=127.0.0.1; MYSQL_PORT=3452; MYSQL_DATABASE=project_full_stack_go; MYSQL_USER=fullstack; MYSQL_PASSWORD=<compose local development credential from process environment>; REDIS_HOST=127.0.0.1; REDIS_PORT=6552; REDIS_DATABASE=0; REDIS_PASSWORD=<empty>; ORDER_STREAM_WORKERS=4; GOMAXPROCS=4
+gofmt -w backend/internal/platform/config/config.go backend/internal/platform/config/config_test.go backend/internal/platform/app/app.go backend/internal/orderstream/integration_test.go backend/internal/orderstream/worker_test.go
+cd backend
+go test -count=1 -p 1 -v ./internal/platform/config ./internal/platform/app ./internal/orderstream ./internal/order ./internal/orderreview
+go vet ./internal/platform/config ./internal/platform/app ./internal/orderstream ./internal/order ./internal/orderreview
+go test -count=1 -p 1 -v ./internal/orderstream # rerun after test-only wait corrected 10s to 30s

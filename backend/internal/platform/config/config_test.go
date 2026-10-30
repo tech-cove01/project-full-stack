@@ -87,9 +87,33 @@ func TestExplicitDependenciesAndSafeDefaults(t *testing.T) {
 	if cfg.OrderPayTimeout != 15*time.Minute {
 		t.Fatal("new orders must default to the specified fifteen-minute payment window")
 	}
+	if cfg.OrderStreamWorkers != 1 {
+		t.Fatal("order Stream consumption must remain serial by default")
+	}
 	_, offset := time.Now().In(cfg.Location).Zone()
 	if cfg.Location.String() != "Asia/Shanghai" || offset != 8*60*60 {
 		t.Fatal("time zone must explicitly be Asia/Shanghai")
+	}
+}
+
+func TestOrderStreamWorkerCountIsBounded(t *testing.T) {
+	for _, test := range []struct {
+		value string
+		want  int
+	}{{"1", 1}, {"4", 4}, {"8", 8}} {
+		values := validEnvironment()
+		values["ORDER_STREAM_WORKERS"] = test.value
+		cfg, err := fromMap(values)
+		if err != nil || cfg.OrderStreamWorkers != test.want {
+			t.Fatalf("explicit worker count %s was not applied", test.value)
+		}
+	}
+	for _, value := range []string{"", "0", "-1", "9", "16", "1.5", "private-value", " 4 "} {
+		values := validEnvironment()
+		values["ORDER_STREAM_WORKERS"] = value
+		if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "ORDER_STREAM_WORKERS") || strings.Contains(err.Error(), "private-value") {
+			t.Fatal("invalid worker count must fail with a bounded diagnostic, without the value")
+		}
 	}
 }
 

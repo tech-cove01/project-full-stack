@@ -1,0 +1,5 @@
+{
+  "exit": 1,
+  "at": "2026-10-30T04:55:57.2488061Z",
+  "command": "go test -count=1 -p 1 -v ./internal/platform/config ./internal/platform/app ./internal/orderstream ./internal/order ./internal/orderreview"
+}

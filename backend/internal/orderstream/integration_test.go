@@ -7,6 +7,7 @@ import (
 	"encoding/hex"
 	"os"
 	"strconv"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -17,6 +18,7 @@ import (
 	"gorm.io/gorm/logger"
 
 	"github.com/cityloop/fullstack-go/internal/order"
+	"github.com/cityloop/fullstack-go/internal/orderreview"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 )
@@ -97,10 +99,114 @@ func (f *streamFixture) pending(t *testing.T) int64 {
 	}
 	return p.Count
 }
+func (f *streamFixture) unread(t *testing.T) int64 {
+	t.Helper()
+	groups, err := f.r.Redis.XInfoGroups(context.Background(), f.stream).Result()
+	if err != nil {
+		t.Fatal("cannot inspect owned Stream unread count")
+	}
+	for _, group := range groups {
+		if group.Name == "g1" {
+			return group.Lag
+		}
+	}
+	t.Fatal("owned Stream group missing")
+	return -1
+}
 func (f *streamFixture) requireCreated(t *testing.T, stock int64) {
 	t.Helper()
 	if f.count(t, "SELECT COUNT(*) FROM tb_voucher_order WHERE id=?", f.id) != 1 || f.count(t, "SELECT stock FROM tb_seckill_voucher WHERE voucher_id=?", f.voucher) != stock || f.count(t, "SELECT COUNT(*) FROM tb_audit_log WHERE resource_id=? AND action='ORDER_CREATE'", f.id) != 1 || f.count(t, "SELECT COUNT(*) FROM tb_outbox WHERE aggregate_type='ORDER' AND aggregate_id=? AND event_type='ORDER_CHANGED'", f.id) != 1 || f.pending(t) != 0 {
 		t.Fatal("order, inventory, audit, event and ACK did not converge exactly once")
+	}
+}
+
+// Extra messages share the fixture's activity but own exact additional order
+// and reservation IDs. Cleanup never touches another activity or stream.
+func (f *streamFixture) addOrder(t *testing.T, id, user string) string {
+	t.Helper()
+	if f.count(t, "SELECT COUNT(*) FROM tb_voucher_order WHERE id=?", id) != 0 {
+		t.Fatal("extra owned order ID collision")
+	}
+	t.Cleanup(func() {
+		for _, query := range []string{
+			"DELETE FROM tb_order_review WHERE order_id=?",
+			"DELETE FROM tb_outbox WHERE aggregate_id=? AND aggregate_type IN ('ORDER','RESERVATION')",
+			"DELETE FROM tb_audit_log WHERE resource_id=? AND action='ORDER_CREATE'",
+			"DELETE FROM tb_voucher_order WHERE id=?",
+		} {
+			if f.r.ORM.Exec(query, id).Error != nil {
+				t.Error("cannot remove exact extra order fixture")
+			}
+		}
+		if f.r.Redis.Del(context.Background(), "order:reservation:"+id).Err() != nil {
+			t.Error("cannot remove exact extra reservation")
+		}
+	})
+	if err := f.r.Redis.HSet(context.Background(), "order:reservation:"+id,
+		"userId", user, "voucherId", f.voucher, "state", "PROCESSING").Err(); err != nil {
+		t.Fatal("cannot seed extra owned reservation")
+	}
+	message, err := f.r.Redis.XAdd(context.Background(), &redis.XAddArgs{Stream: f.stream,
+		Values: map[string]any{"id": id, "userId": user, "voucherId": f.voucher}}).Result()
+	if err != nil {
+		t.Fatal("cannot add extra owned message")
+	}
+	return message
+}
+
+func runFixtureWorkers(t *testing.T, workers ...*Worker) func() {
+	t.Helper()
+	ctx, cancel := context.WithCancel(context.Background())
+	var wait sync.WaitGroup
+	for _, worker := range workers {
+		wait.Add(1)
+		go func() { defer wait.Done(); worker.Run(ctx) }()
+	}
+	done := make(chan struct{})
+	go func() { wait.Wait(); close(done) }()
+	stop := func() {
+		cancel()
+		select {
+		case <-done:
+		case <-time.After(3 * time.Second):
+			t.Error("not all order workers exited after cancellation")
+		}
+	}
+	t.Cleanup(stop)
+	return stop
+}
+
+func awaitStream(t *testing.T, ready func() bool) {
+	t.Helper()
+	// Concurrent same-ID GET_LOCK(0) contention deliberately remains pending.
+	// Four serial winners can require the existing 2s+4s+8s retry schedule.
+	deadline := time.Now().Add(30 * time.Second)
+	for time.Now().Before(deadline) {
+		if ready() {
+			return
+		}
+		time.Sleep(20 * time.Millisecond)
+	}
+	t.Fatal("concurrent Stream delivery did not converge")
+}
+
+type gatedCreator struct {
+	creator Processor
+	entered chan<- struct{}
+	release <-chan struct{}
+}
+
+func (gate gatedCreator) Create(ctx context.Context, id, user, voucher string) (order.Outcome, error) {
+	select {
+	case gate.entered <- struct{}{}:
+	case <-ctx.Done():
+		return order.Outcome{}, ctx.Err()
+	}
+	select {
+	case <-gate.release:
+		return gate.creator.Create(ctx, id, user, voucher)
+	case <-ctx.Done():
+		return order.Outcome{}, ctx.Err()
 	}
 }
 
@@ -124,6 +230,98 @@ func TestIntegrationOrderStream(t *testing.T) {
 		}
 	})
 	ctx = context.Background()
+	t.Run("four_workers_share_creator_and_reviewer_without_losing_inventory_or_ack", func(t *testing.T) {
+		f := newFixture(t, r)
+		const orders = 8
+		base, _ := strconv.ParseUint(f.id, 10, 64)
+		ids := make([]string, orders)
+		ids[0] = f.id
+		f.add(t)
+		for i := 1; i < orders; i++ {
+			ids[i] = strconv.FormatUint(base+uint64(i), 10)
+			f.addOrder(t, ids[i], ids[i])
+		}
+		entered, release := make(chan struct{}, orders), make(chan struct{})
+		var releaseOnce sync.Once
+		defer releaseOnce.Do(func() { close(release) })
+		shared := gatedCreator{order.NewCreator(r.ORM, 15*time.Minute), entered, release}
+		reviewer := orderreview.NewRepository(r.ORM)
+		workers := make([]*Worker, 4)
+		for i := range workers {
+			workers[i] = newWorker(r.Redis, shared, f.stream, "g1", "parallel-"+strconv.Itoa(i))
+			workers[i].UseReviewer(reviewer)
+		}
+		stop := runFixtureWorkers(t, workers...)
+		// Each worker is serial: four entries here prove four independent
+		// consumers entered the shared Creator concurrently, before any commit.
+		for range workers {
+			select {
+			case <-entered:
+			case <-time.After(3 * time.Second):
+				t.Fatal("four independent consumers did not enter the shared processor")
+			}
+		}
+		releaseOnce.Do(func() { close(release) })
+		awaitStream(t, func() bool {
+			return f.count(t, "SELECT COUNT(*) FROM tb_voucher_order WHERE voucher_id=?", f.voucher) == orders && f.pending(t) == 0
+		})
+		stop()
+		if f.count(t, "SELECT stock FROM tb_seckill_voucher WHERE voucher_id=?", f.voucher) != 2 ||
+			f.count(t, "SELECT COUNT(DISTINCT user_id) FROM tb_voucher_order WHERE voucher_id=? AND active_flag=1", f.voucher) != orders {
+			t.Fatal("parallel creation lost stock or unique active ownership")
+		}
+		for _, id := range ids {
+			if f.count(t, "SELECT COUNT(*) FROM tb_voucher_order WHERE id=? AND user_id=? AND voucher_id=?", id, id, f.voucher) != 1 ||
+				f.count(t, "SELECT COUNT(*) FROM tb_audit_log WHERE resource_id=? AND action='ORDER_CREATE'", id) != 1 ||
+				f.count(t, "SELECT COUNT(*) FROM tb_outbox WHERE aggregate_id=? AND aggregate_type='ORDER' AND event_type='ORDER_CHANGED'", id) != 1 {
+				t.Fatal("parallel order, owner, audit and outbox did not match exactly once")
+			}
+			if state, err := r.Redis.HGet(ctx, "order:reservation:"+id, "state").Result(); err != nil || state != "CREATED" {
+				t.Fatal("ACKed order lacks its matching reservation projection")
+			}
+		}
+	})
+	t.Run("four_workers_ack_same_id_replays_but_retain_owner_conflict", func(t *testing.T) {
+		f := newFixture(t, r)
+		for range 4 {
+			f.add(t)
+		}
+		creator, reviewer := order.NewCreator(r.ORM, 15*time.Minute), orderreview.NewRepository(r.ORM)
+		workers := make([]*Worker, 4)
+		for i := range workers {
+			workers[i] = newWorker(r.Redis, creator, f.stream, "g1", "duplicate-"+strconv.Itoa(i))
+			workers[i].UseReviewer(reviewer)
+		}
+		stop := runFixtureWorkers(t, workers...)
+		awaitStream(t, func() bool {
+			return f.count(t, "SELECT COUNT(*) FROM tb_voucher_order WHERE id=?", f.id) == 1 && f.pending(t) == 0 && f.unread(t) == 0
+		})
+		base, _ := strconv.ParseUint(f.id, 10, 64)
+		foreign := strconv.FormatUint(base+1, 10)
+		conflict, err := r.Redis.XAdd(ctx, &redis.XAddArgs{Stream: f.stream,
+			Values: map[string]any{"id": f.id, "userId": foreign, "voucherId": f.voucher}}).Result()
+		if err != nil {
+			t.Fatal("cannot add owned conflicting message")
+		}
+		secondID := strconv.FormatUint(base+2, 10)
+		f.addOrder(t, secondID, f.user) // another ID for an already active owner
+		awaitStream(t, func() bool {
+			return f.count(t, "SELECT COUNT(*) FROM tb_outbox WHERE aggregate_id=? AND event_type='RESERVATION_REJECTED'", secondID) == 1 && f.pending(t) == 1 && f.unread(t) == 0
+		})
+		stop()
+		pending, err := r.Redis.XPendingExt(ctx, &redis.XPendingExtArgs{Stream: f.stream, Group: "g1", Start: "-", End: "+", Count: 10}).Result()
+		if err != nil || len(pending) != 1 || pending[0].ID != conflict {
+			t.Fatal("a foreign binding was mistaken for the owner's durable result")
+		}
+		if f.count(t, "SELECT stock FROM tb_seckill_voucher WHERE voucher_id=?", f.voucher) != 9 ||
+			f.count(t, "SELECT COUNT(*) FROM tb_voucher_order WHERE voucher_id=?", f.voucher) != 1 ||
+			f.count(t, "SELECT COUNT(*) FROM tb_voucher_order WHERE id=? AND user_id=?", f.id, f.user) != 1 ||
+			f.count(t, "SELECT COUNT(*) FROM tb_audit_log WHERE resource_id=? AND action='ORDER_CREATE'", f.id) != 1 ||
+			f.count(t, "SELECT COUNT(*) FROM tb_outbox WHERE aggregate_id=? AND aggregate_type='ORDER'", f.id) != 1 ||
+			f.count(t, "SELECT COUNT(*) FROM tb_outbox WHERE aggregate_id=? AND event_type='RESERVATION_REJECTED'", f.id) != 0 {
+			t.Fatal("duplicate or conflicting delivery changed the single committed fact")
+		}
+	})
 	t.Run("db_fact_overrides_a_cached_failed_reservation", func(t *testing.T) {
 		f := newFixture(t, r)
 		f.add(t)
@@ -220,12 +418,17 @@ func TestIntegrationOrderStream(t *testing.T) {
 		// that the GO-031 cancellation endpoint already exists.
 		f.exec(t, "UPDATE tb_voucher_order SET status=4 WHERE id=?", f.id)
 		f.exec(t, "UPDATE tb_seckill_voucher SET stock=10 WHERE voucher_id=?", f.voucher)
-		recovered := f.worker("after-ack")
-		recovered.claimIdle = 0
-		recovered.turn = 2
-		if processed, e := recovered.Poll(ctx); !processed || e != nil {
-			t.Fatal("committed order not safely replayed")
+		creator, reviewer := order.NewCreator(r.ORM, 15*time.Minute), orderreview.NewRepository(r.ORM)
+		recovered := make([]*Worker, 4)
+		for i := range recovered {
+			recovered[i] = newWorker(r.Redis, creator, f.stream, "g1", "after-ack-"+strconv.Itoa(i))
+			recovered[i].UseReviewer(reviewer)
+			recovered[i].claimIdle = 0
+			recovered[i].turn = 2
 		}
+		stopRecovered := runFixtureWorkers(t, recovered...)
+		awaitStream(t, func() bool { return f.pending(t) == 0 })
+		stopRecovered()
 		f.requireCreated(t, 10)
 		if f.count(t, "SELECT status FROM tb_voucher_order WHERE id=?", f.id) != 4 {
 			t.Fatal("old message reset a later order state")

@@ -67,10 +67,6 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	}
 	knowledge := aiknowledge.NewService(resources.ORM, embedder).WithRetrieval(cfg.AI.TopK, cfg.AI.MinScore)
 	conversations := aichat.NewConversations(resources.Redis)
-	// The consumer parks an unresolved outcome in tb_order_review before it may
-	// acknowledge the Stream entry; the replay command owns the recovery.
-	stream := orderstream.NewWorker(resources.Redis, order.NewCreator(resources.ORM, cfg.OrderPayTimeout))
-	stream.UseReviewer(orderreview.NewRepository(resources.ORM))
 	server := &http.Server{
 		Handler: httpapi.NewRouter(resources, cfg.ProbeTimeout, revision, logger, func(routes gin.IRouter) {
 			identity := auth.NewService(resources.ORM, resources.Redis, cfg.Environment)
@@ -104,9 +100,18 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	// rows remain replayable when cancellation interrupts an in-flight event.
 	workers := []func(context.Context){
 		activitypub.NewWorker(resources.ORM, resources.Redis).Run,
-		stream.Run,
 		ordertimeout.NewWorker(resources.ORM, orders).Run,
 		ordercomp.NewWorker(resources.ORM, resources.Redis).Run,
+	}
+	// Creator and review repository hold only immutable configuration and safe
+	// database pools. Every consumer needs its own identity, cursor and retries.
+	// Durable order/review evidence is still required before each entry's ACK.
+	creator := order.NewCreator(resources.ORM, cfg.OrderPayTimeout)
+	reviewer := orderreview.NewRepository(resources.ORM)
+	for range cfg.OrderStreamWorkers {
+		stream := orderstream.NewWorker(resources.Redis, creator)
+		stream.UseReviewer(reviewer)
+		workers = append(workers, stream.Run)
 	}
 	if len(cfg.Kafka.Brokers) > 0 {
 		// The community relay only runs when a broker is configured; local
@@ -149,7 +154,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		logger.Info("isolated capacity diagnostics enabled", "address", cfg.DiagnosticsAddr)
 	}
 	owned := startBackground(ctx, applicationResources{observation, resources}, workers...)
-	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())
+	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String(), "order_stream_workers", cfg.OrderStreamWorkers)
 	return serve(ctx, server, listener, owned, cfg.ShutdownTimeout, logger)
 }
 

@@ -1,0 +1,45 @@
+=== RUN   TestIntegrationOrderStream
+=== RUN   TestIntegrationOrderStream/four_workers_share_creator_and_reviewer_without_losing_inventory_or_ack
+=== RUN   TestIntegrationOrderStream/four_workers_ack_same_id_replays_but_retain_owner_conflict
+2026/10/30 12:56:14 WARN order delivery remains pending consumer=duplicate-2 message_id=1793336174002-0
+2026/10/30 12:56:14 WARN order delivery remains pending consumer=duplicate-3 message_id=1793336174005-0
+2026/10/30 12:56:14 WARN order delivery remains pending consumer=duplicate-1 message_id=1793336174004-0
+2026/10/30 12:56:16 WARN order delivery remains pending consumer=duplicate-2 message_id=1793336174002-0
+2026/10/30 12:56:16 WARN order delivery remains pending consumer=duplicate-1 message_id=1793336174004-0
+2026/10/30 12:56:20 WARN order delivery remains pending consumer=duplicate-2 message_id=1793336174002-0
+2026/10/30 12:56:28 WARN order delivery remains pending consumer=duplicate-3 message_id=1793336188477-0
+=== RUN   TestIntegrationOrderStream/db_fact_overrides_a_cached_failed_reservation
+=== RUN   TestIntegrationOrderStream/cancel_after_order_insert_before_commit_rolls_back_and_reclaims
+    integration_test.go:363: barrier=after-insert-before-commit orderId=9007199479529634 sourceId=1793336188757-0 consumer=before-commit at=2026-10-30T04:56:28.7804965Z
+    integration_test.go:379: after-cancel orderId=9007199479529634 dbOrders=0 dbStock=10 pending=1 at=2026-10-30T04:56:28.789553Z
+    integration_test.go:387: after-reclaim orderId=9007199479529634 sourceId=1793336188757-0 consumer=after-precommit dbOrders=1 dbStock=9 pending=0 at=2026-10-30T04:56:28.8308741Z
+=== RUN   TestIntegrationOrderStream/cancel_after_commit_before_ack_replays_current_order_without_decrement
+    integration_test.go:401: barrier=after-commit-before-ack orderId=9007200147769455 sourceId=1793336188869-0 consumer=before-ack at=2026-10-30T04:56:28.8985878Z
+2026/10/30 12:56:28 WARN order delivery remains pending consumer=after-ack-0 message_id=1793336188869-0
+2026/10/30 12:56:28 WARN order delivery remains pending consumer=after-ack-3 message_id=1793336188869-0
+2026/10/30 12:56:28 WARN order delivery remains pending consumer=after-ack-2 message_id=1793336188869-0
+    integration_test.go:436: after-replay orderId=9007200147769455 sourceId=1793336188869-0 consumer=after-ack status=4 dbStock=10 pending=0 at=2026-10-30T04:56:28.9440509Z
+=== RUN   TestIntegrationOrderStream/unavailable_db_beyond_five_attempts_never_acks_then_recovers
+=== RUN   TestIntegrationOrderStream/poison_pending_does_not_starve_later_pending_or_new_messages
+=== RUN   TestIntegrationOrderStream/durable_rejection_is_ackable_and_compensation_remains_pending
+=== RUN   TestIntegrationOrderStream/transient_claim_error_does_not_destroy_recovery_cursor
+=== RUN   TestIntegrationOrderStream/cancelled_run_returns_without_group_mutation
+--- PASS: TestIntegrationOrderStream (15.91s)
+    --- PASS: TestIntegrationOrderStream/four_workers_share_creator_and_reviewer_without_losing_inventory_or_ack (0.44s)
+    --- PASS: TestIntegrationOrderStream/four_workers_ack_same_id_replays_but_retain_owner_conflict (14.66s)
+    --- PASS: TestIntegrationOrderStream/db_fact_overrides_a_cached_failed_reservation (0.09s)
+    --- PASS: TestIntegrationOrderStream/cancel_after_order_insert_before_commit_rolls_back_and_reclaims (0.11s)
+    --- PASS: TestIntegrationOrderStream/cancel_after_commit_before_ack_replays_current_order_without_decrement (0.12s)
+    --- PASS: TestIntegrationOrderStream/unavailable_db_beyond_five_attempts_never_acks_then_recovers (0.11s)
+    --- PASS: TestIntegrationOrderStream/poison_pending_does_not_starve_later_pending_or_new_messages (0.18s)
+    --- PASS: TestIntegrationOrderStream/durable_rejection_is_ackable_and_compensation_remains_pending (0.07s)
+    --- PASS: TestIntegrationOrderStream/transient_claim_error_does_not_destroy_recovery_cursor (0.08s)
+    --- PASS: TestIntegrationOrderStream/cancelled_run_returns_without_group_mutation (0.03s)
+=== RUN   TestCancelledWorkerDoesNotAccessDependencies
+--- PASS: TestCancelledWorkerDoesNotAccessDependencies (0.00s)
+=== RUN   TestIndependentWorkerIdentitiesAndCancelledGroup
+--- PASS: TestIndependentWorkerIdentitiesAndCancelledGroup (0.00s)
+=== RUN   TestMessageIDsRemainCanonicalStringsWithSignedOrderRange
+--- PASS: TestMessageIDsRemainCanonicalStringsWithSignedOrderRange (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	17.648s

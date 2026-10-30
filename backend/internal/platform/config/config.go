@@ -38,19 +38,20 @@ type Kafka struct {
 }
 
 type Config struct {
-	Environment     string
-	APIAddr         string
-	DiagnosticsAddr string
-	MySQL           MySQL
-	Redis           Redis
-	Kafka           Kafka
-	AI              AI
-	Search          Search
-	Location        *time.Location
-	StartupTimeout  time.Duration
-	ProbeTimeout    time.Duration
-	ShutdownTimeout time.Duration
-	OrderPayTimeout time.Duration
+	Environment        string
+	APIAddr            string
+	DiagnosticsAddr    string
+	MySQL              MySQL
+	Redis              Redis
+	Kafka              Kafka
+	AI                 AI
+	Search             Search
+	Location           *time.Location
+	StartupTimeout     time.Duration
+	ProbeTimeout       time.Duration
+	ShutdownTimeout    time.Duration
+	OrderPayTimeout    time.Duration
+	OrderStreamWorkers int
 }
 
 func Load() (Config, error) { return load(os.LookupEnv) }
@@ -59,8 +60,9 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	cfg := Config{
 		Environment: "development", APIAddr: "127.0.0.1:8082",
 		StartupTimeout: 8 * time.Second, ProbeTimeout: 2 * time.Second,
-		ShutdownTimeout: 10 * time.Second,
-		OrderPayTimeout: 15 * time.Minute,
+		ShutdownTimeout:    10 * time.Second,
+		OrderPayTimeout:    15 * time.Minute,
+		OrderStreamWorkers: 1,
 	}
 	var err error
 	cfg.Location, err = time.LoadLocation("Asia/Shanghai")
@@ -155,6 +157,12 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 			return Config{}, fmt.Errorf("GO_ORDER_PAY_TIMEOUT must be whole seconds between 1s and 24h")
 		}
 		cfg.OrderPayTimeout = parsed
+	}
+	if value, ok := lookup("ORDER_STREAM_WORKERS"); ok {
+		cfg.OrderStreamWorkers, err = parseInt("ORDER_STREAM_WORKERS", value, 1, 8)
+		if err != nil {
+			return Config{}, err
+		}
 	}
 	cfg.Kafka.Topic = "community.events"
 	if value, ok := lookup("KAFKA_BROKERS"); ok && strings.TrimSpace(value) != "" {

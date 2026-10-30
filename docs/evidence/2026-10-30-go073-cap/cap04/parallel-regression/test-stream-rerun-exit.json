@@ -1,0 +1,5 @@
+{
+  "command": "go test -count=1 -p 1 -v ./internal/orderstream",
+  "exit": 0,
+  "at": "2026-10-30T04:56:29.6030562Z"
+}

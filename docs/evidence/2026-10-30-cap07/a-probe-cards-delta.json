@@ -1,0 +1,7 @@
+{
+  "valid": true,
+  "variant": "A",
+  "scope": "before warmup through after wrapper reconciliation, including warmup, stable workload and background work; endpoint snapshots are sequential, not an atomic stable-only or per-request measurement",
+  "contentLoaderCounters": null,
+  "limits": "Absent component counters do not mean A content SQL is zero."
+}

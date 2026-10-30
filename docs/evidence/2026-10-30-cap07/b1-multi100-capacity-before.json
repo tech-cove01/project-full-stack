@@ -1,0 +1,81 @@
+{
+  "at": "2026-10-30T11:19:24.470834+00:00",
+  "scope": "before warmup through after wrapper reconciliation, including warmup, stable workload and background work; endpoint snapshots are sequential, not an atomic stable-only or per-request measurement",
+  "capacity": {
+    "at": "2026-10-30T11:19:24.4699605Z",
+    "uptime_ms": 145788,
+    "pid": 63936,
+    "runtime": {
+      "goroutines": 18,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 5017616,
+      "heap_sys_bytes": 15335424,
+      "heap_inuse_bytes": 6619136,
+      "total_alloc_bytes": 43210760,
+      "mallocs": 514182,
+      "frees": 466715,
+      "num_gc": 18,
+      "pause_total_ns": 1687000,
+      "last_gc_unix_ns": 1793359148535880100,
+      "gc_cpu_fraction": 4.91241737908713e-05
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 3,
+      "in_use": 0,
+      "idle": 3,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 0,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 5219,
+      "misses": 2,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 2,
+      "idle_connections": 2,
+      "stale_connections": 0
+    },
+    "tail": {
+      "enabled": false,
+      "slow_threshold_ms": 0,
+      "max_slow_traces": 0,
+      "max_spans_per_trace": 0,
+      "latest_sequence": 0,
+      "requests": 0,
+      "stages": null,
+      "slow_traces": null,
+      "missing_measurements": null
+    },
+    "cards": {
+      "coalescing": true,
+      "requests": 112,
+      "l1_hits": 0,
+      "redis_hits": 1600,
+      "miss_items": 640,
+      "loads_started": 32,
+      "flight_started": 32,
+      "flight_joins": 0,
+      "content_sql_batches": 32,
+      "content_sql_rows": 640,
+      "content_bytes": 179640,
+      "load_errors": 0,
+      "oversize_uncached": 0,
+      "redis_errors": 0,
+      "invalid_payloads": 0,
+      "busy_rejected": 0,
+      "expired": 1600,
+      "evictions": 0,
+      "inflight": 0,
+      "active_loads": 0,
+      "waiting_callers": 0,
+      "l1_entries": 640,
+      "l1_bytes": 227000
+    }
+  }
+}

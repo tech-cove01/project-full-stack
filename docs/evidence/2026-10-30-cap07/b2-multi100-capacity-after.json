@@ -1,0 +1,81 @@
+{
+  "at": "2026-10-30T11:29:15.390805+00:00",
+  "scope": "before warmup through after wrapper reconciliation, including warmup, stable workload and background work; endpoint snapshots are sequential, not an atomic stable-only or per-request measurement",
+  "capacity": {
+    "at": "2026-10-30T11:29:15.389482Z",
+    "uptime_ms": 197106,
+    "pid": 14328,
+    "runtime": {
+      "goroutines": 22,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 10496992,
+      "heap_sys_bytes": 21889024,
+      "heap_inuse_bytes": 12632064,
+      "total_alloc_bytes": 1840221496,
+      "mallocs": 21477857,
+      "frees": 21404317,
+      "num_gc": 328,
+      "pause_total_ns": 60066800,
+      "last_gc_unix_ns": 1793359751985059100,
+      "gc_cpu_fraction": 0.0013427612271358787
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 7,
+      "in_use": 0,
+      "idle": 7,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 0,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 32243,
+      "misses": 5,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 5,
+      "idle_connections": 5,
+      "stale_connections": 0
+    },
+    "tail": {
+      "enabled": false,
+      "slow_threshold_ms": 0,
+      "max_slow_traces": 0,
+      "max_spans_per_trace": 0,
+      "latest_sequence": 0,
+      "requests": 0,
+      "stages": null,
+      "slow_traces": null,
+      "missing_measurements": null
+    },
+    "cards": {
+      "coalescing": true,
+      "requests": 18251,
+      "l1_hits": 310620,
+      "redis_hits": 52395,
+      "miss_items": 2005,
+      "loads_started": 437,
+      "flight_started": 437,
+      "flight_joins": 0,
+      "content_sql_batches": 437,
+      "content_sql_rows": 2005,
+      "content_bytes": 562772,
+      "load_errors": 0,
+      "oversize_uncached": 0,
+      "redis_errors": 0,
+      "invalid_payloads": 0,
+      "busy_rejected": 0,
+      "expired": 53760,
+      "evictions": 0,
+      "inflight": 0,
+      "active_loads": 0,
+      "waiting_callers": 0,
+      "l1_entries": 640,
+      "l1_bytes": 227000
+    }
+  }
+}

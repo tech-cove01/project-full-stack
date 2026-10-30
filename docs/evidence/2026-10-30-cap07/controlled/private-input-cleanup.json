@@ -1,0 +1,7 @@
+{
+  "scope": "controlled correctness environment already stopped by exact IDs; only this known private file deleted",
+  "at": "2026-10-30T11:30:02.2301702Z",
+  "volumesRetained": true,
+  "privateFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap07-tests-734da0cf6eb3\\env.private.json",
+  "removed": true
+}

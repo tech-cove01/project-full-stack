@@ -1,0 +1,29 @@
+{
+  "task": "CAP-07",
+  "kind": "comparison",
+  "variant": "A",
+  "tag": "a2-multi100",
+  "slot": "comparison-3",
+  "apiSourceSha": "f3d99ee43dfb422a0cba525de93e9266f07c4ee5",
+  "apiPid": 66968,
+  "apiMetadataPath": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-10-30-cap07\\api-a2.json",
+  "apiMetadataSHA256": "d32b37eb8936d0cd3c87dc75c388463863e5579d3226194c39ca49ffa7d1732a",
+  "mode": "multi",
+  "rate": 100,
+  "seconds": 180,
+  "warmSeconds": 10,
+  "warmRate": 25,
+  "preVUs": 256,
+  "maxVUs": 512,
+  "at": "2026-10-30T11:21:54.392383+00:00",
+  "environmentValuesExported": false,
+  "scriptHashes": {
+    "cap07-stage.py": "f3f91a271b488824b57dad6b5026e83776e6394cfa9e23c438acd3277bc3078f",
+    "cap07-env.py": "442224233bf0ec49d9ed969e466196459ff8068f58555922d7bfdb2f20885182",
+    "cap06-env.py": "bf0b101dd47f1542cecab201bedff8c591f1df8dfa46829753d2af6950aa88da",
+    "capacity-stage.py": "2f30385e62a8c4817ed74bcd9d4c93aeee6fa2e609bb0db5273196243fd209d6",
+    "capacity-resources.py": "6f438853ea211f0264e8f147680ae9eecd80e87f9be52abe5a383db179784135",
+    "go073-cap-read.mjs": "0335ea68479cae4a6fb4dacf6b4889ab94388dac875d04bac16705cd4d08addf",
+    "load/go073-cap-read.js": "7508294dc0738fffb9000f31c9e4faf418c1988faad764914180f2776b460c3f"
+  }
+}

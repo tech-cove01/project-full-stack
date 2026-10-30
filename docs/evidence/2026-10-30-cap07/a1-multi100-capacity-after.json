@@ -1,0 +1,56 @@
+{
+  "at": "2026-10-30T11:16:14.770464+00:00",
+  "scope": "before warmup through after wrapper reconciliation, including warmup, stable workload and background work; endpoint snapshots are sequential, not an atomic stable-only or per-request measurement",
+  "capacity": {
+    "at": "2026-10-30T11:16:14.7697849Z",
+    "uptime_ms": 322646,
+    "pid": 30308,
+    "runtime": {
+      "goroutines": 23,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 6824104,
+      "heap_sys_bytes": 17563648,
+      "heap_inuse_bytes": 9871360,
+      "total_alloc_bytes": 1754677120,
+      "mallocs": 22668873,
+      "frees": 22629850,
+      "num_gc": 329,
+      "pause_total_ns": 48885600,
+      "last_gc_unix_ns": 1793358972609903200,
+      "gc_cpu_fraction": 0.0007396007641621003
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 8,
+      "in_use": 0,
+      "idle": 8,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 0,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 33826,
+      "misses": 4,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 4,
+      "idle_connections": 4,
+      "stale_connections": 0
+    },
+    "tail": {
+      "enabled": false,
+      "slow_threshold_ms": 0,
+      "max_slow_traces": 0,
+      "max_spans_per_trace": 0,
+      "latest_sequence": 0,
+      "requests": 0,
+      "stages": null,
+      "slow_traces": null,
+      "missing_measurements": null
+    }
+  }
+}

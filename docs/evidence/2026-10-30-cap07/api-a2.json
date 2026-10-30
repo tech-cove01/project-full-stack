@@ -1,0 +1,13 @@
+{
+  "pid": 66968,
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap07-build-a\\capacity-a.exe",
+  "creationUnixMs": 1793359313781.4111,
+  "createdAtUtc": "2026-10-30T11:21:53.781411+00:00",
+  "sourceSha": "f3d99ee43dfb422a0cba525de93e9266f07c4ee5",
+  "expectedVersion": "capacity-f3d99ee43dfb422a0cba525de93e9266f07c4ee5",
+  "sha256": "fe5d594762cc7d1485fd283412b00d87c7c918ef3ba83ad02f0c8da9e38e7ee3",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap07-1d061b79461c\\env-a2.private.json",
+  "label": "a2",
+  "tailEnabledRequested": false,
+  "variant": "A"
+}

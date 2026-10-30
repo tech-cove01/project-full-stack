@@ -1,0 +1,11 @@
+{
+  "task": "CAP-07",
+  "kind": "probe",
+  "tag": "b-probe",
+  "wrapperPid": 66852,
+  "wrapperExited": true,
+  "capacityWrapperExit": 0,
+  "cardsEvidenceValid": true,
+  "finishedAt": "2026-10-30T11:17:16.976051+00:00",
+  "limits": "Wrapper exit is supervision only. Read load/result.json, resource stop and cards evidence separately."
+}

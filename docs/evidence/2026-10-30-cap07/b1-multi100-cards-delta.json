@@ -1,0 +1,40 @@
+{
+  "valid": true,
+  "variant": "B",
+  "scope": "before warmup through after wrapper reconciliation, including warmup, stable workload and background work; endpoint snapshots are sequential, not an atomic stable-only or per-request measurement",
+  "counterDelta": {
+    "requests": 6038,
+    "l1_hits": 101004,
+    "redis_hits": 18038,
+    "miss_items": 1718,
+    "loads_started": 151,
+    "flight_started": 151,
+    "flight_joins": 96,
+    "content_sql_batches": 151,
+    "content_sql_rows": 1192,
+    "content_bytes": 334567,
+    "load_errors": 0,
+    "oversize_uncached": 0,
+    "redis_errors": 0,
+    "invalid_payloads": 0,
+    "busy_rejected": 0,
+    "expired": 19200,
+    "evictions": 0
+  },
+  "beforeGauges": {
+    "inflight": 0,
+    "active_loads": 0,
+    "waiting_callers": 0,
+    "l1_entries": 640,
+    "l1_bytes": 227000
+  },
+  "afterGauges": {
+    "inflight": 0,
+    "active_loads": 0,
+    "waiting_callers": 0,
+    "l1_entries": 640,
+    "l1_bytes": 227000
+  },
+  "contentBytesDefinition": "UTF8 bytes of DB title/content/raw images returned to the content loader; not wire/RSS",
+  "limits": "Content loader SQL counts are separate from instance SQL. Gauges are snapshots, not peaks; hot cache is not a zero-DB Feed."
+}

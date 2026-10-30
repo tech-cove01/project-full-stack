@@ -1,0 +1,11 @@
+{
+  "task": "CAP-07",
+  "kind": "comparison",
+  "tag": "a1-multi100",
+  "wrapperPid": 66640,
+  "wrapperExited": true,
+  "capacityWrapperExit": 0,
+  "cardsEvidenceValid": true,
+  "finishedAt": "2026-10-30T11:16:14.773861+00:00",
+  "limits": "Wrapper exit is supervision only. Read load/result.json, resource stop and cards evidence separately."
+}

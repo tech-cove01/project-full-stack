@@ -1,0 +1,135 @@
+{
+  "task": "GO-073-CAP/accounted-stop fixture-settlement guard",
+  "recordedAt": "2026-10-30T05:23:19.041388+00:00",
+  "recordingMethod": "record of the already completed local-check tool output; checks were not rerun for this file",
+  "commands": [
+    {
+      "command": "python -c \"import ast; ast.parse(open('scripts/capacity-settle.py', encoding='utf-8').read()); print('syntax passed')\"",
+      "result": "PASS"
+    },
+    {
+      "command": "python ..\\.runtime-fullstack-cap-trade-8daf877eaa0a\\check-settle-accounted.py",
+      "exit": 0,
+      "result": "PASS",
+      "testSourceScope": "operator-private local driver importing only the guarded accounting function; no main/CLI invocation"
+    }
+  ],
+  "staticOnly": true,
+  "networkSQLOrBusinessInvocations": 0,
+  "script": {
+    "path": "scripts/capacity-settle.py",
+    "sha256": "e1e497f3fb755f9f7723312832dfbeb826fdb0456dd5fd30c67f39b8280966f5"
+  },
+  "checkCount": 23,
+  "checks": [
+    {
+      "name": "valid-stopped-single-unlogged-durable-row",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-stoppedEarly",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-stopConfirmed",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-k6ExitCode",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-exportedLogsComplete",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-k6RequestCount",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-mismatchedUserOrStatus",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-mappingMismatches",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-duplicateEffectiveOrders",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-unresolvedReview",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-durableRejections",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-unfinishedOrderOrCompensationOutbox",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-finalPending",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-finalLag",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-mysqlStock",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-redisAccepted",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-unloggedDurableOrders",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-reconciliation-uniqueAcceptedRecords",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-redis-user-set-or-duplicate",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-user-outside-private-pool",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-response-user-index-mismatch",
+      "result": "PASS"
+    },
+    {
+      "name": "reject-accepted-response-without-durable-id",
+      "result": "PASS"
+    },
+    {
+      "name": "captured-real-stage2399-sql-redis2398-completed-recomputed-with-private-pool",
+      "result": "PASS"
+    }
+  ],
+  "originalStageRecomputation": {
+    "stage": "cap02/workers4-rate-50",
+    "activityId": "1013",
+    "durableOrders": 2399,
+    "redisAcceptedMappings": 2399,
+    "completedResponseRecords": 2398,
+    "uncompletedResponses": 1,
+    "unknownDurableDestinations": 0,
+    "privatePoolOwnershipChecked": true,
+    "rawInputs": [
+      "orders.ndjson",
+      "redis-accepted.ndjson",
+      "requests.ndjson"
+    ],
+    "result": "PASS"
+  },
+  "scope": "only captured evidence and synthetic local negative cases; no cancellation or runtime preflight executed by this check; original stage result and evidence unchanged"
+}

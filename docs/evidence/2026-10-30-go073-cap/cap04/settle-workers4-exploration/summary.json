@@ -1,0 +1,27 @@
+{
+  "ownedOrders": 8729,
+  "completedReceipts": 8729,
+  "cancelledOrAlreadyCancelled": 8729,
+  "accountedStoppedStages": [
+    {
+      "stage": "cap02\\workers4-rate-50",
+      "activityId": "1013",
+      "durableOrders": 2399,
+      "completedResponseRecords": 2398,
+      "uncompletedResponses": 1,
+      "responseGapMeaning": "durable acceptances absent from completed accepted-response records",
+      "unknownDurableDestinations": 0,
+      "evidenceSHA256": {
+        "orders.ndjson": "a358988348bf3428ccc32cca4491b4262ac2835dbe36c8b2fecd9ddc0f0bc299",
+        "redis-accepted.ndjson": "1133489343984e87d25fb52ee939bfb007ed15b1a52bb376ae11d2e2a0b55c29",
+        "requests.ndjson": "87a239f96017ea8721102e3891c4fbe0cb274e17e2955546426d342d5af1b3a3"
+      }
+    }
+  ],
+  "accountedUncompletedResponses": 1,
+  "factsRetained": true,
+  "normalAuthAndLifecycle": true,
+  "noTradeControlListenerObserved": true,
+  "operatorExclusiveOutsideWindowRequired": true,
+  "compensationDrainStillRequired": true
+}

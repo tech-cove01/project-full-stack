@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-10-30T05:27:10.5524946Z",
+  "attempt": 1,
+  "limitSeconds": 180,
+  "exitCode": 1,
+  "lastObservation": "2026-10-30T05:25:42.2953986Z",
+  "lastUnfinished": 1690,
+  "benchmarkStarted": false,
+  "scope": "outside-window cancellation compensation; not a capacity-stage drain result"
+}

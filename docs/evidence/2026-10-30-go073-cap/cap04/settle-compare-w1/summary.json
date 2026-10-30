@@ -1,0 +1,10 @@
+{
+  "ownedOrders": 1377,
+  "completedReceipts": 1377,
+  "cancelledOrAlreadyCancelled": 1377,
+  "factsRetained": true,
+  "normalAuthAndLifecycle": true,
+  "noTradeControlListenerObserved": true,
+  "operatorExclusiveOutsideWindowRequired": true,
+  "compensationDrainStillRequired": true
+}

@@ -8,8 +8,8 @@
 
 ### 当前执行进展（2026-10-30，开发自验，待独立核验）
 
-- CAP-06V已完成并推送 3d99ee43dfb422a0cba525de93e9266f07c4ee5：受控SET/DEL旧FAIL→新PASS，最小固定分片门修复；真实相关回归/vet通过。见[受控报告](docs/evidence/2026-10-30-cap07/controlled/report.md)。原1.137s长尾仍未知，未单跑06D。
-- CAP-07A1契约 7edb3f、固定A/B及有限阶梯工具 968edcb；A固定f3d99ee。CAP-07A2实际Feed片段缓存 4d60b0201ee93ac43cb94cfd50e869ddb6c8ea3d，冷HTTP1批2行、热0内容SQL，单连接/两用户/游标/版本竞争与失败已自验，见[初版记录](docs/evidence/2026-10-30-cap07/phase1.md)。
+- CAP-06V已完成并推送 `f3d99ee43dfb422a0cba525de93e9266f07c4ee5`：受控SET/DEL旧FAIL→新PASS，最小固定分片门修复；真实相关回归/vet通过。见[受控报告](docs/evidence/2026-10-30-cap07/controlled/report.md)。原1.137s长尾仍未知，未单跑06D。
+- CAP-07A1契约 `e7edb3f`、固定A/B及有限阶梯工具 968edcb；A固定f3d99ee。CAP-07A2实际Feed片段缓存 4d60b0201ee93ac43cb94cfd50e869ddb6c8ea3d，冷HTTP1批2行、热0内容SQL，单连接/两用户/游标/版本竞争与失败已自验，见[初版记录](docs/evidence/2026-10-30-cap07/phase1.md)。
 - 正在继续CAP-07A3同批回源合并、真实降级/取消回归，再执行既定A/B、有限阶梯及正式组；当前尚无CAP-07容量成绩，也不标最终验收通过。以下原开工说明保留作授权与历史背景，实际进展以本段为准。
 
 ### 本次接续规则（覆盖下方历史交接中的旧硬前置）

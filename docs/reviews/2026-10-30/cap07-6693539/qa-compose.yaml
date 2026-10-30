@@ -1,0 +1,10 @@
+volumes:
+  go-mysql-data:
+    name: fullstack-review-cap07-6693539-mysql
+  go-redis-data:
+    name: fullstack-review-cap07-6693539-redis
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 10.254.63.0/24

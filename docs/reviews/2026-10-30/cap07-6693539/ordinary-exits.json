@@ -1,0 +1,6 @@
+{
+  "vetExit": 0,
+  "scope": "six affected backend packages",
+  "testsExit": 0,
+  "integration": "explicitly disabled; integration skips recorded"
+}

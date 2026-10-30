@@ -1,0 +1,95 @@
+{
+  "source": "6693539ae3715cc28f1b52b7d1583a713659ca4e",
+  "feedDiagnostics": false,
+  "mysqlPort": 3463,
+  "httpScope": "httptest real MySQL/Redis Feed handlers in Go tests",
+  "standaloneApiStarted": false,
+  "goVersion": "go version go1.27.0 windows/amd64",
+  "newVolumes": true,
+  "services": [
+    {
+      "image": "mysql:8.4",
+      "startedAt": "2026-10-30T12:52:02.578701069Z",
+      "nanoCPUs": 4000000000,
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "fullstack-review-cap07-6693539-mysql",
+          "Source": "/var/lib/docker/volumes/fullstack-review-cap07-6693539-mysql/_data",
+          "Destination": "/var/lib/mysql",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Name": null,
+          "Source": "/run/desktop/mnt/host/d/桌面/The ALL/agent/project/code/.reviews/cap07-6693539/worktree/infra/mysql",
+          "Destination": "/docker-entrypoint-initdb.d",
+          "RW": false
+        }
+      ],
+      "health": "healthy",
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "service": "mysql",
+      "network": [
+        {
+          "address": "10.254.63.3",
+          "name": "fullstack-review-cap07-6693539_default",
+          "networkId": "6fdbcc08ee31aede00ab0c60cc87bded8709ce40f3b1f3a57da54db30eb548a4"
+        }
+      ],
+      "name": "/fullstack-review-cap07-6693539-mysql-1",
+      "project": "fullstack-review-cap07-6693539",
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3463"
+          }
+        ]
+      },
+      "id": "b37fb00c1ff382a5c1c4fb88324f163cf3016ac5a0bbf03b4974abd1b6895bd6",
+      "memory": 2147483648
+    },
+    {
+      "image": "redis:7.4-alpine",
+      "startedAt": "2026-10-30T12:52:02.577066223Z",
+      "nanoCPUs": 2000000000,
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "fullstack-review-cap07-6693539-redis",
+          "Source": "/var/lib/docker/volumes/fullstack-review-cap07-6693539-redis/_data",
+          "Destination": "/data",
+          "RW": true
+        }
+      ],
+      "health": "healthy",
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "service": "redis",
+      "network": [
+        {
+          "address": "10.254.63.2",
+          "name": "fullstack-review-cap07-6693539_default",
+          "networkId": "6fdbcc08ee31aede00ab0c60cc87bded8709ce40f3b1f3a57da54db30eb548a4"
+        }
+      ],
+      "name": "/fullstack-review-cap07-6693539-redis-1",
+      "project": "fullstack-review-cap07-6693539",
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6563"
+          }
+        ]
+      },
+      "id": "d5cc38a644fdfba0f15acd6511b20008a3c9a5045172e4a1fa398c9baf45bf39",
+      "memory": 536870912
+    }
+  ],
+  "redisPort": 6563,
+  "project": "fullstack-review-cap07-6693539",
+  "checkedAt": "2026-10-30T12:54:11.7994002Z",
+  "loadStarted": false,
+  "providerCalls": false
+}

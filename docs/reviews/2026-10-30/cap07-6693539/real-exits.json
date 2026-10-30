@@ -1,0 +1,8 @@
+{
+  "migrationFirst": 0,
+  "scope": "fresh isolated MySQL/Redis; six packages including controlled barrier and actual Feed HTTP; no load test",
+  "testsExit": 0,
+  "platform": "windows/amd64",
+  "migrationSecond": 0,
+  "race": "not executed locally; exact source Linux CI checked separately"
+}

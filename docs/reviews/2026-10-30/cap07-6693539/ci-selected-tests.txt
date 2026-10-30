@@ -1,0 +1,29 @@
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.3731999Z === RUN   TestIntegrationFeedCardsHTTPSameBatchBurstAndFirstCancellation
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.5515693Z --- PASS: TestIntegrationFeedCardsHTTPSameBatchBurstAndFirstCancellation (0.18s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.5516567Z === RUN   TestIntegrationFeedCardsHTTPProjectionCompleteness
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.5994193Z --- PASS: TestIntegrationFeedCardsHTTPProjectionCompleteness (0.05s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.5995060Z === RUN   TestIntegrationFeedCardsHTTPColdHotAndFacts
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.6810433Z --- PASS: TestIntegrationFeedCardsHTTPColdHotAndFacts (0.08s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.6811332Z === RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.6812383Z === RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure/version
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.7364016Z === RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure/draft
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.8001825Z === RUN   TestIntegrationFeedCardsHTTPVersionRaceAndFailure/database
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.8732270Z --- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure (0.19s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.8733393Z     --- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure/version (0.06s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.8734399Z     --- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure/draft (0.06s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:42.8735346Z     --- PASS: TestIntegrationFeedCardsHTTPVersionRaceAndFailure/database (0.07s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:51.7308602Z === RUN   TestIntegrationCountPublicationIsolation
+backend-go	UNKNOWN STEP	2026-10-30T11:37:51.7309471Z === RUN   TestIntegrationCountPublicationIsolation/set
+backend-go	UNKNOWN STEP	2026-10-30T11:37:51.8537608Z === RUN   TestIntegrationCountPublicationIsolation/del
+backend-go	UNKNOWN STEP	2026-10-30T11:37:51.8646959Z --- PASS: TestIntegrationCountPublicationIsolation (0.13s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:51.8647744Z     --- PASS: TestIntegrationCountPublicationIsolation/set (0.12s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:51.8648552Z     --- PASS: TestIntegrationCountPublicationIsolation/del (0.01s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:53.9350665Z --- PASS: TestIntegrationCardsRedisBadPayloadAndType (0.01s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:53.9351398Z     --- PASS: TestIntegrationCardsRedisBadPayloadAndType/bad-json (0.00s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:53.9352476Z     --- PASS: TestIntegrationCardsRedisBadPayloadAndType/null-image (0.00s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:53.9353079Z     --- PASS: TestIntegrationCardsRedisBadPayloadAndType/wrong-type (0.00s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:53.9353766Z     --- PASS: TestIntegrationCardsRedisBadPayloadAndType/oversized-payload (0.00s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:53.9834059Z --- PASS: TestIntegrationCardsOwnedRedisExpiryRebuilds (0.05s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:53.9911691Z --- PASS: TestIntegrationCardsDisconnectedRedisUsesRealSQL (0.01s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:54.0015946Z --- PASS: TestIntegrationCardsUnavailableVersionAndSQLFailureDoNotCacheEmpty (0.01s)
+backend-go	UNKNOWN STEP	2026-10-30T11:37:54.2621460Z --- PASS: TestIntegrationCardsRealSlowRedisPipelineCloseConverges (0.26s)

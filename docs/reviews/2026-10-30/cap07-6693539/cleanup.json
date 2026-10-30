@@ -1,0 +1,32 @@
+{
+  "removedVolumes": false,
+  "affectedOtherServices": false,
+  "loadStarted": false,
+  "checkedAt": "2026-10-30T12:54:15.2026882Z",
+  "standaloneApiStarted": false,
+  "containers": [
+    {
+      "volumesPreserved": [
+        "fullstack-review-cap07-6693539-mysql"
+      ],
+      "oomKilled": false,
+      "project": "fullstack-review-cap07-6693539",
+      "finishedAt": "2026-10-30T12:54:13.442363695Z",
+      "running": false,
+      "id": "b37fb00c1ff382a5c1c4fb88324f163cf3016ac5a0bbf03b4974abd1b6895bd6",
+      "exitCode": 0
+    },
+    {
+      "volumesPreserved": [
+        "fullstack-review-cap07-6693539-redis"
+      ],
+      "oomKilled": false,
+      "project": "fullstack-review-cap07-6693539",
+      "finishedAt": "2026-10-30T12:54:14.405115346Z",
+      "running": false,
+      "id": "d5cc38a644fdfba0f15acd6511b20008a3c9a5045172e4a1fa398c9baf45bf39",
+      "exitCode": 0
+    }
+  ],
+  "sessionScope": "only random test-owned sessions; test cleanup completed; no k6 credential cohort created"
+}

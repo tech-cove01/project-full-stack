@@ -2,6 +2,10 @@
 
 2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
+## 2026-10-30 容量交付后的接续
+
+先读根STATUS。本轮GO-073-CAP实施、自测和收尾已交，下一步为[代表档独立复跑](evidence/2026-10-30-go073-cap/qa-handoff.md)，不是重开GO-072/075/076功能。实际应用构建、两种读分布、交易对账及限制见[总报告](evidence/2026-10-30-go073-cap/report.md)。新自有卷、正式负载错峰，保留实现者旧卷；核验通过后再更新本地求职指标与实际录屏。下方迁移指令保留历史背景，当前动作由STATUS覆盖。
+
 ## 可直接交付的执行指令
 
 ~~~text

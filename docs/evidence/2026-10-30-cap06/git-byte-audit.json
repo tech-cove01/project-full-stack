@@ -1,0 +1,958 @@
+{
+  "task": "CAP-06",
+  "at": "2026-10-30T10:20:24.301857+00:00",
+  "checkedHead": "aa59fed1d6c79dcfc87db5895da012660bae5667",
+  "method": "Git cat-file batch raw blob bytes vs working tree and saved audit declarations",
+  "filesChecked": 189,
+  "declarationsChecked": 58,
+  "worktreeGitMismatches": [],
+  "declaredMismatches": [],
+  "checks": [
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-off-build.txt",
+      "bytes": 3183,
+      "sha256": "52b89c0dec24fc2a40bd5e016836ed1cf8c047ae10f139af975ba66632814e8d"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-off-health.json",
+      "bytes": 1569,
+      "sha256": "897a523a0489513e6ae2cf77a3ef129b452f17850eca3c1fdd2bf0798e1c58b5"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-off-stop.json",
+      "bytes": 257,
+      "sha256": "67029e084a55ae7fed01477f5b3bb5d0d648f001717a02970cc1bdbdd7444a39"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-off.json",
+      "bytes": 657,
+      "sha256": "3a89e5c11d94def04cfd130675145d96ed45aa39fc9eaffc500cf478ac019ab3"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-off.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-off.stdout.txt",
+      "bytes": 377,
+      "sha256": "55e160ee5737d83bd8163e70f43f3ee5ae86825199efb46bcb89b7a3acfb9882"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-on-build.txt",
+      "bytes": 3183,
+      "sha256": "52b89c0dec24fc2a40bd5e016836ed1cf8c047ae10f139af975ba66632814e8d"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-on-health.json",
+      "bytes": 6806,
+      "sha256": "beeb2ba19c1421f06d656cf1d9bd50b619f9742abd91d6b7133e75ae439bb70f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-on.json",
+      "bytes": 655,
+      "sha256": "be0702471c18461f9fa7641fcc4c97658262a5632e48b29d5763323b185d0c34"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-on.stderr.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/api-baseline-on.stdout.txt",
+      "bytes": 377,
+      "sha256": "f06768854b40ec94bfafe8df2de2919c942e4ea746f9d6d68beb65021d439b82"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/audit.json",
+      "bytes": 29960,
+      "sha256": "3f10d8d98a70bb46f2e183a06f422bed6c0debdf2d8929c824b9e483320d8dda"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/audit.py",
+      "bytes": 9706,
+      "sha256": "6f31434dee3b1cff96836b9b414f7171419d28e5696bc4a36de7fd1f0a37faa9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-command.json",
+      "bytes": 1111,
+      "sha256": "2fdac9091f3b30d56960faa27977ac69530e04496a0e259efe50d0bd9f523df9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/done.json",
+      "bytes": 151,
+      "sha256": "3fb757df72b180d0afc6f6860417474878cbd7b01246ded4324847d12a677a1d"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/exit-status.json",
+      "bytes": 984,
+      "sha256": "2f37a5c1289340af0c353e833ab569c3500631372ec4e13b2097204f651b64f9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/resources.ndjson",
+      "bytes": 500929,
+      "sha256": "9325e02ce16644c4c4a72b8255bde4005ee98950011180e78099b4596184e0d0"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/sampler-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-control/stage-console.txt",
+      "bytes": 1234,
+      "sha256": "f011ca67b7edf3e70f9963ebcb600144dea02f23354e06ff7ff1499e1ce8ec26"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic-console.txt",
+      "bytes": 157,
+      "sha256": "d3d4fd905b63527d800be6798aff3722937665581e06f6c3deea0c11990ffd7c"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/goroutine-1.pprof",
+      "bytes": 6013,
+      "sha256": "e6e38638c97adf2a536e7b3458d6ced92993cbe75318d1262906d6b86a314620"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/manifest.json",
+      "bytes": 3922,
+      "sha256": "a5cff855da07b148c2fa8f61a1737082976374f5a4a23619d1957bc453e2ee9d"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/timeline.ndjson",
+      "bytes": 2438230,
+      "sha256": "d8e1452d6c7cc50f3152fb326b9f814a4a3eb0c87c9f450878c83b4dd7909b83"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-diagnostic/trigger-1-window.json",
+      "bytes": 2057111,
+      "sha256": "82dc57a1578152e367a4e23da3c9cb1603d857e6604393bc946ca04e99db3fe8"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/access-delta.json",
+      "bytes": 5922,
+      "sha256": "50e63da4fff824d0c70edb17faf0bf8bb4da38da9703c96f9e0e4bf8ea49c06f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/after.json",
+      "bytes": 36594,
+      "sha256": "ecd0ea49c474ff5af9aa9def61e758db98e56a47e8d3bde3d7c6eb705fd31abf"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/before.json",
+      "bytes": 36529,
+      "sha256": "4f37fec23d90fe3afc5656259411ef41d46de044543efafd3158e96e13ea8c92"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/process.json",
+      "bytes": 88,
+      "sha256": "43596e10fe0d15ca58cedeb909030a3455191c9f4115f006ef5a765b877644a9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/result.json",
+      "bytes": 3150,
+      "sha256": "123f9425fb968eda385b13e13ed00bff29fece50b60b24d7840ef92b9529c8b8"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/stable-console.txt",
+      "bytes": 2085,
+      "sha256": "a8c14269841808457880d1d1f689acd2b3ed552183a6454834ac9cbbad6fe4aa"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/stable-process.json",
+      "bytes": 88,
+      "sha256": "43596e10fe0d15ca58cedeb909030a3455191c9f4115f006ef5a765b877644a9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/stable-summary.json",
+      "bytes": 4773,
+      "sha256": "b10a0d55573329b268b449189cd058c02c98fc5dc5d4186b4914e70b9ff92179"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/warm-before.json",
+      "bytes": 36525,
+      "sha256": "bf209426002f4a6b6826dc58b26262b3e1029c84213f03043ff722b0e4360d34"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/warm-console.txt",
+      "bytes": 2066,
+      "sha256": "6c800a970560a177e1ccff552e9de5c1ac1e15b6899c5aac2661c45d19b72164"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/warm-process.json",
+      "bytes": 86,
+      "sha256": "61f32015e45e483a656e73c6f33a1dc60ec8a5c94f2a512feaebe2ef2599f4d3"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-load/warm-summary.json",
+      "bytes": 4776,
+      "sha256": "1e42b9452210b87b983456a45aa2ce015e89c41881e874f9d350d047d2e9ee0f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-stage-exit.json",
+      "bytes": 287,
+      "sha256": "1f56288c6316d3ddf913e2d8bf597ea02e326782f6b8c27b852239e441e7f80f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-1-summary.json",
+      "bytes": 144881,
+      "sha256": "409b71b06b145efb6377398a86e53e23dcef42ea854797e0ba007f3c301e7a6b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-command.json",
+      "bytes": 1111,
+      "sha256": "b2d18852fbd786e98df6977d77a29bf9a34a9b477d634e2a9d63dd56c26e761d"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/done.json",
+      "bytes": 151,
+      "sha256": "cc4c0ebd2b864c5e43a4615430b442fdc103356d53b74019c338ebd2011747fb"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/exit-status.json",
+      "bytes": 985,
+      "sha256": "5b5a5340319e1552a425ef86821548106335bfab317463fc616bdcb38b3afc9b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/resources.ndjson",
+      "bytes": 2738373,
+      "sha256": "96e558dd0d339c158a7b4253e38e30952e3737c9f700154b5327e4742e6d3e54"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/sampler-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/stage-console.txt",
+      "bytes": 1228,
+      "sha256": "d3e83e4813b47ef808a75962a4e487a57099c1e4d7f07022a3eae0ace45fdf54"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic-console.txt",
+      "bytes": 157,
+      "sha256": "c735fd7af6f09dc7866151b04c7acbb5bc0e04830038ee2ed07a25b6236ddc68"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/manifest.json",
+      "bytes": 1775,
+      "sha256": "d054f360f23478d6d92e26832579d158b8d4b01137c4dce36233e953ac214d99"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/timeline.ndjson",
+      "bytes": 13513840,
+      "sha256": "97dc3668e11a9e71e5708f69aa2d29808579afefff60370571027ca2102857a0"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/access-delta.json",
+      "bytes": 5917,
+      "sha256": "4f66f1f577c74b64ee0b1c1bacf55c8c4e99920cde338981ed94e13af4b61421"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/after.json",
+      "bytes": 36615,
+      "sha256": "623ae420656a071bbb747cfffb86f3863a17e7fff007f4a4bac574690ed51865"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/before.json",
+      "bytes": 36592,
+      "sha256": "5b6a781a76a9ae2702d2b480f219029bc2eaee580d5baa266c6fb57526e8d795"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/process.json",
+      "bytes": 88,
+      "sha256": "74afb596ff214b91aa665ce70be2301507680620cdf7b008cb5fd9829e3c4a64"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/result.json",
+      "bytes": 3144,
+      "sha256": "271c38aad35b4d4f088ba29ba690dad941c2cd6a86c0adbde8009eab9cfc7327"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/stable-console.txt",
+      "bytes": 2081,
+      "sha256": "335bdec238b830de9172f0e1346140cfa076fe1da2dace4b42dbd936456eb9fe"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/stable-process.json",
+      "bytes": 88,
+      "sha256": "74afb596ff214b91aa665ce70be2301507680620cdf7b008cb5fd9829e3c4a64"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/stable-summary.json",
+      "bytes": 4760,
+      "sha256": "9bfdf770d05538185324f152abb3c1b3cfed802a419798cd8cacc49febce3d8b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/warm-before.json",
+      "bytes": 36593,
+      "sha256": "25d5a62f8137c9f39e13a1c9c1f71f94ca32fd25e32b92b1d51d284f84ffd20b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/warm-console.txt",
+      "bytes": 2066,
+      "sha256": "0491a5ace78ccdbdfaa4aa5bd84c6245503ed69429b735a2300b002303dc0dbb"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/warm-process.json",
+      "bytes": 86,
+      "sha256": "ccbe6730b761c9583971c998f4db1ec4a98e3aef04ed072d02a3dc0478718ea9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/warm-summary.json",
+      "bytes": 4816,
+      "sha256": "052b8698a2b95aceeed57350749c6e1aba9eb1a50bdd59714e802cd932924c09"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-stage-exit.json",
+      "bytes": 287,
+      "sha256": "62f838c8804a85b1dfbec10c5c0165d83089f94481dea5fa2abd727c33829fea"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-2-summary.json",
+      "bytes": 4146,
+      "sha256": "dbdd93013924c2ec3d98552fbc24ec2468d87d1d2cca99f5accee213a6073823"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-command.json",
+      "bytes": 1111,
+      "sha256": "7f44721a06c9dc4b65913d2ec879fcfd748a774cc7fce6d4db1729f6cf965d06"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/done.json",
+      "bytes": 151,
+      "sha256": "366e14a03a22eef841cf6d715265223ea46d2a8488d2d364668fc5d175c211e2"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/exit-status.json",
+      "bytes": 984,
+      "sha256": "c5147a6f29dd43b7d505869f788220f84fd0c88621efc246e75ff6edbab919ee"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/resources.ndjson",
+      "bytes": 2738613,
+      "sha256": "95ee6c8de11b3bb96dcc515f69926e5337a957754c2b750c746a11cd7db6a0d3"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/sampler-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/stage-console.txt",
+      "bytes": 1223,
+      "sha256": "cc868eb07b8d69a10f3773eedc331f573da46d525190dde75015f4790d71b2b3"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic-console.txt",
+      "bytes": 157,
+      "sha256": "ac5b802acd4fe1f3f05ab39549c9af594fcd1799f2edb9471c7fef7beab9cbb4"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/manifest.json",
+      "bytes": 1778,
+      "sha256": "71ac93e5212cdc20514790caec3a5cf3e056d07001381b3624a0ac1c2595d488"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/timeline.ndjson",
+      "bytes": 13441405,
+      "sha256": "9e48819dc9ce4b086062dfb727179dcb0df8cdfbd2e60873207bc4cc6cd4396c"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/access-delta.json",
+      "bytes": 5756,
+      "sha256": "968e358e8e487e18023ef8e293e957ab171df653e240c2295f3803716d87a664"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/after.json",
+      "bytes": 36622,
+      "sha256": "71df963b15389207526daf2d2ffb90d14aed634a6db10e960169e4adf1a4d6b5"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/before.json",
+      "bytes": 36619,
+      "sha256": "717550664bd0bb94e1e9d5bef20f40b16170a1032a221ca243d0652d718a5416"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/process.json",
+      "bytes": 88,
+      "sha256": "7036b4413b3be85abd64416cf6a9ba9f6616e6f1786f1e2d5c9c3b8789cc9351"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/result.json",
+      "bytes": 3139,
+      "sha256": "92aa727e65b305f7c1beec0e5914df919476bbb98231cce1a1d7ce7d231d8979"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/stable-console.txt",
+      "bytes": 2081,
+      "sha256": "ab9c21acb8879aa6e11bfd0068b18b1a62087af9128fe5335a32be391a63a533"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/stable-process.json",
+      "bytes": 88,
+      "sha256": "7036b4413b3be85abd64416cf6a9ba9f6616e6f1786f1e2d5c9c3b8789cc9351"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/stable-summary.json",
+      "bytes": 4937,
+      "sha256": "d18caa5939b413790dd052443f774bf4c4b718e7531c817282411d2654cca7ce"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/warm-before.json",
+      "bytes": 36617,
+      "sha256": "02218de2ef4a8487525444062cc5cdb94dd3bb6d185b97a31ea56cb9a3b77ae9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/warm-console.txt",
+      "bytes": 2066,
+      "sha256": "5e3322d395c8bfdbccb1e0b555d8b79c36f6e79ab26d336287575e174ba294cc"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/warm-process.json",
+      "bytes": 86,
+      "sha256": "3dc4ef515ffed76d5830ee1a78de1c15f532c93970e446cba23718a99407ef08"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/warm-summary.json",
+      "bytes": 4892,
+      "sha256": "8a2a9a768b25fbba0140195b8943c1c6782ad1a6fae146a98850ae019577e61b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-stage-exit.json",
+      "bytes": 287,
+      "sha256": "9946f83ab0d87a71630d83ab3ec185855c9b1750199520eb8978a4d8b11d756a"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-diag-3-summary.json",
+      "bytes": 6597,
+      "sha256": "8f280607e8fc09d749925f65dd677d85d7dbb114d948bd7e968a2d84be084d9b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-command.json",
+      "bytes": 1108,
+      "sha256": "44c8135ba6374f133e887318edf17c05b48ae04320adf77478bc7b7e68724fc1"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-control/done.json",
+      "bytes": 151,
+      "sha256": "0eb9c6462112469148cbf41eba3dcf58dced909e045982aa740ba8d4ec0a41f0"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-control/exit-status.json",
+      "bytes": 982,
+      "sha256": "3546aa7d8becd5be2d9fbf9877cf425b1838e581c6b82ed5e153666d1f0173d4"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-control/resources.ndjson",
+      "bytes": 5386,
+      "sha256": "80c3c9395f5a5009e42cd0b852878459fa4a0e754d506f6208061f4223968632"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-control/sampler-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-control/stage-console.txt",
+      "bytes": 1182,
+      "sha256": "89e2d11fddf39fa5bbc59520543386012fb0120253282aef139a3b054b57ec93"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-diagnostic-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/access-delta.json",
+      "bytes": 5529,
+      "sha256": "8e2dc9615cb31dd183691cae571304ca73a15a64846b59d7ade12c88cdfb007f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/after.json",
+      "bytes": 36469,
+      "sha256": "c660a71da0079f242152077318ea01a6213b63f0b1785aea5fc9589a31811ee0"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/before.json",
+      "bytes": 36466,
+      "sha256": "219c628e4e5aeb6d3db006a00731028ac77f7d6bfe4262e68078c69d911b705c"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/process.json",
+      "bytes": 88,
+      "sha256": "9f5605ea2a130ea39953d1bc149311b8a9dbba54b690389a277fdf4a8a1dc5d4"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/result.json",
+      "bytes": 3094,
+      "sha256": "c308fadd30b608861444b5b7a62cd67f63ab33ef127b868ee38a526a3f67c2b2"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/stable-console.txt",
+      "bytes": 2027,
+      "sha256": "ffa94c879d3b84daf907eca6da35e95fae7c719a140b09356b76107b6c1e4795"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/stable-process.json",
+      "bytes": 88,
+      "sha256": "9f5605ea2a130ea39953d1bc149311b8a9dbba54b690389a277fdf4a8a1dc5d4"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/stable-summary.json",
+      "bytes": 4801,
+      "sha256": "a5cc72093d3690a1df77fd4a64941da89eb74b3789df78782af5430d91148ebb"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/warm-before.json",
+      "bytes": 36072,
+      "sha256": "d89f95dc3b42027d200aac978d031f67fb81bf6613484d523df779b794fced98"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/warm-console.txt",
+      "bytes": 2027,
+      "sha256": "9a6e79159c68e1702feae2d275912cf125a2b8e790550f8f1148bd6602f2de82"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/warm-process.json",
+      "bytes": 86,
+      "sha256": "d699784f00c1062ce2323c9315b1a10fc546e90188a32fa709619af1dbf7e554"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-load/warm-summary.json",
+      "bytes": 4688,
+      "sha256": "0d7417593907378904f722983d82c4530257d082f633d634fa4dbdd69f907ae9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-probe-stage-exit.json",
+      "bytes": 285,
+      "sha256": "31b535455b76cfdcd0e4ae104484f2c16ab013e3ddcbceab6de1fc5de8c59776"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-command.json",
+      "bytes": 1112,
+      "sha256": "5127b9e76d36fa28ab9b10895bcb429abfa9fb4a5a7ef6c73571b3e02a9f2181"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-control/done.json",
+      "bytes": 151,
+      "sha256": "0a1067774925cebadea9d79b1b5083ecc8fee98933a1393335f98ad8b29f76c7"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-control/exit-status.json",
+      "bytes": 983,
+      "sha256": "a05f0f39cf9a212c8eb499a496b517a86d70142548ee101407c7159e55dbc069"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-control/resources.ndjson",
+      "bytes": 9883,
+      "sha256": "f6e7352d33b88dce5ab41eb7a5f47f963711e2997dd510d15bd6b7bbdec4fb7a"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-control/sampler-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-control/stage-console.txt",
+      "bytes": 1221,
+      "sha256": "7f30e4ef0f559377016e673df6da395f390ed02fb8e315ad26a71053903685f2"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-diagnostic-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/access-delta.json",
+      "bytes": 5591,
+      "sha256": "d1f9cfc3bb009bf94664f7ac7ae6f6922df00777daba3b5c0c73c78a64e676c1"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/after.json",
+      "bytes": 36503,
+      "sha256": "f45119df5f9e7e72bdcc6d0fd90d2667b96539dd64deaef72f76bc12c2c56911"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/before.json",
+      "bytes": 36477,
+      "sha256": "c30cad67feaad106a3379de003ed62991cdac91c97d8748a40dd506571fbc6df"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/process.json",
+      "bytes": 88,
+      "sha256": "031da582923e52e64c71ccb136a7629b50698b0c45cad3275947c8b1c9023d5b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/result.json",
+      "bytes": 3135,
+      "sha256": "552bdb34eed7333db6da724770d5e63b9fad05e7f23a53714cb2ca1df5249316"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/stable-console.txt",
+      "bytes": 2066,
+      "sha256": "5172f84b8f44d11de24c75b44900454656ee98e16e18140a388023fabe11db0b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/stable-process.json",
+      "bytes": 88,
+      "sha256": "031da582923e52e64c71ccb136a7629b50698b0c45cad3275947c8b1c9023d5b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/stable-summary.json",
+      "bytes": 4820,
+      "sha256": "0284d81e60ae22d530baada75a5a16c4c6b479a15ef33ce7a1b02919bcc5053a"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/warm-before.json",
+      "bytes": 36474,
+      "sha256": "8178dc05a024f74930bf9989427c9c47abcb997c6043254dd37869d5e589f488"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/warm-console.txt",
+      "bytes": 2058,
+      "sha256": "4b38ddf2262c403686cf48aeb0b9024c83cb35fe6e9f795d2be3e3f2b220f296"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/warm-process.json",
+      "bytes": 86,
+      "sha256": "1d860e22f4b0d57dbafaae31d7344553ba07e98863f02150514cfbda62a9a590"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-load/warm-summary.json",
+      "bytes": 4831,
+      "sha256": "83411aced15a90fed1d9017f8df9fe476d46b93998c63997e96bf16c5b4ab439"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-off-short25-stage-exit.json",
+      "bytes": 285,
+      "sha256": "ef4b7879d794fa8282e86d20aa8316d97f4f3a6f1b0aad95ba328643cfb918bc"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-command.json",
+      "bytes": 1106,
+      "sha256": "e04e7a41c705bb8d92ad9e5751c0da6299d48c2dab99b8d3d015b581f431e353"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-control/done.json",
+      "bytes": 151,
+      "sha256": "dfc992f41554925a682bc78c5ce1eb74cd3a277647174b6af6cbfcf720d1d4e2"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-control/exit-status.json",
+      "bytes": 983,
+      "sha256": "377974c0cdf876f779703b92b3a2050c89b08d4619d91d0256b3db70bbf7202c"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-control/resources.ndjson",
+      "bytes": 12217,
+      "sha256": "7a270b7e5be3e66fdb948be5474caa588bf49a39f718dc992c19ef4a5453cdfc"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-control/sampler-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-control/stage-console.txt",
+      "bytes": 1156,
+      "sha256": "cd81dd5c72a6f2c94158d7de3bdebac4f1f00a2fccf942545d8678a5a47b666f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-diagnostic-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/access-delta.json",
+      "bytes": 5607,
+      "sha256": "58174ce62987038a59f60a49c2268452e3ec769607071c169460746cb86b8108"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/after.json",
+      "bytes": 36513,
+      "sha256": "e636616668b48808d018bb0ab1aeaba540c4cfef023ed8c61cc5cbc5cdeffec6"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/before.json",
+      "bytes": 36512,
+      "sha256": "5bb75137000219b20bdd9ee2d51472e5fb8fb1c67ee0bc4903d378396f1d5934"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/process.json",
+      "bytes": 88,
+      "sha256": "d0ce2690eb410a5519ef7beeafb2bd1313947ef404d9e409b928c1ccb52907b8"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/result.json",
+      "bytes": 3068,
+      "sha256": "5645e02c3d0c2114d028bb43cb6d7a354157e2cdd760a709f5ab6f4709564527"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/stable-console.txt",
+      "bytes": 2028,
+      "sha256": "83a5d9c76691278039204ddf2f56d5e79ad14efe5cbc715e56375bedcd9d2973"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/stable-process.json",
+      "bytes": 88,
+      "sha256": "d0ce2690eb410a5519ef7beeafb2bd1313947ef404d9e409b928c1ccb52907b8"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/stable-summary.json",
+      "bytes": 4793,
+      "sha256": "bddca0dbfb2647ddc2118a9d59c551e64d4cd45df7a291e2eab9d4aa03f0e810"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/warm-before.json",
+      "bytes": 36507,
+      "sha256": "10a364f291b83dd675a202f582e6d5826595e429979f5fa1d5ae9cef03a68102"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/warm-console.txt",
+      "bytes": 2044,
+      "sha256": "85ea61cea7040aa3ccb4d60ecb69f1fc34839bee11c6f15602086e0619252302"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/warm-process.json",
+      "bytes": 86,
+      "sha256": "e20f8d810a1194b57f3a977261109b639a1f8ba60a71aa65f0dac462c1fc6270"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-load/warm-summary.json",
+      "bytes": 4621,
+      "sha256": "4d757afa79371d960733ecbf2d0b9e5745a1e779ce3ec853279ca36190ce8c9a"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-probe-stage-exit.json",
+      "bytes": 285,
+      "sha256": "1714992f5696f57510eef3911a9883acb27074164d9404076e3cd7d7c5cee4c0"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-command.json",
+      "bytes": 1110,
+      "sha256": "9acf4bc8994e470ed098a0427fde789335b2ab54d56786b2e5f02228c0977401"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-control/done.json",
+      "bytes": 151,
+      "sha256": "421f3128f20f4b15833832c94fdb5aecb779df6e80440a75c12a2664bdb4227d"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-control/exit-status.json",
+      "bytes": 983,
+      "sha256": "3554bba678f94a64dad2c6f87515e925c3878a910af58978d8a0408b477646a2"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-control/resources.ndjson",
+      "bytes": 23833,
+      "sha256": "95e141b264b5ebee4c7b75dae4f78e69a4b63b362b7695e0dd096e4286167017"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-control/sampler-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-control/stage-console.txt",
+      "bytes": 1229,
+      "sha256": "5e5e7f7e16546de8fd758bf0d4dfb207f2f8e63bbe6b6e9a9cdd02c3401b4fc1"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-diagnostic-console.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/access-delta.json",
+      "bytes": 5674,
+      "sha256": "97db1593bb621cbde76549250df666dcc14b63037553d1f1ab2674b2f8fd90f8"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/after.json",
+      "bytes": 36525,
+      "sha256": "95be4ab519a5a6165745865b03106877e95999c99f983120709763f35ca0f41e"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/before.json",
+      "bytes": 36519,
+      "sha256": "902aa10bc0dd7dc0ff82f0ac4ba4af14ca6a272d34ddc8a7636734d2445f2fd7"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/process.json",
+      "bytes": 88,
+      "sha256": "8ca5bf9132e9cc64df57808d424770d13f186f897be0afd44e8d7715cab0424b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/result.json",
+      "bytes": 3143,
+      "sha256": "916d2f4ea3edfecd71f59f01385ad05c3a76587977720476ed27c41e153e59ba"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/stable-console.txt",
+      "bytes": 2066,
+      "sha256": "3d5ad4f92eb3b154f4b1ab6e7feeb4984bbb7c50049d4c050c4423af9cbcc3d9"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/stable-process.json",
+      "bytes": 88,
+      "sha256": "8ca5bf9132e9cc64df57808d424770d13f186f897be0afd44e8d7715cab0424b"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/stable-summary.json",
+      "bytes": 4814,
+      "sha256": "99e40af2c23f928691b4846c237990c4396d461af53bec18c6d70fba084a8b48"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/warm-before.json",
+      "bytes": 36513,
+      "sha256": "736297454ad57906579a5b39eb245fe4777b6557459ada9bce5219cbf1627a2d"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/warm-console.txt",
+      "bytes": 2053,
+      "sha256": "5ca564811b3dffb286f960d02ba197de0f4478785feb53e43b290adca274ab99"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/warm-process.json",
+      "bytes": 86,
+      "sha256": "f5019b9ca84c9c6fe7aaf3ac854ad5ef76a64fcfa3e3176f360b2fc51d166d5f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-load/warm-summary.json",
+      "bytes": 4884,
+      "sha256": "2f82a950e3e4da88b615a5f7dd85ba97805e6830dffd3a9e92e0509626ce6f62"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/baseline-on-short25-stage-exit.json",
+      "bytes": 285,
+      "sha256": "1c6396858127d51de12a913bfb684b938888104bc44fe426fb345826442b88ce"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/ci-1bed127.json",
+      "bytes": 10931,
+      "sha256": "899f34ca14bf2e709f2125fa02f163ad39b250e8019f6f90da887c83357b47bc"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/cleanup-progress.json",
+      "bytes": 3157,
+      "sha256": "6af516a8f17c7fe7bb97f764342348c7d55cf76e18a26b2f8cced76ba3bdf468"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/cleanup.json",
+      "bytes": 3157,
+      "sha256": "6af516a8f17c7fe7bb97f764342348c7d55cf76e18a26b2f8cced76ba3bdf468"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/compose-start.txt",
+      "bytes": 978,
+      "sha256": "00ad15b10f3c5123d5acb4defd8b884eafc88e1de7adb292f28ca5d0c1a720d1"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/diagnostic-rounds-summary.json",
+      "bytes": 17356,
+      "sha256": "5051ed65d886bc8baa6f252a7c1d00ac54bb485a45913d3f7d0d109745794c41"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/diagnostic-slot-1.json",
+      "bytes": 243,
+      "sha256": "1cfb7bf0d8eeb1556b816253e0cbb3498f697766e809b556c57e9e2eece429d3"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/diagnostic-slot-2.json",
+      "bytes": 243,
+      "sha256": "083f87f012a37769e4015b5753f7e94d5a563f2d165be2d9d60f63a15bf5b476"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/diagnostic-slot-3.json",
+      "bytes": 243,
+      "sha256": "30fb82d5c472341192117a1ff96780cb91518cbce37a05f403fc464dbee5eeaf"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/environment.json",
+      "bytes": 5644,
+      "sha256": "e1a79a8c84edc3a075a1f5737313060f4277003dbbbd38fb4529435f02cfdc6a"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/fixture-prepare-exit.json",
+      "bytes": 66,
+      "sha256": "64bab279a768a05e3e7feff4078234e6ee8d6e4e24ce3c82be05bb4ac60757e2"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/fixture-prepare.txt",
+      "bytes": 177,
+      "sha256": "b0211d9cba32cafe7190a53dcdb5a6ac5cfd7433e613afa95a63cda0cb2ae48e"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/fixture-provenance.json",
+      "bytes": 528,
+      "sha256": "a3c36764cbcb157aadb845f1fc10a330622c152c381bb349d66d223e0b113e57"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/fixture/finish.json",
+      "bytes": 506,
+      "sha256": "b848f5d032d1bbff662a7493045e0dc1d4104ce0ec8652f3db7cb305330c54c3"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/fixture/fixture.json",
+      "bytes": 91876,
+      "sha256": "31f9b9b4b9a43372cbb147ef6ae24a716d67f7619f8032919393464f7ac2bc2c"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/migrate-exit.json",
+      "bytes": 66,
+      "sha256": "83ac70569831ed7ab825e66b649fc55641b515ed02970784ba9bec879246b6cb"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/migrate.txt",
+      "bytes": 303,
+      "sha256": "e9f9f1ee580bcd968d5a28598e31d4820a117ef50deef32c0f0b07ec7f98d48f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/observation-regression/real-tests-exit.json",
+      "bytes": 464,
+      "sha256": "f6987dcab9d986f6491da8a61364498d002f3e2f73ff2cd2ee2eda1bb51762c1"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/observation-regression/real-tests.txt",
+      "bytes": 10247,
+      "sha256": "1870d27f081a751bbc4df35fa48343a637be7b1bb7f9596584de0057d42c11bf"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/observation-regression/related-checks-exit.json",
+      "bytes": 187,
+      "sha256": "fbded9b788c6263447e4b608a1d65ca4c6300aa6cb87908dc48b372b49106dc4"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/observation-regression/related-tests.txt",
+      "bytes": 275,
+      "sha256": "57b1baf081a38fc56c4d6a90e48418b1938d015a5ae096ceeb3ee9e1e9d21ae6"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/observation-regression/vet.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/observer-setup.json",
+      "bytes": 210,
+      "sha256": "b63149e1b82d81a26102a1a44f817c95015ecd4afcaf38aa8299ead4e7c1db57"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/pre-cleanup-private-value-scan.json",
+      "bytes": 615,
+      "sha256": "de1a5628fb324ecdc2c8e8800d1520d3b9c08806510cc2d01fc878accaf3749f"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/preparation.json",
+      "bytes": 2356,
+      "sha256": "d2538731eabf563ad46d938f01ab83695007a0cdff2228e860967405566090a6"
+    },
+    {
+      "path": "docs/evidence/2026-10-30-cap06/switch-probes.json",
+      "bytes": 6170,
+      "sha256": "8ac6fcfbf5697fa363333dc16dc282ec348744e8dd4b6d7ea1a76fe1b7cef279"
+    }
+  ],
+  "limits": "This file and later prose commits do not self-hash; diagnosis remains unresolved, bytes do not prove cause."
+}

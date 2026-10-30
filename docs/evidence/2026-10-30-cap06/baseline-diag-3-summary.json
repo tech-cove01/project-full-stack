@@ -1,0 +1,263 @@
+{
+  "task": "CAP-06B",
+  "at": "2026-10-30T10:13:04.486387+00:00",
+  "diagnosticRound": 3,
+  "maxRounds": 3,
+  "scoredFormalResult": false,
+  "stableStartedAt": 1793354987942,
+  "stableEndedAt": 1793355169404,
+  "requestResult": {
+    "attempted": 18000,
+    "completedHttpRequests": 18000,
+    "completed": 18000,
+    "incompleteOrUnclassified": 0,
+    "completedButUnclassified": 0,
+    "classificationCoverage": 1,
+    "successful": 18000,
+    "systemErrors": 0,
+    "contentErrors": 0,
+    "httpErrors": 0,
+    "dropped": 0,
+    "targetOffers": 18000,
+    "actualOfferedRatio": 1,
+    "issuedPerNominalSecond": 100,
+    "successfulPerNominalSecond": 100,
+    "systemErrorRate": 0,
+    "systemErrorRatePerCompleted": 0,
+    "allLatency": {
+      "p(95)": 31.51600499999999,
+      "p(99)": 40.9272779999999,
+      "max": 73.7404,
+      "avg": 17.58919206111116,
+      "med": 15.13815,
+      "thresholds": {
+        "p(95)<=200": false,
+        "p(99)<=500": false
+      }
+    },
+    "successfulLatency": {
+      "p(99)": 40.9272779999999,
+      "max": 73.7404,
+      "avg": 17.58919206111116,
+      "med": 15.13815,
+      "p(95)": 31.51600499999999
+    },
+    "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+    "k6Metrics": {
+      "vus": {
+        "value": 1,
+        "min": 1,
+        "max": 5
+      },
+      "vusMax": {
+        "value": 256,
+        "min": 256,
+        "max": 256
+      },
+      "dataReceived": {
+        "count": 170203400,
+        "rate": 945547.7437520738
+      }
+    }
+  },
+  "meetsWorkloadBudget": true,
+  "supervisionOk": true,
+  "resources": {
+    "samples": 37,
+    "complete": 37
+  },
+  "collector": {
+    "successfulPolls": 182,
+    "failedPolls": 0,
+    "captures": [],
+    "firstAt": "2026-10-30T10:09:48.313174+00:00",
+    "lastAt": "2026-10-30T10:12:49.329188+00:00",
+    "maxGapMs": 1045.2851000009105,
+    "coverageComplete": true
+  },
+  "currentStableSlowTraces": [],
+  "sampledSlowTraceSequences": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "requestStageDeltas": {
+    "feed.service": {
+      "count": 17996,
+      "total_ns": 276298900800,
+      "errors": 0,
+      "items": 0
+    },
+    "feed.facts": {
+      "count": 17996,
+      "total_ns": 270349921200,
+      "errors": 0,
+      "items": 0
+    },
+    "feed.counts": {
+      "count": 17996,
+      "total_ns": 5872325300,
+      "errors": 0,
+      "items": 359920
+    },
+    "auth.resolve": {
+      "count": 17994,
+      "total_ns": 24807057400,
+      "errors": 0,
+      "items": 0
+    },
+    "sql.begin_acquire_roundtrip": {
+      "count": 17995,
+      "total_ns": 42724422200,
+      "errors": 0,
+      "items": 0
+    },
+    "sql.transaction_hold": {
+      "count": 17996,
+      "total_ns": 227414561200,
+      "errors": 0,
+      "items": 0
+    },
+    "sql.statement_total": {
+      "count": 72401,
+      "total_ns": 204480261000,
+      "errors": 0,
+      "items": 0
+    },
+    "sql.call_until_rows": {
+      "count": 72401,
+      "total_ns": 193384468500,
+      "errors": 0,
+      "items": 0
+    },
+    "sql.exec_call": {
+      "count": 0,
+      "total_ns": 0,
+      "errors": 0,
+      "items": 0
+    },
+    "sql.prepare_call": {
+      "count": 0,
+      "total_ns": 0,
+      "errors": 0,
+      "items": 0
+    },
+    "redis.command_total": {
+      "count": 21951,
+      "total_ns": 27702241100,
+      "errors": 0,
+      "items": 0
+    },
+    "redis.pipeline_total": {
+      "count": 0,
+      "total_ns": 0,
+      "errors": 0,
+      "items": 0
+    },
+    "redis.dial": {
+      "count": 0,
+      "total_ns": 0,
+      "errors": 0,
+      "items": 0
+    },
+    "counts.get_many": {
+      "count": 17996,
+      "total_ns": 5863040100,
+      "errors": 0,
+      "items": 359920
+    },
+    "counts.publication_wait": {
+      "count": 69756,
+      "total_ns": 129156300,
+      "errors": 0,
+      "items": 0
+    },
+    "counts.publication_hold": {
+      "count": 69756,
+      "total_ns": 1383736400,
+      "errors": 0,
+      "items": 0
+    },
+    "counts.redis_read": {
+      "count": 2588,
+      "total_ns": 2983698100,
+      "errors": 0,
+      "items": 51760
+    },
+    "counts.redis_write": {
+      "count": 1369,
+      "total_ns": 1351396500,
+      "errors": 0,
+      "items": 1369
+    },
+    "counts.redis_delete": {
+      "count": 0,
+      "total_ns": 0,
+      "errors": 0,
+      "items": 0
+    },
+    "counts.cold_sql": {
+      "count": 419,
+      "total_ns": 1005862000,
+      "errors": 0,
+      "items": 1369
+    }
+  },
+  "slowTraceScope": "Only traces fully within this stable command window enter currentStableSlowTraces; retained prior ring entries are not new traces.",
+  "sourceFiles": {
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/manifest.json": {
+      "bytes": 1778,
+      "sha256": "71ac93e5212cdc20514790caec3a5cf3e056d07001381b3624a0ac1c2595d488"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-diagnostic/timeline.ndjson": {
+      "bytes": 13441405,
+      "sha256": "9e48819dc9ce4b086062dfb727179dcb0df8cdfbd2e60873207bc4cc6cd4396c"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/result.json": {
+      "bytes": 3139,
+      "sha256": "92aa727e65b305f7c1beec0e5914df919476bbb98231cce1a1d7ce7d231d8979"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-load/stable-summary.json": {
+      "bytes": 4937,
+      "sha256": "d18caa5939b413790dd052443f774bf4c4b718e7531c817282411d2654cca7ce"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-3-control/resources.ndjson": {
+      "bytes": 2738613,
+      "sha256": "95ee6c8de11b3bb96dcc515f69926e5337a957754c2b750c746a11cd7db6a0d3"
+    }
+  },
+  "limits": [
+    "Three-round diagnostic budget exhausted. No fourth round or formal 06D pass is inferred.",
+    "No cleanup or next-stage implementation started by this runner; API and credentials retained for root causal review.",
+    "Extra diagnostic polling makes these diagnostic observations, not formal capacity acceptance."
+  ]
+}

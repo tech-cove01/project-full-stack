@@ -1,0 +1,8 @@
+{
+  "race": "not executed on Windows",
+  "testsExit": 0,
+  "platform": "windows/amd64",
+  "migrationFirst": 0,
+  "scope": "fresh isolated MySQL/Redis; taildiag storage wrapper plus social/communitycache regressions; no load test",
+  "migrationSecond": 0
+}

@@ -1,0 +1,32 @@
+{
+  "apiStarted": false,
+  "containers": [
+    {
+      "id": "380c02138b6ffc67aa6d7bbc7b2c99d1e1f9a826a895b9d34f5262c30f688918",
+      "oomKilled": false,
+      "exitCode": 0,
+      "finishedAt": "2026-10-30T10:36:59.000152852Z",
+      "project": "fullstack-review-cap06-a3c64b5",
+      "volumesPreserved": [
+        "fullstack-review-cap06-a3c64b5-mysql"
+      ],
+      "running": false
+    },
+    {
+      "id": "55d9b9e87c4124467881d2e6947726149667a2a7aab1320f540cc1e74dc61ee1",
+      "oomKilled": false,
+      "exitCode": 0,
+      "finishedAt": "2026-10-30T10:36:59.987887906Z",
+      "project": "fullstack-review-cap06-a3c64b5",
+      "volumesPreserved": [
+        "fullstack-review-cap06-a3c64b5-redis"
+      ],
+      "running": false
+    }
+  ],
+  "loadStarted": false,
+  "removedVolumes": false,
+  "affectedOtherServices": false,
+  "checkedAt": "2026-10-30T10:37:00.7871158Z",
+  "createdSessionTokens": false
+}

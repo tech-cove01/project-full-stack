@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-30T09:52:57.387333+00:00",
+  "user": "cap06_825a82cd767e",
+  "privileges": [
+    "SELECT project_full_stack_go.*",
+    "SELECT performance_schema.*"
+  ],
+  "passwordExported": false
+}

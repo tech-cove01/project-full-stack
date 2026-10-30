@@ -1,0 +1,10 @@
+{
+  "checked": "all Docker IPAM subnets and Windows IPv4 nondefault routes",
+  "dockerSubnetCount": 30,
+  "overlaps": false,
+  "globalDockerConfigurationChanged": false,
+  "hostNondefaultRouteCount": 38,
+  "selectedCidr": "10.253.51.0/24",
+  "networksRemoved": false,
+  "rawDetailsKeptPrivate": true
+}

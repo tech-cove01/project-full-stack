@@ -8,6 +8,7 @@
 $repo = (Get-Location).Path
 $env:GO_MYSQL_PORT='3451'
 $env:GO_REDIS_PORT='6551'
+$env:CAP_READ_SUBNET='10.253.51.0/24' # 本轮先核对Docker IPAM与host routes确认无重叠；复跑需重新检查
 $env:MYSQL_HOST='127.0.0.1'
 $env:MYSQL_PORT='3451'
 $env:MYSQL_DATABASE='project_full_stack_go'
@@ -34,7 +35,7 @@ Get-NetTCPConnection -State Listen -ErrorAction SilentlyContinue |
 
 # 第一次使用独占项目时确认该名称尚未被别人占用；复用自己的已建环境时查标签、端口和卷。
 docker ps -a --filter label=com.docker.compose.project=project-full-stack-cap-read --format '{{.ID}} {{.Names}} {{.Status}} {{.Ports}}'
-docker compose -p project-full-stack-cap-read -f compose.go.yaml -f scripts/load/compose.capacity.yaml up -d --wait mysql redis
+docker compose -p project-full-stack-cap-read -f compose.go.yaml -f scripts/load/compose.capacity.yaml -f scripts/load/compose.capacity-read.yaml up -d --wait mysql redis
 node scripts/migrate.mjs
 ```
 
@@ -103,7 +104,7 @@ if ($LASTEXITCODE -ne 0) { throw 'preserve fixture credential location and retry
 
 # API退出由根 agent 按已记录的PID/创建时间确认后执行，勿按名称批量停止。
 # 专用容器正常停止，保留卷、SQL夹具、原始失败与所有证据。
-docker compose -p project-full-stack-cap-read -f compose.go.yaml -f scripts/load/compose.capacity.yaml stop -t 60 mysql redis
+docker compose -p project-full-stack-cap-read -f compose.go.yaml -f scripts/load/compose.capacity.yaml -f scripts/load/compose.capacity-read.yaml stop -t 60 mysql redis
 ```
 
 准备中途失败也应复用保留的 `fixture.json` 执行 `finish`，不能把未完成夹具当成功覆盖。SQL数据不清理，Redis不flush，卷不删除。若根固定构建/API已停，先按同一配置恢复自己的API再注销会话。

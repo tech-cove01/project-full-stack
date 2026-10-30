@@ -1,0 +1,3 @@
+ Network project-full-stack-cap-read_default Creating 
+ Network project-full-stack-cap-read_default Error Error response from daemon: all predefined address pools have been fully subnetted
+failed to create network project-full-stack-cap-read_default: Error response from daemon: all predefined address pools have been fully subnetted

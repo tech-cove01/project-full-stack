@@ -1,0 +1,9 @@
+# Only for the owned project-full-stack-cap-read capacity environment.
+# Select a private CIDR after checking existing Docker IPAM and host routes.
+# An explicit subnet avoids changing global Docker pools or deleting networks
+# when the workstation's predefined address pools are already exhausted.
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: "${CAP_READ_SUBNET:?set an inspected non-overlapping private CIDR}"

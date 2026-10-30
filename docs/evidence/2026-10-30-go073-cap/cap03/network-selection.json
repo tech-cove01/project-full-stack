@@ -1,0 +1,8 @@
+{
+  "selected": "10.253.51.0/24",
+  "dockerSubnetCount": 30,
+  "hostNondefaultRouteCount": 38,
+  "overlaps": false,
+  "globalDockerConfigurationChanged": false,
+  "networksRemoved": false
+}

@@ -1,0 +1,13 @@
+{
+  "pid": 44828,
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap08-build-46ddefc\\capacity.exe",
+  "creationUnixMs": 1793367852474.5657,
+  "createdAtUtc": "2026-10-30T13:44:12.474566+00:00",
+  "sourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+  "expectedVersion": "capacity-46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+  "sha256": "e65decd1f87a2667d3391954aa20de3b9ae3fcec3e99f41b2812a29d43da0ce2",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap08-2f5549091e83\\env-diag1.private.json",
+  "label": "diag1",
+  "tailEnabledRequested": true,
+  "phase": "diagnostic"
+}

@@ -1,0 +1,7 @@
+{
+  "task": "CAP-08",
+  "stage": "formal-1-multi100",
+  "slot": "formal-1",
+  "at": "2026-10-30T13:55:07.157129+00:00",
+  "failedStartsConsumeSlot": true
+}

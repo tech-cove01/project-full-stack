@@ -1,0 +1,83 @@
+community-kafka	Community events and note search against real dependencies	﻿2026-10-30T13:42:49.6897923Z ##[group]Run go test -race -count=1 -p 1 -v ./internal/communityrelay ./internal/communityconsumer ./internal/notesearch
+community-kafka	Community events and note search against real dependencies	2026-10-30T13:42:49.6899210Z ^[[36;1mgo test -race -count=1 -p 1 -v ./internal/communityrelay ./internal/communityconsumer ./internal/notesearch^[[0m
+community-kafka	Consumer startup before first Kafka topic creation	﻿2026-10-30T13:43:28.1394778Z ##[group]Run go test -race -count=1 -run '^TestIntegration(FreshTopicStartsAllGroupsAndPreservesOffsets|UnavailableBrokerCancelsReadiness)$' -v ./internal/communityconsumer
+community-kafka	Consumer startup before first Kafka topic creation	2026-10-30T13:43:28.1396171Z ^[[36;1mgo test -race -count=1 -run '^TestIntegration(FreshTopicStartsAllGroupsAndPreservesOffsets|UnavailableBrokerCancelsReadiness)$' -v ./internal/communityconsumer^[[0m
+backend-go	Run go test -race -count=1 ./...	﻿2026-10-30T13:42:14.0391748Z ##[group]Run go test -race -count=1 ./...
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0392660Z ^[[36;1mgo test -race -count=1 ./...^[[0m
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0422899Z shell: /usr/bin/bash -e {0}
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0423639Z env:
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0424001Z   GOTOOLCHAIN: local
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0424423Z   GO_ENV: development
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0424842Z   MYSQL_HOST: 127.0.0.1
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0425239Z   MYSQL_PORT: 3308
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0425648Z   MYSQL_DATABASE: project_full_stack_go
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0426155Z   MYSQL_USER: fullstack
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0426570Z   MYSQL_PASSWORD: fullstack_go_dev_only
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0427033Z   REDIS_HOST: 127.0.0.1
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0427416Z   REDIS_PORT: 6380
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:14.0427835Z ##[endgroup]
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:18.5670843Z ?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:20.8236622Z ok  	github.com/cityloop/fullstack-go/cmd/capacity-trade	1.048s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:20.8264407Z ?   	github.com/cityloop/fullstack-go/cmd/community-projector	[no test files]
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:20.8268060Z ?   	github.com/cityloop/fullstack-go/cmd/note-search	[no test files]
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:20.8272488Z ?   	github.com/cityloop/fullstack-go/cmd/recount	[no test files]
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:20.8274383Z ?   	github.com/cityloop/fullstack-go/cmd/review	[no test files]
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:22.2982860Z ok  	github.com/cityloop/fullstack-go/internal/activity	1.054s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:22.3500543Z ok  	github.com/cityloop/fullstack-go/internal/activitypub	1.036s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:22.8557758Z ok  	github.com/cityloop/fullstack-go/internal/ai	1.336s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:24.9668647Z ok  	github.com/cityloop/fullstack-go/internal/aichat	1.088s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:25.2344325Z ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	1.033s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:25.5572741Z ok  	github.com/cityloop/fullstack-go/internal/aitool	1.025s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:25.6014833Z ok  	github.com/cityloop/fullstack-go/internal/auth	1.035s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:26.0608778Z ok  	github.com/cityloop/fullstack-go/internal/communitycache	1.028s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:27.1281309Z ok  	github.com/cityloop/fullstack-go/internal/communitycards	1.067s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:29.3640952Z ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	1.103s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:29.3642226Z ok  	github.com/cityloop/fullstack-go/internal/communityprojection	1.051s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:30.1570135Z ok  	github.com/cityloop/fullstack-go/internal/communityrelay	1.073s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:30.2588238Z ok  	github.com/cityloop/fullstack-go/internal/merchant	1.035s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:30.4752214Z ok  	github.com/cityloop/fullstack-go/internal/merchantorder	1.037s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:31.5756960Z ok  	github.com/cityloop/fullstack-go/internal/note	1.062s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:33.9807663Z ok  	github.com/cityloop/fullstack-go/internal/notesearch	1.152s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:33.9808735Z ok  	github.com/cityloop/fullstack-go/internal/order	1.045s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:33.9809744Z ok  	github.com/cityloop/fullstack-go/internal/orderadmission	1.027s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:34.2264692Z ok  	github.com/cityloop/fullstack-go/internal/ordercomp	1.026s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:34.9689565Z ok  	github.com/cityloop/fullstack-go/internal/orderreview	1.024s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:36.8345146Z ok  	github.com/cityloop/fullstack-go/internal/orderstream	1.041s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:36.9212025Z ok  	github.com/cityloop/fullstack-go/internal/ordertimeout	1.107s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:36.9213855Z ok  	github.com/cityloop/fullstack-go/internal/outbox	1.027s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:38.1322605Z ok  	github.com/cityloop/fullstack-go/internal/platform/app	1.247s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:38.1897831Z ok  	github.com/cityloop/fullstack-go/internal/platform/config	1.037s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:38.7178371Z ok  	github.com/cityloop/fullstack-go/internal/platform/database	1.028s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:39.0224939Z ok  	github.com/cityloop/fullstack-go/internal/platform/diagnostics	1.075s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:40.1395855Z ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	1.061s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:41.0819050Z ok  	github.com/cityloop/fullstack-go/internal/platform/taildiag	1.426s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:41.7567184Z ok  	github.com/cityloop/fullstack-go/internal/shop	1.053s
+backend-go	Run go test -race -count=1 ./...	2026-10-30T13:42:42.3160700Z ok  	github.com/cityloop/fullstack-go/internal/social	1.035s
+backend-go	Auth against real MySQL and Redis	﻿2026-10-30T13:42:42.5103471Z ##[group]Run go test -race -count=1 -v ./internal/auth
+backend-go	Auth against real MySQL and Redis	2026-10-30T13:42:42.5103937Z ^[[36;1mgo test -race -count=1 -v ./internal/auth^[[0m
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	﻿2026-10-30T13:42:47.1997188Z ##[group]Run go test -race -count=1 -v ./internal/platform/taildiag
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	2026-10-30T13:42:47.1998105Z ^[[36;1mgo test -race -count=1 -v ./internal/platform/taildiag^[[0m
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	2026-10-30T13:42:47.8529662Z === RUN   TestOldestActiveMovesWhenOldestOperationEnds
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	2026-10-30T13:42:47.8531231Z --- PASS: TestOldestActiveMovesWhenOldestOperationEnds (0.00s)
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	2026-10-30T13:42:47.8532644Z === RUN   TestActiveClockBudgetMarksMissingAgesInsteadOfZero
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	2026-10-30T13:42:47.8584664Z --- PASS: TestActiveClockBudgetMarksMissingAgesInsteadOfZero (0.01s)
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	2026-10-30T13:42:47.8586097Z === RUN   TestSharedObservationHasIndependentScopeAndLifetime
+backend-go	Feed diagnostic storage wrappers against real MySQL and Redis	2026-10-30T13:42:47.8608026Z --- PASS: TestSharedObservationHasIndependentScopeAndLifetime (0.00s)
+backend-go	Shops against real MySQL	﻿2026-10-30T13:42:49.0997074Z ##[group]Run go test -race -count=1 -v ./internal/shop
+backend-go	Shops against real MySQL	2026-10-30T13:42:49.0997543Z ^[[36;1mgo test -race -count=1 -v ./internal/shop^[[0m
+backend-go	Merchant permissions against real MySQL and Redis	﻿2026-10-30T13:42:51.3664441Z ##[group]Run go test -race -count=1 -v ./internal/merchant
+backend-go	Merchant permissions against real MySQL and Redis	2026-10-30T13:42:51.3664979Z ^[[36;1mgo test -race -count=1 -v ./internal/merchant^[[0m
+backend-go	Activities and publication against real MySQL and Redis	﻿2026-10-30T13:42:53.6323765Z ##[group]Run go test -race -count=1 -p 1 -v ./internal/activity ./internal/activitypub ./internal/outbox
+backend-go	Activities and publication against real MySQL and Redis	2026-10-30T13:42:53.6324551Z ^[[36;1mgo test -race -count=1 -p 1 -v ./internal/activity ./internal/activitypub ./internal/outbox^[[0m
+backend-go	Order admission persistence and recovery against real MySQL and Redis	﻿2026-10-30T13:42:59.8226505Z ##[group]Run go test -race -count=1 -p 1 -v ./internal/orderadmission ./internal/order ./internal/orderstream ./internal/ordertimeout
+backend-go	Order admission persistence and recovery against real MySQL and Redis	2026-10-30T13:42:59.8227496Z ^[[36;1mgo test -race -count=1 -p 1 -v ./internal/orderadmission ./internal/order ./internal/orderstream ./internal/ordertimeout^[[0m
+backend-go	Community, AI and knowledge against real MySQL and Redis	﻿2026-10-30T13:43:26.2670935Z ##[group]Run go test -race -count=1 -p 1 -v ./internal/note ./internal/social ./internal/aitool ./internal/aiknowledge ./internal/aichat ./internal/communitycache ./internal/communitycards ./internal/communityprojection
+backend-go	Community, AI and knowledge against real MySQL and Redis	2026-10-30T13:43:26.2672497Z ^[[36;1mgo test -race -count=1 -p 1 -v ./internal/note ./internal/social ./internal/aitool ./internal/aiknowledge ./internal/aichat ./internal/communitycache ./internal/communitycards ./internal/communityprojection^[[0m
+backend-go	Community, AI and knowledge against real MySQL and Redis	2026-10-30T13:43:30.0043959Z === RUN   TestIntegrationFeedObservationSeparatesHTTPAndSharedWork
+backend-go	Community, AI and knowledge against real MySQL and Redis	2026-10-30T13:43:30.0675562Z --- PASS: TestIntegrationFeedObservationSeparatesHTTPAndSharedWork (0.06s)
+backend-go	Community, AI and knowledge against real MySQL and Redis	2026-10-30T13:43:40.8349133Z === RUN   TestIntegrationCardsControlledSharedObservation
+backend-go	Community, AI and knowledge against real MySQL and Redis	2026-10-30T13:43:40.8352714Z --- SKIP: TestIntegrationCardsControlledSharedObservation (0.00s)
+backend-go	Community, AI and knowledge against real MySQL and Redis	2026-10-30T13:43:41.1746228Z === RUN   TestObservationsSeparateSharedSQLAndSlotQueueAfterCallerCancellation
+backend-go	Community, AI and knowledge against real MySQL and Redis	2026-10-30T13:43:41.1768247Z --- PASS: TestObservationsSeparateSharedSQLAndSlotQueueAfterCallerCancellation (0.00s)
+backend-go	Merchant orders and compensation against real MySQL and Redis	﻿2026-10-30T13:43:44.3024460Z ##[group]Run go test -race -count=1 -p 1 -v ./internal/merchantorder ./internal/ordercomp ./internal/orderreview
+backend-go	Merchant orders and compensation against real MySQL and Redis	2026-10-30T13:43:44.3025311Z ^[[36;1mgo test -race -count=1 -p 1 -v ./internal/merchantorder ./internal/ordercomp ./internal/orderreview^[[0m

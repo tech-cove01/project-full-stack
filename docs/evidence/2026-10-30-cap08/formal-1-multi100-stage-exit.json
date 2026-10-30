@@ -1,0 +1,18 @@
+{
+  "task": "CAP-08",
+  "kind": "formal",
+  "tag": "formal-1-multi100",
+  "slot": "formal-1",
+  "startedAt": "2026-10-30T13:55:07.238749+00:00",
+  "cardsEvidenceValid": true,
+  "wrapperPid": 37292,
+  "wrapperExited": true,
+  "capacityWrapperExit": 0,
+  "extraDiagnosticCollectorExit": null,
+  "toolBytesStable": true,
+  "failedStartOrException": null,
+  "limits": "Wrapper/collector exits and formal budget classifications are separate; diagnostic is not a formal score.",
+  "loadWaitStartedAt": "2026-10-30T13:55:07.367362+00:00",
+  "loadWaitFinishedAt": "2026-10-30T13:58:24.287704+00:00",
+  "finishedAt": "2026-10-30T13:58:24.432163+00:00"
+}

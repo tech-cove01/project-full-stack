@@ -1,0 +1,11 @@
+{
+  "maximum_records": 32,
+  "selection": "highest observed total_ns, then highest sequence; at most 32 distinct actual payloads",
+  "retained": [],
+  "retained_sequences": [],
+  "observed_record_occurrences": 0,
+  "invalid_record_occurrences": 0,
+  "visibility_complete": true,
+  "full_responses_archived": false,
+  "missing_scope": "timeline/window sequence reference not in retained_sequences has no archived payload; app ring/poll gaps may hide additional records"
+}

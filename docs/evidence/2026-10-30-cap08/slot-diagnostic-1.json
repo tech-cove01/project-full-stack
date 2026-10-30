@@ -1,0 +1,7 @@
+{
+  "task": "CAP-08",
+  "stage": "diagnostic-1",
+  "slot": "diagnostic-1",
+  "at": "2026-10-30T13:46:43.448077+00:00",
+  "failedStartsConsumeSlot": true
+}

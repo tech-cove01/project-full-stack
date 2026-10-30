@@ -1,0 +1,531 @@
+{
+  "task": "CAP-08",
+  "applicationSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+  "measurementToolSourceSha": "516d5342af95d51adf8f6ec9a8c3af321fefb4fa",
+  "binarySHA256": "e65decd1f87a2667d3391954aa20de3b9ae3fcec3e99f41b2812a29d43da0ce2",
+  "goVersion": "go version go1.27.0 windows/amd64",
+  "postGroupGuardSha": "322ff9778d68d9cea2bfbc8be2c15e59ffd5262b",
+  "measurementInputsUnchangedByPostGroupGuard": true,
+  "auditScriptSHA256": "80e193a8e2fac2e351b88c0953a5244046eda6dc850f2f3722f33d2b9a8591a6",
+  "fixtureManifestSHA256": "88a3028dc705e18dc80cb32575b7c64a4c3deb60b63d055f116bea24206733cd",
+  "stages": [
+    {
+      "tag": "diagnostic-1",
+      "kind": "diagnostic",
+      "slot": "diagnostic-1",
+      "apiSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+      "toolSourceSha": "516d5342af95d51adf8f6ec9a8c3af321fefb4fa",
+      "mode": "multi",
+      "rate": 100,
+      "seconds": 180,
+      "errors": [],
+      "capacityPassed": true,
+      "toolHashes": [
+        {
+          "name": "cap08-stage.py",
+          "recordedSHA256": "a7d5411acdd46a3edc337c78c06d91132c5cd8e35d375245b5d3ac6ba49f2dce",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-policy.py",
+          "recordedSHA256": "725eee5e6504eaafae05e142524fcf32f38b9d07188ee4ab1690555f2599b136",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": false,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-collector.py",
+          "recordedSHA256": "aa1ec0b291b7f278e4db4399a05bcbaa79d4f1932c56afba160ce257b2a5de8c",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-env.py",
+          "recordedSHA256": "fc172a832ba2a24a745146f3577672daf9073f6b10b646f96a1a261e095559e3",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap06-env.py",
+          "recordedSHA256": "b4999a8fc3737569e7c93a86655ea8cfba030ca67955c10205058f1308377ebe",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap07-stage.py",
+          "recordedSHA256": "f3f91a271b488824b57dad6b5026e83776e6394cfa9e23c438acd3277bc3078f",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "capacity-stage.py",
+          "recordedSHA256": "2f30385e62a8c4817ed74bcd9d4c93aeee6fa2e609bb0db5273196243fd209d6",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "capacity-resources.py",
+          "recordedSHA256": "6f438853ea211f0264e8f147680ae9eecd80e87f9be52abe5a383db179784135",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "go073-cap-read.mjs",
+          "recordedSHA256": "0335ea68479cae4a6fb4dacf6b4889ab94388dac875d04bac16705cd4d08addf",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "load/go073-cap-read.js",
+          "recordedSHA256": "7508294dc0738fffb9000f31c9e4faf418c1988faad764914180f2776b460c3f",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        }
+      ],
+      "nativeSummaryIndependent": {
+        "meetsBudget": true,
+        "attempted": 18001,
+        "http": 18001,
+        "completed": 18001,
+        "successful": 18001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "unknown": 0,
+        "targetOffers": 18000,
+        "offeredRatio": 1.0000555555555555,
+        "successfulFraction": 1.0,
+        "successfulRPS": 100.00555555555556,
+        "allP95Ms": 19.3259,
+        "allP99Ms": 26.6919,
+        "successfulP95Ms": 19.3259,
+        "successfulP99Ms": 26.6919
+      },
+      "nativeSummaryScope": "original summary counts/latencies plus recorded warm/stable exits; separate access rejection is not used to change these native metrics",
+      "originalResultPresent": true,
+      "originalFailure": null,
+      "contentLoaderDeltaIncludingWarmup": {
+        "requests": 18251,
+        "l1_hits": 310620,
+        "redis_hits": 52480,
+        "miss_items": 1920,
+        "loads_started": 575,
+        "flight_started": 575,
+        "flight_joins": 0,
+        "content_sql_batches": 575,
+        "content_sql_rows": 1920,
+        "content_bytes": 538920,
+        "load_errors": 0,
+        "oversize_uncached": 0,
+        "redis_errors": 0,
+        "invalid_payloads": 0,
+        "busy_rejected": 0,
+        "expired": 54400,
+        "evictions": 0
+      },
+      "instanceAccess": {
+        "validAccessCountClaim": true,
+        "uptimeConsistent": true,
+        "statusElapsedMs": 181927.0,
+        "statusUncertaintyMs": 2268,
+        "originalCounterResetsFlag": false,
+        "negativeCounterObserved": false,
+        "counterFlagScope": "original flag includes uptime-window inconsistency; true alone does not prove a server restart or actual counter reset",
+        "lostDigestsDelta": 0,
+        "preparedStatementsLostDelta": 0,
+        "missingAfterDigests": [],
+        "recordedOverlappingComSelectAndExecute": {
+          "Com_select": 75254,
+          "Com_stmt_execute": 75131
+        },
+        "scope": "whole instance between sequential access snapshots; overlapping counters are not added; invalid windows are not performance access-count results"
+      },
+      "actualTerminal": {
+        "wrapperExited": true,
+        "failedStartOrException": null,
+        "toolBytesStable": true,
+        "capacityWrapperExit": 0,
+        "extraDiagnosticCollectorExit": 0
+      },
+      "resources": {
+        "samples": 37,
+        "completeSamples": 37,
+        "samplerExit": 0,
+        "stopSignal": false,
+        "harnessExit": 0,
+        "hostCPUObservedMax": 47.1,
+        "hostMemoryObservedMax": 78.9,
+        "apiRSSObservedMaxBytes": 41271296,
+        "limits": "five-second observations, not a guarantee of instantaneous peaks or pure per-request waits"
+      },
+      "diagnostic": {
+        "validDiagnostic": true,
+        "samples": 182,
+        "captures": 0,
+        "windowCoverage": {
+          "complete": true,
+          "first_gap_seconds": 0.042938,
+          "tail_gap_seconds": 0.427571,
+          "maximum_allowed_gap_seconds": 2.5,
+          "missing_boundary": false,
+          "scope": "stable launcher creation stamp to supervisor done UTC; not atomic workload/capture timing"
+        },
+        "retainedSlowRecords": 0,
+        "scope": "parsed subset hashes recorded from original HTTP bytes; full raw responses and discarded slow payloads cannot be reconstructed"
+      }
+    },
+    {
+      "tag": "formal-1-multi100",
+      "kind": "formal",
+      "slot": "formal-1",
+      "apiSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+      "toolSourceSha": "516d5342af95d51adf8f6ec9a8c3af321fefb4fa",
+      "mode": "multi",
+      "rate": 100,
+      "seconds": 180,
+      "errors": [],
+      "capacityPassed": true,
+      "toolHashes": [
+        {
+          "name": "cap08-stage.py",
+          "recordedSHA256": "a7d5411acdd46a3edc337c78c06d91132c5cd8e35d375245b5d3ac6ba49f2dce",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-policy.py",
+          "recordedSHA256": "725eee5e6504eaafae05e142524fcf32f38b9d07188ee4ab1690555f2599b136",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": false,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-collector.py",
+          "recordedSHA256": "aa1ec0b291b7f278e4db4399a05bcbaa79d4f1932c56afba160ce257b2a5de8c",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-env.py",
+          "recordedSHA256": "fc172a832ba2a24a745146f3577672daf9073f6b10b646f96a1a261e095559e3",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap06-env.py",
+          "recordedSHA256": "b4999a8fc3737569e7c93a86655ea8cfba030ca67955c10205058f1308377ebe",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap07-stage.py",
+          "recordedSHA256": "f3f91a271b488824b57dad6b5026e83776e6394cfa9e23c438acd3277bc3078f",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "capacity-stage.py",
+          "recordedSHA256": "2f30385e62a8c4817ed74bcd9d4c93aeee6fa2e609bb0db5273196243fd209d6",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "capacity-resources.py",
+          "recordedSHA256": "6f438853ea211f0264e8f147680ae9eecd80e87f9be52abe5a383db179784135",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "go073-cap-read.mjs",
+          "recordedSHA256": "0335ea68479cae4a6fb4dacf6b4889ab94388dac875d04bac16705cd4d08addf",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "load/go073-cap-read.js",
+          "recordedSHA256": "7508294dc0738fffb9000f31c9e4faf418c1988faad764914180f2776b460c3f",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        }
+      ],
+      "nativeSummaryIndependent": {
+        "meetsBudget": true,
+        "attempted": 18001,
+        "http": 18001,
+        "completed": 18001,
+        "successful": 18001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "unknown": 0,
+        "targetOffers": 18000,
+        "offeredRatio": 1.0000555555555555,
+        "successfulFraction": 1.0,
+        "successfulRPS": 100.00555555555556,
+        "allP95Ms": 17.3377,
+        "allP99Ms": 23.9781,
+        "successfulP95Ms": 17.3377,
+        "successfulP99Ms": 23.9781
+      },
+      "nativeSummaryScope": "original summary counts/latencies plus recorded warm/stable exits; separate access rejection is not used to change these native metrics",
+      "originalResultPresent": true,
+      "originalFailure": null,
+      "contentLoaderDeltaIncludingWarmup": {
+        "requests": 18251,
+        "l1_hits": 310620,
+        "redis_hits": 52395,
+        "miss_items": 2005,
+        "loads_started": 448,
+        "flight_started": 448,
+        "flight_joins": 0,
+        "content_sql_batches": 448,
+        "content_sql_rows": 2005,
+        "content_bytes": 562772,
+        "load_errors": 0,
+        "oversize_uncached": 0,
+        "redis_errors": 0,
+        "invalid_payloads": 0,
+        "busy_rejected": 0,
+        "expired": 53760,
+        "evictions": 0
+      },
+      "instanceAccess": {
+        "validAccessCountClaim": true,
+        "uptimeConsistent": true,
+        "statusElapsedMs": 183700.0,
+        "statusUncertaintyMs": 2256,
+        "originalCounterResetsFlag": false,
+        "negativeCounterObserved": false,
+        "counterFlagScope": "original flag includes uptime-window inconsistency; true alone does not prove a server restart or actual counter reset",
+        "lostDigestsDelta": 0,
+        "preparedStatementsLostDelta": 0,
+        "missingAfterDigests": [],
+        "recordedOverlappingComSelectAndExecute": {
+          "Com_select": 74947,
+          "Com_stmt_execute": 74822
+        },
+        "scope": "whole instance between sequential access snapshots; overlapping counters are not added; invalid windows are not performance access-count results"
+      },
+      "actualTerminal": {
+        "wrapperExited": true,
+        "failedStartOrException": null,
+        "toolBytesStable": true,
+        "capacityWrapperExit": 0,
+        "extraDiagnosticCollectorExit": null
+      },
+      "resources": {
+        "samples": 37,
+        "completeSamples": 37,
+        "samplerExit": 0,
+        "stopSignal": false,
+        "harnessExit": 0,
+        "hostCPUObservedMax": 35.5,
+        "hostMemoryObservedMax": 80.1,
+        "apiRSSObservedMaxBytes": 39718912,
+        "limits": "five-second observations, not a guarantee of instantaneous peaks or pure per-request waits"
+      }
+    },
+    {
+      "tag": "formal-2-multi100",
+      "kind": "formal",
+      "slot": "formal-2",
+      "apiSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+      "toolSourceSha": "516d5342af95d51adf8f6ec9a8c3af321fefb4fa",
+      "mode": "multi",
+      "rate": 100,
+      "seconds": 180,
+      "errors": [],
+      "capacityPassed": false,
+      "toolHashes": [
+        {
+          "name": "cap08-stage.py",
+          "recordedSHA256": "a7d5411acdd46a3edc337c78c06d91132c5cd8e35d375245b5d3ac6ba49f2dce",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-policy.py",
+          "recordedSHA256": "725eee5e6504eaafae05e142524fcf32f38b9d07188ee4ab1690555f2599b136",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": false,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-collector.py",
+          "recordedSHA256": "aa1ec0b291b7f278e4db4399a05bcbaa79d4f1932c56afba160ce257b2a5de8c",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap08-env.py",
+          "recordedSHA256": "fc172a832ba2a24a745146f3577672daf9073f6b10b646f96a1a261e095559e3",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap06-env.py",
+          "recordedSHA256": "b4999a8fc3737569e7c93a86655ea8cfba030ca67955c10205058f1308377ebe",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "cap07-stage.py",
+          "recordedSHA256": "f3f91a271b488824b57dad6b5026e83776e6394cfa9e23c438acd3277bc3078f",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "capacity-stage.py",
+          "recordedSHA256": "2f30385e62a8c4817ed74bcd9d4c93aeee6fa2e609bb0db5273196243fd209d6",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "capacity-resources.py",
+          "recordedSHA256": "6f438853ea211f0264e8f147680ae9eecd80e87f9be52abe5a383db179784135",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "go073-cap-read.mjs",
+          "recordedSHA256": "0335ea68479cae4a6fb4dacf6b4889ab94388dac875d04bac16705cd4d08addf",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        },
+        {
+          "name": "load/go073-cap-read.js",
+          "recordedSHA256": "7508294dc0738fffb9000f31c9e4faf418c1988faad764914180f2776b460c3f",
+          "historicalGitBlobMatches": true,
+          "currentWorkingTreeMatches": true,
+          "matchScope": "recorded runtime Git blob; current bytes never substitute for historical provenance"
+        }
+      ],
+      "nativeSummaryIndependent": {
+        "meetsBudget": false,
+        "attempted": 16133,
+        "http": 15933,
+        "completed": 15933,
+        "successful": 15933,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 57,
+        "unknown": 200,
+        "targetOffers": 18000,
+        "offeredRatio": 0.8962777777777777,
+        "successfulFraction": 0.9876030496497862,
+        "successfulRPS": 88.51666666666667,
+        "allP95Ms": 24.18683999999999,
+        "allP99Ms": 84.04812800000079,
+        "successfulP95Ms": 24.18683999999999,
+        "successfulP99Ms": 84.04812800000079
+      },
+      "nativeSummaryScope": "original summary counts/latencies plus recorded warm/stable exits; separate access rejection is not used to change these native metrics",
+      "originalResultPresent": false,
+      "originalFailure": "access counters reset, uptime inconsistent or instrumentation lost; no valid access count claim",
+      "missingResultScope": "original result.result is absent and stays absent; native summary is a separate independent failure observation, not a patched report",
+      "contentLoaderDeltaIncludingWarmup": {
+        "requests": 16184,
+        "l1_hits": 274678,
+        "redis_hits": 47082,
+        "miss_items": 1920,
+        "loads_started": 408,
+        "flight_started": 408,
+        "flight_joins": 0,
+        "content_sql_batches": 408,
+        "content_sql_rows": 1920,
+        "content_bytes": 538920,
+        "load_errors": 0,
+        "oversize_uncached": 0,
+        "redis_errors": 0,
+        "invalid_payloads": 0,
+        "busy_rejected": 0,
+        "expired": 48640,
+        "evictions": 0
+      },
+      "instanceAccess": {
+        "validAccessCountClaim": false,
+        "uptimeConsistent": false,
+        "statusElapsedMs": 164101.5,
+        "statusUncertaintyMs": 2261,
+        "originalCounterResetsFlag": true,
+        "negativeCounterObserved": false,
+        "counterFlagScope": "original flag includes uptime-window inconsistency; true alone does not prove a server restart or actual counter reset",
+        "lostDigestsDelta": 0,
+        "preparedStatementsLostDelta": 0,
+        "missingAfterDigests": [],
+        "recordedOverlappingComSelectAndExecute": {
+          "Com_select": 66335,
+          "Com_stmt_execute": 66224
+        },
+        "scope": "whole instance between sequential access snapshots; overlapping counters are not added; invalid windows are not performance access-count results"
+      },
+      "actualTerminal": {
+        "wrapperExited": true,
+        "failedStartOrException": null,
+        "toolBytesStable": true,
+        "capacityWrapperExit": 1,
+        "extraDiagnosticCollectorExit": null
+      },
+      "resources": {
+        "samples": 33,
+        "completeSamples": 33,
+        "samplerExit": 0,
+        "stopSignal": false,
+        "harnessExit": 1,
+        "hostCPUObservedMax": 68.4,
+        "hostMemoryObservedMax": 79.5,
+        "apiRSSObservedMaxBytes": 40730624,
+        "limits": "five-second observations, not a guarantee of instantaneous peaks or pure per-request waits"
+      }
+    }
+  ],
+  "auditDependencySHA256": {
+    "cap07-audit.py": "3ad9550f1ef3140e5ccde72d0487fb23a83a66ddef1a5f07f701c750c0dae393",
+    "cap08-collector.py": "aa1ec0b291b7f278e4db4399a05bcbaa79d4f1932c56afba160ce257b2a5de8c"
+  },
+  "errors": [],
+  "capacityProtocolPassed": false,
+  "protocol": {
+    "controlledReserved": 1,
+    "diagnosticReserved": 1,
+    "businessRepairReserved": 0,
+    "formalReserved": 2,
+    "hotExecuted": false,
+    "optionalAscentExecuted": false,
+    "firstFormalFailureEndedGroup": true
+  },
+  "postMeasurementGuardScope": "current policy late-interruption guard may differ; runtime script hashes are checked against retained historical Git blobs, not ignored or rewritten",
+  "sourceOfPercentiles": "native per-stage stable-summary.json; no per-request distributions or percentile merging",
+  "unfinishedLatencyScope": "native latency summaries contain recorded completed observations; unknown requests have no reconstructed outcome or latency and are never assigned zero",
+  "loaderScope": "warmup through post-wrapper reconciliation, independent of instance-access snapshot window; invalid formal2 access counts stay invalid"
+}

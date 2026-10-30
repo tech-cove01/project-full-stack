@@ -1,0 +1,18 @@
+{
+  "task": "CAP-08",
+  "kind": "diagnostic",
+  "tag": "diagnostic-1",
+  "slot": "diagnostic-1",
+  "startedAt": "2026-10-30T13:46:43.529627+00:00",
+  "cardsEvidenceValid": true,
+  "wrapperPid": 66752,
+  "wrapperExited": true,
+  "capacityWrapperExit": 0,
+  "extraDiagnosticCollectorExit": 0,
+  "toolBytesStable": true,
+  "failedStartOrException": null,
+  "limits": "Wrapper/collector exits and formal budget classifications are separate; diagnostic is not a formal score.",
+  "loadWaitStartedAt": "2026-10-30T13:46:43.676660+00:00",
+  "loadWaitFinishedAt": "2026-10-30T13:50:00.829441+00:00",
+  "finishedAt": "2026-10-30T13:50:00.964498+00:00"
+}

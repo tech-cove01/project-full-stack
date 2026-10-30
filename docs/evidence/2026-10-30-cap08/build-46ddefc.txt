@@ -1,0 +1,158 @@
+HEAD is now at 46ddefc feat(CAP-08B): observe independent shared work before blocked loads complete
+Preparing worktree (detached HEAD 46ddefc)
+Updating files:   4% (158/3900)
+Updating files:   4% (161/3900)
+Updating files:   4% (164/3900)
+Updating files:   4% (184/3900)
+Updating files:   5% (195/3900)
+Updating files:   6% (234/3900)
+Updating files:   7% (273/3900)
+Updating files:   8% (312/3900)
+Updating files:   9% (351/3900)
+Updating files:  10% (390/3900)
+Updating files:  11% (429/3900)
+Updating files:  12% (468/3900)
+Updating files:  13% (507/3900)
+Updating files:  14% (546/3900)
+Updating files:  15% (585/3900)
+Updating files:  16% (624/3900)
+Updating files:  17% (663/3900)
+Updating files:  17% (685/3900)
+Updating files:  18% (702/3900)
+Updating files:  19% (741/3900)
+Updating files:  20% (780/3900)
+Updating files:  21% (819/3900)
+Updating files:  22% (858/3900)
+Updating files:  23% (897/3900)
+Updating files:  24% (936/3900)
+Updating files:  25% (975/3900)
+Updating files:  26% (1014/3900)
+Updating files:  27% (1053/3900)
+Updating files:  28% (1092/3900)
+Updating files:  29% (1131/3900)
+Updating files:  30% (1170/3900)
+Updating files:  31% (1209/3900)
+Updating files:  32% (1248/3900)
+Updating files:  32% (1270/3900)
+Updating files:  33% (1287/3900)
+Updating files:  34% (1326/3900)
+Updating files:  35% (1365/3900)
+Updating files:  36% (1404/3900)
+Updating files:  37% (1443/3900)
+Updating files:  38% (1482/3900)
+Updating files:  39% (1521/3900)
+Updating files:  40% (1560/3900)
+Updating files:  41% (1599/3900)
+Updating files:  42% (1638/3900)
+Updating files:  43% (1677/3900)
+Updating files:  44% (1716/3900)
+Updating files:  45% (1755/3900)
+Updating files:  46% (1794/3900)
+Updating files:  47% (1833/3900)
+Updating files:  48% (1872/3900)
+Updating files:  49% (1911/3900)
+Updating files:  50% (1950/3900)
+Updating files:  51% (1989/3900)
+Updating files:  52% (2028/3900)
+Updating files:  53% (2067/3900)
+Updating files:  54% (2106/3900)
+Updating files:  55% (2145/3900)
+Updating files:  56% (2184/3900)
+Updating files:  57% (2223/3900)
+Updating files:  57% (2237/3900)
+Updating files:  58% (2262/3900)
+Updating files:  59% (2301/3900)
+Updating files:  60% (2340/3900)
+Updating files:  61% (2379/3900)
+Updating files:  62% (2418/3900)
+Updating files:  63% (2457/3900)
+Updating files:  64% (2496/3900)
+Updating files:  65% (2535/3900)
+Updating files:  66% (2574/3900)
+Updating files:  67% (2613/3900)
+Updating files:  68% (2652/3900)
+Updating files:  69% (2691/3900)
+Updating files:  70% (2730/3900)
+Updating files:  71% (2769/3900)
+Updating files:  71% (2781/3900)
+Updating files:  72% (2808/3900)
+Updating files:  73% (2847/3900)
+Updating files:  74% (2886/3900)
+Updating files:  75% (2925/3900)
+Updating files:  76% (2964/3900)
+Updating files:  77% (3003/3900)
+Updating files:  78% (3042/3900)
+Updating files:  79% (3081/3900)
+Updating files:  80% (3120/3900)
+Updating files:  81% (3159/3900)
+Updating files:  82% (3198/3900)
+Updating files:  83% (3237/3900)
+Updating files:  83% (3271/3900)
+Updating files:  84% (3276/3900)
+Updating files:  85% (3315/3900)
+Updating files:  86% (3354/3900)
+Updating files:  87% (3393/3900)
+Updating files:  88% (3432/3900)
+Updating files:  89% (3471/3900)
+Updating files:  90% (3510/3900)
+Updating files:  91% (3549/3900)
+Updating files:  92% (3588/3900)
+Updating files:  93% (3627/3900)
+Updating files:  94% (3666/3900)
+Updating files:  95% (3705/3900)
+Updating files:  95% (3714/3900)
+Updating files:  96% (3744/3900)
+Updating files:  97% (3783/3900)
+Updating files:  98% (3822/3900)
+Updating files:  99% (3861/3900)
+Updating files: 100% (3900/3900)
+Updating files: 100% (3900/3900), done.
+go version go1.27.0 windows/amd64
+D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap08-build-46ddefc\capacity.exe: go1.27.0
+	path	github.com/cityloop/fullstack-go/cmd/api
+	mod	github.com/cityloop/fullstack-go	(devel)	
+	dep	filippo.io/edwards25519	v1.1.0	h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+	dep	github.com/cespare/xxhash/v2	v2.3.0	h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UFvs=
+	dep	github.com/dgryski/go-rendezvous	v0.0.0-20200823014737-9f7001d12a5f	h1:lO4WD4F/rVNCu3HqELle0jiPLLBs70cWOduZpkS1E78=
+	dep	github.com/gabriel-vasile/mimetype	v1.4.8	h1:FfZ3gj38NjllZIeJAmMhr+qKL8Wu+nOoI3GqacKw1NM=
+	dep	github.com/gin-contrib/sse	v1.1.0	h1:n0w2GMuUpWDVp7qSpvze6fAu9iRxJY4Hmj6AmBOU05w=
+	dep	github.com/gin-gonic/gin	v1.11.0	h1:OW/6PLjyusp2PPXtyxKHU0RbX6I/l28FTdDlae5ueWk=
+	dep	github.com/go-playground/locales	v0.14.1	h1:EWaQ/wswjilfKLTECiXz7Rh+3BjFhfDFKv/oXslEjJA=
+	dep	github.com/go-playground/universal-translator	v0.18.1	h1:Bcnm0ZwsGyWbCzImXv+pAJnYK9S473LQFuzCbDbfSFY=
+	dep	github.com/go-playground/validator/v10	v10.27.0	h1:w8+XrWVMhGkxOaaowyKH35gFydVHOvC0/uWoy2Fzwn4=
+	dep	github.com/go-sql-driver/mysql	v1.8.1	h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
+	dep	github.com/goccy/go-yaml	v1.18.0	h1:8W7wMFS12Pcas7KU+VVkaiCng+kG8QiFeFwzFb+rwuw=
+	dep	github.com/jinzhu/inflection	v1.0.0	h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
+	dep	github.com/jinzhu/now	v1.1.5	h1:/o9tlHleP7gOFmsnYNz3RGnqzefHA47wQpKrrdTIwXQ=
+	dep	github.com/klauspost/compress	v1.15.9	h1:wKRjX6JRtDdrE9qwa4b/Cip7ACOshUI4smpCQanqjSY=
+	dep	github.com/leodido/go-urn	v1.4.0	h1:WT9HwE9SGECu3lg4d/dIA+jxlljEa1/ffXKmRjqdmIQ=
+	dep	github.com/mattn/go-isatty	v0.0.20	h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
+	dep	github.com/pelletier/go-toml/v2	v2.2.4	h1:mye9XuhQ6gvn5h28+VilKrrPoQVanw5PMw/TB0t5Ec4=
+	dep	github.com/pierrec/lz4/v4	v4.1.15	h1:MO0/ucJhngq7299dKLwIMtgTfbkoSPF6AoMYDd8Q4q0=
+	dep	github.com/quic-go/qpack	v0.5.1	h1:giqksBPnT/HDtZ6VhtFKgoLOWmlyo9Ei6u9PqzIMbhI=
+	dep	github.com/quic-go/quic-go	v0.54.0	h1:6s1YB9QotYI6Ospeiguknbp2Znb/jZYjZLRXn9kMQBg=
+	dep	github.com/redis/go-redis/v9	v9.17.0	h1:K6E+ZlYN95KSMmZeEQPbU/c++wfmEvfFB17yEAq/VhM=
+	dep	github.com/segmentio/kafka-go	v0.4.47	h1:IqziR4pA3vrZq7YdRxaT3w1/5fvIH5qpCwstUanQQB0=
+	dep	github.com/ugorji/go/codec	v1.3.0	h1:Qd2W2sQawAfG8XSvzwhBeoGq71zXOC/Q1E9y/wUcsUA=
+	dep	golang.org/x/crypto	v0.40.0	h1:r4x+VvoG5Fm+eJcxMaY8CQM7Lb0l1lsmjGBQ6s8BfKM=
+	dep	golang.org/x/net	v0.42.0	h1:jzkYrhi3YQWD6MLBJcsklgQsoAcw89EcZbJw8Z614hs=
+	dep	golang.org/x/sys	v0.35.0	h1:vz1N37gP5bs89s7He8XuIYXpyY0+QlsKmzipCbUtyxI=
+	dep	golang.org/x/text	v0.27.0	h1:4fGWRpyh641NLlecmyl4LOe6yDdfaYNrGb2zdfo4JV4=
+	dep	google.golang.org/protobuf	v1.36.9	h1:w2gp2mA27hUeUzj9Ex9FBjsBm40zfaDtEWow293U7Iw=
+	dep	gorm.io/driver/mysql	v1.6.0	h1:eNbLmNTpPpTOVZi8MMxCi2aaIm0ZpInbORNXDwyLGvg=
+	dep	gorm.io/gorm	v1.31.1	h1:7CA8FTFz/gRfgqgpeKIBcervUn3xSyPUmr6B2WXJ7kg=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	-ldflags="-X main.revision=capacity-46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f"
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=windows
+	build	GOAMD64=v1
+	build	vcs=git
+	build	vcs.revision=46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f
+	build	vcs.time=2026-10-30T13:36:27Z
+	build	vcs.modified=false

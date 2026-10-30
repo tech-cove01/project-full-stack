@@ -1,0 +1,89 @@
+{
+  "task": "CAP-08G",
+  "at": "2026-10-30T14:13:52.449171+00:00",
+  "batchStopped": true,
+  "capacityProtocolPassed": false,
+  "stopReason": "formal-2 failed native offered/success/unknown/dropped budgets and separately rejected access-count consistency; no remaining load authorized within this batch",
+  "formalFailureRecordedAt": "2026-10-30T14:02:55.449323+00:00",
+  "applicationSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+  "measuredToolSourceSha": "516d5342af95d51adf8f6ec9a8c3af321fefb4fa",
+  "postGroupGuardSha": "322ff9778d68d9cea2bfbc8be2c15e59ffd5262b",
+  "used": {
+    "controlled": 1,
+    "diagnostic": 1,
+    "businessRepair": 0,
+    "formal": 2,
+    "hot": 0,
+    "stair": 0,
+    "neighbor": 0,
+    "hold": 0
+  },
+  "unconsumedSlotsReopened": false,
+  "businessFixApplied": false,
+  "historicalB1CauseStillUnknown": true,
+  "developmentBudget": {
+    "startedAt": "2026-10-30T13:10:00+00:00",
+    "maximumSeconds": 14400,
+    "necessaryWorkCompletedAt": "2026-10-30T13:54:19.162691+00:00",
+    "closureRecordedAt": "2026-10-30T14:13:52.449171+00:00",
+    "conservativeWallSecondsThroughClosure": 3832.449171,
+    "subtractWaitSeconds": 0,
+    "method": "All elapsed wall time conservatively included; load waits and CI job timestamps are additional provenance only, not a budget subtraction"
+  },
+  "loadWaits": [
+    {
+      "tag": "diagnostic-1",
+      "start": "2026-10-30T13:46:43.676660+00:00",
+      "end": "2026-10-30T13:50:00.829441+00:00",
+      "seconds": 197.152781
+    },
+    {
+      "tag": "formal-1-multi100",
+      "start": "2026-10-30T13:55:07.367362+00:00",
+      "end": "2026-10-30T13:58:24.287704+00:00",
+      "seconds": 196.920342
+    },
+    {
+      "tag": "formal-2-multi100",
+      "start": "2026-10-30T13:59:57.620931+00:00",
+      "end": "2026-10-30T14:02:55.256324+00:00",
+      "seconds": 177.635393
+    }
+  ],
+  "totalSequentialLoadWaitSeconds": 571.708516,
+  "ci": {
+    "run": 41065266414,
+    "source": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+    "conclusion": "success",
+    "jobIntervals": [
+      {
+        "name": "community-kafka",
+        "startedAt": "2026-10-30T13:41:13Z",
+        "completedAt": "2026-10-30T13:43:40Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "backend-go",
+        "startedAt": "2026-10-30T13:41:14Z",
+        "completedAt": "2026-10-30T13:44:01Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "backend",
+        "startedAt": "2026-10-30T13:41:14Z",
+        "completedAt": "2026-10-30T13:41:48Z",
+        "conclusion": "success"
+      },
+      {
+        "name": "frontend",
+        "startedAt": "2026-10-30T13:41:14Z",
+        "completedAt": "2026-10-30T13:41:41Z",
+        "conclusion": "success"
+      }
+    ],
+    "scope": "CI job intervals may overlap local build/preparation; not claimed as operator idle time"
+  },
+  "cleanupComplete": true,
+  "noFurtherLoad": true,
+  "next": "Independent code/evidence review. At most one new owned QA multi100x180 representative if performed; cannot complete or rewrite this failed group. No automatic CAP09 or new business."
+}

@@ -1,0 +1,25 @@
+{
+  "task": "CAP-08",
+  "kind": "formal-gate",
+  "sourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+  "at": "2026-10-30T13:54:19.162691+00:00",
+  "workCompletedAt": "2026-10-30T13:54:19.162691+00:00",
+  "relatedChecksPassed": true,
+  "exactSourceCIPassed": true,
+  "provenIssuesHandled": true,
+  "workCompletedWithinBudget": true,
+  "diagnosticOutcome": "not-reproduced",
+  "unresolvedReproducedFailure": false,
+  "historicalB1CauseStillUnknown": true,
+  "businessFixApplied": false,
+  "scope": "One effective diagnostic did not reproduce the declared B1 budget failure. No business mechanism was proven or treated; all historical failures remain. This gate permits only the predeclared formal group, not a B1 repair claim.",
+  "evidence": [
+    "docs/evidence/2026-10-30-cap08/ci-46ddefc.json",
+    "docs/evidence/2026-10-30-cap08/observation-related-checks.json",
+    "docs/evidence/2026-10-30-cap08/wiring-result.json",
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-load/result.json",
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-stage-exit.json",
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-diagnostic/manifest.json",
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-control/exit-status.json"
+  ]
+}

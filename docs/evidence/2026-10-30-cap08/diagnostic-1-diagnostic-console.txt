@@ -1,0 +1,1 @@
+{"task": "CAP-08C", "samples": 182, "captures": 0, "successfulPolls": 182, "failedPolls": 0, "valid": true}

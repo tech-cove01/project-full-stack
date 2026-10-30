@@ -1,0 +1,10 @@
+{
+  "scope": "root preauthorized additional fallback before the first 400/180 result; original plan and all failures preserved",
+  "fallbackAfter400Failure": [300, 200, 100],
+  "preVUs": 256,
+  "maxVUs": 512,
+  "secondsPerStage": 180,
+  "sameModeSameRateSuccessfulStagesRequired": 2,
+  "criteriaUnchanged": true,
+  "doNotRaiseRateAgainAfterARepeatableLowerRateIsConfirmed": true
+}

@@ -1,0 +1,97 @@
+{
+  "task": "GO-073-CAP-03",
+  "mode": "multi",
+  "rate": 400,
+  "seconds": 180,
+  "warmSeconds": 10,
+  "warmRate": 25,
+  "preVUs": 256,
+  "maxVUs": 512,
+  "fixture": "capread-d736ef4960",
+  "fixtureSourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "pageSize": 20,
+  "activeReaders": 32,
+  "activeCountKeys": 640,
+  "thresholds": {
+    "actualOfferedRatioMin": 0.99,
+    "successfulFractionMin": 0.99,
+    "incompleteOrUnclassifiedMax": 0,
+    "droppedMax": 0,
+    "systemErrorRateMaxExclusive": 0.01,
+    "p95MsMax": 200,
+    "p99MsMax": 500,
+    "successfulP95MsMax": 200,
+    "successfulP99MsMax": 500,
+    "contentErrorsMax": 0
+  },
+  "started": "2026-10-30T06:43:42.640Z",
+  "performanceSchemaConsumers": "events_statements_current\tYES\r\nstatements_digest\tYES",
+  "selectInstrument": "YES\tYES",
+  "scriptSHA256": {
+    "scripts/go073-cap-read.mjs": "5a05d0021a24809df8210a2dbede761486b28f2cc2e89c9116d51f31697ec6c0",
+    "scripts/load/go073-cap-read.js": "7508294dc0738fffb9000f31c9e4faf418c1988faad764914180f2776b460c3f"
+  },
+  "warmExit": 0,
+  "warmExternalStop": null,
+  "stableStartedAt": 1793342635191,
+  "stableExit": 99,
+  "stableExternalStop": null,
+  "stableEndedAt": 1793342696531,
+  "stableCommandElapsedMs": 61340,
+  "result": {
+    "attempted": 23478,
+    "completedHttpRequests": 22966,
+    "completed": 22966,
+    "incompleteOrUnclassified": 512,
+    "completedButUnclassified": 0,
+    "classificationCoverage": 0.9781923502853735,
+    "successful": 22966,
+    "systemErrors": 0,
+    "contentErrors": 0,
+    "httpErrors": 0,
+    "dropped": 471,
+    "targetOffers": 72000,
+    "actualOfferedRatio": 0.32608333333333334,
+    "issuedPerNominalSecond": 130.43333333333334,
+    "successfulPerNominalSecond": 127.58888888888889,
+    "systemErrorRate": 0,
+    "systemErrorRatePerCompleted": 0,
+    "allLatency": {
+      "avg": 16.643042606461627,
+      "med": 14.46435,
+      "p(95)": 25.638075,
+      "p(99)": 57.55084499999981,
+      "max": 277.7497,
+      "thresholds": {
+        "p(95)<=200": false,
+        "p(99)<=500": false
+      }
+    },
+    "successfulLatency": {
+      "p(95)": 25.638075,
+      "p(99)": 57.55084499999981,
+      "max": 277.7497,
+      "avg": 16.643042606461627,
+      "med": 14.46435
+    },
+    "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+    "k6Metrics": {
+      "vus": {
+        "value": 512,
+        "min": 4,
+        "max": 512
+      },
+      "vusMax": {
+        "min": 256,
+        "max": 512,
+        "value": 512
+      },
+      "dataReceived": {
+        "rate": 3619598.3750787647,
+        "count": 217060172
+      }
+    }
+  },
+  "meetsBudget": false,
+  "finished": "2026-10-30T06:44:57.011Z"
+}

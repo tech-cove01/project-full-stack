@@ -1,0 +1,17 @@
+{
+  "scope": "post-013, same API3db PID45532 and retained 6400-note fixture; no profiling during scored holds",
+  "fixedSeconds": 180,
+  "requiredConsecutiveIndependentStagesPerModeAtSameRate": 2,
+  "modes": ["hot", "multi"],
+  "startingRate": 600,
+  "fallbackRatesAfterAnyBudgetFailure": [500, 400],
+  "generatorSettings": {
+    "600": {"preVUs": 512, "maxVUs": 1024},
+    "500": {"preVUs": 512, "maxVUs": 1024},
+    "400": {"preVUs": 256, "maxVUs": 512}
+  },
+  "criteriaUnchanged": true,
+  "preserveAllFailedOrPartialStages": true,
+  "doNotCombineDifferentRatesIntoTwoSuccessfulRounds": true,
+  "doNotInterpretSharedHostOrGeneratorBoundaryAsTheoreticalServerMaximum": true
+}

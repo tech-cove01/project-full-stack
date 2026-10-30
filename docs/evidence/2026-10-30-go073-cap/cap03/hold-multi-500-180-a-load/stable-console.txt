@@ -1,0 +1,97 @@
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":31,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":0,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":14,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":3,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":16,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":18,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":28,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":5,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":26,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":10,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":21,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":7,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":29,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":7,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":28,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":25,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":25,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":26,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":6,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":15,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":8,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":12,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":6,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:42:49+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":24,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✓ 'p(95)<=200' p(95)=173.88ms
+    ✓ 'p(99)<=500' p(99)=311.77ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=28326
+
+    cap_read_completed
+    ✓ 'count>=0' count=27448
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=27448
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✗ 'count==0' count=549
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=38.44ms med=16.06ms p(95)=173.88ms p(99)=311.77ms max=927.38ms
+    cap_read_attempted.............: 28326  489.317311/s
+    cap_read_completed.............: 27448  474.150306/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 0.00%  0 out of 27448
+    cap_read_http_errors...........: 0      0/s
+    cap_read_success...............: 27448  474.150306/s
+    cap_read_success_ms............: avg=38.44ms med=16.06ms p(95)=173.88ms p(99)=311.77ms max=927.38ms
+    cap_read_system_error_ratio....: 0.00%  0 out of 27448
+    cap_read_system_errors.........: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=38.44ms med=16.06ms p(95)=173.88ms p(99)=311.77ms max=927.38ms
+      { expected_response:true }...: avg=38.44ms med=16.06ms p(95)=173.88ms p(99)=311.77ms max=927.38ms
+    http_req_failed................: 0.00%  0 out of 27448
+    http_reqs......................: 27448  474.150306/s
+
+    EXECUTION
+    dropped_iterations.............: 549    9.483697/s
+    iteration_duration.............: avg=39.11ms med=16.47ms p(95)=175.87ms p(99)=313.4ms  max=929.22ms
+    iterations.....................: 27448  474.150306/s
+    vus............................: 681    min=6          max=681
+    vus_max........................: 681    min=512        max=681
+
+    NETWORK
+    data_received..................: 259 MB 4.5 MB/s
+    data_sent......................: 3.9 MB 68 kB/s
+
+
+
+time="2026-10-30T14:42:50+08:00" level=error msg="thresholds on metrics 'dropped_iterations' were crossed; at least one has abortOnFail enabled, stopping test prematurely"

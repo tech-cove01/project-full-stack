@@ -1,0 +1,107 @@
+time="2026-10-30T14:44:54+08:00" level=warning msg="Insufficient VUs, reached 512 active VUs and cannot initialize more" executor=constant-arrival-rate scenario=read
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":13,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":3,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":9,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":8,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":26,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":20,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":22,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":15,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":26,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":31,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":20,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":12,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":18,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":16,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":20,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":2,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":11,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":11,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":3,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":18,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":31,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":25,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":25,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":19,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":13,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":5,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":17,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":12,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":22,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":24,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":4,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":11,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T14:44:55+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"multi\",\"readerIndex\":14,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✓ 'p(95)<=200' p(95)=25.63ms
+    ✓ 'p(99)<=500' p(99)=57.55ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=23478
+
+    cap_read_completed
+    ✓ 'count>=0' count=22966
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=22966
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✗ 'count==0' count=471
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=16.64ms med=14.46ms p(95)=25.63ms p(99)=57.55ms max=277.74ms
+    cap_read_attempted.............: 23478  391.615785/s
+    cap_read_completed.............: 22966  383.075565/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 0.00%  0 out of 22966
+    cap_read_http_errors...........: 0      0/s
+    cap_read_success...............: 22966  383.075565/s
+    cap_read_success_ms............: avg=16.64ms med=14.46ms p(95)=25.63ms p(99)=57.55ms max=277.74ms
+    cap_read_system_error_ratio....: 0.00%  0 out of 22966
+    cap_read_system_errors.........: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=16.64ms med=14.46ms p(95)=25.63ms p(99)=57.55ms max=277.74ms
+      { expected_response:true }...: avg=16.64ms med=14.46ms p(95)=25.63ms p(99)=57.55ms max=277.74ms
+    http_req_failed................: 0.00%  0 out of 22966
+    http_reqs......................: 22966  383.075565/s
+
+    EXECUTION
+    dropped_iterations.............: 471    7.856335/s
+    iteration_duration.............: avg=17.08ms med=14.85ms p(95)=26.25ms p(99)=58.7ms  max=279.86ms
+    iterations.....................: 22966  383.075565/s
+    vus............................: 512    min=4          max=512
+    vus_max........................: 512    min=256        max=512
+
+    NETWORK
+    data_received..................: 217 MB 3.6 MB/s
+    data_sent......................: 3.2 MB 54 kB/s
+
+
+
+time="2026-10-30T14:44:56+08:00" level=error msg="thresholds on metrics 'dropped_iterations' were crossed; at least one has abortOnFail enabled, stopping test prematurely"

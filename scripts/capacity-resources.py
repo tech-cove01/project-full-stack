@@ -6,6 +6,7 @@ No command line, environment, credential, request body or SQL text is exported.
 """
 import argparse
 import datetime as dt
+import hashlib
 import json
 import math
 import os
@@ -56,10 +57,12 @@ def main():
     no_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     generator = None
     generator_identity = None
+    generator_cpu_at = None
     api.cpu_percent(None)
     psutil.cpu_percent(None)
     me = psutil.Process()
     me.cpu_percent(None)
+    cpu_at = time.monotonic()
     started = time.monotonic()
     busy_samples = 0
     failed_observations = 0
@@ -73,11 +76,13 @@ def main():
             pass
 
     with args.output.open('x', encoding='utf-8') as output:
-        output.write(json.dumps({'kind': 'configuration', 'project': args.project, 'interval_seconds': args.interval, 'logical_cpus': psutil.cpu_count(), 'stop_caps': {'host_memory_percent': 88, 'api_rss_bytes': 1610612736, 'generator_rss_bytes': 2147483648, 'container_memory_percent': 85, 'host_cpu_percent_for_three_samples': 85, 'consecutive_observation_failures': 3}, 'pid': api.pid, 'containers': args.container, 'container_ids': container_ids, 'load_script': args.load_script}) + '\n')
+        output.write(json.dumps({'kind': 'configuration', 'project': args.project, 'interval_seconds': args.interval, 'logical_cpus': psutil.cpu_count(), 'sampler_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'cpu_minimum_interval_seconds': 1, 'stop_caps': {'host_memory_percent': 88, 'api_rss_bytes': 1610612736, 'generator_rss_bytes': 2147483648, 'container_memory_percent': 85, 'host_cpu_percent_for_three_samples': 85, 'consecutive_observation_failures': 3}, 'pid': api.pid, 'containers': args.container, 'container_ids': container_ids, 'load_script': args.load_script}) + '\n')
         output.flush()
         while time.monotonic() - started < args.max_seconds and not args.done_file.exists():
             tick = time.monotonic()
-            row = {'kind': 'sample', 'at': dt.datetime.now(dt.timezone.utc).isoformat(), 'elapsed_seconds': tick - started, 'errors': []}
+            cpu_interval = tick - cpu_at
+            cpu_at = tick
+            row = {'kind': 'sample', 'at': dt.datetime.now(dt.timezone.utc).isoformat(), 'elapsed_seconds': tick - started, 'cpu_interval_seconds': cpu_interval, 'cpu_interval_valid': cpu_interval >= 1, 'errors': []}
             try:
                 if not api.is_running() or api.create_time() != api_identity:
                     raise RuntimeError('API PID identity changed')
@@ -88,7 +93,9 @@ def main():
                 row['errors'].append('API identity/process unavailable: ' + type(error).__name__)
                 signal('API process unavailable')
             row['host'] = {'cpu_percent': psutil.cpu_percent(None), 'memory_percent': psutil.virtual_memory().percent, 'available_memory_bytes': psutil.virtual_memory().available}
-            busy_samples = busy_samples + 1 if row['host']['cpu_percent'] >= 85 else 0
+            # Preserve the raw first value, but a sub-second priming interval
+            # cannot establish a steady CPU peak or a high-CPU budget window.
+            busy_samples = busy_samples + 1 if row['cpu_interval_valid'] and row['host']['cpu_percent'] >= 85 else 0
             if row['host']['memory_percent'] >= 88 or busy_samples >= 3:
                 signal('shared host resource budget reached; not a server-only capacity bound')
             generators = []
@@ -103,9 +110,13 @@ def main():
                         raise ValueError('generator creation time mismatch')
                     candidate.cpu_percent(None)
                     generator, generator_identity = candidate, created
+                    generator_cpu_at = time.monotonic()
                 if not generator.is_running() or generator.pid != int(identity_file['k6_pid']) or generator.create_time() != generator_identity:
                     raise ValueError('generator identity changed')
-                generators.append({'pid': generator.pid, 'rss_bytes': generator.memory_info().rss, 'cpu_percent_one_core': generator.cpu_percent(None), 'threads': generator.num_threads()})
+                generator_now = time.monotonic()
+                generator_interval = generator_now - generator_cpu_at
+                generators.append({'pid': generator.pid, 'rss_bytes': generator.memory_info().rss, 'cpu_percent_one_core': generator.cpu_percent(None), 'cpu_interval_seconds': generator_interval, 'cpu_interval_valid': generator_interval >= 1, 'threads': generator.num_threads()})
+                generator_cpu_at = generator_now
             except Exception as error:
                 row['errors'].append('owned generator observation unavailable: ' + type(error).__name__)
             row['generators'] = generators

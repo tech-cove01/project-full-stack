@@ -1,0 +1,34 @@
+?   	github.com/cityloop/fullstack-go/cmd/api	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/community-projector	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/note-search	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/recount	[no test files]
+?   	github.com/cityloop/fullstack-go/cmd/review	[no test files]
+ok  	github.com/cityloop/fullstack-go/internal/activity	12.969s
+ok  	github.com/cityloop/fullstack-go/internal/activitypub	4.435s
+ok  	github.com/cityloop/fullstack-go/internal/ai	6.489s
+ok  	github.com/cityloop/fullstack-go/internal/aichat	11.211s
+ok  	github.com/cityloop/fullstack-go/internal/aiknowledge	8.906s
+ok  	github.com/cityloop/fullstack-go/internal/aitool	13.225s
+ok  	github.com/cityloop/fullstack-go/internal/auth	11.160s
+ok  	github.com/cityloop/fullstack-go/internal/communitycache	23.299s
+ok  	github.com/cityloop/fullstack-go/internal/communityconsumer	11.011s
+ok  	github.com/cityloop/fullstack-go/internal/communityprojection	30.851s
+ok  	github.com/cityloop/fullstack-go/internal/communityrelay	30.871s
+ok  	github.com/cityloop/fullstack-go/internal/merchant	26.661s
+ok  	github.com/cityloop/fullstack-go/internal/merchantorder	12.805s
+ok  	github.com/cityloop/fullstack-go/internal/note	24.625s
+ok  	github.com/cityloop/fullstack-go/internal/notesearch	16.978s
+ok  	github.com/cityloop/fullstack-go/internal/order	26.681s
+ok  	github.com/cityloop/fullstack-go/internal/orderadmission	26.632s
+ok  	github.com/cityloop/fullstack-go/internal/ordercomp	28.119s
+ok  	github.com/cityloop/fullstack-go/internal/orderreview	30.818s
+ok  	github.com/cityloop/fullstack-go/internal/orderstream	21.010s
+ok  	github.com/cityloop/fullstack-go/internal/ordertimeout	18.985s
+ok  	github.com/cityloop/fullstack-go/internal/outbox	30.648s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	11.149s
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.202s
+ok  	github.com/cityloop/fullstack-go/internal/platform/database	30.624s
+ok  	github.com/cityloop/fullstack-go/internal/platform/diagnostics	30.667s
+ok  	github.com/cityloop/fullstack-go/internal/platform/httpapi	30.534s
+ok  	github.com/cityloop/fullstack-go/internal/shop	33.326s
+ok  	github.com/cityloop/fullstack-go/internal/social	24.810s

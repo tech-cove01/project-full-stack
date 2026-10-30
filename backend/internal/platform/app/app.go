@@ -35,6 +35,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/ordertimeout"
 	"github.com/cityloop/fullstack-go/internal/platform/config"
 	"github.com/cityloop/fullstack-go/internal/platform/database"
+	"github.com/cityloop/fullstack-go/internal/platform/diagnostics"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
 	"github.com/cityloop/fullstack-go/internal/shop"
 	"github.com/cityloop/fullstack-go/internal/social"
@@ -137,9 +138,32 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			workers = append(workers, consumer.Run)
 		}
 	}
-	owned := startBackground(ctx, resources, workers...)
+	var observation io.Closer
+	if cfg.DiagnosticsAddr != "" {
+		observation, err = diagnostics.Start(cfg.DiagnosticsAddr, resources.SQL, resources.Redis, cfg.ShutdownTimeout)
+		if err != nil {
+			_ = listener.Close()
+			_ = resources.Close()
+			return err
+		}
+		logger.Info("isolated capacity diagnostics enabled", "address", cfg.DiagnosticsAddr)
+	}
+	owned := startBackground(ctx, applicationResources{observation, resources}, workers...)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String())
 	return serve(ctx, server, listener, owned, cfg.ShutdownTimeout, logger)
+}
+
+type applicationResources struct {
+	diagnostics io.Closer
+	pools       io.Closer
+}
+
+func (resources applicationResources) Close() error {
+	var err error
+	if resources.diagnostics != nil {
+		err = resources.diagnostics.Close()
+	}
+	return errors.Join(err, resources.pools.Close())
 }
 
 type backgroundResources struct {

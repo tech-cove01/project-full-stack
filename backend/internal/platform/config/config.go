@@ -40,6 +40,7 @@ type Kafka struct {
 type Config struct {
 	Environment     string
 	APIAddr         string
+	DiagnosticsAddr string
 	MySQL           MySQL
 	Redis           Redis
 	Kafka           Kafka
@@ -83,6 +84,17 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	if _, err := parseInt("API_ADDR port", port, 1, 65535); err != nil {
 		return Config{}, err
+	}
+	if value, ok := lookup("GO_DIAGNOSTICS_ADDR"); ok && strings.TrimSpace(value) != "" {
+		cfg.DiagnosticsAddr = strings.TrimSpace(value)
+		host, port, splitErr := net.SplitHostPort(cfg.DiagnosticsAddr)
+		ip := net.ParseIP(host)
+		if cfg.Environment == "production" || splitErr != nil || ip == nil || !ip.IsLoopback() {
+			return Config{}, fmt.Errorf("GO_DIAGNOSTICS_ADDR requires a numeric loopback address in development or test")
+		}
+		if _, err := parseInt("GO_DIAGNOSTICS_ADDR port", port, 1, 65535); err != nil {
+			return Config{}, err
+		}
 	}
 	for _, item := range []struct {
 		name   string

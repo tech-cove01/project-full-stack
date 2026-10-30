@@ -146,3 +146,31 @@ func TestTimeoutAndRedisOverrides(t *testing.T) {
 		t.Fatal("order deadline configuration was not applied")
 	}
 }
+
+func TestCapacityDiagnosticsAreOptInAndOnlyUseNumericLoopbackOutsideProduction(t *testing.T) {
+	cfg, err := fromMap(validEnvironment())
+	if err != nil || cfg.DiagnosticsAddr != "" {
+		t.Fatal("default configuration must not enable diagnostics")
+	}
+	for _, address := range []string{"127.0.0.1:8350", "[::1]:8351"} {
+		values := validEnvironment()
+		values["GO_DIAGNOSTICS_ADDR"] = address
+		cfg, err := fromMap(values)
+		if err != nil || cfg.DiagnosticsAddr != address {
+			t.Fatal("explicit local diagnostics address was rejected")
+		}
+	}
+	for _, address := range []string{"0.0.0.0:8350", ":8350", "localhost:8350", "192.0.2.1:8350", "[::]:8350", "127.0.0.1:0", "127.0.0.1:65536", "127.0.0.1:secret"} {
+		values := validEnvironment()
+		values["GO_DIAGNOSTICS_ADDR"] = address
+		if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "GO_DIAGNOSTICS_ADDR") || strings.Contains(err.Error(), "secret") {
+			t.Fatal("unsafe diagnostics address must fail without configured values")
+		}
+	}
+	values := validEnvironment()
+	values["GO_ENV"] = "production"
+	values["GO_DIAGNOSTICS_ADDR"] = "127.0.0.1:8350"
+	if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "GO_DIAGNOSTICS_ADDR") {
+		t.Fatal("production must reject capacity diagnostics even on loopback")
+	}
+}

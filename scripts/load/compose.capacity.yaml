@@ -1,0 +1,10 @@
+# GO-073-CAP: apply only with compose.go.yaml and an explicit CAP project name.
+# Retain MySQL/Redis durability and application behavior; bound our share of the
+# common Docker VM. The experiment reports these limits with every result.
+services:
+  mysql:
+    cpus: 4
+    mem_limit: 2g
+  redis:
+    cpus: 2
+    mem_limit: 512m

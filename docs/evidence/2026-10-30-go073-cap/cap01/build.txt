@@ -1,0 +1,5 @@
+# github.com/cityloop/fullstack-go/cmd/capacity-trade
+cmd\capacity-trade\main.go:6:2: "bufio" imported and not used
+cmd\capacity-trade\main.go:17:2: "net" imported and not used
+cmd\capacity-trade\main.go:22:2: "sort" imported and not used
+cmd\capacity-trade\main.go:199:12: h.run undefined (type *helper has no field or method run)

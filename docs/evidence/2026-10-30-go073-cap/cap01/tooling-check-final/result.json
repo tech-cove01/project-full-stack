@@ -1,0 +1,8 @@
+{
+  "checkedAt": "2026-10-30T04:43:22.0975418Z",
+  "testExit": 0,
+  "vetExit": 0,
+  "buildExit": 0,
+  "binarySha256": "75950a7f5482927a9773302fd1913fcd700c83039130146cbe92bb66abc6c21a",
+  "scope": "capacity-trade measurement helper; no load run by these checks"
+}

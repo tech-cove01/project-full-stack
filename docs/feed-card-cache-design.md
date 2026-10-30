@@ -52,7 +52,9 @@ L1必须同时有条数和内容字节预算，Redis键有TTL及受限抖动；�
 
 Go的[singleflight文档](https://pkg.go.dev/golang.org/x/sync/singleflight)定义的是相同key在途函数合并，它本身不是缓存；[context文档](https://pkg.go.dev/context)定义请求取消/超时，二者结合仍需上述生命周期与数据隔离设计。
 
-## 必要验收（结果目前均待实施）
+## 必要验收（功能已自验，正式容量尚未通过）
+
+实施结果见 [A2 实际 Feed](evidence/2026-10-30-cap07/phase1.md)、[A3 合并与真实边界回归](evidence/2026-10-30-cap07/phase2.md)。FC-01—07 开发自验、受影响真实回归及精确固定 B 的 Linux CI/race 已通过；均待用户另交独立核验。[预定A/B组](evidence/2026-10-30-cap07/harness-report.md)已经结束，B1 原生长尾失败保留、B2通过不覆盖，整组容量未通过；后续阶梯/持有/hot按门控未执行，不能因功能通过标整票完成。实际状态以根 STATUS 为准。
 
 | ID | 行为与证据 |
 | --- | --- |

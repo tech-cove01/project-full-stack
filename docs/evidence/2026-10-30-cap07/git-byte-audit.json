@@ -1,0 +1,6 @@
+{
+  "sourceCommit": "980d01556951d9ae3da60dc9589b83d018cd62b8",
+  "checked": 213,
+  "failures": [],
+  "scope": "Git committed blob bytes vs frozen pre-stage SHA256; no raw percentile reconstruction"
+}

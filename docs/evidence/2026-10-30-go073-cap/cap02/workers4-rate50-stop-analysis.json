@@ -1,0 +1,148 @@
+{
+  "task": "GO-073-CAP/CAP-02",
+  "generatedAt": "2026-10-30T05:10:51.047641+00:00",
+  "method": "internal read-only recomputation of immutable captured exporter/request/SQL/Redis artifacts; no live SQL or load; original result unchanged",
+  "activityId": "1013",
+  "apiRevision": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "serverAcceptedAndDurableRows": 2399,
+  "clientCompletedRecords": 2398,
+  "rawCompletedMetricCounts": {
+    "http_reqs": 2398,
+    "cap_requests": 2398,
+    "cap_system_errors": 0,
+    "cap_request_record": 2398
+  },
+  "rawExporterRecordCount": 2398,
+  "recomputedChecks": {
+    "duplicateSQLIds": 0,
+    "duplicateSQLUsers": 0,
+    "duplicateRedisOrderIds": 0,
+    "sqlRedisDifferentIDs": 0,
+    "sqlRedisUserMismatch": 0,
+    "completedResponseSQLIdUserMismatch": 0,
+    "exportedRecordMismatch": 0,
+    "publicPoolIndexUserMismatch": 0
+  },
+  "capturedSQLStatusCounts": {
+    "1": 2399
+  },
+  "unloggedDurableRows": [
+    {
+      "id": "654426232770799298",
+      "userId": "2461",
+      "status": 1,
+      "poolIndex": 2457,
+      "redisMappingUser": "2461"
+    }
+  ],
+  "unknownClientResponseWindowCount": 1,
+  "unknownDurableDestinationsObserved": 0,
+  "lossDetected": false,
+  "interpretation": "one server-accepted order has complete SQL/Redis durable identity but no completed client response record; consistent with REST stop interrupting the next in-flight request, not evidence of lost order",
+  "timing": {
+    "lastCompletedRequest": {
+      "phase": "stable",
+      "index": 2456,
+      "started": 1793336881767,
+      "ended": 1793336881779,
+      "durationMs": 11.4743,
+      "blockedMs": 0,
+      "status": 200,
+      "category": "accepted",
+      "orderId": "654426232770799297"
+    },
+    "pauseRequestedAtMs": 1793336881799,
+    "lastResponseToPauseRequestMs": 20,
+    "adjacentUnloggedPoolIndex": 2457,
+    "stopTriggerQueueSample": {
+      "atMs": 1793336881787,
+      "sqlCountObservedAtMs": 1793336881791,
+      "queryMs": 10.163,
+      "durableOrders": 1628,
+      "redisAccepted": 2398,
+      "redisStock": 572,
+      "pending": 4,
+      "lag": 766,
+      "streamLength": 9921,
+      "lastDeliveredId": "1793336866465-0",
+      "oldestQueueMs": 15392,
+      "k6VUs": 1,
+      "k6Requests": 2396,
+      "k6SystemErrors": 0
+    },
+    "loadEndedAtMs": 1793336882826,
+    "convergedObservedAtMs": 1793336907333,
+    "drainMsAfterGeneratorExit": 24506,
+    "lastCompletedResponseToConvergedObservedMs": 25554
+  },
+  "control": {
+    "stopReason": "oldest queued order exceeds 15 seconds",
+    "stoppedEarly": true,
+    "pauseConfirmed": false,
+    "stopConfirmed": true,
+    "fallbackKilledOwnedK6": null,
+    "k6ExitCode": 103,
+    "exportedLogsComplete": true,
+    "passed": false
+  },
+  "final": {
+    "duplicateEffectiveOrders": 0,
+    "durableRejections": 0,
+    "durableRows": 2399,
+    "finalLag": 0,
+    "finalPending": 0,
+    "finalStreamLength": 9922,
+    "mappingMismatches": 0,
+    "mismatchedUserOrStatus": 0,
+    "mysqlStock": 571,
+    "redisAccepted": 2399,
+    "redisStock": 571,
+    "unfinishedOrderOrCompensationOutbox": 0,
+    "uniqueAcceptedRecords": 2398,
+    "unloggedDurableOrders": 1,
+    "unresolvedReview": 0
+  },
+  "limits": [
+    "client HTTP status/body/receive outcome of the unlogged order is unknown; SQL/Redis do not reconstruct that response",
+    "exportedLogsComplete compares completed-request metric counters to completed records; it does not prove no request was interrupted before those counters incremented",
+    "reconciliationPassed=false remains correct because response evidence is incomplete, even though all captured accepted identities have matching final SQL rows",
+    "original lastThirdQueueAssessment measured/pass used post-stop drain samples before nominal stable end and is inapplicable to this interrupted stage; original failure evidence is preserved and helper measurement fix is separate",
+    "final captured PEL/lag/review/outbox are zero and stock571=2970-2399; drain24.506s is observed after generator exit, not exact database commit latency"
+  ],
+  "sources": [
+    {
+      "path": "workers4-rate-50/result.json",
+      "bytes": 4722,
+      "sha256": "e2b21fc3e2ec70adb06cbd46a121aa95e9e2e2e84e68f5dade5538f8ab4a3d99"
+    },
+    {
+      "path": "workers4-rate-50/requests.ndjson",
+      "bytes": 778824,
+      "sha256": "87a239f96017ea8721102e3891c4fbe0cb274e17e2955546426d342d5af1b3a3"
+    },
+    {
+      "path": "workers4-rate-50/orders.ndjson",
+      "bytes": 130906,
+      "sha256": "a358988348bf3428ccc32cca4491b4262ac2835dbe36c8b2fecd9ddc0f0bc299"
+    },
+    {
+      "path": "workers4-rate-50/redis-accepted.ndjson",
+      "bytes": 116512,
+      "sha256": "1133489343984e87d25fb52ee939bfb007ed15b1a52bb376ae11d2e2a0b55c29"
+    },
+    {
+      "path": "workers4-rate-50/queue.ndjson",
+      "bytes": 21911,
+      "sha256": "c6090ca1509d862d889884fc6522f7c5bf493c9a2145d2f022feb6c436c50622"
+    },
+    {
+      "path": "workers4-rate-50/k6-metrics.ndjson.gz",
+      "bytes": 283419,
+      "sha256": "b43a413869a00879fa9ebdbdb457f2a2b1e73956e7b5e2970fa2545bc028117e",
+      "originalPath": "workers4-rate-50/k6-metrics.ndjson",
+      "originalBytes": 8366069,
+      "originalSha256": "4545fd5a373313e0ad20dc690d9666fa4c7e172df0be5fd1c551d5d74685ea6e"
+    }
+  ],
+  "archiveNote": "Only derivative source references updated to lossless gzip; originalPath/Bytes/Sha256 retained, original stage artifacts unchanged."
+}

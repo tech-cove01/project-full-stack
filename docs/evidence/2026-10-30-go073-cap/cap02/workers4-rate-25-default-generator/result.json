@@ -1,0 +1,131 @@
+{
+  "activityId": "1016",
+  "analysis": {
+    "reconciliation": {
+      "duplicateEffectiveOrders": 0,
+      "durableRejections": 0,
+      "durableRows": 1376,
+      "finalLag": 0,
+      "finalPending": 0,
+      "finalStreamLength": 14876,
+      "mappingMismatches": 0,
+      "mismatchedUserOrStatus": 0,
+      "mysqlStock": 169,
+      "redisAccepted": 1376,
+      "redisStock": 169,
+      "unfinishedOrderOrCompensationOutbox": 0,
+      "uniqueAcceptedRecords": 1376,
+      "unloggedDurableOrders": 0,
+      "unresolvedReview": 0
+    },
+    "reconciliationPassed": true,
+    "stable": {
+      "requests": 1125,
+      "categories": {
+        "accepted": 1125
+      },
+      "acceptedUnique": 1125,
+      "repeatedOrderIds": 0,
+      "durableMatched": 1125,
+      "rejectedDurable": 0,
+      "unresolved": 0,
+      "allRequestP95Ms": 13.1529,
+      "allRequestP99Ms": 21.0098,
+      "acceptedP95Ms": 13.1529,
+      "acceptedP99Ms": 21.0098,
+      "systemErrorRate": 0,
+      "offeredRate": 25,
+      "issuedPerNominalSecond": 25
+    },
+    "stableWindow": {
+      "approximateStartFromFirstRequestMs": 1793337398669,
+      "lastCountSampleAtMs": 1793337442604,
+      "nominalDurationSeconds": 45,
+      "note": "count is a lower-time-bound observation up to 2s before the nominal end plus observer query/schedule uncertainty; not exact DB commit throughput",
+      "stableCohortObservedByLastPreEndSample": 1096
+    },
+    "warm": {
+      "requests": 251,
+      "categories": {
+        "accepted": 251
+      },
+      "acceptedUnique": 251,
+      "repeatedOrderIds": 0,
+      "durableMatched": 251,
+      "rejectedDurable": 0,
+      "unresolved": 0,
+      "allRequestP95Ms": 13.4761,
+      "allRequestP99Ms": 16.3307,
+      "acceptedP95Ms": 13.4761,
+      "acceptedP99Ms": 16.3307,
+      "systemErrorRate": 0,
+      "offeredRate": 25,
+      "issuedPerNominalSecond": 25.1
+    }
+  },
+  "completedRequestRecords": 1376,
+  "convergedObservedAtMs": 1793337444648,
+  "criteria": {
+    "acceptedFractionMinimum": 0.99,
+    "allAndAcceptedP95MaximumMs": 200,
+    "allAndAcceptedP99MaximumMs": 500,
+    "capacityMinimumStableSeconds": 30,
+    "droppedMaximum": 0,
+    "highestHoldDrainMaximumSeconds": 15,
+    "issuedFractionMinimum": 0.99,
+    "lastThirdDBToAcceptedRateMinimum": 0.98,
+    "lastThirdLagNetGrowthMaximum": 50,
+    "systemErrorRateLessThan": 0.01
+  },
+  "drainMs": 7,
+  "exportedLogsComplete": true,
+  "finishedAt": "2026-10-30T05:17:24.7678576Z",
+  "k6DroppedIterations": 0,
+  "k6ExitCode": 0,
+  "k6RecordCount": 1376,
+  "k6RequestCount": 1376,
+  "lastResponseToConvergedObservedMs": 1008,
+  "lastThirdQueueAssessment": {
+    "measured": true,
+    "passed": true,
+    "nominalWindowStartMs": 1793337428669,
+    "nominalWindowEndMs": 1793337443669,
+    "firstSampleAtMs": 1793337428604,
+    "lastSampleAtMs": 1793337442604,
+    "lagNetGrowth": -1,
+    "lagGrowthLimit": 50,
+    "dbCompletedBetweenSamples": 348,
+    "acceptedResponsesBetweenSQLObservations": 350,
+    "dbToAcceptedRatio": 0.9942857142857143,
+    "note": "stable start approximates first issued request; sample boundaries are at most one observer interval early; SQL count observation and Redis lag are not simultaneous; no commit timestamp inference"
+  },
+  "limitations": [
+    "MySQL count observer scans the indexed cohort; query time is saved and observer/no-observer probes are needed",
+    "k6 JSON exporter retains metric tag sets and writes all metric samples; generator CPU/RSS and calibration must be checked",
+    "no exact DB commit latency; queue count timestamps are first-observation upper bounds",
+    "REST safety stop pauses first then waits for 10s HTTP deadlines before stopping; interrupted or unknown responses are reconciled as unlogged durable rows, never called lost orders"
+  ],
+  "loadCriteriaMet": true,
+  "loadEndedAtMs": 1793337444640,
+  "loadStartedAtMs": 1793337378556,
+  "measurement": "k6 open-loop arrivals; buffered JSON exporter; persistent SQL COUNT using voucher index every 2s; final exact ID/user/voucher reconciliation",
+  "model": {
+    "rate": 25,
+    "warmSeconds": 10,
+    "stableSeconds": 45,
+    "preAllocatedVUs": 20,
+    "maxVUs": 50,
+    "warmSlots": 285,
+    "availableUsers": 1445,
+    "initialStock": 1545
+  },
+  "nominalStableEndToConvergedObservedMs": 979,
+  "observerErrors": 0,
+  "passed": true,
+  "poolTag": "captrade-efd89f5b7ed7",
+  "shopId": "4",
+  "stableAcceptedFraction": 1,
+  "stableIssuedFraction": 1,
+  "startedAt": "2026-10-30T05:16:17.4101912Z",
+  "task": "GO-073-CAP"
+}

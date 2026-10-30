@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-30T05:37:38.4317194Z",
+  "revokedSessions": 25001,
+  "privatePoolRemoved": true,
+  "apiPid": 70612,
+  "apiStoppedAfterDrain": true,
+  "apiStopMethod": "Windows psutil.terminate with exe/create_time check after convergence",
+  "containers": [
+    "/project-full-stack-cap-trade-mysql-1|exited|0|false|project-full-stack-cap-trade_go-mysql-data  ",
+    "/project-full-stack-cap-trade-redis-1|exited|0|false|project-full-stack-cap-trade_go-redis-data "
+  ],
+  "volumesRetained": true
+}

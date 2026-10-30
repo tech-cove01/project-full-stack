@@ -30,4 +30,8 @@ fixture注册的清理按LIFO先取消并等待全部consumer，再删除精确�
 
 ## 验证边界
 
-本审阅没有自行运行作者的新真实依赖回归，也没有将源码阅读记作测试通过。3452/6552的新隔离依赖由作者负责，实际测试日志/退出码在交付时另行链接。Windows相关回归即使通过，也不能代替Linux race或外部独立QA。四worker的同活动库存行锁仍会串行化持锁段；允许并行只增加非锁段重叠机会，是否改善25/s及更高到达率须以完整队列/成单/资源与逐ID对账确认。
+本审阅没有自行运行作者的新真实依赖回归，也没有将源码阅读记作测试通过。作者使用3452/6552新隔离依赖运行的[初次完整日志](parallel-regression/test-initial.txt)与[退出记录](parallel-regression/test-initial-exit.json)已核读：config/app/order（含创建、锁、支付取消）/orderreview通过，新四条同ID回放场景因10秒测试等候不足而失败。失败原文保留。
+
+随后仅把新测试的有界等待上限改为30秒，并增加原因注释；生产GET_LOCK、2/4/8秒退避、事务或ACK均未修改。四条同ID同时竞争时，最后一条可能在2+4+8秒退避后才能重新确认已有事实，10秒不能覆盖该正常时序，扩大测试等待有源码依据，不是放宽容量判据。[orderstream重跑日志](parallel-regression/test-stream-rerun.txt)及[退出记录](parallel-regression/test-stream-rerun-exit.json)为0，同ID场景14.66秒收敛，唯一库存/ACK和四consumer提交后ACK前恢复均通过；[五个相关包vet](parallel-regression/vet-exit.json)退出0。该测试修正已复读，最终内部审阅仍无阻断项。
+
+这些是作者Windows真实依赖回归及本次非作者日志复读，不代替Linux race或外部独立QA。四worker的同活动库存行锁仍会串行化持锁段；允许并行只增加非锁段重叠机会，是否改善25/s及更高到达率须以完整队列/成单/资源与逐ID对账确认。

@@ -1,0 +1,34 @@
+{
+  "criteria": {
+    "acceptedFractionMinimum": 0.99,
+    "allAndAcceptedP95MaximumMs": 200,
+    "allAndAcceptedP99MaximumMs": 500,
+    "capacityMinimumStableSeconds": 30,
+    "droppedMaximum": 0,
+    "highestHoldDrainMaximumSeconds": 15,
+    "issuedFractionMinimum": 0.99,
+    "lastThirdDBToAcceptedRateMinimum": 0.98,
+    "lastThirdLagNetGrowthMaximum": 70,
+    "systemErrorRateLessThan": 0.01
+  },
+  "limitations": [
+    "MySQL count observer scans the indexed cohort; query time is saved and observer/no-observer probes are needed",
+    "k6 JSON exporter retains metric tag sets and writes all metric samples; generator CPU/RSS and calibration must be checked",
+    "no exact DB commit latency; queue count timestamps are first-observation upper bounds",
+    "REST safety stop pauses first then waits for 10s HTTP deadlines before stopping; interrupted or unknown responses are reconciled as unlogged durable rows, never called lost orders"
+  ],
+  "measurement": "k6 open-loop arrivals; buffered JSON exporter; persistent SQL COUNT using voucher index every 2s; final exact ID/user/voucher reconciliation",
+  "model": {
+    "rate": 35,
+    "warmSeconds": 10,
+    "stableSeconds": 45,
+    "preAllocatedVUs": 20,
+    "maxVUs": 70,
+    "warmSlots": 395,
+    "availableUsers": 2015,
+    "initialStock": 2115
+  },
+  "passed": false,
+  "startedAt": "2026-10-30T05:13:44.5703068Z",
+  "task": "GO-073-CAP"
+}

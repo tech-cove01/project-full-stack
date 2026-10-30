@@ -1,0 +1,7 @@
+{
+  "head": "21325a82cae7d2d49058aec798057a8e1762c657",
+  "at": "2026-10-30T05:27:55.335594+00:00",
+  "referencesChecked": 36,
+  "headBlobDeclarationMismatches": [],
+  "method": "git cat-file blob HEAD:path raw stdout bytes; SHA256 against original declarations"
+}

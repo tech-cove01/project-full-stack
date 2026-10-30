@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-30T05:37:35.543699+00:00",
+  "initialGuardsFailedClosed": true,
+  "causes": [
+    "PowerShell reparsed an already parsed UTC DateTime as local culture string",
+    "Python default local codepage misdecoded UTF8 Chinese metadata path; now explicit utf-8-sig"
+  ],
+  "verifiedPid": 70612,
+  "exeMatches": true,
+  "createTimeDifferenceSeconds": 0.15932607650756836,
+  "privatePoolAlreadyRemoved": true,
+  "sessionsAlreadyRevoked": 25001
+}

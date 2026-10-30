@@ -1,0 +1,66 @@
+[
+  {
+    "path": "compare-w1-rate25\\k6-metrics.ndjson.gz",
+    "originalPath": "compare-w1-rate25\\k6-metrics.ndjson",
+    "originalBytes": 4812572,
+    "originalSha256": "1cf020db60bad04106619b52847acbc00acc44828888ea138ac7a6ee6e05bbb8",
+    "gzipBytes": 164222,
+    "gzipSha256": "56c8437e95e4ea1422ad3432f172a7d22fc8c8a9784f1cde08065eecc39b2f10"
+  },
+  {
+    "path": "workers4-rate-25\\k6-metrics.ndjson.gz",
+    "originalPath": "workers4-rate-25\\k6-metrics.ndjson",
+    "originalBytes": 4809329,
+    "originalSha256": "219b1b17ce061b4872fd068ac179b10a9441dab2f13bc87edc7f59fb6a0169c6",
+    "gzipBytes": 164110,
+    "gzipSha256": "e7a41f11f605bbf32f72ce43bc2a268f8bb045d32e49688c5147ebb22de4b3ac"
+  },
+  {
+    "path": "workers4-rate-25-default-generator\\k6-metrics.ndjson.gz",
+    "originalPath": "workers4-rate-25-default-generator\\k6-metrics.ndjson",
+    "originalBytes": 4810181,
+    "originalSha256": "e6fc071e101d7f4eba6413f03befaba56ec4b8ee84cdbb1f45074cab2fb7870a",
+    "gzipBytes": 164468,
+    "gzipSha256": "edb7dae7b465051ef15d4fa6993a497e627aa3f7b8ef1bd0b4eceee73f627973"
+  },
+  {
+    "path": "workers4-rate-30\\k6-metrics.ndjson.gz",
+    "originalPath": "workers4-rate-30\\k6-metrics.ndjson",
+    "originalBytes": 5768011,
+    "originalSha256": "0268ae791235403e8c51d4e5f703dc6b7ebdf0f9a97a4528e6c1dc76a54e1ff1",
+    "gzipBytes": 196050,
+    "gzipSha256": "9c2f43e9f55a1635e03602ab840d0bbc3cb8f6cb687fa4049df7afd5d5594264"
+  },
+  {
+    "path": "workers4-rate-30-hold-1\\k6-metrics.ndjson.gz",
+    "originalPath": "workers4-rate-30-hold-1\\k6-metrics.ndjson",
+    "originalBytes": 19947368,
+    "originalSha256": "f0b8a3a13c85477a2b2cb4ffc2777b4de4c5afa79fe1ae6b9a3ed98d876e20a6",
+    "gzipBytes": 672822,
+    "gzipSha256": "16e7ade4ad303b05a9e2581b5b6f1e56b5dee7c6b2a1ce443acf39a52ff7f789"
+  },
+  {
+    "path": "workers4-rate-30-hold-2\\k6-metrics.ndjson.gz",
+    "originalPath": "workers4-rate-30-hold-2\\k6-metrics.ndjson",
+    "originalBytes": 19948780,
+    "originalSha256": "38cb8919960692f7ecb08c6f68f8daca96c55abcc97f652a785d0367f5b8350f",
+    "gzipBytes": 673723,
+    "gzipSha256": "7af47fa9017921d9fac7c6b2ecfdc96322c136cd9d81c3e3efe1d312886ea3f3"
+  },
+  {
+    "path": "workers4-rate-35\\k6-metrics.ndjson.gz",
+    "originalPath": "workers4-rate-35\\k6-metrics.ndjson",
+    "originalBytes": 6729170,
+    "originalSha256": "7e7a02744bd4b5eba80a1b65b5ebcef44da136c25144edcb25d058f67066460c",
+    "gzipBytes": 229055,
+    "gzipSha256": "9c8f56a5f85db541aa3dfd86b70330f4ff822e1101deb186d9dbd8dea9e69987"
+  },
+  {
+    "path": "workers4-rate-50\\k6-metrics.ndjson.gz",
+    "originalPath": "workers4-rate-50\\k6-metrics.ndjson",
+    "originalBytes": 8366069,
+    "originalSha256": "4545fd5a373313e0ad20dc690d9666fa4c7e172df0be5fd1c551d5d74685ea6e",
+    "gzipBytes": 283419,
+    "gzipSha256": "b43a413869a00879fa9ebdbdb457f2a2b1e73956e7b5e2970fa2545bc028117e"
+  }
+]

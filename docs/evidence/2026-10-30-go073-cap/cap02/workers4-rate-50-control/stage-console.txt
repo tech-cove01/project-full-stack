@@ -1,0 +1,1 @@
+capacity trade finished: rate=50 requests=2398 stableAccepted=1897 matched=1897 stopped=true passed=false

@@ -1,0 +1,400 @@
+{
+  "task": "GO-073-CAP-04",
+  "stage": "workers4-rate-50",
+  "generated_at": "2026-10-30T05:12:10.391276+00:00",
+  "read_only_analysis": true,
+  "source_sha256": {
+    "cap02/workers4-rate-50/result.json": "e2b21fc3e2ec70adb06cbd46a121aa95e9e2e2e84e68f5dade5538f8ab4a3d99",
+    "cap02/workers4-rate-50/queue.ndjson": "c6090ca1509d862d889884fc6522f7c5bf493c9a2145d2f022feb6c436c50622",
+    "cap02/workers4-rate-50/requests.ndjson": "87a239f96017ea8721102e3891c4fbe0cb274e17e2955546426d342d5af1b3a3",
+    "cap02/workers4-rate-50-control/resources.ndjson": "86050d91249154aceba2b4ea2ceb9e937c44739c1b7e02677e0ebb7e32e7c1fe",
+    "cap02/workers4-rate-50-control/exit-status.json": "92df8766aa070f9a3504d184aee5351f05b3026a9e99edca68c87cac3f612e21"
+  },
+  "api_health": {
+    "Service": "project-full-stack-go",
+    "Runtime": "go",
+    "Status": "UP",
+    "Version": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e"
+  },
+  "stop": {
+    "stopReason": "oldest queued order exceeds 15 seconds",
+    "stoppedEarly": true,
+    "pauseRequestedAtMs": 1793336881799,
+    "pauseConfirmed": false,
+    "stopConfirmed": true,
+    "loadEndedAtMs": 1793336882826,
+    "k6ExitCode": 103,
+    "passed": false,
+    "loadCriteriaMet": false,
+    "drainMs": 24506,
+    "observerErrors": 0,
+    "k6DroppedIterations": 0
+  },
+  "nominal_stable_seconds": 45,
+  "nominal_rate": 50,
+  "stable_start_ms": 1793336843847,
+  "nominal_stable_end_ms": 1793336888847,
+  "stop_request_after_stable_start_seconds": 37.952,
+  "completed_stable_requests": 1897,
+  "completed_stable_requests_over_nominal_offers": 0.8431111111111111,
+  "completed_stable_response_span_ms": 37932,
+  "stable_window_is_complete": false,
+  "nominal_last_third": {
+    "usable": false,
+    "raw_assessment": {
+      "measured": true,
+      "passed": true,
+      "nominalWindowStartMs": 1793336873847,
+      "nominalWindowEndMs": 1793336888847,
+      "firstSampleAtMs": 1793336873787,
+      "lastSampleAtMs": 1793336888444,
+      "lagNetGrowth": -10,
+      "lagGrowthLimit": 100,
+      "dbCompletedBetweenSamples": 411,
+      "acceptedResponsesBetweenSQLObservations": 400,
+      "dbToAcceptedRatio": 1.0275,
+      "note": "stable start approximates first issued request; sample boundaries are at most one observer interval early; SQL count observation and Redis lag are not simultaneous; no commit timestamp inference"
+    },
+    "reason": "raw first/last interval extends beyond stop request and generator exit and includes drain; DB/accepted ratio >1 here does not demonstrate sustained capacity",
+    "last_sample_after_stop_request_ms": 6645,
+    "last_sample_after_generator_exit_ms": 5618
+  },
+  "valid_contained_active_stable_sql_window": {
+    "first": {
+      "atMs": 1793336845787,
+      "sqlCountObservedAtMs": 1793336845789,
+      "queryMs": 7.612,
+      "durableOrders": 558,
+      "redisAccepted": 598,
+      "redisStock": 2372,
+      "pending": 4,
+      "lag": 37,
+      "streamLength": 8121,
+      "lastDeliveredId": "1793336845038-0",
+      "oldestQueueMs": 818,
+      "k6VUs": 1,
+      "k6Requests": 598,
+      "k6SystemErrors": 0
+    },
+    "last": {
+      "atMs": 1793336881787,
+      "sqlCountObservedAtMs": 1793336881791,
+      "queryMs": 10.163,
+      "durableOrders": 1628,
+      "redisAccepted": 2398,
+      "redisStock": 572,
+      "pending": 4,
+      "lag": 766,
+      "streamLength": 9921,
+      "lastDeliveredId": "1793336866465-0",
+      "oldestQueueMs": 15392,
+      "k6VUs": 1,
+      "k6Requests": 2396,
+      "k6SystemErrors": 0
+    },
+    "sql_observation_elapsed_ms": 36002,
+    "db_count_delta": 1070,
+    "observed_db_per_second": 29.720571079384477,
+    "redis_accepted_delta": 1800,
+    "redis_accepted_delta_per_sql_observation_second": 49.99722237653464,
+    "logged_unique_accepted_responses": 1800,
+    "db_to_logged_response_ratio": 0.5944444444444444,
+    "lag_net_growth": 729,
+    "note": "SQL count and Redis snapshot are sequential, so accepted/lag not exactly simultaneous with SQL; counts are observations, not commit timestamps"
+  },
+  "last_8_seconds_before_stop_sql_window": {
+    "first": {
+      "atMs": 1793336873787,
+      "sqlCountObservedAtMs": 1793336873791,
+      "queryMs": 9.775,
+      "durableOrders": 1420,
+      "redisAccepted": 1998,
+      "redisStock": 972,
+      "pending": 4,
+      "lag": 574,
+      "streamLength": 9521,
+      "lastDeliveredId": "1793336862308-0",
+      "oldestQueueMs": 11552,
+      "k6VUs": 1,
+      "k6Requests": 1996,
+      "k6SystemErrors": 0
+    },
+    "last": {
+      "atMs": 1793336881787,
+      "sqlCountObservedAtMs": 1793336881791,
+      "queryMs": 10.163,
+      "durableOrders": 1628,
+      "redisAccepted": 2398,
+      "redisStock": 572,
+      "pending": 4,
+      "lag": 766,
+      "streamLength": 9921,
+      "lastDeliveredId": "1793336866465-0",
+      "oldestQueueMs": 15392,
+      "k6VUs": 1,
+      "k6Requests": 2396,
+      "k6SystemErrors": 0
+    },
+    "sql_observation_elapsed_ms": 8000,
+    "db_count_delta": 208,
+    "observed_db_per_second": 26.0,
+    "redis_accepted_delta": 400,
+    "redis_accepted_delta_per_sql_observation_second": 50.0,
+    "logged_unique_accepted_responses": 400,
+    "db_to_logged_response_ratio": 0.52,
+    "lag_net_growth": 192,
+    "note": "SQL count and Redis snapshot are sequential, so accepted/lag not exactly simultaneous with SQL; counts are observations, not commit timestamps"
+  },
+  "stable_queue_sample_count_before_stop": 19,
+  "max_queue_before_stop": {
+    "lag": 766,
+    "pending": 4,
+    "oldest_queue_ms": 15392
+  },
+  "stable_resources_selected_by_sample_start_before_stop": {
+    "samples": 8,
+    "first_at": "2026-10-30T05:07:24.672760+00:00",
+    "last_at": "2026-10-30T05:07:59.676881+00:00",
+    "samples_with_errors": 0,
+    "statistics": {
+      "api_cpu_one_core_percent": {
+        "min": 14.7,
+        "median": 37.5,
+        "max": 45.9
+      },
+      "k6_cpu_one_core_percent": {
+        "min": 1.6,
+        "median": 5.15,
+        "max": 6.9
+      },
+      "host_cpu_percent": {
+        "min": 26.7,
+        "median": 38.650000000000006,
+        "max": 67.6
+      },
+      "host_memory_percent": {
+        "min": 77.9,
+        "median": 77.95,
+        "max": 79.0
+      },
+      "api_rss_bytes": {
+        "min": 29904896,
+        "median": 30330880.0,
+        "max": 30646272
+      },
+      "k6_rss_bytes": {
+        "min": 41480192,
+        "median": 44015616.0,
+        "max": 45047808
+      },
+      "goroutines": {
+        "min": 54,
+        "median": 55.0,
+        "max": 56
+      },
+      "heap_alloc_bytes": {
+        "min": 3771216,
+        "median": 4969732.0,
+        "max": 6049224
+      },
+      "sql_max_open_connections": {
+        "min": 20,
+        "median": 20.0,
+        "max": 20
+      },
+      "sql_open": {
+        "min": 7,
+        "median": 7.0,
+        "max": 8
+      },
+      "sql_in_use": {
+        "min": 5,
+        "median": 5.0,
+        "max": 6
+      },
+      "redis_total_connections": {
+        "min": 5,
+        "median": 5.0,
+        "max": 5
+      },
+      "redis_idle_connections": {
+        "min": 4,
+        "median": 5.0,
+        "max": 5
+      },
+      "sample_elapsed_ms": {
+        "min": 1888.183899980504,
+        "median": 2070.694000009098,
+        "max": 2173.6618999857455
+      },
+      "mysql_container_cpu_percent": {
+        "max": 53.04
+      },
+      "mysql_container_memory_percent_of_limit": {
+        "max": 23.47
+      },
+      "redis_container_cpu_percent": {
+        "max": 15.96
+      },
+      "redis_container_memory_percent_of_limit": {
+        "max": 3.93
+      }
+    },
+    "counter_deltas": {
+      "sql": {
+        "wait_count": 0,
+        "wait_duration_ns": 0
+      },
+      "redis": {
+        "wait_count": 0,
+        "wait_duration_ns": 0,
+        "timeouts": 0
+      },
+      "runtime": {
+        "num_gc": 44,
+        "pause_total_ns": 4328200,
+        "total_alloc_bytes": 130492224
+      }
+    },
+    "last_sample_completion_estimated_from_elapsed": "2026-10-30T05:08:01.655708+00:00",
+    "estimated_last_sample_finishes_after_stop_request": false,
+    "estimated_last_sample_end_to_stop_request_ms": 143.2919921875
+  },
+  "generator_lifetime_resources": {
+    "samples": 12,
+    "first_at": "2026-10-30T05:07:04.670704+00:00",
+    "last_at": "2026-10-30T05:07:59.676881+00:00",
+    "samples_with_errors": 0,
+    "statistics": {
+      "api_cpu_one_core_percent": {
+        "min": 0.0,
+        "median": 34.55,
+        "max": 45.9
+      },
+      "k6_cpu_one_core_percent": {
+        "min": 0.0,
+        "median": 5.15,
+        "max": 7.2
+      },
+      "host_cpu_percent": {
+        "min": 26.7,
+        "median": 38.650000000000006,
+        "max": 67.6
+      },
+      "host_memory_percent": {
+        "min": 77.9,
+        "median": 78.0,
+        "max": 79.9
+      },
+      "api_rss_bytes": {
+        "min": 29462528,
+        "median": 30048256.0,
+        "max": 30646272
+      },
+      "k6_rss_bytes": {
+        "min": 36671488,
+        "median": 43040768.0,
+        "max": 45047808
+      },
+      "goroutines": {
+        "min": 54,
+        "median": 55.0,
+        "max": 56
+      },
+      "heap_alloc_bytes": {
+        "min": 3413456,
+        "median": 4426524.0,
+        "max": 6049224
+      },
+      "sql_max_open_connections": {
+        "min": 20,
+        "median": 20.0,
+        "max": 20
+      },
+      "sql_open": {
+        "min": 7,
+        "median": 7.0,
+        "max": 8
+      },
+      "sql_in_use": {
+        "min": 5,
+        "median": 5.0,
+        "max": 6
+      },
+      "redis_total_connections": {
+        "min": 5,
+        "median": 5.0,
+        "max": 5
+      },
+      "redis_idle_connections": {
+        "min": 4,
+        "median": 5.0,
+        "max": 5
+      },
+      "sample_elapsed_ms": {
+        "min": 1185.8932000177447,
+        "median": 1942.6221500034444,
+        "max": 2226.302900002338
+      },
+      "mysql_container_cpu_percent": {
+        "max": 53.04
+      },
+      "mysql_container_memory_percent_of_limit": {
+        "max": 23.47
+      },
+      "redis_container_cpu_percent": {
+        "max": 15.96
+      },
+      "redis_container_memory_percent_of_limit": {
+        "max": 3.93
+      }
+    },
+    "counter_deltas": {
+      "sql": {
+        "wait_count": 0,
+        "wait_duration_ns": 0
+      },
+      "redis": {
+        "wait_count": 0,
+        "wait_duration_ns": 0,
+        "timeouts": 0
+      },
+      "runtime": {
+        "num_gc": 64,
+        "pause_total_ns": 5397900,
+        "total_alloc_bytes": 186503160
+      }
+    },
+    "last_sample_completion_estimated_from_elapsed": "2026-10-30T05:08:01.655708+00:00"
+  },
+  "raw_reconciliation": {
+    "duplicateEffectiveOrders": 0,
+    "durableRejections": 0,
+    "durableRows": 2399,
+    "finalLag": 0,
+    "finalPending": 0,
+    "finalStreamLength": 9922,
+    "mappingMismatches": 0,
+    "mismatchedUserOrStatus": 0,
+    "mysqlStock": 571,
+    "redisAccepted": 2399,
+    "redisStock": 571,
+    "unfinishedOrderOrCompensationOutbox": 0,
+    "uniqueAcceptedRecords": 2398,
+    "unloggedDurableOrders": 1,
+    "unresolvedReview": 0
+  },
+  "reconciliation_interpretation": "2399 durable rows and Redis accepted reach agreement; 2398 logged completed responses leave one unlogged durable order. Identity classification is delegated to CAP02 audit and is not described as a lost order. Raw stage reconciliationPassed=false is retained.",
+  "conclusion": "50/s is a guarded limited tier, with observed active stable DB completion about 29.72/s and growing backlog. Coarse resources show no CPU/GC/pool saturation; stock-row/transaction/transport/storage causes are not separated. No theoretical or production maximum is inferred.",
+  "limitations": [
+    "two-second SQL count observations are not exact commit timestamps",
+    "sequential SQL/Redis boundaries are not simultaneous",
+    "stream length includes retained acknowledged entries and is not queue depth",
+    "CPU sampling is coarse and whole-instance/shared-host counters do not identify server-only capacity",
+    "resource windows use sample start timestamps; elapsed cost and estimated final completion are saved, and section snapshots are sequential",
+    "sampler ends at generator exit and does not cover full post-stop drain",
+    "no SQL/lock/fsync timing capture for this tier; earlier serial profile cannot identify this tier root cause",
+    "nominal issuedPerNominalSecond=42.1556 is diluted by early stop, not actual continuous offered rate",
+    "no load was generated and no API/data/instrumentation was changed by this analysis"
+  ]
+}

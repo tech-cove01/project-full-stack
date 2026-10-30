@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "checked_at_unix_ms": 1793336821979,
+  "project": "project-full-stack-cap-trade",
+  "containers": [
+    {
+      "id": "dc2238575581f499b0a249bc754910223edf45bd440a6a7a7bf7209481e4f95d",
+      "name": "/project-full-stack-cap-trade-mysql-1",
+      "service": "mysql",
+      "running": true,
+      "labels": {
+        "com.docker.compose.project": "project-full-stack-cap-trade",
+        "com.docker.compose.service": "mysql"
+      },
+      "ports": [
+        {
+          "target": "3306/tcp",
+          "host_ip": "127.0.0.1",
+          "host_port": "3450"
+        }
+      ]
+    },
+    {
+      "id": "fbd81776c4388ec6ac47817fe2f363dbbab663b7b2cf8974204e1bc1694d4294",
+      "name": "/project-full-stack-cap-trade-redis-1",
+      "service": "redis",
+      "running": true,
+      "labels": {
+        "com.docker.compose.project": "project-full-stack-cap-trade",
+        "com.docker.compose.service": "redis"
+      },
+      "ports": [
+        {
+          "target": "6379/tcp",
+          "host_ip": "127.0.0.1",
+          "host_port": "6550"
+        }
+      ]
+    }
+  ]
+}

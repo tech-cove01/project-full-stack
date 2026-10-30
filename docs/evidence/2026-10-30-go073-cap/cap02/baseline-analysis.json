@@ -397,9 +397,12 @@
           "sha256": "da06d5dcef226324e2b860d4ae990ef529a7fc6c5247fc6cb7f9a47695e51d25"
         },
         {
-          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/k6-metrics.ndjson",
-          "bytes": 1935908,
-          "sha256": "49fa1482387bd9811da5d625276bd99151713d8db2b48915749331273f518d26"
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/k6-metrics.ndjson.gz",
+          "bytes": 67618,
+          "sha256": "29c4c723ec355cc7a734da24bf60412c06ff9a4f3bbfe185238e9a797caaab54",
+          "originalPath": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/k6-metrics.ndjson",
+          "originalBytes": 1935908,
+          "originalSha256": "49fa1482387bd9811da5d625276bd99151713d8db2b48915749331273f518d26"
         }
       ]
     },
@@ -796,9 +799,12 @@
           "sha256": "c4760ffea4ed82c819f7a60b5d9eb1a2caae9600df3881a9a22407566fffc051"
         },
         {
-          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/k6-metrics.ndjson",
-          "bytes": 4809993,
-          "sha256": "edde996f71184187557e5af1f3e9a00d987e1ad2304dd21cb430837ee70c7820"
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/k6-metrics.ndjson.gz",
+          "bytes": 164625,
+          "sha256": "11c63b9904cd5d2b51a42ae6bba40cd70c84164e43b8837e05d62957a745ad8a",
+          "originalPath": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/k6-metrics.ndjson",
+          "originalBytes": 4809993,
+          "originalSha256": "edde996f71184187557e5af1f3e9a00d987e1ad2304dd21cb430837ee70c7820"
         }
       ]
     }
@@ -858,5 +864,6 @@
     "conditions": "fixed45s exploration, same single-hotspot/real-auth model and resource limits; drain and reconcile each stage; new activity each run; do not mix an optimized binary into unoptimized refinement",
     "finalHold": "highest passing refined rate must hold at least180s and repeat once with last-minute DB/accepted and drain checks",
     "noPreclaim": "estimated observed21.9 DB/s at rate25 is not a predicted guaranteed stable capacity"
-  }
+  },
+  "archiveNote": "Only derivative source references updated to lossless gzip; originalPath/Bytes/Sha256 retained, original stage artifacts unchanged."
 }

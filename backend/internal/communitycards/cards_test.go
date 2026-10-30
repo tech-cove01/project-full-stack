@@ -541,6 +541,7 @@ func TestActiveQueueAndWholeLoadDeadline(t *testing.T) {
 	store, cfg := fakeStore(), defaults()
 	cfg.active, cfg.inflight = 1, 3
 	entered, secondLookup := make(chan time.Duration, 1), make(chan struct{})
+	var secondLookupOnce sync.Once
 	store.loadHook = func(ctx context.Context, refs []Ref) error {
 		deadline, ok := ctx.Deadline()
 		if !ok {
@@ -552,7 +553,7 @@ func TestActiveQueueAndWholeLoadDeadline(t *testing.T) {
 	}
 	store.readHook = func(ctx context.Context, refs []Ref) error {
 		if refs[0].ID == 2 {
-			close(secondLookup)
+			secondLookupOnce.Do(func() { close(secondLookup) })
 		}
 		return nil
 	}
@@ -565,17 +566,27 @@ func TestActiveQueueAndWholeLoadDeadline(t *testing.T) {
 		t.Fatalf("content SQL escaped the whole load budget: %s", budget)
 	}
 	secondCtx, cancelSecond := context.WithCancel(context.Background())
+	defer cancelSecond()
 	go func() { _, err := cache.GetMany(secondCtx, []Ref{{2, 1}}); second <- err }()
 	await(t, secondLookup)
+	waitStats(t, cache, func(stats Snapshot) bool {
+		return stats.FlightStarted == 2 && stats.Inflight == 2 && stats.ActiveLoads == 1
+	})
 	cancelSecond()
 	if err := await(t, second); !errors.Is(err, context.Canceled) {
 		t.Fatalf("queued caller did not cancel: %v", err)
 	}
-	if store.loadCalls.Load() != 1 || cache.Stats().ActiveLoads != 1 {
-		t.Fatal("queued caller exceeded active content load bound")
+	if stats := cache.Stats(); store.loadCalls.Load() != 1 || stats.Inflight != 2 || stats.ActiveLoads != 1 {
+		t.Fatalf("caller cancellation removed queued shared work or exceeded active bound: %#v", stats)
 	}
 	cancelFirst()
 	if err := await(t, first); !errors.Is(err, context.Canceled) {
 		t.Fatal(err)
+	}
+	if err := cache.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if stats := cache.Stats(); stats.Inflight != 0 || stats.ActiveLoads != 0 || stats.WaitingCallers != 0 || store.loadCalls.Load() != 1 {
+		t.Fatalf("close did not converge queued shared work within active bound: %#v", stats)
 	}
 }

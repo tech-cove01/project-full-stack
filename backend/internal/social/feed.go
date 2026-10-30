@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 	_ "time/tzdata"
+
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 const (
@@ -53,7 +55,13 @@ func zone() *time.Location {
 // The compound key keeps pages stable when two notes share a timestamp: the id
 // breaks the tie, so a later page cannot repeat or skip a row.
 func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID string,
-	limit int) (FeedPage, error) {
+	limit int) (page FeedPage, returnedErr error) {
+	ctx, finishObservation := taildiag.Start(ctx, service.observations, false)
+	span := taildiag.Begin(ctx, taildiag.FeedService, 0)
+	defer func() {
+		span.End(returnedErr != nil)
+		finishObservation(returnedErr != nil)
+	}()
 	user, err := positive(userID)
 	if err != nil {
 		return FeedPage{}, err
@@ -84,6 +92,7 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		cursorAt, cursorKey = parsed, key
 	}
 	var result FeedPage
+	facts := taildiag.Begin(ctx, taildiag.FeedFacts, 0)
 	if service.projections {
 		err = service.readSnapshot(ctx, func(reader *Service) error {
 			var queryErr error
@@ -93,6 +102,7 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 	} else {
 		result, err = service.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
 	}
+	facts.End(err != nil)
 	if err != nil {
 		return result, err
 	}
@@ -115,7 +125,9 @@ func (service *Service) withFeedCounts(ctx context.Context, page FeedPage) FeedP
 	}
 	// Public counts retain their bounded-cache semantics. Any cache error keeps
 	// the counts already read with the authorized page, without failing the feed.
+	span := taildiag.Begin(ctx, taildiag.FeedCounts, len(ids))
 	counts, err := service.counts.GetMany(ctx, ids)
+	span.End(err != nil)
 	if err != nil {
 		return page
 	}

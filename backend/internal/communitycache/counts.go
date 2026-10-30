@@ -13,6 +13,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 const (
@@ -52,10 +54,13 @@ type flight struct {
 }
 
 func (cache *Cache) acquirePublication(ctx context.Context) error {
+	span := taildiag.Begin(ctx, taildiag.PublicationWait, 0)
 	select {
 	case cache.publication <- struct{}{}:
+		span.End(false)
 		return nil
 	case <-ctx.Done():
+		span.End(true)
 		return ctx.Err()
 	}
 }
@@ -64,7 +69,8 @@ func (cache *Cache) epoch(ctx context.Context) (uint64, error) {
 	if err := cache.acquirePublication(ctx); err != nil {
 		return 0, err
 	}
-	defer func() { <-cache.publication }()
+	hold := taildiag.Begin(ctx, taildiag.PublicationHold, 0)
+	defer func() { hold.End(false); <-cache.publication }()
 	return cache.generation, nil
 }
 
@@ -72,7 +78,8 @@ func (cache *Cache) publish(ctx context.Context, noteID uint64, value Counts, ep
 	if cache.acquirePublication(ctx) != nil {
 		return
 	}
-	defer func() { <-cache.publication }()
+	hold := taildiag.Begin(ctx, taildiag.PublicationHold, 0)
+	defer func() { hold.End(false); <-cache.publication }()
 	if cache.generation != epoch {
 		return
 	}
@@ -146,7 +153,9 @@ func jitter() time.Duration {
 }
 
 func (cache *Cache) read(ctx context.Context, noteID uint64) (Counts, bool) {
+	span := taildiag.Begin(ctx, taildiag.CountsRedisRead, 1)
 	raw, err := cache.redis.Get(ctx, key(noteID)).Result()
+	span.End(err != nil)
 	if err != nil {
 		return Counts{}, false
 	}
@@ -163,7 +172,9 @@ func (cache *Cache) write(ctx context.Context, noteID uint64, value Counts) {
 		return
 	}
 	// A cache write failure must never fail the request.
-	_ = cache.redis.Set(ctx, key(noteID), string(body), baseTTL+jitter()).Err()
+	span := taildiag.Begin(ctx, taildiag.CountsRedisWrite, 1)
+	err = cache.redis.Set(ctx, key(noteID), string(body), baseTTL+jitter()).Err()
+	span.End(err != nil)
 }
 
 func (cache *Cache) loadOne(ctx context.Context, noteID uint64) (Counts, error) {
@@ -237,7 +248,9 @@ func (cache *Cache) Get(ctx context.Context, noteID uint64) (Counts, error) {
 // GetMany reads the whole page in one MGET and one IN query for the misses. It is
 // the feed path: batching already removes the N+1, so it does not also need
 // per-key flights.
-func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (map[uint64]Counts, error) {
+func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (out map[uint64]Counts, returnedErr error) {
+	span := taildiag.Begin(ctx, taildiag.CountsMany, len(noteIDs))
+	defer func() { span.End(returnedErr != nil) }()
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
@@ -265,7 +278,9 @@ func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (map[uint64]C
 	for _, id := range remaining {
 		keys = append(keys, key(id))
 	}
+	readSpan := taildiag.Begin(ctx, taildiag.CountsRedisRead, len(keys))
 	values, err := cache.redis.MGet(ctx, keys...).Result()
+	readSpan.End(err != nil)
 	if err != nil {
 		// Degrade to the database rather than fail the feed.
 		values = make([]any, len(remaining))
@@ -299,8 +314,11 @@ func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (map[uint64]C
 		placeholders += "?"
 		args = append(args, id)
 	}
-	if err = cache.db.WithContext(ctx).Raw(`SELECT id,liked,comments FROM tb_blog
-		WHERE status='PUBLISHED' AND id IN (`+placeholders+`)`, args...).Scan(&rows).Error; err != nil {
+	coldSpan := taildiag.Begin(ctx, taildiag.CountsColdSQL, len(missing))
+	err = cache.db.WithContext(ctx).Raw(`SELECT id,liked,comments FROM tb_blog
+		WHERE status='PUBLISHED' AND id IN (`+placeholders+`)`, args...).Scan(&rows).Error
+	coldSpan.End(err != nil)
+	if err != nil {
 		return nil, err
 	}
 	for _, row := range rows {
@@ -316,8 +334,12 @@ func (cache *Cache) Invalidate(ctx context.Context, noteID uint64) error {
 	if err := cache.acquirePublication(ctx); err != nil {
 		return err
 	}
-	defer func() { <-cache.publication }()
+	hold := taildiag.Begin(ctx, taildiag.PublicationHold, 0)
+	defer func() { hold.End(false); <-cache.publication }()
 	cache.generation++
 	cache.dropLocal(noteID)
-	return cache.redis.Del(ctx, key(noteID)).Err()
+	span := taildiag.Begin(ctx, taildiag.CountsRedisDelete, 1)
+	err := cache.redis.Del(ctx, key(noteID)).Err()
+	span.End(err != nil)
+	return err
 }

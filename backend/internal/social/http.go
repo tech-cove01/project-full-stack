@@ -13,6 +13,7 @@ import (
 
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 // Register mounts the expected-state follow write, the caller's own
@@ -87,7 +88,16 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		}
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: relationship})
 	})
-	routes.GET("/feed/notes", auth.RequireLogin(identity), func(c *gin.Context) {
+	routes.GET("/feed/notes", func(c *gin.Context) {
+		if service.observations == nil {
+			c.Next()
+			return
+		}
+		ctx, finish := taildiag.Start(c.Request.Context(), service.observations, true)
+		c.Request = c.Request.WithContext(ctx)
+		defer func() { finish(c.Writer.Status() >= http.StatusBadRequest) }()
+		c.Next()
+	}, auth.RequireLogin(identity), func(c *gin.Context) {
 		limit := feedDefaultLimit
 		if raw := c.Query("limit"); raw != "" {
 			parsed, err := strconv.Atoi(raw)

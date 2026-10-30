@@ -15,6 +15,7 @@ import (
 
 	"github.com/cityloop/fullstack-go/internal/auth"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 func TestSocialRoutesRequireLogin(t *testing.T) {
@@ -38,6 +39,36 @@ func TestSocialRoutesRequireLogin(t *testing.T) {
 		if response.Code != http.StatusUnauthorized || json.Unmarshal(response.Body.Bytes(), &body) != nil || body.Success {
 			t.Fatalf("%s %s must require a session, got %d", test.method, test.path, response.Code)
 		}
+	}
+}
+
+func TestFeedHTTPObservationsIncludeAuthenticationBeforeServiceAndKeepResponsePrivate(t *testing.T) {
+	recorder := taildiag.New()
+	identity := auth.NewService(nil, nil, "development")
+	router := httpapi.NewRouter(nil, time.Second, "social-test", slog.New(slog.NewTextHandler(io.Discard, nil)), func(routes gin.IRouter) {
+		Register(routes, NewService(nil).WithDiagnostics(recorder), identity)
+	})
+	response := httptest.NewRecorder()
+	router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/feed/notes?limit=20", nil))
+	if response.Code != http.StatusUnauthorized {
+		t.Fatal("diagnostics changed the existing authentication response")
+	}
+	var body map[string]any
+	if json.Unmarshal(response.Body.Bytes(), &body) != nil || body["tail"] != nil {
+		t.Fatal("private diagnostics must not enter product responses")
+	}
+	snapshot := recorder.Snapshot()
+	var authCount, serviceCount uint64
+	for _, stage := range snapshot.Stages {
+		if stage.Name == "auth.resolve" {
+			authCount = stage.Count
+		}
+		if stage.Name == "feed.service" {
+			serviceCount = stage.Count
+		}
+	}
+	if snapshot.Requests != 1 || authCount != 1 || serviceCount != 0 {
+		t.Fatal("HTTP observation must start before authentication even when service is never reached")
 	}
 }
 

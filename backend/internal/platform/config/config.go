@@ -41,6 +41,7 @@ type Config struct {
 	Environment        string
 	APIAddr            string
 	DiagnosticsAddr    string
+	FeedDiagnostics    bool
 	MySQL              MySQL
 	Redis              Redis
 	Kafka              Kafka
@@ -96,6 +97,15 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		}
 		if _, err := parseInt("GO_DIAGNOSTICS_ADDR port", port, 1, 65535); err != nil {
 			return Config{}, err
+		}
+	}
+	if value, ok := lookup("GO_FEED_DIAGNOSTICS"); ok {
+		if value != "true" && value != "false" {
+			return Config{}, fmt.Errorf("GO_FEED_DIAGNOSTICS must be true or false")
+		}
+		cfg.FeedDiagnostics = value == "true"
+		if cfg.FeedDiagnostics && (cfg.DiagnosticsAddr == "" || cfg.Environment == "production") {
+			return Config{}, fmt.Errorf("GO_FEED_DIAGNOSTICS requires isolated loopback diagnostics outside production")
 		}
 	}
 	for _, item := range []struct {

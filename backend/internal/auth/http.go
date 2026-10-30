@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 const identityKey = "cityloop.auth.user"
@@ -70,7 +71,9 @@ func Register(routes gin.IRouter, service *Service) {
 func RequireLogin(service *Service) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx, cancel := requestContext(c)
+		span := taildiag.Begin(ctx, taildiag.AuthResolve, 0)
 		user, err := service.Resolve(ctx, headerToken(c.GetHeader("authorization")))
+		span.End(err != nil)
 		cancel()
 		if err != nil {
 			writeError(c, err)

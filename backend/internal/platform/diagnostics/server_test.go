@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 func TestSnapshotUsesActualPoolCounterCallbacksAndOnlyExportsAllowlistedFields(t *testing.T) {
@@ -47,6 +49,23 @@ func TestSnapshotUsesActualPoolCounterCallbacksAndOnlyExportsAllowlistedFields(t
 	}
 	if recorder.Header().Get("Cache-Control") != "no-store" {
 		t.Fatal("observations must not be cached")
+	}
+}
+
+func TestFeedTimingsAreDisabledByDefaultAndOnlyExposedOnPrivateSnapshot(t *testing.T) {
+	for _, recorder := range []*taildiag.Recorder{nil, taildiag.New()} {
+		routes := handler(func() sql.DBStats { return sql.DBStats{} }, func() *redis.PoolStats { return &redis.PoolStats{} }, recorder)
+		response := httptest.NewRecorder()
+		routes.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/debug/capacity", nil))
+		var body struct {
+			Tail taildiag.Snapshot `json:"tail"`
+		}
+		if response.Code != http.StatusOK || json.Unmarshal(response.Body.Bytes(), &body) != nil || body.Tail.Enabled != (recorder != nil) {
+			t.Fatal("private snapshot did not preserve explicit observation configuration")
+		}
+		if recorder == nil && (len(body.Tail.Stages) != 0 || len(body.Tail.SlowTraces) != 0) {
+			t.Fatal("disabled timing must not report made-up measurements")
+		}
 	}
 }
 

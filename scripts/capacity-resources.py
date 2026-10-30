@@ -124,8 +124,10 @@ def main():
                 signal('load generator RSS reached 2 GiB; generator limit possible')
             try:
                 with no_proxy.open(args.diagnostics, timeout=2) as response:
-                    body = response.read(131073)
-                    if len(body) > 131072:
+                    # CAP-06 adds a fixed 32-trace/256-span diagnostic ring.
+                    # Bound the whole response, including this opt-in evidence.
+                    body = response.read(2 * 1024 * 1024 + 1)
+                    if len(body) > 2 * 1024 * 1024:
                         raise ValueError('diagnostics response too large')
                     row['diagnostics'] = json.loads(body)
                 if row['diagnostics'].get('pid') != args.api_pid:

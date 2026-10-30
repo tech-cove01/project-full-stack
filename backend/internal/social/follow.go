@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/cityloop/fullstack-go/internal/communitycache"
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 var (
@@ -32,13 +33,20 @@ type Relationship struct {
 }
 
 type Service struct {
-	db          *gorm.DB
-	counts      *communitycache.Cache
-	likes       *communitycache.Likes
-	projections bool
+	db           *gorm.DB
+	counts       *communitycache.Cache
+	likes        *communitycache.Likes
+	projections  bool
+	observations *taildiag.Recorder
 }
 
 func NewService(db *gorm.DB) *Service { return &Service{db: db} }
+
+// WithDiagnostics only attaches the opt-in private Feed timing recorder.
+func (service *Service) WithDiagnostics(recorder *taildiag.Recorder) *Service {
+	service.observations = recorder
+	return service
+}
 
 // WithCounts attaches the page-card counter cache. Without it every read goes to
 // MySQL, which keeps unit tests Redis-free.

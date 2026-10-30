@@ -1,0 +1,7 @@
+{
+  "command": "GO_INTEGRATION=1 go test -count=1 -p 1 -v ./internal/platform/taildiag ./internal/social ./internal/communitycache",
+  "limits": "Only explicit ObservedStorageTransactions entry instruments the actual ORM/Redis; existing social/cache integration constructs use original service settings.",
+  "exitCode": 0,
+  "at": "2026-10-30T09:55:24.9745779Z",
+  "environment": "owned fresh CAP06 read MySQL3451/Redis6551, API not started, GOMAXPROCS4"
+}

@@ -37,6 +37,7 @@ import (
 	"github.com/cityloop/fullstack-go/internal/platform/database"
 	"github.com/cityloop/fullstack-go/internal/platform/diagnostics"
 	"github.com/cityloop/fullstack-go/internal/platform/httpapi"
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 	"github.com/cityloop/fullstack-go/internal/shop"
 	"github.com/cityloop/fullstack-go/internal/social"
 )
@@ -47,6 +48,11 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	cancel()
 	if err != nil {
 		return err
+	}
+	var feedObservations *taildiag.Recorder
+	if cfg.FeedDiagnostics {
+		feedObservations = taildiag.New()
+		taildiag.Instrument(resources.ORM, resources.SQL, resources.Redis)
 	}
 	listener, err := net.Listen("tcp", cfg.APIAddr)
 	if err != nil {
@@ -80,6 +86,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 			social.Register(routes,
 				social.NewService(resources.ORM).
 					WithProjections().
+					WithDiagnostics(feedObservations).
 					WithCounts(communitycache.New(resources.Redis, resources.ORM)).
 					WithLikes(communitycache.NewLikes(resources.Redis)), identity)
 			var assistant *aichat.Assistant
@@ -145,7 +152,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	}
 	var observation io.Closer
 	if cfg.DiagnosticsAddr != "" {
-		observation, err = diagnostics.Start(cfg.DiagnosticsAddr, resources.SQL, resources.Redis, cfg.ShutdownTimeout)
+		observation, err = diagnostics.Start(cfg.DiagnosticsAddr, resources.SQL, resources.Redis, cfg.ShutdownTimeout, feedObservations)
 		if err != nil {
 			_ = listener.Close()
 			_ = resources.Close()

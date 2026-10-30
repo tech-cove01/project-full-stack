@@ -167,6 +167,10 @@ if (action === 'prepare') {
   const report = { task: 'GO-073-CAP-03', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture, fixtureSourceSha: manifest.sourceSha, pageSize: 20, activeReaders: mode === 'hot' ? 1 : 32, activeCountKeys: mode === 'hot' ? 20 : 640, thresholds: { actualOfferedRatioMin: .99, droppedMax: 0, systemErrorRateMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500, contentErrorsMax: 0 }, started: new Date().toISOString() }
   let beforeWarm = null
   async function runPhase(phase, duration) {
+    if (process.env.CAP_STOP_FILE) {
+      try { await readFile(process.env.CAP_STOP_FILE); report.phaseStartBlockedByStop = phase; throw new Error('resource stop already present; no new k6 phase started') }
+      catch (error) { if (error.code !== 'ENOENT') throw error }
+    }
     const env = { ...process.env, CAP_READ_INPUT: manifest.credentialFile, CAP_READ_MODE: mode, CAP_READ_RATE: String(phase === 'warm' ? warmRate : rate), CAP_READ_SECONDS: String(duration), CAP_READ_PHASE: phase, CAP_READ_PRE_VUS: String(preVUs), CAP_READ_MAX_VUS: String(maxVUs) }
     return command(process.env.K6_BIN || 'k6', ['run', '--quiet', '--summary-export', join(dir, `${phase}-summary.json`), 'scripts/load/go073-cap-read.js'], { env, output: join(dir, `${phase}-console.txt`), stopFile: process.env.CAP_STOP_FILE, onStart(pid) {
       const detail = JSON.stringify({ phase, helper_pid: process.pid, k6_pid: pid, k6_started_unix_ms: Date.now() }) + '\n'
@@ -184,6 +188,7 @@ if (action === 'prepare') {
     report.scriptSHA256 = hashes
     const warm = await runPhase('warm', warmSeconds); report.warmExit = warm.code; report.warmExternalStop = warm.externalStop
     assert.equal(report.warmExit, 0, 'warm probe failed; no stable workload started')
+    assert.ok(!warm.externalStop, 'warm phase externally stopped; no stable workload started')
     const before = await snapshot('before-stable'); await writeFile(join(dir, 'before.json'), JSON.stringify(before, null, 2) + '\n')
     report.stableStartedAt = Date.now(); const stable = await runPhase('stable', seconds); report.stableExit = stable.code; report.stableExternalStop = stable.externalStop; report.stableEndedAt = Date.now(); report.stableCommandElapsedMs = report.stableEndedAt - report.stableStartedAt
     const after = await snapshot('after-stable'); const accessDelta = deltaSnapshots(before, after); await writeFile(join(dir, 'after.json'), JSON.stringify(after, null, 2) + '\n'); await writeFile(join(dir, 'access-delta.json'), JSON.stringify(accessDelta, null, 2) + '\n')

@@ -1,0 +1,7 @@
+{
+  "relatedRealTestsExit": 0,
+  "allOrdinaryTestsExit": 0,
+  "vetExit": 0,
+  "at": "2026-10-30T11:09:48.7364033Z",
+  "scope": "A3 samebatch shared loads; fresh controlled MySQL3452 Redis6552; ordinary all package tests integration disabled"
+}

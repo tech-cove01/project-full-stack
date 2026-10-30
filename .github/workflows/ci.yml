@@ -108,7 +108,7 @@ jobs:
           --default-character-set=utf8mb4 project_full_stack_go
           < ../infra/mysql/002-demo-data.sql
       - name: Community, AI and knowledge against real MySQL and Redis
-        run: go test -race -count=1 -p 1 -v ./internal/note ./internal/social ./internal/aitool ./internal/aiknowledge ./internal/aichat ./internal/communitycache ./internal/communityprojection
+        run: go test -race -count=1 -p 1 -v ./internal/note ./internal/social ./internal/aitool ./internal/aiknowledge ./internal/aichat ./internal/communitycache ./internal/communitycards ./internal/communityprojection
         env:
           GO_INTEGRATION: '1'
           GIN_MODE: release

@@ -48,6 +48,7 @@ func defaults() limits {
 type counters struct {
 	requests, localHits, redisHits, missing, loads, sqlBatches, sqlRows, contentBytes atomic.Uint64
 	loadErrors, oversize, redisErrors, invalid, busy, expired, evictions              atomic.Uint64
+	flightStarted, flightJoins                                                        atomic.Uint64
 }
 
 // Snapshot contains fixed counters only. Bytes are content/payload budgets, not
@@ -86,13 +87,20 @@ type Cache struct {
 	mu                        sync.Mutex
 	closed                    bool
 	operations                sync.WaitGroup
+	flights                   map[string]*flight
 	inflight, active, waiters chan struct{}
 	local                     localCache
 	stats                     counters
 }
 
+type flight struct {
+	done  chan struct{}
+	cards map[Ref]Card
+	err   error
+}
+
 // New binds shared state to application lifetime, never to a request or tx.
-// This first delivery batches each caller's misses; coalescing is added next.
+// Equal normalized missing batches share one bounded application-owned load.
 func New(appCtx context.Context, client *redis.Client, db *gorm.DB) *Cache {
 	if appCtx == nil || client == nil || db == nil {
 		panic("communitycards requires application context and safe dependency pools")
@@ -104,7 +112,7 @@ func newCache(parent context.Context, store backend, cfg limits) *Cache {
 	life, cancel := context.WithCancel(parent)
 	return &Cache{life: life, cancel: cancel, backend: store, limits: cfg,
 		inflight: make(chan struct{}, cfg.inflight), active: make(chan struct{}, cfg.active),
-		waiters: make(chan struct{}, cfg.waiters), local: newLocal()}
+		waiters: make(chan struct{}, cfg.waiters), local: newLocal(), flights: make(map[string]*flight)}
 }
 
 func (cache *Cache) begin(ctx context.Context) (context.Context, func(), error) {
@@ -187,20 +195,22 @@ func (cache *Cache) GetMany(ctx context.Context, refs []Ref) (map[Ref]Card, erro
 		if len(missing) == 0 {
 			return result, cache.contextError(ctx)
 		}
+		shared, err := cache.startFlight(missing)
+		if err != nil {
+			return nil, err
+		}
 		select {
-		case cache.inflight <- struct{}{}:
-			defer func() { <-cache.inflight }()
-		default:
-			cache.stats.busy.Add(1)
-			return nil, ErrBusy
+		case <-loadCtx.Done():
+			return nil, cache.contextError(loadCtx)
+		case <-shared.done:
 		}
-		cache.stats.loads.Add(1)
-		loaded, loadErr := cache.load(loadCtx, missing)
-		if loadErr != nil {
-			cache.stats.loadErrors.Add(1)
-			return nil, loadErr
+		if err := cache.contextError(ctx); err != nil {
+			return nil, err
 		}
-		for ref, card := range loaded {
+		if shared.err != nil {
+			return nil, shared.err
+		}
+		for ref, card := range shared.cards {
 			result[ref] = card
 		}
 	}
@@ -211,6 +221,59 @@ func (cache *Cache) GetMany(ctx context.Context, refs []Ref) (map[Ref]Card, erro
 		result[ref] = clone(card)
 	}
 	return result, nil
+}
+
+func batchKey(refs []Ref) string {
+	var result strings.Builder
+	for _, ref := range refs {
+		result.WriteString(strconv.FormatUint(ref.ID, 10))
+		result.WriteByte(':')
+		result.WriteString(strconv.FormatUint(ref.Version, 10))
+		result.WriteByte(';')
+	}
+	return result.String()
+}
+
+func (cache *Cache) startFlight(refs []Ref) (*flight, error) {
+	key := batchKey(refs)
+	cache.mu.Lock()
+	defer cache.mu.Unlock()
+	if cache.closed || cache.life.Err() != nil {
+		return nil, ErrClosed
+	}
+	if existing, ok := cache.flights[key]; ok {
+		cache.stats.flightJoins.Add(1)
+		return existing, nil
+	}
+	select {
+	case cache.inflight <- struct{}{}:
+	default:
+		cache.stats.busy.Add(1)
+		return nil, ErrBusy
+	}
+	shared := &flight{done: make(chan struct{})}
+	cache.flights[key] = shared
+	cache.operations.Add(1)
+	cache.stats.flightStarted.Add(1)
+	cache.stats.loads.Add(1)
+	ctx, cancel := context.WithTimeout(cache.life, cache.limits.loadTimeout)
+	go cache.runFlight(ctx, cancel, key, shared, refs)
+	return shared, nil
+}
+
+func (cache *Cache) runFlight(ctx context.Context, cancel context.CancelFunc, key string, shared *flight, refs []Ref) {
+	defer cache.operations.Done()
+	defer cancel()
+	cards, err := cache.load(ctx, refs)
+	if err != nil {
+		cache.stats.loadErrors.Add(1)
+	}
+	cache.mu.Lock()
+	shared.cards, shared.err = cards, err
+	delete(cache.flights, key)
+	<-cache.inflight
+	close(shared.done)
+	cache.mu.Unlock()
 }
 
 func (cache *Cache) cached(ctx context.Context, refs []Ref) (map[Ref]Card, []Ref, error) {
@@ -353,8 +416,9 @@ func (cache *Cache) Close() error {
 
 func (cache *Cache) Stats() Snapshot {
 	entries, size := cache.local.size()
-	return Snapshot{Requests: cache.stats.requests.Load(), L1Hits: cache.stats.localHits.Load(), RedisHits: cache.stats.redisHits.Load(),
+	return Snapshot{Coalescing: true, Requests: cache.stats.requests.Load(), L1Hits: cache.stats.localHits.Load(), RedisHits: cache.stats.redisHits.Load(),
 		MissItems: cache.stats.missing.Load(), LoadsStarted: cache.stats.loads.Load(), ContentSQLBatches: cache.stats.sqlBatches.Load(),
+		FlightStarted: cache.stats.flightStarted.Load(), FlightJoins: cache.stats.flightJoins.Load(),
 		ContentSQLRows: cache.stats.sqlRows.Load(), ContentBytes: cache.stats.contentBytes.Load(), LoadErrors: cache.stats.loadErrors.Load(),
 		OversizeUncached: cache.stats.oversize.Load(), RedisErrors: cache.stats.redisErrors.Load(), InvalidPayloads: cache.stats.invalid.Load(),
 		BusyRejected: cache.stats.busy.Load(), Expired: cache.stats.expired.Load(), Evictions: cache.stats.evictions.Load(),

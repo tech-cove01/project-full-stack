@@ -79,6 +79,10 @@ jobs:
           chmod +x "$RUNNER_TEMP/mysql-go"
           MYSQL_BIN="$RUNNER_TEMP/mysql-go" node ../scripts/migrate.mjs
           MYSQL_BIN="$RUNNER_TEMP/mysql-go" node ../scripts/migrate.mjs
+      - name: Feed diagnostic storage wrappers against real MySQL and Redis
+        run: go test -race -count=1 -v ./internal/platform/taildiag
+        env:
+          GO_INTEGRATION: '1'
       - name: Shops against real MySQL
         run: go test -race -count=1 -v ./internal/shop
         env:

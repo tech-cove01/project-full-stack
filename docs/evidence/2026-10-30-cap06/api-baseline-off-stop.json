@@ -1,0 +1,10 @@
+{
+  "at": "2026-10-30T09:59:03.187467+00:00",
+  "pid": 39952,
+  "exeMatched": true,
+  "creationTimeDifferenceMs": 0.0,
+  "binaryHashMatched": true,
+  "waitExitCode": 15,
+  "method": "Windows native terminate",
+  "goGracefulShutdownClaimed": false
+}

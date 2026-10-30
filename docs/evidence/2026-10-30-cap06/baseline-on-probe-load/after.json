@@ -1,0 +1,796 @@
+{
+  "label": "after-stable",
+  "started": 1793354370756,
+  "ended": 1793354371235,
+  "globalStatus": {
+    "rawRows": [
+      {
+        "name": "Com_commit",
+        "value": "1867"
+      },
+      {
+        "name": "Com_delete",
+        "value": "62"
+      },
+      {
+        "name": "Com_insert",
+        "value": "175"
+      },
+      {
+        "name": "Com_select",
+        "value": "4028"
+      },
+      {
+        "name": "Com_stmt_close",
+        "value": "3919"
+      },
+      {
+        "name": "Com_stmt_execute",
+        "value": "3920"
+      },
+      {
+        "name": "Com_stmt_prepare",
+        "value": "3931"
+      },
+      {
+        "name": "Com_stmt_reprepare",
+        "value": "7"
+      },
+      {
+        "name": "Com_update",
+        "value": "51"
+      },
+      {
+        "name": "Performance_schema_digest_lost",
+        "value": "0"
+      },
+      {
+        "name": "Performance_schema_prepared_statements_lost",
+        "value": "0"
+      },
+      {
+        "name": "Queries",
+        "value": "17127"
+      },
+      {
+        "name": "Questions",
+        "value": "9254"
+      },
+      {
+        "name": "Uptime",
+        "value": "402"
+      }
+    ],
+    "counters": {
+      "Com_commit": 1867,
+      "Com_delete": 62,
+      "Com_insert": 175,
+      "Com_select": 4028,
+      "Com_stmt_close": 3919,
+      "Com_stmt_execute": 3920,
+      "Com_stmt_prepare": 3931,
+      "Com_stmt_reprepare": 7,
+      "Com_update": 51,
+      "Performance_schema_digest_lost": 0,
+      "Performance_schema_prepared_statements_lost": 0,
+      "Queries": 17127,
+      "Questions": 9254,
+      "Uptime": 402
+    },
+    "raw": "Com_commit\t1867\r\nCom_delete\t62\r\nCom_insert\t175\r\nCom_select\t4028\r\nCom_stmt_close\t3919\r\nCom_stmt_execute\t3920\r\nCom_stmt_prepare\t3931\r\nCom_stmt_reprepare\t7\r\nCom_update\t51\r\nPerformance_schema_digest_lost\t0\r\nPerformance_schema_prepared_statements_lost\t0\r\nQueries\t17127\r\nQuestions\t9254\r\nUptime\t402",
+    "startedAt": 1793354370929,
+    "endedAt": 1793354371082
+  },
+  "statementEvents": [
+    {
+      "event": "statement/com/Execute",
+      "count": 3922,
+      "picoseconds": "2252288218000",
+      "errors": 0,
+      "examined": 102988,
+      "sent": 11192
+    },
+    {
+      "event": "statement/com/Prepare",
+      "count": 3926,
+      "picoseconds": "1034825467000",
+      "errors": 4,
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "event": "statement/sql/commit",
+      "count": 1869,
+      "picoseconds": "347084902000",
+      "errors": 0,
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "event": "statement/sql/delete",
+      "count": 0,
+      "picoseconds": "0",
+      "errors": 0,
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "event": "statement/sql/insert",
+      "count": 24,
+      "picoseconds": "388070994000",
+      "errors": 0,
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "event": "statement/sql/select",
+      "count": 373,
+      "picoseconds": "132496983000",
+      "errors": 0,
+      "examined": 14511,
+      "sent": 7415
+    },
+    {
+      "event": "statement/sql/update",
+      "count": 0,
+      "picoseconds": "0",
+      "errors": 0,
+      "examined": 0,
+      "sent": 0
+    }
+  ],
+  "statementEventsRaw": "statement/com/Execute\t3922\t2252288218000\t0\t102988\t11192\r\nstatement/com/Prepare\t3926\t1034825467000\t4\t0\t0\r\nstatement/sql/commit\t1869\t347084902000\t0\t0\t0\r\nstatement/sql/delete\t0\t0\t0\t0\t0\r\nstatement/sql/insert\t24\t388070994000\t0\t0\t0\r\nstatement/sql/select\t373\t132496983000\t0\t14511\t7415\r\nstatement/sql/update\t0\t0\t0\t0\t0",
+  "digestLost": 0,
+  "digests": [
+    {
+      "digest": "00d9f6f389b4d58419e8af2facf9d9a49330832edb4eaf884e52aee8b6a91a7e",
+      "text": "INSERT INTO `tb_user` ( `phone` , PASSWORD , `nick_name` , `icon` ) VALUES (...) /* , ... */",
+      "count": 1,
+      "picoseconds": "9172645000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "0206d7f39d5aea4a1fa1c4dabc1e4ecc0fbbd74ab72b97ff35ccb48dd95eb32e",
+      "text": "UPDATE `tb_seckill_voucher` `sv` JOIN `tb_voucher` `v` ON `v` . `id` = `sv` . `voucher_id` JOIN `tb_shop` `s` ON `s` . `id` = `v` . `shop_id` SET `sv` . `merchant_id` = `s` . `merchant_id` , `sv` . `total_stock` = `sv` . `stock` + ( SELECT COUNT ( * ) FROM `tb_voucher_order` `o` WHERE `o` . `voucher_id` = `sv` . `voucher_id` AND `o` . `status` IN (...) ) , `sv` . `redeem_begin_time` = COALESCE ( `sv` . `redeem_begin_time` , `sv` . `begin_time` ) , `sv` . `redeem_end_time` = COALESCE ( `sv` . `redeem_end_time` , `sv` . `end_time` ) , `sv` . `publish_status` = ? , `sv` . `publish_version` = ?",
+      "count": 1,
+      "picoseconds": "7384884000",
+      "examined": 9,
+      "sent": 0
+    },
+    {
+      "digest": "03e8525fbf4bd575152b3bee62441c525cde57c858ce3a2652228065488da06f",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_ai_chunk` ( `id` INT8 UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY , `document_id` INT8 UNSIGNED NOT NULL , `version` INTEGER NOT NULL , `epoch` INT8 NOT NULL , `ordinal` INTEGER NOT NULL , `content` TEXT NOT NULL , `embedding` JSON NOT NULL , `embedding_model` VARCHARACTER (?) NOT NULL , `embedding_dimension` INTEGER NOT NULL , `create_time` TIMESTAMP NOT NULL DEFAULT NOW , UNIQUE KEY `uk_ai_chunk` ( `document_id` , `version` , `ordinal` ) , KEY `idx_ai_chunk_doc` ( `document_id` , `version` ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "39814224000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "0f101d98991ef95cefc5ab59b4fa316cb86f91b436412a385108a760f16bbf42",
+      "text": "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ",
+      "count": 489,
+      "picoseconds": "59191590000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "0fb14100f75549a3c9937019594a8ec3888c4343951ed4b308e6fa12c7541f62",
+      "text": "SELECT COUNT ( * ) FROM `tb_user` WHERE `nick_name` LIKE ? OR `phone` IN (...)",
+      "count": 1,
+      "picoseconds": "549818000",
+      "examined": 2,
+      "sent": 1
+    },
+    {
+      "digest": "210f83c02903215c675fba4b4d27b8f5699d2c738724bdcba3482ab3124c4bb9",
+      "text": "SELECT `GET_LOCK` (...)",
+      "count": 1,
+      "picoseconds": "357201000",
+      "examined": 1,
+      "sent": 1
+    },
+    {
+      "digest": "28c061d4cea8c1d6fcde019974c93249d6209c93faf9ece5950c76ed35a70271",
+      "text": "ALTER TABLE `tb_audit_log` ADD COLUMN `operator_type` VARCHARACTER (?) NOT NULL DEFAULT ? AFTER `operator_user_id` , ADD KEY `idx_audit_shop_time` ( `shop_id` , `create_time` )",
+      "count": 1,
+      "picoseconds": "50168447000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "2ebfa334f4da3ca905eb25df4660fe6c9c6f88173d574674d2f5e277691d04fe",
+      "text": "SELECT `LAST_INSERT_ID` ( ) AS `id`",
+      "count": 5,
+      "picoseconds": "652259000",
+      "examined": 5,
+      "sent": 5
+    },
+    {
+      "digest": "36dcbb6b5d138568052a1c940ae928a36d737abd84c24653d18710b9e1e9a03f",
+      "text": "UPDATE `tb_voucher_order` `o` JOIN `tb_voucher` `v` ON `v` . `id` = `o` . `voucher_id` JOIN `tb_seckill_voucher` `sv` ON `sv` . `voucher_id` = `o` . `voucher_id` SET `o` . `shop_id` = `v` . `shop_id` , `o` . `pay_amount` = `v` . `pay_value` , `o` . `redeem_begin_time` = `sv` . `redeem_begin_time` , `o` . `redeem_end_time` = `sv` . `redeem_end_time` , `o` . `pay_deadline_at` = `LEAST` ( DATE_ADD ( `o` . `create_time` , INTERVAL ? SQL_TSI_MINUTE ) , `sv` . `redeem_end_time` )",
+      "count": 1,
+      "picoseconds": "689147000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "3dc84aa542eacc0926c6be772b8f80c8487eebe7c51c7c7870d01d59c36b83ad",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_schema_migration` ( `version` VARCHARACTER (?) NOT NULL PRIMARY KEY , CHECKSUM CHARACTER (?) NOT NULL , `applied_at` DATETIME NOT NULL DEFAULT NOW ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "42416312000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "3dd4706eb927808c5f0910f892ba15603c1554c095764286cbff6433fabe52e5",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_ai_document` ( `id` INT8 UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY , `seed_key` VARCHARACTER (?) NULL , `scope` VARCHARACTER (?) NOT NULL , `shop_id` INT8 UNSIGNED NULL , `title` VARCHARACTER (?) NOT NULL , `body` TEXT NOT NULL , STATUS VARCHARACTER (?) NOT NULL DEFAULT ? , `published_version` INTEGER NULL , `epoch` INT8 NOT NULL DEFAULT ? , `disabled` TINYINT NOT NULL DEFAULT ? , `created_by` INT8 UNSIGNED NULL , `updated_by` INT8 UNSIGNED NULL , `create_time` TIMESTAMP NOT NULL DEFAULT NOW , `update_time` TIMESTAMP NOT NULL DEFAULT NOW ON UPDATE NOW , UNIQUE KEY `uk_ai_seed_key` ( `seed_key` ) , KEY `idx_ai_document_scope` ( `scope` , `shop_id` , `disabled` , STATUS ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "30237465000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "3e67fa9d38d82054e7fc01fe3ee8844dc76faaaefbd74d213a2af42e60e95520",
+      "text": "ROLLBACK",
+      "count": 2,
+      "picoseconds": "139683000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb",
+      "text": "SELECT @@`version_comment` LIMIT ?",
+      "count": 193,
+      "picoseconds": "32332971000",
+      "examined": 193,
+      "sent": 193
+    },
+    {
+      "digest": "47fc59d4ae70ac483522d0ad790ad18d36097e922d6ab65f308e0b960c7879cc",
+      "text": "INSERT INTO `tb_blog` ( `shop_id` , `user_id` , `title` , `images` , `content` , STATUS , `publish_version` ) VALUES (...)",
+      "count": 8,
+      "picoseconds": "28211235000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "487d361cf29f04985b8a6e8b1c76da6393c5fb4e5599697dc7b949cbb7739f1f",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_note_search_state` ( `note_id` INT8 UNSIGNED NOT NULL PRIMARY KEY , `version` INTEGER NOT NULL , `document_hash` BINARY (?) NOT NULL , `applied_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , CONSTRAINT `chk_note_search_version` CHECK ( `version` > ? ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "20495499000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "498265f9ea6eb551773b6f490e34f5dd5b201d3b6615747ef8c8a4b5abce511c",
+      "text": "SELECT `version` , CHECKSUM FROM `tb_schema_migration`",
+      "count": 1,
+      "picoseconds": "1213409000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "53f5ed40210d1ab3eed4072f2181a031802f3da64b868fe8b108bd92ef48c61e",
+      "text": "SHOW INDEX FROM `tb_blog_like`",
+      "count": 1,
+      "picoseconds": "5346921000",
+      "examined": 32,
+      "sent": 5
+    },
+    {
+      "digest": "60b8e5a8fa93a8e184cf0c6e5ddb2661e24c89cf1f6a6719417ff02738c51982",
+      "text": "ALTER TABLE `tb_blog` ADD KEY `idx_blog_author_feed` ( `user_id` , STATUS , `create_time` , `id` )",
+      "count": 1,
+      "picoseconds": "16877865000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "65e2ea1e0fc3dda041a05765124dfafd6f0d6486eeb1eb2b04640bdf7b6b0324",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_community_projection_event` ( `projection` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL , `event_id` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL , `event_hash` BINARY (?) NOT NULL , `state` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL , `created_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , `applied_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , PRIMARY KEY ( `projection` , `event_id` ) , CONSTRAINT `chk_community_projection_state` CHECK ( `state` IN (...) ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "20853857000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "6886ab46e60b39abda4dd8a37f00a1302bea61d7e68a173d0af72ff1a9446709",
+      "text": "ALTER TABLE `tb_ai_document_version` ADD COLUMN `title` VARCHARACTER (?) NULL AFTER `epoch`",
+      "count": 1,
+      "picoseconds": "49783683000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "6afe52b1d336294cbf0b4f34a29bd3e8ec421a9b620e60ba6de9c4e547a7762d",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_community_follow_projection` ( `user_id` INT8 UNSIGNED NOT NULL , `target_id` INT8 UNSIGNED NOT NULL , ACTIVE TINYINT NOT NULL DEFAULT ? , `version` INTEGER NOT NULL DEFAULT ? , `event_hash` BINARY (?) NOT NULL , `last_event_id` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL , `updated_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , PRIMARY KEY ( `user_id` , `target_id` ) , KEY `idx_community_follow_reverse` ( `target_id` , ACTIVE , `user_id` ) , CONSTRAINT `chk_community_follow_active` CHECK ( ACTIVE IN (...) ) , CONSTRAINT `chk_community_follow_version` CHECK ( `version` >= ? ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "32847700000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "6b9d2a4fd40241f6242be98a759f9ccd193940e47782d2cecd859262c4b11434",
+      "text": "SELECT COUNT ( * ) FROM `tb_shop` WHERE `id` = ?",
+      "count": 1,
+      "picoseconds": "260367000",
+      "examined": 1,
+      "sent": 1
+    },
+    {
+      "digest": "6c6de122dbb06775ab7e26583f8794682a7a306fa3f75ef733461f8edf989d81",
+      "text": "SELECT ? FROM `tb_shop` LIMIT ?",
+      "count": 131,
+      "picoseconds": "52770834000",
+      "examined": 131,
+      "sent": 131
+    },
+    {
+      "digest": "6d631211d940af327fe3f82a008b908dc6cba3912cae61881353006e73354eee",
+      "text": "SET NAMES `utf8mb4`",
+      "count": 101,
+      "picoseconds": "14551715000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "6df5f6c8acb838ca2d042d54d7dfb5aeb8af6035b7d75b4ad4f4aa1523d9d9c8",
+      "text": "SHOW INDEX FROM `tb_blog`",
+      "count": 1,
+      "picoseconds": "12217935000",
+      "examined": 44,
+      "sent": 8
+    },
+    {
+      "digest": "704ccdc429d4deb2cf37ec8708e8faae1c46acf5683817670906ba621a14bb85",
+      "text": "SET `time_zone` = ?",
+      "count": 90,
+      "picoseconds": "9873303000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "7abb0c9530aa204ab2bfa5de8783080801daadbe93a9cba30e2d7d60df946446",
+      "text": "UPDATE `tb_ai_document_version` `v` JOIN `tb_ai_document` `d` ON `d` . `id` = `v` . `document_id` SET `v` . `title` = `d` . `title` WHERE `v` . `title` IS NULL",
+      "count": 1,
+      "picoseconds": "845249000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "7b3d5bb8c7c1481c4122fe8cd26c2ce40ca9ba8516a6e27bdae20132d29b0036",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_community_consumer_failure` ( `projection` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL , `topic` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL , `partition_id` INTEGER NOT NULL , `source_offset` INT8 NOT NULL , `message_hash` BINARY (?) NOT NULL , `message_key` VARBINARY (?) NOT NULL , `message_body` MEDIUMBLOB NOT NULL , `message_headers` JSON NOT NULL , `reason` VARCHARACTER (?) NOT NULL , `state` VARCHARACTER (?) NOT NULL DEFAULT ? , `created_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , `resolved_at` DATETIME (?) NULL , PRIMARY KEY ( `projection` , `topic` , `partition_id` , `source_offset` ) , KEY `idx_consumer_failure_state` ( `projection` , `state` , `created_at` ) , CONSTRAINT `chk_consumer_source` CHECK ( `partition_id` >= ? AND `source_offset` >= ? ) , CONSTRAINT `chk_consumer_failure_state` CHECK ( `state` IN (...) ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "27566829000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "7b8468a7ffd8fd7262c2bc63b8a1f4da3ab8981d38d2eb4269bddc7064427842",
+      "text": "ALTER TABLE `tb_blog` ADD COLUMN STATUS VARCHARACTER (?) NOT NULL DEFAULT ? AFTER `content` , ADD COLUMN `publish_version` INTEGER NOT NULL DEFAULT ? AFTER STATUS",
+      "count": 1,
+      "picoseconds": "49499493000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "811f64f973d2de47ba193a8b936223c88e2cf477a076488f506bba289f1858a4",
+      "text": "ALTER TABLE `tb_voucher_order` MODIFY COLUMN `shop_id` INT8 UNSIGNED NOT NULL , MODIFY COLUMN `pay_amount` INT8 UNSIGNED NOT NULL , MODIFY COLUMN `pay_deadline_at` DATETIME NOT NULL , DROP INDEX `uk_order_user_voucher` , DROP INDEX `idx_order_user_time` , ADD COLUMN `active_flag` TINYINT GENERATED ALWAYS AS ( CASE WHEN STATUS = ? THEN ? ELSE ? END ) STORED , ADD UNIQUE KEY `uk_order_active` ( `user_id` , `voucher_id` , `active_flag` ) , ADD UNIQUE KEY `uk_order_redeem_token` ( `redeem_token` ) , ADD KEY `idx_order_due` ( STATUS , `pay_deadline_at` , `id` ) , ADD KEY `idx_order_shop` ( `shop_id` , `create_time` , `id` ) , ADD KEY `idx_order_user_time` ( `user_id` , `create_time` , `id` )",
+      "count": 1,
+      "picoseconds": "81304456000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "863a5a5989005ddf5098b3bb6e90ce50bfdcd3f1e7088f68376901fd38279eb6",
+      "text": "ALTER TABLE `tb_seckill_voucher` ADD COLUMN `merchant_id` INT8 UNSIGNED NULL AFTER `voucher_id` , ADD COLUMN `total_stock` INTEGER NOT NULL DEFAULT ? AFTER `stock` , ADD COLUMN `publish_status` VARCHARACTER (?) NOT NULL DEFAULT ? AFTER `total_stock` , ADD COLUMN `publish_version` INTEGER NOT NULL DEFAULT ? AFTER `publish_status` , ADD COLUMN `redeem_begin_time` DATETIME NULL AFTER `end_time` , ADD COLUMN `redeem_end_time` DATETIME NULL AFTER `redeem_begin_time` , ADD COLUMN `publish_request_key` VARCHARACTER (?) NULL , ADD COLUMN `publish_request_hash` CHARACTER (?) NULL",
+      "count": 1,
+      "picoseconds": "52293595000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "8db7de5915fed6ec7ad2f6c8b74a4cca94e658fde934ee4f4a8ee226d0b0e78f",
+      "text": "ALTER TABLE `tb_follow` ADD COLUMN ACTIVE TINYINT NOT NULL DEFAULT ? AFTER `follow_user_id` , ADD COLUMN `version` INTEGER NOT NULL DEFAULT ? AFTER ACTIVE , ADD COLUMN `update_time` TIMESTAMP NOT NULL DEFAULT NOW ON UPDATE NOW AFTER `create_time` , ADD UNIQUE KEY `uk_follow` ( `user_id` , `follow_user_id` ) , ADD KEY `idx_follow_target` ( `follow_user_id` , ACTIVE )",
+      "count": 1,
+      "picoseconds": "53521144000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "924a0bf255073b2ae6a63e4df1c4c160efc3bc02d7a346950cbb0e604276b803",
+      "text": "START TRANSACTION READ ONLY",
+      "count": 489,
+      "picoseconds": "39755679000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "965099645eae39c452ce75f79a6622dd936f2b3a02da271b4f23784af1936213",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_community_note_projection` ( `note_id` INT8 UNSIGNED NOT NULL , `author_id` INT8 UNSIGNED NOT NULL , `version` INTEGER NOT NULL DEFAULT ? , `event_hash` BINARY (?) NOT NULL , `last_event_id` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL , `published_at` DATETIME NOT NULL , `updated_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , PRIMARY KEY ( `note_id` ) , KEY `idx_community_note_author_time` ( `author_id` , `published_at` , `note_id` ) , CONSTRAINT `chk_community_note_version` CHECK ( `version` >= ? ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "31419157000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "97168ada557abce2a1c3e21a39f0021d35529e685806a8a396e8b9c3e45d5b6a",
+      "text": "ALTER TABLE `tb_voucher_order` ADD COLUMN `shop_id` INT8 UNSIGNED NULL AFTER `voucher_id` , ADD COLUMN `pay_amount` INT8 UNSIGNED NULL AFTER `pay_type` , ADD COLUMN `redeem_begin_time` DATETIME NULL AFTER `pay_time` , ADD COLUMN `redeem_end_time` DATETIME NULL AFTER `redeem_begin_time` , ADD COLUMN `pay_deadline_at` DATETIME NULL AFTER `redeem_end_time` , ADD COLUMN `cancel_time` DATETIME NULL AFTER `pay_deadline_at` , ADD COLUMN `cancel_reason` VARCHARACTER (?) NULL AFTER `cancel_time` , ADD COLUMN `redeem_token` VARCHARACTER (?) NULL AFTER `cancel_reason` , ADD COLUMN `version` INTEGER NOT NULL DEFAULT ? AFTER `redeem_token`",
+      "count": 1,
+      "picoseconds": "59481452000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "9dc5cf0ef412c2555853807a5f3bf84d83ce12b9d2578af2e5792126b00b9cae",
+      "text": "SELECT `id` , `user_id` FROM `tb_blog` WHERE `title` LIKE ? ORDER BY `create_time` DESC , `id` DESC",
+      "count": 1,
+      "picoseconds": "7057613000",
+      "examined": 12800,
+      "sent": 6400
+    },
+    {
+      "digest": "9f6606aa4a617001be69c6327abdcbecf410b1281756802de955c77df12d101e",
+      "text": "SELECT `RELEASE_LOCK` (?)",
+      "count": 1,
+      "picoseconds": "228761000",
+      "examined": 1,
+      "sent": 1
+    },
+    {
+      "digest": "aefbbf7ec5f3fdb2a41ce3622d0906ce4578010f1e4bdad7981d97096f0280ff",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_outbox` ( `id` INT8 UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY , `event_id` VARCHARACTER (?) NOT NULL , `aggregate_type` VARCHARACTER (?) NOT NULL , `aggregate_id` VARCHARACTER (?) NOT NULL , `aggregate_version` INTEGER NOT NULL , `event_type` VARCHARACTER (?) NOT NULL , `payload` JSON NOT NULL , `delivery_status` VARCHARACTER (?) NOT NULL DEFAULT ? , `attempts` INTEGER NOT NULL DEFAULT ? , `next_attempt_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , `lease_until` DATETIME (?) NULL , `last_error` VARCHARACTER (?) NULL , `created_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , `completed_at` DATETIME (?) NULL , UNIQUE KEY `uk_outbox_event` ( `event_id` ) , UNIQUE KEY `uk_outbox_transition` ( `aggregate_type` , `aggregate_id` , `aggregate_version` , `event_type` ) , KEY `idx_outbox_due` ( `delivery_status` , `next_attempt_at` , `id` ) , KEY `idx_outbox_lease` ( `delivery_status` , `lease_until` ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "36871308000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "af67ba80150e8b79e66c5887c415665ec10584c6587473f47a2b038efd256720",
+      "text": "INSERT INTO `tb_follow` ( `user_id` , `follow_user_id` , ACTIVE , `version` ) VALUES (...) /* , ... */",
+      "count": 1,
+      "picoseconds": "708656000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "b0a2105f85f781a2af3593f66431f1528f14f14566499839ea27e23911fb9a5a",
+      "text": "SHOW GLOBAL STATUS WHERE `Variable_name` IN (...)",
+      "count": 8,
+      "picoseconds": "8917227000",
+      "examined": 112,
+      "sent": 112
+    },
+    {
+      "digest": "b40a14046b804d02a7c80bd120c545ed4fea040052548cda1f0e8802bd4d5546",
+      "text": "INSERT IGNORE INTO `tb_note_search_control` ( NAME ) VALUES (?)",
+      "count": 1,
+      "picoseconds": "3410760000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "b57cf422fbfb5629759554d7a60a31947a2333a6e1b55d7dce60a94aa1eed044",
+      "text": "START TRANSACTION",
+      "count": 1379,
+      "picoseconds": "150586909000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "b6483a7efe95071ac6967a21eef7f352aef3d1b371657b9c24ac7fa6b4e76ed1",
+      "text": "ALTER TABLE `tb_community_consumer_failure` MODIFY COLUMN `message_key` MEDIUMBLOB NOT NULL",
+      "count": 1,
+      "picoseconds": "58938014000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "b72a17b7daa284cfe7833ff02e05527599ef5cb4c944d9a8fdfc64794f74b816",
+      "text": "ALTER TABLE `tb_seckill_voucher` MODIFY COLUMN `merchant_id` INT8 UNSIGNED NOT NULL , ADD UNIQUE KEY `uk_activity_request` ( `merchant_id` , `publish_request_key` ) , ADD KEY `idx_activity_status` ( `publish_status` , `merchant_id` ) , ADD CONSTRAINT `chk_total_stock_nonnegative` CHECK ( `total_stock` >= ? ) , ADD CONSTRAINT `chk_redeem_window` CHECK ( `redeem_begin_time` IS NULL OR `redeem_end_time` IS NULL OR `redeem_begin_time` < `redeem_end_time` )",
+      "count": 1,
+      "picoseconds": "60132577000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "bf22f05338227dec1aaf9e044601d37fcf7f3f3474c7743a4fdc0f86a7bee4cc",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_community_outbox` ( `id` INT8 UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY , `event_id` VARCHARACTER (?) NOT NULL , `aggregate_type` VARCHARACTER (?) NOT NULL , `aggregate_id` VARCHARACTER (?) NOT NULL , `aggregate_version` INTEGER NOT NULL , `event_type` VARCHARACTER (?) NOT NULL , `payload` JSON NOT NULL , `delivery_status` VARCHARACTER (?) NOT NULL DEFAULT ? , `attempts` INTEGER NOT NULL DEFAULT ? , `next_attempt_at` TIMESTAMP (?) NOT NULL DEFAULT NOW (?) , `lease_until` TIMESTAMP (?) NULL , `last_error` VARCHARACTER (?) NULL , `completed_at` TIMESTAMP (?) NULL , `create_time` TIMESTAMP (?) NOT NULL DEFAULT NOW (?) , UNIQUE KEY `uk_community_event` ( `event_id` ) , KEY `idx_community_claim` ( `delivery_status` , `next_attempt_at` ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "32684422000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "cf33254b7bdbbfb0e1f2d9e09093857bf05cdc050a5bcd9446949853b2cc66f3",
+      "text": "INSERT INTO `tb_blog` ( `shop_id` , `user_id` , `title` , `images` , `content` , `liked` , `comments` , STATUS , `publish_version` , `create_time` , `update_time` ) VALUES ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ? SQL_TSI_HOUR , NOW ( ) - INTERVAL ? SQL_TSI_HOUR ) , ( ?, ... , NOW ( ) - INTERVAL ?",
+      "count": 1,
+      "picoseconds": "301285488000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "cfe60639961b0ebc272c424c4dbc79cc7111aaf597c2da39d0b57a83d62b4bfd",
+      "text": "SELECT `id` FROM `tb_blog` ORDER BY `id` DESC LIMIT ?",
+      "count": 8,
+      "picoseconds": "1907170000",
+      "examined": 8,
+      "sent": 8
+    },
+    {
+      "digest": "d1b44b0c19af710b5a679907e284acd2ddc285201794bc69a2389d77baedddae",
+      "text": "SELECT ?",
+      "count": 2,
+      "picoseconds": "325113000",
+      "examined": 2,
+      "sent": 2
+    },
+    {
+      "digest": "d321317572592af0c07faafc6629d9405c1832e674cc38f44d07bb83e6d8792f",
+      "text": "ALTER TABLE `tb_blog` ADD KEY `idx_blog_feed` ( STATUS , `create_time` , `id` )",
+      "count": 1,
+      "picoseconds": "15184906000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "d80ff239c690a94edb0adf1fee28bfa1db6f96878e066d825fdd7c0921399d44",
+      "text": "SET TRANSACTION ISOLATION LEVEL READ COMMITTED",
+      "count": 101,
+      "picoseconds": "9159881000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "d902ea6a8df45f59c13283061300fcc515d5bbfcae8dbfec0a58e87d626c81c1",
+      "text": "INSERT INTO `tb_schema_migration` ( `version` , CHECKSUM ) VALUES (...)",
+      "count": 11,
+      "picoseconds": "41855800000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "de4a48490b1cc2d18bb3a05e20d9c5ec8c02bf59f737089a554a585196a76894",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_community_projection_control` ( `projection` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL PRIMARY KEY , `rebuilt_at` DATETIME (?) NULL ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "19336698000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "de67ec8a1d6bce9cf6a511a26915f031eb96985df3f8547baa7a5a853e6cc18a",
+      "text": "INSERT IGNORE INTO `tb_community_projection_control` ( `projection` ) VALUES (?) /* , ... */",
+      "count": 1,
+      "picoseconds": "3426410000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "e74be1f0d832e8201f9bc31cab5084cc27558120c4e9c99944ced006a18f39e4",
+      "text": "SHOW INDEX FROM `tb_follow`",
+      "count": 1,
+      "picoseconds": "7500721000",
+      "examined": 40,
+      "sent": 7
+    },
+    {
+      "digest": "ed5c53e4420fd793d9c6a3b189ca995ae0c27b09e67a5eada32f71460632d322",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_blog_like` ( `id` INT8 UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY , `blog_id` INT8 UNSIGNED NOT NULL , `user_id` INT8 UNSIGNED NOT NULL , ACTIVE TINYINT NOT NULL DEFAULT ? , `version` INTEGER NOT NULL DEFAULT ? , `create_time` TIMESTAMP NOT NULL DEFAULT NOW , `update_time` TIMESTAMP NOT NULL DEFAULT NOW ON UPDATE NOW , UNIQUE KEY `uk_blog_like` ( `blog_id` , `user_id` ) , KEY `idx_blog_like_user` ( `user_id` , ACTIVE ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "29273103000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "ee52221f917a8e17aa5b233d8e4510d4dd294cfbc5d020777b8df57cfe31521f",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_order_review` ( `id` INT8 UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY , `order_id` VARCHARACTER (?) NOT NULL , `voucher_id` INT8 UNSIGNED NOT NULL , `user_id` INT8 UNSIGNED NOT NULL , `stream_message_id` VARCHARACTER (?) NULL , `attempts` INTEGER NOT NULL DEFAULT ? , `reason` VARCHARACTER (?) NOT NULL , STATUS VARCHARACTER (?) NOT NULL DEFAULT ? , `created_at` DATETIME (?) NOT NULL DEFAULT NOW (?) , `updated_at` DATETIME (?) NOT NULL DEFAULT NOW (?) ON UPDATE NOW (?) , `resolved_at` DATETIME (?) NULL , UNIQUE KEY `uk_review_order` ( `order_id` ) , KEY `idx_review_status` ( STATUS , `created_at` ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "33413309000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "eeb2fdfcfaa2b568e0c2c7830ce5a2d2f06108902c076306f47d8c4082943bdc",
+      "text": "SELECT `id` , `nick_name` FROM `tb_user` WHERE `nick_name` LIKE ? ORDER BY `nick_name`",
+      "count": 1,
+      "picoseconds": "648408000",
+      "examined": 130,
+      "sent": 64
+    },
+    {
+      "digest": "f2b9be5f0f32ca7507e4ddf133cd2fad0993a1c26fde9caa6f067b1af2b7603c",
+      "text": "COMMIT",
+      "count": 1865,
+      "picoseconds": "346722327000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "f62800e1fab69b8c52d8ff74925e71041b6a9a88461b2e585529a5fd159ab0d8",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_note_search_control` ( NAME VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL PRIMARY KEY , `index_alias` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL DEFAULT ? , `active_generation` VARCHARACTER (?) CHARACTER SET ASCII COLLATE `ascii_bin` NOT NULL DEFAULT ? , `rebuilt_at` DATETIME (?) NULL ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "22972951000",
+      "examined": 0,
+      "sent": 0
+    },
+    {
+      "digest": "f728911d0618ce92e73a49b06e744137517fc3978ba66d41d41ea7523d6cda32",
+      "text": "CREATE TABLE IF NOT EXISTS `tb_ai_document_version` ( `id` INT8 UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY , `document_id` INT8 UNSIGNED NOT NULL , `version` INTEGER NOT NULL , `epoch` INT8 NOT NULL , `body` MEDIUMTEXT NOT NULL , `content_hash` CHARACTER (?) NOT NULL , STATUS VARCHARACTER (?) NOT NULL DEFAULT ? , `embedding_model` VARCHARACTER (?) NULL , `embedding_dimension` INTEGER NULL , ERROR VARCHARACTER (?) NULL , `create_time` TIMESTAMP NOT NULL DEFAULT NOW , `ready_time` TIMESTAMP NULL , UNIQUE KEY `uk_ai_version` ( `document_id` , `version` ) , KEY `idx_ai_version_status` ( STATUS ) ) ENGINE = `InnoDB` DEFAULT CHARSET = `utf8mb4`",
+      "count": 1,
+      "picoseconds": "29014741000",
+      "examined": 0,
+      "sent": 0
+    }
+  ],
+  "redis": {
+    "hdel": {
+      "calls": 1,
+      "usec": 113,
+      "usec_per_call": 113,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "exists": {
+      "calls": 66,
+      "usec": 128,
+      "usec_per_call": 1.94,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "info": {
+      "calls": 8,
+      "usec": 1313,
+      "usec_per_call": 164.12,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "scard": {
+      "calls": 30,
+      "usec": 48,
+      "usec_per_call": 1.6,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "hget": {
+      "calls": 1415,
+      "usec": 3167,
+      "usec_per_call": 2.24,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "get": {
+      "calls": 68,
+      "usec": 283,
+      "usec_per_call": 4.16,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "xreadgroup": {
+      "calls": 2346,
+      "usec": 32517,
+      "usec_per_call": 13.86,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "mget": {
+      "calls": 269,
+      "usec": 4404,
+      "usec_per_call": 16.37,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "set": {
+      "calls": 818,
+      "usec": 5945,
+      "usec_per_call": 7.27,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "pttl": {
+      "calls": 480,
+      "usec": 835,
+      "usec_per_call": 1.74,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "expire": {
+      "calls": 480,
+      "usec": 2496,
+      "usec_per_call": 5.2,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "client|setinfo": {
+      "calls": 56,
+      "usec": 111,
+      "usec_per_call": 1.98,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "xgroup|create": {
+      "calls": 2,
+      "usec": 412,
+      "usec_per_call": 206,
+      "rejected_calls": 0,
+      "failed_calls": 1
+    },
+    "evalsha": {
+      "calls": 594,
+      "usec": 36085,
+      "usec_per_call": 60.75,
+      "rejected_calls": 0,
+      "failed_calls": 9
+    },
+    "hello": {
+      "calls": 28,
+      "usec": 498,
+      "usec_per_call": 17.79,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "ping": {
+      "calls": 165,
+      "usec": 343,
+      "usec_per_call": 2.08,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "xautoclaim": {
+      "calls": 1173,
+      "usec": 19673,
+      "usec_per_call": 16.77,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "hset": {
+      "calls": 64,
+      "usec": 642,
+      "usec_per_call": 10.03,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "eval": {
+      "calls": 7,
+      "usec": 2707,
+      "usec_per_call": 386.71,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "dump": {
+      "calls": 2,
+      "usec": 155,
+      "usec_per_call": 77.5,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "sadd": {
+      "calls": 14,
+      "usec": 322,
+      "usec_per_call": 23,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "type": {
+      "calls": 640,
+      "usec": 2408,
+      "usec_per_call": 3.76,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "del": {
+      "calls": 61,
+      "usec": 629,
+      "usec_per_call": 10.31,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    },
+    "srem": {
+      "calls": 3,
+      "usec": 55,
+      "usec_per_call": 18.33,
+      "rejected_calls": 0,
+      "failed_calls": 0
+    }
+  }
+}

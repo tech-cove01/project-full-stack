@@ -1,0 +1,8 @@
+{
+  "task": "CAP-06",
+  "kind": "probe",
+  "capacityWrapperExit": 0,
+  "extraDiagnosticCollectorExit": null,
+  "finishedAt": "2026-10-30T09:57:54.620164+00:00",
+  "limits": "Wrapper exit is orchestration, not capacity classification. Diagnostic round is never a formal score."
+}

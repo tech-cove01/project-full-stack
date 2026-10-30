@@ -1,0 +1,12 @@
+{
+  "pid": 39952,
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap06-bb03d3f\\backend\\bin\\cap-api.exe",
+  "creationUnixMs": 1793354237709.498,
+  "createdAtUtc": "2026-10-30T09:57:17.709498+00:00",
+  "sourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+  "expectedVersion": "capacity-bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+  "sha256": "a8ef9aa640164b0eaad729139e348491bafbcd19220c6a62b7a97fcc152a6d79",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap06-825a82cd767e\\env-baseline-off.private.json",
+  "label": "baseline-off",
+  "tailEnabledRequested": false
+}

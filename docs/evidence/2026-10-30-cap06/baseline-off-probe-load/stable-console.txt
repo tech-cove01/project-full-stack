@@ -1,0 +1,69 @@
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✓ 'p(95)<=200' p(95)=36.57ms
+    ✓ 'p(99)<=500' p(99)=38.74ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=6
+
+    cap_read_completed
+    ✓ 'count>=0' count=6
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=6
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=25.1ms  med=23.31ms p(95)=36.57ms p(99)=38.74ms max=39.29ms
+    cap_read_attempted.............: 6     1.190138/s
+    cap_read_completed.............: 6     1.190138/s
+    cap_read_content_errors........: 0     0/s
+    cap_read_failure_ratio.........: 0.00% 0 out of 6
+    cap_read_http_errors...........: 0     0/s
+    cap_read_success...............: 6     1.190138/s
+    cap_read_success_ms............: avg=25.1ms  med=23.31ms p(95)=36.57ms p(99)=38.74ms max=39.29ms
+    cap_read_system_error_ratio....: 0.00% 0 out of 6
+    cap_read_system_errors.........: 0     0/s
+
+    HTTP
+    http_req_duration..............: avg=25.1ms  med=23.31ms p(95)=36.57ms p(99)=38.74ms max=39.29ms
+      { expected_response:true }...: avg=25.1ms  med=23.31ms p(95)=36.57ms p(99)=38.74ms max=39.29ms
+    http_req_failed................: 0.00% 0 out of 6
+    http_reqs......................: 6     1.190138/s
+
+    EXECUTION
+    dropped_iterations.............: 0     0/s
+    iteration_duration.............: avg=26.89ms med=25.11ms p(95)=38.17ms p(99)=40.28ms max=40.81ms
+    iterations.....................: 6     1.190138/s
+    vus............................: 0     min=0      max=0  
+    vus_max........................: 256   min=256    max=256
+
+    NETWORK
+    data_received..................: 57 kB 11 kB/s
+    data_sent......................: 828 B 164 B/s
+
+
+

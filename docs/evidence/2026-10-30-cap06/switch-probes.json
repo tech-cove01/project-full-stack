@@ -1,0 +1,212 @@
+{
+  "task": "CAP-06A",
+  "at": "2026-10-30T10:00:39.725676+00:00",
+  "sameBinarySha256": "a8ef9aa640164b0eaad729139e348491bafbcd19220c6a62b7a97fcc152a6d79",
+  "sameFixtureManifestSHA256": "31f9b9b4b9a43372cbb147ef6ae24a716d67f7619f8032919393464f7ac2bc2c",
+  "probeResults": [
+    {
+      "tag": "baseline-off-probe",
+      "sourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "attempted": 6,
+      "native": 6,
+      "terminal": 6,
+      "success": 6,
+      "unknown": 0,
+      "dropped": 0,
+      "allLatency": {
+        "avg": 25.10433333333333,
+        "med": 23.31745,
+        "p(95)": 36.572675000000004,
+        "p(99)": 38.746535,
+        "max": 39.29,
+        "thresholds": {
+          "p(95)<=200": false,
+          "p(99)<=500": false
+        }
+      },
+      "successfulLatency": {
+        "max": 39.29,
+        "avg": 25.10433333333333,
+        "med": 23.31745,
+        "p(95)": 36.572675000000004,
+        "p(99)": 38.746535
+      },
+      "resourceSamples": 2,
+      "completeResources": 2,
+      "tailEnabledObserved": [
+        false,
+        false
+      ],
+      "tailLastSequence": 0,
+      "recordedStages": [],
+      "resultFile": "docs\\evidence\\2026-10-30-cap06\\baseline-off-probe-load\\result.json"
+    },
+    {
+      "tag": "baseline-off-short25",
+      "sourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "attempted": 376,
+      "native": 376,
+      "terminal": 376,
+      "success": 376,
+      "unknown": 0,
+      "dropped": 0,
+      "allLatency": {
+        "p(95)": 35.9898,
+        "p(99)": 42.896475,
+        "max": 50.8656,
+        "avg": 20.60610186170213,
+        "med": 17.9092,
+        "thresholds": {
+          "p(95)<=200": false,
+          "p(99)<=500": false
+        }
+      },
+      "successfulLatency": {
+        "p(95)": 35.9898,
+        "p(99)": 42.896475,
+        "max": 50.8656,
+        "avg": 20.60610186170213,
+        "med": 17.9092
+      },
+      "resourceSamples": 4,
+      "completeResources": 4,
+      "tailEnabledObserved": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "tailLastSequence": 0,
+      "recordedStages": [],
+      "resultFile": "docs\\evidence\\2026-10-30-cap06\\baseline-off-short25-load\\result.json"
+    },
+    {
+      "tag": "baseline-on-probe",
+      "sourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "attempted": 5,
+      "native": 5,
+      "terminal": 5,
+      "success": 5,
+      "unknown": 0,
+      "dropped": 0,
+      "allLatency": {
+        "avg": 45.459360000000004,
+        "med": 51.176,
+        "p(95)": 65.14698,
+        "p(99)": 66.159876,
+        "max": 66.4131,
+        "thresholds": {
+          "p(95)<=200": false,
+          "p(99)<=500": false
+        }
+      },
+      "successfulLatency": {
+        "p(95)": 65.14698,
+        "p(99)": 66.159876,
+        "max": 66.4131,
+        "avg": 45.459360000000004,
+        "med": 51.176
+      },
+      "resourceSamples": 2,
+      "completeResources": 2,
+      "tailEnabledObserved": [
+        true,
+        true
+      ],
+      "tailLastSequence": 0,
+      "recordedStages": [
+        "feed.service",
+        "feed.facts",
+        "feed.counts",
+        "auth.resolve",
+        "sql.begin_acquire_roundtrip",
+        "sql.transaction_hold",
+        "sql.statement_total",
+        "sql.call_until_rows",
+        "sql.exec_call",
+        "sql.prepare_call",
+        "redis.command_total",
+        "redis.pipeline_total",
+        "redis.dial",
+        "counts.get_many",
+        "counts.publication_wait",
+        "counts.publication_hold",
+        "counts.redis_read",
+        "counts.redis_write",
+        "counts.redis_delete",
+        "counts.cold_sql"
+      ],
+      "resultFile": "docs\\evidence\\2026-10-30-cap06\\baseline-on-probe-load\\result.json"
+    },
+    {
+      "tag": "baseline-on-short25",
+      "sourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+      "attempted": 376,
+      "native": 376,
+      "terminal": 376,
+      "success": 376,
+      "unknown": 0,
+      "dropped": 0,
+      "allLatency": {
+        "avg": 20.276523138297872,
+        "med": 17.67315,
+        "p(95)": 34.674975,
+        "p(99)": 54.845175,
+        "max": 91.1276,
+        "thresholds": {
+          "p(99)<=500": false,
+          "p(95)<=200": false
+        }
+      },
+      "successfulLatency": {
+        "avg": 20.276523138297872,
+        "med": 17.67315,
+        "p(95)": 34.674975,
+        "p(99)": 54.845175,
+        "max": 91.1276
+      },
+      "resourceSamples": 4,
+      "completeResources": 4,
+      "tailEnabledObserved": [
+        true,
+        true,
+        true,
+        true
+      ],
+      "tailLastSequence": 0,
+      "recordedStages": [
+        "feed.service",
+        "feed.facts",
+        "feed.counts",
+        "auth.resolve",
+        "sql.begin_acquire_roundtrip",
+        "sql.transaction_hold",
+        "sql.statement_total",
+        "sql.call_until_rows",
+        "sql.exec_call",
+        "sql.prepare_call",
+        "redis.command_total",
+        "redis.pipeline_total",
+        "redis.dial",
+        "counts.get_many",
+        "counts.publication_wait",
+        "counts.publication_hold",
+        "counts.redis_read",
+        "counts.redis_write",
+        "counts.redis_delete",
+        "counts.cold_sql"
+      ],
+      "resultFile": "docs\\evidence\\2026-10-30-cap06\\baseline-on-short25-load\\result.json"
+    }
+  ],
+  "capacityClaim": false,
+  "overheadCausalPercentageClaimed": false,
+  "analysisNotes": [
+    "First local summary attempt treated the intentionally disabled null stages array as iterable and exited before writing output. Corrected to empty-list projection; no raw file or workload was changed."
+  ],
+  "limits": [
+    "Short probes validate switches, classification and observation chain only.",
+    "Order off then on, host variability and cache warm-state differences prevent causal overhead percentage.",
+    "Both stable phases preserve all original safety/SLO criteria; extra 1Hz/profile collector was not active."
+  ]
+}

@@ -1,0 +1,1 @@
+{"prepared":true,"manifest":"D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-10-30-cap06\\fixture\\fixture.json","readers":32,"notes":6400}

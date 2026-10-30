@@ -1,0 +1,25 @@
+{
+  "task": "CAP-06",
+  "kind": "probe",
+  "tag": "baseline-on-short25",
+  "diagnosticSlot": null,
+  "apiSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+  "apiPid": 59564,
+  "apiMetadataPath": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-10-30-cap06\\api-baseline-on.json",
+  "apiMetadataSHA256": "be0702471c18461f9fa7641fcc4c97658262a5632e48b29d5763323b185d0c34",
+  "mode": "multi",
+  "rate": 25,
+  "seconds": 15,
+  "warmSeconds": 1,
+  "preVUs": 256,
+  "maxVUs": 512,
+  "at": "2026-10-30T09:59:36.082046+00:00",
+  "environmentValuesExported": false,
+  "scriptHashes": {
+    "cap06-stage.py": "9fcc46e4f346f3046ec82885f266faa74f2055c60d757626ac7351e72026f682",
+    "cap06-tail.py": "585dcc333386e63fe053d944402e6349dd49b5af036543714a378658d66a25f8",
+    "capacity-stage.py": "2f30385e62a8c4817ed74bcd9d4c93aeee6fa2e609bb0db5273196243fd209d6",
+    "capacity-resources.py": "6f438853ea211f0264e8f147680ae9eecd80e87f9be52abe5a383db179784135",
+    "go073-cap-read.mjs": "0335ea68479cae4a6fb4dacf6b4889ab94388dac875d04bac16705cd4d08addf"
+  }
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "name": "innodb_buffer_pool_size",
+    "value": "134217728"
+  },
+  {
+    "name": "innodb_flush_log_at_trx_commit",
+    "value": "1"
+  },
+  {
+    "name": "innodb_lock_wait_timeout",
+    "value": "50"
+  },
+  {
+    "name": "max_connections",
+    "value": "151"
+  },
+  {
+    "name": "performance_schema",
+    "value": "ON"
+  },
+  {
+    "name": "sync_binlog",
+    "value": "1"
+  },
+  {
+    "name": "transaction_isolation",
+    "value": "REPEATABLE-READ"
+  },
+  {
+    "name": "version",
+    "value": "8.4.13"
+  }
+]

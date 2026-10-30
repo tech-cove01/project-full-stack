@@ -1,0 +1,296 @@
+{
+  "captured_at": "2026-10-30T04:53:32.120983+00:00",
+  "project": "project-full-stack-cap-trade",
+  "container_id": "dc2238575581f499b0a249bc754910223edf45bd440a6a7a7bf7209481e4f95d",
+  "read_only": true,
+  "queries": {
+    "instruments": [
+      {
+        "name": "statement/abstract/new_packet",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/abstract/Query",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/com/Close stmt",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/com/Execute",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/com/Prepare",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/sql/execute_sql",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/sql/insert",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/sql/prepare_sql",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/sql/select",
+        "timed": "YES",
+        "enabled": "YES"
+      },
+      {
+        "name": "statement/sql/update",
+        "timed": "YES",
+        "enabled": "YES"
+      }
+    ],
+    "consumers": [
+      {
+        "name": "events_statements_current",
+        "enabled": "YES"
+      },
+      {
+        "name": "events_statements_history",
+        "enabled": "YES"
+      },
+      {
+        "name": "events_statements_history_long",
+        "enabled": "NO"
+      },
+      {
+        "name": "global_instrumentation",
+        "enabled": "YES"
+      },
+      {
+        "name": "statements_digest",
+        "enabled": "YES"
+      },
+      {
+        "name": "thread_instrumentation",
+        "enabled": "YES"
+      }
+    ],
+    "global_status": [
+      {
+        "name": "Com_stmt_reprepare",
+        "value": "4772"
+      },
+      {
+        "name": "Performance_schema_digest_lost",
+        "value": "0"
+      },
+      {
+        "name": "Performance_schema_prepared_statements_lost",
+        "value": "0"
+      },
+      {
+        "name": "Queries",
+        "value": "461162"
+      },
+      {
+        "name": "Questions",
+        "value": "192351"
+      },
+      {
+        "name": "Uptime",
+        "value": "1660"
+      }
+    ],
+    "by_event": [
+      {
+        "count": 134398,
+        "event": "statement/com/Execute",
+        "errors": 0,
+        "rows_sent": 88683,
+        "rows_examined": 216231,
+        "sum_timer_wait_ps": 86044858454000
+      },
+      {
+        "count": 134397,
+        "event": "statement/com/Prepare",
+        "errors": 0,
+        "rows_sent": 0,
+        "rows_examined": 0,
+        "sum_timer_wait_ps": 20235795695000
+      },
+      {
+        "count": 22740,
+        "event": "statement/sql/commit",
+        "errors": 0,
+        "rows_sent": 0,
+        "rows_examined": 0,
+        "sum_timer_wait_ps": 97897549692000
+      },
+      {
+        "count": 0,
+        "event": "statement/sql/execute_sql",
+        "errors": 0,
+        "rows_sent": 0,
+        "rows_examined": 0,
+        "sum_timer_wait_ps": 0
+      },
+      {
+        "count": 12,
+        "event": "statement/sql/insert",
+        "errors": 0,
+        "rows_sent": 0,
+        "rows_examined": 0,
+        "sum_timer_wait_ps": 103857196000
+      },
+      {
+        "count": 0,
+        "event": "statement/sql/prepare_sql",
+        "errors": 0,
+        "rows_sent": 0,
+        "rows_examined": 0,
+        "sum_timer_wait_ps": 0
+      },
+      {
+        "count": 5937,
+        "event": "statement/sql/select",
+        "errors": 0,
+        "rows_sent": 6210,
+        "rows_examined": 6392,
+        "sum_timer_wait_ps": 937634834000
+      },
+      {
+        "count": 0,
+        "event": "statement/sql/update",
+        "errors": 0,
+        "rows_sent": 0,
+        "rows_examined": 0,
+        "sum_timer_wait_ps": 0
+      }
+    ],
+    "prepared_instances_summary": [
+      {
+        "instances": 0,
+        "executions": 0,
+        "sum_timer_execute_ps": 0
+      }
+    ],
+    "digest_summary": [
+      {
+        "count_star": 56631,
+        "digest_rows": 51,
+        "null_digest_count": 0
+      }
+    ],
+    "show_global_status": [
+      {
+        "name": "Com_commit",
+        "value": "22832"
+      },
+      {
+        "name": "Com_dealloc_sql",
+        "value": "0"
+      },
+      {
+        "name": "Com_delete",
+        "value": "0"
+      },
+      {
+        "name": "Com_execute_sql",
+        "value": "0"
+      },
+      {
+        "name": "Com_insert",
+        "value": "14424"
+      },
+      {
+        "name": "Com_prepare_sql",
+        "value": "0"
+      },
+      {
+        "name": "Com_select",
+        "value": "106907"
+      },
+      {
+        "name": "Com_stmt_close",
+        "value": "134492"
+      },
+      {
+        "name": "Com_stmt_execute",
+        "value": "134492"
+      },
+      {
+        "name": "Com_stmt_prepare",
+        "value": "139264"
+      },
+      {
+        "name": "Com_stmt_reprepare",
+        "value": "4772"
+      },
+      {
+        "name": "Com_update",
+        "value": "19120"
+      },
+      {
+        "name": "Performance_schema_digest_lost",
+        "value": "0"
+      },
+      {
+        "name": "Performance_schema_prepared_statements_lost",
+        "value": "0"
+      },
+      {
+        "name": "Queries",
+        "value": "461661"
+      },
+      {
+        "name": "Questions",
+        "value": "192660"
+      },
+      {
+        "name": "Uptime",
+        "value": "1669"
+      }
+    ],
+    "global_by_event_summary": [
+      {
+        "count": 134493,
+        "event": "statement/com/Execute",
+        "sum_timer_wait_ps": 86074661625000
+      },
+      {
+        "count": 134492,
+        "event": "statement/com/Prepare",
+        "sum_timer_wait_ps": 20256339497000
+      },
+      {
+        "count": 22833,
+        "event": "statement/sql/commit",
+        "sum_timer_wait_ps": 97906782041000
+      },
+      {
+        "count": 12,
+        "event": "statement/sql/insert",
+        "sum_timer_wait_ps": 103857196000
+      },
+      {
+        "count": 5948,
+        "event": "statement/sql/select",
+        "sum_timer_wait_ps": 944219219000
+      },
+      {
+        "count": 0,
+        "event": "statement/sql/update",
+        "sum_timer_wait_ps": 0
+      }
+    ]
+  },
+  "errors": [],
+  "show_status_captured_at": "2026-10-30T04:53:41.616666+00:00"
+}

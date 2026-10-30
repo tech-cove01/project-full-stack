@@ -1,0 +1,151 @@
+{
+  "task": "GO-073-CAP-04",
+  "label": "before-rate25-profile",
+  "project": "project-full-stack-cap-trade",
+  "api_pid": 68744,
+  "api_created_unix_seconds": 1793334636.754758,
+  "started_at": "2026-10-30T04:50:20.521089+00:00",
+  "profiles_requested": false,
+  "containers": {
+    "mysql": {
+      "name": "project-full-stack-cap-trade-mysql-1",
+      "id": "dc2238575581f499b0a249bc754910223edf45bd440a6a7a7bf7209481e4f95d"
+    },
+    "redis": {
+      "name": "project-full-stack-cap-trade-redis-1",
+      "id": "fbd81776c4388ec6ac47817fe2f363dbbab663b7b2cf8974204e1bc1694d4294"
+    }
+  },
+  "sections": [
+    {
+      "file": "mysql-digests.json",
+      "started_at": "2026-10-30T04:50:20.523555+00:00",
+      "rows": 40,
+      "available": true,
+      "elapsed_ms": 197.61709999875166,
+      "finished_at": "2026-10-30T04:50:20.721171+00:00"
+    },
+    {
+      "file": "mysql-locks.json",
+      "started_at": "2026-10-30T04:50:20.721213+00:00",
+      "rows": 0,
+      "available": true,
+      "elapsed_ms": 174.61509999702685,
+      "finished_at": "2026-10-30T04:50:20.895833+00:00"
+    },
+    {
+      "file": "mysql-lock-waits.json",
+      "started_at": "2026-10-30T04:50:20.895851+00:00",
+      "rows": 0,
+      "available": true,
+      "elapsed_ms": 180.64020000747405,
+      "finished_at": "2026-10-30T04:50:21.076495+00:00"
+    },
+    {
+      "file": "mysql-consumers.json",
+      "started_at": "2026-10-30T04:50:21.076514+00:00",
+      "rows": 4,
+      "available": true,
+      "elapsed_ms": 169.43899999023415,
+      "finished_at": "2026-10-30T04:50:21.245957+00:00"
+    },
+    {
+      "file": "mysql-instruments.json",
+      "started_at": "2026-10-30T04:50:21.245975+00:00",
+      "rows": 6,
+      "available": true,
+      "elapsed_ms": 166.52719999547116,
+      "finished_at": "2026-10-30T04:50:21.412508+00:00"
+    },
+    {
+      "file": "mysql-status.json",
+      "started_at": "2026-10-30T04:50:21.412527+00:00",
+      "rows": 11,
+      "available": true,
+      "elapsed_ms": 171.96490001515485,
+      "finished_at": "2026-10-30T04:50:21.584495+00:00"
+    },
+    {
+      "file": "mysql-settings.json",
+      "started_at": "2026-10-30T04:50:21.584514+00:00",
+      "rows": 8,
+      "available": true,
+      "elapsed_ms": 170.15489999903366,
+      "finished_at": "2026-10-30T04:50:21.754673+00:00"
+    },
+    {
+      "file": "redis-server.json",
+      "started_at": "2026-10-30T04:50:21.754692+00:00",
+      "available": true,
+      "elapsed_ms": 163.08549998211674,
+      "finished_at": "2026-10-30T04:50:21.917781+00:00"
+    },
+    {
+      "file": "redis-memory.json",
+      "started_at": "2026-10-30T04:50:21.917797+00:00",
+      "available": true,
+      "elapsed_ms": 166.07350000413135,
+      "finished_at": "2026-10-30T04:50:22.083874+00:00"
+    },
+    {
+      "file": "redis-cpu.json",
+      "started_at": "2026-10-30T04:50:22.083891+00:00",
+      "available": true,
+      "elapsed_ms": 173.97549998713657,
+      "finished_at": "2026-10-30T04:50:22.257870+00:00"
+    },
+    {
+      "file": "redis-stats.json",
+      "started_at": "2026-10-30T04:50:22.257883+00:00",
+      "available": true,
+      "elapsed_ms": 165.51979997893795,
+      "finished_at": "2026-10-30T04:50:22.423407+00:00"
+    },
+    {
+      "file": "redis-commandstats.json",
+      "started_at": "2026-10-30T04:50:22.423425+00:00",
+      "available": true,
+      "elapsed_ms": 176.49690000689588,
+      "finished_at": "2026-10-30T04:50:22.599927+00:00"
+    },
+    {
+      "file": "redis-clients.json",
+      "started_at": "2026-10-30T04:50:22.599943+00:00",
+      "available": true,
+      "elapsed_ms": 170.8578999969177,
+      "finished_at": "2026-10-30T04:50:22.770804+00:00"
+    },
+    {
+      "file": "redis-persistence.json",
+      "started_at": "2026-10-30T04:50:22.770819+00:00",
+      "available": true,
+      "elapsed_ms": 167.65860002487898,
+      "finished_at": "2026-10-30T04:50:22.938481+00:00"
+    },
+    {
+      "file": "redis-keyspace.json",
+      "started_at": "2026-10-30T04:50:22.938497+00:00",
+      "available": true,
+      "elapsed_ms": 168.54319997946732,
+      "finished_at": "2026-10-30T04:50:23.107043+00:00"
+    },
+    {
+      "file": "diagnostics-after.json",
+      "started_at": "2026-10-30T04:50:23.107057+00:00",
+      "available": true,
+      "elapsed_ms": 3.1504999788012356,
+      "finished_at": "2026-10-30T04:50:23.110212+00:00"
+    }
+  ],
+  "errors": [],
+  "limitations": [
+    "one-shot cumulative counters; take separate before/after captures and check resets",
+    "normalized SQL digests include background workers/helper traffic and are capped to the top 100 by cumulative wait",
+    "lock snapshots are transient and an empty snapshot does not prove absence of contention",
+    "no instruments or profiling rates are enabled by this collector",
+    "CPU profiling and metadata queries consume resources; compare with unprofiled stages",
+    "no workload control; a failing collector does not stop or alter the API"
+  ],
+  "finished_at": "2026-10-30T04:50:23.110227+00:00",
+  "all_sections_available": true
+}

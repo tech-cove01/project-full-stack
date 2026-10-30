@@ -1,0 +1,989 @@
+{
+  "task": "GO-073-CAP-04",
+  "generated_at": "2026-10-30T04:54:40.506141+00:00",
+  "scope": "read-only analysis of serial-worker baseline; no workload or instrumentation change by this analysis",
+  "stages": {
+    "rate-10": {
+      "result_path": "cap02/rate-10/result.json",
+      "stable_start_ms": 1793335655807,
+      "stable_end_ms": 1793335700807,
+      "stable_start_utc": "2026-10-30T04:47:35.807000+00:00",
+      "stable_end_utc": "2026-10-30T04:48:20.807000+00:00",
+      "passed": true,
+      "stable": {
+        "requests": 450,
+        "categories": {
+          "accepted": 450
+        },
+        "acceptedUnique": 450,
+        "repeatedOrderIds": 0,
+        "durableMatched": 450,
+        "rejectedDurable": 0,
+        "unresolved": 0,
+        "allRequestP95Ms": 12.4661,
+        "allRequestP99Ms": 13.9301,
+        "acceptedP95Ms": 12.4661,
+        "acceptedP99Ms": 13.9301,
+        "systemErrorRate": 0,
+        "offeredRate": 10,
+        "issuedPerNominalSecond": 10
+      },
+      "last_third": {
+        "measured": true,
+        "passed": true,
+        "nominalWindowStartMs": 1793335685807,
+        "nominalWindowEndMs": 1793335700807,
+        "firstSampleAtMs": 1793335685758,
+        "lastSampleAtMs": 1793335699758,
+        "lagNetGrowth": 0,
+        "lagGrowthLimit": 20,
+        "dbCompletedBetweenSamples": 140,
+        "acceptedResponsesBetweenSQLObservations": 140,
+        "dbToAcceptedRatio": 1,
+        "note": "stable start approximates first issued request; sample boundaries are at most one observer interval early; SQL count observation and Redis lag are not simultaneous; no commit timestamp inference"
+      },
+      "drain_ms": 5,
+      "observer_errors": 0,
+      "dropped": 0,
+      "reconciliation": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 551,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 917,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 139,
+        "redisAccepted": 551,
+        "redisStock": 139,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 551,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "stable_first_queue": {
+        "atMs": 1793335657758,
+        "sqlCountObservedAtMs": 1793335657760,
+        "queryMs": 6.115,
+        "durableOrders": 120,
+        "redisAccepted": 121,
+        "redisStock": 569,
+        "pending": 0,
+        "lag": 1,
+        "streamLength": 487,
+        "lastDeliveredId": "1793335657614-0",
+        "oldestQueueMs": 51,
+        "k6VUs": 0,
+        "k6Requests": 121,
+        "k6SystemErrors": 0
+      },
+      "stable_last_queue": {
+        "atMs": 1793335699758,
+        "sqlCountObservedAtMs": 1793335699760,
+        "queryMs": 7.274,
+        "durableOrders": 540,
+        "redisAccepted": 541,
+        "redisStock": 149,
+        "pending": 1,
+        "lag": 0,
+        "streamLength": 907,
+        "lastDeliveredId": "1793335699739-0",
+        "oldestQueueMs": 26,
+        "k6VUs": 0,
+        "k6Requests": 540,
+        "k6SystemErrors": 0
+      },
+      "queue_query_ms": {
+        "max": 10.217,
+        "median": 6.1080000000000005
+      },
+      "stable_resources": {
+        "sample_count": 9,
+        "first_sample_at": "2026-10-30T04:47:36.580409+00:00",
+        "last_sample_at": "2026-10-30T04:48:16.584834+00:00",
+        "samples_with_errors": 0,
+        "statistics": {
+          "api_cpu_one_core_percent": {
+            "min": 2.5,
+            "median": 10.3,
+            "max": 17.5
+          },
+          "k6_cpu_one_core_percent": {
+            "min": 0.0,
+            "median": 0.0,
+            "max": 0.6
+          },
+          "host_cpu_percent": {
+            "min": 20.5,
+            "median": 30.9,
+            "max": 35.9
+          },
+          "host_memory_percent": {
+            "min": 77.3,
+            "median": 77.3,
+            "max": 77.6
+          },
+          "api_rss_bytes": {
+            "min": 31621120,
+            "median": 32067584,
+            "max": 32493568
+          },
+          "k6_rss_bytes": {
+            "min": 40280064,
+            "median": 40939520,
+            "max": 42307584
+          },
+          "goroutines": {
+            "min": 46,
+            "median": 47,
+            "max": 48
+          },
+          "sql_in_use": {
+            "min": 0,
+            "median": 2,
+            "max": 2
+          },
+          "sql_open": {
+            "min": 10,
+            "median": 10,
+            "max": 10
+          },
+          "redis_idle": {
+            "min": 9,
+            "median": 10,
+            "max": 10
+          },
+          "sample_elapsed_ms": {
+            "min": 1154.876399989007,
+            "median": 2191.3069000001997,
+            "max": 2205.8532000228297
+          },
+          "mysql_container_cpu_percent": {
+            "max": 20.47
+          },
+          "mysql_container_memory_percent_of_limit": {
+            "max": 25.33
+          },
+          "redis_container_cpu_percent": {
+            "max": 5.39
+          },
+          "redis_container_memory_percent_of_limit": {
+            "max": 3.32
+          }
+        },
+        "counter_deltas": {
+          "sql": {
+            "wait_count": 0,
+            "wait_duration_ns": 0
+          },
+          "redis": {
+            "wait_count": 0,
+            "wait_duration_ns": 0,
+            "timeouts": 0
+          },
+          "runtime": {
+            "num_gc": 15,
+            "pause_total_ns": 545500,
+            "total_alloc_bytes": 47841640
+          }
+        }
+      },
+      "whole_generator_lifetime_resources": {
+        "sample_count": 14,
+        "first_sample_at": "2026-10-30T04:47:16.577596+00:00",
+        "last_sample_at": "2026-10-30T04:48:21.585377+00:00",
+        "samples_with_errors": 0,
+        "statistics": {
+          "api_cpu_one_core_percent": {
+            "min": 0.0,
+            "median": 10.95,
+            "max": 17.5
+          },
+          "k6_cpu_one_core_percent": {
+            "min": 0.0,
+            "median": 0.15,
+            "max": 1.2
+          },
+          "host_cpu_percent": {
+            "min": 20.5,
+            "median": 31.65,
+            "max": 47.6
+          },
+          "host_memory_percent": {
+            "min": 77.2,
+            "median": 77.3,
+            "max": 77.6
+          },
+          "api_rss_bytes": {
+            "min": 31334400,
+            "median": 32018432.0,
+            "max": 32493568
+          },
+          "k6_rss_bytes": {
+            "min": 36331520,
+            "median": 40781824.0,
+            "max": 49152000
+          },
+          "goroutines": {
+            "min": 37,
+            "median": 47.0,
+            "max": 48
+          },
+          "sql_in_use": {
+            "min": 0,
+            "median": 1.0,
+            "max": 2
+          },
+          "sql_open": {
+            "min": 10,
+            "median": 10.0,
+            "max": 10
+          },
+          "redis_idle": {
+            "min": 9,
+            "median": 10.0,
+            "max": 10
+          },
+          "sample_elapsed_ms": {
+            "min": 1154.876399989007,
+            "median": 2180.0176999968244,
+            "max": 2205.8532000228297
+          },
+          "mysql_container_cpu_percent": {
+            "max": 20.47
+          },
+          "mysql_container_memory_percent_of_limit": {
+            "max": 25.33
+          },
+          "redis_container_cpu_percent": {
+            "max": 5.39
+          },
+          "redis_container_memory_percent_of_limit": {
+            "max": 3.32
+          }
+        },
+        "counter_deltas": {
+          "sql": {
+            "wait_count": 0,
+            "wait_duration_ns": 0
+          },
+          "redis": {
+            "wait_count": 0,
+            "wait_duration_ns": 0,
+            "timeouts": 0
+          },
+          "runtime": {
+            "num_gc": 21,
+            "pause_total_ns": 545500,
+            "total_alloc_bytes": 66457792
+          }
+        }
+      }
+    },
+    "rate-25": {
+      "result_path": "cap02/rate-25/result.json",
+      "stable_start_ms": 1793335726130,
+      "stable_end_ms": 1793335771130,
+      "stable_start_utc": "2026-10-30T04:48:46.130000+00:00",
+      "stable_end_utc": "2026-10-30T04:49:31.130000+00:00",
+      "passed": false,
+      "stable": {
+        "requests": 1125,
+        "categories": {
+          "accepted": 1125
+        },
+        "acceptedUnique": 1125,
+        "repeatedOrderIds": 0,
+        "durableMatched": 1125,
+        "rejectedDurable": 0,
+        "unresolved": 0,
+        "allRequestP95Ms": 13.4285,
+        "allRequestP99Ms": 23.3434,
+        "acceptedP95Ms": 13.4285,
+        "acceptedP99Ms": 23.3434,
+        "systemErrorRate": 0,
+        "offeredRate": 25,
+        "issuedPerNominalSecond": 25
+      },
+      "last_third": {
+        "measured": true,
+        "passed": false,
+        "nominalWindowStartMs": 1793335756130,
+        "nominalWindowEndMs": 1793335771130,
+        "firstSampleAtMs": 1793335756073,
+        "lastSampleAtMs": 1793335770073,
+        "lagNetGrowth": 43,
+        "lagGrowthLimit": 50,
+        "dbCompletedBetweenSamples": 307,
+        "acceptedResponsesBetweenSQLObservations": 350,
+        "dbToAcceptedRatio": 0.8771428571428571,
+        "note": "stable start approximates first issued request; sample boundaries are at most one observer interval early; SQL count observation and Redis lag are not simultaneous; no commit timestamp inference"
+      },
+      "drain_ms": 6651,
+      "observer_errors": 0,
+      "dropped": 0,
+      "reconciliation": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 1376,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 2293,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 169,
+        "redisAccepted": 1376,
+        "redisStock": 169,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 1376,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "stable_first_queue": {
+        "atMs": 1793335728073,
+        "sqlCountObservedAtMs": 1793335728075,
+        "queryMs": 7.425,
+        "durableOrders": 292,
+        "redisAccepted": 300,
+        "redisStock": 1245,
+        "pending": 1,
+        "lag": 7,
+        "streamLength": 1217,
+        "lastDeliveredId": "1793335727776-0",
+        "oldestQueueMs": 304,
+        "k6VUs": 0,
+        "k6Requests": 298,
+        "k6SystemErrors": 0
+      },
+      "stable_last_queue": {
+        "atMs": 1793335770073,
+        "sqlCountObservedAtMs": 1793335770075,
+        "queryMs": 7.702,
+        "durableOrders": 1200,
+        "redisAccepted": 1350,
+        "redisStock": 195,
+        "pending": 1,
+        "lag": 149,
+        "streamLength": 2267,
+        "lastDeliveredId": "1793335764107-0",
+        "oldestQueueMs": 5974,
+        "k6VUs": 0,
+        "k6Requests": 1349,
+        "k6SystemErrors": 0
+      },
+      "queue_query_ms": {
+        "max": 8.809,
+        "median": 7.067
+      },
+      "stable_resources": {
+        "sample_count": 9,
+        "first_sample_at": "2026-10-30T04:48:46.947865+00:00",
+        "last_sample_at": "2026-10-30T04:49:26.951510+00:00",
+        "samples_with_errors": 0,
+        "statistics": {
+          "api_cpu_one_core_percent": {
+            "min": 5.6,
+            "median": 25.0,
+            "max": 30.9
+          },
+          "k6_cpu_one_core_percent": {
+            "min": 0.6,
+            "median": 4.4,
+            "max": 8.1
+          },
+          "host_cpu_percent": {
+            "min": 26.6,
+            "median": 31.7,
+            "max": 40.3
+          },
+          "host_memory_percent": {
+            "min": 77.3,
+            "median": 77.4,
+            "max": 77.6
+          },
+          "api_rss_bytes": {
+            "min": 32006144,
+            "median": 32190464,
+            "max": 32612352
+          },
+          "k6_rss_bytes": {
+            "min": 41066496,
+            "median": 42852352,
+            "max": 44224512
+          },
+          "goroutines": {
+            "min": 46,
+            "median": 47,
+            "max": 48
+          },
+          "sql_in_use": {
+            "min": 1,
+            "median": 2,
+            "max": 3
+          },
+          "sql_open": {
+            "min": 10,
+            "median": 10,
+            "max": 10
+          },
+          "redis_idle": {
+            "min": 9,
+            "median": 10,
+            "max": 10
+          },
+          "sample_elapsed_ms": {
+            "min": 1162.0022999995854,
+            "median": 2163.297399994917,
+            "max": 2209.5733000023756
+          },
+          "mysql_container_cpu_percent": {
+            "max": 36.69
+          },
+          "mysql_container_memory_percent_of_limit": {
+            "max": 25.69
+          },
+          "redis_container_cpu_percent": {
+            "max": 9.4
+          },
+          "redis_container_memory_percent_of_limit": {
+            "max": 3.36
+          }
+        },
+        "counter_deltas": {
+          "sql": {
+            "wait_count": 0,
+            "wait_duration_ns": 0
+          },
+          "redis": {
+            "wait_count": 0,
+            "wait_duration_ns": 0,
+            "timeouts": 0
+          },
+          "runtime": {
+            "num_gc": 31,
+            "pause_total_ns": 870600,
+            "total_alloc_bytes": 99664160
+          }
+        }
+      },
+      "whole_generator_lifetime_resources": {
+        "sample_count": 14,
+        "first_sample_at": "2026-10-30T04:48:26.945743+00:00",
+        "last_sample_at": "2026-10-30T04:49:31.952256+00:00",
+        "samples_with_errors": 0,
+        "statistics": {
+          "api_cpu_one_core_percent": {
+            "min": 0.0,
+            "median": 24.55,
+            "max": 30.9
+          },
+          "k6_cpu_one_core_percent": {
+            "min": 0.0,
+            "median": 4.4,
+            "max": 9.0
+          },
+          "host_cpu_percent": {
+            "min": 22.4,
+            "median": 33.35,
+            "max": 47.2
+          },
+          "host_memory_percent": {
+            "min": 77.2,
+            "median": 77.4,
+            "max": 77.6
+          },
+          "api_rss_bytes": {
+            "min": 31879168,
+            "median": 32161792.0,
+            "max": 32612352
+          },
+          "k6_rss_bytes": {
+            "min": 36896768,
+            "median": 42715136.0,
+            "max": 51400704
+          },
+          "goroutines": {
+            "min": 45,
+            "median": 47.0,
+            "max": 49
+          },
+          "sql_in_use": {
+            "min": 0,
+            "median": 2.0,
+            "max": 3
+          },
+          "sql_open": {
+            "min": 10,
+            "median": 10.0,
+            "max": 10
+          },
+          "redis_idle": {
+            "min": 9,
+            "median": 10.0,
+            "max": 10
+          },
+          "sample_elapsed_ms": {
+            "min": 1158.4535999863874,
+            "median": 2159.114049980417,
+            "max": 2231.931300018914
+          },
+          "mysql_container_cpu_percent": {
+            "max": 36.69
+          },
+          "mysql_container_memory_percent_of_limit": {
+            "max": 25.69
+          },
+          "redis_container_cpu_percent": {
+            "max": 9.4
+          },
+          "redis_container_memory_percent_of_limit": {
+            "max": 3.36
+          }
+        },
+        "counter_deltas": {
+          "sql": {
+            "wait_count": 0,
+            "wait_duration_ns": 0
+          },
+          "redis": {
+            "wait_count": 0,
+            "wait_duration_ns": 0,
+            "timeouts": 0
+          },
+          "runtime": {
+            "num_gc": 44,
+            "pause_total_ns": 1825800,
+            "total_alloc_bytes": 141021872
+          }
+        }
+      }
+    },
+    "rate-25-profile": {
+      "result_path": "cap02/rate-25-profile/result.json",
+      "stable_start_ms": 1793335845762,
+      "stable_end_ms": 1793335890762,
+      "stable_start_utc": "2026-10-30T04:50:45.762000+00:00",
+      "stable_end_utc": "2026-10-30T04:51:30.762000+00:00",
+      "passed": false,
+      "stable": {
+        "requests": 1125,
+        "categories": {
+          "accepted": 1125
+        },
+        "acceptedUnique": 1125,
+        "repeatedOrderIds": 0,
+        "durableMatched": 1125,
+        "rejectedDurable": 0,
+        "unresolved": 0,
+        "allRequestP95Ms": 12.8065,
+        "allRequestP99Ms": 15.3812,
+        "acceptedP95Ms": 12.8065,
+        "acceptedP99Ms": 15.3812,
+        "systemErrorRate": 0,
+        "offeredRate": 25,
+        "issuedPerNominalSecond": 25
+      },
+      "last_third": {
+        "measured": true,
+        "passed": false,
+        "nominalWindowStartMs": 1793335875762,
+        "nominalWindowEndMs": 1793335890762,
+        "firstSampleAtMs": 1793335875709,
+        "lastSampleAtMs": 1793335889709,
+        "lagNetGrowth": 46,
+        "lagGrowthLimit": 50,
+        "dbCompletedBetweenSamples": 304,
+        "acceptedResponsesBetweenSQLObservations": 350,
+        "dbToAcceptedRatio": 0.8685714285714285,
+        "note": "stable start approximates first issued request; sample boundaries are at most one observer interval early; SQL count observation and Redis lag are not simultaneous; no commit timestamp inference"
+      },
+      "drain_ms": 6820,
+      "observer_errors": 0,
+      "dropped": 0,
+      "reconciliation": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 1376,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 3669,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 169,
+        "redisAccepted": 1376,
+        "redisStock": 169,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 1376,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "stable_first_queue": {
+        "atMs": 1793335847709,
+        "sqlCountObservedAtMs": 1793335847712,
+        "queryMs": 8.102,
+        "durableOrders": 292,
+        "redisAccepted": 300,
+        "redisStock": 1245,
+        "pending": 1,
+        "lag": 7,
+        "streamLength": 2593,
+        "lastDeliveredId": "1793335847367-0",
+        "oldestQueueMs": 351,
+        "k6VUs": 0,
+        "k6Requests": 298,
+        "k6SystemErrors": 0
+      },
+      "stable_last_queue": {
+        "atMs": 1793335889709,
+        "sqlCountObservedAtMs": 1793335889713,
+        "queryMs": 8.005,
+        "durableOrders": 1214,
+        "redisAccepted": 1350,
+        "redisStock": 195,
+        "pending": 1,
+        "lag": 135,
+        "streamLength": 3643,
+        "lastDeliveredId": "1793335884308-0",
+        "oldestQueueMs": 5409,
+        "k6VUs": 0,
+        "k6Requests": 1349,
+        "k6SystemErrors": 0
+      },
+      "queue_query_ms": {
+        "max": 10.048,
+        "median": 7.000500000000001
+      },
+      "stable_resources": {
+        "sample_count": 9,
+        "first_sample_at": "2026-10-30T04:50:46.632304+00:00",
+        "last_sample_at": "2026-10-30T04:51:26.637259+00:00",
+        "samples_with_errors": 0,
+        "statistics": {
+          "api_cpu_one_core_percent": {
+            "min": 6.9,
+            "median": 23.7,
+            "max": 30.0
+          },
+          "k6_cpu_one_core_percent": {
+            "min": 0.3,
+            "median": 1.9,
+            "max": 4.1
+          },
+          "host_cpu_percent": {
+            "min": 21.9,
+            "median": 34.7,
+            "max": 41.5
+          },
+          "host_memory_percent": {
+            "min": 77.7,
+            "median": 77.8,
+            "max": 78.1
+          },
+          "api_rss_bytes": {
+            "min": 32342016,
+            "median": 33103872,
+            "max": 36806656
+          },
+          "k6_rss_bytes": {
+            "min": 41308160,
+            "median": 43008000,
+            "max": 44826624
+          },
+          "goroutines": {
+            "min": 46,
+            "median": 47,
+            "max": 50
+          },
+          "sql_in_use": {
+            "min": 1,
+            "median": 2,
+            "max": 2
+          },
+          "sql_open": {
+            "min": 10,
+            "median": 10,
+            "max": 10
+          },
+          "redis_idle": {
+            "min": 9,
+            "median": 10,
+            "max": 10
+          },
+          "sample_elapsed_ms": {
+            "min": 1155.7116000039969,
+            "median": 2160.6396000133827,
+            "max": 2186.402099992847
+          },
+          "mysql_container_cpu_percent": {
+            "max": 36.01
+          },
+          "mysql_container_memory_percent_of_limit": {
+            "max": 26.21
+          },
+          "redis_container_cpu_percent": {
+            "max": 7.34
+          },
+          "redis_container_memory_percent_of_limit": {
+            "max": 3.41
+          }
+        },
+        "counter_deltas": {
+          "sql": {
+            "wait_count": 0,
+            "wait_duration_ns": 0
+          },
+          "redis": {
+            "wait_count": 0,
+            "wait_duration_ns": 0,
+            "timeouts": 0
+          },
+          "runtime": {
+            "num_gc": 32,
+            "pause_total_ns": 1566200,
+            "total_alloc_bytes": 104655176
+          }
+        }
+      },
+      "whole_generator_lifetime_resources": {
+        "sample_count": 14,
+        "first_sample_at": "2026-10-30T04:50:26.630113+00:00",
+        "last_sample_at": "2026-10-30T04:51:31.638277+00:00",
+        "samples_with_errors": 0,
+        "statistics": {
+          "api_cpu_one_core_percent": {
+            "min": 0.0,
+            "median": 22.45,
+            "max": 30.0
+          },
+          "k6_cpu_one_core_percent": {
+            "min": 0.0,
+            "median": 1.75,
+            "max": 5.3
+          },
+          "host_cpu_percent": {
+            "min": 21.9,
+            "median": 34.400000000000006,
+            "max": 45.5
+          },
+          "host_memory_percent": {
+            "min": 77.7,
+            "median": 77.8,
+            "max": 78.4
+          },
+          "api_rss_bytes": {
+            "min": 31391744,
+            "median": 33005568.0,
+            "max": 36806656
+          },
+          "k6_rss_bytes": {
+            "min": 37679104,
+            "median": 42215424.0,
+            "max": 51732480
+          },
+          "goroutines": {
+            "min": 46,
+            "median": 46.5,
+            "max": 50
+          },
+          "sql_in_use": {
+            "min": 0,
+            "median": 1.5,
+            "max": 2
+          },
+          "sql_open": {
+            "min": 10,
+            "median": 10.0,
+            "max": 10
+          },
+          "redis_idle": {
+            "min": 9,
+            "median": 10.0,
+            "max": 10
+          },
+          "sample_elapsed_ms": {
+            "min": 1155.7116000039969,
+            "median": 2161.5472999983467,
+            "max": 2365.933799999766
+          },
+          "mysql_container_cpu_percent": {
+            "max": 36.01
+          },
+          "mysql_container_memory_percent_of_limit": {
+            "max": 26.21
+          },
+          "redis_container_cpu_percent": {
+            "max": 9.89
+          },
+          "redis_container_memory_percent_of_limit": {
+            "max": 3.54
+          }
+        },
+        "counter_deltas": {
+          "sql": {
+            "wait_count": 0,
+            "wait_duration_ns": 0
+          },
+          "redis": {
+            "wait_count": 0,
+            "wait_duration_ns": 0,
+            "timeouts": 0
+          },
+          "runtime": {
+            "num_gc": 44,
+            "pause_total_ns": 2610100,
+            "total_alloc_bytes": 145942176
+          }
+        }
+      }
+    }
+  },
+  "conclusion": {
+    "supported": "single serial consumer I/O service chain is the leading bottleneck hypothesis; bounded worker-count A/B is warranted",
+    "not_proven": [
+      "disk/fsync root cause",
+      "SQL/Redis pool exhaustion",
+      "server-only or production maximum capacity"
+    ],
+    "candidate": {
+      "default_workers": 1,
+      "allowed_workers": [
+        1,
+        8
+      ],
+      "first_comparison_workers": 4,
+      "preserve": [
+        "GET_LOCK identifier fencing",
+        "stock row locks",
+        "transaction durability",
+        "audit/outbox",
+        "ACK after durable outcome or review",
+        "replay and recovery"
+      ]
+    }
+  },
+  "sql_capture": {
+    "scope": "rate25-before to rate25-after metadata sections; includes warm/stable/drain/background/helper/observer; not stable-only nor per-order latency",
+    "before_manifest": "2026-10-30T04:50:20.521089+00:00",
+    "after_manifest": "2026-10-30T04:51:42.541926+00:00",
+    "digests_before": 40,
+    "digests_after": 40,
+    "changed_digests": [
+      {
+        "digest": "f2b9be5f0f32ca7507e4ddf133cd2fad0993a1c26fde9caa6f067b1af2b7603c",
+        "normalized_text": "COMMIT",
+        "count_delta": 3212,
+        "sum_timer_wait_ps_delta": 27492985779000,
+        "mean_timer_wait_ms_from_deltas": 8.559460080635118
+      },
+      {
+        "digest": "b57cf422fbfb5629759554d7a60a31947a2333a6e1b55d7dce60a94aa1eed044",
+        "normalized_text": "START TRANSACTION",
+        "count_delta": 3211,
+        "sum_timer_wait_ps_delta": 282386456000,
+        "mean_timer_wait_ms_from_deltas": 0.087943461849891
+      },
+      {
+        "digest": "e7f2ee938f7f13325b333b9aaea7c3fcffd3d496ef2e85fb5d8fec3fdb9f31db",
+        "normalized_text": "SELECT NOW ( ) AS VALUE",
+        "count_delta": 1376,
+        "sum_timer_wait_ps_delta": 152658999000,
+        "mean_timer_wait_ms_from_deltas": 0.11094403997093023
+      },
+      {
+        "digest": "d80ff239c690a94edb0adf1fee28bfa1db6f96878e066d825fdd7c0921399d44",
+        "normalized_text": "SET TRANSACTION ISOLATION LEVEL READ COMMITTED",
+        "count_delta": 1377,
+        "sum_timer_wait_ps_delta": 140104044000,
+        "mean_timer_wait_ms_from_deltas": 0.10174585620915033
+      },
+      {
+        "digest": "44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb",
+        "normalized_text": "SELECT @@`version_comment` LIMIT ?",
+        "count_delta": 40,
+        "sum_timer_wait_ps_delta": 5712920000,
+        "mean_timer_wait_ms_from_deltas": 0.142823
+      },
+      {
+        "digest": "6c6de122dbb06775ab7e26583f8794682a7a306fa3f75ef733461f8edf989d81",
+        "normalized_text": "SELECT ? FROM `tb_shop` LIMIT ?",
+        "count_delta": 26,
+        "sum_timer_wait_ps_delta": 4155228000,
+        "mean_timer_wait_ms_from_deltas": 0.15981646153846155
+      },
+      {
+        "digest": "704ccdc429d4deb2cf37ec8708e8faae1c46acf5683817670906ba621a14bb85",
+        "normalized_text": "SET `time_zone` = ?",
+        "count_delta": 1,
+        "sum_timer_wait_ps_delta": 116698000,
+        "mean_timer_wait_ms_from_deltas": 0.116698
+      },
+      {
+        "digest": "6d631211d940af327fe3f82a008b908dc6cba3912cae61881353006e73354eee",
+        "normalized_text": "SET NAMES `utf8mb4`",
+        "count_delta": 1,
+        "sum_timer_wait_ps_delta": 111980000,
+        "mean_timer_wait_ms_from_deltas": 0.11198
+      }
+    ],
+    "global_status_deltas": {
+      "Connections": 41,
+      "Created_tmp_disk_tables": 0,
+      "Innodb_buffer_pool_read_requests": 316199,
+      "Innodb_buffer_pool_reads": 0,
+      "Innodb_row_lock_current_waits": 0,
+      "Innodb_row_lock_time": 2531,
+      "Innodb_row_lock_waits": 453,
+      "Performance_schema_digest_lost": 0,
+      "Slow_queries": 0,
+      "Threads_connected": 0,
+      "Threads_running": 0
+    },
+    "invalid_historical_max": [
+      {
+        "normalized_text": "COMMIT",
+        "max_timer_wait_ps": 18446744061588337616
+      }
+    ],
+    "limitations": [
+      "prepared binary SQL is absent from current digest coverage",
+      "COMMIT historic max is an anomalous near-uint64 value and excluded",
+      "delta sum/count is only an auxiliary average across all captured transactions",
+      "Com_* absent from PFS global_status; SHOW GLOBAL STATUS required",
+      "empty instantaneous lock-waits does not exclude earlier waits",
+      "events_waits_current disabled; no fsync wait breakdown collected"
+    ]
+  },
+  "profile": {
+    "path": "rate25-during/cpu-10s.pprof",
+    "duration_seconds": 10,
+    "cpu_samples_seconds": 1.55,
+    "cpu_samples_percent_of_one_core_wall_time": 15.5,
+    "runtime_cgocall_cpu_sample_fraction_percent": 51.61,
+    "goroutine_snapshot_total": 46,
+    "gopark_snapshot_count": 44,
+    "order_creator_chain_snapshot_count": 1,
+    "interpretation": "single point-in-time goroutine capture and CPU-only samples; not blocked-time attribution or fsync proof"
+  },
+  "sql_counter_observation": {
+    "path": "prepared-observation.json",
+    "captured_at": "2026-10-30T04:53:32.120983+00:00",
+    "instrumentation_changed": false,
+    "instruments_checked_all_enabled_and_timed": true,
+    "global_com_source": "SHOW GLOBAL STATUS",
+    "publiccounts_back_to_source_query_count": null,
+    "per_sql_count_supported": false,
+    "must_not_sum": [
+      "Com_select",
+      "Com_stmt_execute"
+    ],
+    "prepared_snapshot_survival": "deallocated instances are removed; this snapshot saw zero live instances despite nonzero Execute/Prepare totals"
+  },
+  "baseline_build": {
+    "revision": "32ae24331d7de98d8df004cf854708ec3c59eec4",
+    "api_pid": 68744,
+    "binary_sha256": "A7EE55A47B312CCC838A1A770F631446CFDDAF3601CA295BD56A2FE2722C8BD4",
+    "GOMAXPROCS": 4,
+    "GOMEMLIMIT": "1GiB"
+  }
+}

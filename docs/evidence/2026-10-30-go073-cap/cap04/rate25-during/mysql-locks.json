@@ -1,0 +1,74 @@
+[
+  {
+    "count": 1,
+    "table": "tb_voucher",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "IS",
+    "lock_type": "TABLE"
+  },
+  {
+    "count": 1,
+    "table": "tb_seckill_voucher",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "IX",
+    "lock_type": "TABLE"
+  },
+  {
+    "count": 1,
+    "table": "tb_voucher_order",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "IX",
+    "lock_type": "TABLE"
+  },
+  {
+    "count": 1,
+    "table": "tb_outbox",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "IX",
+    "lock_type": "TABLE"
+  },
+  {
+    "count": 1,
+    "table": "tb_voucher",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "S,REC_NOT_GAP",
+    "lock_type": "RECORD"
+  },
+  {
+    "count": 1,
+    "table": "tb_outbox",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "X,REC_NOT_GAP",
+    "lock_type": "RECORD"
+  },
+  {
+    "count": 1,
+    "table": "tb_seckill_voucher",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "X,REC_NOT_GAP",
+    "lock_type": "RECORD"
+  },
+  {
+    "count": 1,
+    "table": "tb_outbox",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "X,GAP",
+    "lock_type": "RECORD"
+  },
+  {
+    "count": 4,
+    "table": "tb_outbox",
+    "engine": "INNODB",
+    "status": "GRANTED",
+    "lock_mode": "X",
+    "lock_type": "RECORD"
+  }
+]

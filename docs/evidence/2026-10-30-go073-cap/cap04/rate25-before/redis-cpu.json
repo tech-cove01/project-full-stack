@@ -1,0 +1,4 @@
+{
+  "at": "2026-10-30T04:50:22.256627+00:00",
+  "info": "# CPU\nused_cpu_sys:8.010213\nused_cpu_user:16.331964\nused_cpu_sys_children:0.034380\nused_cpu_user_children:0.244746\nused_cpu_sys_main_thread:7.895926\nused_cpu_user_main_thread:16.331136"
+}

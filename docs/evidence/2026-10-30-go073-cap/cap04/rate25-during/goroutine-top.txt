@@ -1,0 +1,32 @@
+File: cap-api.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.worktrees\full-stack-cap-32ae243\backend\bin\cap-api.exe2026-10-30 12:29:32.3482369 +0800 CST
+Type: goroutine
+Time: 2026-10-30 12:51:01 CST
+Showing nodes accounting for 46, 100% of 46 total
+Showing top 25 nodes out of 90
+      flat  flat%   sum%        cum   cum%
+        44 95.65% 95.65%         44 95.65%  runtime.gopark
+         1  2.17% 97.83%          1  2.17%  runtime.goroutineProfileWithLabels
+         1  2.17%   100%          1  2.17%  runtime.notetsleepg
+         0     0%   100%         21 45.65%  bufio.(*Reader).Peek
+         0     0%   100%         21 45.65%  bufio.(*Reader).fill
+         0     0%   100%          1  2.17%  database/sql.(*DB).ExecContext
+         0     0%   100%          1  2.17%  database/sql.(*DB).ExecContext.func1
+         0     0%   100%          1  2.17%  database/sql.(*DB).connectionCleaner
+         0     0%   100%          1  2.17%  database/sql.(*DB).connectionOpener
+         0     0%   100%          1  2.17%  database/sql.(*DB).exec
+         0     0%   100%          1  2.17%  database/sql.(*DB).execDC
+         0     0%   100%          1  2.17%  database/sql.(*DB).retry
+         0     0%   100%          1  2.17%  database/sql.(*Tx).Commit
+         0     0%   100%          1  2.17%  database/sql.(*Tx).Commit.func1
+         0     0%   100%          1  2.17%  database/sql.ctxDriverStmtExec
+         0     0%   100%          1  2.17%  database/sql.resultFromStatement
+         0     0%   100%          1  2.17%  database/sql.withLock
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/activitypub.(*Worker).Run
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/order.(*Creator).Create
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/order.(*Creator).Create.func1
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/order.(*Creator).createLocked
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/ordercomp.(*Worker).Apply
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/ordercomp.(*Worker).Poll
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/ordercomp.(*Worker).Run
+         0     0%   100%          1  2.17%  github.com/cityloop/fullstack-go/internal/orderstream.(*Worker).Poll

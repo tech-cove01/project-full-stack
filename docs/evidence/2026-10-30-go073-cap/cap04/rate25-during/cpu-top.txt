@@ -1,0 +1,38 @@
+File: cap-api.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.worktrees\full-stack-cap-32ae243\backend\bin\cap-api.exe2026-10-30 12:29:32.3482369 +0800 CST
+Type: cpu
+Time: 2026-10-30 12:50:51 CST
+Duration: 10s, Total samples = 1.55s (15.50%)
+Showing nodes accounting for 1.35s, 87.10% of 1.55s total
+Showing top 30 nodes out of 304
+      flat  flat%   sum%        cum   cum%
+     0.80s 51.61% 51.61%      0.82s 52.90%  runtime.cgocall
+     0.14s  9.03% 60.65%      0.14s  9.03%  runtime.semawakeup
+     0.07s  4.52% 65.16%      0.07s  4.52%  runtime.netpollQueueTimer
+     0.03s  1.94% 67.10%      0.03s  1.94%  runtime.mallocgcSmallScanNoHeaderSC2
+     0.03s  1.94% 69.03%      0.10s  6.45%  runtime.netpoll
+     0.03s  1.94% 70.97%      0.23s 14.84%  runtime.schedule
+     0.02s  1.29% 72.26%      0.02s  1.29%  runtime.(*mspan).writeHeapBitsSmall
+     0.01s  0.65% 72.90%      0.25s 16.13%  database/sql.(*DB).execDC
+     0.01s  0.65% 73.55%      0.01s  0.65%  encoding/json/v2.makeInterfaceArshaler.func1
+     0.01s  0.65% 74.19%      0.01s  0.65%  errors.Is
+     0.01s  0.65% 74.84%      0.01s  0.65%  github.com/go-sql-driver/mysql.(*mysqlConn).readUntilEOF
+     0.01s  0.65% 75.48%      0.01s  0.65%  github.com/redis/go-redis/v9/internal/pool.(*ConnPool).isHealthyConn
+     0.01s  0.65% 76.13%      0.02s  1.29%  gorm.io/gorm/logger.ExplainSQL.func1
+     0.01s  0.65% 76.77%      0.10s  6.45%  internal/poll.(*FD).Read.func2
+     0.01s  0.65% 77.42%      0.90s 58.06%  internal/poll.(*FD).execIO
+     0.01s  0.65% 78.06%      0.01s  0.65%  internal/poll.(*pollDesc).wait
+     0.01s  0.65% 78.71%      0.01s  0.65%  internal/strconv.FormatUint
+     0.01s  0.65% 79.35%      0.02s  1.29%  internal/sync.(*HashTrieMap[go.shape.interface {},go.shape.interface {}]).Load
+     0.01s  0.65% 80.00%      0.16s 10.32%  net.(*conn).Read
+     0.01s  0.65% 80.65%      0.01s  0.65%  net/http.Header.writeSubset
+     0.01s  0.65% 81.29%      0.01s  0.65%  reflect.New
+     0.01s  0.65% 81.94%      0.01s  0.65%  reflect.flag.mustBeExported
+     0.01s  0.65% 82.58%      0.01s  0.65%  reflect.packEfaceData
+     0.01s  0.65% 83.23%      0.01s  0.65%  runtime.(*itabTableType).find
+     0.01s  0.65% 83.87%      0.01s  0.65%  runtime.(*mspan).divideByElemSize (inline)
+     0.01s  0.65% 84.52%      0.01s  0.65%  runtime.(*pageCache).alloc
+     0.01s  0.65% 85.16%      0.01s  0.65%  runtime.(*timers).addHeap
+     0.01s  0.65% 85.81%      0.01s  0.65%  runtime.(*timers).cleanHead
+     0.01s  0.65% 86.45%      0.01s  0.65%  runtime.(*waitq).dequeueSudoG
+     0.01s  0.65% 87.10%      0.01s  0.65%  runtime.casgstatus

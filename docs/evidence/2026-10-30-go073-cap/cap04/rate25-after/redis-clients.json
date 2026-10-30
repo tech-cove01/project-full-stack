@@ -1,0 +1,4 @@
+{
+  "at": "2026-10-30T04:51:42.157534+00:00",
+  "info": "# Clients\nconnected_clients:11\ncluster_connections:0\nmaxclients:10000\nclient_recent_max_input_buffer:20480\nclient_recent_max_output_buffer:0\nblocked_clients:0\ntracking_clients:0\npubsub_clients:0\nwatching_clients:0\nclients_in_timeout_table:0\ntotal_watched_keys:0\ntotal_blocking_keys:0\ntotal_blocking_keys_on_nokey:0"
+}

@@ -1,0 +1,222 @@
+{
+  "globalCommands": {
+    "Uptime": 14,
+    "Questions": 66216,
+    "Queries": 141596,
+    "Com_select": 37717,
+    "Com_insert": 0,
+    "Com_update": 0,
+    "Com_delete": 0,
+    "Com_commit": 9501,
+    "Com_stmt_execute": 37690,
+    "Com_stmt_prepare": 37694,
+    "Com_stmt_close": 37686,
+    "Com_stmt_reprepare": 0,
+    "Performance_schema_digest_lost": 0,
+    "Performance_schema_prepared_statements_lost": 0
+  },
+  "statementEvents": [
+    {
+      "event": "statement/com/Execute",
+      "count": 37690,
+      "errors": 0,
+      "examined": 2123049,
+      "sent": 206672,
+      "timerPicoseconds": "17997748646000"
+    },
+    {
+      "event": "statement/com/Prepare",
+      "count": 37694,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "5610701314000"
+    },
+    {
+      "event": "statement/sql/commit",
+      "count": 9501,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "763284188000"
+    },
+    {
+      "event": "statement/sql/delete",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/insert",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/select",
+      "count": 27,
+      "errors": 0,
+      "examined": 315,
+      "sent": 170,
+      "timerPicoseconds": "13991773000"
+    },
+    {
+      "event": "statement/sql/update",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    }
+  ],
+  "sql": [
+    {
+      "digest": "0f101d98991ef95cefc5ab59b4fa316cb86f91b436412a385108a760f16bbf42",
+      "text": "SET TRANSACTION ISOLATION LEVEL REPEATABLE READ",
+      "count": 9379,
+      "picoseconds": "11247530179000",
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "737148541000"
+    },
+    {
+      "digest": "44e35cee979ba420eb49a8471f852bbe15b403c89742704817dfbaace0d99dbb",
+      "text": "SELECT @@`version_comment` LIMIT ?",
+      "count": 14,
+      "picoseconds": "146146674000",
+      "examined": 14,
+      "sent": 14,
+      "timerPicoseconds": "2008054000"
+    },
+    {
+      "digest": "6c6de122dbb06775ab7e26583f8794682a7a306fa3f75ef733461f8edf989d81",
+      "text": "SELECT ? FROM `tb_shop` LIMIT ?",
+      "count": 4,
+      "picoseconds": "124230738000",
+      "examined": 4,
+      "sent": 4,
+      "timerPicoseconds": "680962000"
+    },
+    {
+      "digest": "6d631211d940af327fe3f82a008b908dc6cba3912cae61881353006e73354eee",
+      "text": "SET NAMES `utf8mb4`",
+      "count": 27,
+      "picoseconds": "82807557000",
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "2514479000"
+    },
+    {
+      "digest": "704ccdc429d4deb2cf37ec8708e8faae1c46acf5683817670906ba621a14bb85",
+      "text": "SET `time_zone` = ?",
+      "count": 27,
+      "picoseconds": "76436510000",
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "2360369000"
+    },
+    {
+      "digest": "924a0bf255073b2ae6a63e4df1c4c160efc3bc02d7a346950cbb0e604276b803",
+      "text": "START TRANSACTION READ ONLY",
+      "count": 9392,
+      "picoseconds": "9191634743000",
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "617794779000"
+    },
+    {
+      "digest": "b0a2105f85f781a2af3593f66431f1528f14f14566499839ea27e23911fb9a5a",
+      "text": "SHOW GLOBAL STATUS WHERE `Variable_name` IN (...)",
+      "count": 1,
+      "picoseconds": "56777961000",
+      "examined": 14,
+      "sent": 14,
+      "timerPicoseconds": "686063000"
+    },
+    {
+      "digest": "b57cf422fbfb5629759554d7a60a31947a2333a6e1b55d7dce60a94aa1eed044",
+      "text": "START TRANSACTION",
+      "count": 112,
+      "picoseconds": "2615124782000",
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "9409178000"
+    },
+    {
+      "digest": "f2b9be5f0f32ca7507e4ddf133cd2fad0993a1c26fde9caa6f067b1af2b7603c",
+      "text": "COMMIT",
+      "count": 9482,
+      "picoseconds": "13072959709000",
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "761352140000"
+    }
+  ],
+  "redis": {
+    "ping": {
+      "calls": 5,
+      "usec": 22,
+      "failed": 0
+    },
+    "info": {
+      "calls": 9,
+      "usec": 619,
+      "failed": 0
+    },
+    "type": {
+      "calls": 9401,
+      "usec": 29653,
+      "failed": 0
+    },
+    "pttl": {
+      "calls": 9401,
+      "usec": 13771,
+      "failed": 0
+    },
+    "xreadgroup": {
+      "calls": 264,
+      "usec": 3051,
+      "failed": 0
+    },
+    "xautoclaim": {
+      "calls": 133,
+      "usec": 2448,
+      "failed": 0
+    },
+    "evalsha": {
+      "calls": 9401,
+      "usec": 512790,
+      "failed": 0
+    },
+    "mget": {
+      "calls": 17,
+      "usec": 205,
+      "failed": 0
+    },
+    "expire": {
+      "calls": 9401,
+      "usec": 41428,
+      "failed": 0
+    },
+    "hget": {
+      "calls": 28203,
+      "usec": 49557,
+      "failed": 0
+    }
+  },
+  "scope": "whole isolated instance between sequential snapshots; includes API/background/helper/observer SQL and Redis commands, not per-endpoint or public-count cache DB loads",
+  "commandCountersOverlap": "Com_select and Com_stmt_execute overlap; report separately, never add them as SQL total",
+  "digestCoverage": "auxiliary only: binary prepared SQL is absent from this digest view; empty SQL digest delta does not mean no database access",
+  "publicCountDatabaseLoads": null,
+  "uptimeConsistent": true,
+  "statusElapsedMs": 14047,
+  "statusUncertaintyMs": 2296,
+  "counterResets": false,
+  "lostDigestsDelta": 0,
+  "preparedStatementsLostDelta": 0,
+  "missingAfterDigests": []
+}

@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-30T06:24:24.3836806Z",
+  "warmRate": 25,
+  "seconds": 30,
+  "warmSeconds": 10,
+  "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "preVUs": 512,
+  "maxVUs": 1024,
+  "command": "python -X utf8 scripts/capacity-stage.py --mode read --control-dir <stage>-control --api-pid <api.pid> --diagnostics http://127.0.0.1:8351/debug/capacity --interval 5 --max-seconds <seconds+warm+120> --stop-grace-seconds 90 -- node scripts/go073-cap-read.mjs run",
+  "secretsExported": false,
+  "apiPid": 45532,
+  "workingDirectory": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack",
+  "rate": 600,
+  "mode": "multi"
+}

@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-30T10:52:04.467359+00:00",
+  "runtime": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap07-tests-734da0cf6eb3",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap07-tests-734da0cf6eb3\\env.private.json",
+  "oldContainers": {
+    "mysql": {
+      "id": "f5f7a43c80996489b854181eb9eec710abb9e6fba06bf7e96ee4a26ee8609b3c",
+      "volumes": [
+        "project-full-stack-cap-opt-tests_go-mysql-data"
+      ]
+    },
+    "redis": {
+      "id": "a5771d6f01554fa386cc111a233ed3007eb2d5d536162d5a583365d2e7d968e7",
+      "volumes": [
+        "project-full-stack-cap-opt-tests_go-redis-data"
+      ]
+    }
+  },
+  "newVolumes": {
+    "mysql": "project-full-stack-cap-opt-tests-cap07-734da0cf6eb3-mysql",
+    "redis": "project-full-stack-cap-opt-tests-cap07-734da0cf6eb3-redis"
+  },
+  "project": "project-full-stack-cap-opt-tests",
+  "ports": [
+    3452,
+    6552
+  ],
+  "noApiOrCapacityLoad": true,
+  "override": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap07-tests-734da0cf6eb3\\fresh-volumes.yaml"
+}

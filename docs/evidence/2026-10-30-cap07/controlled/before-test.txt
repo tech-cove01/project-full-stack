@@ -1,0 +1,11 @@
+=== RUN   TestIntegrationCountPublicationIsolation
+=== RUN   TestIntegrationCountPublicationIsolation/set
+    counts_isolation_integration_test.go:255: blocked A set prevented independent hot B read before release (deadline=true)
+=== RUN   TestIntegrationCountPublicationIsolation/del
+    counts_isolation_integration_test.go:255: blocked A del prevented independent hot B read before release (deadline=true)
+--- FAIL: TestIntegrationCountPublicationIsolation (0.72s)
+    --- FAIL: TestIntegrationCountPublicationIsolation/set (0.37s)
+    --- FAIL: TestIntegrationCountPublicationIsolation/del (0.35s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/communitycache	2.617s
+FAIL

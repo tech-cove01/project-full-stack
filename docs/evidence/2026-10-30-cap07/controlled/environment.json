@@ -1,0 +1,35 @@
+{
+  "containers": {
+    "mysql": {
+      "id": "5b9c1fc43721600ecc401611b8dadf4808b493bb15ec67683640338275e56b3a",
+      "volumes": [
+        "project-full-stack-cap-opt-tests-cap07-734da0cf6eb3-mysql"
+      ],
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3452"
+          }
+        ]
+      }
+    },
+    "redis": {
+      "id": "0646c36e241e86e2906712641c21f92ff70a65a95cfafa5cc5fa9f7dceea2690",
+      "volumes": [
+        "project-full-stack-cap-opt-tests-cap07-734da0cf6eb3-redis"
+      ],
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6552"
+          }
+        ]
+      }
+    }
+  },
+  "oldVolumesRetained": true,
+  "runtime": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap07-tests-734da0cf6eb3",
+  "noApiOrCapacityLoad": true
+}

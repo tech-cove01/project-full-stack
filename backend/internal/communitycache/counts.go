@@ -23,6 +23,9 @@ const (
 	// A short in-process copy absorbs a hot key: a popular note is served without
 	// touching Redis on every request, while the value is never older than this.
 	defaultLocalTTL = 2 * time.Second
+	// Fixed stripes bound the ordering state. Different stripes do not hold one
+	// another across Redis I/O; colliding note IDs intentionally share ordering.
+	countPublicationShards = 4096
 )
 
 type Counts struct {
@@ -36,14 +39,19 @@ type Cache struct {
 
 	mu       sync.Mutex
 	inflight map[uint64]*flight
-	// Publication and invalidation share an ordering boundary. An old database
-	// load must not recreate a cache value after a completed mutation invalidates it.
-	publication chan struct{}
-	generation  uint64
+	// Same-note publication and invalidation share an ordering boundary. A slow
+	// Redis write/delete no longer takes a network lock over the whole cache.
+	publication [countPublicationShards]countPublicationShard
 
 	localMu  sync.Mutex
 	local    map[uint64]localEntry
 	localTTL time.Duration
+}
+
+type countPublicationShard struct {
+	once       sync.Once
+	gate       chan struct{}
+	generation uint64
 }
 
 type flight struct {
@@ -53,34 +61,38 @@ type flight struct {
 	err        error
 }
 
-func (cache *Cache) acquirePublication(ctx context.Context) error {
+func (cache *Cache) acquirePublication(ctx context.Context, noteID uint64) (*countPublicationShard, error) {
+	shard := &cache.publication[noteID%countPublicationShards]
+	shard.once.Do(func() { shard.gate = make(chan struct{}, 1) })
 	span := taildiag.Begin(ctx, taildiag.PublicationWait, 0)
 	select {
-	case cache.publication <- struct{}{}:
+	case shard.gate <- struct{}{}:
 		span.End(false)
-		return nil
+		return shard, nil
 	case <-ctx.Done():
 		span.End(true)
-		return ctx.Err()
+		return nil, ctx.Err()
 	}
 }
 
-func (cache *Cache) epoch(ctx context.Context) (uint64, error) {
-	if err := cache.acquirePublication(ctx); err != nil {
+func (cache *Cache) epoch(ctx context.Context, noteID uint64) (uint64, error) {
+	shard, err := cache.acquirePublication(ctx, noteID)
+	if err != nil {
 		return 0, err
 	}
 	hold := taildiag.Begin(ctx, taildiag.PublicationHold, 0)
-	defer func() { hold.End(false); <-cache.publication }()
-	return cache.generation, nil
+	defer func() { hold.End(false); <-shard.gate }()
+	return shard.generation, nil
 }
 
 func (cache *Cache) publish(ctx context.Context, noteID uint64, value Counts, epoch uint64, toRedis bool) {
-	if cache.acquirePublication(ctx) != nil {
+	shard, err := cache.acquirePublication(ctx, noteID)
+	if err != nil {
 		return
 	}
 	hold := taildiag.Begin(ctx, taildiag.PublicationHold, 0)
-	defer func() { hold.End(false); <-cache.publication }()
-	if cache.generation != epoch {
+	defer func() { hold.End(false); <-shard.gate }()
+	if shard.generation != epoch {
 		return
 	}
 	if toRedis {
@@ -95,7 +107,7 @@ type localEntry struct {
 }
 
 func New(client *redis.Client, db *gorm.DB) *Cache {
-	return &Cache{redis: client, db: db, inflight: make(map[uint64]*flight), publication: make(chan struct{}, 1),
+	return &Cache{redis: client, db: db, inflight: make(map[uint64]*flight),
 		local: make(map[uint64]localEntry), localTTL: defaultLocalTTL}
 }
 
@@ -196,7 +208,7 @@ func (cache *Cache) Get(ctx context.Context, noteID uint64) (Counts, error) {
 	if err := ctx.Err(); err != nil {
 		return Counts{}, err
 	}
-	epoch, err := cache.epoch(ctx)
+	epoch, err := cache.epoch(ctx, noteID)
 	if err != nil {
 		return Counts{}, err
 	}
@@ -254,13 +266,19 @@ func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (out map[uint
 	if err := ctx.Err(); err != nil {
 		return nil, err
 	}
-	epoch, err := cache.epoch(ctx)
-	if err != nil {
-		return nil, err
-	}
 	result := make(map[uint64]Counts, len(noteIDs))
 	if len(noteIDs) == 0 {
 		return result, nil
+	}
+	// Capture each stripe epoch without holding multiple gates. The batch keeps
+	// one MGET/IN query; it never acquires several network locks in a lock order.
+	epochs := make(map[uint64]uint64, len(noteIDs))
+	for _, id := range noteIDs {
+		epoch, err := cache.epoch(ctx, id)
+		if err != nil {
+			return nil, err
+		}
+		epochs[id] = epoch
 	}
 	// A hot page is served from the in-process copy; only the rest reaches Redis.
 	remaining := make([]uint64, 0, len(noteIDs))
@@ -291,7 +309,7 @@ func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (out map[uint
 			var value Counts
 			if json.Unmarshal([]byte(text), &value) == nil {
 				result[remaining[index]] = value
-				cache.publish(ctx, remaining[index], value, epoch, false)
+				cache.publish(ctx, remaining[index], value, epochs[remaining[index]], false)
 				continue
 			}
 		}
@@ -324,22 +342,23 @@ func (cache *Cache) GetMany(ctx context.Context, noteIDs []uint64) (out map[uint
 	for _, row := range rows {
 		value := Counts{Likes: row.Liked, Comments: row.Comments}
 		result[row.ID] = value
-		cache.publish(ctx, row.ID, value, epoch, true)
+		cache.publish(ctx, row.ID, value, epochs[row.ID], true)
 	}
 	return result, nil
 }
 
 // Invalidate drops both layers after a mutation so the next read rebuilds them.
 func (cache *Cache) Invalidate(ctx context.Context, noteID uint64) error {
-	if err := cache.acquirePublication(ctx); err != nil {
+	shard, err := cache.acquirePublication(ctx, noteID)
+	if err != nil {
 		return err
 	}
 	hold := taildiag.Begin(ctx, taildiag.PublicationHold, 0)
-	defer func() { hold.End(false); <-cache.publication }()
-	cache.generation++
+	defer func() { hold.End(false); <-shard.gate }()
+	shard.generation++
 	cache.dropLocal(noteID)
 	span := taildiag.Begin(ctx, taildiag.CountsRedisDelete, 1)
-	err := cache.redis.Del(ctx, key(noteID)).Err()
+	err = cache.redis.Del(ctx, key(noteID)).Err()
 	span.End(err != nil)
 	return err
 }

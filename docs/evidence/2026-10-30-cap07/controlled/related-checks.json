@@ -1,0 +1,6 @@
+{
+  "at": "2026-10-30T10:56:44.3810959Z",
+  "vetExit": 0,
+  "relatedRealTestsExit": 0,
+  "scope": "owned fresh test MySQL3452 Redis6552, no API or capacity load"
+}

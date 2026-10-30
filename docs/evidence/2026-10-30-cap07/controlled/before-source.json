@@ -1,0 +1,7 @@
+{
+  "sourceSha": "52cd5c4015d2ac4b745f1bea9006e8dba4e359e9",
+  "path": "backend/internal/communitycache/counts.go",
+  "sha256": "a6d1509855c6dda41b5f01e117d9d1191d952bbdf73ec9b49681a4daecc14cf8",
+  "bytes": 9663,
+  "scope": "same new controlled test, counts.go-only Go overlay; no fourth capacity diagnostic"
+}

@@ -1,0 +1,8 @@
+=== RUN   TestIntegrationCountPublicationIsolation
+=== RUN   TestIntegrationCountPublicationIsolation/set
+=== RUN   TestIntegrationCountPublicationIsolation/del
+--- PASS: TestIntegrationCountPublicationIsolation (0.10s)
+    --- PASS: TestIntegrationCountPublicationIsolation/set (0.05s)
+    --- PASS: TestIntegrationCountPublicationIsolation/del (0.05s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communitycache	0.368s

@@ -1,0 +1,56 @@
+goroutine profile: total 10
+1 @ 0x7ff692a295f1 0x7ff692a6c3dd 0x7ff692c25fd1 0x7ff692c25ca5 0x7ff692c22c09 0x7ff69310790e 0x7ff692b42fa3 0x7ff692a74981
+#	0x7ff692c25fd0	runtime/pprof.writeRuntimeProfile+0xb0										C:/Program Files/Go/src/runtime/pprof/pprof.go:848
+#	0x7ff692c25ca4	runtime/pprof.writeGoroutine+0x44										C:/Program Files/Go/src/runtime/pprof/pprof.go:781
+#	0x7ff692c22c08	runtime/pprof.(*Profile).WriteTo+0x148										C:/Program Files/Go/src/runtime/pprof/pprof.go:405
+#	0x7ff69310790d	github.com/cityloop/fullstack-go/internal/communitycache.TestIntegrationCountPublicationIsolation.func1+0xccd	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts_isolation_integration_test.go:197
+#	0x7ff692b42fa2	testing.tRunner+0xc2												C:/Program Files/Go/src/testing/testing.go:2193
+
+1 @ 0x7ff692a6d6aa 0x7ff6929fa5ae 0x7ff6929fa0d2 0x7ff692b434f2 0x7ff692b49217 0x7ff692b42fa3 0x7ff692b45545 0x7ff692b4410f 0x7ff69310b9db 0x7ff692a3587b 0x7ff692a74981
+#	0x7ff692b434f1	testing.(*T).Run+0x4d1		C:/Program Files/Go/src/testing/testing.go:2266
+#	0x7ff692b49216	testing.runTests.func1+0x36	C:/Program Files/Go/src/testing/testing.go:2742
+#	0x7ff692b42fa2	testing.tRunner+0xc2		C:/Program Files/Go/src/testing/testing.go:2193
+#	0x7ff692b45544	testing.runTests+0x504		C:/Program Files/Go/src/testing/testing.go:2740
+#	0x7ff692b4410e	testing.(*M).Run+0x6ae		C:/Program Files/Go/src/testing/testing.go:2600
+#	0x7ff69310b9da	main.main+0x9a			_testmain.go:64
+#	0x7ff692a3587a	runtime.main+0x3fa		C:/Program Files/Go/src/runtime/proc.go:302
+
+1 @ 0x7ff692a6d6aa 0x7ff6929fa5ae 0x7ff6929fa0d2 0x7ff692b434f2 0x7ff6930ffa1e 0x7ff692b42fa3 0x7ff692a74981
+#	0x7ff692b434f1	testing.(*T).Run+0x4d1											C:/Program Files/Go/src/testing/testing.go:2266
+#	0x7ff6930ffa1d	github.com/cityloop/fullstack-go/internal/communitycache.TestIntegrationCountPublicationIsolation+0x2bd	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts_isolation_integration_test.go:132
+#	0x7ff692b42fa2	testing.tRunner+0xc2											C:/Program Files/Go/src/testing/testing.go:2193
+
+1 @ 0x7ff692a6d6aa 0x7ff6929fa5ae 0x7ff6929fa0f2 0x7ff692cca69e 0x7ff692a74981
+#	0x7ff692cca69d	github.com/redis/go-redis/v9/internal/pool.startGlobalTimeCache.func1+0x9d	C:/Users/19083/go/pkg/mod/github.com/redis/go-redis/v9@v9.17.0/internal/pool/global_time_cache.go:48
+
+1 @ 0x7ff692a6d6aa 0x7ff692a477d7 0x7ff692c5db1e 0x7ff692a74981
+#	0x7ff692c5db1d	database/sql.(*DB).connectionCleaner+0x9d	C:/Program Files/Go/src/database/sql/sql.go:1109
+
+1 @ 0x7ff692a6d6aa 0x7ff692a477d7 0x7ff692c5e589 0x7ff692a74981
+#	0x7ff692c5e588	database/sql.(*DB).connectionOpener+0x88	C:/Program Files/Go/src/database/sql/sql.go:1266
+
+1 @ 0x7ff692a6d6aa 0x7ff692a477d7 0x7ff6930c23fa 0x7ff692a74981
+#	0x7ff6930c23f9	github.com/go-sql-driver/mysql.(*mysqlConn).startWatcher.func1+0x99	C:/Users/19083/go/pkg/mod/github.com/go-sql-driver/mysql@v1.8.1/connection.go:628
+
+1 @ 0x7ff692a6d6aa 0x7ff692a477d7 0x7ff6930f98c7 0x7ff6930f9985 0x7ff6930fafd4 0x7ff693108945 0x7ff692a74981
+#	0x7ff6930f98c6	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).acquirePublication+0xa6			D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:58
+#	0x7ff6930f9984	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).epoch+0x44					D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:69
+#	0x7ff6930fafd3	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).GetMany+0xf3					D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:257
+#	0x7ff693108944	github.com/cityloop/fullstack-go/internal/communitycache.TestIntegrationCountPublicationIsolation.func1.5+0x44	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts_isolation_integration_test.go:192
+
+1 @ 0x7ff692a6d6aa 0x7ff692a477d7 0x7ff6930f98c7 0x7ff6930f9985 0x7ff6930fafd4 0x7ff6931089c5 0x7ff692a74981
+#	0x7ff6930f98c6	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).acquirePublication+0xa6			D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:58
+#	0x7ff6930f9984	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).epoch+0x44					D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:69
+#	0x7ff6930fafd3	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).GetMany+0xf3					D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:257
+#	0x7ff6931089c4	github.com/cityloop/fullstack-go/internal/communitycache.TestIntegrationCountPublicationIsolation.func1.4+0x44	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts_isolation_integration_test.go:184
+
+1 @ 0x7ff692a6d6aa 0x7ff692a477d7 0x7ff693106b71 0x7ff692dcaa9e 0x7ff692dcaa83 0x7ff692dfe2ba 0x7ff6930fa618 0x7ff6930f9b70 0x7ff6930fbef0 0x7ff693108a65 0x7ff692a74981
+#	0x7ff693106b70	github.com/cityloop/fullstack-go/internal/communitycache.(*countCommandBarrier).ProcessHook.func1+0x190		D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts_isolation_integration_test.go:43
+#	0x7ff692dcaa9d	github.com/redis/go-redis/v9.(*hooksMixin).processHook+0x3d							C:/Users/19083/go/pkg/mod/github.com/redis/go-redis/v9@v9.17.0/redis.go:200
+#	0x7ff692dcaa82	github.com/redis/go-redis/v9.(*Client).Process+0x22								C:/Users/19083/go/pkg/mod/github.com/redis/go-redis/v9@v9.17.0/redis.go:1100
+#	0x7ff692dfe2b9	github.com/redis/go-redis/v9.cmdable.Set+0x299									C:/Users/19083/go/pkg/mod/github.com/redis/go-redis/v9@v9.17.0/string_commands.go:336
+#	0x7ff6930fa617	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).write+0x177					D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:176
+#	0x7ff6930f9b6f	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).publish+0xef					D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:87
+#	0x7ff6930fbeef	github.com/cityloop/fullstack-go/internal/communitycache.(*Cache).GetMany+0x100f				D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts.go:327
+#	0x7ff693108a64	github.com/cityloop/fullstack-go/internal/communitycache.TestIntegrationCountPublicationIsolation.func1.3+0x64	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycache/counts_isolation_integration_test.go:170
+

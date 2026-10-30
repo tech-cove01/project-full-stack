@@ -1,0 +1,214 @@
+{
+  "barrierReached": true,
+  "capturedAt": "2026-10-30T10:56:04.4705129Z",
+  "independentBDeadlineExceeded": false,
+  "independentBElapsedNs": 0,
+  "independentHotBReturned": true,
+  "operation": "del",
+  "profileSha256": "b14f0d639f1c3159e6aa93f4cad2bf2aacb81fc6cebc374a0bfd621aa867a5a3",
+  "profileTruncated": false,
+  "releasedAtCapture": false,
+  "sameKeyWaitCancelled": true,
+  "sameStripeCollisionCancelled": true,
+  "scope": "controlled Redis hook, not a capacity run or proof of the original incident cause; no SQL/command arguments are exported",
+  "snapshot": {
+    "enabled": true,
+    "slow_threshold_ms": 100,
+    "max_slow_traces": 32,
+    "max_spans_per_trace": 256,
+    "latest_sequence": 0,
+    "requests": 0,
+    "stages": [
+      {
+        "name": "feed.service",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "feed.facts",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "feed.counts",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "auth.resolve",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "sql.begin_acquire_roundtrip",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "sql.transaction_hold",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "sql.statement_total",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "sql.call_until_rows",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "sql.exec_call",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "sql.prepare_call",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "redis.command_total",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "redis.pipeline_total",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "redis.dial",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "counts.get_many",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 2
+      },
+      {
+        "name": "counts.publication_wait",
+        "count": 1,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 2
+      },
+      {
+        "name": "counts.publication_hold",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 1
+      },
+      {
+        "name": "counts.redis_read",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "counts.redis_write",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      },
+      {
+        "name": "counts.redis_delete",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 1
+      },
+      {
+        "name": "counts.cold_sql",
+        "count": 0,
+        "total_ns": 0,
+        "max_ns": 0,
+        "errors": 0,
+        "items": 0,
+        "active": 0
+      }
+    ],
+    "slow_traces": [],
+    "missing_measurements": [
+      "sql.begin_acquire_roundtrip includes pool acquisition and BEGIN roundtrip; pure per-request SQL pool wait is not separately measured",
+      "sql.transaction_hold spans successful BeginTx return through Commit/Rollback return, including server commit/rollback roundtrip",
+      "sql.statement_total includes pool acquisition when outside a transaction, execution, transfer and GORM scanning; sql.call_until_rows ends before full row consumption",
+      "redis.command_total includes pool acquisition, transport and command RTT; pure per-request Redis pool wait and server execution are not separated",
+      "stage counters and pool snapshots are concurrent observations, not an atomic per-request attribution; nested stages must not be added as disjoint totals",
+      "trace.canceled reflects the outer observed HTTP or direct-service context; inner deadline failures are reflected by stage errors without exporting error text",
+      "feed.http covers the Gin handler including authentication and JSON serialization, not client-observed network RTT or time before handler entry"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "expectedFailure": true,
+  "scope": "single controlled SET/DEL batch on new isolated MySQL3452 Redis6552; same new test, only counts.go mapped to old implementation; not a capacity diagnostic",
+  "exitCode": 1,
+  "at": "2026-10-30T10:55:54.4227692Z"
+}

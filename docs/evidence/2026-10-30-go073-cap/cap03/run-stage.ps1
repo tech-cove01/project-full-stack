@@ -1,5 +1,6 @@
 param(
   [Parameter(Mandatory=$true)][string]$EnvironmentFile,
+  [string]$ApiMetadataFile='',
   [Parameter(Mandatory=$true)][ValidateSet('hot','multi')][string]$Mode,
   [Parameter(Mandatory=$true)][ValidateRange(1,20000)][int]$Rate,
   [Parameter(Mandatory=$true)][ValidateRange(1,600)][int]$Seconds,
@@ -14,7 +15,10 @@ foreach($entry in $settings.GetEnumerator()) {
   [Environment]::SetEnvironmentVariable($entry.Key,[string]$entry.Value,'Process')
 }
 if($env:MYSQL_PORT -ne '3451' -or $env:REDIS_PORT -ne '6551' -or $env:ORDER_STREAM_WORKERS -ne '1') { throw 'dedicated read environment required' }
-$api=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'api.json') -Raw -Encoding utf8 | ConvertFrom-Json
+$metadataPath=if($ApiMetadataFile){(Get-Item -LiteralPath $ApiMetadataFile).FullName}else{Join-Path $PSScriptRoot 'api.json'}
+$api=Get-Content -LiteralPath $metadataPath -Raw -Encoding utf8 | ConvertFrom-Json
+if($api.sourceSha -ne $settings.CAP_SOURCE_SHA) { throw 'API metadata source does not match explicit API source environment' }
+$metadataHash=(Get-FileHash -LiteralPath $metadataPath -Algorithm SHA256).Hash.ToLowerInvariant()
 $stage=Join-Path $PSScriptRoot $Tag
 $env:CAP_READ_MODE=$Mode
 $env:CAP_READ_RATE=[string]$Rate
@@ -28,6 +32,6 @@ $control="$stage-control"
 $env:CAP_STOP_FILE=Join-Path $control 'stop.json'
 $commandPath="$stage-command.json"
 if(Test-Path -LiteralPath $commandPath) { throw 'new stage tag required; preserve previous evidence' }
-@{at=(Get-Date).ToUniversalTime().ToString('o');mode=$Mode;rate=$Rate;seconds=$Seconds;warmSeconds=$WarmSeconds;warmRate=[Math]::Min(25,$Rate);preVUs=$PreVUs;maxVUs=$MaxVUs;apiPid=$api.pid;sourceSha=$settings.CAP_SOURCE_SHA;workingDirectory=(Get-Location).Path;command='python -X utf8 scripts/capacity-stage.py --mode read --control-dir <stage>-control --api-pid <api.pid> --diagnostics http://127.0.0.1:8351/debug/capacity --interval 5 --max-seconds <seconds+warm+120> --stop-grace-seconds 90 -- node scripts/go073-cap-read.mjs run';secretsExported=$false} | ConvertTo-Json | Set-Content -LiteralPath $commandPath -Encoding utf8
+@{at=(Get-Date).ToUniversalTime().ToString('o');mode=$Mode;rate=$Rate;seconds=$Seconds;warmSeconds=$WarmSeconds;warmRate=[Math]::Min(25,$Rate);preVUs=$PreVUs;maxVUs=$MaxVUs;apiPid=$api.pid;sourceSha=$settings.CAP_SOURCE_SHA;apiMetadataFile=$metadataPath;apiMetadataSHA256=$metadataHash;fixtureSourceSha=if($settings.CAP_READ_FIXTURE_SOURCE_SHA){$settings.CAP_READ_FIXTURE_SOURCE_SHA}else{$settings.CAP_SOURCE_SHA};workingDirectory=(Get-Location).Path;command='python -X utf8 scripts/capacity-stage.py --mode read --control-dir <stage>-control --api-pid <api.pid> --diagnostics http://127.0.0.1:8351/debug/capacity --interval 5 --max-seconds <seconds+warm+120> --stop-grace-seconds 90 -- node scripts/go073-cap-read.mjs run';secretsExported=$false} | ConvertTo-Json | Set-Content -LiteralPath $commandPath -Encoding utf8
 & python -X utf8 scripts/capacity-stage.py --mode read --control-dir $control --api-pid $api.pid --diagnostics http://127.0.0.1:8351/debug/capacity --interval 5 --max-seconds ($Seconds+$WarmSeconds+120) --stop-grace-seconds 90 -- node scripts/go073-cap-read.mjs run
 exit $LASTEXITCODE

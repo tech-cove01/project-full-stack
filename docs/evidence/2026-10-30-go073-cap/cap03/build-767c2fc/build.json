@@ -1,0 +1,13 @@
+{
+  "at": "2026-10-30T06:54:36.183198+00:00",
+  "sourceSha": "767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "worktree": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-767c2fc",
+  "gitStatusPorcelain": "",
+  "binary": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-767c2fc\\backend\\bin\\cap-api.exe",
+  "binarySHA256": "97a5165e48a74c98ee521eebda01f79d049c44938239e2bd4ed89fe38e25e20c",
+  "vcsModified": false,
+  "expectedRevision": "capacity-767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "command": "go build -trimpath -ldflags '-X main.revision=capacity-767c2fc8bdf1be08c5636143a71898eec25081a9' -o bin/cap-api.exe ./cmd/api",
+  "buildExit": 0,
+  "indexMigration": "013 already applied to retained fixture; not changed by this API build"
+}

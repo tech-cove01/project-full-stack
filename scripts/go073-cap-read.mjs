@@ -12,10 +12,14 @@ import net from 'node:net'
 const owned = { project: 'project-full-stack-cap-read', mysql: '3451', redis: '6551', api: 'http://127.0.0.1:8251', database: 'project_full_stack_go' }
 for (const name of ['MYSQL_USER', 'MYSQL_PASSWORD', 'CAP_SOURCE_SHA', 'CAP_READ_EXPECTED_REVISION']) assert.ok(process.env[name], `explicit ${name} required`)
 assert.match(process.env.CAP_SOURCE_SHA, /^[0-9a-f]{40}$/)
+assert.equal(process.env.CAP_READ_EXPECTED_REVISION, `capacity-${process.env.CAP_SOURCE_SHA}`, 'API revision must bind the declared API source SHA')
+const fixtureSourceSha = process.env.CAP_READ_FIXTURE_SOURCE_SHA ?? process.env.CAP_SOURCE_SHA
+assert.match(fixtureSourceSha, /^[0-9a-f]{40}$/, 'fixture provenance must be a full source SHA')
 assert.equal(process.env.MYSQL_HOST, '127.0.0.1'); assert.equal(process.env.MYSQL_PORT, owned.mysql); assert.equal(process.env.MYSQL_DATABASE, owned.database)
 assert.equal(process.env.REDIS_HOST, '127.0.0.1'); assert.equal(process.env.REDIS_PORT, owned.redis); assert.equal(process.env.API_BASE, owned.api)
 const action = process.argv[2]
 assert.ok(['prepare', 'run', 'finish'].includes(action), 'use prepare, run or finish')
+if (action === 'prepare') assert.equal(fixtureSourceSha, process.env.CAP_SOURCE_SHA, 'a new fixture must originate from the current API source')
 const pause = ms => new Promise(r => setTimeout(r, ms))
 const sqlBin = process.env.MYSQL_BIN || 'mysql'
 
@@ -89,11 +93,13 @@ async function guard() {
 const manifestPath = process.env.CAP_READ_FIXTURE ? resolve(process.env.CAP_READ_FIXTURE) : null
 async function loadFixture() {
   assert.ok(manifestPath, 'explicit CAP_READ_FIXTURE required')
-  const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
-  assert.equal(manifest.project, owned.project); assert.equal(manifest.baseUrl, owned.api); assert.equal(manifest.sourceSha, process.env.CAP_SOURCE_SHA)
+  const manifestBytes = await readFile(manifestPath)
+  const manifest = JSON.parse(manifestBytes.toString('utf8'))
+  assert.equal(manifest.project, owned.project); assert.equal(manifest.baseUrl, owned.api); assert.equal(manifest.sourceSha, fixtureSourceSha)
+  assert.equal(manifest.expectedRevision, `capacity-${manifest.sourceSha}`, 'fixture revision must retain its original source binding')
   const runtime = JSON.parse(await readFile(manifest.credentialFile, 'utf8'))
   assert.equal(runtime.fixture, manifest.fixture); assert.ok(Array.isArray(runtime.readers) && runtime.readers.length <= 32)
-  return { manifest, runtime }
+  return { manifest, runtime, manifestSHA256: createHash('sha256').update(manifestBytes).digest('hex') }
 }
 function parseCommands(text) {
   return Object.fromEntries(text.split(/\r?\n/).filter(x => x.startsWith('cmdstat_')).map(line => { const [name, values] = line.split(':'); return [name.slice(8), Object.fromEntries(values.split(',').map(kv => { const [k, v] = kv.split('='); return [k, Number(v)] }))] }))
@@ -202,21 +208,21 @@ if (action === 'prepare') {
   await writeFile(join(dir, 'fixture.json'), JSON.stringify(manifest, null, 2) + '\n')
   console.log(JSON.stringify({ prepared: true, manifest: join(dir, 'fixture.json'), readers: 32, notes: 6400 }))
 } else if (action === 'finish') {
-  const { manifest, runtime } = await loadFixture()
+  const { manifest, runtime, manifestSHA256 } = await loadFixture()
   const outcomes = []; for (const reader of runtime.readers) { const r = await api('POST', '/user/logout', undefined, reader.token); outcomes.push(r.status === 200 && r.body.success === true) }
   assert.ok(outcomes.every(Boolean), 'a reader logout failed')
   await unlink(manifest.credentialFile); await rmdir(dirname(manifest.credentialFile))
-  await writeFile(join(dirname(manifestPath), 'finish.json'), JSON.stringify({ at: new Date().toISOString(), logoutCount: outcomes.length, credentialFileRemoved: true, sqlFixtureRetained: true }, null, 2) + '\n', { flag: 'wx' })
+  await writeFile(join(dirname(manifestPath), 'finish.json'), JSON.stringify({ at: new Date().toISOString(), logoutCount: outcomes.length, credentialFileRemoved: true, sqlFixtureRetained: true, apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION, fixtureSourceSha: manifest.sourceSha, fixtureExpectedRevision: manifest.expectedRevision, fixtureManifestSHA256: manifestSHA256 }, null, 2) + '\n', { flag: 'wx' })
   console.log(JSON.stringify({ finished: true, readersLoggedOut: outcomes.length, sqlFixtureRetained: true }))
 } else {
-  const { manifest, runtime } = await loadFixture()
+  const { manifest, runtime, manifestSHA256 } = await loadFixture()
   assert.equal(manifest.status, 'READY', 'fixture prepare did not complete'); assert.equal(runtime.readers.length, 32)
   const mode = process.env.CAP_READ_MODE, rate = Number(process.env.CAP_READ_RATE), seconds = Number(process.env.CAP_READ_SECONDS || 60), warmSeconds = Number(process.env.CAP_READ_WARM_SECONDS || 10), warmRate = Number(process.env.CAP_READ_WARM_RATE || Math.min(rate, 25)), preVUs = Number(process.env.CAP_READ_PRE_VUS || 64), maxVUs = Number(process.env.CAP_READ_MAX_VUS || 512)
   assert.ok(['hot', 'multi'].includes(mode)); assert.ok([rate, seconds, warmSeconds, warmRate, preVUs, maxVUs].every(Number.isInteger)); assert.ok(rate > 0 && rate <= 20000 && seconds >= 1 && seconds <= 600 && warmSeconds >= 1 && warmSeconds <= 60 && warmRate >= 1 && warmRate <= rate && preVUs >= 1 && maxVUs >= preVUs && maxVUs <= 4096)
   assert.ok(process.env.CAP_READ_EVIDENCE, 'explicit new CAP_READ_EVIDENCE required')
   const dir = resolve(process.env.CAP_READ_EVIDENCE); await mkdir(dir, { recursive: false })
   if (process.env.CAP_STOP_FILE) { try { await readFile(process.env.CAP_STOP_FILE); throw new Error('stop file already exists; preserve it and choose a new path') } catch (error) { if (error.code !== 'ENOENT') throw error } }
-  const report = { task: 'GO-073-CAP-03', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture, fixtureSourceSha: manifest.sourceSha, pageSize: 20, activeReaders: mode === 'hot' ? 1 : 32, activeCountKeys: mode === 'hot' ? 20 : 640, thresholds: { actualOfferedRatioMin: .99, successfulFractionMin: .99, incompleteOrUnclassifiedMax: 0, droppedMax: 0, systemErrorRateMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500, successfulP95MsMax: 200, successfulP99MsMax: 500, contentErrorsMax: 0 }, started: new Date().toISOString() }
+  const report = { task: 'GO-073-CAP-03', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture, apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION, fixtureSourceSha: manifest.sourceSha, fixtureExpectedRevision: manifest.expectedRevision, fixtureManifestSHA256: manifestSHA256, pageSize: 20, activeReaders: mode === 'hot' ? 1 : 32, activeCountKeys: mode === 'hot' ? 20 : 640, thresholds: { actualOfferedRatioMin: .99, successfulFractionMin: .99, incompleteOrUnclassifiedMax: 0, droppedMax: 0, systemErrorRateMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500, successfulP95MsMax: 200, successfulP99MsMax: 500, contentErrorsMax: 0 }, started: new Date().toISOString() }
   let beforeWarm = null
   async function runPhase(phase, duration) {
     if (process.env.CAP_STOP_FILE) {

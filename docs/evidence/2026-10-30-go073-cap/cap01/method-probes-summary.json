@@ -1,0 +1,1381 @@
+{
+  "task": "GO-073-CAP/CAP-01",
+  "generatedAt": "2026-10-30T04:47:54.246582+00:00",
+  "toolingCommit": "4e35830",
+  "capacityAchievement": false,
+  "method": {
+    "percentiles": "ascending order statistic ceil(n*p)-1 (nearest rank), independently recomputed from redacted per-request records; k6 summary uses interpolation and differs",
+    "matching": "lookup each accepted response orderId in complete activity SQL rows and Redis mapping and compare expectedUserId; check SQL/Redis IDs absent in logs separately",
+    "queueObserverTotalWallMs": "sampleQueue wall time includes indexed COUNT when enabled and Redis commands; not SQL-only query time",
+    "sqlCompletionTimeBracketMs": "wall-clock ms from observer start to SQL result receipt, not SQL service time; includes scheduling/round-trip and ms clock rounding",
+    "resources": "5-second discrete samples; CPU percent_one_core is process usage where 100% is one logical CPU; peak sampled RSS/host memory is not continuous high-water",
+    "comparisonLimitation": "single short on/off probes, different activities and mutable shared host; background tasks such as Go build were not controlled. No causal observer overhead percentage can be inferred",
+    "safetyLimitation": "pause was not confirmed; response body/status details not retained, so cause unknown. Verified REST stopped fallback, not successful pause-and-12s-grace path. REST stop can interrupt in-flight responses; all activity SQL and acceptance maps reconciled with no observed unknown outcomes.",
+    "metricsArchives": "six completed k6 exporters are lossless gzip; each source now points to .gz with compressed bytes/SHA256 and retains originalPath/originalBytes/originalSha256; metrics-archives.json is the cross-check manifest"
+  },
+  "trades": [
+    {
+      "activityId": "1003",
+      "model": {
+        "rate": 10,
+        "warmSeconds": 2,
+        "stableSeconds": 8,
+        "preAllocatedVUs": 20,
+        "maxVUs": 20,
+        "warmSlots": 40,
+        "availableUsers": 140,
+        "initialStock": 240
+      },
+      "capacityPassed": false,
+      "reconciliationPassed": true,
+      "requestCount": 102,
+      "acceptedCount": 102,
+      "sqlRows": 102,
+      "redisMappings": 102,
+      "recomputedChecks": {
+        "duplicateSQLOrderIds": 0,
+        "duplicateRedisOrderIds": 0,
+        "duplicateAcceptedResponseOrderIds": 0,
+        "duplicateExportedPhaseIndex": 0,
+        "exportedRequestRecordMismatches": 0,
+        "publicPoolIndexUserMismatches": 0,
+        "sqlMissingOrUserMismatch": 0,
+        "redisMissingOrUserMismatch": 0,
+        "unloggedSQLOrders": 0,
+        "unloggedRedisAccepted": 0,
+        "requestRecordsEqualExportedRecords": true
+      },
+      "rawMetricCounts": {
+        "http_reqs": 102,
+        "cap_requests": 102,
+        "cap_system_errors": 0,
+        "cap_request_record": 102
+      },
+      "exportedRecordCount": 102,
+      "phases": {
+        "warm": {
+          "count": 21,
+          "categories": {
+            "accepted": 21
+          },
+          "allLatencyMs": {
+            "n": 21,
+            "min": 9.0584,
+            "mean": 10.37289523809524,
+            "p95NearestRank": 13.081,
+            "p99NearestRank": 15.6625,
+            "max": 15.6625
+          },
+          "acceptedLatencyMs": {
+            "n": 21,
+            "min": 9.0584,
+            "mean": 10.37289523809524,
+            "p95NearestRank": 13.081,
+            "p99NearestRank": 15.6625,
+            "max": 15.6625
+          },
+          "firstStartedMs": 1793335353011,
+          "lastEndedMs": 1793335355019
+        },
+        "stable": {
+          "count": 81,
+          "categories": {
+            "accepted": 81
+          },
+          "allLatencyMs": {
+            "n": 81,
+            "min": 8.0432,
+            "mean": 10.573611111111111,
+            "p95NearestRank": 14.081,
+            "p99NearestRank": 16.2243,
+            "max": 16.2243
+          },
+          "acceptedLatencyMs": {
+            "n": 81,
+            "min": 8.0432,
+            "mean": 10.573611111111111,
+            "p95NearestRank": 14.081,
+            "p99NearestRank": 16.2243,
+            "max": 16.2243
+          },
+          "firstStartedMs": 1793335365010,
+          "lastEndedMs": 1793335373021
+        }
+      },
+      "observerSqlDisabled": false,
+      "queueObserverTotalWallMs": {
+        "n": 12,
+        "min": 4.811,
+        "mean": 6.838,
+        "p95NearestRank": 10.622,
+        "p99NearestRank": 10.622,
+        "max": 10.622
+      },
+      "sqlCompletionTimeBracketMs": {
+        "n": 12,
+        "min": 2.0,
+        "mean": 2.5833333333333335,
+        "p95NearestRank": 7.0,
+        "p99NearestRank": 7.0,
+        "max": 7.0
+      },
+      "queueSampleCount": 12,
+      "queueObserverErrors": 0,
+      "final": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 102,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 102,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 138,
+        "redisAccepted": 102,
+        "redisStock": 138,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 102,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "drain": {
+        "loadEndedAtMs": 1793335375312,
+        "convergedObservedAtMs": 1793335375323,
+        "drainMs": 10,
+        "lastResponseToConvergedObservedMs": 2302,
+        "nominalStableEndToConvergedObservedMs": 2313
+      },
+      "safety": {
+        "stoppedEarly": null,
+        "stopReason": null,
+        "pauseRequestedAtMs": null,
+        "pauseConfirmed": null,
+        "stopConfirmed": null,
+        "fallbackKilledOwnedK6": null,
+        "k6ExitCode": 0,
+        "exportedLogsComplete": true
+      },
+      "sources": [
+        {
+          "path": "probe-observer-on/result.json",
+          "bytes": 4427,
+          "sha256": "81e8ed75fc276de26a1d5b26a4ac4000690ce71cb5c2f61ccd1b8fdfb0d6af41"
+        },
+        {
+          "path": "probe-observer-on/requests.ndjson",
+          "bytes": 32787,
+          "sha256": "c3ce1becbc00722885e8465aa44c0bc7a06ea46b49d04a3a59e2399e406eeb11"
+        },
+        {
+          "path": "probe-observer-on/orders.ndjson",
+          "bytes": 5425,
+          "sha256": "dd130ae7ac7925e97d689c0c0fcc84bb6ee1e0adee5c167781ffc3dd1a57802d"
+        },
+        {
+          "path": "probe-observer-on/redis-accepted.ndjson",
+          "bytes": 4813,
+          "sha256": "295ece80ddce9331c7c7e8b2b222cca9ba32cdb7cc25858f61248b49b22e6a06"
+        },
+        {
+          "path": "probe-observer-on/queue.ndjson",
+          "bytes": 3235,
+          "sha256": "f7c37ecb9235486315e41717b0349aa9f9f9d9ffc61ce8aca2c2706fb9cb2f1f"
+        },
+        {
+          "path": "probe-observer-on/k6-metrics.ndjson.gz",
+          "bytes": 13661,
+          "sha256": "a9c4e671bb288067966f6746f80fe9b3387c0b87e6249dc720d187803449ed9b",
+          "originalPath": "probe-observer-on/k6-metrics.ndjson",
+          "originalBytes": 362629,
+          "originalSha256": "cdc4c858b65635d708d2f2ef65a81eeaa2e8dccaadf8df9f72f24053b92a801d"
+        }
+      ],
+      "resources": {
+        "source": {
+          "path": "probe-observer-on/resources.ndjson",
+          "bytes": 8405,
+          "sha256": "b37626d3a1b58bbfed6818d07aef51a14f049c318ede16c43da84e2912c7b7f3"
+        },
+        "sampleCount": 4,
+        "completeSampleCount": 1,
+        "errors": [
+          [
+            "owned generator observation unavailable: ValueError"
+          ],
+          [
+            "owned generator observation unavailable: ValueError"
+          ],
+          [
+            "owned generator observation unavailable: ValueError"
+          ]
+        ],
+        "firstSampleAt": "2026-10-30T04:42:51.002888+00:00",
+        "lastSampleAt": "2026-10-30T04:43:06.004126+00:00",
+        "hostMemoryPercent": {
+          "n": 4,
+          "min": 76.6,
+          "mean": 76.775,
+          "p95NearestRank": 77.0,
+          "p99NearestRank": 77.0,
+          "max": 77.0
+        },
+        "hostCPUPercent": {
+          "n": 4,
+          "min": 17.6,
+          "mean": 27.225,
+          "p95NearestRank": 38.1,
+          "p99NearestRank": 38.1,
+          "max": 38.1
+        },
+        "samplerCPUPercentOneCore": {
+          "n": 4,
+          "min": 1.3,
+          "mean": 2.1,
+          "p95NearestRank": 3.6,
+          "p99NearestRank": 3.6,
+          "max": 3.6
+        },
+        "samplerRSSBytes": {
+          "n": 4,
+          "min": 31637504.0,
+          "mean": 31654912.0,
+          "p95NearestRank": 31674368.0,
+          "p99NearestRank": 31674368.0,
+          "max": 31674368.0
+        },
+        "samplerObservationWallMs": {
+          "n": 4,
+          "min": 2159.4754999969155,
+          "mean": 2168.702274997486,
+          "p95NearestRank": 2173.3363999810535,
+          "p99NearestRank": 2173.3363999810535,
+          "max": 2173.3363999810535
+        },
+        "apiRSSBytes": {
+          "n": 4,
+          "min": 31068160.0,
+          "mean": 31084544.0,
+          "p95NearestRank": 31096832.0,
+          "p99NearestRank": 31096832.0,
+          "max": 31096832.0
+        },
+        "generatorRSSBytes": {
+          "n": 1,
+          "min": 39641088.0,
+          "mean": 39641088.0,
+          "p95NearestRank": 39641088.0,
+          "p99NearestRank": 39641088.0,
+          "max": 39641088.0
+        },
+        "generatorCPUPercentOneCore": {
+          "n": 1,
+          "min": 0.0,
+          "mean": 0.0,
+          "p95NearestRank": 0.0,
+          "p99NearestRank": 0.0,
+          "max": 0.0
+        }
+      }
+    },
+    {
+      "activityId": "1004",
+      "model": {
+        "rate": 10,
+        "warmSeconds": 2,
+        "stableSeconds": 8,
+        "preAllocatedVUs": 20,
+        "maxVUs": 20,
+        "warmSlots": 40,
+        "availableUsers": 140,
+        "initialStock": 240
+      },
+      "capacityPassed": false,
+      "reconciliationPassed": true,
+      "requestCount": 102,
+      "acceptedCount": 102,
+      "sqlRows": 102,
+      "redisMappings": 102,
+      "recomputedChecks": {
+        "duplicateSQLOrderIds": 0,
+        "duplicateRedisOrderIds": 0,
+        "duplicateAcceptedResponseOrderIds": 0,
+        "duplicateExportedPhaseIndex": 0,
+        "exportedRequestRecordMismatches": 0,
+        "publicPoolIndexUserMismatches": 0,
+        "sqlMissingOrUserMismatch": 0,
+        "redisMissingOrUserMismatch": 0,
+        "unloggedSQLOrders": 0,
+        "unloggedRedisAccepted": 0,
+        "requestRecordsEqualExportedRecords": true
+      },
+      "rawMetricCounts": {
+        "http_reqs": 102,
+        "cap_requests": 102,
+        "cap_system_errors": 0,
+        "cap_request_record": 102
+      },
+      "exportedRecordCount": 102,
+      "phases": {
+        "warm": {
+          "count": 21,
+          "categories": {
+            "accepted": 21
+          },
+          "allLatencyMs": {
+            "n": 21,
+            "min": 9.1648,
+            "mean": 10.721761904761905,
+            "p95NearestRank": 12.5533,
+            "p99NearestRank": 13.2074,
+            "max": 13.2074
+          },
+          "acceptedLatencyMs": {
+            "n": 21,
+            "min": 9.1648,
+            "mean": 10.721761904761905,
+            "p95NearestRank": 12.5533,
+            "p99NearestRank": 13.2074,
+            "max": 13.2074
+          },
+          "firstStartedMs": 1793335502781,
+          "lastEndedMs": 1793335504793
+        },
+        "stable": {
+          "count": 81,
+          "categories": {
+            "accepted": 81
+          },
+          "allLatencyMs": {
+            "n": 81,
+            "min": 8.5274,
+            "mean": 17.19184814814815,
+            "p95NearestRank": 31.4467,
+            "p99NearestRank": 150.0415,
+            "max": 150.0415
+          },
+          "acceptedLatencyMs": {
+            "n": 81,
+            "min": 8.5274,
+            "mean": 17.19184814814815,
+            "p95NearestRank": 31.4467,
+            "p99NearestRank": 150.0415,
+            "max": 150.0415
+          },
+          "firstStartedMs": 1793335514780,
+          "lastEndedMs": 1793335522794
+        }
+      },
+      "observerSqlDisabled": false,
+      "queueObserverTotalWallMs": {
+        "n": 11,
+        "min": 4.845,
+        "mean": 7.746,
+        "p95NearestRank": 13.676,
+        "p99NearestRank": 13.676,
+        "max": 13.676
+      },
+      "sqlCompletionTimeBracketMs": {
+        "n": 11,
+        "min": 2.0,
+        "mean": 3.3636363636363638,
+        "p95NearestRank": 7.0,
+        "p99NearestRank": 7.0,
+        "max": 7.0
+      },
+      "queueSampleCount": 11,
+      "queueObserverErrors": 0,
+      "final": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 102,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 204,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 138,
+        "redisAccepted": 102,
+        "redisStock": 138,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 102,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "drain": {
+        "loadEndedAtMs": 1793335524083,
+        "convergedObservedAtMs": 1793335524092,
+        "drainMs": 8,
+        "lastResponseToConvergedObservedMs": 1298,
+        "nominalStableEndToConvergedObservedMs": 1312
+      },
+      "safety": {
+        "stoppedEarly": null,
+        "stopReason": null,
+        "pauseRequestedAtMs": null,
+        "pauseConfirmed": null,
+        "stopConfirmed": null,
+        "fallbackKilledOwnedK6": null,
+        "k6ExitCode": 0,
+        "exportedLogsComplete": true
+      },
+      "sources": [
+        {
+          "path": "probe-auto-observer-on/result.json",
+          "bytes": 4431,
+          "sha256": "dcea27e2f35dc922639fef65d0d9dc199be2835aff52101b041c2b9d49dad23e"
+        },
+        {
+          "path": "probe-auto-observer-on/requests.ndjson",
+          "bytes": 32822,
+          "sha256": "b752889d38cd32f9704d8add597cd1e803c6819c14b9155a3a5bfbf409e06afb"
+        },
+        {
+          "path": "probe-auto-observer-on/orders.ndjson",
+          "bytes": 5425,
+          "sha256": "09807b8b6a9d48f6ff1cfddadcb2e44005382d638886c71fb5945fffbdd48db6"
+        },
+        {
+          "path": "probe-auto-observer-on/redis-accepted.ndjson",
+          "bytes": 4813,
+          "sha256": "a2792d7bff7ce7ea2f1a2a2ad9334ecdf10982b6622dbb17cdb9027962357945"
+        },
+        {
+          "path": "probe-auto-observer-on/queue.ndjson",
+          "bytes": 2971,
+          "sha256": "66248f0b15ca901cb3188b3b137fe7b5f99c29f8b942313b0b83cb002e4ffd50"
+        },
+        {
+          "path": "probe-auto-observer-on/k6-metrics.ndjson.gz",
+          "bytes": 13708,
+          "sha256": "dfb036bb4bd07de3e4f8daddb7493f213997074e2c48e1d9f42e029b48f4d76b",
+          "originalPath": "probe-auto-observer-on/k6-metrics.ndjson",
+          "originalBytes": 362886,
+          "originalSha256": "7eb1e315c518214c733beaa438671c7636d5b31512b4430e4df2a19515edf0c9"
+        }
+      ],
+      "resources": {
+        "source": {
+          "path": "probe-auto-observer-on-control/resources.ndjson",
+          "bytes": 10411,
+          "sha256": "80bdfe3b2b9f6f0000246789e8d8d398f8a93c322915d922a06904f36c9753c5"
+        },
+        "sampleCount": 5,
+        "completeSampleCount": 5,
+        "errors": [],
+        "firstSampleAt": "2026-10-30T04:45:03.585658+00:00",
+        "lastSampleAt": "2026-10-30T04:45:23.587740+00:00",
+        "hostMemoryPercent": {
+          "n": 5,
+          "min": 77.7,
+          "mean": 78.26,
+          "p95NearestRank": 79.9,
+          "p99NearestRank": 79.9,
+          "max": 79.9
+        },
+        "hostCPUPercent": {
+          "n": 5,
+          "min": 23.5,
+          "mean": 39.74,
+          "p95NearestRank": 59.7,
+          "p99NearestRank": 59.7,
+          "max": 59.7
+        },
+        "samplerCPUPercentOneCore": {
+          "n": 5,
+          "min": 1.3,
+          "mean": 1.9,
+          "p95NearestRank": 2.9,
+          "p99NearestRank": 2.9,
+          "max": 2.9
+        },
+        "samplerRSSBytes": {
+          "n": 5,
+          "min": 31531008.0,
+          "mean": 31569510.4,
+          "p95NearestRank": 31592448.0,
+          "p99NearestRank": 31592448.0,
+          "max": 31592448.0
+        },
+        "samplerObservationWallMs": {
+          "n": 5,
+          "min": 1165.3576999960933,
+          "mean": 1714.575079997303,
+          "p95NearestRank": 2166.073200001847,
+          "p99NearestRank": 2166.073200001847,
+          "max": 2166.073200001847
+        },
+        "apiRSSBytes": {
+          "n": 5,
+          "min": 31780864.0,
+          "mean": 32008601.6,
+          "p95NearestRank": 32800768.0,
+          "p99NearestRank": 32800768.0,
+          "max": 32800768.0
+        },
+        "generatorRSSBytes": {
+          "n": 5,
+          "min": 36577280.0,
+          "mean": 39949107.2,
+          "p95NearestRank": 45297664.0,
+          "p99NearestRank": 45297664.0,
+          "max": 45297664.0
+        },
+        "generatorCPUPercentOneCore": {
+          "n": 5,
+          "min": 0.0,
+          "mean": 1.42,
+          "p95NearestRank": 5.3,
+          "p99NearestRank": 5.3,
+          "max": 5.3
+        }
+      },
+      "supervision": {
+        "started_at": "2026-10-30T04:45:01.238164+00:00",
+        "mode": "trade",
+        "api_pid": 68744,
+        "sampler_started": true,
+        "stop_signal": false,
+        "forced_owned_processes": [],
+        "errors": [],
+        "helper_launcher_pid": 61472,
+        "sampler_pid": 51016,
+        "sampled_k6_pid": 47108,
+        "sampling_started_at": "2026-10-30T04:45:02.792975+00:00",
+        "sampling_ended_after_generator_exit": true,
+        "sampling_ended_at": "2026-10-30T04:45:24.122953+00:00",
+        "harness_exit": 0,
+        "sampler_exit": 0,
+        "resource_samples": 5,
+        "complete_resource_samples": 5,
+        "first_resource_sample_at": "2026-10-30T04:45:03.585658+00:00",
+        "last_resource_sample_at": "2026-10-30T04:45:23.587740+00:00",
+        "ended_at": "2026-10-30T04:45:24.811445+00:00",
+        "elapsed_seconds": 23.573276700015413,
+        "forced": false,
+        "completed_without_supervision_failure": true
+      }
+    },
+    {
+      "activityId": "1005",
+      "model": {
+        "rate": 10,
+        "warmSeconds": 2,
+        "stableSeconds": 8,
+        "preAllocatedVUs": 20,
+        "maxVUs": 20,
+        "warmSlots": 40,
+        "availableUsers": 140,
+        "initialStock": 240
+      },
+      "capacityPassed": false,
+      "reconciliationPassed": true,
+      "requestCount": 102,
+      "acceptedCount": 102,
+      "sqlRows": 102,
+      "redisMappings": 102,
+      "recomputedChecks": {
+        "duplicateSQLOrderIds": 0,
+        "duplicateRedisOrderIds": 0,
+        "duplicateAcceptedResponseOrderIds": 0,
+        "duplicateExportedPhaseIndex": 0,
+        "exportedRequestRecordMismatches": 0,
+        "publicPoolIndexUserMismatches": 0,
+        "sqlMissingOrUserMismatch": 0,
+        "redisMissingOrUserMismatch": 0,
+        "unloggedSQLOrders": 0,
+        "unloggedRedisAccepted": 0,
+        "requestRecordsEqualExportedRecords": true
+      },
+      "rawMetricCounts": {
+        "http_reqs": 102,
+        "cap_requests": 102,
+        "cap_system_errors": 0,
+        "cap_request_record": 102
+      },
+      "exportedRecordCount": 102,
+      "phases": {
+        "warm": {
+          "count": 21,
+          "categories": {
+            "accepted": 21
+          },
+          "allLatencyMs": {
+            "n": 21,
+            "min": 10.2424,
+            "mean": 12.410757142857143,
+            "p95NearestRank": 14.007,
+            "p99NearestRank": 16.1761,
+            "max": 16.1761
+          },
+          "acceptedLatencyMs": {
+            "n": 21,
+            "min": 10.2424,
+            "mean": 12.410757142857143,
+            "p95NearestRank": 14.007,
+            "p99NearestRank": 16.1761,
+            "max": 16.1761
+          },
+          "firstStartedMs": 1793335527150,
+          "lastEndedMs": 1793335529161
+        },
+        "stable": {
+          "count": 81,
+          "categories": {
+            "accepted": 81
+          },
+          "allLatencyMs": {
+            "n": 81,
+            "min": 8.038,
+            "mean": 11.585164197530863,
+            "p95NearestRank": 15.78,
+            "p99NearestRank": 19.6478,
+            "max": 19.6478
+          },
+          "acceptedLatencyMs": {
+            "n": 81,
+            "min": 8.038,
+            "mean": 11.585164197530863,
+            "p95NearestRank": 15.78,
+            "p99NearestRank": 19.6478,
+            "max": 19.6478
+          },
+          "firstStartedMs": 1793335539149,
+          "lastEndedMs": 1793335547168
+        }
+      },
+      "observerSqlDisabled": true,
+      "queueObserverTotalWallMs": {
+        "n": 11,
+        "min": 3.007,
+        "mean": 4.673363636363637,
+        "p95NearestRank": 6.88,
+        "p99NearestRank": 6.88,
+        "max": 6.88
+      },
+      "sqlCompletionTimeBracketMs": {
+        "n": 0,
+        "min": null,
+        "mean": null,
+        "p95NearestRank": null,
+        "p99NearestRank": null,
+        "max": null
+      },
+      "queueSampleCount": 11,
+      "queueObserverErrors": 0,
+      "final": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 102,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 306,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 138,
+        "redisAccepted": 102,
+        "redisStock": 138,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 102,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "drain": {
+        "loadEndedAtMs": 1793335548584,
+        "convergedObservedAtMs": 1793335548601,
+        "drainMs": 16,
+        "lastResponseToConvergedObservedMs": 1433,
+        "nominalStableEndToConvergedObservedMs": 1452
+      },
+      "safety": {
+        "stoppedEarly": null,
+        "stopReason": null,
+        "pauseRequestedAtMs": null,
+        "pauseConfirmed": null,
+        "stopConfirmed": null,
+        "fallbackKilledOwnedK6": null,
+        "k6ExitCode": 0,
+        "exportedLogsComplete": true
+      },
+      "sources": [
+        {
+          "path": "probe-auto-observer-off/result.json",
+          "bytes": 4444,
+          "sha256": "68afa52ed77322b518e115d2a559f04e15b0581acdfd6a2dc678277383784eb0"
+        },
+        {
+          "path": "probe-auto-observer-off/requests.ndjson",
+          "bytes": 32814,
+          "sha256": "2e21658e1d69f98cef5d2a5c6b67c11b3cab348935e80005b9ea13a8c35de54f"
+        },
+        {
+          "path": "probe-auto-observer-off/orders.ndjson",
+          "bytes": 5425,
+          "sha256": "dc76560f555d522dace6c53e88a9134cc91147462ad6b7a147d88c3900137284"
+        },
+        {
+          "path": "probe-auto-observer-off/redis-accepted.ndjson",
+          "bytes": 4813,
+          "sha256": "7f184516837b8f58aa5323607a6af995d784c18941fb8ad7bed12ca4ff982819"
+        },
+        {
+          "path": "probe-auto-observer-off/queue.ndjson",
+          "bytes": 2836,
+          "sha256": "a26e881bf45ab5ffac8d7af15979be171c0623d8bc59fb1b09440f5a3184902b"
+        },
+        {
+          "path": "probe-auto-observer-off/k6-metrics.ndjson.gz",
+          "bytes": 13684,
+          "sha256": "5d67889df51e2674297ca463c002938a629c37f3b7897fd9a281c7a11e7e4dc0",
+          "originalPath": "probe-auto-observer-off/k6-metrics.ndjson",
+          "originalBytes": 362874,
+          "originalSha256": "765258c7a503ba0a7918c554ea30453fe082a96a9951958a44629b54940b67b2"
+        }
+      ],
+      "resources": {
+        "source": {
+          "path": "probe-auto-observer-off-control/resources.ndjson",
+          "bytes": 10433,
+          "sha256": "837ae135a34e265b120af413b6324edb8fe1edc284df02c8cfd848de865d5f69"
+        },
+        "sampleCount": 5,
+        "completeSampleCount": 5,
+        "errors": [],
+        "firstSampleAt": "2026-10-30T04:45:27.980123+00:00",
+        "lastSampleAt": "2026-10-30T04:45:47.982421+00:00",
+        "hostMemoryPercent": {
+          "n": 5,
+          "min": 77.4,
+          "mean": 77.7,
+          "p95NearestRank": 78.4,
+          "p99NearestRank": 78.4,
+          "max": 78.4
+        },
+        "hostCPUPercent": {
+          "n": 5,
+          "min": 23.3,
+          "mean": 31.78,
+          "p95NearestRank": 47.9,
+          "p99NearestRank": 47.9,
+          "max": 47.9
+        },
+        "samplerCPUPercentOneCore": {
+          "n": 5,
+          "min": 0.8,
+          "mean": 2.2199999999999998,
+          "p95NearestRank": 4.8,
+          "p99NearestRank": 4.8,
+          "max": 4.8
+        },
+        "samplerRSSBytes": {
+          "n": 5,
+          "min": 31858688.0,
+          "mean": 31880806.4,
+          "p95NearestRank": 31895552.0,
+          "p99NearestRank": 31895552.0,
+          "max": 31895552.0
+        },
+        "samplerObservationWallMs": {
+          "n": 5,
+          "min": 1635.8933000010438,
+          "mean": 1881.844560004538,
+          "p95NearestRank": 2187.9248000041116,
+          "p99NearestRank": 2187.9248000041116,
+          "max": 2187.9248000041116
+        },
+        "apiRSSBytes": {
+          "n": 5,
+          "min": 31662080.0,
+          "mean": 31805440.0,
+          "p95NearestRank": 31916032.0,
+          "p99NearestRank": 31916032.0,
+          "max": 31916032.0
+        },
+        "generatorRSSBytes": {
+          "n": 5,
+          "min": 35110912.0,
+          "mean": 38463897.6,
+          "p95NearestRank": 43167744.0,
+          "p99NearestRank": 43167744.0,
+          "max": 43167744.0
+        },
+        "generatorCPUPercentOneCore": {
+          "n": 5,
+          "min": 0.0,
+          "mean": 1.48,
+          "p95NearestRank": 5.3,
+          "p99NearestRank": 5.3,
+          "max": 5.3
+        }
+      },
+      "supervision": {
+        "started_at": "2026-10-30T04:45:25.084170+00:00",
+        "mode": "trade",
+        "api_pid": 68744,
+        "sampler_started": true,
+        "stop_signal": false,
+        "forced_owned_processes": [],
+        "errors": [],
+        "helper_launcher_pid": 67096,
+        "sampler_pid": 45092,
+        "sampled_k6_pid": 68428,
+        "sampling_started_at": "2026-10-30T04:45:27.146962+00:00",
+        "sampling_ended_after_generator_exit": true,
+        "sampling_ended_at": "2026-10-30T04:45:48.607516+00:00",
+        "harness_exit": 0,
+        "sampler_exit": 0,
+        "resource_samples": 5,
+        "complete_resource_samples": 5,
+        "first_resource_sample_at": "2026-10-30T04:45:27.980123+00:00",
+        "last_resource_sample_at": "2026-10-30T04:45:47.982421+00:00",
+        "ended_at": "2026-10-30T04:45:49.778482+00:00",
+        "elapsed_seconds": 24.694303399999626,
+        "forced": false,
+        "completed_without_supervision_failure": true
+      }
+    },
+    {
+      "activityId": "1006",
+      "model": {
+        "rate": 10,
+        "warmSeconds": 2,
+        "stableSeconds": 30,
+        "preAllocatedVUs": 20,
+        "maxVUs": 20,
+        "warmSlots": 40,
+        "availableUsers": 360,
+        "initialStock": 460
+      },
+      "capacityPassed": false,
+      "reconciliationPassed": true,
+      "requestCount": 60,
+      "acceptedCount": 60,
+      "sqlRows": 60,
+      "redisMappings": 60,
+      "recomputedChecks": {
+        "duplicateSQLOrderIds": 0,
+        "duplicateRedisOrderIds": 0,
+        "duplicateAcceptedResponseOrderIds": 0,
+        "duplicateExportedPhaseIndex": 0,
+        "exportedRequestRecordMismatches": 0,
+        "publicPoolIndexUserMismatches": 0,
+        "sqlMissingOrUserMismatch": 0,
+        "redisMissingOrUserMismatch": 0,
+        "unloggedSQLOrders": 0,
+        "unloggedRedisAccepted": 0,
+        "requestRecordsEqualExportedRecords": true
+      },
+      "rawMetricCounts": {
+        "http_reqs": 60,
+        "cap_requests": 60,
+        "cap_system_errors": 0,
+        "cap_request_record": 60
+      },
+      "exportedRecordCount": 60,
+      "phases": {
+        "warm": {
+          "count": 20,
+          "categories": {
+            "accepted": 20
+          },
+          "allLatencyMs": {
+            "n": 20,
+            "min": 8.5156,
+            "mean": 10.5629,
+            "p95NearestRank": 12.5923,
+            "p99NearestRank": 13.3663,
+            "max": 13.3663
+          },
+          "acceptedLatencyMs": {
+            "n": 20,
+            "min": 8.5156,
+            "mean": 10.5629,
+            "p95NearestRank": 12.5923,
+            "p99NearestRank": 13.3663,
+            "max": 13.3663
+          },
+          "firstStartedMs": 1793335574359,
+          "lastEndedMs": 1793335576270
+        },
+        "stable": {
+          "count": 40,
+          "categories": {
+            "accepted": 40
+          },
+          "allLatencyMs": {
+            "n": 40,
+            "min": 9.178,
+            "mean": 11.214382500000001,
+            "p95NearestRank": 13.973,
+            "p99NearestRank": 19.374,
+            "max": 19.374
+          },
+          "acceptedLatencyMs": {
+            "n": 40,
+            "min": 9.178,
+            "mean": 11.214382500000001,
+            "p95NearestRank": 13.973,
+            "p99NearestRank": 19.374,
+            "max": 19.374
+          },
+          "firstStartedMs": 1793335586359,
+          "lastEndedMs": 1793335590271
+        }
+      },
+      "observerSqlDisabled": false,
+      "queueObserverTotalWallMs": {
+        "n": 9,
+        "min": 4.498,
+        "mean": 6.774444444444445,
+        "p95NearestRank": 10.747,
+        "p99NearestRank": 10.747,
+        "max": 10.747
+      },
+      "sqlCompletionTimeBracketMs": {
+        "n": 9,
+        "min": 1.0,
+        "mean": 2.3333333333333335,
+        "p95NearestRank": 6.0,
+        "p99NearestRank": 6.0,
+        "max": 6.0
+      },
+      "queueSampleCount": 9,
+      "queueObserverErrors": 0,
+      "final": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 60,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 366,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 400,
+        "redisAccepted": 60,
+        "redisStock": 400,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 60,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "drain": {
+        "loadEndedAtMs": 1793335591282,
+        "convergedObservedAtMs": 1793335591289,
+        "drainMs": 7,
+        "lastResponseToConvergedObservedMs": 1018,
+        "nominalStableEndToConvergedObservedMs": 0
+      },
+      "safety": {
+        "stoppedEarly": true,
+        "stopReason": "external resource budget",
+        "pauseRequestedAtMs": 1793335590320,
+        "pauseConfirmed": false,
+        "stopConfirmed": true,
+        "fallbackKilledOwnedK6": null,
+        "k6ExitCode": 103,
+        "exportedLogsComplete": true
+      },
+      "sources": [
+        {
+          "path": "probe-safety-stop/result.json",
+          "bytes": 4627,
+          "sha256": "373f61a31e5bd09c57a96267e20f627b7ca1d799425420c3068866f148a90627"
+        },
+        {
+          "path": "probe-safety-stop/requests.ndjson",
+          "bytes": 19263,
+          "sha256": "63694747d6e8a5396c0180c8745036dc609753a8452586885e010291ab2cc3ae"
+        },
+        {
+          "path": "probe-safety-stop/orders.ndjson",
+          "bytes": 3174,
+          "sha256": "9e2e34fcb3fe5f842aaffa0c26d0105bc7420989d7b0725a432f1ee41754886d"
+        },
+        {
+          "path": "probe-safety-stop/redis-accepted.ndjson",
+          "bytes": 2814,
+          "sha256": "59e04123225b5452ae61ba786bda86aeda326932e85294d6c3dc4bffbb1f4d1e"
+        },
+        {
+          "path": "probe-safety-stop/queue.ndjson",
+          "bytes": 2426,
+          "sha256": "832b606c289ee10337ac04bc388eef35b4f651a3e6492b6a4fa80565aa5c8067"
+        },
+        {
+          "path": "probe-safety-stop/k6-metrics.ndjson.gz",
+          "bytes": 8509,
+          "sha256": "db98b0504527be26af0dc77dcba877ed5ae1e91dcc928ba5c4c393b2627b7d75",
+          "originalPath": "probe-safety-stop/k6-metrics.ndjson",
+          "originalBytes": 214960,
+          "originalSha256": "59b356b9d533b0d7c8ee2c8663f46107e3f32127872f39725b4a96fcdaac5ed5"
+        }
+      ],
+      "resources": {
+        "source": {
+          "path": "probe-safety-stop-control/resources.ndjson",
+          "bytes": 8495,
+          "sha256": "e45e3ac799e0bbe481efc18d5154a1d82d430b49e40c59145737d955d3b16d58"
+        },
+        "sampleCount": 4,
+        "completeSampleCount": 4,
+        "errors": [],
+        "firstSampleAt": "2026-10-30T04:46:15.167531+00:00",
+        "lastSampleAt": "2026-10-30T04:46:30.169082+00:00",
+        "hostMemoryPercent": {
+          "n": 4,
+          "min": 77.6,
+          "mean": 77.875,
+          "p95NearestRank": 78.2,
+          "p99NearestRank": 78.2,
+          "max": 78.2
+        },
+        "hostCPUPercent": {
+          "n": 4,
+          "min": 17.6,
+          "mean": 30.5,
+          "p95NearestRank": 39.7,
+          "p99NearestRank": 39.7,
+          "max": 39.7
+        },
+        "samplerCPUPercentOneCore": {
+          "n": 4,
+          "min": 1.1,
+          "mean": 1.85,
+          "p95NearestRank": 2.9,
+          "p99NearestRank": 2.9,
+          "max": 2.9
+        },
+        "samplerRSSBytes": {
+          "n": 4,
+          "min": 31682560.0,
+          "mean": 31707136.0,
+          "p95NearestRank": 31719424.0,
+          "p99NearestRank": 31719424.0,
+          "max": 31719424.0
+        },
+        "samplerObservationWallMs": {
+          "n": 4,
+          "min": 1249.3576999986544,
+          "mean": 1707.639799991739,
+          "p95NearestRank": 2172.063400008483,
+          "p99NearestRank": 2172.063400008483,
+          "max": 2172.063400008483
+        },
+        "apiRSSBytes": {
+          "n": 4,
+          "min": 31830016.0,
+          "mean": 31980544.0,
+          "p95NearestRank": 32059392.0,
+          "p99NearestRank": 32059392.0,
+          "max": 32059392.0
+        },
+        "generatorRSSBytes": {
+          "n": 4,
+          "min": 36016128.0,
+          "mean": 38082560.0,
+          "p95NearestRank": 39706624.0,
+          "p99NearestRank": 39706624.0,
+          "max": 39706624.0
+        },
+        "generatorCPUPercentOneCore": {
+          "n": 4,
+          "min": 0.0,
+          "mean": 0.4,
+          "p95NearestRank": 1.6,
+          "p99NearestRank": 1.6,
+          "max": 1.6
+        }
+      },
+      "supervision": {
+        "started_at": "2026-10-30T04:46:13.121193+00:00",
+        "mode": "trade",
+        "api_pid": 68744,
+        "sampler_started": true,
+        "stop_signal": true,
+        "forced_owned_processes": [],
+        "errors": [],
+        "helper_launcher_pid": 68300,
+        "sampler_pid": 63400,
+        "sampled_k6_pid": 61600,
+        "sampling_started_at": "2026-10-30T04:46:14.375099+00:00",
+        "harness_exit": 0,
+        "sampler_exit": 0,
+        "resource_samples": 4,
+        "complete_resource_samples": 4,
+        "first_resource_sample_at": "2026-10-30T04:46:15.167531+00:00",
+        "last_resource_sample_at": "2026-10-30T04:46:30.169082+00:00",
+        "ended_at": "2026-10-30T04:46:31.439448+00:00",
+        "elapsed_seconds": 18.31824510000297,
+        "forced": false,
+        "completed_without_supervision_failure": false
+      }
+    }
+  ],
+  "generatorCalibrations": [
+    {
+      "purpose": "generator/exporter short-response calibration only; no transaction capacity implication",
+      "stage": {
+        "healthOnly": true,
+        "rate": 100,
+        "nominalSeconds": 15,
+        "loadExit": 0,
+        "samplerExit": 0,
+        "stopped": false,
+        "elapsedSeconds": 18.036397218704224
+      },
+      "requestCount": 1501,
+      "actualIssuedPerNominalSecond": 100.06666666666666,
+      "rawMetricCounts": {
+        "http_reqs": 1501,
+        "cap_requests": 1501,
+        "cap_system_errors": 0,
+        "cap_request_record": 1501
+      },
+      "recomputedUniqueOrdinalCount": 1501,
+      "allLatencyMs": {
+        "n": 1501,
+        "min": 0.0,
+        "mean": 0.19592071952031978,
+        "p95NearestRank": 0.5939,
+        "p99NearestRank": 0.8824,
+        "max": 4.9074
+      },
+      "k6InterpolatedLatencyMs": {
+        "med": 0,
+        "p(95)": 0.5939,
+        "p(99)": 0.8824,
+        "max": 4.9074,
+        "avg": 0.19592071952031986
+      },
+      "resources": {
+        "source": {
+          "path": "generator-health-100/resources.ndjson",
+          "bytes": 8495,
+          "sha256": "b8706548e3459919cf267dc3b2871c3b536cd207a0878e66c6081b9ad497c7fe"
+        },
+        "sampleCount": 4,
+        "completeSampleCount": 4,
+        "errors": [],
+        "firstSampleAt": "2026-10-30T04:43:42.357106+00:00",
+        "lastSampleAt": "2026-10-30T04:43:57.358921+00:00",
+        "hostMemoryPercent": {
+          "n": 4,
+          "min": 77.1,
+          "mean": 77.15,
+          "p95NearestRank": 77.2,
+          "p99NearestRank": 77.2,
+          "max": 77.2
+        },
+        "hostCPUPercent": {
+          "n": 4,
+          "min": 18.4,
+          "mean": 26.2,
+          "p95NearestRank": 45.5,
+          "p99NearestRank": 45.5,
+          "max": 45.5
+        },
+        "samplerCPUPercentOneCore": {
+          "n": 4,
+          "min": 1.3,
+          "mean": 2.25,
+          "p95NearestRank": 3.6,
+          "p99NearestRank": 3.6,
+          "max": 3.6
+        },
+        "samplerRSSBytes": {
+          "n": 4,
+          "min": 31490048.0,
+          "mean": 31511552.0,
+          "p95NearestRank": 31535104.0,
+          "p99NearestRank": 31535104.0,
+          "max": 31535104.0
+        },
+        "samplerObservationWallMs": {
+          "n": 4,
+          "min": 2160.0279999838676,
+          "mean": 2171.9737249950413,
+          "p95NearestRank": 2187.8596000024118,
+          "p99NearestRank": 2187.8596000024118,
+          "max": 2187.8596000024118
+        },
+        "apiRSSBytes": {
+          "n": 4,
+          "min": 31277056.0,
+          "mean": 34458624.0,
+          "p95NearestRank": 36491264.0,
+          "p99NearestRank": 36491264.0,
+          "max": 36491264.0
+        },
+        "generatorRSSBytes": {
+          "n": 4,
+          "min": 69529600.0,
+          "mean": 87362560.0,
+          "p95NearestRank": 99450880.0,
+          "p99NearestRank": 99450880.0,
+          "max": 99450880.0
+        },
+        "generatorCPUPercentOneCore": {
+          "n": 4,
+          "min": 0.0,
+          "mean": 7.1,
+          "p95NearestRank": 11.8,
+          "p99NearestRank": 11.8,
+          "max": 11.8
+        }
+      },
+      "metricsBytes": 4972799,
+      "sources": [
+        {
+          "path": "generator-health-100/stage.json",
+          "bytes": 168,
+          "sha256": "a4a8cf3b648d030ca7bfe5200c77f5cdd11d69d7322731e738e6ab50723bd0f5"
+        },
+        {
+          "path": "generator-health-100/summary.json",
+          "bytes": 3114,
+          "sha256": "b8946b034a7f3a82d85db39dacd25644288ae698638abde7d1511cca565e3ba7"
+        },
+        {
+          "path": "generator-health-100/k6-metrics.ndjson.gz",
+          "bytes": 145896,
+          "sha256": "79a7f856723e257bc0e184a6559b392029b9b48cca2b3d726224b8ead7788fbd",
+          "originalPath": "generator-health-100/k6-metrics.ndjson",
+          "originalBytes": 4972799,
+          "originalSha256": "d1a1a9841b75180f2acad319bd7b3e9055b65dd5fe18d2c8463099f851e02267"
+        }
+      ]
+    },
+    {
+      "purpose": "generator/exporter short-response calibration only; no transaction capacity implication",
+      "stage": {
+        "healthOnly": true,
+        "rate": 400,
+        "nominalSeconds": 15,
+        "loadExit": 0,
+        "samplerExit": 0,
+        "stopped": false,
+        "elapsedSeconds": 16.982839107513428
+      },
+      "requestCount": 6000,
+      "actualIssuedPerNominalSecond": 400.0,
+      "rawMetricCounts": {
+        "http_reqs": 6000,
+        "cap_requests": 6000,
+        "cap_system_errors": 0,
+        "cap_request_record": 6000
+      },
+      "recomputedUniqueOrdinalCount": 6000,
+      "allLatencyMs": {
+        "n": 6000,
+        "min": 0.0,
+        "mean": 0.06369631666666667,
+        "p95NearestRank": 0.5285,
+        "p99NearestRank": 0.7172,
+        "max": 3.5451
+      },
+      "k6InterpolatedLatencyMs": {
+        "med": 0,
+        "p(95)": 0.528505,
+        "p(99)": 0.717203,
+        "max": 3.5451,
+        "avg": 0.06369631666666663
+      },
+      "resources": {
+        "source": {
+          "path": "generator-health-400/resources.ndjson",
+          "bytes": 8509,
+          "sha256": "c642caeb2e01f848daad5c75a279c85da014e09d3397fa10f9743213832245bf"
+        },
+        "sampleCount": 4,
+        "completeSampleCount": 4,
+        "errors": [],
+        "firstSampleAt": "2026-10-30T04:44:00.355228+00:00",
+        "lastSampleAt": "2026-10-30T04:44:15.356826+00:00",
+        "hostMemoryPercent": {
+          "n": 4,
+          "min": 77.1,
+          "mean": 77.275,
+          "p95NearestRank": 77.5,
+          "p99NearestRank": 77.5,
+          "max": 77.5
+        },
+        "hostCPUPercent": {
+          "n": 4,
+          "min": 17.9,
+          "mean": 23.925,
+          "p95NearestRank": 28.4,
+          "p99NearestRank": 28.4,
+          "max": 28.4
+        },
+        "samplerCPUPercentOneCore": {
+          "n": 4,
+          "min": 0.8,
+          "mean": 2.575,
+          "p95NearestRank": 6.6,
+          "p99NearestRank": 6.6,
+          "max": 6.6
+        },
+        "samplerRSSBytes": {
+          "n": 4,
+          "min": 31703040.0,
+          "mean": 31730688.0,
+          "p95NearestRank": 31748096.0,
+          "p99NearestRank": 31748096.0,
+          "max": 31748096.0
+        },
+        "samplerObservationWallMs": {
+          "n": 4,
+          "min": 1154.0808000136167,
+          "mean": 1674.1183000049205,
+          "p95NearestRank": 2198.357199988095,
+          "p99NearestRank": 2198.357199988095,
+          "max": 2198.357199988095
+        },
+        "apiRSSBytes": {
+          "n": 4,
+          "min": 36618240.0,
+          "mean": 38451200.0,
+          "p95NearestRank": 39440384.0,
+          "p99NearestRank": 39440384.0,
+          "max": 39440384.0
+        },
+        "generatorRSSBytes": {
+          "n": 4,
+          "min": 80822272.0,
+          "mean": 98277376.0,
+          "p95NearestRank": 112750592.0,
+          "p99NearestRank": 112750592.0,
+          "max": 112750592.0
+        },
+        "generatorCPUPercentOneCore": {
+          "n": 4,
+          "min": 0.0,
+          "mean": 27.275,
+          "p95NearestRank": 37.5,
+          "p99NearestRank": 37.5,
+          "max": 37.5
+        }
+      },
+      "metricsBytes": 19814922,
+      "sources": [
+        {
+          "path": "generator-health-400/stage.json",
+          "bytes": 168,
+          "sha256": "ac0fc3dd463597f20f7e2b26c4f682200675edb534bf8e33d7181ac401616fb5"
+        },
+        {
+          "path": "generator-health-400/summary.json",
+          "bytes": 3176,
+          "sha256": "49cc5983acab1d659092793430740e42cd0c7fac3ebb6fe8eb8521f2589058c5"
+        },
+        {
+          "path": "generator-health-400/k6-metrics.ndjson.gz",
+          "bytes": 544087,
+          "sha256": "fbcd450c6eb14c76802a49e941c5d12a160ddd4fbe53a584016751b283b70011",
+          "originalPath": "generator-health-400/k6-metrics.ndjson",
+          "originalBytes": 19814922,
+          "originalSha256": "1933768f56d115ec3ede287b457d60cf464ade1b2daa5352039689b8de6e481a"
+        }
+      ]
+    }
+  ]
+}

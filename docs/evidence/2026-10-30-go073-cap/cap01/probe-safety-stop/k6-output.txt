@@ -1,0 +1,40 @@
+
+
+  █ THRESHOLDS 
+
+    cap_requests
+    ✓ 'count>=0' count=60
+
+    dropped_iterations
+    ✓ 'count>=0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_accepted.........: 60     3.758302/s
+    cap_accepted_ms......: avg=10.99ms med=10.66ms p(95)=13.48ms p(99)=16.31ms max=19.37ms
+    cap_admission_ms.....: avg=10.99ms med=10.66ms p(95)=13.48ms p(99)=16.31ms max=19.37ms
+    cap_request_record...: 60     3.758302/s
+    cap_requests.........: 60     3.758302/s
+    cap_system_errors....: 0      0/s
+
+    HTTP
+    http_req_duration....: avg=10.99ms med=10.66ms p(95)=13.48ms p(99)=16.31ms max=19.37ms
+    http_req_failed......: 0.00%  0 out of 60
+    http_reqs............: 60     3.758302/s
+
+    EXECUTION
+    dropped_iterations...: 0      0/s
+    iteration_duration...: avg=11.46ms med=10.95ms p(95)=14.07ms p(99)=16.91ms max=20.06ms
+    iterations...........: 60     3.758302/s
+    vus..................: 0      min=0       max=0 
+    vus_max..............: 20     min=20      max=20
+
+    NETWORK
+    data_received........: 10 kB  628 B/s
+    data_sent............: 9.9 kB 620 B/s
+
+
+
+time="2026-10-30T12:46:31+08:00" level=error msg="test run stopped from REST API"

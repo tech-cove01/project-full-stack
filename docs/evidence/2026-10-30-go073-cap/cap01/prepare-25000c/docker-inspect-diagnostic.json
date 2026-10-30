@@ -1,0 +1,8 @@
+{
+  "binaryPath": "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
+  "errorKind": "*exec.ExitError",
+  "exitCode": 1,
+  "lookPathSucceeded": true,
+  "service": "mysql",
+  "stderrClass": "permission-denied"
+}

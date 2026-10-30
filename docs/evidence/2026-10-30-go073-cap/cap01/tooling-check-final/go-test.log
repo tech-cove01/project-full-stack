@@ -1,0 +1,10 @@
+=== RUN   TestReadOnlyDockerErrorDiagnosticIsBoundedAndRedacted
+--- PASS: TestReadOnlyDockerErrorDiagnosticIsBoundedAndRedacted (0.00s)
+=== RUN   TestExternalPreflightKeepsExactOwnershipAndFifteenSecondGuard
+--- PASS: TestExternalPreflightKeepsExactOwnershipAndFifteenSecondGuard (0.00s)
+=== RUN   TestExporterReaderPreservesStringIDsAndRejectsTruncationOrDuplicateOrdinal
+--- PASS: TestExporterReaderPreservesStringIDsAndRejectsTruncationOrDuplicateOrdinal (0.01s)
+=== RUN   TestTemporaryPoolGuardAndFixedQueueGrowthCriterion
+--- PASS: TestTemporaryPoolGuardAndFixedQueueGrowthCriterion (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/cmd/capacity-trade	0.288s

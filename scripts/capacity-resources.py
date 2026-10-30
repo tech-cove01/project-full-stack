@@ -24,7 +24,7 @@ def main():
     parser.add_argument('--diagnostics', required=True)
     parser.add_argument('--project', required=True)
     parser.add_argument('--container', action='append', required=True)
-    parser.add_argument('--load-script', choices=['capacity-trade.js', 'go073-cap-read.js'], required=True)
+    parser.add_argument('--load-script', choices=['capacity-trade.js', 'go073-cap-read.js', 'capacity-health.js'], required=True)
     parser.add_argument('--load-pid-file', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--stop-file', type=Path, required=True)

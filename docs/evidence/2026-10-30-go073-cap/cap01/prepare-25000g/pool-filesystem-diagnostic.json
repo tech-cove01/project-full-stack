@@ -1,0 +1,6 @@
+{
+  "errorKind": "*fs.PathError",
+  "operation": "reserve-new-private-pool",
+  "osError": "Access is denied.",
+  "osOperation": "open"
+}

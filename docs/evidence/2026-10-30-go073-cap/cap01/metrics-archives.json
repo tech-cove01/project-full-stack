@@ -1,0 +1,44 @@
+[
+  {
+    "path": "generator-health-100\\k6-metrics.ndjson.gz",
+    "originalBytes": 4972799,
+    "originalSha256": "d1a1a9841b75180f2acad319bd7b3e9055b65dd5fe18d2c8463099f851e02267",
+    "gzipBytes": 145896,
+    "gzipSha256": "79a7f856723e257bc0e184a6559b392029b9b48cca2b3d726224b8ead7788fbd"
+  },
+  {
+    "path": "generator-health-400\\k6-metrics.ndjson.gz",
+    "originalBytes": 19814922,
+    "originalSha256": "1933768f56d115ec3ede287b457d60cf464ade1b2daa5352039689b8de6e481a",
+    "gzipBytes": 544087,
+    "gzipSha256": "fbcd450c6eb14c76802a49e941c5d12a160ddd4fbe53a584016751b283b70011"
+  },
+  {
+    "path": "probe-auto-observer-off\\k6-metrics.ndjson.gz",
+    "originalBytes": 362874,
+    "originalSha256": "765258c7a503ba0a7918c554ea30453fe082a96a9951958a44629b54940b67b2",
+    "gzipBytes": 13684,
+    "gzipSha256": "5d67889df51e2674297ca463c002938a629c37f3b7897fd9a281c7a11e7e4dc0"
+  },
+  {
+    "path": "probe-auto-observer-on\\k6-metrics.ndjson.gz",
+    "originalBytes": 362886,
+    "originalSha256": "7eb1e315c518214c733beaa438671c7636d5b31512b4430e4df2a19515edf0c9",
+    "gzipBytes": 13708,
+    "gzipSha256": "dfb036bb4bd07de3e4f8daddb7493f213997074e2c48e1d9f42e029b48f4d76b"
+  },
+  {
+    "path": "probe-observer-on\\k6-metrics.ndjson.gz",
+    "originalBytes": 362629,
+    "originalSha256": "cdc4c858b65635d708d2f2ef65a81eeaa2e8dccaadf8df9f72f24053b92a801d",
+    "gzipBytes": 13661,
+    "gzipSha256": "a9c4e671bb288067966f6746f80fe9b3387c0b87e6249dc720d187803449ed9b"
+  },
+  {
+    "path": "probe-safety-stop\\k6-metrics.ndjson.gz",
+    "originalBytes": 214960,
+    "originalSha256": "59b356b9d533b0d7c8ee2c8663f46107e3f32127872f39725b4a96fcdaac5ed5",
+    "gzipBytes": 8509,
+    "gzipSha256": "db98b0504527be26af0dc77dcba877ed5ae1e91dcc928ba5c4c393b2627b7d75"
+  }
+]

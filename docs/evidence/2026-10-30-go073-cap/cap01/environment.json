@@ -1,0 +1,45 @@
+{
+  "atUTC": "2026-10-30T04:31:56.6676278Z",
+  "os": {
+    "version": "10.0.26300",
+    "architecture": "64 位",
+    "caption": "Microsoft Windows 11 专业版"
+  },
+  "hardware": {
+    "model": "ROG Zephyrus M16 GU604VI_GU604VI",
+    "logicalProcessors": 20,
+    "cpu": "13th Gen Intel(R) Core(TM) i9-13900H",
+    "physicalCores": 14,
+    "memoryBytes": 33960505344
+  },
+  "docker": {
+    "version": "29.3.1",
+    "cpus": 20,
+    "memoryBytes": 16572063744
+  },
+  "toolVersions": {
+    "go": "go version go1.27.0 windows/amd64",
+    "k6": "k6.exe v2.2.0 (commit/00a9a1b7f5, go1.26.5, windows/amd64)",
+    "node": "v24.15.0"
+  },
+  "ownedContainerLimits": [
+    "/project-full-stack-cap-trade-mysql-1|sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34|4000000000|2147483648|{\"3306/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"3450\"}]}",
+    "/project-full-stack-cap-trade-redis-1|sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65|2000000000|536870912|{\"6379/tcp\":[{\"HostIp\":\"127.0.0.1\",\"HostPort\":\"6550\"}]}"
+  ],
+  "otherRunningContainers": [
+    "crm-agent-services-clickhouse-1",
+    "crm-agent-services-weknora-1",
+    "crm-agent-services-seaweedfs-1",
+    "crm-agent-services-langfuse-web-1",
+    "crm-agent-services-langfuse-worker-1",
+    "crm-agent-services-redis-1",
+    "crm-agent-services-mem0-1",
+    "crm-agent-services-postgres-1",
+    "supabase_storage_project-crm-local",
+    "supabase_rest_project-crm-local",
+    "supabase_realtime_project-crm-local",
+    "supabase_auth_project-crm-local",
+    "supabase_kong_project-crm-local",
+    "supabase_db_project-crm-local"
+  ]
+}

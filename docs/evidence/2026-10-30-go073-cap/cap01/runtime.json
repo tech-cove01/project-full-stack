@@ -1,0 +1,10 @@
+{
+  "pid": 68744,
+  "runtimeDirectory": "C:\\Users\\19083\\AppData\\Local\\Temp\\fullstack-cap-1d8427b785cd4d8694de1a3da44e9947",
+  "binary": "D:\\桌面\\The ALL\\agent\\project\\code\\.worktrees\\full-stack-cap-32ae243\\backend\\bin\\cap-api.exe",
+  "revision": "32ae24331d7de98d8df004cf854708ec3c59eec4",
+  "GOMAXPROCS": 4,
+  "GOMEMLIMIT": "1GiB",
+  "api": "http://127.0.0.1:8250",
+  "diagnostics": "http://127.0.0.1:8350/debug/capacity"
+}

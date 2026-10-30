@@ -1,0 +1,9 @@
+{
+  "healthOnly": true,
+  "rate": 400,
+  "nominalSeconds": 15,
+  "loadExit": 0,
+  "samplerExit": 0,
+  "stopped": false,
+  "elapsedSeconds": 16.982839107513428
+}

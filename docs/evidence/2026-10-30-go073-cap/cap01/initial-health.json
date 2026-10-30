@@ -1,0 +1,49 @@
+{
+  "health": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "capacity-32ae24331d7de98d8df004cf854708ec3c59eec4"
+  },
+  "diagnostics": {
+    "at": "2026-10-30T04:30:43.4079478Z",
+    "uptime_ms": 6119,
+    "pid": 68744,
+    "runtime": {
+      "goroutines": 18,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 2441120,
+      "heap_sys_bytes": 11829248,
+      "heap_inuse_bytes": 4259840,
+      "total_alloc_bytes": 4497912,
+      "mallocs": 49641,
+      "frees": 29915,
+      "num_gc": 2,
+      "pause_total_ns": 532300,
+      "last_gc_unix_ns": 1793334642470672400,
+      "gc_cpu_fraction": 0.00020600623210906445
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 3,
+      "in_use": 0,
+      "idle": 3,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 0,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 179,
+      "misses": 1,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 1,
+      "idle_connections": 1,
+      "stale_connections": 0
+    }
+  }
+}

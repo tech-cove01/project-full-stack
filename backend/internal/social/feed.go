@@ -99,9 +99,9 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 
 func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time.Time,
 	cursorKey uint64, hasCursor bool, limit int) (FeedPage, error) {
-	// Two steps on purpose: a join makes MySQL sort the whole joined set
-	// (Using temporary; Using filesort). Reading the author ids first lets the
-	// note query scan idx_blog_feed backwards and stop at the page limit.
+	// Read the author catalog first to narrow candidates. The final SQL still
+	// verifies the current relation before LIMIT. Global-order and author-first
+	// indexes are alternatives; the actual plan can still join and sort.
 	authors := make([]uint64, 0)
 	if err := service.db.WithContext(ctx).Raw(`SELECT follow_user_id FROM tb_follow
 		WHERE user_id=? AND active=1`, user).Scan(&authors).Error; err != nil {
@@ -138,8 +138,8 @@ func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time
 		Comments   uint64
 		CreateTime time.Time
 	}, 0, limit)
-	// One join assembles the shop label for the whole page instead of querying it
-	// per card; the feed still scans idx_blog_feed for the ordered page.
+	// One join assembles shop labels for the page. Index selection and sorting
+	// depend on the author distribution and must be checked in the actual plan.
 	projected := service.projections && service.feedCatalogComplete(ctx, authors)
 	query := func(useCatalog bool) error {
 		catalog := ""

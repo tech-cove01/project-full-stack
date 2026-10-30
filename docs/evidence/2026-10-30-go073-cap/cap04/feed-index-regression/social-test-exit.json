@@ -1,0 +1,8 @@
+{
+  "exitCode": 0,
+  "mysqlPort": 3452,
+  "redisPort": 6552,
+  "integration": true,
+  "command": "go test -count=1 -p 1 -v ./internal/social",
+  "at": "2026-10-30T05:58:17.5992430Z"
+}

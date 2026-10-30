@@ -1,0 +1,13 @@
+skip  003-trade
+skip  004-ai
+skip  005-order-review
+skip  006-community
+skip  007-feed-index
+skip  008-ai-version-title
+skip  009-community-projections
+skip  010-community-consumer-recovery
+skip  011-community-failure-key
+skip  012-note-search
+apply 013-feed-author-index
+migrations applied
+exit_code=0

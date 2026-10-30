@@ -216,7 +216,7 @@ if (action === 'prepare') {
   assert.ok(process.env.CAP_READ_EVIDENCE, 'explicit new CAP_READ_EVIDENCE required')
   const dir = resolve(process.env.CAP_READ_EVIDENCE); await mkdir(dir, { recursive: false })
   if (process.env.CAP_STOP_FILE) { try { await readFile(process.env.CAP_STOP_FILE); throw new Error('stop file already exists; preserve it and choose a new path') } catch (error) { if (error.code !== 'ENOENT') throw error } }
-  const report = { task: 'GO-073-CAP-03', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture, fixtureSourceSha: manifest.sourceSha, pageSize: 20, activeReaders: mode === 'hot' ? 1 : 32, activeCountKeys: mode === 'hot' ? 20 : 640, thresholds: { actualOfferedRatioMin: .99, droppedMax: 0, systemErrorRateMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500, contentErrorsMax: 0 }, started: new Date().toISOString() }
+  const report = { task: 'GO-073-CAP-03', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture, fixtureSourceSha: manifest.sourceSha, pageSize: 20, activeReaders: mode === 'hot' ? 1 : 32, activeCountKeys: mode === 'hot' ? 20 : 640, thresholds: { actualOfferedRatioMin: .99, successfulFractionMin: .99, droppedMax: 0, systemErrorRateMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500, successfulP95MsMax: 200, successfulP99MsMax: 500, contentErrorsMax: 0 }, started: new Date().toISOString() }
   let beforeWarm = null
   async function runPhase(phase, duration) {
     if (process.env.CAP_STOP_FILE) {
@@ -249,9 +249,10 @@ if (action === 'prepare') {
     const attempted = metric('cap_read_attempted').count, successful = metric('cap_read_success').count, systemErrors = metric('cap_read_system_errors').count, contentErrors = metric('cap_read_content_errors').count, httpErrors = metric('cap_read_http_errors').count, dropped = metric('dropped_iterations').count
     const latency = metric('cap_read_all_ms'), successfulLatency = summary.metrics?.cap_read_success_ms || null
     assert.ok([attempted, successful, systemErrors, contentErrors, httpErrors, dropped, latency['p(95)'], latency['p(99)']].every(Number.isFinite), 'required metric value missing')
+    if (successful > 0) assert.ok(successfulLatency && [successfulLatency['p(95)'], successfulLatency['p(99)']].every(Number.isFinite), 'successful request latency missing')
     report.result = { attempted, successful, systemErrors, contentErrors, httpErrors, dropped, targetOffers: rate * seconds, actualOfferedRatio: attempted / (rate * seconds), issuedPerNominalSecond: attempted / seconds, successfulPerNominalSecond: successful / seconds, systemErrorRate: systemErrors / attempted, allLatency: latency, successfulLatency, k6Metrics: { vus: summary.metrics?.vus, vusMax: summary.metrics?.vus_max, dataReceived: summary.metrics?.data_received } }
     if (successful > 0) assert.ok(accessDelta.globalCommands.Com_select > 0 && accessDelta.globalCommands.Com_stmt_execute > 0 && accessDelta.statementEvents.some(row => row.event === 'statement/com/Execute' && row.count > 0), 'successful Feed stage lacks measured instance SQL executions; no access count claim')
-    report.meetsBudget = report.stableExit === 0 && !report.stableExternalStop && attempted / (rate * seconds) >= .99 && dropped === 0 && systemErrors / attempted < .01 && contentErrors === 0 && httpErrors / attempted < .01 && latency['p(95)'] <= 200 && latency['p(99)'] <= 500
+    report.meetsBudget = report.stableExit === 0 && !report.stableExternalStop && attempted / (rate * seconds) >= .99 && successful / attempted >= .99 && dropped === 0 && systemErrors / attempted < .01 && contentErrors === 0 && httpErrors / attempted < .01 && latency['p(95)'] <= 200 && latency['p(99)'] <= 500 && successfulLatency && successfulLatency['p(95)'] <= 200 && successfulLatency['p(99)'] <= 500
   } catch (error) { report.failure = error.message; report.meetsBudget = false }
   finally {
     report.finished = new Date().toISOString(); if (beforeWarm) await writeFile(join(dir, 'warm-before.json'), JSON.stringify(beforeWarm, null, 2) + '\n'); await writeFile(join(dir, 'result.json'), JSON.stringify(report, null, 2) + '\n')

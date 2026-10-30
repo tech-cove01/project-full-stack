@@ -1,0 +1,141 @@
+{
+  "task": "CAP-06B",
+  "at": "2026-10-30T10:08:46.807807+00:00",
+  "diagnosticRound": 2,
+  "maxRounds": 3,
+  "scoredFormalResult": false,
+  "stableStartedAt": 1793354729894,
+  "stableEndedAt": 1793354912732,
+  "requestResult": {
+    "attempted": 18001,
+    "completedHttpRequests": 18001,
+    "completed": 18001,
+    "incompleteOrUnclassified": 0,
+    "completedButUnclassified": 0,
+    "classificationCoverage": 1,
+    "successful": 18001,
+    "systemErrors": 0,
+    "contentErrors": 0,
+    "httpErrors": 0,
+    "dropped": 0,
+    "targetOffers": 18000,
+    "actualOfferedRatio": 1.0000555555555555,
+    "issuedPerNominalSecond": 100.00555555555556,
+    "successfulPerNominalSecond": 100.00555555555556,
+    "systemErrorRate": 0,
+    "systemErrorRatePerCompleted": 0,
+    "allLatency": {
+      "avg": 17.088311554913712,
+      "med": 14.99,
+      "p(95)": 29.2595,
+      "p(99)": 40.4513,
+      "max": 76.5284,
+      "thresholds": {
+        "p(95)<=200": false,
+        "p(99)<=500": false
+      }
+    },
+    "successfulLatency": {
+      "avg": 17.088311554913712,
+      "med": 14.99,
+      "p(95)": 29.2595,
+      "p(99)": 40.4513,
+      "max": 76.5284
+    },
+    "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+    "k6Metrics": {
+      "vus": {
+        "value": 2,
+        "min": 1,
+        "max": 4
+      },
+      "vusMax": {
+        "value": 256,
+        "min": 256,
+        "max": 256
+      },
+      "dataReceived": {
+        "count": 170212862,
+        "rate": 945548.6319584841
+      }
+    }
+  },
+  "meetsWorkloadBudget": true,
+  "supervisionOk": true,
+  "resources": {
+    "samples": 37,
+    "complete": 37
+  },
+  "collector": {
+    "successfulPolls": 183,
+    "failedPolls": 0,
+    "captures": [],
+    "firstAt": "2026-10-30T10:05:30.348950+00:00",
+    "lastAt": "2026-10-30T10:08:32.392286+00:00",
+    "maxGapMs": 1040.481300005922,
+    "coverageComplete": true
+  },
+  "sampledSlowTraceSequences": [
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39
+  ],
+  "currentStableSlowTraces": [],
+  "slowTraceScope": "Only start_at>=stable command start AND end_at<=stable command end enter currentStableSlowTraces; prior API ring entries remain in raw timeline and are not new requests.",
+  "sourceFiles": {
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/manifest.json": {
+      "bytes": 1775,
+      "sha256": "d054f360f23478d6d92e26832579d158b8d4b01137c4dce36233e953ac214d99"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-diagnostic/timeline.ndjson": {
+      "bytes": 13513840,
+      "sha256": "97dc3668e11a9e71e5708f69aa2d29808579afefff60370571027ca2102857a0"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/result.json": {
+      "bytes": 3144,
+      "sha256": "271c38aad35b4d4f088ba29ba690dad941c2cd6a86c0adbde8009eab9cfc7327"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-load/stable-summary.json": {
+      "bytes": 4760,
+      "sha256": "9bfdf770d05538185324f152abb3c1b3cfed802a419798cd8cacc49febce3d8b"
+    },
+    "docs/evidence/2026-10-30-cap06/baseline-diag-2-control/resources.ndjson": {
+      "bytes": 2738373,
+      "sha256": "96e558dd0d339c158a7b4253e38e30952e3737c9f700154b5327e4742e6d3e54"
+    }
+  },
+  "limits": [
+    "Additional 1Hz observation means this is a diagnostic result, not a formal 06D pass or proof that prior independent failure was repaired.",
+    "No state/cache reset or API restart occurred between diag1 and diag2; cumulative ring/pool baselines were retained.",
+    "No further diagnostic round or cleanup started; API and credentials retained pending root causal review."
+  ]
+}

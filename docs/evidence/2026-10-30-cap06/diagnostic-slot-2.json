@@ -1,0 +1,9 @@
+{
+  "task": "CAP-06B",
+  "number": 2,
+  "stage": "baseline-diag-2",
+  "at": "2026-10-30T10:05:16.546833+00:00",
+  "apiSourceSha": "bb03d3fe9172f3bb369cbbaa473a2ab041ec4db5",
+  "maximumRounds": 3,
+  "failedStartsAlsoConsumeSlot": true
+}

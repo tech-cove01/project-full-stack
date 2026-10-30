@@ -1,0 +1,99 @@
+=== RUN   TestIntegrationFeedColdCountsWithOneConnection
+--- PASS: TestIntegrationFeedColdCountsWithOneConnection (0.26s)
+=== RUN   TestIntegrationConcurrentFirstFollow
+--- PASS: TestIntegrationConcurrentFirstFollow (0.18s)
+=== RUN   TestIntegrationFollowAndFeed
+--- PASS: TestIntegrationFollowAndFeed (0.26s)
+=== RUN   TestIntegrationExpectedStateLike
+--- PASS: TestIntegrationExpectedStateLike (0.28s)
+=== RUN   TestIntegrationCommunityProjectionQueries
+=== RUN   TestIntegrationCommunityProjectionQueries/default_database_and_complete_projection_reads
+=== RUN   TestIntegrationCommunityProjectionQueries/complete_catalog_same_time_three_pages
+=== RUN   TestIntegrationCommunityProjectionQueries/mixed_historical_note_without_event_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/partial_catalog_gap_after_first_page_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/catalog_author_mismatch_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/catalog_version_mismatch_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/catalog_time_mismatch_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/draft_candidate_filtered_before_limit
+=== RUN   TestIntegrationCommunityProjectionQueries/follower_active_mismatch_keeps_database_state_and_count
+=== RUN   TestIntegrationCommunityProjectionQueries/follower_version_mismatch_keeps_database_state_and_count
+=== RUN   TestIntegrationCommunityProjectionQueries/missing_active_follower_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/extra_active_follower_cannot_inflate_count
+=== RUN   TestIntegrationCommunityProjectionQueries/missing_inactive_version_zero_also_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/complete_empty_author_is_zero
+=== RUN   TestIntegrationCommunityProjectionQueries/missing_follow_table_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/follow_count_after_completeness_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/missing_catalog_table_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/catalog_read_after_completeness_falls_back
+=== RUN   TestIntegrationCommunityProjectionQueries/new_follow_and_unfollow_do_not_wait_for_graph
+=== RUN   TestIntegrationCommunityProjectionQueries/one_repeatable_read_snapshot_and_next_request_guard
+=== NAME  TestIntegrationCommunityProjectionQueries
+    projection_integration_test.go:129: owned query fixtures removed; shared Kafka topic/groups and sequences preserved
+--- PASS: TestIntegrationCommunityProjectionQueries (1.74s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/default_database_and_complete_projection_reads (0.05s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/complete_catalog_same_time_three_pages (0.04s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/mixed_historical_note_without_event_falls_back (0.03s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/partial_catalog_gap_after_first_page_falls_back (0.09s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/catalog_author_mismatch_falls_back (0.03s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/catalog_version_mismatch_falls_back (0.03s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/catalog_time_mismatch_falls_back (0.03s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/draft_candidate_filtered_before_limit (0.11s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/follower_active_mismatch_keeps_database_state_and_count (0.03s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/follower_version_mismatch_keeps_database_state_and_count (0.03s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/missing_active_follower_falls_back (0.10s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/extra_active_follower_cannot_inflate_count (0.03s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/missing_inactive_version_zero_also_falls_back (0.04s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/complete_empty_author_is_zero (0.01s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/missing_follow_table_falls_back (0.01s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/follow_count_after_completeness_falls_back (0.01s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/missing_catalog_table_falls_back (0.01s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/catalog_read_after_completeness_falls_back (0.02s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/new_follow_and_unfollow_do_not_wait_for_graph (0.31s)
+    --- PASS: TestIntegrationCommunityProjectionQueries/one_repeatable_read_snapshot_and_next_request_guard (0.23s)
+=== RUN   TestIntegrationLikeProjectionCannotReplaceFacts
+--- PASS: TestIntegrationLikeProjectionCannotReplaceFacts (0.15s)
+=== RUN   TestSocialRoutesRequireLogin
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] PUT    /authors/:id/follow       --> github.com/cityloop/fullstack-go/internal/social.Register.func1 (3 handlers)
+[GIN-debug] PUT    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func2 (3 handlers)
+[GIN-debug] GET    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func3 (3 handlers)
+[GIN-debug] GET    /authors/:id/relationship --> github.com/cityloop/fullstack-go/internal/social.Register.func4 (3 handlers)
+[GIN-debug] GET    /feed/notes               --> github.com/cityloop/fullstack-go/internal/social.Register.func5 (3 handlers)
+--- PASS: TestSocialRoutesRequireLogin (0.00s)
+=== RUN   TestSetFollowRejectsSelfAndBadIdsBeforeSQL
+--- PASS: TestSetFollowRejectsSelfAndBadIdsBeforeSQL (0.00s)
+=== RUN   TestFeedCursorRequiresBothHalvesAndABoundedLimit
+--- PASS: TestFeedCursorRequiresBothHalvesAndABoundedLimit (0.00s)
+=== RUN   TestLikeRejectsBadIdsBeforeStorage
+--- PASS: TestLikeRejectsBadIdsBeforeStorage (0.00s)
+=== RUN   TestEventIDIsStablePerVersion
+--- PASS: TestEventIDIsStablePerVersion (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/social	3.128s
+=== RUN   TestIntegrationLikeBitmap
+--- PASS: TestIntegrationLikeBitmap (0.05s)
+=== RUN   TestIntegrationNoteCountsCache
+--- PASS: TestIntegrationNoteCountsCache (0.07s)
+=== RUN   TestIntegrationLocalLayerAbsorbsHotKey
+--- PASS: TestIntegrationLocalLayerAbsorbsHotKey (0.20s)
+=== RUN   TestIntegrationCountLoadCannotUndoInvalidation
+--- PASS: TestIntegrationCountLoadCannotUndoInvalidation (0.26s)
+=== RUN   TestIntegrationCancelledCountWaiterReturnsIndependently
+--- PASS: TestIntegrationCancelledCountWaiterReturnsIndependently (0.04s)
+=== RUN   TestGO073CacheMeasurement
+    go073_measure_test.go:73: explicit isolated measurement only
+--- SKIP: TestGO073CacheMeasurement (0.00s)
+=== RUN   TestIntegrationLikeProjectionEmptyRebuild
+--- PASS: TestIntegrationLikeProjectionEmptyRebuild (0.03s)
+=== RUN   TestIntegrationLikeRebuildLocksFactSnapshot
+--- PASS: TestIntegrationLikeRebuildLocksFactSnapshot (0.24s)
+=== RUN   TestIntegrationLikeProjectionFences
+--- PASS: TestIntegrationLikeProjectionFences (0.07s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communitycache	1.339s

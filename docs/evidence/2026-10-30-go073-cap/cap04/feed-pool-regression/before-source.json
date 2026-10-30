@@ -1,0 +1,8 @@
+{
+  "at": "2026-10-30T06:50:34.752257+00:00",
+  "sourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "path": "backend/internal/social/feed.go",
+  "sha256": "ef029a80c4ac568b4d2814af8f3d3e853310a0c0930503f38b810d7e9368f1a6",
+  "bytes": 7882,
+  "method": "git show sourceSha:path byte capture; Go test overlay changes only feed implementation, uses identical new regression test"
+}

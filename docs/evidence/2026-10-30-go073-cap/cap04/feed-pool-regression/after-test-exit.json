@@ -1,0 +1,6 @@
+{
+  "environment": "owned opt-tests MySQL3452 Redis6552 GO_INTEGRATION1 GOMAXPROCS4",
+  "exitCode": 0,
+  "command": "go test -count=1 -run ^TestIntegrationFeedColdCountsWithOneConnection$ -v ./internal/social",
+  "at": "2026-10-30T06:52:11.8980832Z"
+}

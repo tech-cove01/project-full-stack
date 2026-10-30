@@ -1,0 +1,4 @@
+=== RUN   TestIntegrationFeedColdCountsWithOneConnection
+--- PASS: TestIntegrationFeedColdCountsWithOneConnection (0.27s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/social	0.511s

@@ -1,0 +1,7 @@
+{
+  "exitCode": 1,
+  "test": "TestIntegrationFeedColdCountsWithOneConnection",
+  "expectedFailure": true,
+  "environment": "owned opt-tests MySQL3452 Redis6552; GO_INTEGRATION1; same new test, only feed.go overlaid with 3db source",
+  "at": "2026-10-30T06:51:48.8670753Z"
+}

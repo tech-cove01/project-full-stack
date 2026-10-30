@@ -1,0 +1,6 @@
+=== RUN   TestIntegrationFeedColdCountsWithOneConnection
+    feed_cache_integration_test.go:95: cold Feed must finish with one SQL connection: sql: transaction has already been committed or rolled back (pool waits 1)
+--- FAIL: TestIntegrationFeedColdCountsWithOneConnection (3.20s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/social	5.329s
+FAIL

@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 	_ "time/tzdata"
-
-	"github.com/cityloop/fullstack-go/internal/communitycache"
 )
 
 const (
@@ -85,16 +83,49 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		}
 		cursorAt, cursorKey = parsed, key
 	}
+	var result FeedPage
 	if service.projections {
-		var result FeedPage
 		err = service.readSnapshot(ctx, func(reader *Service) error {
 			var queryErr error
 			result, queryErr = reader.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
 			return queryErr
 		})
+	} else {
+		result, err = service.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
+	}
+	if err != nil {
 		return result, err
 	}
-	return service.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
+	// Facts, authorization, own likes and the cursor are already fixed. Release
+	// the snapshot connection before a cold cache borrows from the same DB pool.
+	return service.withFeedCounts(ctx, result), nil
+}
+
+func (service *Service) withFeedCounts(ctx context.Context, page FeedPage) FeedPage {
+	if service.counts == nil || len(page.Items) == 0 {
+		return page
+	}
+	ids := make([]uint64, len(page.Items))
+	for index, item := range page.Items {
+		id, err := strconv.ParseUint(item.ID, 10, 64)
+		if err != nil || id == 0 {
+			return page
+		}
+		ids[index] = id
+	}
+	// Public counts retain their bounded-cache semantics. Any cache error keeps
+	// the counts already read with the authorized page, without failing the feed.
+	counts, err := service.counts.GetMany(ctx, ids)
+	if err != nil {
+		return page
+	}
+	for index, id := range ids {
+		if cached, ok := counts[id]; ok {
+			page.Items[index].Liked = int(cached.Likes)
+			page.Items[index].Comments = int(cached.Comments)
+		}
+	}
+	return page
 }
 
 func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time.Time,
@@ -188,18 +219,6 @@ func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time
 			liked[id] = true
 		}
 	}
-	// Counters come from the page cache in one MGET; a miss falls back to the rows
-	// already loaded, so the feed never issues a query per card.
-	cachedCounts := map[uint64]communitycache.Counts{}
-	if service.counts != nil {
-		ids := make([]uint64, 0, len(rows))
-		for _, row := range rows {
-			ids = append(ids, row.ID)
-		}
-		if loaded, cacheErr := service.counts.GetMany(ctx, ids); cacheErr == nil {
-			cachedCounts = loaded
-		}
-	}
 	items := make([]FeedItem, 0, len(rows))
 	for _, row := range rows {
 		images := make([]string, 0)
@@ -208,13 +227,9 @@ func (service *Service) feedPage(ctx context.Context, user uint64, cursorAt time
 				images = append(images, image)
 			}
 		}
-		likes, comments := int(row.Liked), int(row.Comments)
-		if cached, ok := cachedCounts[row.ID]; ok {
-			likes, comments = int(cached.Likes), int(cached.Comments)
-		}
 		item := FeedItem{ID: strconv.FormatUint(row.ID, 10),
 			UserID: strconv.FormatUint(row.UserID, 10), Title: row.Title, Content: row.Content,
-			Images: images, Liked: likes, Comments: comments,
+			Images: images, Liked: int(row.Liked), Comments: int(row.Comments),
 			LikedByMe: liked[row.ID], CreateTime: row.CreateTime.In(zone()).Format(feedTimeLayout)}
 		if row.ShopID != 0 {
 			shop := strconv.FormatUint(row.ShopID, 10)

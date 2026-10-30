@@ -1,0 +1,862 @@
+{
+  "task": "GO-073-CAP/CAP-02",
+  "generatedAt": "2026-10-30T04:51:31.962229+00:00",
+  "scope": "read-only recomputation of finished baseline 10/25; no load or product change",
+  "runningAPIRevision": "capacity-32ae24331d7de98d8df004cf854708ec3c59eec4",
+  "stages": [
+    {
+      "targetRate": 10,
+      "activityId": "1007",
+      "stableSeconds": 45,
+      "firstStableRequestMs": 1793335655807,
+      "nominalStableEndMs": 1793335700807,
+      "recordCount": 551,
+      "stableRequests": 450,
+      "stableAccepted": 450,
+      "stableP95Ms": 12.4661,
+      "stableP99Ms": 13.9301,
+      "rawMetricCounts": {
+        "http_reqs": 551,
+        "cap_requests": 551,
+        "cap_system_errors": 0,
+        "cap_request_record": 551
+      },
+      "recomputedIDChecks": {
+        "exportedRecordMismatch": 0,
+        "poolIndexUserMismatch": 0,
+        "sqlIdUserOrStatusMismatch": 0,
+        "redisIdUserMismatch": 0,
+        "duplicateExportPhaseIndex": 0,
+        "duplicateAcceptedOrderId": 0,
+        "duplicateSQLOrderId": 0,
+        "unloggedSQLOrders": 0,
+        "unloggedRedisAccepted": 0
+      },
+      "warmDrainedBeforeStable": {
+        "sampleAtMs": 1793335655758,
+        "db": 101,
+        "accepted": 101,
+        "pending": 0,
+        "lag": 0
+      },
+      "lastThird": {
+        "nominalWindowStartMs": 1793335685807,
+        "nominalWindowEndMs": 1793335700807,
+        "firstSample": {
+          "atMs": 1793335685758,
+          "sqlCountObservedAtMs": 1793335685760,
+          "queryMs": 5.844,
+          "durableOrders": 400,
+          "redisAccepted": 401,
+          "redisStock": 289,
+          "pending": 1,
+          "lag": 0,
+          "streamLength": 767,
+          "lastDeliveredId": "1793335685721-0",
+          "oldestQueueMs": 43,
+          "k6VUs": 0,
+          "k6Requests": 400,
+          "k6SystemErrors": 0
+        },
+        "lastSample": {
+          "atMs": 1793335699758,
+          "sqlCountObservedAtMs": 1793335699760,
+          "queryMs": 7.274,
+          "durableOrders": 540,
+          "redisAccepted": 541,
+          "redisStock": 149,
+          "pending": 1,
+          "lag": 0,
+          "streamLength": 907,
+          "lastDeliveredId": "1793335699739-0",
+          "oldestQueueMs": 26,
+          "k6VUs": 0,
+          "k6Requests": 540,
+          "k6SystemErrors": 0
+        },
+        "sqlBoundaryElapsedSeconds": 14.0,
+        "dbDelta": 140,
+        "actualAcceptedResponses": 140,
+        "redisAcceptedDelta": 140,
+        "lagDelta": 0,
+        "dbToAcceptedRatio": 1.0,
+        "observedDBPerSecond": 10.0,
+        "actualAcceptedResponsesPerSecond": 10.0,
+        "acceptedMinusDBGapFirst": 1,
+        "acceptedMinusDBGapLast": 1,
+        "minimumAdditionalDBCommitsToReach98Percent": 0
+      },
+      "stableQueueSamples": [
+        {
+          "atMs": 1793335657758,
+          "sqlCountObservedAtMs": 1793335657760,
+          "durableOrders": 120,
+          "redisAccepted": 121,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 51,
+          "queryMs": 6.115
+        },
+        {
+          "atMs": 1793335659758,
+          "sqlCountObservedAtMs": 1793335659760,
+          "durableOrders": 140,
+          "redisAccepted": 141,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 50,
+          "queryMs": 6.084
+        },
+        {
+          "atMs": 1793335661759,
+          "sqlCountObservedAtMs": 1793335661761,
+          "durableOrders": 160,
+          "redisAccepted": 161,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 48,
+          "queryMs": 6.715
+        },
+        {
+          "atMs": 1793335663758,
+          "sqlCountObservedAtMs": 1793335663760,
+          "durableOrders": 180,
+          "redisAccepted": 181,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 47,
+          "queryMs": 5.505
+        },
+        {
+          "atMs": 1793335665759,
+          "sqlCountObservedAtMs": 1793335665760,
+          "durableOrders": 200,
+          "redisAccepted": 201,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 44,
+          "queryMs": 5.699
+        },
+        {
+          "atMs": 1793335667758,
+          "sqlCountObservedAtMs": 1793335667760,
+          "durableOrders": 220,
+          "redisAccepted": 221,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 41,
+          "queryMs": 6.101
+        },
+        {
+          "atMs": 1793335669758,
+          "sqlCountObservedAtMs": 1793335669761,
+          "durableOrders": 240,
+          "redisAccepted": 241,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 40,
+          "queryMs": 6.475
+        },
+        {
+          "atMs": 1793335671758,
+          "sqlCountObservedAtMs": 1793335671761,
+          "durableOrders": 260,
+          "redisAccepted": 261,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 36,
+          "queryMs": 5.94
+        },
+        {
+          "atMs": 1793335673758,
+          "sqlCountObservedAtMs": 1793335673761,
+          "durableOrders": 280,
+          "redisAccepted": 281,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 35,
+          "queryMs": 7.769
+        },
+        {
+          "atMs": 1793335675758,
+          "sqlCountObservedAtMs": 1793335675761,
+          "durableOrders": 300,
+          "redisAccepted": 301,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 32,
+          "queryMs": 6.836
+        },
+        {
+          "atMs": 1793335677758,
+          "sqlCountObservedAtMs": 1793335677764,
+          "durableOrders": 320,
+          "redisAccepted": 321,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 32,
+          "queryMs": 10.217
+        },
+        {
+          "atMs": 1793335679758,
+          "sqlCountObservedAtMs": 1793335679761,
+          "durableOrders": 340,
+          "redisAccepted": 341,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 48,
+          "queryMs": 8.182
+        },
+        {
+          "atMs": 1793335681758,
+          "sqlCountObservedAtMs": 1793335681761,
+          "durableOrders": 360,
+          "redisAccepted": 361,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 45,
+          "queryMs": 6.399
+        },
+        {
+          "atMs": 1793335683758,
+          "sqlCountObservedAtMs": 1793335683761,
+          "durableOrders": 380,
+          "redisAccepted": 381,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 46,
+          "queryMs": 6.425
+        },
+        {
+          "atMs": 1793335685758,
+          "sqlCountObservedAtMs": 1793335685760,
+          "durableOrders": 400,
+          "redisAccepted": 401,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 43,
+          "queryMs": 5.844
+        },
+        {
+          "atMs": 1793335687758,
+          "sqlCountObservedAtMs": 1793335687761,
+          "durableOrders": 420,
+          "redisAccepted": 421,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 38,
+          "queryMs": 5.401
+        },
+        {
+          "atMs": 1793335689758,
+          "sqlCountObservedAtMs": 1793335689760,
+          "durableOrders": 440,
+          "redisAccepted": 441,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 39,
+          "queryMs": 5.44
+        },
+        {
+          "atMs": 1793335691758,
+          "sqlCountObservedAtMs": 1793335691761,
+          "durableOrders": 460,
+          "redisAccepted": 461,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 36,
+          "queryMs": 5.763
+        },
+        {
+          "atMs": 1793335693758,
+          "sqlCountObservedAtMs": 1793335693760,
+          "durableOrders": 480,
+          "redisAccepted": 481,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 33,
+          "queryMs": 5.796
+        },
+        {
+          "atMs": 1793335695758,
+          "sqlCountObservedAtMs": 1793335695760,
+          "durableOrders": 500,
+          "redisAccepted": 501,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 31,
+          "queryMs": 5.384
+        },
+        {
+          "atMs": 1793335697758,
+          "sqlCountObservedAtMs": 1793335697761,
+          "durableOrders": 520,
+          "redisAccepted": 521,
+          "pending": 0,
+          "lag": 1,
+          "oldestQueueMs": 14,
+          "queryMs": 8.032
+        },
+        {
+          "atMs": 1793335699758,
+          "sqlCountObservedAtMs": 1793335699760,
+          "durableOrders": 540,
+          "redisAccepted": 541,
+          "pending": 1,
+          "lag": 0,
+          "oldestQueueMs": 26,
+          "queryMs": 7.274
+        }
+      ],
+      "stableFirstToLastLagGrowth": -1,
+      "stableFirstToLastObservedDBRate": 10.0,
+      "queueObserverAllSamplesMaxWallMs": 11.473,
+      "maxObservedPending": 1,
+      "maxObservedLag": 1,
+      "maxObservedOldestQueueMs": 59,
+      "final": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 551,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 917,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 139,
+        "redisAccepted": 551,
+        "redisStock": 139,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 551,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "drainMsFromGeneratorExit": 5,
+      "lastResponseToConvergedObservedMs": 1037,
+      "capacityExplorationPassed": true,
+      "resourceSamples": {
+        "samples": 14,
+        "complete": 14,
+        "hostMemoryMaxPercent": 77.6,
+        "hostCPUMaxPercent": 47.6,
+        "apiRSSMaxBytes": 32493568,
+        "generatorRSSMaxBytes": 49152000,
+        "generatorCPUMaxOneCorePercent": 1.2,
+        "sqlWaitCountStableDelta": 0,
+        "sqlWaitDurationStableDeltaNs": 0
+      },
+      "supervision": {
+        "started_at": "2026-10-30T04:47:14.040861+00:00",
+        "mode": "trade",
+        "api_pid": 68744,
+        "sampler_started": true,
+        "stop_signal": false,
+        "forced_owned_processes": [],
+        "errors": [],
+        "helper_launcher_pid": 53868,
+        "sampler_pid": 52316,
+        "sampled_k6_pid": 55972,
+        "sampling_started_at": "2026-10-30T04:47:15.796861+00:00",
+        "sampling_ended_after_generator_exit": true,
+        "sampling_ended_at": "2026-10-30T04:48:21.828168+00:00",
+        "harness_exit": 0,
+        "sampler_exit": 0,
+        "resource_samples": 14,
+        "complete_resource_samples": 14,
+        "first_resource_sample_at": "2026-10-30T04:47:16.577596+00:00",
+        "last_resource_sample_at": "2026-10-30T04:48:21.585377+00:00",
+        "ended_at": "2026-10-30T04:48:23.756779+00:00",
+        "elapsed_seconds": 69.71590640000068,
+        "forced": false,
+        "completed_without_supervision_failure": true
+      },
+      "sources": [
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/result.json",
+          "bytes": 4479,
+          "sha256": "5c13f6f4fdabb07ee9d6fe5f15c5d525f05a3ed7fe2d2fa7253ed39e74820807"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/requests.ndjson",
+          "bytes": 177705,
+          "sha256": "131137be6cb217e2a3415e2b000cfe08fffcf8e4ab943f5ec861c77901307f95"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/orders.ndjson",
+          "bytes": 29652,
+          "sha256": "138250c911e8ce8d752518a1f754f8f65e3690b32b0607f8bdd75bc1dcae9606"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/redis-accepted.ndjson",
+          "bytes": 26346,
+          "sha256": "35e2187c044c0ef7db364a5a7252b937a52e192fc1756b42b37b2ee963bf0ee6"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/queue.ndjson",
+          "bytes": 8989,
+          "sha256": "da06d5dcef226324e2b860d4ae990ef529a7fc6c5247fc6cb7f9a47695e51d25"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-10/k6-metrics.ndjson",
+          "bytes": 1935908,
+          "sha256": "49fa1482387bd9811da5d625276bd99151713d8db2b48915749331273f518d26"
+        }
+      ]
+    },
+    {
+      "targetRate": 25,
+      "activityId": "1008",
+      "stableSeconds": 45,
+      "firstStableRequestMs": 1793335726130,
+      "nominalStableEndMs": 1793335771130,
+      "recordCount": 1376,
+      "stableRequests": 1125,
+      "stableAccepted": 1125,
+      "stableP95Ms": 13.4285,
+      "stableP99Ms": 23.3434,
+      "rawMetricCounts": {
+        "http_reqs": 1376,
+        "cap_requests": 1376,
+        "cap_system_errors": 0,
+        "cap_request_record": 1376
+      },
+      "recomputedIDChecks": {
+        "exportedRecordMismatch": 0,
+        "poolIndexUserMismatch": 0,
+        "sqlIdUserOrStatusMismatch": 0,
+        "redisIdUserMismatch": 0,
+        "duplicateExportPhaseIndex": 0,
+        "duplicateAcceptedOrderId": 0,
+        "duplicateSQLOrderId": 0,
+        "unloggedSQLOrders": 0,
+        "unloggedRedisAccepted": 0
+      },
+      "warmDrainedBeforeStable": {
+        "sampleAtMs": 1793335726073,
+        "db": 251,
+        "accepted": 251,
+        "pending": 0,
+        "lag": 0
+      },
+      "lastThird": {
+        "nominalWindowStartMs": 1793335756130,
+        "nominalWindowEndMs": 1793335771130,
+        "firstSample": {
+          "atMs": 1793335756073,
+          "sqlCountObservedAtMs": 1793335756075,
+          "queryMs": 7.087,
+          "durableOrders": 893,
+          "redisAccepted": 1000,
+          "redisStock": 545,
+          "pending": 1,
+          "lag": 106,
+          "streamLength": 1917,
+          "lastDeliveredId": "1793335751810-0",
+          "oldestQueueMs": 4270,
+          "k6VUs": 0,
+          "k6Requests": 1000,
+          "k6SystemErrors": 0
+        },
+        "lastSample": {
+          "atMs": 1793335770073,
+          "sqlCountObservedAtMs": 1793335770075,
+          "queryMs": 7.702,
+          "durableOrders": 1200,
+          "redisAccepted": 1350,
+          "redisStock": 195,
+          "pending": 1,
+          "lag": 149,
+          "streamLength": 2267,
+          "lastDeliveredId": "1793335764107-0",
+          "oldestQueueMs": 5974,
+          "k6VUs": 0,
+          "k6Requests": 1349,
+          "k6SystemErrors": 0
+        },
+        "sqlBoundaryElapsedSeconds": 14.0,
+        "dbDelta": 307,
+        "actualAcceptedResponses": 350,
+        "redisAcceptedDelta": 350,
+        "lagDelta": 43,
+        "dbToAcceptedRatio": 0.8771428571428571,
+        "observedDBPerSecond": 21.928571428571427,
+        "actualAcceptedResponsesPerSecond": 25.0,
+        "acceptedMinusDBGapFirst": 107,
+        "acceptedMinusDBGapLast": 150,
+        "minimumAdditionalDBCommitsToReach98Percent": 36
+      },
+      "stableQueueSamples": [
+        {
+          "atMs": 1793335728073,
+          "sqlCountObservedAtMs": 1793335728075,
+          "durableOrders": 292,
+          "redisAccepted": 300,
+          "pending": 1,
+          "lag": 7,
+          "oldestQueueMs": 304,
+          "queryMs": 7.425
+        },
+        {
+          "atMs": 1793335730073,
+          "sqlCountObservedAtMs": 1793335730075,
+          "durableOrders": 337,
+          "redisAccepted": 350,
+          "pending": 0,
+          "lag": 13,
+          "oldestQueueMs": 506,
+          "queryMs": 7.906
+        },
+        {
+          "atMs": 1793335732073,
+          "sqlCountObservedAtMs": 1793335732075,
+          "durableOrders": 380,
+          "redisAccepted": 400,
+          "pending": 1,
+          "lag": 19,
+          "oldestQueueMs": 782,
+          "queryMs": 7.764
+        },
+        {
+          "atMs": 1793335734073,
+          "sqlCountObservedAtMs": 1793335734075,
+          "durableOrders": 426,
+          "redisAccepted": 450,
+          "pending": 1,
+          "lag": 24,
+          "oldestQueueMs": 980,
+          "queryMs": 7.973
+        },
+        {
+          "atMs": 1793335736073,
+          "sqlCountObservedAtMs": 1793335736075,
+          "durableOrders": 470,
+          "redisAccepted": 500,
+          "pending": 1,
+          "lag": 29,
+          "oldestQueueMs": 1175,
+          "queryMs": 6.155
+        },
+        {
+          "atMs": 1793335738073,
+          "sqlCountObservedAtMs": 1793335738075,
+          "durableOrders": 513,
+          "redisAccepted": 550,
+          "pending": 1,
+          "lag": 36,
+          "oldestQueueMs": 1455,
+          "queryMs": 7.114
+        },
+        {
+          "atMs": 1793335740073,
+          "sqlCountObservedAtMs": 1793335740075,
+          "durableOrders": 556,
+          "redisAccepted": 600,
+          "pending": 1,
+          "lag": 43,
+          "oldestQueueMs": 1741,
+          "queryMs": 6.397
+        },
+        {
+          "atMs": 1793335742073,
+          "sqlCountObservedAtMs": 1793335742075,
+          "durableOrders": 596,
+          "redisAccepted": 650,
+          "pending": 1,
+          "lag": 53,
+          "oldestQueueMs": 2145,
+          "queryMs": 8.809
+        },
+        {
+          "atMs": 1793335744073,
+          "sqlCountObservedAtMs": 1793335744075,
+          "durableOrders": 633,
+          "redisAccepted": 700,
+          "pending": 1,
+          "lag": 66,
+          "oldestQueueMs": 2666,
+          "queryMs": 6.084
+        },
+        {
+          "atMs": 1793335746073,
+          "sqlCountObservedAtMs": 1793335746075,
+          "durableOrders": 672,
+          "redisAccepted": 750,
+          "pending": 1,
+          "lag": 77,
+          "oldestQueueMs": 3108,
+          "queryMs": 5.985
+        },
+        {
+          "atMs": 1793335748073,
+          "sqlCountObservedAtMs": 1793335748075,
+          "durableOrders": 718,
+          "redisAccepted": 799,
+          "pending": 1,
+          "lag": 80,
+          "oldestQueueMs": 3269,
+          "queryMs": 6.703
+        },
+        {
+          "atMs": 1793335750073,
+          "sqlCountObservedAtMs": 1793335750074,
+          "durableOrders": 762,
+          "redisAccepted": 850,
+          "pending": 1,
+          "lag": 87,
+          "oldestQueueMs": 3512,
+          "queryMs": 5.948
+        },
+        {
+          "atMs": 1793335752073,
+          "sqlCountObservedAtMs": 1793335752075,
+          "durableOrders": 806,
+          "redisAccepted": 900,
+          "pending": 1,
+          "lag": 93,
+          "oldestQueueMs": 3752,
+          "queryMs": 7.047
+        },
+        {
+          "atMs": 1793335754073,
+          "sqlCountObservedAtMs": 1793335754075,
+          "durableOrders": 850,
+          "redisAccepted": 950,
+          "pending": 1,
+          "lag": 99,
+          "oldestQueueMs": 3989,
+          "queryMs": 6.4
+        },
+        {
+          "atMs": 1793335756073,
+          "sqlCountObservedAtMs": 1793335756075,
+          "durableOrders": 893,
+          "redisAccepted": 1000,
+          "pending": 1,
+          "lag": 106,
+          "oldestQueueMs": 4270,
+          "queryMs": 7.087
+        },
+        {
+          "atMs": 1793335758073,
+          "sqlCountObservedAtMs": 1793335758077,
+          "durableOrders": 937,
+          "redisAccepted": 1050,
+          "pending": 1,
+          "lag": 112,
+          "oldestQueueMs": 4510,
+          "queryMs": 8.114
+        },
+        {
+          "atMs": 1793335760073,
+          "sqlCountObservedAtMs": 1793335760075,
+          "durableOrders": 979,
+          "redisAccepted": 1100,
+          "pending": 1,
+          "lag": 120,
+          "oldestQueueMs": 4818,
+          "queryMs": 7.107
+        },
+        {
+          "atMs": 1793335762073,
+          "sqlCountObservedAtMs": 1793335762076,
+          "durableOrders": 1023,
+          "redisAccepted": 1150,
+          "pending": 1,
+          "lag": 126,
+          "oldestQueueMs": 5065,
+          "queryMs": 7.606
+        },
+        {
+          "atMs": 1793335764073,
+          "sqlCountObservedAtMs": 1793335764075,
+          "durableOrders": 1068,
+          "redisAccepted": 1200,
+          "pending": 1,
+          "lag": 131,
+          "oldestQueueMs": 5263,
+          "queryMs": 6.837
+        },
+        {
+          "atMs": 1793335766073,
+          "sqlCountObservedAtMs": 1793335766075,
+          "durableOrders": 1112,
+          "redisAccepted": 1250,
+          "pending": 1,
+          "lag": 137,
+          "oldestQueueMs": 5500,
+          "queryMs": 6.417
+        },
+        {
+          "atMs": 1793335768073,
+          "sqlCountObservedAtMs": 1793335768075,
+          "durableOrders": 1157,
+          "redisAccepted": 1300,
+          "pending": 1,
+          "lag": 142,
+          "oldestQueueMs": 5697,
+          "queryMs": 5.938
+        },
+        {
+          "atMs": 1793335770073,
+          "sqlCountObservedAtMs": 1793335770075,
+          "durableOrders": 1200,
+          "redisAccepted": 1350,
+          "pending": 1,
+          "lag": 149,
+          "oldestQueueMs": 5974,
+          "queryMs": 7.702
+        }
+      ],
+      "stableFirstToLastLagGrowth": 142,
+      "stableFirstToLastObservedDBRate": 21.61904761904762,
+      "queueObserverAllSamplesMaxWallMs": 17.976,
+      "maxObservedPending": 1,
+      "maxObservedLag": 149,
+      "maxObservedOldestQueueMs": 7252,
+      "final": {
+        "duplicateEffectiveOrders": 0,
+        "durableRejections": 0,
+        "durableRows": 1376,
+        "finalLag": 0,
+        "finalPending": 0,
+        "finalStreamLength": 2293,
+        "mappingMismatches": 0,
+        "mismatchedUserOrStatus": 0,
+        "mysqlStock": 169,
+        "redisAccepted": 1376,
+        "redisStock": 169,
+        "unfinishedOrderOrCompensationOutbox": 0,
+        "uniqueAcceptedRecords": 1376,
+        "unloggedDurableOrders": 0,
+        "unresolvedReview": 0
+      },
+      "drainMsFromGeneratorExit": 6651,
+      "lastResponseToConvergedObservedMs": 7681,
+      "capacityExplorationPassed": false,
+      "resourceSamples": {
+        "samples": 14,
+        "complete": 14,
+        "hostMemoryMaxPercent": 77.6,
+        "hostCPUMaxPercent": 47.2,
+        "apiRSSMaxBytes": 32612352,
+        "generatorRSSMaxBytes": 51400704,
+        "generatorCPUMaxOneCorePercent": 9.0,
+        "sqlWaitCountStableDelta": 0,
+        "sqlWaitDurationStableDeltaNs": 0
+      },
+      "supervision": {
+        "started_at": "2026-10-30T04:48:24.055065+00:00",
+        "mode": "trade",
+        "api_pid": 68744,
+        "sampler_started": true,
+        "stop_signal": false,
+        "forced_owned_processes": [],
+        "errors": [],
+        "helper_launcher_pid": 63240,
+        "sampler_pid": 21812,
+        "sampled_k6_pid": 66912,
+        "sampling_started_at": "2026-10-30T04:48:26.117987+00:00",
+        "sampling_ended_after_generator_exit": true,
+        "sampling_ended_at": "2026-10-30T04:49:32.207193+00:00",
+        "harness_exit": 0,
+        "sampler_exit": 0,
+        "resource_samples": 14,
+        "complete_resource_samples": 14,
+        "first_resource_sample_at": "2026-10-30T04:48:26.945743+00:00",
+        "last_resource_sample_at": "2026-10-30T04:49:31.952256+00:00",
+        "ended_at": "2026-10-30T04:49:39.002789+00:00",
+        "elapsed_seconds": 74.94771290000062,
+        "forced": false,
+        "completed_without_supervision_failure": true
+      },
+      "sources": [
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/result.json",
+          "bytes": 4518,
+          "sha256": "b91b70531050a9928db1ef073ecd0baf3ff28558ac522a3ef5f569638477710d"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/requests.ndjson",
+          "bytes": 445509,
+          "sha256": "a815f1a0cea408b93ce3b606ae727cf627a724d65ee7e362dce5b8ae8a28025a"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/orders.ndjson",
+          "bytes": 74616,
+          "sha256": "2be7228e90ecfecb988b22786ee8f3c950ce3a22630d79d6038764d38c831bd1"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/redis-accepted.ndjson",
+          "bytes": 66360,
+          "sha256": "5c314bbdf49e4755a082a5d38a8307ddc32b5edf1adcf65db3fcf0feb23cbc79"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/queue.ndjson",
+          "bytes": 13080,
+          "sha256": "c4760ffea4ed82c819f7a60b5d9eb1a2caae9600df3881a9a22407566fffc051"
+        },
+        {
+          "path": "docs/evidence/2026-10-30-go073-cap/cap02/rate-25/k6-metrics.ndjson",
+          "bytes": 4809993,
+          "sha256": "edde996f71184187557e5af1f3e9a00d987e1ad2304dd21cb430837ee70c7820"
+        }
+      ]
+    }
+  ],
+  "finding": {
+    "rate10": "45-second exploration passes all fixed criteria; not yet a repeated 180-second sustainable boundary",
+    "rate25": "admission succeeds at 25/s but asynchronous durable completion falls behind; ratio fails .98 despite fast admission and final correctness",
+    "evidenceAgainstSamplingArtifact": [
+      "last-third SQL commits307 vs completed accepted responses350 in exactly14.000s",
+      "same boundary Redis acceptance count grows350 and accepted-minus-DB backlog grows43, identical to lag delta43",
+      "both SQL result timestamps are2ms after observer start; millisecond skew cannot explain36 additional commits needed for threshold",
+      "warm cohort fully drained before stable; stable queue starts low and grows over many consecutive samples rather than a single edge",
+      "lag persists after generator exit and then drains while final1376 request/SQL/Redis rows converge with no unmatched IDs"
+    ],
+    "limits": [
+      "COUNT result receipt is not exact commit timestamp and SQL/Redis read times differ; individual snapshots can differ by one in-flight order",
+      "this proves true backlog at these workload/host conditions, not a universal server limit or a definitive CPU/SQL-lock diagnosis",
+      "14 resource samples per stage cover generation; rate25 external resources stop near generator exit and do not cover all post-generator drain"
+    ]
+  },
+  "sourceReview": {
+    "files": [
+      {
+        "path": "backend/internal/platform/app/app.go",
+        "bytes": 9576,
+        "sha256": "964e6a14c7249992302914ccf6a56e388f23de9deae9bc05abf74060edb430e3"
+      },
+      {
+        "path": "backend/internal/orderstream/worker.go",
+        "bytes": 10079,
+        "sha256": "77911dfce2a46e17eea5a80ab630f1cba0d6182d885ed89094341ebf0964248f"
+      },
+      {
+        "path": "backend/internal/order/creator.go",
+        "bytes": 9905,
+        "sha256": "6209cf39c051c9c5eee1ba691230dfece54f3aac2c3c17811a13f1bc2a534eff"
+      },
+      {
+        "path": "backend/cmd/capacity-trade/run.go",
+        "bytes": 31547,
+        "sha256": "869d388f780b5fe3c8eef9681c23b598311bcc9389b5312fb458f7650f74ef54"
+      }
+    ],
+    "facts": [
+      "app assembles one orderstream Worker and runs stream.Run once",
+      "Poll rotates new own-PEL and idle-claim; each Redis read Count1 and delivery is synchronous",
+      "Run immediately continues after a successful delivery; 100ms sleep applies after enough empty/error steps, not one forced sleep per successful order",
+      "Creator performs connection GET_LOCK plus transactional idempotency/current-row checks, inventory lock/update, order/audit/outbox writes, commit and RELEASE_LOCK; worker then review cleanup, Redis projection and ACK",
+      "helper counts all rows for voucher via persistent indexed COUNT, not a MAX(id) commit-watermark assumption"
+    ],
+    "inference": "serial service time and multiple database/Redis round trips are candidates; use captured wall/profile/SQL evidence before choosing an optimization"
+  },
+  "refinementRecommendation": {
+    "unoptimizedNextRate": 20,
+    "if20Fails": 15,
+    "if20Passes": "22 or nearby integer rate to narrow the observed10..25 bracket",
+    "conditions": "fixed45s exploration, same single-hotspot/real-auth model and resource limits; drain and reconcile each stage; new activity each run; do not mix an optimized binary into unoptimized refinement",
+    "finalHold": "highest passing refined rate must hold at least180s and repeat once with last-minute DB/accepted and drain checks",
+    "noPreclaim": "estimated observed21.9 DB/s at rate25 is not a predicted guaranteed stable capacity"
+  }
+}

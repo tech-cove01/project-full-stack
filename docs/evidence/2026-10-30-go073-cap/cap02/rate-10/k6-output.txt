@@ -1,0 +1,39 @@
+
+
+  █ THRESHOLDS 
+
+    cap_requests
+    ✓ 'count>=0' count=551
+
+    dropped_iterations
+    ✓ 'count>=0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_accepted.........: 551   8.476856/s
+    cap_accepted_ms......: avg=10.1ms  med=9.75ms p(95)=12.52ms p(99)=14ms    max=33.48ms
+    cap_admission_ms.....: avg=10.1ms  med=9.75ms p(95)=12.52ms p(99)=14ms    max=33.48ms
+    cap_request_record...: 551   8.476856/s
+    cap_requests.........: 551   8.476856/s
+    cap_system_errors....: 0     0/s
+
+    HTTP
+    http_req_duration....: avg=10.1ms  med=9.75ms p(95)=12.52ms p(99)=14ms    max=33.48ms
+    http_req_failed......: 0.00% 0 out of 551
+    http_reqs............: 551   8.476856/s
+
+    EXECUTION
+    dropped_iterations...: 0     0/s
+    iteration_duration...: avg=10.33ms med=9.94ms p(95)=12.73ms p(99)=14.26ms max=34.63ms
+    iterations...........: 551   8.476856/s
+    vus..................: 0     min=0        max=0 
+    vus_max..............: 20    min=20       max=20
+
+    NETWORK
+    data_received........: 92 kB 1.4 kB/s
+    data_sent............: 91 kB 1.4 kB/s
+
+
+

@@ -1,0 +1,30 @@
+[
+  {
+    "path": "rate-10\\k6-metrics.ndjson.gz",
+    "originalBytes": 1935908,
+    "originalSha256": "49fa1482387bd9811da5d625276bd99151713d8db2b48915749331273f518d26",
+    "gzipBytes": 67618,
+    "gzipSha256": "29c4c723ec355cc7a734da24bf60412c06ff9a4f3bbfe185238e9a797caaab54"
+  },
+  {
+    "path": "rate-20\\k6-metrics.ndjson.gz",
+    "originalBytes": 3851500,
+    "originalSha256": "2b0e48e5d599f003e33859c435fe563d5cf7ba1768d06d6101eda1c6c0a7da16",
+    "gzipBytes": 131879,
+    "gzipSha256": "5b167bcece1fa8dff1f1cbc5db9ab8552084415198d0f13d14abb9fd71f145a2"
+  },
+  {
+    "path": "rate-25\\k6-metrics.ndjson.gz",
+    "originalBytes": 4809993,
+    "originalSha256": "edde996f71184187557e5af1f3e9a00d987e1ad2304dd21cb430837ee70c7820",
+    "gzipBytes": 164625,
+    "gzipSha256": "11c63b9904cd5d2b51a42ae6bba40cd70c84164e43b8837e05d62957a745ad8a"
+  },
+  {
+    "path": "rate-25-profile\\k6-metrics.ndjson.gz",
+    "originalBytes": 4809389,
+    "originalSha256": "3fa024faf45484a188550bf0bb074f4324890a3961be516ffe79cf1fc4a3462a",
+    "gzipBytes": 164376,
+    "gzipSha256": "d29d5e5c1db89bb706a2dd27dcf276b2fff60f6289e97b9ac5cc639ea4782de8"
+  }
+]

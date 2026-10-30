@@ -73,6 +73,7 @@ class Checks(unittest.TestCase):
         self.write(tag + '-load/stable-summary.json', {'synthetic': True})
         self.write(tag + '-stage-exit.json', {'capacityWrapperExit': 0 if passed else 1,
                    'cardsEvidenceValid': True, 'toolBytesStable': True, 'wrapperExited': True,
+                   'failedStartOrException': None,
                    'extraDiagnosticCollectorExit': 0 if kind == 'diagnostic' else None})
         self.write(tag + '-control/exit-status.json', {'harness_exit': 0 if passed else 1,
                    'sampler_exit': 0, 'errors': [], 'stop_signal': False, 'forced': False})
@@ -126,6 +127,25 @@ class Checks(unittest.TestCase):
         first['apiSourceSha'] = 'b' * 40
         with self.assertRaises(AssertionError):
             policy.stage_slot(formal, [diagnostic, first], self.root)
+
+    def test_completed_stage_requires_normal_exit_without_late_interrupt(self):
+        completed = self.record('complete', 'formal')
+        limited = self.record('limited', 'stair', passed=False, rate=150, seconds=45)
+        self.assertTrue(policy.passed(self.root, completed))
+        self.assertTrue(policy.measured_slo_failure(self.root, limited))
+        # A late KeyboardInterrupt can occur after tool hashes/counters are
+        # complete but before the normal exit artifact is saved. The exception
+        # artifact must not qualify a next formal round or a capacity bracket.
+        for changes in ({'failedStartOrException': 'KeyboardInterrupt'}, {'wrapperExited': False}):
+            for command, predicate in ((completed, policy.passed), (limited, policy.measured_slo_failure)):
+                with self.subTest(changes=changes, predicate=predicate.__name__):
+                    name = command['tag'] + '-stage-exit.json'
+                    original = policy.read(self.root / name)
+                    self.write(name, {**original, **changes})
+                    try:
+                        self.assertFalse(predicate(self.root, command))
+                    finally:
+                        self.write(name, original)
 
     def test_missing_collection_is_not_non_reproduction_and_treated_needs_proof(self):
         self.record('d1', 'diagnostic')

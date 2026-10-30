@@ -29,3 +29,23 @@
 ## 固定 A 构建
 
 本审查者另完成固定 A 的隔离构建，见 [build-a.json](build-a.json) 与 [build-a.txt](build-a.txt)。新建 sibling runtime 中的 detached worktree，源码固定 `f3d99ee43dfb422a0cba525de93e9266f07c4ee5`，构建前后源码 checkout 均干净；exe 在源码 checkout 外。link revision 为 `capacity-<完整 SHA>`，`go version -m` 确认 `vcs.revision` 匹配且 `vcs.modified=false`。主工作区当时有其它实施修改，未拿它构建或声称它干净；未执行产物、启动服务或负载。
+
+## A3 组件追加非作者审查
+
+只读审查作者冻结后的 `communitycards/cards.go`、`cards_test.go` 差量及新增 `integration_test.go`，未自行编译、执行普通或真实组件测试。未发现生产代码阻断：排序去重后的 `(ID,Version)` 缺失集合生成有分隔的批次键；共享 loader 从应用 life 派生独立两秒 context，调用者仅取消各自等待。`begin`/`startFlight` 的 WaitGroup Add 与 Close 关门在同一 mutex 内，关门后才 Wait，避免新任务越过收敛边界。完成结果先写字段再关闭 done，接收方经 channel 同步读取，最终逐请求 clone 图片切片；锁内只改内存状态，不做网络操作。flight、active load、等待 caller 分别有 64/8/1024 上限，L1 原预算与版本键保持。
+
+发现并交作者修正一项普通测试问题：原 `TestActiveQueueAndWholeLoadDeadline` 在 caller 的第一次 Redis 预查时即发信号并取消，可能尚未建立第二个共享 flight；若后来确实进入共享重查，测试 hook 还可能重复 close channel。现 hook 用 sync.Once，取消前明确观察 `FlightStarted=2 / Inflight=2 / ActiveLoads=1`，取消后仍核共享任务存在，Close 后断言三个 admission gauge 为零且仅一次 SQL。最终冻结段已复审通过；作者执行结果另由其原始测试证据负责，本审查者未复跑。
+
+v1 晚归测试在 fakeBackend 已捕获 v1 rows 后暂停，先并发完成 v2 再放回 v1，并检查 v2 L1、两个独立 Redis 版本命名空间及原 TTL 范围。它是受控存储响应注入，不是实际 MySQL 版本变更或编辑 API。真实组件用例则覆盖坏 JSON/字段类型/Redis 类型/过大 payload、服务端自有 key 到期重建、真实内容 SQL 错误与版本缺失不发布部分结果。Redis 降级用例明确关闭专属真实 client 后走真实 SQL，不能写成 Redis 服务停机或网络断连实测。
+
+真实慢 pipeline 设计有效：专属 client 在自有 SET 前插入 CLIENT SETNAME 和对唯一空 key 的 BLPOP；先以另一连接的 CLIENT LIST 确认该命名连接 `cmd=blpop`，再 Close 缓存，检查 caller ErrClosed、pipeline 错误和任务 gauge 收敛。清理先关闭专属 client 并等待服务端命名连接消失，再由较早注册的 fixture 清理精确 key 并 EXISTS=0，避免阻塞连接晚执行排队 SET 污染清理后的键。本记录只认可证据设计，实际结果由 root 的真实执行记录确认。
+
+## 只读 audit 工具补审
+
+另只读审查 `scripts/cap07-audit.py`，并独立执行 **10 项纯内存 native_score 合成用例**，覆盖阈值边界、分类计数不一致、发起不足、内容错误、drop、P99 超限、缺成功分位、错误率恰 1%、外部 stop 与非零 stable exit；全部通过。未执行其正式证据 CLI，也未生成 audit 结果冒充尚未执行的阶段。
+
+当前未发现阻断：capacityPassed 同时要求原生 SLO、stage cards 状态和 control 监督成功，wrapper 退出零不能单独通过；A 无组件仍为 null，不能转为零内容 SQL；counter 差与 gauge、两项重叠实例 SQL 分别处理，分位仅保留每轮原生值，不合并或离线重建分布。脚本还核 API/exe/tool/fixture 哈希、新 CAP07 环境来源、slot 与有限协议。它只能验证已有公开记录的一致性；CLI 算术检查成功也不等于最终 B 协议通过，必须读取显式 `finalBProtocolPassed` 和各阶段结果。
+
+## 固定 B 构建与停止编译
+
+根 agent 指定最终 B 后，以与 A 相同的 Go `go1.27.0 windows/amd64` 和构建参数，在新 sibling runtime 的 detached checkout 构建 `30b6571227b5508d0f04bc8c4cfc1bcfbc313275`；见 [build-b.json](build-b.json) 与 [build-b.txt](build-b.txt)。构建前核目录和证据不存在，不覆盖已有产物；checkout 前后 clean，link revision 为 `capacity-<完整 SHA>`，VCS revision 匹配且 modified=false，exe SHA256 已保存。完成后停止本审查者所有编译/测试，只轻量补写本文；未操作 API、Docker 或负载，正式阶段由 root 统一执行。

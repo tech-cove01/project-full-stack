@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-30T11:09:52.895226+00:00",
+  "scope": "controlled correctness dependencies stopped before scored load; retained volumes",
+  "containers": [
+    {
+      "id": "5b9c1fc43721600ecc401611b8dadf4808b493bb15ec67683640338275e56b3a",
+      "status": "exited",
+      "running": false,
+      "exitCode": 0,
+      "oomKilled": false,
+      "volumes": [
+        "project-full-stack-cap-opt-tests-cap07-734da0cf6eb3-mysql"
+      ]
+    },
+    {
+      "id": "0646c36e241e86e2906712641c21f92ff70a65a95cfafa5cc5fa9f7dceea2690",
+      "status": "exited",
+      "running": false,
+      "exitCode": 0,
+      "oomKilled": false,
+      "volumes": [
+        "project-full-stack-cap-opt-tests-cap07-734da0cf6eb3-redis"
+      ]
+    }
+  ]
+}

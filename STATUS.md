@@ -10,7 +10,8 @@
 
 - CAP-06V已完成并推送 `f3d99ee43dfb422a0cba525de93e9266f07c4ee5`：受控SET/DEL旧FAIL→新PASS，最小固定分片门修复；真实相关回归/vet通过。见[受控报告](docs/evidence/2026-10-30-cap07/controlled/report.md)。原1.137s长尾仍未知，未单跑06D。
 - CAP-07A1契约 `e7edb3f`、固定A/B及有限阶梯工具 968edcb；A固定f3d99ee。CAP-07A2实际Feed片段缓存 4d60b0201ee93ac43cb94cfd50e869ddb6c8ea3d，冷HTTP1批2行、热0内容SQL，单连接/两用户/游标/版本竞争与失败已自验，见[初版记录](docs/evidence/2026-10-30-cap07/phase1.md)。
-- 正在继续CAP-07A3同批回源合并、真实降级/取消回归，再执行既定A/B、有限阶梯及正式组；当前尚无CAP-07容量成绩，也不标最终验收通过。以下原开工说明保留作授权与历史背景，实际进展以本段为准。
+- CAP-07A3合并 `47938143b7c429618c30163675557bc90e6ac1a7`、排队测试修正/固定B `30b6571227b5508d0f04bc8c4cfc1bcfbc313275` 已推送：真实8 HTTP冷突发、首caller取消/7成功、1flight/7joins/1内容SQL2行；真实Redis坏值/过期/断开client/慢pipeline关闭、版本竞争、全包普通测试和相关vet通过。精确B [CI四项成功](https://github.com/tech-cove01/project-full-stack/actions/runs/41046300775)，含Linux race/真实新组件测试；见[功能记录](docs/evidence/2026-10-30-cap07/phase2.md)。均为开发自验，待交独立核验。
+- 当前正在既定A1/B1/A2/B2对照：新6400篇/32读者卷，A/B clean detached构建，测试依赖已停止留卷。A1 multi100×180：18001全部成功，P95/P99 28.2026/36.3832ms，unknown/错误/dropped0。B1及余下对照、有限阶梯/正式持有尚未完成，不标最终容量验收通过。以下原开工说明保留作授权与历史背景，实际进展以本段为准。
 
 ### 本次接续规则（覆盖下方历史交接中的旧硬前置）
 

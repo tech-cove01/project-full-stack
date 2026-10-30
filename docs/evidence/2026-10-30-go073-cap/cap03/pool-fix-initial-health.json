@@ -1,0 +1,53 @@
+{
+  "diagnostics": {
+    "at": "2026-10-30T06:56:50.6610421Z",
+    "uptime_ms": 156,
+    "pid": 64908,
+    "runtime": {
+      "goroutines": 18,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 2741184,
+      "heap_sys_bytes": 7471104,
+      "heap_inuse_bytes": 4513792,
+      "total_alloc_bytes": 3725376,
+      "mallocs": 39521,
+      "frees": 15074,
+      "num_gc": 1,
+      "pause_total_ns": 0,
+      "last_gc_unix_ns": 1793343410487947700,
+      "gc_cpu_fraction": 0.01733147650784177
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 3,
+      "in_use": 0,
+      "idle": 3,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 0,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 5,
+      "misses": 1,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 1,
+      "idle_connections": 1,
+      "stale_connections": 0
+    }
+  },
+  "fixtureSourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "onlyApplicationVariable": "Feed pool-starvation fix",
+  "fixtureUnchanged": true,
+  "at": "2026-10-30T06:56:50.7388525Z",
+  "health": {
+    "status": "UP",
+    "service": "project-full-stack-go",
+    "runtime": "go",
+    "version": "capacity-767c2fc8bdf1be08c5636143a71898eec25081a9"
+  }
+}

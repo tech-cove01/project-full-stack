@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-30T07:38:10.064454+00:00",
+  "attempt": 1,
+  "phase": "preflight before any mutation",
+  "exitCode": 1,
+  "exceptionType": "psutil.NoSuchProcess",
+  "operation": "read exe of fixed PID64908",
+  "mutationsStarted": false,
+  "credentialsRetained": true,
+  "interpretation": "One native process-query failure; subsequent read-only probes showed same live API, matching exe and original creation epoch. Cause unknown; not a measured load failure.",
+  "rechecks": [
+    "cleanup-api-absence-preflight.json",
+    "cleanup-api-identity-recheck.json"
+  ]
+}

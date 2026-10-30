@@ -1,0 +1,247 @@
+{
+  "stage": "probe-hot-001-a",
+  "mode": "hot",
+  "rate": 1,
+  "seconds": 5,
+  "meetsBudget": true,
+  "failure": null,
+  "result": {
+    "attempted": 6,
+    "successful": 6,
+    "systemErrors": 0,
+    "contentErrors": 0,
+    "httpErrors": 0,
+    "dropped": 0,
+    "targetOffers": 5,
+    "actualOfferedRatio": 1.2,
+    "issuedPerNominalSecond": 1.2,
+    "successfulPerNominalSecond": 1.2,
+    "systemErrorRate": 0,
+    "allLatency": {
+      "avg": 25.260483333333337,
+      "med": 25.43355,
+      "p(95)": 26.50685,
+      "p(99)": 26.51465,
+      "max": 26.5166,
+      "thresholds": {
+        "p(95)<=200": false,
+        "p(99)<=500": false
+      }
+    },
+    "successfulLatency": {
+      "avg": 25.260483333333337,
+      "med": 25.43355,
+      "p(95)": 26.50685,
+      "p(99)": 26.51465,
+      "max": 26.5166
+    },
+    "k6Metrics": {
+      "vus": {
+        "value": 0,
+        "min": 0,
+        "max": 0
+      },
+      "vusMax": {
+        "value": 64,
+        "min": 64,
+        "max": 64
+      },
+      "dataReceived": {
+        "rate": 11250.67921109836,
+        "count": 56532
+      }
+    }
+  },
+  "stableCommandElapsedMs": 6197,
+  "completionAudit": {
+    "attempted": 6,
+    "completedHttpRequests": 6,
+    "classified": 6,
+    "incompleteOrUnclassified": 0,
+    "completedButUnclassified": 0,
+    "classifiedSource": "legacy cap_read_failure_ratio passes+fails; original files unchanged",
+    "systemErrorRatePerClassified": 0.0
+  },
+  "supervisionOk": true,
+  "stopSignal": false,
+  "resources": {
+    "samples": 2,
+    "completeSamples": 2,
+    "samplerSha256": null,
+    "validCpuSamples": 1,
+    "observationErrors": [],
+    "firstSampleAt": "2026-10-30T05:40:31.711564+00:00",
+    "lastSampleAt": "2026-10-30T05:40:36.712295+00:00",
+    "firstSampleAfterStableSpawnMs": 954.56396484375,
+    "stableProcessEndAfterLastSampleMs": 241.704833984375,
+    "maxSampleGapMs": 5000.731201171875,
+    "cpuScope": "sampler cpu_interval_valid intervals (at least one second); legacy samples exclude the first psutil priming interval; raw initial CPU retained separately",
+    "initialCpu": {
+      "host": 50.0,
+      "apiOneCore": 0.0,
+      "generatorOneCore": 0.0
+    },
+    "hostCpuPercentMax": 15.0,
+    "hostMemoryPercentMax": 78.4,
+    "apiCpuOneCorePercentMax": 1.2,
+    "apiRssBytesMax": 26324992,
+    "generatorCpuOneCorePercentMax": 4.4,
+    "generatorRssBytesMax": 62226432,
+    "containers": {
+      "project-full-stack-cap-read-mysql-1": {
+        "cpuPercentMax": 8.73,
+        "memoryPercentMax": 24.8
+      },
+      "project-full-stack-cap-read-redis-1": {
+        "cpuPercentMax": 4.25,
+        "memoryPercentMax": 1.69
+      }
+    },
+    "sqlSampledDelta": {
+      "wait_count": 0,
+      "wait_duration_ns": 0
+    },
+    "redisSampledDelta": {
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "timeouts": 0
+    },
+    "runtimeSampledDelta": {
+      "num_gc": 1,
+      "pause_total_ns": 0,
+      "total_alloc_bytes": 1204168
+    },
+    "sqlInUseMax": 0,
+    "goGoroutinesMax": 24
+  },
+  "mysqlGlobalDelta": {
+    "Uptime": 7,
+    "Questions": 273,
+    "Queries": 461,
+    "Com_select": 103,
+    "Com_insert": 0,
+    "Com_update": 0,
+    "Com_delete": 0,
+    "Com_commit": 75,
+    "Com_stmt_execute": 94,
+    "Com_stmt_prepare": 94,
+    "Com_stmt_close": 94,
+    "Com_stmt_reprepare": 0,
+    "Performance_schema_digest_lost": 0,
+    "Performance_schema_prepared_statements_lost": 0
+  },
+  "mysqlEventDelta": [
+    {
+      "event": "statement/com/Execute",
+      "count": 94,
+      "errors": 0,
+      "examined": 38556,
+      "sent": 132,
+      "timerPicoseconds": "84641891000"
+    },
+    {
+      "event": "statement/com/Prepare",
+      "count": 94,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "19390952000"
+    },
+    {
+      "event": "statement/sql/commit",
+      "count": 75,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "7278136000"
+    },
+    {
+      "event": "statement/sql/delete",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/insert",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    },
+    {
+      "event": "statement/sql/select",
+      "count": 9,
+      "errors": 0,
+      "examined": 127,
+      "sent": 65,
+      "timerPicoseconds": "2843775000"
+    },
+    {
+      "event": "statement/sql/update",
+      "count": 0,
+      "errors": 0,
+      "examined": 0,
+      "sent": 0,
+      "timerPicoseconds": "0"
+    }
+  ],
+  "redisDelta": {
+    "ping": {
+      "calls": 2,
+      "usec": 3,
+      "failed": 0
+    },
+    "info": {
+      "calls": 1,
+      "usec": 96,
+      "failed": 0
+    },
+    "type": {
+      "calls": 6,
+      "usec": 27,
+      "failed": 0
+    },
+    "pttl": {
+      "calls": 6,
+      "usec": 10,
+      "failed": 0
+    },
+    "xreadgroup": {
+      "calls": 128,
+      "usec": 1598,
+      "failed": 0
+    },
+    "xautoclaim": {
+      "calls": 64,
+      "usec": 1047,
+      "failed": 0
+    },
+    "evalsha": {
+      "calls": 6,
+      "usec": 409,
+      "failed": 0
+    },
+    "mget": {
+      "calls": 2,
+      "usec": 32,
+      "failed": 0
+    },
+    "expire": {
+      "calls": 6,
+      "usec": 33,
+      "failed": 0
+    },
+    "hget": {
+      "calls": 18,
+      "usec": 32,
+      "failed": 0
+    }
+  },
+  "counterResets": false,
+  "uptimeConsistent": true,
+  "scope": "whole isolated instance between sequential snapshots; includes API/background/helper/observer SQL and Redis commands, not per-endpoint or public-count cache DB loads",
+  "counterOverlap": "Com_select and Com_stmt_execute overlap; report separately, never add them as SQL total"
+}

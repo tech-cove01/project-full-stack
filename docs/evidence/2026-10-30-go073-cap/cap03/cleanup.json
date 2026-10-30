@@ -1,0 +1,76 @@
+{
+  "at": "2026-10-30T07:38:11.244361+00:00",
+  "complete": true,
+  "privateValueScan": {
+    "files": 1289,
+    "uniqueValues": 34,
+    "matchingFiles": 0
+  },
+  "callbackExceptions": [],
+  "exceptions": [],
+  "selectedHolds": [
+    "hold-fix-hot-200-180-a",
+    "hold-fix-hot-200-180-b",
+    "hold-fix-multi-100-180-a",
+    "hold-fix-multi-100-180-b"
+  ],
+  "sqlFixtureRetained": true,
+  "volumesRetained": true,
+  "step": "complete",
+  "updatedAt": "2026-10-30T07:38:17.403288+00:00",
+  "sessionsBeforeLogout": 32,
+  "finishCommandOutput": {
+    "finished": true,
+    "readersLoggedOut": 32,
+    "sqlFixtureRetained": true
+  },
+  "sessionsAfterLogout": 0,
+  "observer": {
+    "user": "capread_2c79ddf4f58b",
+    "host": "%",
+    "droppedAndVerifiedMissing": true
+  },
+  "apiStop": {
+    "pid": 64908,
+    "exeMatched": true,
+    "creationTimeDifferenceMs": 0.93603515625,
+    "binarySHA256Matched": true,
+    "method": "Windows native terminate of guarded PID",
+    "goGracefulShutdownClaimed": false,
+    "waitExitCode": 15
+  },
+  "portsClosed": {
+    "8251": true,
+    "8351": true
+  },
+  "containerStopOutput": "3528bc43fe4c67bbb3ad294eb339c7006c56e7e2118527dde2ccc13991890686\n178d1faad6b012a008bab7270470f0f8d70a3d16004480c04b86867a6661e996",
+  "containers": {
+    "mysql": {
+      "id": "3528bc43fe4c67bbb3ad294eb339c7006c56e7e2118527dde2ccc13991890686",
+      "running": false,
+      "oomKilled": false,
+      "exitCode": 0,
+      "volumes": [
+        "project-full-stack-cap-read_go-mysql-data"
+      ]
+    },
+    "redis": {
+      "id": "178d1faad6b012a008bab7270470f0f8d70a3d16004480c04b86867a6661e996",
+      "running": false,
+      "oomKilled": false,
+      "exitCode": 0,
+      "volumes": [
+        "project-full-stack-cap-read_go-redis-data"
+      ]
+    }
+  },
+  "removedPrivateEnvironmentFiles": [
+    "env-pool-fix.private.json",
+    "env.private.json"
+  ],
+  "privateCredentialsRemoved": {
+    "currentEnvironment": true,
+    "originalEnvironment": true,
+    "tokenInputAndLeaf": true
+  }
+}

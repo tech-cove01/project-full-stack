@@ -1,0 +1,19 @@
+{
+  "reportLocalLinks": 30,
+  "missingLinks": [],
+  "state": "complete-self-tested",
+  "normalStages": 54,
+  "unscoredStages": 1,
+  "selectedRequests": 108002,
+  "checks": [
+    {
+      "command": "python -X utf8 -m py_compile docs/evidence/2026-10-30-go073-cap/cap03/finalize-summary.py docs/evidence/2026-10-30-go073-cap/cap03/finish-and-cleanup.py",
+      "exit": 0
+    },
+    {
+      "command": "git diff --check",
+      "exit": 0
+    }
+  ],
+  "scope": "Local static/JSON/link validation only; all workload and cleanup evidence remains in its original stage files."
+}

@@ -1,0 +1,69 @@
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✓ 'p(95)<=200' p(95)=33.27ms
+    ✓ 'p(99)<=500' p(99)=50.44ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=250
+
+    cap_read_completed
+    ✓ 'count>=0' count=250
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=250
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=19.11ms med=16.05ms p(95)=33.27ms p(99)=50.44ms max=66.11ms
+    cap_read_attempted.............: 250    24.998219/s
+    cap_read_completed.............: 250    24.998219/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 0.00%  0 out of 250
+    cap_read_http_errors...........: 0      0/s
+    cap_read_success...............: 250    24.998219/s
+    cap_read_success_ms............: avg=19.11ms med=16.05ms p(95)=33.27ms p(99)=50.44ms max=66.11ms
+    cap_read_system_error_ratio....: 0.00%  0 out of 250
+    cap_read_system_errors.........: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=19.11ms med=16.05ms p(95)=33.27ms p(99)=50.44ms max=66.11ms
+      { expected_response:true }...: avg=19.11ms med=16.05ms p(95)=33.27ms p(99)=50.44ms max=66.11ms
+    http_req_failed................: 0.00%  0 out of 250
+    http_reqs......................: 250    24.998219/s
+
+    EXECUTION
+    dropped_iterations.............: 0      0/s
+    iteration_duration.............: avg=20.75ms med=17.76ms p(95)=34.44ms p(99)=51.61ms max=67.23ms
+    iterations.....................: 250    24.998219/s
+    vus............................: 1      min=1        max=1  
+    vus_max........................: 512    min=512      max=512
+
+    NETWORK
+    data_received..................: 2.4 MB 236 kB/s
+    data_sent......................: 35 kB  3.4 kB/s
+
+
+

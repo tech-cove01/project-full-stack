@@ -1,0 +1,18 @@
+{
+  "maxVUs": 1024,
+  "command": "python -X utf8 scripts/capacity-stage.py --mode read --control-dir <stage>-control --api-pid <api.pid> --diagnostics http://127.0.0.1:8351/debug/capacity --interval 5 --max-seconds <seconds+warm+120> --stop-grace-seconds 90 -- node scripts/go073-cap-read.mjs run",
+  "workingDirectory": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack",
+  "secretsExported": false,
+  "mode": "multi",
+  "rate": 500,
+  "apiMetadataSHA256": "0a43c1fe39e7a70ece3ab628cbe13a3891245114d6c20c293ec97b98faec6f88",
+  "at": "2026-10-30T07:24:53.3897852Z",
+  "warmRate": 25,
+  "preVUs": 512,
+  "warmSeconds": 10,
+  "apiPid": 64908,
+  "fixtureSourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "apiMetadataFile": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-10-30-go073-cap\\cap03\\api-pool-fix.json",
+  "sourceSha": "767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "seconds": 180
+}

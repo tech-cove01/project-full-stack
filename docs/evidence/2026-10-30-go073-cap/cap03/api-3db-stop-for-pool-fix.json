@@ -1,0 +1,15 @@
+{
+  "at": "2026-10-30T06:56:22.576839+00:00",
+  "oldPid": 45532,
+  "exeMatched": true,
+  "expectedCreatedUtc": "2026-10-30T05:39:59.076000+00:00",
+  "actualCreatedUtc": "2026-10-30T05:39:59.076356+00:00",
+  "creationDifferenceSeconds": 0.00035572052001953125,
+  "originalEnvironmentSHA256": "158aefef3fb35e3d45e38da65cd3f0b602c0e397ef1f926bb57a9bffaae15e5b",
+  "originalEnvironmentBytesUnchanged": true,
+  "newBinarySHA256": "97a5165e48a74c98ee521eebda01f79d049c44938239e2bd4ed89fe38e25e20c",
+  "privateValuesExported": false,
+  "method": "psutil.terminate on Windows; Go graceful shutdown not asserted",
+  "exitCode": 15,
+  "stopped": true
+}

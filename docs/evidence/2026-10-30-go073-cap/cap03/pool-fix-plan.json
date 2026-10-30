@@ -1,0 +1,22 @@
+{
+  "scope": "new clean API build after deterministic Feed pool-starvation fix; all previous 3db results remain historical",
+  "apiSourceSha": "767c2fc8bdf1be08c5636143a71898eec25081a9",
+  "apiMetadataFile": "api-pool-fix.json",
+  "apiPid": 64908,
+  "fixtureSourceSha": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "fixtureManifestSHA256": "7e3a9a9019c7fffc35dbbffd1c66f88ca65db2808faee1d263017698e2501754",
+  "sameExisting6400NotesAnd013Index": true,
+  "qualifiedRoundsBeforeNewApi": 0,
+  "finalQualifiedApiSourceMustBe767": true,
+  "probe": {"rate": 1, "warmSeconds": 1, "seconds": 5, "capacityClaim": false},
+  "explorationRates": [400, 600, 800],
+  "secondsPerExploration": 30,
+  "nearBoundary": "narrow to 700/650 as actual measured budget and resource headroom allow; do not chase a target",
+  "generatorSettings": {"400": {"preVUs": 256, "maxVUs": 512}, "600": {"preVUs": 512, "maxVUs": 1024}, "800": {"preVUs": 512, "maxVUs": 1024}},
+  "sameModeSameRateHoldSeconds": 180,
+  "successfulHoldRoundsRequiredPerMode": 2,
+  "fallbackAfterLongHoldFailure": [600, 500, 400, 300, 200, 100],
+  "criteriaResourceAndPoolsUnchanged": true,
+  "noOldApiAndNewApiRoundMixing": true,
+  "noProfilingDuringScoredHolds": true
+}

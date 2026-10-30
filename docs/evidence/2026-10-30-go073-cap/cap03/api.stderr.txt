@@ -1,0 +1,12 @@
+2026/10/30 13:46:26 WARN expired order scan will retry attempted=0
+2026/10/30 13:46:28 WARN activity outbox delivery will retry error="context deadline exceeded"
+2026/10/30 13:51:43 WARN expired order scan will retry attempted=0
+2026/10/30 13:55:56 WARN expired order scan will retry attempted=0
+[mysql] 2026/10/30 13:56:00 connection.go:49: invalid connection
+[mysql] 2026/10/30 13:56:00 connection.go:49: invalid connection
+[mysql] 2026/10/30 14:09:05 connection.go:49: invalid connection
+[mysql] 2026/10/30 14:09:05 connection.go:49: invalid connection
+[mysql] 2026/10/30 14:17:52 connection.go:49: invalid connection
+[mysql] 2026/10/30 14:28:25 connection.go:49: invalid connection
+[mysql] 2026/10/30 14:42:49 connection.go:49: invalid connection
+[mysql] 2026/10/30 14:47:42 connection.go:49: invalid connection

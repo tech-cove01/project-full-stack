@@ -1,0 +1,24 @@
+{
+  "stage": "post-fix-multi-500-pre512-a",
+  "classification": "native_harness_abort_before_stable",
+  "stablePhaseStarted": false,
+  "samplerStarted": false,
+  "harnessExit": 3221226505,
+  "exitHex": "0xC0000409",
+  "counts": null,
+  "scored": false,
+  "reason": "Local native harness exited before stable generator was observed; cause unknown. This is not a measured business failure or a capacity pass. One retry is a separate preserved stage.",
+  "evidence": [
+    {
+      "path": "docs/evidence/2026-10-30-go073-cap/cap03/post-fix-multi-500-pre512-a-control/exit-status.json",
+      "sha256": "cec5411188b6c1dccc4015aee96c41a9b7357fa3695ca1b5bfd3f8d1b49e08bc"
+    }
+  ],
+  "absentAtInspection": [
+    "process.json",
+    "stable-summary.json",
+    "result.json"
+  ],
+  "existingLoadFilesBeforeMarker": [],
+  "durationSeconds": 1.6643919000052847
+}

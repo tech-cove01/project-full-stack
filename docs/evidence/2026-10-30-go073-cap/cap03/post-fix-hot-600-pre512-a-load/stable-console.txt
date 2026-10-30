@@ -1,0 +1,72 @@
+time="2026-10-30T15:00:19+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"hot\",\"readerIndex\":0,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+time="2026-10-30T15:00:19+08:00" level=warning msg="{\"phase\":\"stable\",\"mode\":\"hot\",\"readerIndex\":0,\"status\":0,\"systemError\":true,\"httpError\":true,\"contentError\":true,\"bodyRetained\":false}" source=console
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✗ 'p(95)<=200' p(95)=218.53ms
+    ✗ 'p(99)<=500' p(99)=595.91ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=9430
+
+    cap_read_completed
+    ✓ 'count>=0' count=9415
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=9415
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=51.61ms med=19.97ms p(95)=218.53ms p(99)=595.91ms max=1.39s
+    cap_read_attempted.............: 9430   598.724042/s
+    cap_read_completed.............: 9415   597.771671/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 0.00%  0 out of 9415
+    cap_read_http_errors...........: 0      0/s
+    cap_read_success...............: 9415   597.771671/s
+    cap_read_success_ms............: avg=51.61ms med=19.97ms p(95)=218.53ms p(99)=595.91ms max=1.39s
+    cap_read_system_error_ratio....: 0.00%  0 out of 9415
+    cap_read_system_errors.........: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=51.61ms med=19.97ms p(95)=218.53ms p(99)=595.91ms max=1.39s
+      { expected_response:true }...: avg=51.61ms med=19.97ms p(95)=218.53ms p(99)=595.91ms max=1.39s
+    http_req_failed................: 0.00%  0 out of 9415
+    http_reqs......................: 9415   597.771671/s
+
+    EXECUTION
+    dropped_iterations.............: 0      0/s
+    iteration_duration.............: avg=52.16ms med=20.52ms p(95)=219.09ms p(99)=596.09ms max=1.39s
+    iterations.....................: 9415   597.771671/s
+    vus............................: 14     min=9         max=202
+    vus_max........................: 512    min=512       max=512
+
+    NETWORK
+    data_received..................: 89 MB  5.6 MB/s
+    data_sent......................: 1.3 MB 83 kB/s
+
+
+
+time="2026-10-30T15:00:20+08:00" level=error msg="thresholds on metrics 'cap_read_all_ms' were crossed; at least one has abortOnFail enabled, stopping test prematurely"

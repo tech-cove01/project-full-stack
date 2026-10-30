@@ -1,0 +1,11 @@
+{
+  "sqlInUse": 0,
+  "goroutines": 25,
+  "formalReadLoadPaused": true,
+  "apiPid": 45532,
+  "at": "2026-10-30T06:49:39.8748673Z",
+  "fixtureRetained": true,
+  "reason": "root-directed deterministic starvation fix and isolated regression",
+  "credentialsRetained": true,
+  "cleanupPerformed": false
+}

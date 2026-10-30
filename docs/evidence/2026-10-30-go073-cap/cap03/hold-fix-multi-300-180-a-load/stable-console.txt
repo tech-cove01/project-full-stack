@@ -1,0 +1,70 @@
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✗ 'p(95)<=200' p(95)=206.34ms
+    ✓ 'p(99)<=500' p(99)=282.6ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=4761
+
+    cap_read_completed
+    ✓ 'count>=0' count=4755
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=4755
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_read_all_ms................: avg=50.22ms med=17.92ms p(95)=206.34ms p(99)=282.6ms  max=449.18ms
+    cap_read_attempted.............: 4761   299.961079/s
+    cap_read_completed.............: 4755   299.583056/s
+    cap_read_content_errors........: 0      0/s
+    cap_read_failure_ratio.........: 0.00%  0 out of 4755
+    cap_read_http_errors...........: 0      0/s
+    cap_read_success...............: 4755   299.583056/s
+    cap_read_success_ms............: avg=50.22ms med=17.92ms p(95)=206.34ms p(99)=282.6ms  max=449.18ms
+    cap_read_system_error_ratio....: 0.00%  0 out of 4755
+    cap_read_system_errors.........: 0      0/s
+
+    HTTP
+    http_req_duration..............: avg=50.22ms med=17.92ms p(95)=206.34ms p(99)=282.6ms  max=449.18ms
+      { expected_response:true }...: avg=50.22ms med=17.92ms p(95)=206.34ms p(99)=282.6ms  max=449.18ms
+    http_req_failed................: 0.00%  0 out of 4755
+    http_reqs......................: 4755   299.583056/s
+
+    EXECUTION
+    dropped_iterations.............: 0      0/s
+    iteration_duration.............: avg=51.79ms med=18.54ms p(95)=213.12ms p(99)=288.34ms max=450.37ms
+    iterations.....................: 4755   299.583056/s
+    vus............................: 6      min=4         max=27 
+    vus_max........................: 256    min=256       max=256
+
+    NETWORK
+    data_received..................: 45 MB  2.8 MB/s
+    data_sent......................: 657 kB 41 kB/s
+
+
+
+time="2026-10-30T15:28:53+08:00" level=error msg="thresholds on metrics 'cap_read_all_ms' were crossed; at least one has abortOnFail enabled, stopping test prematurely"

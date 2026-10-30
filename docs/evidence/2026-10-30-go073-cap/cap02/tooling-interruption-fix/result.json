@@ -1,0 +1,9 @@
+{
+  "checkedAt": "2026-10-30T05:11:12.9337470Z",
+  "testExit": 0,
+  "vetExit": 0,
+  "buildExit": 0,
+  "binary": "backend/bin/capacity-trade.exe",
+  "binarySha256": "c33185213e0741b03e5a246af6ff3ab221e8da6824cd8fdee32c80be9600ac39",
+  "scope": "measurement helper interrupted-window correction; fixed product API untouched; no load"
+}

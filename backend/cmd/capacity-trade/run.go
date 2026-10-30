@@ -331,9 +331,10 @@ running:
 		return analysisErr
 	}
 	stable := analysis["stable"].(phaseResult)
-	queueAssessment := assessQueue(records, samples, rate, seconds, false)
+	generationCompleted := stopReason == "" && childErr == nil
+	queueAssessment := assessQueue(records, samples, rate, seconds, false, generationCompleted)
 	result["lastThirdQueueAssessment"] = queueAssessment
-	lastMinute := assessQueue(records, samples, rate, seconds, true)
+	lastMinute := assessQueue(records, samples, rate, seconds, true, generationCompleted)
 	if seconds >= 180 {
 		result["lastMinuteQueueAssessment"] = lastMinute
 	}
@@ -749,8 +750,12 @@ type queueAssessment struct {
 	Note              string  `json:"note"`
 }
 
-func assessQueue(records []requestRecord, samples []queueSample, rate, seconds int, lastMinute bool) queueAssessment {
+func assessQueue(records []requestRecord, samples []queueSample, rate, seconds int, lastMinute, generationCompleted bool) queueAssessment {
 	result := queueAssessment{LagLimit: 2 * rate, Note: "stable start approximates first issued request; sample boundaries are at most one observer interval early; SQL count observation and Redis lag are not simultaneous; no commit timestamp inference"}
+	if !generationCompleted {
+		result.Note = "full nominal stable window was not covered: generation stopped or exited with an error; post-stop drain observations cannot establish a last-third or last-minute capacity result"
+		return result
+	}
 	start := int64(math.MaxInt64)
 	for _, row := range records {
 		if row.Phase == "stable" {

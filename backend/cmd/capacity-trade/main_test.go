@@ -84,14 +84,52 @@ func TestTemporaryPoolGuardAndFixedQueueGrowthCriterion(t *testing.T) {
 		records = append(records, requestRecord{Phase: "stable", Category: "accepted", Started: 100 + int64(i*100), Ended: 110 + int64(i*100)})
 	}
 	samples := []queueSample{{AtMS: 20100, SQLObservedMS: 20110, DurableOrders: 200, Lag: 1}, {AtMS: 24100, SQLObservedMS: 24110, DurableOrders: 240, Lag: 1}, {AtMS: 28100, SQLObservedMS: 28110, DurableOrders: 280, Lag: 1}}
-	if result := assessQueue(records, samples, 10, 30, false); !result.Measured || !result.Passed {
+	if result := assessQueue(records, samples, 10, 30, false, true); !result.Measured || !result.Passed {
 		t.Fatalf("flat convergent queue failed: %+v", result)
 	}
 	samples[2].Lag = 30
-	if result := assessQueue(records, samples, 10, 30, false); !result.Measured || result.Passed {
+	if result := assessQueue(records, samples, 10, 30, false, true); !result.Measured || result.Passed {
 		t.Fatalf("lag growth budget not enforced: %+v", result)
 	}
-	if result := assessQueue(records, samples, 10, 5, false); result.Measured {
+	if result := assessQueue(records, samples, 10, 5, false, true); result.Measured {
 		t.Fatal("short probe produced a capacity conclusion")
+	}
+}
+
+func TestInterruptedGenerationCannotUseDrainToCompleteNominalQueueWindow(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		seconds    int
+		lastMinute bool
+	}{
+		{"last third", 30, false},
+		{"hold last third", 180, false},
+		{"hold last minute", 180, true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			// Generation stops five seconds early. Drain samples below extend
+			// into the unserved tail and make the completed/accepted ratio look
+			// healthy even though they cannot prove sustained generation.
+			records := []requestRecord{}
+			count := test.seconds*10 - 50
+			for i := 0; i < count; i++ {
+				records = append(records, requestRecord{Phase: "stable", Category: "accepted", Started: 100 + int64(i*100), Ended: 110 + int64(i*100)})
+			}
+			windowStart := int64(test.seconds) * 2000 / 3
+			if test.lastMinute {
+				windowStart = int64(test.seconds-60) * 1000
+			}
+			samples := []queueSample{
+				{AtMS: 100 + windowStart, SQLObservedMS: 110 + windowStart, DurableOrders: windowStart/100 - 50, Lag: 50},
+				{AtMS: 100 + int64(test.seconds*1000-2000), SQLObservedMS: 110 + int64(test.seconds*1000-2000), DurableOrders: int64(count), Lag: 0},
+			}
+			if ordinary := assessQueue(records, samples, 10, test.seconds, test.lastMinute, true); !ordinary.Measured || !ordinary.Passed {
+				t.Fatalf("fixture must demonstrate the misleading drain-only pass: %+v", ordinary)
+			}
+			interrupted := assessQueue(records, samples, 10, test.seconds, test.lastMinute, false)
+			if interrupted.Measured || interrupted.Passed || !strings.Contains(interrupted.Note, "full nominal stable window was not covered") {
+				t.Fatalf("interrupted generation produced a nominal capacity conclusion: %+v", interrupted)
+			}
+		})
 	}
 }

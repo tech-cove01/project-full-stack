@@ -1,0 +1,17 @@
+{
+  "task": "CAP-08",
+  "kind": "controlled",
+  "prediction": "After a barrier confirms that the first owned content load entered cards.cold_sql, an independent second batch with the test-only active limit 1 will be visible in cards.slot_wait. Both age clocks must cross 100ms while the barrier remains held. Canceling the first caller must leave two app-owned shared tasks active. The actual loopback collector must capture one bounded goroutine profile with both age reasons before release.",
+  "differentObservation": "Completion-only or caller-only observations cannot expose both shared SQL and active-slot waiting before release. A shared loader incorrectly tied to the first caller would leave its SQL/queue state on caller cancellation. Missing/late/truncated evidence or states already ended at capture are explicit failures, not evidence that waiting was absent.",
+  "evidence": [
+    "docs/evidence/2026-10-30-cap08/failure-window.md",
+    "docs/evidence/2026-10-30-cap08/start.json"
+  ],
+  "scope": "One CAP08B wiring scenario, no capacity run, no B1 cause claim. Barrier is before owned GORM Row reaches the driver, not a MySQL server execution stall.",
+  "testActiveLimit": 1,
+  "productionActiveLimitUnchanged": 8,
+  "sharedLoadDeadlineMillisecondsUnchanged": 2000,
+  "maximumCaptures": 1,
+  "maximumProfileBytes": 1048576,
+  "method": "TestIntegrationCardsControlledSharedObservation with GO_INTEGRATION=1 and an exclusive new CAP08_CONTROL_EVIDENCE directory."
+}

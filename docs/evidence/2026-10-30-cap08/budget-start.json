@@ -1,0 +1,8 @@
+{
+  "task": "CAP-08",
+  "startedAt": "2026-10-30T13:10:00+00:00",
+  "recordedAt": "2026-10-30T13:31:15.846597+00:00",
+  "sourceSha": "1de173517a54c3be46748779437b592f7bcdbc58",
+  "maximumDevelopmentSeconds": 14400,
+  "accounting": "conservative all-wall-time; load and CI waits are recorded separately, not subtracted"
+}

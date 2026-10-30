@@ -1,0 +1,5 @@
+=== RUN   TestIntegrationCardsControlledSharedObservation
+    controlled_observation_integration_test.go:206: controlled SQL and slot queue were separately observed and captured before release; first caller cancellation left shared work active
+--- PASS: TestIntegrationCardsControlledSharedObservation (0.44s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communitycards	4.025s

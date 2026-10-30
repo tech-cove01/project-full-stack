@@ -17,6 +17,8 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 var (
@@ -91,6 +93,7 @@ type Cache struct {
 	inflight, active, waiters chan struct{}
 	local                     localCache
 	stats                     counters
+	observations              *taildiag.Recorder
 }
 
 type flight struct {
@@ -106,6 +109,13 @@ func New(appCtx context.Context, client *redis.Client, db *gorm.DB) *Cache {
 		panic("communitycards requires application context and safe dependency pools")
 	}
 	return newCache(appCtx, storage{redis: client, db: db}, defaults())
+}
+
+// WithDiagnostics attaches the opt-in recorder before serving callers. Shared
+// loaders start their own application-owned trace, never the first caller's.
+func (cache *Cache) WithDiagnostics(recorder *taildiag.Recorder) *Cache {
+	cache.observations = recorder
+	return cache
 }
 
 func newCache(parent context.Context, store backend, cfg limits) *Cache {
@@ -165,7 +175,9 @@ func clone(card Card) Card {
 
 // GetMany returns the complete requested set or an error; it never fills an
 // unavailable directory version with a newer body or returns a partial page.
-func (cache *Cache) GetMany(ctx context.Context, refs []Ref) (map[Ref]Card, error) {
+func (cache *Cache) GetMany(ctx context.Context, refs []Ref) (out map[Ref]Card, returnedErr error) {
+	span := taildiag.Begin(ctx, taildiag.CardsMany, len(refs))
+	defer func() { span.End(returnedErr != nil) }()
 	refs, err := normalize(refs, cache.limits.batch)
 	if err != nil {
 		return nil, err
@@ -264,6 +276,13 @@ func (cache *Cache) startFlight(refs []Ref) (*flight, error) {
 func (cache *Cache) runFlight(ctx context.Context, cancel context.CancelFunc, key string, shared *flight, refs []Ref) {
 	defer cache.operations.Done()
 	defer cancel()
+	ctx, finishObservation := taildiag.StartShared(ctx, cache.observations)
+	span := taildiag.Begin(ctx, taildiag.CardsShared, len(refs))
+	var err error
+	defer func() {
+		span.End(err != nil)
+		finishObservation(err != nil)
+	}()
 	cards, err := cache.load(ctx, refs)
 	if err != nil {
 		cache.stats.loadErrors.Add(1)
@@ -302,7 +321,12 @@ func (cache *Cache) cachedRedis(ctx context.Context, result map[Ref]Card, remain
 		return result, nil, cache.contextError(ctx)
 	}
 	redisCtx, stop := context.WithTimeout(ctx, cache.limits.redisTimeout)
+	var span *taildiag.Span
+	if countHits {
+		span = taildiag.Begin(ctx, taildiag.CardsCallerRedisRead, len(remaining))
+	}
 	values, err := cache.backend.read(redisCtx, remaining)
+	span.End(err != nil)
 	stop()
 	if err != nil {
 		cache.stats.redisErrors.Add(1)
@@ -331,19 +355,26 @@ func (cache *Cache) cachedRedis(ctx context.Context, result map[Ref]Card, remain
 }
 
 func (cache *Cache) load(ctx context.Context, refs []Ref) (map[Ref]Card, error) {
+	queue := taildiag.Begin(ctx, taildiag.CardsSlotWait, len(refs))
 	select {
 	case cache.active <- struct{}{}:
+		queue.End(false)
 		defer func() { <-cache.active }()
 	case <-ctx.Done():
+		queue.End(true)
 		return nil, cache.contextError(ctx)
 	}
 	// A different caller may already have filled this batch while we queued.
+	recheck := taildiag.Begin(ctx, taildiag.CardsRecheck, len(refs))
 	result, missing, err := cache.cached(ctx, refs)
+	recheck.End(err != nil)
 	if err != nil || len(missing) == 0 {
 		return result, err
 	}
 	cache.stats.sqlBatches.Add(1)
+	sqlSpan := taildiag.Begin(ctx, taildiag.CardsColdSQL, len(missing))
 	rows, facts, err := cache.backend.load(ctx, missing)
+	sqlSpan.End(err != nil)
 	cache.stats.sqlRows.Add(facts.rows)
 	cache.stats.contentBytes.Add(facts.bytes)
 	if err := cache.contextError(ctx); err != nil {
@@ -357,6 +388,8 @@ func (cache *Cache) load(ctx context.Context, refs []Ref) (map[Ref]Card, error) 
 			return nil, ErrVersionChanged
 		}
 	}
+	fillSpan := taildiag.Begin(ctx, taildiag.CardsFill, len(missing))
+	fillFailed := false
 	values := make([]storedValue, 0, len(missing))
 	for _, ref := range missing {
 		card := rows[ref]
@@ -382,9 +415,11 @@ func (cache *Cache) load(ctx context.Context, refs []Ref) (map[Ref]Card, error) 
 		redisCtx, stop := context.WithTimeout(ctx, cache.limits.redisTimeout)
 		if cache.backend.write(redisCtx, values) != nil {
 			cache.stats.redisErrors.Add(1)
+			fillFailed = true
 		}
 		stop()
 	}
+	fillSpan.End(fillFailed)
 	return result, nil
 }
 

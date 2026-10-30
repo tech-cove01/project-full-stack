@@ -1,0 +1,9 @@
+{
+  "task": "CAP-08",
+  "kind": "controlled",
+  "slot": "controlled-1",
+  "tag": "wiring-1",
+  "at": "2026-10-30T13:31:15.974399+00:00",
+  "predictionPath": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-10-30-cap08\\controlled-wiring-prediction.json",
+  "failedStartsConsumeSlot": true
+}

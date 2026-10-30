@@ -33,6 +33,15 @@ const (
 	CountsRedisWrite
 	CountsRedisDelete
 	CountsColdSQL
+	FeedCards
+	FeedCardFallback
+	CardsMany
+	CardsCallerRedisRead
+	CardsShared
+	CardsSlotWait
+	CardsRecheck
+	CardsColdSQL
+	CardsFill
 	stageCount
 )
 
@@ -43,27 +52,35 @@ var names = [...]string{
 	"redis.command_total", "redis.pipeline_total", "redis.dial",
 	"counts.get_many", "counts.publication_wait", "counts.publication_hold",
 	"counts.redis_read", "counts.redis_write", "counts.redis_delete", "counts.cold_sql",
+	"feed.cards", "feed.card_fallback", "cards.get_many", "cards.caller_redis_read",
+	"cards.shared", "cards.slot_wait", "cards.recheck", "cards.cold_sql", "cards.fill",
 }
 
 const (
-	MaxSlowTraces = 32
-	MaxSpans      = 256
-	SlowThreshold = 100 * time.Millisecond
+	MaxSlowTraces     = 32
+	MaxSpans          = 256
+	SlowThreshold     = 100 * time.Millisecond
+	MaxActivePerStage = 1024
 )
 
 type aggregate struct {
 	count, total, max, errors, items atomic.Uint64
-	active                           atomic.Int64
+	live                             activeStage
 }
 
 type Aggregate struct {
-	Name    string `json:"name"`
-	Count   uint64 `json:"count"`
-	TotalNS uint64 `json:"total_ns"`
-	MaxNS   uint64 `json:"max_ns"`
-	Errors  uint64 `json:"errors"`
-	Items   uint64 `json:"items"`
-	Active  int64  `json:"active"`
+	Name                    string `json:"name"`
+	Count                   uint64 `json:"count"`
+	TotalNS                 uint64 `json:"total_ns"`
+	MaxNS                   uint64 `json:"max_ns"`
+	Errors                  uint64 `json:"errors"`
+	Items                   uint64 `json:"items"`
+	Active                  int64  `json:"active"`
+	TrackedActive           int    `json:"tracked_active"`
+	UntrackedActive         int64  `json:"untracked_active"`
+	OldestActiveNS          int64  `json:"oldest_active_ns"`
+	OldestComplete          bool   `json:"oldest_complete"`
+	ActiveTrackingOverflows uint64 `json:"active_tracking_overflows"`
 }
 
 type Timing struct {
@@ -93,20 +110,28 @@ type Snapshot struct {
 	MaxSpansPerTrace    int         `json:"max_spans_per_trace"`
 	LatestSequence      uint64      `json:"latest_sequence"`
 	Requests            uint64      `json:"requests"`
+	SharedTasks         uint64      `json:"shared_tasks"`
 	Stages              []Aggregate `json:"stages"`
 	SlowTraces          []SlowTrace `json:"slow_traces"`
 	MissingMeasurements []string    `json:"missing_measurements"`
 }
 
 type Recorder struct {
-	stages   [stageCount]aggregate
-	requests atomic.Uint64
-	mu       sync.Mutex
-	sequence uint64
-	slow     [MaxSlowTraces]SlowTrace
+	started     time.Time
+	clockOnce   sync.Once
+	stages      [stageCount]aggregate
+	requests    atomic.Uint64
+	sharedTasks atomic.Uint64
+	mu          sync.Mutex
+	sequence    uint64
+	slow        [MaxSlowTraces]SlowTrace
 }
 
-func New() *Recorder { return &Recorder{} }
+func New() *Recorder { recorder := &Recorder{}; recorder.initClock(); return recorder }
+
+func (recorder *Recorder) initClock() {
+	recorder.clockOnce.Do(func() { recorder.started = time.Now() })
+}
 
 type traceKey struct{}
 
@@ -130,13 +155,32 @@ func Start(ctx context.Context, recorder *Recorder, http bool) (context.Context,
 	if http {
 		scope = "feed.http"
 	}
+	return start(ctx, recorder, scope)
+}
+
+// StartShared creates an independent application-owned observation. It never
+// inherits the caller's trace, identity or cancellation; ctx is the loader's
+// existing application-derived deadline, not a request context.
+func StartShared(ctx context.Context, recorder *Recorder) (context.Context, func(bool)) {
+	if recorder == nil {
+		return ctx, func(bool) {}
+	}
+	return start(ctx, recorder, "cards.shared")
+}
+
+func start(ctx context.Context, recorder *Recorder, scope string) (context.Context, func(bool)) {
+	recorder.initClock()
 	trace := &request{recorder: recorder, started: time.Now(), scope: scope}
 	derived := context.WithValue(ctx, traceKey{}, trace)
 	var once sync.Once
 	return derived, func(failed bool) {
 		once.Do(func() {
 			end := time.Now()
-			recorder.requests.Add(1)
+			if scope == "cards.shared" {
+				recorder.sharedTasks.Add(1)
+			} else {
+				recorder.requests.Add(1)
+			}
 			if end.Sub(trace.started) < SlowThreshold {
 				return
 			}
@@ -163,11 +207,12 @@ func fromContext(ctx context.Context) *request {
 }
 
 type Span struct {
-	trace   *request
-	stage   Stage
-	started time.Time
-	items   int
-	once    sync.Once
+	trace      *request
+	stage      Stage
+	started    time.Time
+	items      int
+	once       sync.Once
+	activeSlot int
 }
 
 // Begin returns nil outside enabled Feed contexts. End is safe on nil, so the
@@ -177,8 +222,9 @@ func Begin(ctx context.Context, stage Stage, items int) *Span {
 	if trace == nil || stage >= stageCount {
 		return nil
 	}
-	trace.recorder.stages[stage].active.Add(1)
-	return &Span{trace: trace, stage: stage, started: time.Now(), items: items}
+	started := time.Now()
+	slot := trace.recorder.stages[stage].live.begin(started.Sub(trace.recorder.started).Nanoseconds() + 1)
+	return &Span{trace: trace, stage: stage, started: started, items: items, activeSlot: slot}
 }
 
 func (span *Span) End(failed bool) {
@@ -186,7 +232,7 @@ func (span *Span) End(failed bool) {
 		return
 	}
 	span.once.Do(func() {
-		span.trace.recorder.stages[span.stage].active.Add(-1)
+		span.trace.recorder.stages[span.stage].live.end(span.activeSlot)
 		span.trace.record(span.stage, span.started, time.Since(span.started), failed, span.items)
 	})
 }
@@ -232,8 +278,9 @@ func (recorder *Recorder) Snapshot() Snapshot {
 	if recorder == nil {
 		return Snapshot{Enabled: false}
 	}
+	recorder.initClock()
 	out := Snapshot{Enabled: true, SlowThresholdMS: SlowThreshold.Milliseconds(), MaxSlowTraces: MaxSlowTraces,
-		MaxSpansPerTrace: MaxSpans, Requests: recorder.requests.Load(), Stages: make([]Aggregate, 0, stageCount),
+		MaxSpansPerTrace: MaxSpans, Requests: recorder.requests.Load(), SharedTasks: recorder.sharedTasks.Load(), Stages: make([]Aggregate, 0, stageCount),
 		SlowTraces: []SlowTrace{}, MissingMeasurements: []string{
 			"sql.begin_acquire_roundtrip includes pool acquisition and BEGIN roundtrip; pure per-request SQL pool wait is not separately measured",
 			"sql.transaction_hold spans successful BeginTx return through Commit/Rollback return, including server commit/rollback roundtrip",
@@ -242,11 +289,16 @@ func (recorder *Recorder) Snapshot() Snapshot {
 			"stage counters and pool snapshots are concurrent observations, not an atomic per-request attribution; nested stages must not be added as disjoint totals",
 			"trace.canceled reflects the outer observed HTTP or direct-service context; inner deadline failures are reflected by stage errors without exporting error text",
 			"feed.http covers the Gin handler including authentication and JSON serialization, not client-observed network RTT or time before handler entry",
+			"active ages are monotonic per-stage snapshots, not an atomic cross-stage timeline; overflow leaves oldest_complete=false and untracked_active explicit",
+			"cards.shared traces are independent application-owned tasks, not children of an individual HTTP trace; request waiting and shared task duration overlap and must not be added",
 		}}
 	for stage := Stage(0); stage < stageCount; stage++ {
 		stat := &recorder.stages[stage]
+		active, tracked, untracked, oldest, overflows := stat.live.snapshot(time.Since(recorder.started).Nanoseconds() + 1)
 		out.Stages = append(out.Stages, Aggregate{Name: names[stage], Count: stat.count.Load(), TotalNS: stat.total.Load(),
-			MaxNS: stat.max.Load(), Errors: stat.errors.Load(), Items: stat.items.Load(), Active: stat.active.Load()})
+			MaxNS: stat.max.Load(), Errors: stat.errors.Load(), Items: stat.items.Load(), Active: active,
+			TrackedActive: tracked, UntrackedActive: untracked, OldestActiveNS: oldest,
+			OldestComplete: untracked == 0, ActiveTrackingOverflows: overflows})
 	}
 	recorder.mu.Lock()
 	defer recorder.mu.Unlock()

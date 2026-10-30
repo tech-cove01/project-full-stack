@@ -57,6 +57,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		feedObservations = taildiag.New()
 		taildiag.Instrument(resources.ORM, resources.SQL, resources.Redis)
 	}
+	cards.WithDiagnostics(feedObservations)
 	listener, err := net.Listen("tcp", cfg.APIAddr)
 	if err != nil {
 		_ = owned.Close()

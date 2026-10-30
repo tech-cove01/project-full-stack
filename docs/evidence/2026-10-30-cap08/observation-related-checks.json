@@ -1,0 +1,6 @@
+{
+  "at": "2026-10-30T13:24:44.7686605Z",
+  "vetExit": 0,
+  "scope": "fresh CAP08 read-owned MySQL3451 Redis6551; no load/API; opt-in controlled case deliberately not activated in this general regression",
+  "relatedRealTestsExit": 0
+}

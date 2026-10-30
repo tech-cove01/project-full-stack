@@ -1,0 +1,102 @@
+goroutine profile: total 14
+1 @ 0x7ff794779731 0x7ff7947bc61d 0x7ff79497ba51 0x7ff79497b725 0x7ff794978689 0x7ff794f2f8a5 0x7ff794e950c9 0x7ff794e96caf 0x7ff794eb5c6e 0x7ff794e933fc 0x7ff7947c4c01
+#	0x7ff79497ba50	runtime/pprof.writeRuntimeProfile+0xb0											C:/Program Files/Go/src/runtime/pprof/pprof.go:848
+#	0x7ff79497b724	runtime/pprof.writeGoroutine+0x44											C:/Program Files/Go/src/runtime/pprof/pprof.go:781
+#	0x7ff794978688	runtime/pprof.(*Profile).WriteTo+0x148											C:/Program Files/Go/src/runtime/pprof/pprof.go:405
+#	0x7ff794f2f8a4	github.com/cityloop/fullstack-go/internal/communitycards.TestIntegrationCardsControlledSharedObservation.func8+0x164	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/controlled_observation_integration_test.go:142
+#	0x7ff794e950c8	net/http.HandlerFunc.ServeHTTP+0x28											C:/Program Files/Go/src/net/http/server.go:2338
+#	0x7ff794e96cae	net/http.(*ServeMux).ServeHTTP+0x1ce											C:/Program Files/Go/src/net/http/server.go:2903
+#	0x7ff794eb5c6d	net/http.serverHandler.ServeHTTP+0x8d											C:/Program Files/Go/src/net/http/server.go:3413
+#	0x7ff794e933fb	net/http.(*conn).serve+0x6db												C:/Program Files/Go/src/net/http/server.go:2137
+
+1 @ 0x7ff7947ba4fe 0x7ff7947c17e8 0x7ff7947d779e 0x7ff7947e20f9 0x7ff794815dea 0x7ff794815dd3 0x7ff79480d94d 0x7ff79480e525 0x7ff79481ecaf 0x7ff79481ecaa 0x7ff79487de78 0x7ff794800211 0x7ff79481f4b5 0x7ff79481f4b6 0x7ff79481f409 0x7ff79480015d 0x7ff7948cb7b4 0x7ff7948cb7a0 0x7ff7948cb8ac 0x7ff7947c4c01
+#	0x7ff7947c17e7	syscall.syscalln+0x47				C:/Program Files/Go/src/runtime/syscall_windows.go:427
+#	0x7ff7947d779d	syscall.SyscallN+0x1d				C:/Program Files/Go/src/syscall/dll_windows.go:99
+#	0x7ff7947e20f8	syscall.readFile+0xb8				C:/Program Files/Go/src/syscall/zsyscall_windows.go:1030
+#	0x7ff794815de9	syscall.ReadFile+0x49				C:/Program Files/Go/src/syscall/syscall_windows.go:510
+#	0x7ff794815dd2	internal/poll.(*FD).Read.func1+0x32		C:/Program Files/Go/src/internal/poll/fd_windows.go:597
+#	0x7ff79480d94c	internal/poll.(*FD).execIO+0x1ec		C:/Program Files/Go/src/internal/poll/fd_windows.go:303
+#	0x7ff79480e524	internal/poll.(*FD).Read+0x2e4			C:/Program Files/Go/src/internal/poll/fd_windows.go:596
+#	0x7ff79481ecae	os.(*File).read+0x4e				C:/Program Files/Go/src/os/file_posix.go:30
+#	0x7ff79481eca9	os.(*File).Read+0x49				C:/Program Files/Go/src/os/file.go:144
+#	0x7ff79487de77	bytes.(*Buffer).ReadFrom+0x97			C:/Program Files/Go/src/bytes/buffer.go:229
+#	0x7ff794800210	io.copyBuffer+0x150				C:/Program Files/Go/src/io/io.go:415
+#	0x7ff79481f4b4	io.Copy+0x34					C:/Program Files/Go/src/io/io.go:388
+#	0x7ff79481f4b5	os.genericWriteTo+0x35				C:/Program Files/Go/src/os/file.go:295
+#	0x7ff79481f408	os.(*File).WriteTo+0x48				C:/Program Files/Go/src/os/file.go:273
+#	0x7ff79480015c	io.copyBuffer+0x9c				C:/Program Files/Go/src/io/io.go:411
+#	0x7ff7948cb7b3	io.Copy+0x33					C:/Program Files/Go/src/io/io.go:388
+#	0x7ff7948cb79f	os/exec.(*Cmd).writerDescriptor.func1+0x1f	C:/Program Files/Go/src/os/exec/exec.go:613
+#	0x7ff7948cb8ab	os/exec.(*Cmd).Start.func2+0x2b			C:/Program Files/Go/src/os/exec/exec.go:768
+
+1 @ 0x7ff7947ba4fe 0x7ff7947c17e8 0x7ff7947d779e 0x7ff7947e2c69 0x7ff79481de09 0x7ff7948c8425 0x7ff7948c841d 0x7ff7948c732d 0x7ff7948c8c6f 0x7ff794f27f2c 0x7ff794894863 0x7ff7947c4c01
+#	0x7ff7947c17e7	syscall.syscalln+0x47												C:/Program Files/Go/src/runtime/syscall_windows.go:427
+#	0x7ff7947d779d	syscall.SyscallN+0x1d												C:/Program Files/Go/src/syscall/dll_windows.go:99
+#	0x7ff7947e2c68	syscall.WaitForSingleObject+0x68										C:/Program Files/Go/src/syscall/zsyscall_windows.go:1159
+#	0x7ff79481de08	os.(*Process).wait+0x88												C:/Program Files/Go/src/os/exec_windows.go:28
+#	0x7ff7948c8424	os.(*Process).Wait+0x44												C:/Program Files/Go/src/os/exec.go:347
+#	0x7ff7948c841c	os/exec.(*Cmd).Wait+0x3c											C:/Program Files/Go/src/os/exec/exec.go:944
+#	0x7ff7948c732c	os/exec.(*Cmd).Run+0x2c												C:/Program Files/Go/src/os/exec/exec.go:643
+#	0x7ff7948c8c6e	os/exec.(*Cmd).CombinedOutput+0x8e										C:/Program Files/Go/src/os/exec/exec.go:1061
+#	0x7ff794f27f2b	github.com/cityloop/fullstack-go/internal/communitycards.TestIntegrationCardsControlledSharedObservation+0x17ab	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/controlled_observation_integration_test.go:164
+#	0x7ff794894862	testing.tRunner+0xc2												C:/Program Files/Go/src/testing/testing.go:2193
+
+1 @ 0x7ff7947bd92a 0x7ff79474a6ee 0x7ff79474a212 0x7ff794894db2 0x7ff79489aad7 0x7ff794894863 0x7ff794896e05 0x7ff7948959cf 0x7ff794f354fb 0x7ff7947859bb 0x7ff7947c4c01
+#	0x7ff794894db1	testing.(*T).Run+0x4d1		C:/Program Files/Go/src/testing/testing.go:2266
+#	0x7ff79489aad6	testing.runTests.func1+0x36	C:/Program Files/Go/src/testing/testing.go:2742
+#	0x7ff794894862	testing.tRunner+0xc2		C:/Program Files/Go/src/testing/testing.go:2193
+#	0x7ff794896e04	testing.runTests+0x504		C:/Program Files/Go/src/testing/testing.go:2740
+#	0x7ff7948959ce	testing.(*M).Run+0x6ae		C:/Program Files/Go/src/testing/testing.go:2600
+#	0x7ff794f354fa	main.main+0x9a			_testmain.go:84
+#	0x7ff7947859ba	runtime.main+0x3fa		C:/Program Files/Go/src/runtime/proc.go:302
+
+1 @ 0x7ff7947bd92a 0x7ff79474a6ee 0x7ff79474a232 0x7ff794a0bb9e 0x7ff7947c4c01
+#	0x7ff794a0bb9d	github.com/redis/go-redis/v9/internal/pool.startGlobalTimeCache.func1+0x9d	C:/Users/19083/go/pkg/mod/github.com/redis/go-redis/v9@v9.17.0/internal/pool/global_time_cache.go:48
+
+1 @ 0x7ff7947bd92a 0x7ff79477cc57 0x7ff7947bca25 0x7ff79480c427 0x7ff79480d5bd 0x7ff79480d9de 0x7ff794811765 0x7ff7948119ed 0x7ff7949b0c2b 0x7ff7949c3d9b 0x7ff7949c2fb0 0x7ff794e984b9 0x7ff794ebfe75 0x7ff7947c4c01
+#	0x7ff7947bca24	internal/poll.runtime_pollWait+0x84		C:/Program Files/Go/src/runtime/netpoll.go:351
+#	0x7ff79480c426	internal/poll.(*pollDesc).wait+0x26		C:/Program Files/Go/src/internal/poll/fd_poll_runtime.go:84
+#	0x7ff79480d5bc	internal/poll.(*FD).waitIO+0x3c			C:/Program Files/Go/src/internal/poll/fd_windows.go:233
+#	0x7ff79480d9dd	internal/poll.(*FD).execIO+0x27d		C:/Program Files/Go/src/internal/poll/fd_windows.go:310
+#	0x7ff794811764	internal/poll.(*FD).acceptOne+0x84		C:/Program Files/Go/src/internal/poll/fd_windows.go:1111
+#	0x7ff7948119ec	internal/poll.(*FD).Accept+0x18c		C:/Program Files/Go/src/internal/poll/fd_windows.go:1146
+#	0x7ff7949b0c2a	net.(*netFD).accept+0x4a			C:/Program Files/Go/src/net/fd_windows.go:201
+#	0x7ff7949c3d9a	net.(*TCPListener).accept+0x1a			C:/Program Files/Go/src/net/tcpsock_posix.go:159
+#	0x7ff7949c2faf	net.(*TCPListener).Accept+0x2f			C:/Program Files/Go/src/net/tcpsock.go:387
+#	0x7ff794e984b8	net/http.(*Server).Serve+0x378			C:/Program Files/Go/src/net/http/server.go:3551
+#	0x7ff794ebfe74	net/http/httptest.(*Server).goServe.func1+0x54	C:/Program Files/Go/src/net/http/httptest/server.go:586
+
+1 @ 0x7ff7947bd92a 0x7ff794797957 0x7ff7948c7f30 0x7ff7947c4c01
+#	0x7ff7948c7f2f	os/exec.(*Cmd).watchCtx+0xaf	C:/Program Files/Go/src/os/exec/exec.go:808
+
+1 @ 0x7ff7947bd92a 0x7ff794797957 0x7ff794d669be 0x7ff7947c4c01
+#	0x7ff794d669bd	database/sql.(*DB).connectionCleaner+0x9d	C:/Program Files/Go/src/database/sql/sql.go:1109
+
+1 @ 0x7ff7947bd92a 0x7ff794797957 0x7ff794d67429 0x7ff7947c4c01
+#	0x7ff794d67428	database/sql.(*DB).connectionOpener+0x88	C:/Program Files/Go/src/database/sql/sql.go:1266
+
+1 @ 0x7ff7947bd92a 0x7ff794797957 0x7ff794ede6ba 0x7ff7947c4c01
+#	0x7ff794ede6b9	github.com/go-sql-driver/mysql.(*mysqlConn).startWatcher.func1+0x99	C:/Users/19083/go/pkg/mod/github.com/go-sql-driver/mysql@v1.8.1/connection.go:628
+
+1 @ 0x7ff7947bd92a 0x7ff794797957 0x7ff794f197f1 0x7ff794f30510 0x7ff7947c4c01
+#	0x7ff794f197f0	github.com/cityloop/fullstack-go/internal/communitycards.(*Cache).GetMany+0x330						D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/cards.go:214
+#	0x7ff794f3050f	github.com/cityloop/fullstack-go/internal/communitycards.TestIntegrationCardsControlledSharedObservation.func5+0x4f	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/controlled_observation_integration_test.go:107
+
+1 @ 0x7ff7947bd92a 0x7ff794797957 0x7ff794f1b6f9 0x7ff794f1a9cc 0x7ff7947c4c01
+#	0x7ff794f1b6f8	github.com/cityloop/fullstack-go/internal/communitycards.(*Cache).load+0x118		D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/cards.go:359
+#	0x7ff794f1a9cb	github.com/cityloop/fullstack-go/internal/communitycards.(*Cache).runFlight+0x14b	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/cards.go:286
+
+1 @ 0x7ff7947bd92a 0x7ff794797957 0x7ff794f307c5 0x7ff7947d040b 0x7ff794f30705 0x7ff794f306be 0x7ff794df7239 0x7ff794e00092 0x7ff794e0037f 0x7ff794f1e945 0x7ff794f1b8e2 0x7ff794f1a9cc 0x7ff7947c4c01
+#	0x7ff794f307c4	github.com/cityloop/fullstack-go/internal/communitycards.TestIntegrationCardsControlledSharedObservation.func3.1+0x84	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/controlled_observation_integration_test.go:84
+#	0x7ff7947d040a	sync.(*Once).doSlow+0xaa												C:/Program Files/Go/src/sync/once.go:78
+#	0x7ff794f30704	sync.(*Once).Do+0x124													C:/Program Files/Go/src/sync/once.go:69
+#	0x7ff794f306bd	github.com/cityloop/fullstack-go/internal/communitycards.TestIntegrationCardsControlledSharedObservation.func3+0xdd	D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/controlled_observation_integration_test.go:82
+#	0x7ff794df7238	gorm.io/gorm.(*processor).Execute+0x4b8											C:/Users/19083/go/pkg/mod/gorm.io/gorm@v1.31.1/callbacks.go:136
+#	0x7ff794e00091	gorm.io/gorm.(*DB).Rows+0x71												C:/Users/19083/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:518
+#	0x7ff794e0037e	gorm.io/gorm.(*DB).Scan+0x25e												C:/Users/19083/go/pkg/mod/gorm.io/gorm@v1.31.1/finisher_api.go:535
+#	0x7ff794f1e944	github.com/cityloop/fullstack-go/internal/communitycards.storage.load+0x3e4						D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/storage.go:67
+#	0x7ff794f1b8e1	github.com/cityloop/fullstack-go/internal/communitycards.(*Cache).load+0x301						D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/cards.go:376
+#	0x7ff794f1a9cb	github.com/cityloop/fullstack-go/internal/communitycards.(*Cache).runFlight+0x14b					D:/桌面/The ALL/agent/project/code/project-full-stack/backend/internal/communitycards/cards.go:286
+
+1 @ 0x7ff7947c4c01
+

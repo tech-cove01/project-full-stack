@@ -113,16 +113,20 @@ func (service *Service) Feed(ctx context.Context, userID, cursorTime, cursorID s
 		return result, err
 	}
 	if service.cards != nil && len(refs) > 0 {
+		cardWait := taildiag.Begin(ctx, taildiag.FeedCards, len(refs))
 		cards, loadErr := service.cards.GetMany(ctx, refs)
+		cardWait.End(loadErr != nil)
 		if errors.Is(loadErr, communitycards.ErrVersionChanged) || errors.Is(loadErr, communitycards.ErrBusy) {
 			// The old directory must never receive a different version's body.
 			// Retry the original full-field path once, in a new fact snapshot.
 			service.cardFallbacks.Add(1)
+			fallback := taildiag.Begin(ctx, taildiag.FeedCardFallback, 0)
 			loadErr = service.readSnapshot(ctx, func(reader *Service) error {
 				var queryErr error
 				result, queryErr = reader.feedPage(ctx, user, cursorAt, cursorKey, hasCursor, limit)
 				return queryErr
 			})
+			fallback.End(loadErr != nil)
 		} else if loadErr == nil {
 			for index, ref := range refs {
 				card, ok := cards[ref]

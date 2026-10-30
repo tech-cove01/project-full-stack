@@ -1,0 +1,30 @@
+{
+  "task": "CAP-08",
+  "kind": "wiring-result",
+  "at": "2026-10-30T13:34:10.769694+00:00",
+  "testExit": 0,
+  "capturedBeforeRelease": true,
+  "firstCallerCanceled": true,
+  "stageSeparationValidated": true,
+  "profileBytes": 10604,
+  "allActiveConverged": true,
+  "sourceAtExecutionHead": "5f677506b1ac4bcdb79d4b0e4c56d4281aa31b26",
+  "sourceWorktreeModified": true,
+  "sourceFileSHA256": {
+    "backend/internal/platform/taildiag/recorder.go": "34328505bc38495ad0f6a5d2deb7e890cc8b7c465655dd8d692eae55098d66f5",
+    "backend/internal/platform/taildiag/active.go": "76cc8ab3e25764659aa44ce81678ebd7cf15b00ae19973fd7bc1df11c43c9ba9",
+    "backend/internal/communitycards/cards.go": "53f85fa4c75331f6a4cf08723a4c02db4c113cdc9a79c711f79d9ac02b4e1db0",
+    "backend/internal/communitycards/controlled_observation_integration_test.go": "3ef4191df2ce8db9da1e93372561d23548bbf728173742b2ff45702f050bc4fa",
+    "backend/internal/social/feed.go": "e2ea64370d951d17e9a6e786fc9f5d0c06f226c87cdfddee22c0401a11190292",
+    "backend/internal/platform/app/app.go": "07def231aa91a37196d095ec510411a173383b44f5af0a0a4568f4825c0e361d",
+    "scripts/cap08-collector.py": "aa1ec0b291b7f278e4db4399a05bcbaa79d4f1932c56afba160ce257b2a5de8c"
+  },
+  "evidence": [
+    "docs/evidence/2026-10-30-cap08/controlled-wiring-1-test-exit.json",
+    "docs/evidence/2026-10-30-cap08/controlled-wiring-1/before-release.json",
+    "docs/evidence/2026-10-30-cap08/controlled-wiring-1/collector/manifest.json",
+    "docs/evidence/2026-10-30-cap08/controlled-wiring-1/collector-exit.json",
+    "docs/evidence/2026-10-30-cap08/controlled-wiring-1/after-release.json"
+  ],
+  "scope": "real wiring control before owned GORM Row driver call, not proof of MySQL server blocking or historical B1 cause"
+}

@@ -14,6 +14,7 @@ const abort = __ENV.CAP_READ_ABORT !== '0' && phase === 'stable'
 if (!Number.isInteger(rate) || rate < 1 || rate > 20000 || !Number.isInteger(seconds) || seconds < 1 || seconds > 600 || !['hot', 'multi'].includes(mode)) throw new Error('invalid read load settings')
 
 const attempted = new Counter('cap_read_attempted')
+const completed = new Counter('cap_read_completed')
 const success = new Counter('cap_read_success')
 const systemErrors = new Counter('cap_read_system_errors')
 const httpErrors = new Counter('cap_read_http_errors')
@@ -28,7 +29,7 @@ export const options = {
   scenarios: { read: { executor: 'constant-arrival-rate', rate, timeUnit: '1s', duration: `${seconds}s`, gracefulStop: '10s', preAllocatedVUs: Number(__ENV.CAP_READ_PRE_VUS || 64), maxVUs: Number(__ENV.CAP_READ_MAX_VUS || 512) } },
   thresholds: {
     // These force zero counters to appear, so absent data cannot be called zero.
-    cap_read_attempted: ['count>=0'], cap_read_success: ['count>=0'],
+    cap_read_attempted: ['count>=0'], cap_read_completed: ['count>=0'], cap_read_success: ['count>=0'],
     cap_read_system_errors: ['count>=0'], cap_read_http_errors: ['count>=0'],
     dropped_iterations: [{ threshold: 'count==0', abortOnFail: abort, delayAbortEval: '10s' }],
     cap_read_system_error_ratio: [{ threshold: 'rate<0.01', abortOnFail: abort, delayAbortEval: '10s' }],
@@ -68,4 +69,7 @@ export default function () {
     errorLogged = true
     console.warn(JSON.stringify({ phase, mode, readerIndex, status: response.status, systemError: isSystemError, httpError: isHTTPError, contentError: !correct, bodyRetained: false }))
   }
+  // A threshold/resource abort may interrupt HTTP calls. Started iterations
+  // without this terminal classification remain explicitly unknown.
+  completed.add(1)
 }

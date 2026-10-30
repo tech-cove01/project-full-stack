@@ -1,0 +1,2 @@
+node --check scripts/go073-cap-read.mjs: exit 0
+node --check scripts/load/go073-cap-read.js: exit 0

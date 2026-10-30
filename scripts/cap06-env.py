@@ -23,10 +23,26 @@ import psutil
 
 
 REPO = Path(__file__).resolve().parent.parent
+COHORT = 'cap06'
+KEY_PREFIX = 'CAP06'
+TASK = 'CAP-06A'
 ROOT = REPO / 'docs/evidence/2026-10-30-cap06'
 PROJECT = 'project-full-stack-cap-read'
 FLAGS = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
 OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
+# The CAP07 adapter selects one fixed cohort before parsing arguments. The
+# default CAP06 CLI retains its original paths/guards; arbitrary roots and
+# projects are deliberately not configurable.
+def configure_cohort(cohort):
+    global COHORT, KEY_PREFIX, TASK, ROOT
+    if cohort not in ('cap06', 'cap07'):
+        raise ValueError('unsupported fixed capacity cohort')
+    COHORT = cohort
+    KEY_PREFIX = cohort.upper()
+    TASK = 'CAP-06A' if cohort == 'cap06' else 'CAP-07'
+    ROOT = REPO / ('docs/evidence/2026-10-30-' + cohort)
 
 
 def now():
@@ -53,7 +69,7 @@ def run(command, *, env=None, input=None, allow_failure=False):
 def compose(settings):
     return ['docker', 'compose', '-p', PROJECT, '-f', 'compose.go.yaml', '-f',
             'scripts/load/compose.capacity.yaml', '-f', 'scripts/load/compose.capacity-read.yaml',
-            '-f', settings['CAP06_VOLUME_OVERRIDE']]
+            '-f', settings[KEY_PREFIX + '_VOLUME_OVERRIDE']]
 
 
 def environment(settings):
@@ -112,13 +128,13 @@ def load_settings(path):
     path = Path(path).resolve()
     assert path.name.startswith('env') and path.name.endswith('.private.json')
     runtime = path.parent
-    assert runtime.parent == REPO.parent and re.fullmatch(r'\.runtime-fullstack-cap06-[a-f0-9]{12}', runtime.name)
+    assert runtime.parent == REPO.parent and re.fullmatch(r'\.runtime-fullstack-' + re.escape(COHORT) + '-[a-f0-9]{12}', runtime.name)
     value = read(path)
-    assert value['CAP06_RUNTIME'] == str(runtime)
+    assert value[KEY_PREFIX + '_RUNTIME'] == str(runtime)
     assert value['MYSQL_HOST'] == value['REDIS_HOST'] == '127.0.0.1'
     assert value['MYSQL_PORT'] == '3451' and value['REDIS_PORT'] == '6551'
     assert value['API_BASE'] == 'http://127.0.0.1:8251' and value['ORDER_STREAM_WORKERS'] == '1'
-    assert value['CAP06_EVIDENCE'] == str(ROOT)
+    assert value[KEY_PREFIX + '_EVIDENCE'] == str(ROOT)
     return value, runtime
 
 
@@ -127,6 +143,18 @@ def get_json(url):
         body = response.read(2 * 1024 * 1024 + 1)
         assert len(body) <= 2 * 1024 * 1024
         return json.loads(body)
+
+
+def read_api_metadata(path):
+    path = Path(path).resolve()
+    value = read(path)
+    if COHORT == 'cap07':
+        assert path.parent == ROOT and re.fullmatch(r'api-[a-z0-9-]+\.json', path.name)
+        private = Path(value['privateEnvironmentFile']).resolve()
+        assert private.parent.parent == REPO.parent
+        assert re.fullmatch(r'\.runtime-fullstack-cap07-[a-f0-9]{12}', private.parent.name)
+        assert value['variant'] in ('A', 'B')
+    return value
 
 
 def api_identity(metadata, *, require_health=False):
@@ -153,7 +181,7 @@ def private_write(runtime, name, settings):
 
 
 def prepare(args):
-    assert not (ROOT / 'environment.json').exists(), 'preserve existing CAP06 environment'
+    assert not (ROOT / 'environment.json').exists(), 'preserve existing cohort environment'
     assert not any(port_open(p) for p in (3451, 6551, 8251, 8351)), 'dedicated ports already occupied'
     assert re.fullmatch(r'[a-f0-9]{64}', args.previous_mysql_id) and re.fullmatch(r'[a-f0-9]{64}', args.previous_redis_id)
     old = {'mysql': container('mysql', expected_id=args.previous_mysql_id, running=False),
@@ -166,7 +194,7 @@ def prepare(args):
     assert net['Labels']['com.docker.compose.project'] == PROJECT
     assert any(x.get('Subnet') == str(network) for x in net['IPAM']['Config']), 'explicit subnet must match retained owned network'
     nonce = secrets.token_hex(6)
-    runtime = REPO.parent / ('.runtime-fullstack-cap06-' + nonce)
+    runtime = REPO.parent / ('.runtime-fullstack-' + COHORT + '-' + nonce)
     runtime.mkdir()
     if os.name == 'nt':
         # Do not assume Python mode0600 creates a Windows-only owner ACL.
@@ -176,7 +204,7 @@ def prepare(args):
         runtime.chmod(0o700)
     (runtime / 'tmp').mkdir()
     ROOT.mkdir(parents=True, exist_ok=True)
-    volumes = {s: PROJECT + '-cap06-' + nonce + '-' + s for s in ('mysql', 'redis')}
+    volumes = {s: PROJECT + '-' + COHORT + '-' + nonce + '-' + s for s in ('mysql', 'redis')}
     for value in volumes.values():
         assert run(['docker', 'volume', 'inspect', value], allow_failure=True).returncode != 0, 'new random volume already exists'
     override = runtime / 'fresh-volumes.yaml'
@@ -189,12 +217,12 @@ def prepare(args):
                 'GO_DIAGNOSTICS_ADDR': '127.0.0.1:8351', 'GOMAXPROCS': '4', 'GOMEMLIMIT': '1GiB',
                 'ORDER_STREAM_WORKERS': '1', 'KAFKA_BROKERS': '', 'ES_URL': '', 'AI_ENABLED': 'false',
                 'TEMP': str(runtime / 'tmp'), 'TMP': str(runtime / 'tmp'),
-                'CAP_READ_OBSERVER_USER': 'cap06_' + nonce, 'CAP_READ_OBSERVER_PASSWORD': secrets.token_hex(24),
-                'CAP06_RUNTIME': str(runtime), 'CAP06_EVIDENCE': str(ROOT), 'CAP06_VOLUME_OVERRIDE': str(override)}
+                'CAP_READ_OBSERVER_USER': COHORT + '_' + nonce, 'CAP_READ_OBSERVER_PASSWORD': secrets.token_hex(24),
+                KEY_PREFIX + '_RUNTIME': str(runtime), KEY_PREFIX + '_EVIDENCE': str(ROOT), KEY_PREFIX + '_VOLUME_OVERRIDE': str(override)}
     if args.mysql_bin:
         settings['MYSQL_BIN'] = str(Path(args.mysql_bin).resolve())
     settings_path = private_write(runtime, 'env.private.json', settings)
-    save(ROOT / 'preparation.json', {'at': now(), 'task': 'CAP-06A', 'runtime': str(runtime),
+    save(ROOT / 'preparation.json', {'at': now(), 'task': TASK, 'runtime': str(runtime),
          'privateEnvironmentFile': str(settings_path), 'oldContainers': old, 'newVolumes': volumes,
          'retainedNetworkId': net['Id'], 'subnet': str(network), 'credentialValuesExported': False})
     env = environment(settings)
@@ -215,7 +243,7 @@ def prepare(args):
     versions = {}
     for key, command in [('go', ['go', 'version']), ('node', ['node', '--version']), ('k6', ['k6', 'version'])]:
         versions[key] = run(command).stdout.strip()
-    save(ROOT / 'environment.json', {'task': 'CAP-06A', 'at': now(), 'project': PROJECT,
+    save(ROOT / 'environment.json', {'task': TASK, 'at': now(), 'project': PROJECT,
          'runtime': str(runtime), 'privateEnvironmentFile': str(settings_path), 'containers': owned,
          'oldContainers': old, 'oldVolumesRetained': True, 'newVolumes': volumes,
          'subnet': str(network), 'sharedHost': True,
@@ -242,6 +270,8 @@ def start_api(args):
     label = args.label
     assert re.fullmatch(r'[a-z0-9][a-z0-9-]{1,30}', label)
     assert re.fullmatch(r'[a-f0-9]{40}', args.source_sha)
+    variant = getattr(args, 'variant', None)
+    assert (COHORT == 'cap07' and variant in ('A', 'B')) or (COHORT == 'cap06' and variant is None), 'variant is required only for CAP07'
     assert not any(port_open(p) for p in (8251, 8351)), 'stop only the previous guarded API before replacement'
     owned = read(ROOT / 'environment.json')['containers']
     for service in ('mysql', 'redis'):
@@ -252,6 +282,9 @@ def start_api(args):
     version = 'capacity-' + args.source_sha
     current = {**settings, 'CAP_SOURCE_SHA': args.source_sha, 'CAP_READ_EXPECTED_REVISION': version,
                'GO_FEED_DIAGNOSTICS': 'true' if args.tail else 'false'}
+    if COHORT == 'cap07':
+        assert not args.tail, 'CAP07 formal experiments keep heavy Feed diagnostics disabled'
+        current['CAP07_VARIANT'] = variant
     if current.get('CAP_READ_FIXTURE'):
         manifest = read(current['CAP_READ_FIXTURE'])
         current['CAP_READ_FIXTURE_SOURCE_SHA'] = manifest['sourceSha']
@@ -265,6 +298,8 @@ def start_api(args):
                 'createdAtUtc': dt.datetime.fromtimestamp(process.create_time(), dt.timezone.utc).isoformat(),
                 'sourceSha': args.source_sha, 'expectedVersion': version, 'sha256': hashlib.sha256(binary.read_bytes()).hexdigest(),
                 'privateEnvironmentFile': str(path), 'label': label, 'tailEnabledRequested': args.tail}
+    if COHORT == 'cap07':
+        metadata['variant'] = variant
     save(ROOT / ('api-' + label + '.json'), metadata)
     (ROOT / ('api-' + label + '-build.txt')).write_text(info, encoding='utf-8')
     ready = False
@@ -286,7 +321,7 @@ def start_api(args):
 
 def fixture(args):
     settings, runtime = load_settings(args.environment)
-    metadata = read(args.api_metadata)
+    metadata = read_api_metadata(args.api_metadata)
     api_identity(metadata, require_health=True)
     assert metadata['sourceSha'] == settings['CAP_SOURCE_SHA']
     assert 'CAP_READ_FIXTURE' not in settings, 'new fixture only; preserve existing manifest'
@@ -304,7 +339,7 @@ def fixture(args):
 
 
 def stop_api(args):
-    metadata = read(args.api_metadata)
+    metadata = read_api_metadata(args.api_metadata)
     process, difference = api_identity(metadata)
     process.terminate()
     code = process.wait(timeout=15)
@@ -317,7 +352,9 @@ def stop_api(args):
 
 def finish(args):
     settings, runtime = load_settings(args.environment)
-    metadata = read(args.api_metadata)
+    metadata = read_api_metadata(args.api_metadata)
+    if COHORT == 'cap07':
+        assert not (runtime / 'cap07-stage-active.private.json').exists(), 'review active/crashed stage identity before cleanup'
     owned = read(ROOT / 'environment.json')['containers']
     api_identity(metadata, require_health=True)
     assert metadata['sourceSha'] == settings['CAP_SOURCE_SHA']
@@ -355,7 +392,7 @@ def finish(args):
             assert record['sessionsAfterLogout'] == 0 and record['finishOutput']['readersLoggedOut'] == 32 and not credentials.exists()
             checkpoint('normal_reader_logout_and_private_input_removal')
         observer = settings['CAP_READ_OBSERVER_USER']
-        assert re.fullmatch(r'cap06_[a-f0-9]{12}', observer)
+        assert re.fullmatch(re.escape(COHORT) + '_[a-f0-9]{12}', observer)
         assert observer.endswith(runtime.name[-12:])
         sql = f"DROP USER '{observer}'@'%'; SELECT COUNT(*) FROM mysql.user WHERE User='{observer}' AND Host='%';\n"
         result = run(['docker', 'exec', '-i', owned['mysql']['id'], 'sh', '-c', 'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot --batch --skip-column-names'], input=sql)
@@ -405,6 +442,8 @@ def main():
     p.add_argument('--previous-mysql-id', required=True); p.add_argument('--previous-redis-id', required=True)
     p = sub.add_parser('start-api'); p.add_argument('--environment', required=True); p.add_argument('--binary', required=True)
     p.add_argument('--source-sha', required=True); p.add_argument('--label', required=True); p.add_argument('--tail', action='store_true')
+    if COHORT == 'cap07':
+        p.add_argument('--variant', choices=('A', 'B'), required=True)
     p = sub.add_parser('prepare-fixture'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)
     p = sub.add_parser('stop-api'); p.add_argument('--api-metadata', required=True)
     p = sub.add_parser('finish'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)

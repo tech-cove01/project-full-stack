@@ -1,0 +1,9 @@
+{
+  "exit": 0,
+  "apiSource": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "dataReset": false,
+  "at": "2026-10-30T06:01:08.6302383Z",
+  "schemaCommit": "5aa658a7c5c65149d3e0c47759d3798e71c7ddfd",
+  "apiPid": 45532,
+  "command": "node scripts/migrate.mjs"
+}

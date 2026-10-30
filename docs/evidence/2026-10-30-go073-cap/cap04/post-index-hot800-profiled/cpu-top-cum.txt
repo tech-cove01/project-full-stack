@@ -1,0 +1,39 @@
+File: cap-api.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.worktrees\full-stack-cap-3db296d\backend\bin\cap-api.exe2026-10-30 12:58:19.4783854 +0800 CST
+Type: cpu
+Time: 2026-10-30 14:17:45 CST
+Duration: 10s, Total samples = 15.08s (150.79%)
+Showing nodes accounting for 7.11s, 47.15% of 15.08s total
+Dropped 557 nodes (cum <= 0.08s)
+Showing top 30 nodes out of 216
+      flat  flat%   sum%        cum   cum%
+     0.01s 0.066% 0.066%     11.43s 75.80%  net/http.(*conn).serve
+     0.01s 0.066%  0.13%     10.87s 72.08%  github.com/gin-gonic/gin.(*Engine).ServeHTTP
+         0     0%  0.13%     10.87s 72.08%  net/http.serverHandler.ServeHTTP
+         0     0%  0.13%     10.85s 71.95%  github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+         0     0%  0.13%     10.84s 71.88%  github.com/cityloop/fullstack-go/internal/auth.RequireLogin.func1
+         0     0%  0.13%     10.84s 71.88%  github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func1
+         0     0%  0.13%     10.84s 71.88%  github.com/gin-gonic/gin.(*Context).Next
+         0     0%  0.13%      9.98s 66.18%  github.com/cityloop/fullstack-go/internal/social.Register.func5
+         0     0%  0.13%      8.91s 59.08%  gorm.io/gorm.(*DB).Transaction
+     0.01s 0.066%   0.2%      8.89s 58.95%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed
+         0     0%   0.2%      8.88s 58.89%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot
+     0.01s 0.066%  0.27%      7.36s 48.81%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot.func1
+         0     0%  0.27%      7.34s 48.67%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func1
+         0     0%  0.27%      7.34s 48.67%  github.com/cityloop/fullstack-go/internal/social.(*Service).feedPage
+     0.08s  0.53%   0.8%      7.24s 48.01%  internal/poll.(*FD).execIO
+     0.01s 0.066%  0.86%      6.94s 46.02%  syscall.SyscallN
+     6.86s 45.49% 46.35%      6.93s 45.95%  runtime.cgocall
+         0     0% 46.35%      6.93s 45.95%  syscall.syscalln
+     0.01s 0.066% 46.42%      6.44s 42.71%  gorm.io/gorm.(*DB).Scan
+     0.01s 0.066% 46.49%      6.26s 41.51%  net.(*conn).Write
+     0.03s   0.2% 46.68%      6.25s 41.45%  internal/poll.(*FD).Write
+     0.01s 0.066% 46.75%      6.25s 41.45%  net.(*netFD).Write
+     0.01s 0.066% 46.82%      6.10s 40.45%  internal/poll.(*FD).Write.func2
+     0.01s 0.066% 46.88%      6.09s 40.38%  syscall.WSASend
+     0.02s  0.13% 47.02%      4.90s 32.49%  github.com/go-sql-driver/mysql.(*mysqlConn).writePacket
+         0     0% 47.02%      3.75s 24.87%  gorm.io/gorm.(*DB).Rows
+     0.02s  0.13% 47.15%      3.71s 24.60%  gorm.io/gorm.(*processor).Execute
+         0     0% 47.15%      3.52s 23.34%  gorm.io/gorm/callbacks.RowQuery
+         0     0% 47.15%      3.50s 23.21%  database/sql.(*Tx).QueryContext
+         0     0% 47.15%      3.47s 23.01%  database/sql.(*DB).queryDC

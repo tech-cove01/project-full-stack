@@ -1,0 +1,42 @@
+{
+  "diagnosticOnly": true,
+  "additionalObservationCost": true,
+  "k6Process": {
+    "phase": "stable",
+    "helper_pid": 41560,
+    "k6_pid": 60220,
+    "k6_started_unix_ms": 1793341179282
+  },
+  "captures": [
+    {
+      "offsetAfterK6SpawnSeconds": 4,
+      "startedAt": "2026-10-30T06:19:43.282178+00:00",
+      "finishedAt": "2026-10-30T06:19:43.311095+00:00",
+      "goGoroutines": 572,
+      "sqlInUse": 13,
+      "waitCount": 17832,
+      "k6Pid": 60220,
+      "bytes": 7294
+    },
+    {
+      "offsetAfterK6SpawnSeconds": 6.5,
+      "startedAt": "2026-10-30T06:19:45.782525+00:00",
+      "finishedAt": "2026-10-30T06:19:45.820191+00:00",
+      "goGoroutines": 616,
+      "sqlInUse": 20,
+      "waitCount": 18967,
+      "k6Pid": 60220,
+      "bytes": 7673
+    },
+    {
+      "offsetAfterK6SpawnSeconds": 9,
+      "startedAt": "2026-10-30T06:19:48.282500+00:00",
+      "finishedAt": "2026-10-30T06:19:48.331597+00:00",
+      "goGoroutines": 685,
+      "sqlInUse": 20,
+      "waitCount": 20925,
+      "k6Pid": 60220,
+      "bytes": 8107
+    }
+  ]
+}

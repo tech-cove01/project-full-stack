@@ -1,0 +1,32 @@
+[
+  {
+    "name": "statement/sql/commit",
+    "timed": "YES",
+    "enabled": "YES"
+  },
+  {
+    "name": "statement/sql/insert",
+    "timed": "YES",
+    "enabled": "YES"
+  },
+  {
+    "name": "statement/sql/select",
+    "timed": "YES",
+    "enabled": "YES"
+  },
+  {
+    "name": "statement/sql/update",
+    "timed": "YES",
+    "enabled": "YES"
+  },
+  {
+    "name": "wait/lock/metadata/sql/mdl",
+    "timed": "YES",
+    "enabled": "YES"
+  },
+  {
+    "name": "wait/lock/table/sql/handler",
+    "timed": "YES",
+    "enabled": "YES"
+  }
+]

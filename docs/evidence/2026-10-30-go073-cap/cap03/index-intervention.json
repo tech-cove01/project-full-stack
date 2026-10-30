@@ -1,0 +1,54 @@
+{
+  "dataReset": false,
+  "apiPid": 45532,
+  "diagnostics": {
+    "at": "2026-10-30T06:01:34.9935808Z",
+    "uptime_ms": 1295765,
+    "pid": 45532,
+    "runtime": {
+      "goroutines": 25,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 5223728,
+      "heap_sys_bytes": 40599552,
+      "heap_inuse_bytes": 8142848,
+      "total_alloc_bytes": 2533938808,
+      "mallocs": 32479918,
+      "frees": 32440869,
+      "num_gc": 696,
+      "pause_total_ns": 50543700,
+      "last_gc_unix_ns": 1793340083660699300,
+      "gc_cpu_fraction": 0.0002324425403816094
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 10,
+      "in_use": 0,
+      "idle": 10,
+      "wait_count": 4507,
+      "wait_duration_ns": 6581550843900,
+      "max_idle_closed": 36,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 67807,
+      "misses": 9,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 9,
+      "idle_connections": 9,
+      "stale_connections": 0
+    }
+  },
+  "version": "capacity-3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "fixtureManifestSha256": "7e3a9a9019c7fffc35dbbffd1c66f88ca65db2808faee1d263017698e2501754",
+  "at": "2026-10-30T06:01:35.1908522Z",
+  "binarySha256": "ef29e9e3838b7ec8ffd1aca5b1a51848fbd8a020ca084228879481adc209bd69",
+  "sameVersion": true,
+  "samePid": true,
+  "migrationSha256": "fc6320c218afbd1e2528290a7bb048f63e6e65cd6667d630d32acd9aa001a565",
+  "schemaCommit": "5aa658a7c5c65149d3e0c47759d3798e71c7ddfd",
+  "sameBinarySha256": true
+}

@@ -1,0 +1,106 @@
+{
+  "task": "GO-073-CAP-03",
+  "scope": "one-shot full no-cursor Feed fallback after-index plan between measured stages; no active read k6 at start",
+  "status": "complete",
+  "started_at": "2026-10-30T06:02:35.286192+00:00",
+  "ended_at": "2026-10-30T06:02:36.084515+00:00",
+  "project": "project-full-stack-cap-read",
+  "mysql_host": "127.0.0.1",
+  "mysql_port": 3451,
+  "database": "project_full_stack_go",
+  "container_id": "3528bc43fe4c67bbb3ad294eb339c7006c56e7e2118527dde2ccc13991890686",
+  "fixture": "capread-d736ef4960",
+  "public_parameters": {
+    "reader_id": "35",
+    "author_ids": [
+      "3"
+    ],
+    "limit": 20,
+    "cursor": null
+  },
+  "baseline_query_sha256": "6b5ba2486df244f8beff13aac2bffdc2d3aa2f9ef9c240eb3b8451ad6546fb54",
+  "query_bytes_identical_to_baseline": true,
+  "baseline_data_scale_identical": true,
+  "fixed_API_source_revision": "3db296dd0beedd6f85d06cf5479d707b0498ce7e",
+  "fixed_API_source_sha256": "ef029a80c4ac568b4d2814af8f3d3e853310a0c0930503f38b810d7e9368f1a6",
+  "fixed_API_source_matches_baseline": true,
+  "current_feed_source_sha256": "e7f7e65dd0df6ed608a76e0a27d9cde12db3ef095d0d2944588e3004d940fd5e",
+  "current_source_change_comment_only": true,
+  "precheck_history": "initial whole-current-file hash guard stopped before SQL because 5aa658a corrected two plan comments; verified fixed 3db API source equals baseline and non-comment code is identical, then captured this same SQL",
+  "expected_major_change": "013 idx_blog_author_feed applied by root/read agent before capture; collector applies nothing",
+  "sections": [
+    {
+      "section": "current_followed_authors",
+      "started_at": "2026-10-30T06:02:35.286219+00:00",
+      "ended_at": "2026-10-30T06:02:35.386543+00:00",
+      "elapsed_ms": 100.33469999325462,
+      "available": true
+    },
+    {
+      "section": "explain_json",
+      "started_at": "2026-10-30T06:02:35.388276+00:00",
+      "ended_at": "2026-10-30T06:02:35.486169+00:00",
+      "elapsed_ms": 97.90019999491051,
+      "available": true
+    },
+    {
+      "section": "explain_analyze",
+      "started_at": "2026-10-30T06:02:35.488196+00:00",
+      "ended_at": "2026-10-30T06:02:35.585559+00:00",
+      "elapsed_ms": 97.36559999873862,
+      "available": true
+    },
+    {
+      "section": "tb_blog_indexes",
+      "started_at": "2026-10-30T06:02:35.587109+00:00",
+      "ended_at": "2026-10-30T06:02:35.687961+00:00",
+      "elapsed_ms": 100.88429998722859,
+      "available": true
+    },
+    {
+      "section": "tb_follow_indexes",
+      "started_at": "2026-10-30T06:02:35.689372+00:00",
+      "ended_at": "2026-10-30T06:02:35.784808+00:00",
+      "elapsed_ms": 95.44159998768009,
+      "available": true
+    },
+    {
+      "section": "tb_shop_indexes",
+      "started_at": "2026-10-30T06:02:35.786192+00:00",
+      "ended_at": "2026-10-30T06:02:35.881078+00:00",
+      "elapsed_ms": 94.88869999768212,
+      "available": true
+    },
+    {
+      "section": "tb_blog_like_indexes",
+      "started_at": "2026-10-30T06:02:35.882398+00:00",
+      "ended_at": "2026-10-30T06:02:35.976408+00:00",
+      "elapsed_ms": 94.01490000891499,
+      "available": true
+    },
+    {
+      "section": "row_counts",
+      "started_at": "2026-10-30T06:02:35.978142+00:00",
+      "ended_at": "2026-10-30T06:02:36.079101+00:00",
+      "elapsed_ms": 100.96469998825341,
+      "available": true
+    }
+  ],
+  "file_sha256": {
+    "explain-analyze.txt": "20fb8efc5c4a4bfee1399eb2e9bee72624d7ae07414df216c691f37bf3a85b76",
+    "explain.json": "03303299dfbb5c64f916eb1fc07703d21baa0267e3bd8f955fa2ecd687ee44ff",
+    "query.sql": "6b5ba2486df244f8beff13aac2bffdc2d3aa2f9ef9c240eb3b8451ad6546fb54",
+    "row-counts.json": "e22bb732e4d55dbdc3a549493cea7df05e00ff1f0f770107964171dd889d9274",
+    "tb_blog-indexes.tsv": "82276fa65013f1f151a228b7ef73fd2f0020f88a97f527e329bf0934a4e994c0",
+    "tb_blog_like-indexes.tsv": "6f6a45fa65fc2e75317f7c70dcdc39a04f766686a88f6273783a79abd5c71146",
+    "tb_follow-indexes.tsv": "5c6f72424cd06804fbf2c01aac6c4ee7ac722b519bd335deabab70bd94c6da85",
+    "tb_shop-indexes.tsv": "795ab8b94d24b0422a70616dc47ef3ef0f91254fbb03eeb7f3a8f7f89f0c1367"
+  },
+  "limitations": [
+    "one EXPLAIN ANALYZE SELECT and metadata/count probes add work between stages",
+    "same SQL bytes and row counts do not prove identical cache/statistics or background state",
+    "single main fallback plan is not HTTP throughput/latency and excludes auth/likes/cache auxiliary SQL",
+    "no data,index,instrumentation or server setting changes by this collector",
+    "private UTF-8 credentials passed only in MYSQL_PWD, not persisted"
+  ]
+}

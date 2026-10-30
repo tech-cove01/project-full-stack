@@ -1,0 +1,46 @@
+[
+  {
+    "name": "Connections",
+    "value": "1315"
+  },
+  {
+    "name": "Created_tmp_disk_tables",
+    "value": "0"
+  },
+  {
+    "name": "Innodb_buffer_pool_read_requests",
+    "value": "548785317"
+  },
+  {
+    "name": "Innodb_buffer_pool_reads",
+    "value": "971"
+  },
+  {
+    "name": "Innodb_row_lock_current_waits",
+    "value": "0"
+  },
+  {
+    "name": "Innodb_row_lock_time",
+    "value": "0"
+  },
+  {
+    "name": "Innodb_row_lock_waits",
+    "value": "0"
+  },
+  {
+    "name": "Performance_schema_digest_lost",
+    "value": "0"
+  },
+  {
+    "name": "Slow_queries",
+    "value": "0"
+  },
+  {
+    "name": "Threads_connected",
+    "value": "21"
+  },
+  {
+    "name": "Threads_running",
+    "value": "8"
+  }
+]

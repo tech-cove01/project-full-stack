@@ -1,0 +1,8 @@
+tb_blog	0	PRIMARY	1	id	A	1	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_feed	1	status	A	1	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_feed	2	create_time	A	1	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_feed	3	id	A	1	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_author_feed	1	user_id	A	32	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_author_feed	2	status	A	32	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_author_feed	3	create_time	A	32	NULL	NULL		BTREE			YES	NULL
+tb_blog	1	idx_blog_author_feed	4	id	A	6273	NULL	NULL		BTREE			YES	NULL

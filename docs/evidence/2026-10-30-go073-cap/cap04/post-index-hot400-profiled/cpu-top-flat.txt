@@ -1,0 +1,34 @@
+File: cap-api.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.worktrees\full-stack-cap-3db296d\backend\bin\cap-api.exe2026-10-30 12:58:19.4783854 +0800 CST
+Type: cpu
+Time: 2026-10-30 14:10:46 CST
+Duration: 10s, Total samples = 8.89s (88.90%)
+Showing nodes accounting for 6.14s, 69.07% of 8.89s total
+Dropped 408 nodes (cum <= 0.04s)
+Showing top 25 nodes out of 226
+      flat  flat%   sum%        cum   cum%
+     4.19s 47.13% 47.13%      4.23s 47.58%  runtime.cgocall
+     0.40s  4.50% 51.63%      0.40s  4.50%  runtime.semawakeup
+     0.35s  3.94% 55.57%      0.49s  5.51%  time/tzdata.loadFromEmbeddedTZData
+     0.16s  1.80% 57.37%      0.16s  1.80%  runtime.semasleep
+     0.13s  1.46% 58.83%      0.14s  1.57%  runtime.netpollQueueTimer
+     0.11s  1.24% 60.07%      0.11s  1.24%  runtime.osyield.func1
+     0.07s  0.79% 60.85%      0.07s  0.79%  runtime.memmove
+     0.07s  0.79% 61.64%      0.21s  2.36%  runtime.netpoll
+     0.06s  0.67% 62.32%      4.48s 50.39%  internal/poll.(*FD).execIO
+     0.06s  0.67% 62.99%      0.06s  0.67%  time/tzdata.get2s (inline)
+     0.06s  0.67% 63.67%      0.06s  0.67%  time/tzdata.get4s (inline)
+     0.05s  0.56% 64.23%      0.07s  0.79%  runtime.mallocgcTinySC2
+     0.04s  0.45% 64.68%      3.93s 44.21%  internal/poll.(*FD).Write
+     0.04s  0.45% 65.13%      0.43s  4.84%  runtime.mallocgc
+     0.04s  0.45% 65.58%      0.13s  1.46%  runtime.selectgo
+     0.04s  0.45% 66.03%      0.07s  0.79%  runtime.tryDeferToSpanScan
+     0.03s  0.34% 66.37%      0.28s  3.15%  database/sql.(*Rows).scanLocked
+     0.03s  0.34% 66.70%      0.25s  2.81%  database/sql.convertAssignRows
+     0.03s  0.34% 67.04%      0.15s  1.69%  encoding/json/v2.makeStructArshaler.func2
+     0.03s  0.34% 67.38%      0.51s  5.74%  github.com/go-sql-driver/mysql.(*buffer).fill
+     0.03s  0.34% 67.72%      0.08s   0.9%  github.com/go-sql-driver/mysql.(*mysqlConn).startWatcher.func1
+     0.03s  0.34% 68.05%      0.06s  0.67%  github.com/go-sql-driver/mysql.converter.ConvertValue
+     0.03s  0.34% 68.39%      0.05s  0.56%  gorm.io/gorm.(*Statement).AddVar
+     0.03s  0.34% 68.73%      0.12s  1.35%  reflect.New
+     0.03s  0.34% 69.07%      0.61s  6.86%  runtime.findRunnable

@@ -1,0 +1,3 @@
+tb_shop	0	PRIMARY	1	id	A	3	NULL	NULL		BTREE			YES	NULL
+tb_shop	1	idx_shop_type	1	type_id	A	3	NULL	NULL		BTREE			YES	NULL
+tb_shop	1	idx_shop_merchant	1	merchant_id	A	2	NULL	NULL		BTREE			YES	NULL

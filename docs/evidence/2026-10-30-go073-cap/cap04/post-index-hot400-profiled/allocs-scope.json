@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-30T06:12:50.076866+00:00",
+  "apiPid": 45532,
+  "scope": "cumulative allocation samples since API process start; fetched after diagnostic workload, not a per-stage allocation delta",
+  "loadActive": false,
+  "bytes": 32553
+}

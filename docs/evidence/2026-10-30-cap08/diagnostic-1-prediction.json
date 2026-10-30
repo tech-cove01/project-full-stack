@@ -1,0 +1,17 @@
+{
+  "task": "CAP-08",
+  "kind": "diagnostic",
+  "prediction": "If the B1-like SQL/Redis pool queue recurs, the primary candidate predicts aged feed.facts / sql.begin_acquire_roundtrip / sql.transaction_hold or cards.cold_sql / sql.call_until_rows before or alongside secondary cards.slot_wait growth. A held active loader alone does not identify which phase is slow. The new independent shared trace and oldest-age trigger should distinguish content SQL from recheck/fill without changing the business path.",
+  "differentObservation": "Aged cards.recheck or cards.fill with young SQL would contradict the SQL-first candidate. Counts-only ages would point to the separate counts path. Several unrelated stages aging together plus delayed collector request/response windows would leave a common runtime/dependency/host pause candidate. A one-second snapshot cannot by itself prove ordering or isolate pure pool/server time; absent/late/truncated sampling is missing evidence, not exclusion or non-reproduction.",
+  "evidence": [
+    "docs/evidence/2026-10-30-cap08/failure-window.md",
+    "docs/evidence/2026-10-30-cap08/observation-report.md",
+    "docs/evidence/2026-10-30-cap08/wiring-result.json"
+  ],
+  "wiringEvidence": "docs/evidence/2026-10-30-cap08/wiring-result.json",
+  "businessChange": false,
+  "workload": {"mode": "multi", "rate": 100, "seconds": 180, "warmSeconds": 10, "warmRate": 25, "preVUs": 256, "maxVUs": 512},
+  "diagnosticOnly": true,
+  "collector": {"maximumHz": 1, "ageThresholdMilliseconds": 100, "maximumGoroutineCaptures": 3, "maximumProfileBytes": 1048576, "minimumCaptureSpacingAfterPreviousEndSeconds": 15, "maximumCoverageGapSeconds": 2.5, "maximumRetainedSlowRecords": 32},
+  "stop": "Preserve all native failures and missing evidence. No ascent. Second diagnostic only validates one observed candidate or proven treatment, no information-free repeat. Unknown reproduced failure does not enter the formal group."
+}

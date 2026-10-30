@@ -1,0 +1,71 @@
+{
+  "at": "2026-10-30T13:22:46.285942+00:00",
+  "task": "CAP-08",
+  "runtime": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap08-2f5549091e83",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap08-2f5549091e83\\env.private.json",
+  "oldContainers": {
+    "mysql": {
+      "id": "0c4bf7ff43baa32be69eb96f5590df16f7518f83eeff1033d1f5067e5910c3ce",
+      "name": "/project-full-stack-cap-read-mysql-1",
+      "service": "mysql",
+      "project": "project-full-stack-cap-read",
+      "image": "mysql:8.4",
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "oomKilled": false,
+      "cpuNano": 4000000000,
+      "memoryBytes": 2147483648,
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3451"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap-read-cap07-1d061b79461c-mysql",
+          "destination": "/var/lib/mysql"
+        }
+      ]
+    },
+    "redis": {
+      "id": "049a2c157db4aae46b4febde28b2aebdfda7e772b4b563dd4b3c6e5bb9fec732",
+      "name": "/project-full-stack-cap-read-redis-1",
+      "service": "redis",
+      "project": "project-full-stack-cap-read",
+      "image": "redis:7.4-alpine",
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "oomKilled": false,
+      "cpuNano": 2000000000,
+      "memoryBytes": 536870912,
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6551"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap-read-cap07-1d061b79461c-redis",
+          "destination": "/data"
+        }
+      ]
+    }
+  },
+  "newVolumes": {
+    "mysql": "project-full-stack-cap-read-cap08-2f5549091e83-mysql",
+    "redis": "project-full-stack-cap-read-cap08-2f5549091e83-redis"
+  },
+  "retainedNetworkId": "c06fdbcf38161fc84e04335d73d5b631c729611640d83e55d6df380a49d6f14e",
+  "subnet": "10.253.51.0/24",
+  "credentialValuesExported": false
+}

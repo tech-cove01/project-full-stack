@@ -32,16 +32,16 @@ FLAGS = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
 OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
-# The CAP07 adapter selects one fixed cohort before parsing arguments. The
+# The CAP07/CAP08 adapters select a fixed cohort before parsing arguments. The
 # default CAP06 CLI retains its original paths/guards; arbitrary roots and
 # projects are deliberately not configurable.
 def configure_cohort(cohort):
     global COHORT, KEY_PREFIX, TASK, ROOT
-    if cohort not in ('cap06', 'cap07'):
+    if cohort not in ('cap06', 'cap07', 'cap08'):
         raise ValueError('unsupported fixed capacity cohort')
     COHORT = cohort
     KEY_PREFIX = cohort.upper()
-    TASK = 'CAP-06A' if cohort == 'cap06' else 'CAP-07'
+    TASK = {'cap06': 'CAP-06A', 'cap07': 'CAP-07', 'cap08': 'CAP-08'}[cohort]
     ROOT = REPO / ('docs/evidence/2026-10-30-' + cohort)
 
 
@@ -148,12 +148,16 @@ def get_json(url):
 def read_api_metadata(path):
     path = Path(path).resolve()
     value = read(path)
-    if COHORT == 'cap07':
+    if COHORT in ('cap07', 'cap08'):
         assert path.parent == ROOT and re.fullmatch(r'api-[a-z0-9-]+\.json', path.name)
         private = Path(value['privateEnvironmentFile']).resolve()
         assert private.parent.parent == REPO.parent
-        assert re.fullmatch(r'\.runtime-fullstack-cap07-[a-f0-9]{12}', private.parent.name)
-        assert value['variant'] in ('A', 'B')
+        assert re.fullmatch(r'\.runtime-fullstack-' + re.escape(COHORT) + '-[a-f0-9]{12}', private.parent.name)
+        if COHORT == 'cap07':
+            assert value['variant'] in ('A', 'B')
+        else:
+            assert value['phase'] in ('diagnostic', 'formal')
+            assert value['tailEnabledRequested'] is (value['phase'] == 'diagnostic')
     return value
 
 
@@ -271,7 +275,7 @@ def start_api(args):
     assert re.fullmatch(r'[a-z0-9][a-z0-9-]{1,30}', label)
     assert re.fullmatch(r'[a-f0-9]{40}', args.source_sha)
     variant = getattr(args, 'variant', None)
-    assert (COHORT == 'cap07' and variant in ('A', 'B')) or (COHORT == 'cap06' and variant is None), 'variant is required only for CAP07'
+    assert (COHORT == 'cap07' and variant in ('A', 'B')) or (COHORT in ('cap06', 'cap08') and variant is None), 'variant is required only for CAP07'
     assert not any(port_open(p) for p in (8251, 8351)), 'stop only the previous guarded API before replacement'
     owned = read(ROOT / 'environment.json')['containers']
     for service in ('mysql', 'redis'):
@@ -285,6 +289,10 @@ def start_api(args):
     if COHORT == 'cap07':
         assert not args.tail, 'CAP07 formal experiments keep heavy Feed diagnostics disabled'
         current['CAP07_VARIANT'] = variant
+    if COHORT == 'cap08':
+        assert args.phase in ('diagnostic', 'formal')
+        assert args.tail is (args.phase == 'diagnostic'), 'CAP08 diagnostic/formal phase must match the explicit tail switch'
+        current['CAP08_PHASE'] = args.phase
     if current.get('CAP_READ_FIXTURE'):
         manifest = read(current['CAP_READ_FIXTURE'])
         current['CAP_READ_FIXTURE_SOURCE_SHA'] = manifest['sourceSha']
@@ -300,6 +308,8 @@ def start_api(args):
                 'privateEnvironmentFile': str(path), 'label': label, 'tailEnabledRequested': args.tail}
     if COHORT == 'cap07':
         metadata['variant'] = variant
+    if COHORT == 'cap08':
+        metadata['phase'] = args.phase
     save(ROOT / ('api-' + label + '.json'), metadata)
     (ROOT / ('api-' + label + '-build.txt')).write_text(info, encoding='utf-8')
     ready = False
@@ -353,8 +363,8 @@ def stop_api(args):
 def finish(args):
     settings, runtime = load_settings(args.environment)
     metadata = read_api_metadata(args.api_metadata)
-    if COHORT == 'cap07':
-        assert not (runtime / 'cap07-stage-active.private.json').exists(), 'review active/crashed stage identity before cleanup'
+    if COHORT in ('cap07', 'cap08'):
+        assert not (runtime / (COHORT + '-stage-active.private.json')).exists(), 'review active/crashed stage identity before cleanup'
     owned = read(ROOT / 'environment.json')['containers']
     api_identity(metadata, require_health=True)
     assert metadata['sourceSha'] == settings['CAP_SOURCE_SHA']
@@ -444,6 +454,8 @@ def main():
     p.add_argument('--source-sha', required=True); p.add_argument('--label', required=True); p.add_argument('--tail', action='store_true')
     if COHORT == 'cap07':
         p.add_argument('--variant', choices=('A', 'B'), required=True)
+    if COHORT == 'cap08':
+        p.add_argument('--phase', choices=('diagnostic', 'formal'), required=True)
     p = sub.add_parser('prepare-fixture'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)
     p = sub.add_parser('stop-api'); p.add_argument('--api-metadata', required=True)
     p = sub.add_parser('finish'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)

@@ -1,0 +1,165 @@
+{
+  "task": "CAP-08",
+  "at": "2026-10-30T13:23:03.791080+00:00",
+  "project": "project-full-stack-cap-read",
+  "runtime": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap08-2f5549091e83",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap08-2f5549091e83\\env.private.json",
+  "containers": {
+    "mysql": {
+      "id": "9e71ca549169ab9f3836669376ad12a0b9b8b964c0f36a1cf6eb2c431e3a719a",
+      "name": "/project-full-stack-cap-read-mysql-1",
+      "service": "mysql",
+      "project": "project-full-stack-cap-read",
+      "image": "mysql:8.4",
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "cpuNano": 4000000000,
+      "memoryBytes": 2147483648,
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3451"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap-read-cap08-2f5549091e83-mysql",
+          "destination": "/var/lib/mysql"
+        }
+      ]
+    },
+    "redis": {
+      "id": "112cd2e69ba3d002aa5f7363e31c469947d5f353875755eef733f639375d330b",
+      "name": "/project-full-stack-cap-read-redis-1",
+      "service": "redis",
+      "project": "project-full-stack-cap-read",
+      "image": "redis:7.4-alpine",
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "cpuNano": 2000000000,
+      "memoryBytes": 536870912,
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6551"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap-read-cap08-2f5549091e83-redis",
+          "destination": "/data"
+        }
+      ]
+    }
+  },
+  "oldContainers": {
+    "mysql": {
+      "id": "0c4bf7ff43baa32be69eb96f5590df16f7518f83eeff1033d1f5067e5910c3ce",
+      "name": "/project-full-stack-cap-read-mysql-1",
+      "service": "mysql",
+      "project": "project-full-stack-cap-read",
+      "image": "mysql:8.4",
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "oomKilled": false,
+      "cpuNano": 4000000000,
+      "memoryBytes": 2147483648,
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3451"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap-read-cap07-1d061b79461c-mysql",
+          "destination": "/var/lib/mysql"
+        }
+      ]
+    },
+    "redis": {
+      "id": "049a2c157db4aae46b4febde28b2aebdfda7e772b4b563dd4b3c6e5bb9fec732",
+      "name": "/project-full-stack-cap-read-redis-1",
+      "service": "redis",
+      "project": "project-full-stack-cap-read",
+      "image": "redis:7.4-alpine",
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "oomKilled": false,
+      "cpuNano": 2000000000,
+      "memoryBytes": 536870912,
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6551"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap-read-cap07-1d061b79461c-redis",
+          "destination": "/data"
+        }
+      ]
+    }
+  },
+  "oldVolumesRetained": true,
+  "newVolumes": {
+    "mysql": "project-full-stack-cap-read-cap08-2f5549091e83-mysql",
+    "redis": "project-full-stack-cap-read-cap08-2f5549091e83-redis"
+  },
+  "subnet": "10.253.51.0/24",
+  "sharedHost": true,
+  "host": {
+    "platform": "win32",
+    "physicalCores": 14,
+    "logicalCpus": 20,
+    "memoryBytes": 33960505344
+  },
+  "docker": {
+    "serverVersion": "29.3.1",
+    "cpus": 20,
+    "memoryBytes": 16572063744
+  },
+  "toolVersions": {
+    "go": "go version go1.27.0 windows/amd64",
+    "node": "v24.15.0",
+    "k6": "k6.exe v2.2.0 (commit/00a9a1b7f5, go1.26.5, windows/amd64)"
+  },
+  "runningContainers": [
+    "9e71ca549169|project-full-stack-cap-read-mysql-1|Up 15 seconds (healthy)",
+    "112cd2e69ba3|project-full-stack-cap-read-redis-1|Up 15 seconds (healthy)",
+    "54c89c4d6146|crm-agent-services-clickhouse-1|Up 9 hours (healthy)",
+    "d2e438ca0250|crm-agent-services-weknora-1|Up 2 days",
+    "3d031cc46574|crm-agent-services-seaweedfs-1|Up 2 days",
+    "f6fe0c184567|crm-agent-services-langfuse-web-1|Up 2 days",
+    "3258c2abe59c|crm-agent-services-langfuse-worker-1|Up 2 days",
+    "6faca9a0df78|crm-agent-services-redis-1|Up 2 days",
+    "bdce54e784eb|crm-agent-services-mem0-1|Up 2 days",
+    "621827ad7e0c|crm-agent-services-postgres-1|Up 2 days (healthy)",
+    "554ae1e5805c|supabase_storage_project-crm-local|Up 2 days (healthy)",
+    "2cccdd9f11f5|supabase_rest_project-crm-local|Up 2 days",
+    "b36629efcc8d|supabase_realtime_project-crm-local|Up 2 days (healthy)",
+    "38c730ecc8e8|supabase_auth_project-crm-local|Up 2 days (healthy)",
+    "8151812f7623|supabase_kong_project-crm-local|Up 2 days (healthy)",
+    "db4420bedc6c|supabase_db_project-crm-local|Up 2 days (healthy)"
+  ],
+  "limits": "No API or workload started by prepare-deps."
+}

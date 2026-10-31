@@ -36,6 +36,8 @@
 
 公共卡片缓存与实际Feed同批回源合并已[独立核验功能](docs/reviews/2026-10-30/cap07-6693539/report.md)。新A/B组保留B1长尾早停与B2通过，尚未证明一致HTTP收益或重复通过的B100容量；功能机制与性能结果分别记录。
 
+CAP-08有界观测与受控回归已[独立核验](docs/reviews/2026-10-31/cap08-2c1ef04/report.md)，正式稳定容量组仍未通过，已按预算结束本批。功能版冻结，保留性能限制，不宣称根因已修、容量全部通过或提高QPS。
+
 提交 `399705a1fb92e5075192004c1cf1563f120dee47` 的 [GitHub Actions 四项作业](https://github.com/tech-cove01/project-full-stack/actions/runs/40839300797)通过，包含 Linux race 和真实依赖检查；该结果适用于该提交，后续提交的状态以对应运行结果为准。
 
 ## 开发与验证

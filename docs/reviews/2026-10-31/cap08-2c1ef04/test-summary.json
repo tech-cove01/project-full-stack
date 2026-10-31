@@ -1,0 +1,166 @@
+{
+  "ordinary": {
+    "testsIncludingSubtests": {
+      "pass": 75,
+      "skip": 30
+    },
+    "topLevelTests": {
+      "pass": 49,
+      "skip": 27
+    },
+    "packages": {
+      "github.com/cityloop/fullstack-go/internal/social": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/diagnostics": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/app": "pass",
+      "github.com/cityloop/fullstack-go/internal/communitycards": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/taildiag": "pass",
+      "github.com/cityloop/fullstack-go/internal/communitycache": "pass"
+    },
+    "skipped": [
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedColdCountsWithOneConnection"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedCardsHTTPSameBatchBurstAndFirstCancellation"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedCardsHTTPProjectionCompleteness"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedCardsHTTPColdHotAndFacts"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedCardsHTTPVersionRaceAndFailure/version"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedCardsHTTPVersionRaceAndFailure/draft"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedCardsHTTPVersionRaceAndFailure/database"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFeedObservationSeparatesHTTPAndSharedWork"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationConcurrentFirstFollow"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationFollowAndFeed"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationExpectedStateLike"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationCommunityProjectionQueries"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/social",
+        "test": "TestIntegrationLikeProjectionCannotReplaceFacts"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycards",
+        "test": "TestIntegrationCardsControlledSharedObservation"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycards",
+        "test": "TestIntegrationCardsRedisBadPayloadAndType"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycards",
+        "test": "TestIntegrationCardsOwnedRedisExpiryRebuilds"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycards",
+        "test": "TestIntegrationCardsDisconnectedRedisUsesRealSQL"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycards",
+        "test": "TestIntegrationCardsUnavailableVersionAndSQLFailureDoNotCacheEmpty"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycards",
+        "test": "TestIntegrationCardsRealSlowRedisPipelineCloseConverges"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/platform/taildiag",
+        "test": "TestIntegrationObservedStorageTransactions"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationLikeBitmap"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationNoteCountsCache"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationLocalLayerAbsorbsHotKey"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationCountPublicationIsolation"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationCountLoadCannotUndoInvalidation"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationCancelledCountWaiterReturnsIndependently"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestGO073CacheMeasurement"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationLikeProjectionEmptyRebuild"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationLikeRebuildLocksFactSnapshot"
+      },
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestIntegrationLikeProjectionFences"
+      }
+    ]
+  },
+  "real": {
+    "testsIncludingSubtests": {
+      "pass": 130,
+      "skip": 1
+    },
+    "topLevelTests": {
+      "pass": 75,
+      "skip": 1
+    },
+    "packages": {
+      "github.com/cityloop/fullstack-go/internal/communitycards": "pass",
+      "github.com/cityloop/fullstack-go/internal/social": "pass",
+      "github.com/cityloop/fullstack-go/internal/communitycache": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/taildiag": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/app": "pass",
+      "github.com/cityloop/fullstack-go/internal/platform/diagnostics": "pass"
+    },
+    "skipped": [
+      {
+        "package": "github.com/cityloop/fullstack-go/internal/communitycache",
+        "test": "TestGO073CacheMeasurement"
+      }
+    ]
+  }
+}

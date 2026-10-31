@@ -1,12 +1,12 @@
 # 当前进度与开发入口
 
-更新：2026-10-30。用户已确定全面改用 Go 后端，前端保留 Vue 3/TypeScript，数据库保留 MySQL。唯一任务状态入口为 [STATUS](../STATUS.md)，总路线见 [Go 迁移方案](implementation-plan.md)，实现者先读 [交接说明](agent-handoff.md)。各票详细记录保留交付时的范围与限制。
+更新：2026-10-31。用户已确定全面改用 Go 后端，前端保留 Vue 3/TypeScript，数据库保留 MySQL。唯一任务状态入口为 [STATUS](../STATUS.md)，总路线见 [Go 迁移方案](implementation-plan.md)，实现者先读 [交接说明](agent-handoff.md)。各票详细记录保留交付时的范围与限制。
 
 功能冻结后的材料入口：[本机录屏指南](demo-recording.md)、[源码讲解路线](source-walkthrough.md)。两份材料按实际源码校对，尚未生成视频，也不新增运行或核验结论。
 
 ## 当前事实
 
-- 当前实施任务为根[STATUS的CAP-08](../STATUS.md)：一轮有上限的B1长尾定位/修复和正式收尾，不新增业务/中间件。CAP-07功能已核验，旧容量组失败保留；新的名额、固定判据和未知/失败时的停止方式均在STATUS，不另维护任务状态。
+- CAP-08已[独立核验并按预算结束](reviews/2026-10-31/cap08-2c1ef04/report.md)：观测/受控接线与功能回归成立，P3工具终态缺字段问题单独修复；正式2原生unknown200/dropped57及访问时基拒绝保留，稳定容量整组未过。功能版冻结，可整理已核验机制/演示，不自动续新负载或CAP-09，最新口径在根[STATUS](../STATUS.md)。
 
 - CAP-06V分片修复与CAP-07实际Feed卡片缓存/同批合并已[独立核验功能](reviews/2026-10-30/cap07-6693539/report.md)：新卷真实回归通过，旧长尾根因仍未知。新A/B组B1长尾早停、B2通过，性能整组未过，不能覆盖原失败或宣称QPS提升；原[有限诊断](evidence/2026-10-30-cap06/report.md)与[当时核验](reviews/2026-10-30/cap06-a3c64b5/report.md)保留历史范围。本轮未重跑容量或新增诊断，最新状态见根STATUS。
 - 2026-10-30新增[GO-073-CAP独立核验](reviews/2026-10-30/go073-cap-09b4921/report.md)：新卷交易30/s与Feed hot200/s各180秒通过，multi100/s约120秒因P99 1137ms超预算早停，下一步定位长尾。[原容量总报告](evidence/2026-10-30-go073-cap/report.md)的各两轮自测与全部失败保留；不与本次代表档混同，不称理论上限。当前动作以根STATUS为准。

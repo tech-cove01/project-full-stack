@@ -1,0 +1,96 @@
+{
+  "standaloneApiStarted": false,
+  "controlledOptIn": true,
+  "project": "fullstack-review-cap08-2c1ef04",
+  "httpScope": "real-dependency Go handlers plus one dynamic loopback controlled collector",
+  "checkedAt": "2026-10-31T02:03:48.2703121Z",
+  "regularFeedDiagnostics": false,
+  "redisPort": 6564,
+  "newVolumes": true,
+  "providerCalls": false,
+  "goVersion": "go version go1.27.0 windows/amd64",
+  "services": [
+    {
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6564"
+          }
+        ]
+      },
+      "startedAt": "2026-10-31T02:01:44.618867261Z",
+      "memory": 536870912,
+      "service": "redis",
+      "health": "healthy",
+      "project": "fullstack-review-cap08-2c1ef04",
+      "name": "/fullstack-review-cap08-2c1ef04-redis-1",
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "fullstack-review-cap08-2c1ef04-redis",
+          "Source": "/var/lib/docker/volumes/fullstack-review-cap08-2c1ef04-redis/_data",
+          "Destination": "/data",
+          "RW": true
+        }
+      ],
+      "id": "a1713fd825741fc5e416f59205abd7f694b834f37a6f86c042490e74d6eccb10",
+      "image": "redis:7.4-alpine",
+      "network": [
+        {
+          "networkId": "36a723f0d1203f2806075adaf835edf6d5749e8a1529f1cce5ef80d3f513aca9",
+          "name": "fullstack-review-cap08-2c1ef04_default",
+          "address": "10.254.64.2"
+        }
+      ],
+      "nanoCPUs": 2000000000,
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65"
+    },
+    {
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3464"
+          }
+        ]
+      },
+      "startedAt": "2026-10-31T02:01:44.626881624Z",
+      "memory": 2147483648,
+      "service": "mysql",
+      "health": "healthy",
+      "project": "fullstack-review-cap08-2c1ef04",
+      "name": "/fullstack-review-cap08-2c1ef04-mysql-1",
+      "mounts": [
+        {
+          "Type": "volume",
+          "Name": "fullstack-review-cap08-2c1ef04-mysql",
+          "Source": "/var/lib/docker/volumes/fullstack-review-cap08-2c1ef04-mysql/_data",
+          "Destination": "/var/lib/mysql",
+          "RW": true
+        },
+        {
+          "Type": "bind",
+          "Name": null,
+          "Source": "/run/desktop/mnt/host/d/桌面/The ALL/agent/project/code/.reviews/cap08-2c1ef04/worktree/infra/mysql",
+          "Destination": "/docker-entrypoint-initdb.d",
+          "RW": false
+        }
+      ],
+      "id": "83069c55fabaad01ee29347fc26eea98d7960c6d8f6a3230087ece5344e076a9",
+      "image": "mysql:8.4",
+      "network": [
+        {
+          "networkId": "36a723f0d1203f2806075adaf835edf6d5749e8a1529f1cce5ef80d3f513aca9",
+          "name": "fullstack-review-cap08-2c1ef04_default",
+          "address": "10.254.64.3"
+        }
+      ],
+      "nanoCPUs": 4000000000,
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34"
+    }
+  ],
+  "testedApplicationSource": "2c1ef04b7b1d1ae10d98767e18e6c12ff697166c",
+  "mysqlPort": 3464,
+  "loadStarted": false
+}

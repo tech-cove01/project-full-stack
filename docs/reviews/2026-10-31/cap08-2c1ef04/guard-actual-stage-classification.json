@@ -1,0 +1,26 @@
+{
+  "scope": "read existing archived stages with fixed policy; no measured rerun or artifact mutation",
+  "stages": [
+    {
+      "tag": "diagnostic-1",
+      "exceptionFieldPresent": true,
+      "exceptionValue": null,
+      "passed": true,
+      "measuredSLOFailure": false
+    },
+    {
+      "tag": "formal-1-multi100",
+      "exceptionFieldPresent": true,
+      "exceptionValue": null,
+      "passed": true,
+      "measuredSLOFailure": false
+    },
+    {
+      "tag": "formal-2-multi100",
+      "exceptionFieldPresent": true,
+      "exceptionValue": null,
+      "passed": false,
+      "measuredSLOFailure": false
+    }
+  ]
+}

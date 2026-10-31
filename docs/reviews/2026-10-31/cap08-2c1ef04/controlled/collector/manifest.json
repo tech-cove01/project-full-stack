@@ -1,0 +1,104 @@
+{
+  "task": "CAP-08B",
+  "started_at": "2026-10-31T02:03:04.312043+00:00",
+  "diagnostic_only": true,
+  "controlled": true,
+  "url": "http://127.0.0.1:64456/debug/capacity",
+  "expected_pid": 49076,
+  "poll_interval_seconds": 1,
+  "age_trigger_ns": 100000000,
+  "maximum_goroutine_captures": 1,
+  "maximum_profile_bytes": 1048576,
+  "minimum_capture_spacing_seconds": 15,
+  "minimum_capture_spacing_scope": "previous capture completion to next capture request",
+  "maximum_poll_start_gap_seconds": 2.5,
+  "pre_trigger_seconds": 20,
+  "post_trigger_seconds": 10,
+  "captures": [
+    {
+      "number": 1,
+      "at": "2026-10-31T02:03:04.350089+00:00",
+      "trigger_sample_sequence": 1,
+      "reasons": [
+        {
+          "kind": "stage_active_age",
+          "name": "cards.get_many",
+          "active": 1,
+          "oldest_active_ns": 351942500,
+          "scope": "in-flight boundary age; includes nested work and is not pure pool acquisition time"
+        },
+        {
+          "kind": "stage_active_age",
+          "name": "cards.shared",
+          "active": 2,
+          "oldest_active_ns": 353080700,
+          "scope": "in-flight boundary age; includes nested work and is not pure pool acquisition time"
+        },
+        {
+          "kind": "stage_active_age",
+          "name": "cards.slot_wait",
+          "active": 1,
+          "oldest_active_ns": 351428300,
+          "scope": "in-flight boundary age; includes nested work and is not pure pool acquisition time"
+        },
+        {
+          "kind": "stage_active_age",
+          "name": "cards.cold_sql",
+          "active": 1,
+          "oldest_active_ns": 351942500,
+          "scope": "in-flight boundary age; includes nested work and is not pure pool acquisition time"
+        }
+      ],
+      "released_state": "not observed by collector; controlled caller must separately prove barrier remains held",
+      "fetch": {
+        "started_at": "2026-10-31T02:03:04.350097+00:00",
+        "available": true,
+        "bytes": 11706,
+        "sha256": "d911bf0dc9aa21751e68a013b3ee88238a9f036581122f7842a54cbad1156708",
+        "truncated": false,
+        "http_status": 200,
+        "error": null,
+        "finished_at": "2026-10-31T02:03:04.364167+00:00",
+        "elapsed_ms": 14.08269998501055
+      },
+      "started_at": "2026-10-31T02:03:04.350097+00:00",
+      "available": true,
+      "bytes": 11706,
+      "sha256": "d911bf0dc9aa21751e68a013b3ee88238a9f036581122f7842a54cbad1156708",
+      "truncated": false,
+      "http_status": 200,
+      "error": null,
+      "finished_at": "2026-10-31T02:03:04.364167+00:00",
+      "elapsed_ms": 14.08269998501055,
+      "file": "goroutine-1.txt",
+      "done_file_present_after_capture": false,
+      "load_scope": "not atomic with workload lifetime; align request/response timestamps with supervisor start/end before excluding prior waits"
+    }
+  ],
+  "errors": [],
+  "stable_observed": true,
+  "successful_polls": 1,
+  "failed_polls": 0,
+  "stage_fields_valid": true,
+  "active_age_coverage_complete": true,
+  "script_sha256": "aa1ec0b291b7f278e4db4399a05bcbaa79d4f1932c56afba160ce257b2a5de8c",
+  "generator_identity_scope": "HTTP-only collector; actual k6/API identity is guarded by the separate five-second supervisor. Capture timing must be aligned to its native stage records.",
+  "finished_at": "2026-10-31T02:03:04.366074+00:00",
+  "elapsed_seconds": 0.053550600016023964,
+  "samples": 1,
+  "maximum_sample_start_gap_ms": 0,
+  "window_coverage": {
+    "complete": true,
+    "scope": "controlled single capture; no stable-window coverage claim"
+  },
+  "slow_records_visibility_complete": true,
+  "poll_coverage_complete": true,
+  "stopped_by_done_file": false,
+  "limits": [
+    "Diagnostic-only overhead; never a formal score.",
+    "Incomplete oldest tracking is explicit and never converted to a zero-age exclusion.",
+    "Cumulative pool wait is not per-request wait; nested request/shared stages must not be added.",
+    "No process enumeration, SQL, Redis, secrets, keys or command-line collection is performed.",
+    "Profile bytes are capped; any truncated/missing profile remains explicit."
+  ]
+}

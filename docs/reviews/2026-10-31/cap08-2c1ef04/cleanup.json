@@ -1,0 +1,32 @@
+{
+  "removedVolumes": false,
+  "loadStarted": false,
+  "checkedAt": "2026-10-31T02:03:51.6822191Z",
+  "sessionScope": "random test-owned rows/keys cleaned by passing tests; no capacity token cohort or observer created",
+  "standaloneApiStarted": false,
+  "containers": [
+    {
+      "volumesPreserved": [
+        "fullstack-review-cap08-2c1ef04-redis"
+      ],
+      "id": "a1713fd825741fc5e416f59205abd7f694b834f37a6f86c042490e74d6eccb10",
+      "running": false,
+      "exitCode": 0,
+      "finishedAt": "2026-10-31T02:03:49.241811501Z",
+      "oomKilled": false,
+      "project": "fullstack-review-cap08-2c1ef04"
+    },
+    {
+      "volumesPreserved": [
+        "fullstack-review-cap08-2c1ef04-mysql"
+      ],
+      "id": "83069c55fabaad01ee29347fc26eea98d7960c6d8f6a3230087ece5344e076a9",
+      "running": false,
+      "exitCode": 0,
+      "finishedAt": "2026-10-31T02:03:51.421702323Z",
+      "oomKilled": false,
+      "project": "fullstack-review-cap08-2c1ef04"
+    }
+  ],
+  "affectedOtherServices": false
+}

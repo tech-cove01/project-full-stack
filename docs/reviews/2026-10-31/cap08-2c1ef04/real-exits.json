@@ -1,0 +1,8 @@
+{
+  "migrationFirst": 0,
+  "race": "not executed locally",
+  "platform": "windows/amd64",
+  "testsExit": 0,
+  "migrationSecond": 0,
+  "scope": "six packages with fresh MySQL/Redis and opt-in CAP08 controlled collector; no load test"
+}

@@ -1,0 +1,19 @@
+{
+  "task": "CAP08 limited follow-up",
+  "at": "2026-10-31T02:22:39.758032+00:00",
+  "baseSha": "5ec381ad47eacb0dfcd867a51fcaf5180b188715",
+  "newLoadRuns": 0,
+  "scope": "Two selected/derived public JSON artifacts only. Host events are explicit-UTC selected native fields and messages, not a full EVTX; cross-run arithmetic is derived from 45 frozen old artifacts. No new performance samples. Markdown prose and this manifest/later byte audit excluded to avoid self-reference.",
+  "files": [
+    {
+      "path": "docs/evidence/2026-10-31-cap08-followup/host-events.json",
+      "bytes": 11614,
+      "sha256": "fbdab2e3fdc6bab24362b733bc7ac0c7eeab1909bf07e2c8aa246765893ed4f4"
+    },
+    {
+      "path": "docs/evidence/2026-10-31-cap08-followup/cross-run-check.json",
+      "bytes": 16792,
+      "sha256": "89e73b27dd68dde28d7e0f3b9aff251d3c115ecc1527ccad4a7ab839b2792f90"
+    }
+  ]
+}

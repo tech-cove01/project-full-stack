@@ -1,0 +1,277 @@
+{
+  "task": "CAP08-followup-host-read",
+  "readAtUtc": "2026-10-31T02:18:25.1617910Z",
+  "source": "Windows System event log, exact explicit-UTC SystemTime XPath",
+  "windows": [
+    {
+      "queryWindowUtc": {
+        "from": "2026-10-30T13:57:57.000Z",
+        "until": "2026-10-30T14:04:55.000Z"
+      },
+      "label": "CAP08-formal2",
+      "allSystemEventsInQueryWindow": 18,
+      "selectedEventCount": 5,
+      "exactXPath": "*[System[TimeCreated[@SystemTime >= '2026-10-30T13:57:57.000Z' and @SystemTime <= '2026-10-30T14:04:55.000Z']]]",
+      "queryOutcome": "read",
+      "selectedEvents": [
+        {
+          "eventRecordId": 183192,
+          "inCoreWindow": true,
+          "selectedNativePowerFields": {
+            "Reason": "15",
+            "BootId": "199",
+            "MonitorReason": "15",
+            "PowerStateAc": "true"
+          },
+          "nativeMessage": "系统会话已从18转换为 19.\r\n\r\n原因 PolicyChange \r\n\r\nBootId： 199",
+          "atUtc": "2026-10-30T14:02:49.0370846Z",
+          "eventId": 566,
+          "provider": "Microsoft-Windows-Kernel-Power"
+        },
+        {
+          "eventRecordId": 183193,
+          "inCoreWindow": true,
+          "selectedNativePowerFields": {
+            "ScenarioInstanceId": "19",
+            "Reason": "15",
+            "LidOpenState": "false",
+            "BootId": "199",
+            "ExternalMonitorConnectedState": "false"
+          },
+          "nativeMessage": "系统正在进入新型待机状态 \r\n\r\n原因: Lid。",
+          "atUtc": "2026-10-30T14:02:49.0378364Z",
+          "eventId": 506,
+          "provider": "Microsoft-Windows-Kernel-Power"
+        },
+        {
+          "eventRecordId": 183194,
+          "inCoreWindow": true,
+          "selectedNativePowerFields": {
+            "Reason": "15",
+            "BootId": "199",
+            "MonitorReason": "15",
+            "PowerStateAc": "true"
+          },
+          "nativeMessage": "系统会话已从19转换为 20.\r\n\r\n原因 PolicyChange \r\n\r\nBootId： 199",
+          "atUtc": "2026-10-30T14:02:50.0427507Z",
+          "eventId": 566,
+          "provider": "Microsoft-Windows-Kernel-Power"
+        },
+        {
+          "eventRecordId": 183195,
+          "inCoreWindow": true,
+          "selectedNativePowerFields": {
+            "SleepEntered": "true",
+            "NonDripsTimeActivatedInUs": "0",
+            "PowerStateAc": "true",
+            "SleepDurationInUs": "2361858",
+            "DisconnectedStandby": "false",
+            "ActiveResidencyInUs": "3368132",
+            "BootId": "199",
+            "LidOpenState": "true",
+            "ExternalMonitorConnectedState": "false",
+            "ScenarioInstanceId": "21",
+            "Reason": "15",
+            "DurationInUs": "3368132",
+            "NonResiliencyTimeInUs": "3368132",
+            "DripsResidencyInUs": "0"
+          },
+          "nativeMessage": "系统正在退出新型待机状态 \r\n\r\n原因: Lid。",
+          "atUtc": "2026-10-30T14:02:52.4047896Z",
+          "eventId": 507,
+          "provider": "Microsoft-Windows-Kernel-Power"
+        },
+        {
+          "eventRecordId": 183196,
+          "inCoreWindow": true,
+          "selectedNativePowerFields": {
+            "Reason": "15",
+            "BootId": "199",
+            "MonitorReason": "15",
+            "PowerStateAc": "true"
+          },
+          "nativeMessage": "系统会话已从20转换为 21.\r\n\r\n原因 PolicyChange \r\n\r\nBootId： 199",
+          "atUtc": "2026-10-30T14:02:52.4049296Z",
+          "eventId": 566,
+          "provider": "Microsoft-Windows-Kernel-Power"
+        }
+      ],
+      "coreWindowUtc": {
+        "from": "2026-10-30T13:59:57Z",
+        "until": "2026-10-30T14:02:55Z"
+      },
+      "coreSelectedEventCount": 5
+    },
+    {
+      "queryWindowUtc": {
+        "from": "2026-10-30T11:18:28.000Z",
+        "until": "2026-10-30T11:22:38.000Z"
+      },
+      "label": "CAP07-B1-anomaly",
+      "allSystemEventsInQueryWindow": 2,
+      "selectedEventCount": 0,
+      "exactXPath": "*[System[TimeCreated[@SystemTime >= '2026-10-30T11:18:28.000Z' and @SystemTime <= '2026-10-30T11:22:38.000Z']]]",
+      "queryOutcome": "read",
+      "selectedEvents": [],
+      "coreWindowUtc": {
+        "from": "2026-10-30T11:20:28Z",
+        "until": "2026-10-30T11:20:38Z"
+      },
+      "coreSelectedEventCount": 0
+    },
+    {
+      "queryWindowUtc": {
+        "from": "2026-10-30T11:20:29.260Z",
+        "until": "2026-10-30T11:24:34.700Z"
+      },
+      "label": "CAP07-A2-wait-step",
+      "allSystemEventsInQueryWindow": 4,
+      "selectedEventCount": 0,
+      "exactXPath": "*[System[TimeCreated[@SystemTime >= '2026-10-30T11:20:29.260Z' and @SystemTime <= '2026-10-30T11:24:34.700Z']]]",
+      "queryOutcome": "read",
+      "selectedEvents": [],
+      "coreWindowUtc": {
+        "from": "2026-10-30T11:22:29.260Z",
+        "until": "2026-10-30T11:22:34.700Z"
+      },
+      "coreSelectedEventCount": 0
+    },
+    {
+      "queryWindowUtc": {
+        "from": "2026-10-30T13:44:43.529627Z",
+        "until": "2026-10-30T13:52:00.964498Z"
+      },
+      "label": "CAP08-diagnostic1-passed",
+      "allSystemEventsInQueryWindow": 0,
+      "selectedEventCount": 0,
+      "exactXPath": "*[System[TimeCreated[@SystemTime >= '2026-10-30T13:44:43.529627Z' and @SystemTime <= '2026-10-30T13:52:00.964498Z']]]",
+      "queryOutcome": "read-empty",
+      "selectedEvents": [],
+      "coreWindowUtc": {
+        "from": "2026-10-30T13:46:43.529627Z",
+        "until": "2026-10-30T13:50:00.964498Z"
+      },
+      "coreSelectedEventCount": 0
+    },
+    {
+      "queryWindowUtc": {
+        "from": "2026-10-30T13:53:07.238749Z",
+        "until": "2026-10-30T14:00:24.432163Z"
+      },
+      "label": "CAP08-formal1-passed",
+      "allSystemEventsInQueryWindow": 0,
+      "selectedEventCount": 0,
+      "exactXPath": "*[System[TimeCreated[@SystemTime >= '2026-10-30T13:53:07.238749Z' and @SystemTime <= '2026-10-30T14:00:24.432163Z']]]",
+      "queryOutcome": "read-empty",
+      "selectedEvents": [],
+      "coreWindowUtc": {
+        "from": "2026-10-30T13:55:07.238749Z",
+        "until": "2026-10-30T13:58:24.432163Z"
+      },
+      "coreSelectedEventCount": 0
+    }
+  ],
+  "selectedProvider": "Microsoft-Windows-Kernel-Power",
+  "selectedEventIds": [
+    506,
+    507,
+    566
+  ],
+  "logMetadata": {
+    "maximumSizeBytes": 20971520,
+    "retainedRecordCount": 39474,
+    "isEnabled": true,
+    "logMode": "Circular"
+  },
+  "limitations": [
+    "Native entering/exiting modern standby events are not direct proof of Docker/WSL VM suspension or the unique causal path to application latency.",
+    "Only the declared windows plus two-minute context are queried. Event absence does not exclude unlogged pauses or retention gaps.",
+    "No machine name, user environment, full event XML, unrelated provider message, API request, SQL, load or power configuration change is exported.",
+    "Native messages are retained only for selected power events; reason=Lid and state/duration fields may be used without inferring unrelated service activity.",
+    "An initial UTC DateTime FilterHashtable query returned empty and is not used; explicit SystemTime XPath queries are the retained source."
+  ],
+  "readOnlyPowercfgAvailability": {
+    "command": [
+      "powercfg",
+      "/a"
+    ],
+    "nativeAvailabilityText": "此系统上有以下睡眠状态:\r\n    待机 (S0 低电量待机) 连接的网络\r\n\r\n此系统上没有以下睡眠状态:\r\n    待机 (S1)\r\n\t系统固件不支持此待机状态。\r\n\t当支持 S0 低电量待机时，禁用此待机状态。\r\n\r\n    待机 (S2)\r\n\t系统固件不支持此待机状态。\r\n\t当支持 S0 低电量待机时，禁用此待机状态。\r\n\r\n    待机 (S3)\r\n\t当支持 S0 低电量待机时，禁用此待机状态。\r\n\r\n    休眠\r\n\t尚未启用休眠。\r\n\r\n    混合睡眠\r\n\t待机(S3)不可用。\r\n\t休眠不可用。\r\n\t虚拟机监控程序不支持此待机状态。\r\n\r\n    快速启动\r\n\t休眠不可用。\r\n",
+    "scope": "Current sleep-state capability only; not a change to policy or proof of historical configuration",
+    "queriedAtUtc": "2026-10-31T02:20:14.9478123Z"
+  },
+  "dockerHostLogReadOnlySummary": {
+    "capturedAtUtc": "2026-10-31T02:20:15.166723+00:00",
+    "sourceFileName": "com.docker.backend.exe.log.2",
+    "sourceFileBytes": 1048455,
+    "sourceFileSHA256": "13bbeb5eb35289e393b6607de729a35c5e0fed8b1ed5ab7b3735a0bb67e8ced2",
+    "minimumParsedUtc": "2026-10-30T11:31:41.744634+00:00",
+    "maximumParsedUtc": "2026-10-30T15:30:29.165892+00:00",
+    "queryFromUtc": "2026-10-30T13:57:57+00:00",
+    "queryUntilUtc": "2026-10-30T14:04:55+00:00",
+    "explicitTimestampLinesInWindow": 151,
+    "unparsedLinesInSource": 0,
+    "keywordPatterns": {
+      "pause-resume": "\\b(pausing|paused|pause|resuming|resumed|resume|suspend|suspended|unpause|freeze|thaw|sleep|wake)\\b",
+      "clock-time-sync": "\\bclock\\b|time.?jump|time.?sync|time (?:has )?changed|clock.?drift",
+      "wsl-vm-abnormal": "(?:wsl|hyper-v|hvsock|\\bvm\\b|vpnkit).*(?:error|fail|timeout|reset|unavailable|stopp|restart|unexpected)|(?:error|fail|timeout|reset|unavailable|stopp|restart|unexpected).*(?:wsl|hyper-v|hvsock|\\bvm\\b|vpnkit)"
+    },
+    "keywordCategoryCounts": {},
+    "retainedMonitorFileBounds": [
+      {
+        "file": "monitor.log",
+        "firstExplicitTimestamp": "2026-10-31T02:19:17.040728700Z",
+        "modifiedAtUtc": "2026-10-31T02:20:14.020946+00:00"
+      },
+      {
+        "file": "monitor.log.0",
+        "firstExplicitTimestamp": "2026-10-31T02:18:12.486808600Z",
+        "modifiedAtUtc": "2026-10-31T02:19:17.040181+00:00"
+      },
+      {
+        "file": "monitor.log.1",
+        "firstExplicitTimestamp": "2026-10-31T02:17:11.745795200Z",
+        "modifiedAtUtc": "2026-10-31T02:18:12.486258+00:00"
+      },
+      {
+        "file": "monitor.log.2",
+        "firstExplicitTimestamp": "2026-10-31T02:16:06.937952500Z",
+        "modifiedAtUtc": "2026-10-31T02:17:11.745222+00:00"
+      },
+      {
+        "file": "monitor.log.3",
+        "firstExplicitTimestamp": "2026-10-31T02:15:02.318923500Z",
+        "modifiedAtUtc": "2026-10-31T02:16:06.937433+00:00"
+      },
+      {
+        "file": "monitor.log.4",
+        "firstExplicitTimestamp": "2026-10-31T02:14:01.579667000Z",
+        "modifiedAtUtc": "2026-10-31T02:15:02.318382+00:00"
+      },
+      {
+        "file": "monitor.log.5",
+        "firstExplicitTimestamp": "2026-10-31T02:12:56.814654600Z",
+        "modifiedAtUtc": "2026-10-31T02:14:01.579667+00:00"
+      },
+      {
+        "file": "monitor.log.6",
+        "firstExplicitTimestamp": "2026-10-31T02:11:52.160423200Z",
+        "modifiedAtUtc": "2026-10-31T02:12:56.808867+00:00"
+      },
+      {
+        "file": "monitor.log.7",
+        "firstExplicitTimestamp": "2026-10-31T02:10:51.494589800Z",
+        "modifiedAtUtc": "2026-10-31T02:11:52.160423+00:00"
+      },
+      {
+        "file": "monitor.log.8",
+        "firstExplicitTimestamp": "2026-10-31T02:09:46.834334100Z",
+        "modifiedAtUtc": "2026-10-31T02:10:51.491826+00:00"
+      }
+    ],
+    "limitations": [
+      "Keyword categories were not found in this retained backend window; that does not prove absence of all relevant state transitions.",
+      "Current retained monitor log first timestamps do not cover the historic failure window; no historic monitor record is reconstructed.",
+      "Only filename, bounds, hashes and keyword category counts are exported, not raw messages, endpoints, names of other services or environment values."
+    ]
+  }
+}

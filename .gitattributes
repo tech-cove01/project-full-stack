@@ -32,3 +32,7 @@ docs/evidence/2026-10-30-cap08/**/*.txt -text
 docs/evidence/2026-10-30-cap08/**/*.log -text
 docs/evidence/2026-10-30-cap08/**/*.gz binary
 docs/evidence/2026-10-30-cap08/**/*.pprof binary
+
+# Bounded CAP08 follow-up keeps selected host-event and analysis bytes intact.
+docs/evidence/2026-10-31-cap08-followup/**/*.json -text
+docs/evidence/2026-10-31-cap08-followup/**/*.txt -text

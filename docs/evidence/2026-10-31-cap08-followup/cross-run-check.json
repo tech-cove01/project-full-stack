@@ -1,0 +1,396 @@
+{
+  "task": "CAP-08 limited follow-up round 1",
+  "at": "2026-10-31T02:19:59.693809+00:00",
+  "method": "Read-only deterministic arithmetic over frozen local artifacts; no API, SQL, dependency, generator or new load. Native summaries retain full planned denominators. MySQL Uptime is a seconds-resolution guest wall-time-based server status; not Linux /proc/uptime. Python timestamp differences are microsecond-resolution parses, not proof of sub-microsecond clock accuracy.",
+  "baseSha": "5ec381ad47eacb0dfcd867a51fcaf5180b188715",
+  "newLoadRuns": 0,
+  "cases": [
+    {
+      "cohort": "2026-10-30-cap07",
+      "tag": "b1-multi100",
+      "apiSourceSha": "30b6571227b5508d0f04bc8c4cfc1bcfbc313275",
+      "nominalSeconds": 180,
+      "native": {
+        "meetsBudget": false,
+        "attempted": 5788,
+        "http": 5787,
+        "completed": 5787,
+        "successful": 5787,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "unknown": 1,
+        "targetOffers": 18000,
+        "offeredRatio": 0.32155555555555554,
+        "successfulFraction": 0.9998272287491361,
+        "successfulRPS": 32.15,
+        "allP95Ms": 40.82358999999999,
+        "allP99Ms": 1449.5717160000024,
+        "successfulP95Ms": 40.82358999999999,
+        "successfulP99Ms": 1449.5717160000024
+      },
+      "originalMeetsBudget": false,
+      "originalClassifiedResultPresent": true,
+      "originalFailure": null,
+      "stableStartedAtUtc": "2026-10-30T11:19:37.815000+00:00",
+      "stableEndedAtUtc": "2026-10-30T11:20:37.213000+00:00",
+      "mysqlUptimeDeltaSeconds": 60,
+      "windowsStatusMidpointElapsedMs": 59894,
+      "mysqlMinusWindowsElapsedMs": 106,
+      "originalStatusUncertaintyMs": 2322,
+      "originalUptimeConsistent": true,
+      "resourceSamples": 12,
+      "hostWallMinusPerfIntervalMaxAbsMs": 0.0027999870999551035,
+      "apiWallMinusUptimeAdjacentMaxAbsMs": 0.8339999999998327,
+      "wholeStageApiWallElapsedMs": 73441.53,
+      "wholeStageApiUptimeElapsedMs": 73442
+    },
+    {
+      "cohort": "2026-10-30-cap07",
+      "tag": "a2-multi100",
+      "apiSourceSha": "f3d99ee43dfb422a0cba525de93e9266f07c4ee5",
+      "nominalSeconds": 180,
+      "native": {
+        "meetsBudget": true,
+        "attempted": 18001,
+        "http": 18001,
+        "completed": 18001,
+        "successful": 18001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "unknown": 0,
+        "targetOffers": 18000,
+        "offeredRatio": 1.0000555555555555,
+        "successfulFraction": 1.0,
+        "successfulRPS": 100.00555555555556,
+        "allP95Ms": 29.7205,
+        "allP99Ms": 45.3673,
+        "successfulP95Ms": 29.7205,
+        "successfulP99Ms": 45.3673
+      },
+      "originalMeetsBudget": true,
+      "originalClassifiedResultPresent": true,
+      "originalFailure": null,
+      "stableStartedAtUtc": "2026-10-30T11:22:08.260000+00:00",
+      "stableEndedAtUtc": "2026-10-30T11:25:11.134000+00:00",
+      "mysqlUptimeDeltaSeconds": 184,
+      "windowsStatusMidpointElapsedMs": 183369,
+      "mysqlMinusWindowsElapsedMs": 631,
+      "originalStatusUncertaintyMs": 2302,
+      "originalUptimeConsistent": true,
+      "resourceSamples": 37,
+      "hostWallMinusPerfIntervalMaxAbsMs": 0.0049999945295198245,
+      "apiWallMinusUptimeAdjacentMaxAbsMs": 0.6440000000002328,
+      "wholeStageApiWallElapsedMs": 197485.95700000002,
+      "wholeStageApiUptimeElapsedMs": 197486
+    },
+    {
+      "cohort": "2026-10-30-cap08",
+      "tag": "diagnostic-1",
+      "apiSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+      "nominalSeconds": 180,
+      "native": {
+        "meetsBudget": true,
+        "attempted": 18001,
+        "http": 18001,
+        "completed": 18001,
+        "successful": 18001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "unknown": 0,
+        "targetOffers": 18000,
+        "offeredRatio": 1.0000555555555555,
+        "successfulFraction": 1.0,
+        "successfulRPS": 100.00555555555556,
+        "allP95Ms": 19.3259,
+        "allP99Ms": 26.6919,
+        "successfulP95Ms": 19.3259,
+        "successfulP99Ms": 26.6919
+      },
+      "originalMeetsBudget": true,
+      "originalClassifiedResultPresent": true,
+      "originalFailure": null,
+      "stableStartedAtUtc": "2026-10-30T13:46:58.311000+00:00",
+      "stableEndedAtUtc": "2026-10-30T13:49:59.815000+00:00",
+      "mysqlUptimeDeltaSeconds": 181,
+      "windowsStatusMidpointElapsedMs": 181927,
+      "mysqlMinusWindowsElapsedMs": -927,
+      "originalStatusUncertaintyMs": 2268,
+      "originalUptimeConsistent": true,
+      "resourceSamples": 37,
+      "hostWallMinusPerfIntervalMaxAbsMs": 0.0342999769431529,
+      "apiWallMinusUptimeAdjacentMaxAbsMs": 0.9089999999996508,
+      "wholeStageApiWallElapsedMs": 197296.051,
+      "wholeStageApiUptimeElapsedMs": 197296
+    },
+    {
+      "cohort": "2026-10-30-cap08",
+      "tag": "formal-1-multi100",
+      "apiSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+      "nominalSeconds": 180,
+      "native": {
+        "meetsBudget": true,
+        "attempted": 18001,
+        "http": 18001,
+        "completed": 18001,
+        "successful": 18001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "unknown": 0,
+        "targetOffers": 18000,
+        "offeredRatio": 1.0000555555555555,
+        "successfulFraction": 1.0,
+        "successfulRPS": 100.00555555555556,
+        "allP95Ms": 17.3377,
+        "allP99Ms": 23.9781,
+        "successfulP95Ms": 17.3377,
+        "successfulP99Ms": 23.9781
+      },
+      "originalMeetsBudget": true,
+      "originalClassifiedResultPresent": true,
+      "originalFailure": null,
+      "stableStartedAtUtc": "2026-10-30T13:55:20.536000+00:00",
+      "stableEndedAtUtc": "2026-10-30T13:58:23.839000+00:00",
+      "mysqlUptimeDeltaSeconds": 184,
+      "windowsStatusMidpointElapsedMs": 183700,
+      "mysqlMinusWindowsElapsedMs": 300,
+      "originalStatusUncertaintyMs": 2256,
+      "originalUptimeConsistent": true,
+      "resourceSamples": 37,
+      "hostWallMinusPerfIntervalMaxAbsMs": 0.00250000132950845,
+      "apiWallMinusUptimeAdjacentMaxAbsMs": 0.9200000000000728,
+      "wholeStageApiWallElapsedMs": 197061.588,
+      "wholeStageApiUptimeElapsedMs": 197062
+    },
+    {
+      "cohort": "2026-10-30-cap08",
+      "tag": "formal-2-multi100",
+      "apiSourceSha": "46ddefc2a16d41e4bb01a3d20d08bdfcaeff465f",
+      "nominalSeconds": 180,
+      "native": {
+        "meetsBudget": false,
+        "attempted": 16133,
+        "http": 15933,
+        "completed": 15933,
+        "successful": 15933,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 57,
+        "unknown": 200,
+        "targetOffers": 18000,
+        "offeredRatio": 0.8962777777777777,
+        "successfulFraction": 0.9876030496497862,
+        "successfulRPS": 88.51666666666667,
+        "allP95Ms": 24.18683999999999,
+        "allP99Ms": 84.04812800000079,
+        "successfulP95Ms": 24.18683999999999,
+        "successfulP99Ms": 84.04812800000079
+      },
+      "originalMeetsBudget": false,
+      "originalClassifiedResultPresent": false,
+      "originalFailure": "access counters reset, uptime inconsistent or instrumentation lost; no valid access count claim",
+      "stableStartedAtUtc": "2026-10-30T14:00:10.929000+00:00",
+      "stableEndedAtUtc": "2026-10-30T14:02:54.582000+00:00",
+      "mysqlUptimeDeltaSeconds": 161,
+      "windowsStatusMidpointElapsedMs": 164101.5,
+      "mysqlMinusWindowsElapsedMs": -3101.5,
+      "originalStatusUncertaintyMs": 2261,
+      "originalUptimeConsistent": false,
+      "resourceSamples": 33,
+      "hostWallMinusPerfIntervalMaxAbsMs": 0.003099995752542384,
+      "apiWallMinusUptimeAdjacentMaxAbsMs": 0.8900000000003274,
+      "wholeStageApiWallElapsedMs": 177824.66400000002,
+      "wholeStageApiUptimeElapsedMs": 177825
+    }
+  ],
+  "sourceFiles": {
+    "docs/evidence/2026-10-30-cap07/b1-multi100-command.json": {
+      "bytes": 1326,
+      "sha256": "9882f372ab19a71f90f662e738c95bbc069c5da00a9ff815b5cab6cb07465365"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-load/result.json": {
+      "bytes": 3195,
+      "sha256": "d5020cd05c73bb76e99aaa9fe3b5a3cfca606b6d7400f61b583f0809e260ed30"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-load/stable-summary.json": {
+      "bytes": 4927,
+      "sha256": "b415c8d3982679e9bc5d52df0361bac78902aae8206a58d35461ee6d4cda8039"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-load/before.json": {
+      "bytes": 33930,
+      "sha256": "ae172639d52f7a19a86c3af4696d1fc597a6470c1ce04bbaae47238bdd2c2be3"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-load/after.json": {
+      "bytes": 33951,
+      "sha256": "b58b3c575f0b099f5b693e924a420599d1a7e4a4364d0b215d1e7152d24c874e"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-load/access-delta.json": {
+      "bytes": 5891,
+      "sha256": "00dc90863830906880c0c9e7e3a68070cab55da21885e78175cb27a30a6c4705"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-control/resources.ndjson": {
+      "bytes": 33733,
+      "sha256": "73a36e1712ec64736afe6316e2bbc8a5619ca6053798fae69e8a3e8ac853cfe0"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-capacity-before.json": {
+      "bytes": 2239,
+      "sha256": "c5112d2fd6dd9abc4d72f0cfe3d19140d3e24d247a925d7c0c0401b150d8d948"
+    },
+    "docs/evidence/2026-10-30-cap07/b1-multi100-capacity-after.json": {
+      "bytes": 2293,
+      "sha256": "791051a98e105df6b84381f2296a1400b32fbaaef2a64aab74f972f53752fbe3"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-command.json": {
+      "bytes": 1326,
+      "sha256": "5ccfa8c94c124990c68d1e3c855a6d038cf7c239b00b84636c83a47abc93ca34"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-load/result.json": {
+      "bytes": 3151,
+      "sha256": "4bdf50da964b1ebfd12c1434711113317806f5bfb4c12720e779cf364ae59c7e"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-load/stable-summary.json": {
+      "bytes": 4771,
+      "sha256": "dbe7dc621096828fd13d2d7a9e4e1e010774cded4e5a174b328bae85af250608"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-load/before.json": {
+      "bytes": 33957,
+      "sha256": "7ae2ab61386eb1a8a95d6d0400fdd9b7b39dce3f8ab40e18f3171d6e97afeb2c"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-load/after.json": {
+      "bytes": 33959,
+      "sha256": "8fb94d495a14839ffb8fbb3cb2114a411db65ad2ec1678858cc9d1fa2bc507a9"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-load/access-delta.json": {
+      "bytes": 5924,
+      "sha256": "a3601b8708b4507d9c268ca98370dc6a38db48f0621c9a52fe8a34c27b40d48a"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-control/resources.ndjson": {
+      "bytes": 85163,
+      "sha256": "3d0a3e234a58d7d078195a9cc79f39b8ae510af80553a887f5a394ab6a3535b4"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-capacity-before.json": {
+      "bytes": 1579,
+      "sha256": "7b459a4244b637555635e4fdc394aa6328ca34c79c1485a5ab8dc417c264a2e3"
+    },
+    "docs/evidence/2026-10-30-cap07/a2-multi100-capacity-after.json": {
+      "bytes": 1632,
+      "sha256": "26bd40b76f3493f3c8f9252a23d5fe8fdd9832df541233765f30b2ec65807d7f"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-command.json": {
+      "bytes": 2237,
+      "sha256": "15eced148b815a74064f5b10b0165362053d636861cfe728b2c4c10015dc0387"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-load/result.json": {
+      "bytes": 3148,
+      "sha256": "da1100fc2431e63ffd422221598fe229c660680cd622d7ce5dce012b7c452fae"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-load/stable-summary.json": {
+      "bytes": 4766,
+      "sha256": "4ce6a4a1c3161c7785e4809da01987def3a5543023bdca8aa74c698a01028fed"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-load/before.json": {
+      "bytes": 37075,
+      "sha256": "26835a601dc4698b9c513f85ef27151d3c6270d672fc6c1ef22c05719b0e03e4"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-load/after.json": {
+      "bytes": 37151,
+      "sha256": "33049a4211df93fd9d60857486ba3e591b85febedefd37dab1aad52925e02b44"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-load/access-delta.json": {
+      "bytes": 5917,
+      "sha256": "f983a1fb952421419c2bd665504a43f4e749a83db0df60eef1812dc964af0b66"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-control/resources.ndjson": {
+      "bytes": 422402,
+      "sha256": "ea413ebdc5a37d081af3bf46e9c4c597a2feecd938dc84072d511f3e519bbb74"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-capacity-before.json": {
+      "bytes": 16433,
+      "sha256": "efc691ddb118134a25384bc5fed5851864700b284d35de5f1a260d5d8e12d5bf"
+    },
+    "docs/evidence/2026-10-30-cap08/diagnostic-1-capacity-after.json": {
+      "bytes": 16598,
+      "sha256": "8abfed43d6a90e4d5ecdd3f9fb4caa6cc56b8bfe4e6863b0daf519f7a6c0a9d4"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-command.json": {
+      "bytes": 2223,
+      "sha256": "17665d6e230ee136886ba2f65152d9b113fb00b44e794996c667b72a6ea2f7e8"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-load/result.json": {
+      "bytes": 3148,
+      "sha256": "26802b44cb5fe954b4691ae1d6c0b979345b4d3b214932dde969487694154b08"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-load/stable-summary.json": {
+      "bytes": 4761,
+      "sha256": "3e419bfab3937c5e8bed0e648d8330a37d2f441b79b70f4db9b0383c436ff604"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-load/before.json": {
+      "bytes": 37162,
+      "sha256": "717a01459631daf2525821ef580ecc96c9cf3f2587877730c503f873107eead6"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-load/after.json": {
+      "bytes": 37184,
+      "sha256": "eef5d03a843e5318d41b2184a7d98639f12f42af794db98673d5d50a1dee5279"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-load/access-delta.json": {
+      "bytes": 5918,
+      "sha256": "4e76a71b85d46e032c078b05ca2dd117820eaf70fb2d72bf5711bd1af2052a6d"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-control/resources.ndjson": {
+      "bytes": 102918,
+      "sha256": "743cfaa94fb4fbd2c8fcb08fbe15bad0c055db95d394feee1f760dd59b7e4043"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-capacity-before.json": {
+      "bytes": 3024,
+      "sha256": "2870993dd82890357c541a250dd0ae4d95c0f80fbee8bd5e59c8d7a5b4e9d559"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-1-multi100-capacity-after.json": {
+      "bytes": 3085,
+      "sha256": "829c2349ce961849fd89dac5bb1b883160fb8d1a70d97b9d04541c97c574019e"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-command.json": {
+      "bytes": 2223,
+      "sha256": "32d096b151da7f8dce7d402cf4b2a82d2919fa95377567170348976c762f0289"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-load/result.json": {
+      "bytes": 1741,
+      "sha256": "835e2fc6ccffce02a81955afd5f3843d86c52470e6b48064a8815e216234a404"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-load/stable-summary.json": {
+      "bytes": 4949,
+      "sha256": "02634a3bd5cfdf2c09349aaa5e90bdb966171d3885b27726ac1982ca8e0ea96c"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-load/before.json": {
+      "bytes": 37186,
+      "sha256": "c0a6d8204ec30e2848abce9e0ea2be1ef2a26d8d65162a6830fc7e30beeb0ce1"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-load/after.json": {
+      "bytes": 37197,
+      "sha256": "f3b4c0e302cd67e5d262817a0eab1dec6cb63318d1f51c880189f8424c7e2b66"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-load/access-delta.json": {
+      "bytes": 5931,
+      "sha256": "82cb825c8158a040f03bdf3b7ac9b890150e401442adef70daadc50076e62b18"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-control/resources.ndjson": {
+      "bytes": 92074,
+      "sha256": "10de8731732ff4f122e4469c433e197301a6fcfc66509f3613f48b226a9aaa95"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-capacity-before.json": {
+      "bytes": 3084,
+      "sha256": "0615ce2e7b2f47b8071e5a9086f935e308bea3aea87dc3e1e9b7466c59caa18b"
+    },
+    "docs/evidence/2026-10-30-cap08/formal-2-multi100-capacity-after.json": {
+      "bytes": 3119,
+      "sha256": "31402d86b27e453c3e29e75133f5098683e3c6e0ba405c1cf08f306cdf81a9db"
+    }
+  }
+}

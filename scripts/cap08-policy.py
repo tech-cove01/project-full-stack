@@ -65,7 +65,7 @@ def passed(root, command):
         stage = read(root / (tag + '-stage-exit.json'))
         control = read(root / (tag + '-control/exit-status.json'))
         return (result.get('meetsBudget') is True and stage.get('capacityWrapperExit') == 0 and
-                stage.get('wrapperExited') is True and stage.get('failedStartOrException') is None and
+                stage.get('wrapperExited') is True and stage['failedStartOrException'] is None and
                 stage.get('cardsEvidenceValid') is True and stage.get('toolBytesStable') is True and control.get('harness_exit') == 0 and
                 control.get('sampler_exit') == 0 and not control.get('errors') and
                 control.get('stop_signal') is False and control.get('forced') is False)
@@ -96,7 +96,7 @@ def measured_slo_failure(root, command):
                 result['result'].get('contentErrors') == 0 and result.get('warmExit') == 0 and
                 result.get('stableExit') in (0, 99) and not result.get('warmExternalStop') and not result.get('stableExternalStop') and
                 (root / (tag + '-load/stable-summary.json')).is_file() and
-                stage.get('wrapperExited') is True and stage.get('failedStartOrException') is None and
+                stage.get('wrapperExited') is True and stage['failedStartOrException'] is None and
                 stage.get('cardsEvidenceValid') is True and stage.get('toolBytesStable') is True and
                 control.get('sampler_exit') == 0 and control.get('stop_signal') is False and
                 not control.get('errors') and control.get('forced') is False)

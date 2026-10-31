@@ -1,0 +1,4 @@
+{
+  "expected": "FAIL before strict terminal-field fix; two predicate subcases",
+  "exit": 1
+}

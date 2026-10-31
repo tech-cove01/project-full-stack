@@ -1,0 +1,5 @@
+{
+  "exit": 0,
+  "regressedCases": "missing terminal exception field rejected by both predicates",
+  "scope": "all pure CAP08 tool checks; no API/SQL/Redis/Docker/load"
+}

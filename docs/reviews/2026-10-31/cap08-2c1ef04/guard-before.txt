@@ -1,0 +1,26 @@
+test_stage_without_explicit_exception_field_is_incomplete (__main__.Checks.test_stage_without_explicit_exception_field_is_incomplete) ... 
+  test_stage_without_explicit_exception_field_is_incomplete (__main__.Checks.test_stage_without_explicit_exception_field_is_incomplete) (predicate='passed') ... FAIL
+  test_stage_without_explicit_exception_field_is_incomplete (__main__.Checks.test_stage_without_explicit_exception_field_is_incomplete) (predicate='measured_slo_failure') ... FAIL
+
+======================================================================
+FAIL: test_stage_without_explicit_exception_field_is_incomplete (__main__.Checks.test_stage_without_explicit_exception_field_is_incomplete) (predicate='passed')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\桌面\The ALL\agent\project\code\.reviews\cap08-2c1ef04\worktree\scripts\cap08-check.py", line 160, in test_stage_without_explicit_exception_field_is_incomplete
+    self.assertFalse(predicate(self.root, command))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+======================================================================
+FAIL: test_stage_without_explicit_exception_field_is_incomplete (__main__.Checks.test_stage_without_explicit_exception_field_is_incomplete) (predicate='measured_slo_failure')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "D:\桌面\The ALL\agent\project\code\.reviews\cap08-2c1ef04\worktree\scripts\cap08-check.py", line 160, in test_stage_without_explicit_exception_field_is_incomplete
+    self.assertFalse(predicate(self.root, command))
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 0.030s
+
+FAILED (failures=2)

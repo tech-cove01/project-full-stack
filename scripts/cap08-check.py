@@ -147,6 +147,18 @@ class Checks(unittest.TestCase):
                     finally:
                         self.write(name, original)
 
+    def test_stage_without_explicit_exception_field_is_incomplete(self):
+        # The writer explicitly records null on normal completion. A missing
+        # terminal field is unknown, not evidence of a normal completion.
+        for completed, predicate in ((True, policy.passed), (False, policy.measured_slo_failure)):
+            with self.subTest(predicate=predicate.__name__):
+                command = self.record('incomplete', 'formal', passed=completed)
+                name = command['tag'] + '-stage-exit.json'
+                incomplete = policy.read(self.root / name)
+                del incomplete['failedStartOrException']
+                self.write(name, incomplete)
+                self.assertFalse(predicate(self.root, command))
+
     def test_missing_collection_is_not_non_reproduction_and_treated_needs_proof(self):
         self.record('d1', 'diagnostic')
         self.gate()

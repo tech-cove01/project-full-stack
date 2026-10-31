@@ -1,0 +1,17 @@
+test_budget_and_two_diagnostic_slots (__main__.Checks.test_budget_and_two_diagnostic_slots) ... ok
+test_completed_stage_requires_normal_exit_without_late_interrupt (__main__.Checks.test_completed_stage_requires_normal_exit_without_late_interrupt) ... ok
+test_controlled_first_capture_returns_without_full_window (__main__.Checks.test_controlled_first_capture_returns_without_full_window) ... ok
+test_fetch_failure_timings_redirect_rejection_and_profile_bound (__main__.Checks.test_fetch_failure_timings_redirect_rejection_and_profile_bound) ... ok
+test_fixed_cohorts_reject_each_others_private_paths (__main__.Checks.test_fixed_cohorts_reject_each_others_private_paths) ... ok
+test_formal_order_source_and_first_failure (__main__.Checks.test_formal_order_source_and_first_failure) ... ok
+test_genuine_startup_failure_keeps_reservation (__main__.Checks.test_genuine_startup_failure_keeps_reservation) ... ok
+test_missing_collection_is_not_non_reproduction_and_treated_needs_proof (__main__.Checks.test_missing_collection_is_not_non_reproduction_and_treated_needs_proof) ... ok
+test_optional_native_failure_only_and_no_backfill (__main__.Checks.test_optional_native_failure_only_and_no_backfill) ... ok
+test_slow_archive_bounds_and_parsed_subset_raw_hash (__main__.Checks.test_slow_archive_bounds_and_parsed_subset_raw_hash) ... ok
+test_stage_without_explicit_exception_field_is_incomplete (__main__.Checks.test_stage_without_explicit_exception_field_is_incomplete) ... ok
+test_trigger_completeness_pool_and_coverage_boundaries (__main__.Checks.test_trigger_completeness_pool_and_coverage_boundaries) ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 0.662s
+
+OK

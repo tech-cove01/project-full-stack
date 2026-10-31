@@ -85,7 +85,6 @@ flowchart LR
 - [本地环境、数据库迁移与 Go 启动](docs/development.md#go-迁移环境与启动)
 - [用户、商家与业务 AI 演示](docs/demo-recording.md)
 - [核心源码与设计取舍](docs/source-walkthrough.md)
-- [开发状态与工作记录](STATUS.md)
 
 ## 目录
 

@@ -34,7 +34,11 @@ func (pool *observedPool) BeginTx(ctx context.Context, options *sql.TxOptions) (
 	if err != nil || fromContext(ctx) == nil {
 		return tx, err
 	}
-	return &observedTransaction{Tx: tx, hold: Begin(ctx, SQLHold, 0)}, nil
+	observed := &observedTransaction{Tx: tx, hold: Begin(ctx, SQLHold, 0)}
+	if scope := fromContext(ctx).scope; scope == "like.http" || scope == "like.service" {
+		observed.likeContext = ctx
+	}
+	return observed, nil
 }
 
 func (pool *observedPool) QueryContext(ctx context.Context, statement string, args ...any) (*sql.Rows, error) {
@@ -60,12 +64,18 @@ func (pool *observedPool) PrepareContext(ctx context.Context, statement string) 
 
 type observedTransaction struct {
 	*sql.Tx
-	hold *Span
-	once sync.Once
+	hold        *Span
+	once        sync.Once
+	likeContext context.Context
 }
 
 func (tx *observedTransaction) Commit() error {
+	var span *Span
+	if tx.likeContext != nil {
+		span = Begin(tx.likeContext, SQLCommit, 0)
+	}
 	err := tx.Tx.Commit()
+	span.End(err != nil)
 	tx.once.Do(func() { tx.hold.End(err != nil) })
 	return err
 }

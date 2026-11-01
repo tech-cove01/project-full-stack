@@ -1,8 +1,24 @@
-# CAP-06/08 bounded Feed observations
+# CAP-06/08/10 bounded Feed and Like observations
 
 Enable with `GO_FEED_DIAGNOSTICS=true` **and** the existing numeric-loopback
 `GO_DIAGNOSTICS_ADDR` outside production. Default is false. No product response,
 SQL, pool size, cache TTL, cache invalidation or request deadline changes.
+
+Like observations independently require `GO_LIKE_DIAGNOSTICS=true` and the same
+private diagnostics address. They default off and do not enable Feed tracing.
+When both flags are enabled, hooks are installed once and both scopes share the
+same 32-trace ring. `like.http` begins before authentication and includes handler
+and JSON work; it is not network RTT. `like.service` spans the service call.
+`like.transaction_total` covers the existing transaction call including BEGIN
+and Commit/Rollback. `sql.commit_call` measures only the `database/sql` Commit
+call in Like traces, not pure server execution or proof of rejection on error.
+The original independent two-second postcommit context retains the trace while
+detaching caller cancellation. `like.postcommit_invalidate`,
+`like.postcommit_state` and `like.postcommit_mark` measure its existing calls;
+conditional calls can be absent. Invalidate/Mark errors remain best-effort as
+before, while their stage error counters record failures. These nested intervals
+overlap SQL/Redis timings and must not be summed as disjoint work. The flag
+changes observation only; it does not change business or cancellation semantics.
 
 The private `GET /debug/capacity` response adds `tail`. Fixed allowlisted stage
 names expose lifetime count/total/max/error/items and current active operations.

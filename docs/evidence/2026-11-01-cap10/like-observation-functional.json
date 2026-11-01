@@ -1,0 +1,8 @@
+{
+  "startedAt": "2026-11-01T07:53:03.043481+00:00",
+  "finishedAt": "2026-11-01T07:53:06.711259+00:00",
+  "command": "go test ./internal/social -run ^TestIntegrationLikeObservations$ -count=1 -v",
+  "exitCode": 0,
+  "scope": "One finite controlled integration case; two handler mutations, no k6/native capacity window. New owned MySQL3481/Redis6581, no API server or relay yet.",
+  "testSHA256": "7377ff51b27cc3eb59639cbdc14090c646e7a0eaa47f43e59d1e720c3f42fa2f"
+}

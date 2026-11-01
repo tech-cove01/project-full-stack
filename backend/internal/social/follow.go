@@ -35,16 +35,23 @@ type Relationship struct {
 }
 
 type Service struct {
-	db            *gorm.DB
-	counts        *communitycache.Cache
-	cards         *communitycards.Cache
-	cardFallbacks *atomic.Uint64
-	likes         *communitycache.Likes
-	projections   bool
-	observations  *taildiag.Recorder
+	db               *gorm.DB
+	counts           *communitycache.Cache
+	cards            *communitycards.Cache
+	cardFallbacks    *atomic.Uint64
+	likes            *communitycache.Likes
+	projections      bool
+	observations     *taildiag.Recorder
+	likeObservations *taildiag.Recorder
 }
 
 func NewService(db *gorm.DB) *Service { return &Service{db: db, cardFallbacks: new(atomic.Uint64)} }
+
+// WithLikeDiagnostics only attaches the opt-in private Like timing recorder.
+func (service *Service) WithLikeDiagnostics(recorder *taildiag.Recorder) *Service {
+	service.likeObservations = recorder
+	return service
+}
 
 // WithCards caches only the versioned public fragment, after the fact snapshot.
 func (service *Service) WithCards(cache *communitycards.Cache) *Service {

@@ -1,0 +1,37 @@
+{
+  "at": "2026-11-01T07:54:33.991014+00:00",
+  "task": "CAP-10A bounded Like observations",
+  "reviewer": "cap09_like_review (non-author for Go and env flag)",
+  "passed": true,
+  "files": {
+    "backend/internal/platform/config/config.go": "c12e5e2b6c583644dff099d6e067836e7fe1af3c95b98cdd4dee187b13ca9202",
+    "backend/internal/platform/config/like_diagnostics_test.go": "867e68a5fe990964caabcb49a41080572b8624d8ad612b03876b40eff023e73f",
+    "backend/internal/platform/app/app.go": "35714de8c578ddcec08e0c5aa801a11bee1608a19011baf4f46e927a3932ac5d",
+    "backend/internal/platform/taildiag/recorder.go": "fcf1a685134eb3d8387ec792cbc4da95f92b226e82f2f7abb56a8c93869cda36",
+    "backend/internal/platform/taildiag/recorder_test.go": "e5d60e5cb13f7d3b7e32c0de02f46fdb04d7a441d74360065f00f8e3f97ba497",
+    "backend/internal/platform/taildiag/storage.go": "5959c6c0a00505c645b71214670203e0207b7f8139da346d3094318cc7285cd8",
+    "backend/internal/platform/taildiag/storage_test.go": "92f2087379fafe4940aa3b1245eed34ed805037e24c7f33a1c5c4b85cfe686ff",
+    "backend/internal/platform/taildiag/README.md": "01b9b4baf28a857303823aaedd1d1ea74f6dbaea60a26861b1381ade753f6bf3",
+    "backend/internal/social/follow.go": "ad2172160b61f76a20710e490b8937f32ff8f53fa881960eee609cb2ae7e84f5",
+    "backend/internal/social/http.go": "dc34c35062aa8c835c365f8302eef237f7020a7ff2b0439990b2d396eb7cd3c2",
+    "backend/internal/social/like.go": "1631aa4f9c42c067148e015d6d63234397c0fa5196c9fdac0c111974f2e0d26c",
+    "backend/internal/social/social_test.go": "1033a1b27b26612e1e344dcb3dffeccb2822cb7be3d3a88ca6c529e375da6513",
+    "backend/internal/social/like_observations_integration_test.go": "7377ff51b27cc3eb59639cbdc14090c646e7a0eaa47f43e59d1e720c3f42fa2f",
+    "scripts/cap10-env.py": "7a488c3fc4674ccedf1893524278830a7d2ea6e54e1da19a63f36d5ee0272d90"
+  },
+  "checks": [
+    "Independent default-off Like flag; numeric loopback diagnostics and production refusal.",
+    "Route observation precedes auth; auth, request/service total, transaction envelope/actual driver commit envelope, invalidation/state/Mark traced.",
+    "One recorder/hook installation, Feed independent; fixed32 slow ring/256 spans, internal sequence/times only.",
+    "Transaction ctx, acknowledged successful commit and independent2s WithoutCancel derived path unchanged.",
+    "Actual commit-call envelope is not server-only execution; nested timings overlap.",
+    "Finite real test explicitly requires every fixed stage and zero active stages after cancellation, facts/outbox/Redis and exact private session cleanup."
+  ],
+  "validation": [
+    "like-observation-functional.json",
+    "like-observation-pure.json",
+    "like-observation-vet.json"
+  ],
+  "capacityClaim": false,
+  "productionOptimizationCount": 0
+}

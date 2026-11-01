@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+
+	"github.com/cityloop/fullstack-go/internal/platform/taildiag"
 )
 
 // ErrNoteNotFound also covers a note that is not published: a draft and a
@@ -25,7 +27,13 @@ type LikeState struct {
 // SetLike is an expected-state write. The note row is locked first, which
 // serializes the counter update with concurrent likes on the same note; repeating
 // the current state changes nothing and emits no event.
-func (service *Service) SetLike(ctx context.Context, userID, noteID string, liked bool) (LikeState, error) {
+func (service *Service) SetLike(ctx context.Context, userID, noteID string, liked bool) (result LikeState, returnedErr error) {
+	ctx, finish := taildiag.StartLike(ctx, service.likeObservations, false)
+	span := taildiag.Begin(ctx, taildiag.LikeService, 0)
+	defer func() {
+		span.End(returnedErr != nil)
+		finish(returnedErr != nil)
+	}()
 	user, err := positive(userID)
 	if err != nil {
 		return LikeState{}, err
@@ -34,6 +42,8 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	if err != nil {
 		return LikeState{}, err
 	}
+	transactionSpan := taildiag.Begin(ctx, taildiag.LikeTransaction, 0)
+	defer transactionSpan.End(true)
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var blog struct {
 			ID     uint64
@@ -107,6 +117,7 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 				"userId": strconv.FormatUint(user, 10),
 				"liked":  liked, "version": version})
 	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
+	transactionSpan.End(err != nil)
 	if err != nil {
 		return LikeState{}, err
 	}
@@ -117,16 +128,26 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	defer cancel()
 	// The counter changed, so the cached copy must go; the next read rebuilds it.
 	if service.counts != nil {
-		_ = service.counts.Invalidate(postCommitCtx, note)
+		invalidateSpan := taildiag.Begin(postCommitCtx, taildiag.LikeInvalidate, 0)
+		defer invalidateSpan.End(true)
+		invalidateErr := service.counts.Invalidate(postCommitCtx, note)
+		invalidateSpan.End(invalidateErr != nil)
 	}
+	stateSpan := taildiag.Begin(postCommitCtx, taildiag.LikeStateRead, 0)
+	defer stateSpan.End(true)
 	state, err := service.LikeState(postCommitCtx, userID, noteID)
+	stateSpan.End(err != nil)
 	if err != nil {
 		return LikeState{}, err
 	}
 	// Read the current committed relation, not the original requested state. The
 	// projection version fences a delayed completion behind a later unlike.
 	if service.likes != nil && state.Version > 0 {
-		if _, markErr := service.likes.Mark(postCommitCtx, note, user, state.Liked, state.Version); markErr != nil {
+		markSpan := taildiag.Begin(postCommitCtx, taildiag.LikeMark, 0)
+		defer markSpan.End(true)
+		_, markErr := service.likes.Mark(postCommitCtx, note, user, state.Liked, state.Version)
+		markSpan.End(markErr != nil)
+		if markErr != nil {
 			// The projection is repairable, but the failure must be visible.
 			slog.Warn("like bitmap update failed", "note_id", note, "user_id", user, "error", markErr)
 		}

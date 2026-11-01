@@ -44,7 +44,21 @@ func Register(routes gin.IRouter, service *Service, identity *auth.Service) {
 		c.JSON(http.StatusOK, httpapi.Result{Success: true, Data: relationship})
 	})
 	// Expected-state like: the body must say which state the caller wants.
-	routes.PUT("/notes/:id/like", auth.RequireLogin(identity), func(c *gin.Context) {
+	routes.PUT("/notes/:id/like", func(c *gin.Context) {
+		if service.likeObservations == nil {
+			c.Next()
+			return
+		}
+		ctx, finish := taildiag.StartLike(c.Request.Context(), service.likeObservations, true)
+		c.Request = c.Request.WithContext(ctx)
+		span := taildiag.Begin(ctx, taildiag.LikeHTTP, 0)
+		defer func() {
+			failed := c.Writer.Status() >= http.StatusBadRequest
+			span.End(failed)
+			finish(failed)
+		}()
+		c.Next()
+	}, auth.RequireLogin(identity), func(c *gin.Context) {
 		var body struct {
 			Liked *bool `json:"liked"`
 		}

@@ -86,7 +86,7 @@ func TestSQLWrapperPreservesTransactionAndPoolInterfaces(t *testing.T) {
 	}
 	_ = connection.(gorm.TxCommitter).Rollback()
 	out := recorder.Snapshot()
-	if out.Stages[SQLBegin].Count != 1 || out.Stages[SQLCall].Count != 1 || out.Stages[SQLHold].Count != 1 || out.Stages[SQLHold].Active != 0 {
+	if out.Stages[SQLBegin].Count != 1 || out.Stages[SQLCall].Count != 1 || out.Stages[SQLHold].Count != 1 || out.Stages[SQLHold].Active != 0 || out.Stages[SQLCommit].Count != 0 {
 		t.Fatal("transaction boundaries must be measured once")
 	}
 	plain, err := observed.BeginTx(context.Background(), nil)
@@ -97,6 +97,37 @@ func TestSQLWrapperPreservesTransactionAndPoolInterfaces(t *testing.T) {
 		t.Fatal("untraced transaction should retain original concrete type")
 	}
 	_ = plain.(gorm.TxCommitter).Rollback()
+}
+
+func TestLikeCommitCallIsMeasuredSeparatelyAndRollbackIsNotACommit(t *testing.T) {
+	pool, err := sql.Open("taildiag-no-network", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer pool.Close()
+	observed := &observedPool{DB: pool}
+	recorder := New()
+	ctx, finish := StartLike(context.Background(), recorder, false)
+	defer finish(false)
+	for _, commit := range []bool{true, false} {
+		connection, err := observed.BeginTx(ctx, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		tx := connection.(gorm.TxCommitter)
+		if commit {
+			err = tx.Commit()
+		} else {
+			err = tx.Rollback()
+		}
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	out := recorder.Snapshot()
+	if out.Stages[SQLBegin].Count != 2 || out.Stages[SQLHold].Count != 2 || out.Stages[SQLCommit].Count != 1 || out.Stages[SQLCommit].Errors != 0 || out.Stages[SQLCommit].Active != 0 || out.Stages[SQLHold].Active != 0 {
+		t.Fatal("Like commit call must be distinct from the transaction lifetime and rollback")
+	}
 }
 
 func TestStorageHooksNeverReadTextOrArgumentsAndPropagateCancellation(t *testing.T) {

@@ -16,11 +16,45 @@ func TestDisabledRecorderIsANoOpAndStageAllowlistIsClosed(t *testing.T) {
 		t.Fatal("disabled diagnostics must leave the context unchanged")
 	}
 	finish(true)
+	likeContext, likeFinish := StartLike(ctx, nil, true)
+	if likeContext != ctx {
+		t.Fatal("disabled Like diagnostics must leave the context unchanged")
+	}
+	likeFinish(true)
 	var span *Span
 	span.End(false)
 	var recorder *Recorder
 	if recorder.Snapshot().Enabled {
 		t.Fatal("nil recorder must be disabled")
+	}
+}
+
+func TestLikeHTTPAndDetachedPostcommitShareOneBoundedPrivateTrace(t *testing.T) {
+	recorder := New()
+	ctx, cancel := context.WithCancel(context.WithValue(context.Background(), struct{ private bool }{true}, "private-like-token-and-identities"))
+	ctx, finish := StartLike(ctx, recorder, true)
+	inner, innerFinish := StartLike(ctx, recorder, false)
+	if inner != ctx {
+		t.Fatal("Like service must reuse its enclosing HTTP observation")
+	}
+	fromContext(ctx).started = time.Now().Add(-SlowThreshold - time.Millisecond)
+	cancel()
+	postcommit, stop := context.WithTimeout(context.WithoutCancel(ctx), 2*time.Second)
+	defer stop()
+	span := Begin(postcommit, LikeMark, 0)
+	span.End(postcommit.Err() != nil)
+	innerFinish(false)
+	if recorder.Snapshot().Requests != 0 {
+		t.Fatal("inner completion must not publish an HTTP trace")
+	}
+	finish(false)
+	out := recorder.Snapshot()
+	if out.Requests != 1 || len(out.SlowTraces) != 1 || out.SlowTraces[0].Scope != "like.http" || !out.SlowTraces[0].Canceled || out.SlowTraces[0].Error || out.Stages[LikeMark].Count != 1 || out.Stages[LikeMark].Active != 0 {
+		t.Fatal("detached postcommit work or outer cancellation was lost")
+	}
+	encoded, err := json.Marshal(out)
+	if err != nil || strings.Contains(string(encoded), "private-like-token-and-identities") {
+		t.Fatal("Like observations exported private context values")
 	}
 }
 

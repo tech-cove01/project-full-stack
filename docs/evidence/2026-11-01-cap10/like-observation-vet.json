@@ -1,0 +1,14 @@
+{
+  "startedAt": "2026-11-01T07:53:18.357610+00:00",
+  "finishedAt": "2026-11-01T07:53:20.184101+00:00",
+  "command": [
+    "go",
+    "vet",
+    "./internal/platform/config",
+    "./internal/platform/taildiag",
+    "./internal/social",
+    "./internal/platform/app"
+  ],
+  "exitCode": 0,
+  "realDependenciesEnabled": false
+}

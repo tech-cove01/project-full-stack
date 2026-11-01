@@ -1,4 +1,4 @@
-// Package taildiag records bounded, explicitly enabled Feed timing evidence.
+// Package taildiag records bounded, explicitly enabled Feed and Like timing evidence.
 // Stages are a fixed allowlist. It never accepts identities, SQL, cache keys,
 // command arguments, request bodies, URLs or arbitrary metric labels.
 package taildiag
@@ -42,6 +42,13 @@ const (
 	CardsRecheck
 	CardsColdSQL
 	CardsFill
+	LikeHTTP
+	LikeService
+	LikeTransaction
+	SQLCommit
+	LikeInvalidate
+	LikeStateRead
+	LikeMark
 	stageCount
 )
 
@@ -54,6 +61,8 @@ var names = [...]string{
 	"counts.redis_read", "counts.redis_write", "counts.redis_delete", "counts.cold_sql",
 	"feed.cards", "feed.card_fallback", "cards.get_many", "cards.caller_redis_read",
 	"cards.shared", "cards.slot_wait", "cards.recheck", "cards.cold_sql", "cards.fill",
+	"like.http", "like.service", "like.transaction_total", "sql.commit_call",
+	"like.postcommit_invalidate", "like.postcommit_state", "like.postcommit_mark",
 }
 
 const (
@@ -158,6 +167,19 @@ func Start(ctx context.Context, recorder *Recorder, http bool) (context.Context,
 	return start(ctx, recorder, scope)
 }
 
+// StartLike uses the same bounded recorder with a fixed Like scope. A service
+// call inside an observed HTTP request reuses that request's trace.
+func StartLike(ctx context.Context, recorder *Recorder, http bool) (context.Context, func(bool)) {
+	if recorder == nil || fromContext(ctx) != nil {
+		return ctx, func(bool) {}
+	}
+	scope := "like.service"
+	if http {
+		scope = "like.http"
+	}
+	return start(ctx, recorder, scope)
+}
+
 // StartShared creates an independent application-owned observation. It never
 // inherits the caller's trace, identity or cancellation; ctx is the loader's
 // existing application-derived deadline, not a request context.
@@ -215,7 +237,7 @@ type Span struct {
 	activeSlot int
 }
 
-// Begin returns nil outside enabled Feed contexts. End is safe on nil, so the
+// Begin returns nil outside enabled observation contexts. End is safe on nil, so the
 // production path does not allocate timers, maps or metric labels when disabled.
 func Begin(ctx context.Context, stage Stage, items int) *Span {
 	trace := fromContext(ctx)
@@ -289,6 +311,9 @@ func (recorder *Recorder) Snapshot() Snapshot {
 			"stage counters and pool snapshots are concurrent observations, not an atomic per-request attribution; nested stages must not be added as disjoint totals",
 			"trace.canceled reflects the outer observed HTTP or direct-service context; inner deadline failures are reflected by stage errors without exporting error text",
 			"feed.http covers the Gin handler including authentication and JSON serialization, not client-observed network RTT or time before handler entry",
+			"like.http starts before authentication and covers handler/JSON work, not network RTT; like.transaction_total includes BEGIN through Commit/Rollback return and overlaps SQL stages",
+			"sql.commit_call measures the database/sql Commit call for Like traces, not pure server execution; a commit error is not proof that the write was rejected",
+			"Like postcommit stages retain the original independent two-second deadline; invalidate/mark stage errors do not change their existing best-effort API behavior",
 			"active ages are monotonic per-stage snapshots, not an atomic cross-stage timeline; overflow leaves oldest_complete=false and untracked_active explicit",
 			"cards.shared traces are independent application-owned tasks, not children of an individual HTTP trace; request waiting and shared task duration overlap and must not be added",
 		}}

@@ -1,0 +1,16 @@
+=== RUN   TestIntegrationLikeObservations
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /health/live              --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func3 (2 handlers)
+[GIN-debug] GET    /actuator/health          --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] GET    /health/ready             --> github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func4 (2 handlers)
+[GIN-debug] PUT    /authors/:id/follow       --> github.com/cityloop/fullstack-go/internal/social.Register.func1 (3 handlers)
+[GIN-debug] PUT    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func3 (4 handlers)
+[GIN-debug] GET    /notes/:id/like           --> github.com/cityloop/fullstack-go/internal/social.Register.func4 (3 handlers)
+[GIN-debug] GET    /authors/:id/relationship --> github.com/cityloop/fullstack-go/internal/social.Register.func5 (3 handlers)
+[GIN-debug] GET    /feed/notes               --> github.com/cityloop/fullstack-go/internal/social.Register.func7 (4 handlers)
+--- PASS: TestIntegrationLikeObservations (0.32s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/social	0.521s

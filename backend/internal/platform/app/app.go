@@ -52,10 +52,16 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	}
 	cards := communitycards.New(ctx, resources.Redis, resources.ORM)
 	owned := applicationResources{cards: cards, pools: resources}
-	var feedObservations *taildiag.Recorder
-	if cfg.FeedDiagnostics {
-		feedObservations = taildiag.New()
+	var observations, feedObservations, likeObservations *taildiag.Recorder
+	if cfg.FeedDiagnostics || cfg.LikeDiagnostics {
+		observations = taildiag.New()
 		taildiag.Instrument(resources.ORM, resources.SQL, resources.Redis)
+	}
+	if cfg.FeedDiagnostics {
+		feedObservations = observations
+	}
+	if cfg.LikeDiagnostics {
+		likeObservations = observations
 	}
 	cards.WithDiagnostics(feedObservations)
 	listener, err := net.Listen("tcp", cfg.APIAddr)
@@ -91,6 +97,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 				social.NewService(resources.ORM).
 					WithProjections().
 					WithDiagnostics(feedObservations).
+					WithLikeDiagnostics(likeObservations).
 					WithCards(cards).
 					WithCounts(communitycache.New(resources.Redis, resources.ORM)).
 					WithLikes(communitycache.NewLikes(resources.Redis)), identity)
@@ -156,7 +163,7 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		}
 	}
 	if cfg.DiagnosticsAddr != "" {
-		observation, err := diagnostics.StartWithCards(cfg.DiagnosticsAddr, resources.SQL, resources.Redis, cfg.ShutdownTimeout, cards, feedObservations)
+		observation, err := diagnostics.StartWithCards(cfg.DiagnosticsAddr, resources.SQL, resources.Redis, cfg.ShutdownTimeout, cards, observations)
 		if err != nil {
 			_ = listener.Close()
 			_ = owned.Close()

@@ -1,0 +1,4 @@
+ok  	github.com/cityloop/fullstack-go/internal/platform/config	0.175s
+ok  	github.com/cityloop/fullstack-go/internal/platform/taildiag	0.321s
+ok  	github.com/cityloop/fullstack-go/internal/social	0.256s
+ok  	github.com/cityloop/fullstack-go/internal/platform/app	0.466s

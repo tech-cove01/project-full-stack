@@ -294,7 +294,8 @@ def start_api(args):
     info = run(['go', 'version', '-m', str(binary)]).stdout
     assert 'vcs.revision=' + args.source_sha in info and 'vcs.modified=false' in info
     current = {**value, 'CAP_SOURCE_SHA': args.source_sha, 'CAP_READ_EXPECTED_REVISION': 'capacity-' + args.source_sha,
-               'GO_FEED_DIAGNOSTICS': 'true' if args.tail else 'false'}
+               'GO_FEED_DIAGNOSTICS': 'true' if args.tail else 'false',
+               'GO_LIKE_DIAGNOSTICS': 'true' if args.like_diagnostics else 'false'}
     private = private_write(runtime, 'env-' + args.label + '.private.json', current)
     out_path, err_path = (ROOT / ('api-' + args.label + suffix) for suffix in ('.stdout.txt', '.stderr.txt'))
     with out_path.open('xb') as out, err_path.open('xb') as error:
@@ -304,7 +305,8 @@ def start_api(args):
                 'creationUnixMs': process.create_time() * 1000, 'createdAtUtc': dt.datetime.fromtimestamp(process.create_time(), dt.timezone.utc).isoformat(),
                 'sourceSha': args.source_sha, 'expectedVersion': current['CAP_READ_EXPECTED_REVISION'],
                 'sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'label': args.label,
-                'privateEnvironmentFile': str(private), 'tailEnabledRequested': args.tail}
+                'privateEnvironmentFile': str(private), 'tailEnabledRequested': args.tail,
+                'likeDiagnosticsRequested': args.like_diagnostics}
     save(ROOT / ('api-' + args.label + '.json'), metadata)
     (ROOT / ('api-' + args.label + '-build.txt')).write_text(info, encoding='utf-8')
     ready = False
@@ -490,6 +492,7 @@ def main():
     p = sub.add_parser('resume-preparation'); p.add_argument('--environment', required=True)
     p = sub.add_parser('start-api'); p.add_argument('--environment', required=True); p.add_argument('--binary', required=True)
     p.add_argument('--source-sha', required=True); p.add_argument('--label', required=True); p.add_argument('--tail', action='store_true')
+    p.add_argument('--like-diagnostics', action='store_true')
     p = sub.add_parser('stop-api'); p.add_argument('--api-metadata', required=True)
     p = sub.add_parser('finish'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)
     args = parser.parse_args()

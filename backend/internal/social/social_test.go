@@ -72,6 +72,43 @@ func TestFeedHTTPObservationsIncludeAuthenticationBeforeServiceAndKeepResponsePr
 	}
 }
 
+func TestLikeHTTPObservationsStartBeforeAuthenticationAndStayIndependent(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		recorder := taildiag.New()
+		service := NewService(nil).WithDiagnostics(recorder)
+		if enabled {
+			service.WithLikeDiagnostics(recorder)
+		}
+		identity := auth.NewService(nil, nil, "development")
+		router := httpapi.NewRouter(nil, time.Second, "social-test", slog.New(slog.NewTextHandler(io.Discard, nil)), func(routes gin.IRouter) {
+			Register(routes, service, identity)
+		})
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, httptest.NewRequest(http.MethodPut, "/notes/1/like", nil))
+		var body map[string]any
+		if response.Code != http.StatusUnauthorized || json.Unmarshal(response.Body.Bytes(), &body) != nil || body["tail"] != nil {
+			t.Fatal("Like diagnostics changed or exposed the authentication response")
+		}
+		want := uint64(0)
+		if enabled {
+			want = 1
+		}
+		out := recorder.Snapshot()
+		if out.Requests != want {
+			t.Fatal("Feed diagnostics must not enable Like observations")
+		}
+		for _, stage := range out.Stages {
+			expected := uint64(0)
+			if stage.Name == "auth.resolve" || stage.Name == "like.http" {
+				expected = want
+			}
+			if stage.Count != expected || stage.Active != 0 || stage.Errors != expected {
+				t.Fatalf("unexpected unauthorized Like stage %s: count=%d active=%d errors=%d", stage.Name, stage.Count, stage.Active, stage.Errors)
+			}
+		}
+	}
+}
+
 func TestSetFollowRejectsSelfAndBadIdsBeforeSQL(t *testing.T) {
 	service := NewService(nil)
 	if _, err := service.SetFollow(context.Background(), "1", "1", true); !errors.Is(err, ErrSelf) {

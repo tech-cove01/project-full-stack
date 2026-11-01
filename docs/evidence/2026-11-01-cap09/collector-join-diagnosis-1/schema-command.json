@@ -1,0 +1,8 @@
+{
+  "sql": "SHOW FULL COLUMNS FROM tb_community_outbox; SHOW FULL COLUMNS FROM tb_community_projection_event; SHOW INDEX FROM tb_community_outbox; SHOW INDEX FROM tb_community_projection_event;",
+  "credentialValuesExported": false,
+  "name": "schema",
+  "exit": 0,
+  "durationMs": 161.10379999736324,
+  "sqlSHA256": "08e474b44cfda277ba580b80a5e68135d00111d40a6061cfbc30d22be0b75c6a"
+}

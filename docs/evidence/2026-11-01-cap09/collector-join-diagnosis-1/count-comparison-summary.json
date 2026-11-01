@@ -1,0 +1,144 @@
+{
+  "startedAt": "2026-11-01T06:13:21.698646+00:00",
+  "processMonotonicDurationMs": 2631.1610999982804,
+  "exit": 0,
+  "snapshotMaxOutboxID": 3248,
+  "stageAfterWatermark": 781,
+  "records": {
+    "old-full-follow-v1": {
+      "startedAt": "2026-11-01T06:13:23.250891Z",
+      "values": [
+        0,
+        0,
+        2415
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.483773Z",
+      "statementBracketMs": 2232.882
+    },
+    "new-full-follow-v1": {
+      "startedAt": "2026-11-01T06:13:25.484741Z",
+      "values": [
+        0,
+        0,
+        2415
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.497529Z",
+      "statementBracketMs": 12.788
+    },
+    "new-full-feed-v1": {
+      "startedAt": "2026-11-01T06:13:25.498493Z",
+      "values": [
+        0,
+        0,
+        2415
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.509916Z",
+      "statementBracketMs": 11.423
+    },
+    "new-full-search-v1": {
+      "startedAt": "2026-11-01T06:13:25.510849Z",
+      "values": [
+        0,
+        0,
+        2415
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.521362Z",
+      "statementBracketMs": 10.513
+    },
+    "old-subset-follow-v1": {
+      "startedAt": "2026-11-01T06:13:25.522225Z",
+      "values": [
+        0,
+        0,
+        10
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.534557Z",
+      "statementBracketMs": 12.331999999999999
+    },
+    "old-subset-feed-v1": {
+      "startedAt": "2026-11-01T06:13:25.535296Z",
+      "values": [
+        0,
+        0,
+        10
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.547342Z",
+      "statementBracketMs": 12.046
+    },
+    "old-subset-search-v1": {
+      "startedAt": "2026-11-01T06:13:25.548308Z",
+      "values": [
+        0,
+        0,
+        10
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.561421Z",
+      "statementBracketMs": 13.113
+    },
+    "new-subset-follow-v1": {
+      "startedAt": "2026-11-01T06:13:25.562212Z",
+      "values": [
+        0,
+        0,
+        10
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.565849Z",
+      "statementBracketMs": 3.637
+    },
+    "new-subset-feed-v1": {
+      "startedAt": "2026-11-01T06:13:25.566671Z",
+      "values": [
+        0,
+        0,
+        10
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.569279Z",
+      "statementBracketMs": 2.608
+    },
+    "new-subset-search-v1": {
+      "startedAt": "2026-11-01T06:13:25.570069Z",
+      "values": [
+        0,
+        0,
+        10
+      ],
+      "error": null,
+      "finishedAt": "2026-11-01T06:13:25.572632Z",
+      "statementBracketMs": 2.563
+    }
+  },
+  "subsetNote": "6401",
+  "subsetOldNewCountsExactlyEqual": true,
+  "binaryGuardCases": [
+    {
+      "case": "canonical",
+      "candidateMatch": 1,
+      "exactMatch": 1
+    },
+    {
+      "case": "trailing-space",
+      "candidateMatch": 1,
+      "exactMatch": 0
+    },
+    {
+      "case": "lossy-nonascii",
+      "candidateMatch": 1,
+      "exactMatch": 0
+    }
+  ],
+  "errors": [],
+  "onlyReadOnlySQL": true,
+  "oneRepeatableReadSnapshot": true,
+  "queryTimeoutHintMs": 5000,
+  "collectorTimeoutChanged": false,
+  "timingScope": "SQL UTC markers bracket each statement on one persistent mysql client; process total uses host monotonic. Single execution per case, not a throughput benchmark."
+}

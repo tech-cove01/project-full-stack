@@ -1,0 +1,34 @@
+SNAPSHOT	3248
+BEGIN	old-full-follow-v1	2026-11-01T06:13:23.250891Z
+0	0	2415
+END	old-full-follow-v1	2026-11-01T06:13:25.483773Z
+BEGIN	new-full-follow-v1	2026-11-01T06:13:25.484741Z
+0	0	2415
+END	new-full-follow-v1	2026-11-01T06:13:25.497529Z
+BEGIN	new-full-feed-v1	2026-11-01T06:13:25.498493Z
+0	0	2415
+END	new-full-feed-v1	2026-11-01T06:13:25.509916Z
+BEGIN	new-full-search-v1	2026-11-01T06:13:25.510849Z
+0	0	2415
+END	new-full-search-v1	2026-11-01T06:13:25.521362Z
+BEGIN	old-subset-follow-v1	2026-11-01T06:13:25.522225Z
+0	0	10
+END	old-subset-follow-v1	2026-11-01T06:13:25.534557Z
+BEGIN	old-subset-feed-v1	2026-11-01T06:13:25.535296Z
+0	0	10
+END	old-subset-feed-v1	2026-11-01T06:13:25.547342Z
+BEGIN	old-subset-search-v1	2026-11-01T06:13:25.548308Z
+0	0	10
+END	old-subset-search-v1	2026-11-01T06:13:25.561421Z
+BEGIN	new-subset-follow-v1	2026-11-01T06:13:25.562212Z
+0	0	10
+END	new-subset-follow-v1	2026-11-01T06:13:25.565849Z
+BEGIN	new-subset-feed-v1	2026-11-01T06:13:25.566671Z
+0	0	10
+END	new-subset-feed-v1	2026-11-01T06:13:25.569279Z
+BEGIN	new-subset-search-v1	2026-11-01T06:13:25.570069Z
+0	0	10
+END	new-subset-search-v1	2026-11-01T06:13:25.572632Z
+GUARD	canonical	1	1
+GUARD	trailing-space	1	0
+GUARD	lossy-nonascii	1	0

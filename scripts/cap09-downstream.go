@@ -122,7 +122,9 @@ func sqlSnapshot(ctx context.Context, db *sql.DB, after int64, notes []string) (
 	for _, group := range groups {
 		r := receipt{Projection: group}
 		values := append([]any{group}, args...)
-		query = "SELECT COUNT(o.id)-COUNT(r.event_id),COALESCE(SUM(r.state='APPLIED'),0),COALESCE(SUM(r.state='IGNORED'),0) FROM tb_community_outbox o LEFT JOIN tb_community_projection_event r ON r.projection=? AND r.event_id=o.event_id WHERE " + filter
+		// Match the ASCII receipt PK without converting the indexed column.
+		// The binary guard rejects lossy conversion and trailing-space aliases.
+		query = "SELECT COUNT(o.id)-COUNT(r.event_id),COALESCE(SUM(r.state='APPLIED'),0),COALESCE(SUM(r.state='IGNORED'),0) FROM tb_community_outbox o LEFT JOIN tb_community_projection_event r ON r.projection=? AND r.event_id=CONVERT(o.event_id USING ascii) COLLATE ascii_bin AND BINARY r.event_id=BINARY o.event_id WHERE " + filter
 		if err = tx.QueryRowContext(ctx, query, values...).Scan(&r.Missing, &r.Applied, &r.Ignored); err != nil {
 			return nil, err
 		}

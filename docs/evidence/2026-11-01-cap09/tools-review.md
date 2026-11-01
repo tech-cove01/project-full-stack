@@ -12,3 +12,5 @@ root对非root作者的共享stage/resources/Feedhelper与纯契约逐项审查�
 09A真实探针后补齐两链路原生offer时钟：共享纯函数核k6 scenario.startTime、配置duration、wrapper覆盖、正常退出且无external stop；保留旧wrapper时间，早停/缺summary不补native成绩。Feed作者与点赞作者双向审查，root复跑7项common、26项like、15项grade纯检查通过；grade含窗外分母、跨end积压、恢复真实finish、内部采样间隙、零事件Feed、固定来源和名额反例。45秒末15秒斜率仅作描述。
 
 root执行器由点赞审查者独立复审，另9项纯convergence反例通过；必须done+可信监督终态、无同PID/create存活或warm/stable marker活进程才解锁。正常observer先退可接受；异常/Ctrl+C清零通过标志并请求原监督有界停止，缺终态保留锁。预期停止须自身精确stop原因、资源完整、真实事实/observer收敛，始终不计吞吐通过。root另6项纯收敛检查通过。无native之前所有工具冻结，后续按每档hash核对。
+
+09C采集SQL修复经非作者审查闭环：同静态数据的真实EXPLAIN证明outbox utf8mb4 event_id与receipt ascii_bin隐式比较使r仅用projection索引前缀；新ON转换外侧o并加BINARY精确guard后，r完整PK eq_ref/每行1。保持LEFT JOIN缺失计数、水位/fixture范围、4秒总采集预算/5秒间隔/三连续失败保护。old/new同RR全量follow均[missing0,APPLIED0,IGNORED2415]，单note三组全等，尾空格/非ASCII损失guard反例正确。旧单组2232.882ms→新12.788ms仅采样SQL一次idle对照；不计业务吞吐收益。helper原plan为rscan→o unique lookup，不做无关修改。原like-diagnostic-1及其缺summary/整体失败不回填重跑。

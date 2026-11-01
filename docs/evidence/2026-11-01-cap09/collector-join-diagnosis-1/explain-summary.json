@@ -1,0 +1,30 @@
+{
+  "records": [
+    {
+      "name": "schema",
+      "exit": 0,
+      "durationMs": 161.10379999736324,
+      "sqlSHA256": "08e474b44cfda277ba580b80a5e68135d00111d40a6061cfbc30d22be0b75c6a"
+    },
+    {
+      "name": "explain-observer-old",
+      "exit": 0,
+      "durationMs": 129.95660002343357,
+      "sqlSHA256": "03115257bbec095dbd50462c04cfc17bbd694f8a7225850b13b45cc1f24703b1"
+    },
+    {
+      "name": "explain-observer-new",
+      "exit": 0,
+      "durationMs": 129.60679997922853,
+      "sqlSHA256": "719f56f13acc5719d3292ad57efa850b08387110174f880d61051a5ab182ad04"
+    },
+    {
+      "name": "explain-helper-old",
+      "exit": 0,
+      "durationMs": 120.83030003122985,
+      "sqlSHA256": "a6a59a536c7e1a3305d5bc190b4d55a6094443212e504a62dd1f6d853b6dc381"
+    }
+  ],
+  "onlyReadOnlySQL": true,
+  "sameOwnedFrozenDataset": true
+}

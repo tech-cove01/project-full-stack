@@ -1,0 +1,26 @@
+id	bigint unsigned	NULL	NO	PRI	NULL	auto_increment	select	
+event_id	varchar(96)	utf8mb4_0900_ai_ci	NO	UNI	NULL		select	
+aggregate_type	varchar(32)	utf8mb4_0900_ai_ci	NO		NULL		select	
+aggregate_id	varchar(64)	utf8mb4_0900_ai_ci	NO		NULL		select	
+aggregate_version	int	NULL	NO		NULL		select	
+event_type	varchar(40)	utf8mb4_0900_ai_ci	NO		NULL		select	
+payload	json	NULL	NO		NULL		select	
+delivery_status	varchar(16)	utf8mb4_0900_ai_ci	NO	MUL	PENDING		select	
+attempts	int	NULL	NO		0		select	
+next_attempt_at	timestamp(3)	NULL	NO		CURRENT_TIMESTAMP(3)	DEFAULT_GENERATED	select	
+lease_until	timestamp(3)	NULL	YES		NULL		select	
+last_error	varchar(500)	utf8mb4_0900_ai_ci	YES		NULL		select	
+completed_at	timestamp(3)	NULL	YES		NULL		select	
+create_time	timestamp(3)	NULL	NO		CURRENT_TIMESTAMP(3)	DEFAULT_GENERATED	select	
+projection	varchar(32)	ascii_bin	NO	PRI	NULL		select	
+event_id	varchar(96)	ascii_bin	NO	PRI	NULL		select	
+event_hash	binary(32)	NULL	NO		NULL		select	
+state	varchar(16)	ascii_bin	NO		NULL		select	
+created_at	datetime(3)	NULL	NO		CURRENT_TIMESTAMP(3)	DEFAULT_GENERATED	select	
+applied_at	datetime(3)	NULL	NO		CURRENT_TIMESTAMP(3)	DEFAULT_GENERATED	select	
+tb_community_outbox	0	PRIMARY	1	id	A	3022	NULL	NULL		BTREE			YES	NULL
+tb_community_outbox	0	uk_community_event	1	event_id	A	3022	NULL	NULL		BTREE			YES	NULL
+tb_community_outbox	1	idx_community_claim	1	delivery_status	A	2	NULL	NULL		BTREE			YES	NULL
+tb_community_outbox	1	idx_community_claim	2	next_attempt_at	A	3022	NULL	NULL		BTREE			YES	NULL
+tb_community_projection_event	0	PRIMARY	1	projection	A	2	NULL	NULL		BTREE			YES	NULL
+tb_community_projection_event	0	PRIMARY	2	event_id	A	8219	NULL	NULL		BTREE			YES	NULL

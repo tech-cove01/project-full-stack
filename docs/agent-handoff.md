@@ -8,7 +8,7 @@
 
 **本地交付已经完成：** 34 API模拟/29 collector/62上传绑定清理准入/18 HTTP与终态/14 Groovy合同，以及原34 Like/21 runner/34策略检查通过，非作者审查通过。完整[本地接线原件](evidence/2026-11-01-cap10/pts-jmeter-checks.json)包含44个假PUT四case及0PUT失败；最终同源20/20、两JVM0、完整10秒。Linux API与observer、1.27GB四依赖离线镜像归档已备好，镜像压缩读回校验通过。用户现在可依清单租一台ECS并开通PTS；不需要租第二台ECS。PTS默认2个引擎由平台提供，上传普通512+tearDown1的场景，总并发513、平台保护时长600秒，真实warm10/主60或180不变。packet→bind→显式verify-scene只读准入，成功且哈希固定后才允许预约S1；不要点击控制台调试或另开校准负载。后续freeze必须包含loadBackend、ptsPacketSHA256和ptsAdmissionSHA256，正式两轮不能换包或场景。
 
-**接续预算以[新账本](evidence/2026-11-01-cap10/pts-preparation-budget.json)为准：** 原已用6600秒、剩余4200秒；本次额外准备已关闭，不转给性能定位。实际transition originalUsed不得低于6600，原71份原件不改、linux/仍是同批实测子目录。先核SSH/真实规格/私网与RAM读取权限，加载离线镜像/二进制、新夹具和一次云环境空载，再按原S1=50/s执行。Start/Stop写权限在本地与只读准入均没有被实际云调用证明；运行时结果未知不重试Start，终态未证则不预约下一窗。收尾先证实远端停压和本地controller退出，finish会精确撤销会话、清上传包、停自有API/四CID、保留卷并删除已登记env；外部用户SSH/AK文件不删除，云资源释放由用户完成。原旧B1未知、旧CAP-09失败保留，本批完成后收尾无CAP-11。
+**接续预算以[最终收尾账本](evidence/2026-11-01-cap10/pts-preparation-closeout-budget.json)为准：** 原已用6600秒、剩余4200秒；本次额外准备含最后提交/推送/离线包核验仍在75分钟内且已关闭，不转给性能定位，前一计时快照保留。实际transition originalUsed不得低于6600，原71份原件不改、linux/仍是同批实测子目录。先核SSH/真实规格/私网与RAM读取权限，加载离线镜像/二进制、新夹具和一次云环境空载，再按原S1=50/s执行。Start/Stop写权限在本地与只读准入均没有被实际云调用证明；运行时结果未知不重试Start，终态未证则不预约下一窗。收尾先证实远端停压和本地controller退出，finish会精确撤销会话、清上传包、停自有API/四CID、保留卷并删除已登记env；外部用户SSH/AK文件不删除，云资源释放由用户完成。原旧B1未知、旧CAP-09失败保留，本批完成后收尾无CAP-11。
 
 先读根[STATUS当前CAP-10](../STATUS.md)。本批已完成默认关闭Like全链观测与真实有限取消用例、容量工具/初态/名额监督及内部非作者审查；实际应用`0602ac08a0b458851b2cc6a8b595bbafb443bdaa`，精确CI四项通过。**没有发压，没有本批L/U/R，没有性能优化效果；8短窗、2正式、唯一优化均未用。**
 

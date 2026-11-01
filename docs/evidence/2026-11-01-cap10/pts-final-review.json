@@ -21,6 +21,13 @@
     "additionalPreparationCountedSecondsUpperBound": 2340,
     "additionalPreparationClosed": true,
     "unusedAdditionalPreparationSecondsNotTransferred": 2160,
+    "additionalPreparationSnapshotSupersededByFinalCloseout": true,
+    "finalCloseoutLedger": "pts-preparation-closeout-budget.json",
+    "finalCloseoutLedgerSHA256": "72b3212cef22aa966521451779b5cdb0d31ad8e02e8fa1e1d4508f50942bbcaf",
+    "finalAdditionalPreparationCountedSecondsUpperBound": 2580,
+    "finalUnusedAdditionalPreparationSecondsNotTransferred": 1920,
+    "finalAdditionalPreparationClosed": true,
+    "closeoutReview": "PASS: original 2340-second snapshot and its failed closure-clock assertion remain preserved. The 2580-second conservative roll-forward includes final Git/push/bundle work and a 150-second handoff allowance, stays within the same authorized 4500 seconds, and leaves the original 6600/4200 ledger and all load/optimization quotas unchanged. No source or test change.",
     "originalBudgetReset": false,
     "shortMaximum": 8,
     "shortSeconds": 60,
@@ -29,7 +36,7 @@
     "mainLoadMaximumSeconds": 840,
     "productionOptimizationMaximum": 1,
     "slotsUsed": 0,
-    "cloudTransitionRequirement": "Carry at least 6600 original used seconds and subsequent original-scope active work into the one transition; older 4200/6180 handoffs are not a replacement for the latest ledger. User-authorized PTS offline preparation is closed separately, without transferring its unused 2160 seconds or reissuing slots or the original three-hour segment."
+    "cloudTransitionRequirement": "Carry at least 6600 original used seconds and subsequent original-scope active work into the one transition; older 4200/6180 handoffs are not a replacement for the latest ledger. User-authorized PTS offline preparation is closed separately, without transferring its final unused 1920 seconds or reissuing slots or the original three-hour segment. The prior 2340/2160 snapshot remains historical evidence, superseded only for final additional-preparation accounting."
   },
   "reviewedContracts": {
     "privatePacketAndSceneBinding": "Prepare creates registered private packet/control/derived environment paths; bind preserves original packet bytes, token and all three actual upload-file MD5s. Explicit read-only verify-scene validates GetScene admission, without claiming Start/Stop RAM permissions. Live phase consumes the bound derived environment and the exclusive user-created SceneId, not the initial UNBOUND configuration. Every prior command and the formal freeze bind loadBackend, packet SHA and admission SHA.",
@@ -97,8 +104,8 @@
     "negativeCaseVersionLimit": "Earlier positive/no-op/uncertainty cases used cdb712437bc06de0770c540031151d90a2f33fd01f5d0eb2a8ec3057dc2754dc; only the final positive is the exact final ba0399 source. Missing historical stderr/causes were not fabricated."
   },
   "documentHashesAtFinalRead": {
-    "STATUS.md": "118350c93e65a1d934e22704464382d8026730bf54bee7888b9175884ad5e70c",
-    "docs/agent-handoff.md": "e0416af2af45ee5e5e88eea4317cfa8d3715610a13a6b9b66d6989232f61f5ed",
+    "STATUS.md": "437cd746d5838c41ef50330f75d605882df8a85615a261d97d5faedb0db1d202",
+    "docs/agent-handoff.md": "22161138c8210dc74193662925be9bee5c60d2f57d4e50ea71b7600530d85859",
     "docs/implementation-plan.md": "5c03e8eb2406730b543eb99e50420d4b8bec548c36c1728bfe14d6501f12c247",
     "docs/evidence/2026-11-01-cap10/aliyun-ecs-pts-steps.md": "a5d2f78d5b8519652cc011229d71998f13c937fa504f4f7481de29a648912aea"
   }

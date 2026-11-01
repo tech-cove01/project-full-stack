@@ -1,0 +1,30 @@
+{
+  "version": 1,
+  "batch": "CAP-10",
+  "recordedAt": "2026-11-01T10:06:05.671205+00:00",
+  "userAuthorization": "After explicit45–75min extra offline preparation explanation, user confirmed one ECS+PTS and instructed finishing local adaptation before renting. No extra capacity rounds.",
+  "previousOriginalBudgetSHA256": "751bcbcdebaac619417357827865470a3fc7dc970c10c275190207b2c9fef486",
+  "originalEffectiveWorkMaximumSeconds": 10800,
+  "originalEffectiveWorkSecondsUpperBound": 6600,
+  "originalRemainingEffectiveWorkSecondsLowerBound": 4200,
+  "originalAddedSincePreviousHandoffSeconds": 420,
+  "originalAccounting": "Prior6180s conservative handoff plus420s for intervening consultation/selection before this authorized extra offline preparation. No original time reset. Any future original-scope work must be added; inactive user host-creation waiting is excluded.",
+  "additionalLocalPreparationStartedAt": "2026-11-01T09:26:15+00:00",
+  "additionalLocalPreparationMaximumSeconds": 4500,
+  "additionalLocalPreparationRecordedSecondsUpperBound": 2580,
+  "additionalPreparationClosed": true,
+  "unusedAdditionalPreparationSecondsNotTransferredToLoadStage": 1920,
+  "additionalAccounting": "Final closeout roll-forward includes commit/push/Git bundle verification and all local waits, plus150s final handoff allowance. Prior2340s snapshot preserved; an explicit final clock assertion found its closure allowance22.156369s short at10:05:37.156369UTC. No pressure or original-budget reset.",
+  "futureTransitionOriginalUsedSecondsMinimum": 6600,
+  "shortSlotsUsed": 0,
+  "formalSlotsUsed": 0,
+  "mainLoadSecondsUsed": 0,
+  "optimizationsUsed": 0,
+  "environmentSwitchActuallyExecuted": false,
+  "previousPreparationBudgetSHA256": "71c7fd14181fa1f4298ab4b8d6f5aebfe48f21ec43eb339cab5e0040059d3ba5",
+  "earlierClosureClockCheck": {
+    "checkedAt": "2026-11-01T10:05:37.156369+00:00",
+    "priorAllowanceCovered": false,
+    "scope": "Local accounting assertion only; no cloud/native load."
+  }
+}

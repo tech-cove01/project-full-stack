@@ -26,7 +26,7 @@
 
 **本轮PTS本地准备已完成，交叉审查通过：** 用户在说明额外45—75分钟准备需求后明确要求先完成ECS+PTS适配，按[追加规格](docs/evidence/2026-11-01-cap10/pts-preparation-plan.md)将该准备最多75分钟单列，原云端定位/优化工作预算和8+2/840秒/唯一优化不增加。34项API模拟、29项collector、62项上传/绑定/清理/只读准入、18项HTTP/计量/精确终态检查和14项Groovy合同通过，原34 Like/21 runner/34策略检查通过。四份本地功能case共44个假API PUT：旧版本成功20、no-op停压2、HTTP503未知停压2、最终版本成功20；只有最终同源20/20与完整10秒用于证明最终接线，均非真实业务或S/H容量窗，全部失败0PUT来源保留，见[接线原件](docs/evidence/2026-11-01-cap10/pts-jmeter-checks.json)。标准JMeter5.6.3/512独占槽位/2托管引擎已接原规范化、SQL/Redis与下游对账；采样日志/15秒聚合报表仅辅助，P95/P99从完整样本重算。ECS本地collector+Node合计2GiB、每台独立远端引擎各2GiB分别事前声明，不将换发压器算Go优化。Linux API/观察器已离线编译，四依赖镜像已打包并解压读回校验，可按[逐步清单](docs/evidence/2026-11-01-cap10/aliyun-ecs-pts-steps.md)开通一台ECS和PTS。云端真实权限/网络/资源/空载准入仍待执行，没有新容量L/U/R，S/H仍0。
 
-**预算交接：** [准备账本](docs/evidence/2026-11-01-cap10/pts-preparation-budget.json)保守承接原已用6600秒、剩余4200秒；追加离线准备已关闭，剩余追加时间不转为新的性能工作段。用户准备云机期间无开发则不计工作；拿到主机再建立唯一transition，其原已用值不得低于6600秒。最终源码和离线证据审查见[定稿审查](docs/evidence/2026-11-01-cap10/pts-final-review.json)。
+**预算交接：** [最终收尾账本](docs/evidence/2026-11-01-cap10/pts-preparation-closeout-budget.json)保守承接原已用6600秒、剩余4200秒，并在保留前一快照的基础上计入最后提交/推送/离线包核验；追加准备仍在75分钟内且已关闭，剩余追加时间不转为新的性能工作段。用户准备云机期间无开发则不计工作；拿到主机再建立唯一transition，其原已用值不得低于6600秒。最终源码和离线证据审查见[定稿审查](docs/evidence/2026-11-01-cap10/pts-final-review.json)。
 
 ### CAP-10 目标与总预算
 

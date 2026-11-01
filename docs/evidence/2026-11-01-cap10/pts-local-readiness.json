@@ -30,7 +30,7 @@
   },
   "independentReview": "pts-final-review.json",
   "steps": "aliyun-ecs-pts-steps.md",
-  "budget": "pts-preparation-budget.json",
+  "budget": "pts-preparation-closeout-budget.json",
   "codeAndMaterialCommits": [
     "60e5c02edee3a6a060a2affc28c8c10d56604a98 feat(CAP-10A-PTS4): integrate cloud phases with original quota supervision and reconciliation",
     "12ef5f8438a3a65c0c9a83c3efef757fd115bba0 feat(CAP-10A-PTS1): add distributed JMeter mutation workload and finite wiring evidence",
@@ -43,5 +43,6 @@
     "657afc7ddbb7dfac3e773dc299603c923273a927 feat(CAP-10A-PTS3): add guarded Alibaba PTS task controller"
   ],
   "offlineArtifacts": "See pts-offline-builds.json and pts-dependency-image-pack.json; actual binaries/1.27GB dependency archive stay in ignored sibling runtime, not in Git. Final Git bundle/delivery-index are generated from the final committed main locally.",
-  "nextAction": "User rents one Shanghai ECS and enables PTS; provide SSH/metadata/private credentials path. Agent deploys/does read-only scene admission and one cloud idle admission before original S1, with no extra calibration capacity window."
+  "nextAction": "User rents one Shanghai ECS and enables PTS; provide SSH/metadata/private credentials path. Agent deploys/does read-only scene admission and one cloud idle admission before original S1, with no extra calibration capacity window.",
+  "previousBudget": "pts-preparation-budget.json"
 }

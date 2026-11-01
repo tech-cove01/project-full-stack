@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T07:47:35.288883+00:00",
+  "task": "CAP-10A owned dependency lifecycle",
+  "reviewer": "cap09_like_review, non-author",
+  "passed": true,
+  "sourceSHA256": "e9ce80e35d69620521721970739abe8edc9a8ab4230d8df8b3691d3bee522e99",
+  "changes": [
+    "Fixed CAP10 project/runtime/observer/evidence and six new loopback ports.",
+    "Initial ES heap256MiB matches CAP09 final deployment; same CPU/memory limits, SQL/Redis pools, AOF everysec and Kafka heap.",
+    "No Feed cohort; cleanup only owned512 Like sessions plus observer/API/fullCID, preserves all six volumes.",
+    "Verified Java SIGTERM143 guard preserved; no OOM/SIGKILL accepted."
+  ],
+  "verification": "Python AST syntax and replacement checks; complete source diff independently reviewed. Dependency preparation not a capacity pass; unique60s idle gate still required.",
+  "newLoadSlotsConsumed": 0
+}

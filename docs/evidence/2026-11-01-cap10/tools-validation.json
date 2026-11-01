@@ -1,0 +1,138 @@
+{
+  "task": "CAP-10A",
+  "artifact": "offline-tool-validation",
+  "scope": "Records checks already executed and non-author source reviews. Creating this record did not rerun checks, connect to dependencies or start a workload.",
+  "validationTimestamps": null,
+  "validationTimestampNote": "Individual execution timestamps were not separately archived; no execution time is reconstructed.",
+  "stdoutArchive": {
+    "separatelyArchived": false,
+    "note": "The author's command output was returned in the Codex tool transcript, not saved to standalone stdout files. PASS totals below reflect that output; this document does not fabricate raw stdout."
+  },
+  "commands": [
+    {
+      "command": "node --check scripts/cap10-like.mjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "evidence": "No syntax diagnostic; executed in the final combined verification call."
+    },
+    {
+      "command": "node --check scripts/load/cap10-like.js",
+      "result": "PASS",
+      "exitCode": 0,
+      "evidence": "No syntax diagnostic; executed in the final combined verification call."
+    },
+    {
+      "command": "node scripts/cap10-like-check.mjs",
+      "result": "PASS",
+      "exitCode": 0,
+      "checks": 33,
+      "failed": 0,
+      "servicesStarted": false,
+      "loadRuns": 0,
+      "coverage": [
+        "Actual response classification, exact/overlapping unknown bounds and one-relation-per-VU ownership",
+        "Actual native options retain full-window latency gates and immediate correctness aborts",
+        "Native scenario start/duration and terminal latency-only exit99 completion",
+        "Actual helper version-zero/mixed-version facts, membership and extra-version-field rejection",
+        "Actual runPhase registration-before-secret ordering and cleanup under registration/private-write faults"
+      ]
+    },
+    {
+      "command": "python -B scripts/cap10-run-check.py",
+      "result": "PASS",
+      "exitCode": 0,
+      "checks": 21,
+      "failed": 0,
+      "servicesStarted": false,
+      "loadRuns": 0,
+      "coverage": [
+        "Actual runner functions extracted through AST, without importing the process-launching module",
+        "Correctness/unknown/no-op/native-to-DB mutation discrepancies end the batch",
+        "Incomplete collection, generator failure, early stop and formal failure do not create a service upper bound",
+        "Warm/setup guard identity, CPU interval validity and container memory threshold",
+        "Four-container health/restart/OOM boundary validation"
+      ]
+    },
+    {
+      "command": "python -c \"import ast,pathlib;[ast.parse(pathlib.Path(p).read_text(encoding='utf-8')) for p in ['scripts/cap10-run.py','scripts/cap10-grade.py','scripts/cap10-run-check.py']];print('AST PASS')\"",
+      "result": "PASS",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS",
+      "exitCode": 0,
+      "limitation": "Checks the Git diff available at that invocation. Newly untracked files are not covered by git diff --check until staged."
+    }
+  ],
+  "commandExitScope": "The final commands were issued together in one PowerShell invocation, whose tool-reported exit code was 0. Successful checker completion/PASS totals and absence of syntax/AST/diff diagnostics were observed; separate per-command exit-status files were not captured.",
+  "earlierPureCheckFailure": {
+    "command": "python -B scripts/cap10-run-check.py",
+    "result": "FAILED during authoring",
+    "reason": "The isolated test execution namespace initially omitted the json module. Fourteen checks completed before NameError in the guard fixture.",
+    "correction": "Added json to the offline checker namespace; final actual-function suite completed 21/21.",
+    "stdoutSeparatelyArchived": false,
+    "productionFailure": false,
+    "workloadStarted": false
+  },
+  "nonAuthorReviews": [
+    {
+      "reviewer": "/root/cap09_feed_review",
+      "result": "PASS; no remaining blocker in reviewed scope",
+      "scope": [
+        "Synthetic normalization transaction, version-zero seed rules and exact Redis version/membership checks",
+        "Separate warm/setup/stable accounting and native-window capacity/DB snapshot placement",
+        "Private phase input lifecycle and registration-before-secret final correction"
+      ],
+      "method": "Read-only review of frozen source and direct-fault checker source; reviewer reported no dependency/service/workload execution.",
+      "finalHelperSHA256": "a9004e4e4ed938e96119fd55e7c57bbeda2661c219010ddaf3511f78808e42a8",
+      "reviewTranscriptSeparatelyArchived": false
+    },
+    {
+      "reviewer": "/root/cap09_like_review",
+      "result": "PASS; no remaining blocker in reviewed scope",
+      "scope": [
+        "Bounded search/reservation policy, rollback cutoff, candidate/formal identity and tool freeze",
+        "Whole60/tail15 and formal tail60 conservative event denominators, queue boundaries and recovery completion",
+        "Runner pre-stable supervision, terminal retention and classification",
+        "Helper normalization/independent phase input/native complete-window semantics"
+      ],
+      "independentlyExecutedPureChecks": 26,
+      "pureChecksPassed": 26,
+      "gradeSHA256": "23ba81f255eca671bb3cb55366f147dbe0a75f35c911ef08b8435cc1f835f0c0",
+      "runnerSHA256": "df4e883d3c7f83a4fc4bfe7940a3b0e6c92f129732f1e1be81baf3a1b3d252c7",
+      "checkerSHA256": "5bfc32eb22a4fc05374a8757a9ce6a834e405327531b1e3866389262f22e3ad9",
+      "artifacts": [
+        "grade-checks-initial.json",
+        "grade-checks-final.json"
+      ],
+      "initialArtifactNote": "Initial 23/24 result retained: one synthetic crossing-end fixture correctly hit the existing 7.5s boundary limit. The final checker explicitly verifies that rejection and a valid 7s endpoint case, plus rollback cases.",
+      "method": "Pure temporary workspace fixtures and read-only source/public-artifact review; no dependency/SQL/HTTP/workload execution by reviewer."
+    }
+  ],
+  "preparationAndFinalSource": {
+    "preparedUsingHelperSHA256": "a68c68776654884914f3d5dc3ad0dfc5740f2d16bbb9a6406ea31dc740f6809b",
+    "finalHelperSHA256": "a9004e4e4ed938e96119fd55e7c57bbeda2661c219010ddaf3511f78808e42a8",
+    "difference": "After the one-time prepare and read-only inspect, independent review found the runPhase private-input lifecycle gap. The final patch registers the exact cleanup path inside try before writing credentials, tolerates only unlink ENOENT and removes the exact new parent in finally. The prepare branch, prepared fixture and sessions were not changed or regenerated.",
+    "note": "These are helper file-byte hashes, not application revisions or capacity results."
+  },
+  "finalFileSHA256": {
+    "scripts/cap10-like.mjs": "a9004e4e4ed938e96119fd55e7c57bbeda2661c219010ddaf3511f78808e42a8",
+    "scripts/cap10-like-check.mjs": "213850a638ceb12d8f8eadd8ab3ed9e22b31cb008f2aed08c9b869a80b3c1164",
+    "scripts/cap10-run.py": "df4e883d3c7f83a4fc4bfe7940a3b0e6c92f129732f1e1be81baf3a1b3d252c7",
+    "scripts/cap10-run-check.py": "c7bb36d4cc3b1e0422b13b779d9382d502af9ba5fc49071169ea0cd34e25b77e",
+    "scripts/cap10-grade.py": "23ba81f255eca671bb3cb55366f147dbe0a75f35c911ef08b8435cc1f835f0c0",
+    "scripts/cap10-grade-check.py": "5bfc32eb22a4fc05374a8757a9ce6a834e405327531b1e3866389262f22e3ad9",
+    "scripts/load/cap10-like.js": "2e2c55ea532c8e1e352dbcd8d020e9eeefc27b356206da9b26370a63e9eb46e1",
+    "scripts/load/cap10-like-contract.mjs": "01f9f65c91daeddd4cb749c5af58e9b2e38f92fc92221af375c7585633950a7f",
+    "scripts/load/cap10-native-window.mjs": "9e1dce808682f036a477934cb021ab0c368b6695424ba09a62f93917ff21570e",
+    "scripts/load/cap10-db-observe.mjs": "add23e892fb9993eaf0db0df9365e73b3c3ad64712de0641e17f4d50700fc8d7",
+    "scripts/cap10-downstream.go": "2f83e2d76db877d1a5e784013dc9961b957cc8f797de5ff39bb708478eebb039"
+  },
+  "exclusions": [
+    "The author's checks did not compile or execute Go, connect to SQL/Redis/Kafka/ES/API, or execute k6.",
+    "Root-controlled preparation, finite real-dependency wiring, observer build and the unique idle observation have separate artifacts and are not passed off as these pure checks.",
+    "The unique local idle result remains failed and unmodified. Zero S/H windows were reserved or started at the time of this record; tool validation does not permit bypassing that environment gate.",
+    "No stdout, execution timestamp, application revision, throughput result or independent environment rerun is invented here."
+  ]
+}

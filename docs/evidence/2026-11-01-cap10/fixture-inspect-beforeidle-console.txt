@@ -1,0 +1,1 @@
+{"valid":true,"distribution":{"configuredRelationships":512,"existing":512,"active":0,"inactive":512,"missing":0,"versionHistogram":{"0":512},"existingFraction":1,"scope":"authoritative RR facts for the exact 512 configured pairs; active/version distributions are recorded explicitly, never inferred from fixture hash"},"errors":[],"reservesCapacitySlot":false}

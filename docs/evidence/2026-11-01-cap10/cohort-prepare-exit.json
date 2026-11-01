@@ -1,0 +1,10 @@
+{
+  "startedAt": "2026-11-01T08:13:57.928499+00:00",
+  "finishedAt": "2026-11-01T08:14:04.214877+00:00",
+  "exitCode": 0,
+  "helperSourceSHA256": "a68c68776654884914f3d5dc3ad0dfc5740f2d16bbb9a6406ea31dc740f6809b",
+  "helperBytesStable": true,
+  "apiSourceSha": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "scope": "One owned512session/512note/512inactive-v0relation fixture preparation. Development login only, no k6/probe/native capacity window.",
+  "credentialValuesExported": false
+}

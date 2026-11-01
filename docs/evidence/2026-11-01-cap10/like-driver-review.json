@@ -1,0 +1,26 @@
+{
+  "at": "2026-11-01T08:26:55.135789+00:00",
+  "task": "CAP-10A real Like driver and fixed initial distribution",
+  "author": "cap09_like_harness",
+  "reviewer": "cap09_feed_review (non-author)",
+  "passed": true,
+  "sourceSHA256": {
+    "scripts/cap10-like.mjs": "a9004e4e4ed938e96119fd55e7c57bbeda2661c219010ddaf3511f78808e42a8",
+    "scripts/load/cap10-like.js": "2e2c55ea532c8e1e352dbcd8d020e9eeefc27b356206da9b26370a63e9eb46e1",
+    "scripts/load/cap10-like-contract.mjs": "01f9f65c91daeddd4cb749c5af58e9b2e38f92fc92221af375c7585633950a7f",
+    "scripts/load/cap10-native-window.mjs": "9e1dce808682f036a477934cb021ab0c368b6695424ba09a62f93917ff21570e",
+    "scripts/cap10-like-check.mjs": "213850a638ceb12d8f8eadd8ab3ed9e22b31cb008f2aed08c9b869a80b3c1164"
+  },
+  "checks": [
+    "Like-only512exclusive pairs and real synchronous alternating PUT; native512mapping tested.",
+    "60/180s latency only judged at completewindow; unexpectednoop/unknown abort, no hidden capacityprobe.",
+    "Existing inactive-v0 synthetic seed explicitly separate from actual mutations.",
+    "Warm/setup/native counters and RR boundaries separated; versions/history monotonic, canonical false events/counter in SQL tx.",
+    "Production Mark Lua used by original byte hash; v0/foreign versionfields handled; setup bounded60s and real3IGNORED/lag baseline required.",
+    "Phase secret registration precedes secret write, bounded exactprivate cleanup on registration/partialwrite failure."
+  ],
+  "verification": "33direct pure cases by author, non-author source review; stdout not separately archived, see tools-validation.json. Actual prepare+readonlyinspect verified512inactive-v0/event0, no k6 or main normalization executed.",
+  "prepareUsedSourceSHA256": "a68c68776654884914f3d5dc3ad0dfc5740f2d16bbb9a6406ea31dc740f6809b",
+  "prepareSourceSnapshot": "helper-used-for-prepare.mjs.txt",
+  "nativeLoads": 0
+}

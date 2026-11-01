@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "batch": "CAP-10",
+  "reviewer": "cap09_like_review",
+  "passed": true,
+  "scope": "Read-only review of the rental execution clarification and its STATUS/handoff entries. Documentation only; no source changes, new tests, services, cloud calls or pressure windows.",
+  "latestUserGoal": "Quickly select a defensible higher rate, then repeat one fixed rate twice. The fixed 50/40 short-only proposal is not adopted.",
+  "algorithmAndQuota": {
+    "existingAlgorithmUnchanged": true,
+    "codeUnchangedByThisTask": true,
+    "ptsAutomaticRampDisabled": true,
+    "independentCompleteShortWindows": "50/s diagnostic; an evidence-based single optimization requires its same-50/s comparison. Valid passes may expand by four to 200/800/3200/5000; with L/U use integer midpoint, without L halve the first failing rate under the original rule. Preserve the candidate margin confirmation before formal runs.",
+    "shortWindowsMaximum": 8,
+    "shortWindowSeconds": 60,
+    "formalWindowsMaximum": 2,
+    "formalWindowSeconds": 180,
+    "mainLoadSecondsMaximum": 840,
+    "productionOptimizationsMaximum": 1,
+    "quotasReissued": false,
+    "boundaryQualification": "Only complete, correct, resource-valid, collection/generator-valid ordinary performance misses with recovery verified within the unchanged 60-second budget may support U. Unoffered load, dropped work, invalid measurement or resource interruptions do not automatically become a service upper bound.",
+    "largeRateAdmission": "Each increase needs evidence from actual iteration latency, the unchanged 512 exclusive relationships, PTS CPU/RSS, drops, queueing and target resources. No blind pool expansion or relaxed criteria to obtain a larger number.",
+    "formalQualification": "One candidate with original 160/400 ms margins, then the same frozen R/source/binary/environment/tools/scenario/distribution for two complete 180-second runs. Formal P95/P99 remains 200/500 ms; first failure ends the group without a replacement success pair.",
+    "correctnessStopsPreserved": true
+  },
+  "claimBoundaries": {
+    "configurationAndMeasuredTPSSeparate": true,
+    "stableTPS": "Actual verified mutations/180 seconds for each formal run, with the lower passing result reported as repeated stable throughput.",
+    "noUpperBound": "Report only an observed lower bound when U is absent; do not claim a mathematical maximum.",
+    "5000IsExplorationCapNotPromise": true,
+    "environmentChangeNotCodeOptimization": true,
+    "cloudAdmissionOrCapacityPassed": false
+  },
+  "rentalTimeAndPreparation": {
+    "originalWorkBudgetNotReset": true,
+    "seventyMinutesIsPriorEffectiveWorkRemainderNotWallClockGuarantee": true,
+    "transferApproxBytes": 1528532741,
+    "effective10MbpsTransferMinutesApprox": 20.4,
+    "effective20MbpsTransferMinutesApprox": 10.2,
+    "transferAndImageLoadMustBeAccounted": true,
+    "warmAndStableAreSeparatePTSTasks": true,
+    "platform600SecondsIsLifecycleGuardNotFixedBusinessDuration": true,
+    "fourteenMinutesIsMainLoadCapNotRentalWallClock": true,
+    "preRentalPreparation": "Account/quota/RAM or private STS configuration, SSH public key, Shanghai VPC/subnet/security groups, and a saved non-running PTS JMeter draft when supported. The actual ECS private IP/control credential/private JSON is bound after the host exists; no debug or calibration load is added.",
+    "unprovedCloudCapabilitiesDisclosed": "Actual Start/Stop permissions, SaaS CSV/thread allocation, private collector connectivity, process RSS access and clock precision remain subject to necessary cloud admission. Local wiring/read-only scene checks do not establish these.",
+    "earlyStopForEnvironmentBlockers": true
+  },
+  "reviewFindings": [
+    "PASS after clarifying that midpoint search requires both L and U, while no-L failures retain the original halving branch.",
+    "PASS after explicitly adding resource-validity to boundary qualification.",
+    "No code or threshold change, extra capacity round, promised 5000/s result, or promised 14-minute rental completion was introduced."
+  ],
+  "documentSHA256": {
+    "docs/evidence/2026-11-01-cap10/rental-run-plan.md": "95fa55bb7733d8c6cb6532cddfa11f0ddb6a31d5d62cef0f65e1242c28a8daf0",
+    "STATUS.md": "a3bb0559c42bb407189d5036d5ebe3dba677aff5faf39725a66333f6ab52bbf0",
+    "docs/agent-handoff.md": "49d0ae625fa050b98c43d0dea4e093149d0a481fd5755fa4efa96b5369f6a99a"
+  },
+  "previousFrozenReviewPreserved": "pts-final-review.json",
+  "sourceFilesModified": [],
+  "testsRun": 0,
+  "cloudCalls": 0,
+  "pressureWindowsAdded": 0,
+  "blockingIssues": []
+}

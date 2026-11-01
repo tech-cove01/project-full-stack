@@ -14,3 +14,5 @@ root对非root作者的共享stage/resources/Feedhelper与纯契约逐项审查�
 root执行器由点赞审查者独立复审，另9项纯convergence反例通过；必须done+可信监督终态、无同PID/create存活或warm/stable marker活进程才解锁。正常observer先退可接受；异常/Ctrl+C清零通过标志并请求原监督有界停止，缺终态保留锁。预期停止须自身精确stop原因、资源完整、真实事实/observer收敛，始终不计吞吐通过。root另6项纯收敛检查通过。无native之前所有工具冻结，后续按每档hash核对。
 
 09C采集SQL修复经非作者审查闭环：同静态数据的真实EXPLAIN证明outbox utf8mb4 event_id与receipt ascii_bin隐式比较使r仅用projection索引前缀；新ON转换外侧o并加BINARY精确guard后，r完整PK eq_ref/每行1。保持LEFT JOIN缺失计数、水位/fixture范围、4秒总采集预算/5秒间隔/三连续失败保护。old/new同RR全量follow均[missing0,APPLIED0,IGNORED2415]，单note三组全等，尾空格/非ASCII损失guard反例正确。旧单组2232.882ms→新12.788ms仅采样SQL一次idle对照；不计业务吞吐收益。helper原plan为rscan→o unique lookup，不做无关修改。原like-diagnostic-1及其缺summary/整体失败不回填重跑。
+
+Like最终同条件对照旗标：生产只有Feed端点启动tail request观察，故root把阶段gate限定为Feed diagnostic才true；Like diagnostic和其余所有purpose均强制false，并在command记录feedTailEnabled。非作者核这两行未改变任何名额、早停、收敛或原始工件；旧Like诊断1原true/旧hash/整体失败保持，新诊断2与最终20档可按同样tailfalse旗标比较。AST解析通过，该采集开关校正不改变应用代码。

@@ -78,6 +78,7 @@ def reserve(args, api, value):
                'warmSeconds': 1 if args.kind == 'probe' else 10, 'warmRate': 1 if args.kind == 'probe' else 25,
                'preVUs': 2 if args.kind == 'probe' else 256, 'maxVUs': 2 if args.kind == 'probe' else 512,
                'apiSourceSha': api['sourceSha'], 'apiPid': api['pid'], 'binarySHA256': api['sha256'],
+               'feedTailEnabled': api['tailEnabledRequested'],
                'environmentSHA256': sha(ROOT / 'environment.json'),
                'fixtureSHA256': sha(value['CAP_READ_FIXTURE' if args.chain == 'feed' else 'CAP_LIKE_FIXTURE']),
                'toolSourceSha': owned.run(['git', 'rev-parse', 'HEAD']).stdout.strip(),
@@ -186,7 +187,8 @@ def main():
     value, runtime = owned.settings(args.environment)
     api = owned.read(args.api_metadata); owned.api_identity(api, health=True)
     assert value['CAP_SOURCE_SHA'] == api['sourceSha']
-    assert api['tailEnabledRequested'] is (args.kind == 'diagnostic')
+    # Only Feed has request-tail instrumentation; like comparisons keep final flags.
+    assert api['tailEnabledRequested'] is (args.kind == 'diagnostic' and args.chain == 'feed')
     lock = runtime / 'cap09-active.private.json'
     assert not lock.exists(), 'prior owned stage still holds exclusivity'
     command = reserve(args, api, value); tag = command['tag']

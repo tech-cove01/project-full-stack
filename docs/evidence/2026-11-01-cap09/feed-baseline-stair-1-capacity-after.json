@@ -1,0 +1,82 @@
+{
+  "at": "2026-11-01T05:52:38.815748+00:00",
+  "capacity": {
+    "at": "2026-11-01T05:52:38.831716Z",
+    "uptime_ms": 359268,
+    "pid": 31080,
+    "runtime": {
+      "goroutines": 59,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 7253784,
+      "heap_sys_bytes": 21987328,
+      "heap_inuse_bytes": 11493376,
+      "total_alloc_bytes": 531258960,
+      "mallocs": 7000057,
+      "frees": 6962547,
+      "num_gc": 111,
+      "pause_total_ns": 23362900,
+      "last_gc_unix_ns": 1793512357096055900,
+      "gc_cpu_fraction": 0.00022868907140517481
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 10,
+      "in_use": 0,
+      "idle": 10,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 57,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 17580,
+      "misses": 10,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 10,
+      "idle_connections": 10,
+      "stale_connections": 0
+    },
+    "tail": {
+      "enabled": false,
+      "slow_threshold_ms": 0,
+      "max_slow_traces": 0,
+      "max_spans_per_trace": 0,
+      "latest_sequence": 0,
+      "requests": 0,
+      "shared_tasks": 0,
+      "stages": null,
+      "slow_traces": null,
+      "missing_measurements": null
+    },
+    "cards": {
+      "coalescing": true,
+      "requests": 2521,
+      "l1_hits": 35860,
+      "redis_hits": 13580,
+      "miss_items": 980,
+      "loads_started": 49,
+      "flight_started": 49,
+      "flight_joins": 0,
+      "content_sql_batches": 49,
+      "content_sql_rows": 980,
+      "content_bytes": 274980,
+      "load_errors": 0,
+      "oversize_uncached": 0,
+      "redis_errors": 0,
+      "invalid_payloads": 0,
+      "busy_rejected": 0,
+      "expired": 13920,
+      "evictions": 0,
+      "inflight": 0,
+      "active_loads": 0,
+      "waiting_callers": 0,
+      "l1_entries": 640,
+      "l1_bytes": 227000
+    }
+  },
+  "scope": "parsed post-wrapper/drain snapshot; includes warm and background"
+}

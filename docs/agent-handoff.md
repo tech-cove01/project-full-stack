@@ -6,7 +6,7 @@
 
 用户已于2026-11-01明确执行两条吞吐链路的测试、瓶颈定位与必要优化，作为最后性能收尾。先读根 [STATUS 顶部 CAP-09](../STATUS.md)及[本次执行协议](evidence/2026-11-01-cap09/plan.md)，按09A—09E分小任务推进，一问题一commit；起点53fa，新自有project-cap09/数据/会话/名额，保留旧批失败。完整Feed与真实点赞状态变更分别出结果；点赞走`PUT /notes/:id/like`同步MySQL事实/计数/Outbox及提交后失效/回查/Redis Mark，no-op与mutation、热点与多笔记、API档与完整下游档分列。实际三组为follow-v1/feed-v1/search-v1，LIKE均记IGNORED而非有效投影应用。5000 requests/s仅为探索档，成绩据实核验。
 
-09A当前已完成四依赖/迁移与两cohort、基线构建/CI、真实点赞语义探针；SQL严格分组工具问题已单独修复并保留失败。native工具最终复审后进入09B，当前尚无新吞吐成绩。实际轮次与结果以STATUS及本次reservation为准。
+09A工具与两cohort已完成；09B基线和所有失败均保留原件，09C必要修复与定位按STATUS推进。短测、早停、统计守卫失败与最终180秒两轮成绩分列；当前交付进度和名额只读STATUS及reservation，不把探针/诊断写成容量验收。
 
 旧 CAP-07/08 失败和旧 B1 未知继续保留。功能已成形，本批不扩收藏、新业务或付费 AI；环境、名额、稳态判据和提交/独立核验要求统一在 STATUS，不在这里另建状态表。
 

@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-01T05:57:45.443327+00:00",
+  "task": "CAP-09C Feed iteration1/2",
+  "observedEvidence": [
+    "feed-baseline-stair-2-load/result.json",
+    "feed-baseline-stair-3-load/result.json",
+    "feed-baseline-stair-4-load/result.json",
+    "backend/internal/social/feed.go:zone invoked per20rows inside RR directory snapshot"
+  ],
+  "differentPredictions": {
+    "zone": "CPU/alloc_space/alloc_objects show social.zone -> time.LoadLocation -> TZData parsing/embeddedloader. Only if material, cache a single immutable location; expect same SQL/Redis work/content and fewer allocs/CPU on later same-condition unprofiled stage. No prior disk I/O assumption.",
+    "sql_pool": "Long internal sql.begin_acquire_roundtrip/statement_total/transaction_hold and pool wait correlate; hold includes assembly, so do not subtract overlapping spans or call it pure SQL. If zone chain small, do not change zone.",
+    "redis_cards": "Internal feed.counts/counts.redis_read/redis.pipeline_total/cards caller/recheck/slot_wait/cold_sql/fill and matching waits/miss/expiry explain cost; timezone cache should not remove these waits.",
+    "client_host": "Host/generator contention or dropped offers while API internal spans differ would support client/host pressure. Current no dropped and low sustained k6 CPU are insufficient to rule out transient bursts."
+  },
+  "changeGate": "Only measured material repeated timezone parsing/allocation supports one immutable Location cache; no blind pool/TTL tuning and no asserted250 longtail cause.",
+  "diagnosticScope": "Same53fa/binary/environment/fixtures, multi100/s45s. tail=true plus CPU30s is an explicitly instrumented diagnosis; existing5s resource/tail snapshots only, max3 retained traces; allocation profiles before warm and after drain, no forcedGC during native. Not a tailfalse capacity A/B.",
+  "plannedCpuProfileSeconds": 30,
+  "nativeStagesThisIterationMax": 1,
+  "businessSemantics": "whole authenticated20card Feed contract, same RR/public/version/personalization and all classification/power/resource/downstream gates"
+}

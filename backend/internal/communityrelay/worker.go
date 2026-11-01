@@ -31,6 +31,7 @@ func NewWorker(db *gorm.DB, brokers []string, topic string) *Worker {
 			Balancer:     &kafka.Hash{},
 			RequiredAcks: kafka.RequireAll,
 			WriteTimeout: 5 * time.Second,
+			BatchSize:    1, // Poll waits for each event's acknowledgement before claiming another.
 			BatchTimeout: 10 * time.Millisecond,
 			// The topic is created by the first event on a fresh broker; a relay
 			// that cannot write must not crash the process.

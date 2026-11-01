@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T06:26:24.102599+00:00",
+  "counts": {
+    "done": 3397,
+    "allRows": 3397,
+    "pending": 0,
+    "processing": 0,
+    "needsReview": 0
+  },
+  "countsUnchangedFromBefore": true,
+  "randomPrivateKafkaTestTopicRetained": true
+}

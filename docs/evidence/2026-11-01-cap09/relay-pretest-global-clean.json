@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T06:26:10.535016+00:00",
+  "scope": "ALL outbox rows, not justcohort. API/relay stopped, no other producers, no active native.",
+  "counts": {
+    "done": 3397,
+    "allRows": 3397,
+    "pending": 0,
+    "processing": 0,
+    "needsReview": 0
+  },
+  "credentialsExported": false
+}

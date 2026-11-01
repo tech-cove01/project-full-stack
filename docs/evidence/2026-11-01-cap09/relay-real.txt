@@ -1,0 +1,12 @@
+=== RUN   TestIntegrationCommunityRelay
+--- PASS: TestIntegrationCommunityRelay (9.97s)
+=== RUN   TestIntegrationExhaustedLeaseDoesNotBlockQueue
+--- PASS: TestIntegrationExhaustedLeaseDoesNotBlockQueue (0.07s)
+=== RUN   TestBackoffDoublesAndStopsAtTheCap
+--- PASS: TestBackoffDoublesAndStopsAtTheCap (0.00s)
+=== RUN   TestTruncateKeepsTheRowWithinTheColumnLimit
+--- PASS: TestTruncateKeepsTheRowWithinTheColumnLimit (0.00s)
+=== RUN   TestEnvelopeKeepsTheConsumerContract
+--- PASS: TestEnvelopeKeepsTheConsumerContract (0.00s)
+PASS
+ok  	github.com/cityloop/fullstack-go/internal/communityrelay	10.280s

@@ -1,0 +1,16 @@
+{
+  "startedAt": "2026-11-01T06:26:22.773209+00:00",
+  "finishedAt": "2026-11-01T06:26:23.958892+00:00",
+  "elapsedSeconds": 1.1856842000270262,
+  "argv": [
+    "go",
+    "vet",
+    "./internal/communityrelay"
+  ],
+  "exitCode": 0,
+  "sourceSHA256": "1f11b6c65744a4ef7d56e6616b17df60839ed27cdccf96fe5a378627ba3fb67b",
+  "noConcurrentAPIOrLoad": true,
+  "allOutboxCleanVerified": true,
+  "randomPrivateKafkaTestTopicRetained": true,
+  "scope": "existing5tests including2realintegration, exactIT eventscleanup; no publictopic/group/fixturechanges"
+}

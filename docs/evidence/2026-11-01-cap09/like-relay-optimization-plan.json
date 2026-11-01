@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-01T06:24:03.299717+00:00",
+  "task": "CAP-09C like repair2/2 relay single-event batch",
+  "sourceBefore": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "observedEvidence": [
+    "like-baseline-stair-1-downstream/timeline.ndjson",
+    "like-diagnostic-1-downstream/timeline.ndjson",
+    "like-baseline-hot-choice.json"
+  ],
+  "knownFindings": [
+    "50/s oldbaseline samples events+250/5s whileDONE+69 andpending grows, realbrokerlag about1;sourceA diag1 alsoevent growth outrunsDONE before sampler failure. Publication path constrained separately from consumer lag.",
+    "WorkerRun loops synchronously Poll Claim->one WriteMessages->Done before nextevent. kafka-go0.4.47 defaultBatchSize100 waitsBatchTimeout10ms for this underfilled one-message batch."
+  ],
+  "singleVariable": "Set kafka.Writer.BatchSize=1 only, preserving existing10ms timeout for other semantics but ready batch sends immediately. No concurrency, asyncadmission, SQLClaim, lease, retry, key/headers orRequireAll/ack-beforeDone changes.",
+  "differentPredictions": {
+    "expected": "Remove fixed underfilled10ms wait. At same20/shot final case, relay queue/gap/lag should stay bounded; any lower latency is observed result, not presumed. Final multi staircase may find sustainable higher rate but no valid preoptimizedmulti exists for relative percent.",
+    "alternative": "Claim/Done SQL roundtrips, Kafka ack or hot-row transaction contention may dominate, limiting effect. Do not add blindSQL/pool/TTL/timeout changes after this repair budget."
+  },
+  "validation": "Existingcommunityrelay realKafka/mysql2integration+3pure andvet, only afterAPI/relaystopped+readonly ALLtablePENDING/PROCESSING0. Exacttestevents cleanup, randomprivateITtopicretained. Hnonauthorreview. Independentclean finalsource build andexactCI before180stable groups.",
+  "comparisonScope": "Only reservedsourceAhot20 andfinalhot20 share workload/flags/indexedsampler/warm20. Main before attempts remainfailures/unavailable, afterstandalone throughput measured separately. Natural event/version history advances and counts are reported.",
+  "budget": "Like necessaryrepairs now2/2, diagnostic slots2/2 spent (secondprestartguardfailure); no new repair/diagnosticload afterthis, proceed onlyfixedfinalstairs/hot/formal and cleanup."
+}

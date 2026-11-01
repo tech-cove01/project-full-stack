@@ -34,6 +34,11 @@ def identity(service):
               'networkMode': resources.CAP09_PROJECT + '_default',
               'networks': {resources.CAP09_PROJECT + '_default': {}},
               'mounts': [{'Type': 'volume', 'Name': volume, 'Destination': destination}]}
+    if service == 'kafka':
+        # The stock Apache image creates these two additional anonymous mounts.
+        for name, target in (('d' * 64, '/etc/kafka/secrets'), ('e' * 64, '/mnt/shared/config')):
+            expected['volumes'].append({'name': name, 'destination': target})
+            actual['mounts'].append({'Type': 'volume', 'Name': name, 'Destination': target})
     return expected, actual
 
 
@@ -55,6 +60,41 @@ class Checks(unittest.TestCase):
                 checked = resources.cap09_container(expected, actual, service)
                 self.assertEqual(checked['id'], expected['id'])
                 self.assertEqual(checked['nonce'], 'a' * 12)
+                self.assertEqual(len(checked['volumes']), 3 if service == 'kafka' else 1)
+
+    def test_kafka_keeps_all_three_exact_named_and_anonymous_mounts(self):
+        expected, actual = identity('kafka')
+        checked = resources.cap09_container(expected, actual, 'kafka')
+        self.assertEqual({value['name'] for value in checked['volumes']},
+                         {value['name'] for value in expected['volumes']})
+        for edit in ('missing', 'foreign_name', 'changed_destination', 'extra', 'duplicate_name', 'extra_bind', 'extra_tmpfs'):
+            changed = copy.deepcopy(actual)
+            if edit == 'missing':
+                changed['mounts'].pop()
+            elif edit == 'foreign_name':
+                changed['mounts'][1]['Name'] = 'f' * 64
+            elif edit == 'changed_destination':
+                changed['mounts'][1]['Destination'] = '/somewhere-else'
+            elif edit == 'extra':
+                changed['mounts'].append({'Type': 'volume', 'Name': 'f' * 64, 'Destination': '/extra'})
+            elif edit in ('extra_bind', 'extra_tmpfs'):
+                changed['mounts'].append({'Type': 'bind' if edit == 'extra_bind' else 'tmpfs', 'Destination': '/extra'})
+            else:
+                changed['mounts'][2]['Name'] = changed['mounts'][1]['Name']
+            with self.subTest(edit=edit), self.assertRaises(ValueError):
+                resources.cap09_container(expected, changed, 'kafka')
+        # Even a forged matching manifest may not rename the allowed anonymous
+        # destinations or make non-hex names look like image-created volumes.
+        for edit in ('wrong_destination', 'nonhex_name', 'duplicate_name'):
+            changed_expected, changed = copy.deepcopy(expected), copy.deepcopy(actual)
+            if edit == 'wrong_destination':
+                changed_expected['volumes'][1]['destination'] = changed['mounts'][1]['Destination'] = '/other'
+            elif edit == 'nonhex_name':
+                changed_expected['volumes'][1]['name'] = changed['mounts'][1]['Name'] = 'foreign-volume'
+            else:
+                changed_expected['volumes'][2]['name'] = changed['mounts'][2]['Name'] = changed['mounts'][1]['Name']
+            with self.subTest(forged=edit), self.assertRaises(ValueError):
+                resources.cap09_container(changed_expected, changed, 'kafka')
 
     def test_owned_container_rejects_changed_id_limits_namespace_port_mount(self):
         expected, actual = identity('mysql')

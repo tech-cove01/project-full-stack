@@ -1,0 +1,141 @@
+{
+  "at": "2026-11-01T05:17:26.833011+00:00",
+  "project": "project-full-stack-cap09",
+  "failure": "strict one-volume guard rejected Kafka image two anonymous ancillary mounts after all four containers became healthy",
+  "phase": "healthy-before-environment-record-migration-or-observer",
+  "preparationSHA256": "7611cad622ce00faa3021a9aa5a87649abe4f6f6b844bc611856ab3b7513e0ff",
+  "containers": {
+    "mysql": {
+      "id": "cdb236fad2383af616b3a7fd65cbe288741d7de3a0a8c69f920aa4701adb18b1",
+      "name": "/project-full-stack-cap09-mysql-1",
+      "project": "project-full-stack-cap09",
+      "service": "mysql",
+      "image": "mysql:8.4",
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 4000000000,
+      "memoryBytes": 2147483648,
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3471"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap09-a4fc273c7715-mysql",
+          "destination": "/var/lib/mysql"
+        }
+      ],
+      "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+    },
+    "redis": {
+      "id": "c390978f550e16fa46e1716f2bd2c46d0e519d987d783c8d75f06c52f32daad7",
+      "name": "/project-full-stack-cap09-redis-1",
+      "project": "project-full-stack-cap09",
+      "service": "redis",
+      "image": "redis:7.4-alpine",
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 2000000000,
+      "memoryBytes": 536870912,
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6571"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap09-a4fc273c7715-redis",
+          "destination": "/data"
+        }
+      ],
+      "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+    },
+    "kafka": {
+      "id": "98ad3e00041ca26d25c20945b6ca13c07b13b79e61d20cd6b014e5f7763ad2ed",
+      "name": "/project-full-stack-cap09-kafka-1",
+      "project": "project-full-stack-cap09",
+      "service": "kafka",
+      "image": "apache/kafka:3.9.0",
+      "imageId": "sha256:2956061ba5d3388af8eb3148200f385ccba13ef75bc0eb6dcca5827ebd2d36d4",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 2000000000,
+      "memoryBytes": 1073741824,
+      "ports": {
+        "9092/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9391"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "b5f5a3b3d582933a0cb3cecb393f542d936d7d100e1fe5ec8b8ee83a16effe83",
+          "destination": "/etc/kafka/secrets"
+        },
+        {
+          "name": "9b3d7371c41d0bbe8fbd1acb8b051ff20f8d12fcd174a86feda5ef61a8dd1845",
+          "destination": "/mnt/shared/config"
+        },
+        {
+          "name": "project-full-stack-cap09-a4fc273c7715-kafka",
+          "destination": "/var/lib/kafka/data"
+        }
+      ],
+      "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+    },
+    "elasticsearch": {
+      "id": "7e2826e1e08a876c540ca7e1ba758ce2dfa1987db1f9a93b55ff8e524427c13a",
+      "name": "/project-full-stack-cap09-elasticsearch-1",
+      "project": "project-full-stack-cap09",
+      "service": "elasticsearch",
+      "image": "docker.elastic.co/elasticsearch/elasticsearch:8.19.23",
+      "imageId": "sha256:c8ec58306c7c7b426362a2feb04cc42652e71483b8601591132ef9d583e303b7",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 2000000000,
+      "memoryBytes": 1073741824,
+      "ports": {
+        "9200/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9271"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap09-a4fc273c7715-elasticsearch",
+          "destination": "/usr/share/elasticsearch/data"
+        }
+      ],
+      "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+    }
+  },
+  "apiStarted": false,
+  "nativeLoadStarted": false,
+  "recreated": false,
+  "volumesRemoved": false
+}

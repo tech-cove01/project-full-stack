@@ -54,13 +54,28 @@ def cap09_container(expected, actual, service):
         raise ValueError('CAP09 network namespace differs')
     volumes = sorted((value.get('Name'), value.get('Destination')) for value in actual.get('mounts', []) if value.get('Type') == 'volume')
     recorded = sorted((value.get('name'), value.get('destination')) for value in expected.get('volumes', []))
-    if len(volumes) != 1 or volumes != recorded or volumes[0][1] != destination:
+    if volumes != recorded:
         raise ValueError('CAP09 volume/mount differs')
-    match = re.fullmatch(re.escape(CAP09_PROJECT) + r'-([a-f0-9]{12})-' + service, volumes[0][0] or '')
+    data_volumes = [value for value in volumes if value[1] == destination]
+    if len(data_volumes) != 1:
+        raise ValueError('CAP09 data volume/mount differs')
+    data_volume = data_volumes[0]
+    if service == 'kafka':
+        anonymous = [value for value in volumes if value[1] != destination]
+        if (len(actual.get('mounts', [])) != 3 or any(value.get('Type') != 'volume' for value in actual.get('mounts', [])) or
+                len(volumes) != 3 or len({value[0] for value in volumes}) != 3 or
+                {value[1] for value in anonymous} != {'/etc/kafka/secrets', '/mnt/shared/config'} or
+                not all(re.fullmatch(r'[a-f0-9]{64}', value[0] or '') for value in anonymous)):
+            raise ValueError('CAP09 Kafka image-created anonymous volumes differ')
+    elif len(volumes) != 1:
+        raise ValueError('CAP09 unexpected extra volume/mount')
+    match = re.fullmatch(re.escape(CAP09_PROJECT) + r'-([a-f0-9]{12})-' + service, data_volume[0] or '')
     if not match:
         raise ValueError('CAP09 fresh volume namespace differs')
     return {'service': service, 'id': expected['id'], 'cpuNano': cpu, 'memoryBytes': memory,
-            'volume': volumes[0][0], 'destination': destination, 'nonce': match.group(1), 'network': network}
+            'volume': data_volume[0], 'destination': destination,
+            'volumes': [{'name': name, 'destination': target} for name, target in volumes],
+            'nonce': match.group(1), 'network': network}
 
 
 def cap09_stats(rows, identities):

@@ -22,6 +22,8 @@
 
 新project `project-full-stack-cap09`，全新随机命名卷，loopback MySQL3471/Redis6571/Kafka9391/ES9271/API8271/diag8371。候选网段10.253.71.0/24已与Docker既有网段只读对比，无重叠；创建前再次核端口/项目/卷为空，不替换任何旧项目，不停止CRM。记录全部四服务不可变CID、挂载、imageID/限制，结束保留所有卷。
 
+首次实态准备发现Kafka镜像还自动创建`/etc/kafka/secrets`与`/mnt/shared/config`两只匿名卷；初始严格单卷检查停止于健康后、迁移前，原始失败保留。按新CID与匿名卷标签独立确认归属后，记录全部三只Kafka卷与精确目标（另三服务仍一只数据卷；MySQL初始化只读bind另列），准备恢复仅从该检查点继续迁移/observer，不重新compose或换卷。原件见preparation-recovery-1.json，所有匿名卷同样保留。
+
 MySQL4CPU/2GiB、Redis2CPU/512MiB/AOF everysec、Kafka2CPU/1GiB（heap256–512MiB）、ES2CPU/1GiB（heap512MiB）；API SQL20/Redis10/GOMAXPROCS4/GOMEMLIMIT1GiB/workers1，001—013。Kafka relay和实际三组 `community.follow-v1`、`community.feed-v1`、`community.search-v1` 正常开启；ES开启以装配第3组。没有metrics组。LIKE在三组均属IGNORED收据，不冒充APPLIED或Redis投影更新；点赞Redis Mark在HTTP提交后同步路径。[点赞契约](like-contract.md)
 
 同一Windows宿主，20逻辑CPU，Docker约16GiB内存；开始预检宿主内存80.4%、AC供电且电池保护关闭。启动后再次核88%安全预算，余量不足不发压。记录供电/原生盖子和睡眠事件；仅用本任务进程级保持唤醒请求，不改全局电源配置，不人为合盖/暂停Docker。任何实际供电/待机转换保留为失败/无效档。

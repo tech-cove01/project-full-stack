@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T05:18:55.718075+00:00",
+  "action": "prepare-deps",
+  "exitCode": 1,
+  "exceptionClass": "AssertionError",
+  "toolSourceSha": "7948070c88928d1aa4a8ebc6638afa96b4adf1c4",
+  "toolSHA256": "35a971c0fc6c16b6810789b2e8417d38258248d72d788a57cb75f93a1f1aefba",
+  "cause": "Kafka image added two anonymous ancillary volume mounts; all services healthy, strict one-data-volume guard rejected actual shape",
+  "recovery": "exact four IDs and all volumes preserved in preparation-recovery-1.json; no new environment/nonce or load retry",
+  "apiStarted": false,
+  "nativeLoadStarted": false
+}

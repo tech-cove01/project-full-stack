@@ -122,10 +122,18 @@ def container(service, cid=None, running=None):
     assert any(x['HostIp'] == '127.0.0.1' and x['HostPort'] == str(port)
                for x in raw['HostConfig']['PortBindings'][target])
     assert (raw['HostConfig']['NanoCpus'], raw['HostConfig']['Memory']) == LIMITS[service]
-    volumes = [{'name': item['Name'], 'destination': item['Destination']}
-               for item in raw['Mounts'] if item['Type'] == 'volume']
-    assert len(volumes) == 1 and volumes[0]['destination'] == MOUNTS[service]
-    assert re.fullmatch(PROJECT + r'-[a-f0-9]{12}-' + service, volumes[0]['name'])
+    volumes = sorted(({'name': item['Name'], 'destination': item['Destination']}
+                      for item in raw['Mounts'] if item['Type'] == 'volume'), key=lambda item: item['destination'])
+    primary = [item for item in volumes if item['destination'] == MOUNTS[service]]
+    assert len(primary) == 1 and re.fullmatch(PROJECT + r'-[a-f0-9]{12}-' + service, primary[0]['name'])
+    if service == 'kafka':
+        assert len(raw['Mounts']) == 3 and all(item['Type'] == 'volume' for item in raw['Mounts'])
+        assert len(volumes) == 3 and len({item['name'] for item in volumes}) == 3
+        ancillary = [item for item in volumes if item['destination'] != MOUNTS[service]]
+        assert {item['destination'] for item in ancillary} == {'/etc/kafka/secrets', '/mnt/shared/config'}
+        assert all(re.fullmatch(r'[a-f0-9]{64}', item['name']) for item in ancillary)
+    else:
+        assert len(volumes) == 1
     return {'id': raw['Id'], 'name': raw['Name'], 'project': PROJECT, 'service': service,
             'image': raw['Config']['Image'], 'imageId': raw['Image'],
             'running': raw['State']['Running'], 'status': raw['State']['Status'],
@@ -222,10 +230,16 @@ def prepare(args):
     (ROOT / 'compose-start.txt').write_text(result.stdout + result.stderr, encoding='utf-8')
     assert result.returncode == 0, 'preserve partial own setup; no API/load'
     owned = {name: container(name, running=True) for name in PORTS}
-    assert all(owned[name]['volumes'][0]['name'] == volumes[name] for name in PORTS)
+    assert all(any(item['name'] == volumes[name] and item['destination'] == MOUNTS[name]
+                   for item in owned[name]['volumes']) for name in PORTS)
+    complete_dependencies(value, runtime, private, owned)
+
+
+def complete_dependencies(value, runtime, private, owned):
+    preparation = read(ROOT / 'preparation.json')
     save(ROOT / 'environment.json', {'task': 'CAP-09A', 'at': now(), 'project': PROJECT,
          'runtime': str(runtime), 'privateEnvironmentFile': str(private), 'containers': owned,
-         'newVolumes': volumes, 'subnet': str(subnet), 'powerAfterStart': power(),
+         'newVolumes': preparation['newVolumes'], 'subnet': preparation['subnet'], 'powerAfterStart': power(),
          'groups': ['community.follow-v1', 'community.feed-v1', 'community.search-v1'],
          'kafkaTopic': 'community.events', 'mysqlMaxOpen': 20, 'redisPoolSize': 10,
          'gomaxprocs': 4, 'gomemlimit': '1GiB', 'sharedHost': True, 'oldVolumesUntouched': True})
@@ -247,6 +261,26 @@ def prepare(args):
     save(ROOT / 'dependency-health.json', {'at': now(), 'es': es_health,
          'kafkaTopic': 'community.events', 'topicCreatedBeforeAPI': True})
     print(json.dumps({'prepared': True, 'privateEnvironmentFile': str(private), 'runtime': str(runtime)}))
+
+
+def resume_preparation(args):
+    # Only the known healthy-before-migration failure is supported. Never repeat
+    # compose up, replace volumes, or silently retry an already applied phase.
+    assert not (ROOT / 'environment.json').exists() and not (ROOT / 'migrate-exit.json').exists()
+    value, runtime = settings(args.environment)
+    recovery = read(ROOT / 'preparation-recovery-1.json')
+    preparation = read(ROOT / 'preparation.json')
+    assert recovery['preparationSHA256'] == hashlib.sha256((ROOT / 'preparation.json').read_bytes()).hexdigest()
+    assert recovery['project'] == preparation['project'] == PROJECT
+    assert preparation['runtime'] == str(runtime) and preparation['privateEnvironmentFile'] == str(Path(args.environment).resolve())
+    owned = {name: container(name, recovery['containers'][name]['id'], True) for name in PORTS}
+    for name in PORTS:
+        assert owned[name]['volumes'] == recovery['containers'][name]['volumes']
+        assert any(item['name'] == preparation['newVolumes'][name] and item['destination'] == MOUNTS[name]
+                   for item in owned[name]['volumes'])
+    save(ROOT / 'preparation-resumed.json', {'at': now(), 'reason': 'strict Kafka image ancillary-mount adaptation',
+         'exactIdsAndVolumesRevalidated': True, 'composeRepeated': False, 'volumesDeleted': False})
+    complete_dependencies(value, runtime, Path(args.environment).resolve(), owned)
 
 
 def start_api(args):
@@ -451,12 +485,14 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='action', required=True)
     p = sub.add_parser('prepare-deps'); p.add_argument('--subnet', required=True); p.add_argument('--mysql-bin', required=True)
+    p = sub.add_parser('resume-preparation'); p.add_argument('--environment', required=True)
     p = sub.add_parser('start-api'); p.add_argument('--environment', required=True); p.add_argument('--binary', required=True)
     p.add_argument('--source-sha', required=True); p.add_argument('--label', required=True); p.add_argument('--tail', action='store_true')
     p = sub.add_parser('stop-api'); p.add_argument('--api-metadata', required=True)
     p = sub.add_parser('finish'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)
     args = parser.parse_args()
-    {'prepare-deps': prepare, 'start-api': start_api, 'stop-api': stop_api, 'finish': finish}[args.action](args)
+    {'prepare-deps': prepare, 'resume-preparation': resume_preparation,
+     'start-api': start_api, 'stop-api': stop_api, 'finish': finish}[args.action](args)
 
 
 if __name__ == '__main__':

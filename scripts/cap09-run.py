@@ -75,7 +75,7 @@ def reserve(args, api, value):
     tag = reservation['tag']
     command = {'task': 'CAP-09', 'at': owned.now(), 'chain': args.chain, 'kind': args.kind, 'tag': tag,
                'mode': args.mode, 'rate': args.rate, 'seconds': args.seconds,
-               'warmSeconds': 1 if args.kind == 'probe' else 10, 'warmRate': 1 if args.kind == 'probe' else 25,
+               'warmSeconds': 1 if args.kind == 'probe' else 10, 'warmRate': 1 if args.kind == 'probe' else min(25, args.rate),
                'preVUs': 2 if args.kind == 'probe' else 256, 'maxVUs': 2 if args.kind == 'probe' else 512,
                'apiSourceSha': api['sourceSha'], 'apiPid': api['pid'], 'binarySHA256': api['sha256'],
                'feedTailEnabled': api['tailEnabledRequested'],

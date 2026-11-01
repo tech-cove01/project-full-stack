@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T06:21:08.723828+00:00",
+  "task": "CAP-09C like diagnostic2 pre-native failure",
+  "reservation": "like-diagnostic-2-command.json",
+  "failedStagePreserved": true,
+  "nativeWarmStarted": false,
+  "nativeStableStarted": false,
+  "measuredNativeLoadRuns": 0,
+  "primaryEvidence": "like-diagnostic-2-control/stage-console.txt",
+  "cause": "Runner declared target20/s but retained warm25/s; helper correctly rejected warmRate>rate before any k6 process. Root failed to cap warm for low selected targets.",
+  "secondaryRunnerException": "FileNotFoundError is absent result.json after rejected helper, not primary process/AV failure.",
+  "correction": "warmRate=min(25,targetRate) for every non-probe; probe stays1/s. Targets>=25 unchanged.",
+  "budget": "diagnostic2 is consumed and staysfailed; no replay/newdiagnosticname. Like before/after performance comparison will use remaining single sourceA baseline-hot20 then related-code-change final-hot20, bothsameflagstailfalse/warp20; main before full-valid baseline unavailable, do not claim main relative improvement.",
+  "businessDataEffect": "No measured native writes and readonly sampler sees empty-stagewatermark. Original baseline/diagnostic1 unknown/failures unchanged."
+}

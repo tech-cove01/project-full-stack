@@ -1,0 +1,86 @@
+{
+  "at": "2026-11-01T06:19:20.997908+00:00",
+  "tag": "like-diagnostic-2",
+  "passed": false,
+  "failedStartOrException": "FileNotFoundError",
+  "wrapperExit": 1,
+  "observerExit": 0,
+  "childrenConverged": true,
+  "observerPid": 52240,
+  "wrapperPid": 66044,
+  "loadWaitStartedAt": "2026-11-01T06:19:21.290952+00:00",
+  "loadWaitFinishedAt": "2026-11-01T06:19:22.335267+00:00",
+  "powerEvidence": {
+    "before": {
+      "at": "2026-11-01T06:19:20.997981+00:00",
+      "hostMemoryPercent": 80.2,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "after": {
+      "at": "2026-11-01T06:19:26.329483+00:00",
+      "hostMemoryPercent": 80.3,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "events": {
+      "available": true,
+      "events": []
+    },
+    "valid": true
+  },
+  "observerResources": [
+    {
+      "at": "2026-11-01T06:19:21.312656+00:00",
+      "pid": 52240,
+      "rssBytes": 16711680,
+      "cpuPercentOneCore": 27.1,
+      "cpuIntervalSeconds": 0.23026670003309846,
+      "cpuIntervalValid": false,
+      "power": {
+        "at": "2026-11-01T06:19:21.312222+00:00",
+        "hostMemoryPercent": 80.1,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    }
+  ],
+  "toolBytesStable": true,
+  "probeExpectedStopConfirmed": false,
+  "knownOwnedProcesses": [
+    {
+      "pid": 66044,
+      "created": 1793513961.2871525,
+      "name": "python.exe"
+    },
+    {
+      "pid": 59020,
+      "created": 1793513961.2944193,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 39508,
+      "created": 1793513961.4857297,
+      "name": "node.exe"
+    },
+    {
+      "pid": 46996,
+      "created": 1793513961.5287023,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 54248,
+      "created": 1793513961.7751436,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 60128,
+      "created": 1793513961.80378,
+      "name": "conhost.exe"
+    }
+  ],
+  "finishedAt": "2026-11-01T06:19:26.334768+00:00"
+}

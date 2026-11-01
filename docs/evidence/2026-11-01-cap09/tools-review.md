@@ -16,3 +16,5 @@ root执行器由点赞审查者独立复审，另9项纯convergence反例通过�
 09C采集SQL修复经非作者审查闭环：同静态数据的真实EXPLAIN证明outbox utf8mb4 event_id与receipt ascii_bin隐式比较使r仅用projection索引前缀；新ON转换外侧o并加BINARY精确guard后，r完整PK eq_ref/每行1。保持LEFT JOIN缺失计数、水位/fixture范围、4秒总采集预算/5秒间隔/三连续失败保护。old/new同RR全量follow均[missing0,APPLIED0,IGNORED2415]，单note三组全等，尾空格/非ASCII损失guard反例正确。旧单组2232.882ms→新12.788ms仅采样SQL一次idle对照；不计业务吞吐收益。helper原plan为rscan→o unique lookup，不做无关修改。原like-diagnostic-1及其缺summary/整体失败不回填重跑。
 
 Like最终同条件对照旗标：生产只有Feed端点启动tail request观察，故root把阶段gate限定为Feed diagnostic才true；Like diagnostic和其余所有purpose均强制false，并在command记录feedTailEnabled。非作者核这两行未改变任何名额、早停、收敛或原始工件；旧Like诊断1原true/旧hash/整体失败保持，新诊断2与最终20档可按同样tailfalse旗标比较。AST解析通过，该采集开关校正不改变应用代码。
+
+20/s诊断在native前被helper的warm<=target保护正确拒绝，runner已由非作者审查仅修为非probe warm=min(25,target)、probe保持1；>=25场景不变，AST通过。该诊断失败与slot2保留，不补跑、不转名额。热点before/after仅用于相同20/s/hot/tailfalse/indexedsampler/warm20场景，main先前无完整有效baseline不报相对优化比例。

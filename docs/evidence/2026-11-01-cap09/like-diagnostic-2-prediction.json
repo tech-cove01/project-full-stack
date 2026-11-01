@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-01T06:19:18.377707+00:00",
+  "task": "CAP-09C like diagnostic2/2 before relay optimization",
+  "observedEvidence": [
+    "like-baseline-stair-1-load/result.json",
+    "like-diagnostic-1-stage.json",
+    "collector-join-diagnosis-1/explain-summary.json",
+    "collector-join-diagnosis-1/count-comparison-summary.json",
+    "observer-r2-readiness-2/ready.json"
+  ],
+  "differentPredictions": {
+    "baseline": "At20 real mutations/s, corrected postcommit completion and indexed4s sampler should permit a complete45s baseline with exact SQL/Redis/events/receipt/realKafka lag proof. Any error/unknown/latequeue remains a failed stage and cannot be replayed.",
+    "publisher": "Original relay still serially waits underfilled10ms per event; observe outbox/receipt gap/slope independent of API P95. Existing50/s publication backlog remains evidence of a higher-load limit, not assumed fixed.",
+    "laterOneVariable": "Only if proceeding with BatchSize1, final-stair20 on clean finalsource must use this same indexed observer, tailfalse/no CPUprofile, payload/fixtures/pools/limits/persistence. It compares request and queue metrics at equal20/s; event history grows naturally and is separately recorded."
+  },
+  "sourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "mode": "multi",
+  "rate": 20,
+  "seconds": 45,
+  "warmRate": 25,
+  "warmSeconds": 10,
+  "preVUs": 256,
+  "maxVUs": 512,
+  "feedTailEnabled": false,
+  "collector": "r2 full-PK exact receipt lookup, same4s/5s budget",
+  "budget": "last like diagnostic slot; no retry or replacement if limited. Correctness repair1/2 complete; one remaining justified relay repair at most."
+}

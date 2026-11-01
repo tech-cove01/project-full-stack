@@ -1,0 +1,18 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+  assert.ok(rate >= 1 && rate <= 5000 && seconds >= 1 && seconds <= 180 && warmSeconds >= 1 && warmSeconds <= 30 && warmRate >= 1 && warmRate <= rate && preVUs >= 1 && preVUs <= maxVUs && maxVUs <= 512)
+
+    at file:///D:/%E6%A1%8C%E9%9D%A2/The%20ALL/agent/project/code/project-full-stack/scripts/cap09-like.mjs:340:12 {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: false,
+  expected: true,
+  operator: '==',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

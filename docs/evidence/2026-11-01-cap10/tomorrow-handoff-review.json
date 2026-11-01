@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "batch": "CAP-10",
+  "reviewer": "cap09_like_review",
+  "passed": true,
+  "scope": "Read-only review of the three final handoff documents. Only this review record is added; no source, previous review, tests, services, cloud calls or scheduled tasks are changed or run.",
+  "todayStopDateAsiaShanghai": "2026-11-01",
+  "plannedUserReturnDateAsiaShanghai": "2026-11-02",
+  "resumeOnlyWhenUserActivelyReturns": true,
+  "noAutomaticStartOrReminder": true,
+  "userInteraction": {
+    "oneCurrentStepAtATime": true,
+    "waitForUserCompletionBeforeNextUserOperation": true,
+    "firstStep": "Check account, PTS and private RAM/STS readiness before asking the user to pay for an ECS. If the user has already rented, inspect that state without requiring another purchase.",
+    "tomorrowSTSValidityMustBeChecked": true,
+    "credentialsProvidedAsPrivatePathsNotValues": true,
+    "afterSceneIdHandoffAndAdmission": "Agent autonomously executes the already-authorized bounded plan; it does not seek confirmation again before each pressure window.",
+    "screenshotNotificationsDoNotPauseLoad": true
+  },
+  "continuity": {
+    "sameBatchAndQuota": true,
+    "shortWindowsMaximum": 8,
+    "formalWindowsMaximum": 2,
+    "mainLoadSecondsMaximum": 840,
+    "productionOptimizationsMaximum": 1,
+    "original6600Used4200RemainingSnapshotPreserved": true,
+    "subsequentActiveWorkStillCounted": true,
+    "overnightWaitingDoesNotResetBudget": true,
+    "additionalPreparationAllowanceRemainsClosed": true,
+    "evidenceRoot": "docs/evidence/2026-11-01-cap10/linux/",
+    "recordActualCollectionDates": true,
+    "noNewDatedBatchOrRepeatedCompletedFullChecks": true
+  },
+  "evidenceAndRelease": {
+    "ecsSpecificationScreenshotBeforeRelease": true,
+    "ptsConfigurationScreenshotWithoutSecrets": true,
+    "formalScreenshotsUseExactMainStableReportId": true,
+    "warmAndPlatform600SecondsNotFormal180Seconds": true,
+    "h1H2ReportsOrFailureNotRunStatusPreservedTruthfully": true,
+    "screenshotsDoNotReplaceFullP95P99UnknownAndReconciliationEvidence": true,
+    "noExtraPressureOrExtendedRentalForScreenshots": true,
+    "userReleasesOnlyAfterAgentConfirmsDownloadedAndHashVerifiedRawEvidence": true,
+    "remotePressureTerminationAndOwnedCleanupRequired": true
+  },
+  "documentSHA256": {
+    "docs/evidence/2026-11-01-cap10/tomorrow-handoff.md": "270c9427cee80c008fa42d7e566bd5e27ebcb7e8102246a0eef9fc172cfae949",
+    "STATUS.md": "ee000728b2b9c2cea0381b1e9cd54b412b0be4816f313b8ccee0b7bebbaa5c5f",
+    "docs/agent-handoff.md": "a617e4a05a56a090df955dffbd01b838b88e36c1d0d80c497107e945ed94e476"
+  },
+  "testsRun": 0,
+  "cloudCalls": 0,
+  "pressureWindowsAdded": 0,
+  "automationsCreated": 0,
+  "blockingIssues": []
+}

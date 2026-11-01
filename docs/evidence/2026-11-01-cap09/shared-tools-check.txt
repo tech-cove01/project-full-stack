@@ -1,0 +1,10 @@
+test_explicit_cap09_profile_does_not_change_legacy (__main__.Checks.test_explicit_cap09_profile_does_not_change_legacy) ... ok
+test_four_container_stats_missing_foreign_nonfinite_not_zero (__main__.Checks.test_four_container_stats_missing_foreign_nonfinite_not_zero) ... ok
+test_full_feed_contract_rejects_payload_cursor_and_personal_differences (__main__.Checks.test_full_feed_contract_rejects_payload_cursor_and_personal_differences) ... ok
+test_owned_container_rejects_changed_id_limits_namespace_port_mount (__main__.Checks.test_owned_container_rejects_changed_id_limits_namespace_port_mount) ... ok
+test_owned_four_services_and_resource_limits (__main__.Checks.test_owned_four_services_and_resource_limits) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.148s
+
+OK

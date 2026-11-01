@@ -11,6 +11,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import subprocess
 import time
 import urllib.parse
@@ -19,13 +20,72 @@ import urllib.request
 import psutil
 
 
+CAP09_PROJECT = 'project-full-stack-cap09'
+CAP09_LIMITS = {
+    'mysql': (4_000_000_000, 2 << 30, '3306/tcp', '3471', '/var/lib/mysql'),
+    'redis': (2_000_000_000, 512 << 20, '6379/tcp', '6571', '/data'),
+    'kafka': (2_000_000_000, 1 << 30, '9092/tcp', '9391', '/var/lib/kafka/data'),
+    'elasticsearch': (2_000_000_000, 1 << 30, '9200/tcp', '9271', '/usr/share/elasticsearch/data'),
+}
+
+
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, response, code, message, headers, new_url):
+        return None
+
+
+def cap09_container(expected, actual, service):
+    """Validate selected inspect fields; never serialize a container environment."""
+    cpu, memory, port, host_port, destination = CAP09_LIMITS[service]
+    if not re.fullmatch(r'[a-f0-9]{64}', expected.get('id', '')) or actual.get('id') != expected['id']:
+        raise ValueError('CAP09 immutable container identity differs')
+    labels = actual.get('labels', {})
+    if labels.get('com.docker.compose.project') != CAP09_PROJECT or labels.get('com.docker.compose.service') != service:
+        raise ValueError('CAP09 project/service differs')
+    if actual.get('running') is not True or actual.get('cpuNano') != cpu or actual.get('memoryBytes') != memory:
+        raise ValueError('CAP09 state/resource limit differs')
+    if expected.get('cpuNano') != cpu or expected.get('memoryBytes') != memory:
+        raise ValueError('CAP09 recorded resource limit differs')
+    bindings = actual.get('ports', {}).get(port, []) or []
+    if not any(value.get('HostIp') == '127.0.0.1' and value.get('HostPort') == host_port for value in bindings):
+        raise ValueError('CAP09 loopback binding differs')
+    network = CAP09_PROJECT + '_default'
+    if actual.get('networkMode') != network or set(actual.get('networks', {})) != {network}:
+        raise ValueError('CAP09 network namespace differs')
+    volumes = sorted((value.get('Name'), value.get('Destination')) for value in actual.get('mounts', []) if value.get('Type') == 'volume')
+    recorded = sorted((value.get('name'), value.get('destination')) for value in expected.get('volumes', []))
+    if len(volumes) != 1 or volumes != recorded or volumes[0][1] != destination:
+        raise ValueError('CAP09 volume/mount differs')
+    match = re.fullmatch(re.escape(CAP09_PROJECT) + r'-([a-f0-9]{12})-' + service, volumes[0][0] or '')
+    if not match:
+        raise ValueError('CAP09 fresh volume namespace differs')
+    return {'service': service, 'id': expected['id'], 'cpuNano': cpu, 'memoryBytes': memory,
+            'volume': volumes[0][0], 'destination': destination, 'nonce': match.group(1), 'network': network}
+
+
+def cap09_stats(rows, identities):
+    """Missing service rows stay failures; do not turn them into zero use."""
+    by_name = {CAP09_PROJECT + '-' + row['service'] + '-1': row for row in identities}
+    if len(rows) != 4 or len({row.get('Name') for row in rows}) != 4 or set(row.get('Name') for row in rows) != set(by_name):
+        raise ValueError('CAP09 stats missing/duplicate/foreign container')
+    for row in rows:
+        identifier = row.get('ID', '')
+        if len(identifier) < 12 or not by_name[row['Name']]['id'].startswith(identifier):
+            raise ValueError('CAP09 stats immutable identity differs')
+        value = float(row['MemPerc'].rstrip('%'))
+        if not math.isfinite(value) or value < 0:
+            raise ValueError('CAP09 memory percentage unavailable')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--api-pid', type=int, required=True)
     parser.add_argument('--diagnostics', required=True)
     parser.add_argument('--project', required=True)
+    parser.add_argument('--cohort', choices=('legacy', 'cap09'), default='legacy')
+    parser.add_argument('--ownership', type=Path)
     parser.add_argument('--container', action='append', required=True)
-    parser.add_argument('--load-script', choices=['capacity-trade.js', 'go073-cap-read.js', 'capacity-health.js'], required=True)
+    parser.add_argument('--load-script', choices=['capacity-trade.js', 'go073-cap-read.js', 'capacity-health.js', 'cap09-like.js'], required=True)
     parser.add_argument('--load-pid-file', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--stop-file', type=Path, required=True)
@@ -36,8 +96,20 @@ def main():
     url = urllib.parse.urlsplit(args.diagnostics)
     if url.scheme != 'http' or url.hostname != '127.0.0.1' or url.path != '/debug/capacity' or url.username or url.password:
         parser.error('explicit loopback diagnostics URL required')
-    if args.project not in ('project-full-stack-cap-trade', 'project-full-stack-cap-read'):
-        parser.error('dedicated CAP project required')
+    if args.cohort == 'cap09':
+        if args.project != CAP09_PROJECT or args.load_script not in ('go073-cap-read.js', 'cap09-like.js') or args.diagnostics != 'http://127.0.0.1:8371/debug/capacity':
+            parser.error('fixed CAP09 project/script/diagnostics required')
+        expected_path = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap09/environment.json'
+        if args.ownership is None or args.ownership.resolve() != expected_path or not expected_path.is_file():
+            parser.error('fixed CAP09 public ownership manifest required')
+        ownership = json.loads(expected_path.read_text(encoding='utf-8-sig'))
+        if ownership.get('project') != CAP09_PROJECT or set(ownership.get('containers', {})) != set(CAP09_LIMITS):
+            parser.error('CAP09 ownership services differ')
+        expected_ids = {value['id'] for value in ownership['containers'].values()}
+        if len(args.container) != 4 or set(args.container) != expected_ids or not all(re.fullmatch(r'[a-f0-9]{64}', value) for value in args.container):
+            parser.error('four exact CAP09 container IDs required')
+    elif args.project not in ('project-full-stack-cap-trade', 'project-full-stack-cap-read') or args.load_script == 'cap09-like.js':
+        parser.error('dedicated legacy CAP project/script required')
     if not math.isfinite(args.interval) or args.interval < 2 or args.interval > 30 or args.max_seconds < 1 or args.max_seconds > 3600:
         parser.error('invalid sampling interval/duration')
     if len({p.resolve() for p in (args.output, args.stop_file, args.done_file, args.load_pid_file)}) != 4:
@@ -48,16 +120,38 @@ def main():
     api = psutil.Process(args.api_pid)
     api_identity = api.create_time()
     container_ids = []
+    identities = []
     for name in args.container:
+        if args.cohort == 'cap09':
+            template = ('{"id":{{json .Id}},"labels":{{json .Config.Labels}},"running":{{json .State.Running}},'
+                        '"ports":{{json .HostConfig.PortBindings}},"cpuNano":{{json .HostConfig.NanoCpus}},'
+                        '"memoryBytes":{{json .HostConfig.Memory}},"networkMode":{{json .HostConfig.NetworkMode}},'
+                        '"networks":{{json .NetworkSettings.Networks}},"mounts":{{json .Mounts}}}')
+            result = subprocess.run(['docker', 'inspect', '--format', template, name], capture_output=True, text=True, timeout=15, check=True)
+            actual = json.loads(result.stdout)
+            services = [service for service, value in ownership['containers'].items() if value['id'] == name]
+            if len(services) != 1:
+                parser.error('CAP09 manifest container identity duplicated')
+            identities.append(cap09_container(ownership['containers'][services[0]], actual, services[0]))
+            container_ids.append(name)
+            continue
         result = subprocess.run(['docker', 'inspect', '--format', '{{json .Config.Labels}}', name], capture_output=True, text=True, timeout=15, check=True)
         labels = json.loads(result.stdout)
         if labels.get('com.docker.compose.project') != args.project or labels.get('com.docker.compose.service') not in ('mysql', 'redis'):
             parser.error('container project/service ownership mismatch')
         container_ids.append(subprocess.run(['docker', 'inspect', '--format', '{{.Id}}', name], capture_output=True, text=True, timeout=15, check=True).stdout.strip())
-    no_proxy = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    if args.cohort == 'cap09' and len({value['nonce'] for value in identities}) != 1:
+        parser.error('CAP09 containers are not from one fresh-volume cohort')
+    handlers = [urllib.request.ProxyHandler({})]
+    if args.cohort == 'cap09':
+        handlers.append(NoRedirect())
+    no_proxy = urllib.request.build_opener(*handlers)
     generator = None
     generator_identity = None
     generator_cpu_at = None
+    helper = None
+    helper_identity = None
+    helper_cpu_at = None
     api.cpu_percent(None)
     psutil.cpu_percent(None)
     me = psutil.Process()
@@ -77,6 +171,11 @@ def main():
 
     with args.output.open('x', encoding='utf-8') as output:
         output.write(json.dumps({'kind': 'configuration', 'project': args.project, 'interval_seconds': args.interval, 'logical_cpus': psutil.cpu_count(), 'sampler_sha256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(), 'cpu_minimum_interval_seconds': 1, 'stop_caps': {'host_memory_percent': 88, 'api_rss_bytes': 1610612736, 'generator_rss_bytes': 2147483648, 'container_memory_percent': 85, 'host_cpu_percent_for_three_samples': 85, 'consecutive_observation_failures': 3}, 'pid': api.pid, 'containers': args.container, 'container_ids': container_ids, 'load_script': args.load_script}) + '\n')
+        if args.cohort == 'cap09':
+            output.write(json.dumps({'kind': 'ownership', 'cohort': 'cap09', 'ownership': str(args.ownership),
+                                     'ownership_sha256': hashlib.sha256(args.ownership.read_bytes()).hexdigest(),
+                                     'verified_containers': identities,
+                                     'load_rss_scope': 'CAP09 2GiB cap covers k6 plus its Node workload/classification helper; both processes reported separately'}) + '\n')
         output.flush()
         while time.monotonic() - started < args.max_seconds and not args.done_file.exists():
             tick = time.monotonic()
@@ -122,6 +221,29 @@ def main():
             row['generators'] = generators
             if sum(item['rss_bytes'] for item in generators) >= 2147483648:
                 signal('load generator RSS reached 2 GiB; generator limit possible')
+            if args.cohort == 'cap09':
+                try:
+                    if helper is None:
+                        candidate_helper = psutil.Process(int(identity_file['helper_pid']))
+                        expected_helper = 'cap09-like.mjs' if args.load_script == 'cap09-like.js' else 'go073-cap-read.mjs'
+                        if candidate_helper.name().lower() not in ('node', 'node.exe') or not any(expected_helper in value for value in candidate_helper.cmdline()):
+                            raise ValueError('CAP09 helper executable/script differs')
+                        helper = candidate_helper
+                        helper_identity = helper.create_time()
+                        helper.cpu_percent(None)
+                        helper_cpu_at = time.monotonic()
+                    if not helper.is_running() or helper.pid != int(identity_file['helper_pid']) or helper.create_time() != helper_identity:
+                        raise ValueError('CAP09 helper identity changed')
+                    helper_now = time.monotonic()
+                    helper_interval = helper_now - helper_cpu_at
+                    row['helper'] = {'pid': helper.pid, 'rss_bytes': helper.memory_info().rss,
+                                     'cpu_percent_one_core': helper.cpu_percent(None), 'cpu_interval_seconds': helper_interval,
+                                     'cpu_interval_valid': helper_interval >= 1, 'threads': helper.num_threads()}
+                    helper_cpu_at = helper_now
+                    if row['helper']['rss_bytes'] + sum(item['rss_bytes'] for item in generators) >= 2147483648:
+                        signal('CAP09 k6 and classification helper RSS reached 2 GiB')
+                except Exception as error:
+                    row['errors'].append('CAP09 helper observation unavailable: ' + type(error).__name__)
             try:
                 with no_proxy.open(args.diagnostics, timeout=2) as response:
                     # CAP-06 adds a fixed 32-trace/256-span diagnostic ring.
@@ -137,6 +259,8 @@ def main():
             try:
                 stats = subprocess.run(['docker', 'stats', '--no-stream', '--format', '{{json .}}', *container_ids], capture_output=True, text=True, timeout=12, check=True)
                 row['containers'] = [json.loads(line) for line in stats.stdout.splitlines() if line.strip()]
+                if args.cohort == 'cap09':
+                    cap09_stats(row['containers'], identities)
                 for item in row['containers']:
                     if float(item['MemPerc'].rstrip('%')) >= 85:
                         signal('owned container memory budget reached: ' + item.get('Name', 'unknown'))

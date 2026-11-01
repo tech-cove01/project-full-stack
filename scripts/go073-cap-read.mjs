@@ -9,7 +9,11 @@ import { tmpdir } from 'node:os'
 import { resolve, dirname, join } from 'node:path'
 import net from 'node:net'
 
-const owned = { project: 'project-full-stack-cap-read', mysql: '3451', redis: '6551', api: 'http://127.0.0.1:8251', database: 'project_full_stack_go' }
+assert.ok(process.env.CAP_COHORT === undefined || process.env.CAP_COHORT === 'cap09', 'unsupported fixed read cohort')
+const cap09 = process.env.CAP_COHORT === 'cap09'
+const owned = cap09
+  ? { project: 'project-full-stack-cap09', mysql: '3471', redis: '6571', api: 'http://127.0.0.1:8271', database: 'project_full_stack_go' }
+  : { project: 'project-full-stack-cap-read', mysql: '3451', redis: '6551', api: 'http://127.0.0.1:8251', database: 'project_full_stack_go' }
 for (const name of ['MYSQL_USER', 'MYSQL_PASSWORD', 'CAP_SOURCE_SHA', 'CAP_READ_EXPECTED_REVISION']) assert.ok(process.env[name], `explicit ${name} required`)
 assert.match(process.env.CAP_SOURCE_SHA, /^[0-9a-f]{40}$/)
 assert.equal(process.env.CAP_READ_EXPECTED_REVISION, `capacity-${process.env.CAP_SOURCE_SHA}`, 'API revision must bind the declared API source SHA')
@@ -76,7 +80,7 @@ async function redis(...parts) {
   })
 }
 async function api(method, path, body, token) {
-  const response = await fetch(owned.api + path, { method, headers: { 'Content-Type': 'application/json', ...(token ? { authorization: token } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), signal: AbortSignal.timeout(10000) })
+  const response = await fetch(owned.api + path, { method, headers: { 'Content-Type': 'application/json', ...(token ? { authorization: token } : {}) }, ...(body ? { body: JSON.stringify(body) } : {}), ...(cap09 ? { redirect: 'error' } : {}), signal: AbortSignal.timeout(10000) })
   return { status: response.status, body: await response.json() }
 }
 async function guard() {
@@ -99,6 +103,10 @@ async function loadFixture() {
   assert.equal(manifest.expectedRevision, `capacity-${manifest.sourceSha}`, 'fixture revision must retain its original source binding')
   const runtime = JSON.parse(await readFile(manifest.credentialFile, 'utf8'))
   assert.equal(runtime.fixture, manifest.fixture); assert.ok(Array.isArray(runtime.readers) && runtime.readers.length <= 32)
+  if (cap09) {
+    assert.equal(runtime.baseUrl, owned.api); assert.equal(runtime.pageSize, 20)
+    assert.equal(runtime.content, 'x'.repeat(256)); assert.equal(typeof runtime.shopName, 'string')
+  }
   return { manifest, runtime, manifestSHA256: createHash('sha256').update(manifestBytes).digest('hex') }
 }
 function parseCommands(text) {
@@ -175,7 +183,7 @@ if (action === 'prepare') {
   assert.ok(process.env.CAP_READ_FIXTURE_DIR, 'explicit new CAP_READ_FIXTURE_DIR required')
   const dir = resolve(process.env.CAP_READ_FIXTURE_DIR); await mkdir(dir, { recursive: false })
   const fixture = 'capread-' + randomBytes(5).toString('hex'), runtimeDir = await mkdtemp(join(tmpdir(), 'cap-read-')), credentialFile = join(runtimeDir, 'input.json')
-  const manifest = { task: 'GO-073-CAP-03', fixture, project: owned.project, baseUrl: owned.api, sourceSha: process.env.CAP_SOURCE_SHA, expectedRevision: process.env.CAP_READ_EXPECTED_REVISION, credentialFile, pageSize: 20, authors: 32, readers: 32, notesPerAuthor: 200, noteCount: 6400, created: new Date().toISOString(), status: 'PREPARING' }
+  const manifest = { task: cap09 ? 'CAP-09-Feed' : 'GO-073-CAP-03', fixture, project: owned.project, baseUrl: owned.api, sourceSha: process.env.CAP_SOURCE_SHA, expectedRevision: process.env.CAP_READ_EXPECTED_REVISION, credentialFile, pageSize: 20, authors: 32, readers: 32, notesPerAuthor: 200, noteCount: 6400, created: new Date().toISOString(), status: 'PREPARING' }
   await writeFile(join(dir, 'fixture.json'), JSON.stringify(manifest, null, 2) + '\n', { flag: 'wx' })
   const usedPhones = new Set(), phones = Array.from({ length: 64 }, () => { let phone; do { phone = '136' + randomInt(10000000, 100000000) } while (usedPhones.has(phone)); usedPhones.add(phone); return phone })
   const names = phones.map((_, i) => fixture + (i < 32 ? '-a' : '-r') + String(i % 32).padStart(2, '0'))
@@ -188,23 +196,30 @@ if (action === 'prepare') {
   Object.assign(manifest, { authorIds, readerIds }); await writeFile(join(dir, 'fixture.json'), JSON.stringify(manifest, null, 2) + '\n')
   const noteValues = []; for (let ordinal = 0; ordinal < 200; ordinal++) for (let a = 0; a < 32; a++) noteValues.push(`(1,${authorIds[a]},'${fixture}-${ordinal}-${a}','','${'x'.repeat(256)}',0,0,'PUBLISHED',1,NOW()-INTERVAL 1 HOUR,NOW()-INTERVAL 1 HOUR)`)
   await sql(`START TRANSACTION; INSERT INTO tb_follow(user_id,follow_user_id,active,version) VALUES ${readerIds.map((id, a) => `(${id},${authorIds[a]},1,1)`).join(',')}; INSERT INTO tb_blog(shop_id,user_id,title,images,content,liked,comments,status,publish_version,create_time,update_time) VALUES ${noteValues.join(',')}; COMMIT;`)
-  const notes = (await sql(`SELECT id,user_id FROM tb_blog WHERE title LIKE '${fixture}%' ORDER BY create_time DESC,id DESC`)).split(/\r?\n/).map(line => line.split('\t'))
+  const noteColumns = cap09 ? "id,user_id,title,DATE_FORMAT(create_time,'%Y-%m-%d %H:%i:%s')" : 'id,user_id'
+  const notes = (await sql(`SELECT ${noteColumns} FROM tb_blog WHERE title LIKE '${fixture}%' ORDER BY create_time DESC,id DESC`)).split(/\r?\n/).map(line => line.split('\t'))
   assert.equal(notes.length, 6400)
   const readers = []
-  await writeFile(credentialFile, JSON.stringify({ fixture, baseUrl: owned.api, pageSize: 20, readers }), { mode: 0o600, flag: 'wx' })
+  const contract = cap09 ? { expectedSource: 'database', content: 'x'.repeat(256), shopName: JSON.parse(await sql('SELECT JSON_QUOTE(name) FROM tb_shop WHERE id=1')) } : {}
+  const privateInput = { fixture, baseUrl: owned.api, pageSize: 20, ...contract, readers }
+  await writeFile(credentialFile, JSON.stringify(privateInput), { mode: 0o600, flag: 'wx' })
   for (let i = 0; i < 32; i++) {
     const phone = phones[32 + i], code = await api('POST', '/user/code?phone=' + phone)
     assert.equal(code.body.data?.mode, 'development')
     const login = await api('POST', '/user/login', { phone, code: code.body.data.code }); assert.equal(login.body.success, true); assert.equal(typeof login.body.data, 'string')
-    const expectedIds = notes.filter(([, author]) => author === authorIds[i]).slice(0, 20).map(([id]) => id)
-    readers.push({ userId: readerIds[i], authorId: authorIds[i], token: login.body.data, expectedIds })
+    const expected = notes.filter(([, author]) => author === authorIds[i]).slice(0, 20)
+    const expectedIds = expected.map(([id]) => id)
+    readers.push({ userId: readerIds[i], authorId: authorIds[i], token: login.body.data, expectedIds,
+      ...(cap09 ? { expectedTitles: expected.map(row => row[2]), expectedCreateTimes: expected.map(row => row[3]) } : {}) })
     // Keep already-issued sessions recoverable if a later login or probe fails.
-    await writeFile(credentialFile, JSON.stringify({ fixture, baseUrl: owned.api, pageSize: 20, readers }), { mode: 0o600 })
+    await writeFile(credentialFile, JSON.stringify(privateInput), { mode: 0o600 })
   }
-  // Fixed data is inserted outside the measured window; no community events
-  // were created. Kafka must remain disabled, and Feed source must be database.
+  // Fixed facts are inserted outside the measured window, with no community
+  // events. CAP09 keeps relay/three consumers/ES enabled and accounts for their
+  // state separately; the intentionally incomplete catalog still yields the
+  // full authoritative database Feed, never a silently lighter projection.
   for (const reader of readers) { const result = await api('GET', '/feed/notes?limit=20', undefined, reader.token); assert.equal(result.body.data?.source, 'database'); assert.deepEqual(result.body.data.items.map(x => x.id), reader.expectedIds) }
-  Object.assign(manifest, { status: 'READY', expectedPages: readers.map(({ token, ...r }) => r), noteIds: notes.map(([id]) => id), indexes: await sql('SHOW INDEX FROM tb_blog; SHOW INDEX FROM tb_follow; SHOW INDEX FROM tb_blog_like') })
+  Object.assign(manifest, { status: 'READY', ...(cap09 ? { cohort: 'cap09', bodyBytes: 256, expectedSource: 'database', downstreamScope: 'relay, follow-v1, feed-v1 and search-v1 remain enabled; direct fixture inserts emit no publication events' } : {}), expectedPages: readers.map(({ token, ...r }) => r), noteIds: notes.map(([id]) => id), indexes: await sql('SHOW INDEX FROM tb_blog; SHOW INDEX FROM tb_follow; SHOW INDEX FROM tb_blog_like') })
   await writeFile(join(dir, 'fixture.json'), JSON.stringify(manifest, null, 2) + '\n')
   console.log(JSON.stringify({ prepared: true, manifest: join(dir, 'fixture.json'), readers: 32, notes: 6400 }))
 } else if (action === 'finish') {
@@ -222,7 +237,12 @@ if (action === 'prepare') {
   assert.ok(process.env.CAP_READ_EVIDENCE, 'explicit new CAP_READ_EVIDENCE required')
   const dir = resolve(process.env.CAP_READ_EVIDENCE); await mkdir(dir, { recursive: false })
   if (process.env.CAP_STOP_FILE) { try { await readFile(process.env.CAP_STOP_FILE); throw new Error('stop file already exists; preserve it and choose a new path') } catch (error) { if (error.code !== 'ENOENT') throw error } }
-  const report = { task: 'GO-073-CAP-03', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture, apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION, fixtureSourceSha: manifest.sourceSha, fixtureExpectedRevision: manifest.expectedRevision, fixtureManifestSHA256: manifestSHA256, pageSize: 20, activeReaders: mode === 'hot' ? 1 : 32, activeCountKeys: mode === 'hot' ? 20 : 640, thresholds: { actualOfferedRatioMin: .99, successfulFractionMin: .99, incompleteOrUnclassifiedMax: 0, droppedMax: 0, systemErrorRateMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500, successfulP95MsMax: 200, successfulP99MsMax: 500, contentErrorsMax: 0 }, started: new Date().toISOString() }
+  const report = { task: cap09 ? 'CAP-09-Feed' : 'GO-073-CAP-03', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture, apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION, fixtureSourceSha: manifest.sourceSha, fixtureExpectedRevision: manifest.expectedRevision, fixtureManifestSHA256: manifestSHA256, pageSize: 20, activeReaders: mode === 'hot' ? 1 : 32, activeCountKeys: mode === 'hot' ? 20 : 640, thresholds: { actualOfferedRatioMin: .99, successfulFractionMin: .99, incompleteOrUnclassifiedMax: 0, droppedMax: 0, systemErrorRateMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500, successfulP95MsMax: 200, successfulP99MsMax: 500, contentErrorsMax: 0 }, started: new Date().toISOString() }
+  if (cap09) {
+    assert.equal(manifest.cohort, 'cap09'); assert.equal(manifest.bodyBytes, 256)
+    assert.ok(runtime.readers.every(reader => reader.expectedTitles?.length === 20 && reader.expectedCreateTimes?.length === 20), 'CAP09 full-content expected metadata required')
+    report.fullContentContract = 'IDs/order/author/shop/counts/own-state/title/256B body/images/createTime/nextCursor; classification CPU is observed on the generator'
+  }
   let beforeWarm = null
   async function runPhase(phase, duration) {
     if (process.env.CAP_STOP_FILE) {
@@ -242,7 +262,7 @@ if (action === 'prepare') {
     report.selectInstrument = await sql("SELECT ENABLED,TIMED FROM performance_schema.setup_instruments WHERE NAME='statement/sql/select'", true)
     assert.equal(report.selectInstrument, 'YES\tYES', 'timed statement/sql/select instrumentation required')
     beforeWarm = await snapshot('before-warm')
-    const hashes = {}; for (const path of ['scripts/go073-cap-read.mjs', 'scripts/load/go073-cap-read.js']) hashes[path] = createHash('sha256').update(await readFile(path)).digest('hex')
+    const hashes = {}; for (const path of ['scripts/go073-cap-read.mjs', 'scripts/load/go073-cap-read.js', ...(cap09 ? ['scripts/load/cap09-feed-contract.js'] : [])]) hashes[path] = createHash('sha256').update(await readFile(path)).digest('hex')
     report.scriptSHA256 = hashes
     const warm = await runPhase('warm', warmSeconds); report.warmExit = warm.code; report.warmExternalStop = warm.externalStop
     assert.equal(report.warmExit, 0, 'warm probe failed; no stable workload started')

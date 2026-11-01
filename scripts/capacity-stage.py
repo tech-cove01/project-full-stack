@@ -7,9 +7,11 @@ Read warmup uses a separate k6 process: sampling starts only at stable phase.
 """
 import argparse
 import datetime as dt
+import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import subprocess
 import sys
 import time
@@ -31,9 +33,26 @@ def write_new(path, value):
         return False
 
 
+def stage_profile(mode, cohort='legacy'):
+    if cohort == 'cap09':
+        if mode not in ('read', 'like'):
+            raise ValueError('CAP09 measures only Feed read and real like writes')
+        return {'diagnostics': 'http://127.0.0.1:8371/debug/capacity',
+                'project': 'project-full-stack-cap09',
+                'script': 'go073-cap-read.js' if mode == 'read' else 'cap09-like.js',
+                'output': 'CAP_READ_EVIDENCE' if mode == 'read' else 'CAP_LIKE_EVIDENCE'}
+    if cohort != 'legacy' or mode not in ('trade', 'read'):
+        raise ValueError('unsupported capacity cohort/mode')
+    return {'diagnostics': f"http://127.0.0.1:{8350 if mode == 'trade' else 8351}/debug/capacity",
+            'project': 'project-full-stack-cap-' + mode,
+            'script': 'capacity-trade.js' if mode == 'trade' else 'go073-cap-read.js',
+            'output': 'CAP_OUTPUT_DIR' if mode == 'trade' else 'CAP_READ_EVIDENCE'}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--mode', choices=('trade', 'read'), required=True)
+    parser.add_argument('--mode', choices=('trade', 'read', 'like'), required=True)
+    parser.add_argument('--cohort', choices=('legacy', 'cap09'), default='legacy')
     parser.add_argument('--control-dir', type=Path, required=True,
                         help='new directory for sampler, stop/done signals and exit status')
     parser.add_argument('--api-pid', type=int, required=True)
@@ -49,16 +68,37 @@ def main():
     command = args.command[1:] if args.command[:1] == ['--'] else args.command
     if not command or not 2 <= args.interval <= 30 or not 1 <= args.max_seconds <= 3600 or not 5 <= args.stop_grace_seconds <= 300:
         parser.error('command and bounded sampling/deadline/grace settings required')
-    expected_diagnostics = f"http://127.0.0.1:{8350 if args.mode == 'trade' else 8351}/debug/capacity"
-    if args.diagnostics != expected_diagnostics:
+    try:
+        profile = stage_profile(args.mode, args.cohort)
+    except ValueError as error:
+        parser.error(str(error))
+    if args.diagnostics != profile['diagnostics']:
         parser.error('exact dedicated loopback diagnostics URL required for this mode')
+    ownership = None
+    if args.cohort == 'cap09':
+        if os.environ.get('CAP_COHORT') != 'cap09':
+            parser.error('CAP09 requires explicit CAP_COHORT=cap09')
+        ownership = Path(os.environ.get('CAP09_ENVIRONMENT_METADATA', '')).resolve()
+        expected = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap09/environment.json'
+        if ownership != expected or not ownership.is_file():
+            parser.error('fixed CAP09 ownership metadata required')
+        environment = json.loads(ownership.read_text(encoding='utf-8-sig'))
+        if environment.get('project') != profile['project'] or set(environment.get('containers', {})) != {'mysql', 'redis', 'kafka', 'elasticsearch'}:
+            parser.error('CAP09 environment/project/services differ')
+        container_ids = [environment['containers'][name]['id'] for name in ('mysql', 'redis', 'kafka', 'elasticsearch')]
+        if not all(re.fullmatch(r'[a-f0-9]{64}', value) for value in container_ids) or len(set(container_ids)) != 4:
+            parser.error('four immutable CAP09 container IDs required')
     control = args.control_dir.resolve()
-    output_var = 'CAP_OUTPUT_DIR' if args.mode == 'trade' else 'CAP_READ_EVIDENCE'
+    output_var = profile['output']
     raw_output, raw_stop = os.environ.get(output_var), os.environ.get('CAP_STOP_FILE')
     if not raw_output or not raw_stop:
         parser.error(f'explicit {output_var} and CAP_STOP_FILE required in environment')
     load = Path(raw_output).resolve()
     stop = Path(raw_stop).resolve()
+    if args.cohort == 'cap09':
+        evidence_root = ownership.parent
+        if not all(value != evidence_root and value.is_relative_to(evidence_root) for value in (load, control)):
+            parser.error('CAP09 load/control must remain inside this fixed new evidence root')
     if control.exists() or load.exists() or stop.exists():
         parser.error('control directory, harness output and stop path must all be new')
     if control == load or control in load.parents or load in control.parents:
@@ -72,8 +112,7 @@ def main():
     sampler_script = Path(__file__).resolve().with_name('capacity-resources.py')
     if not sampler_script.is_file():
         parser.error('capacity-resources.py must exist beside this wrapper')
-    project = 'project-full-stack-cap-' + args.mode
-    script = 'capacity-trade.js' if args.mode == 'trade' else 'go073-cap-read.js'
+    project, script = profile['project'], profile['script']
     control.mkdir()
     state = {'started_at': now(), 'mode': args.mode, 'api_pid': api.pid,
              'sampler_started': False, 'stop_signal': False, 'forced_owned_processes': [],
@@ -81,6 +120,9 @@ def main():
                                                'GOMEMLIMIT': os.environ.get('GOMEMLIMIT'),
                                                'scope': 'inherited by harness children; null means runtime default; API is a pre-existing process observed separately'},
              'errors': []}
+    if args.cohort == 'cap09':
+        state.update(cohort=args.cohort, ownership_metadata=str(ownership),
+                     ownership_metadata_sha256=hashlib.sha256(ownership.read_bytes()).hexdigest(), container_ids=container_ids)
     child = sampler = None
     owned_generator = None
     child_identity = None
@@ -98,7 +140,7 @@ def main():
     def generator():
         # Read the file privately; only the selected identity fields are used.
         detail = json.loads((load / 'process.json').read_text(encoding='utf-8-sig'))
-        if args.mode == 'read' and detail.get('phase') != 'stable':
+        if args.mode in ('read', 'like') and detail.get('phase') != 'stable':
             return None
         helper = psutil.Process(int(detail['helper_pid']))
         candidate = psutil.Process(int(detail['k6_pid']))
@@ -175,6 +217,17 @@ def main():
                             '--output', str(control / 'resources.ndjson'), '--stop-file', str(stop),
                             '--done-file', str(control / 'done.json'), '--interval', str(args.interval),
                             '--max-seconds', str(args.max_seconds)]
+                        if args.cohort == 'cap09':
+                            # Replace only the two legacy name arguments with all
+                            # four immutable IDs from this batch's public manifest.
+                            sampler_command = [sys.executable, str(sampler_script), '--api-pid', str(api.pid),
+                                '--diagnostics', args.diagnostics, '--project', project,
+                                '--cohort', 'cap09', '--ownership', str(ownership),
+                                *[value for cid in container_ids for value in ('--container', cid)],
+                                '--load-script', script, '--load-pid-file', str(load / 'process.json'),
+                                '--output', str(control / 'resources.ndjson'), '--stop-file', str(stop),
+                                '--done-file', str(control / 'done.json'), '--interval', str(args.interval),
+                                '--max-seconds', str(args.max_seconds)]
                         sampler = subprocess.Popen(sampler_command, stdout=sampler_log,
                             stderr=subprocess.STDOUT, creationflags=flags)
                         state.update(sampler_started=True, sampler_pid=sampler.pid,

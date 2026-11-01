@@ -2,6 +2,7 @@ import http from 'k6/http'
 import exec from 'k6/execution'
 import { SharedArray } from 'k6/data'
 import { Counter, Rate, Trend } from 'k6/metrics'
+import { validCap09Feed } from './cap09-feed-contract.js'
 
 // Credentials live in an OS-temporary input, never in output or metric tags.
 const fixture = JSON.parse(open(__ENV.CAP_READ_INPUT))
@@ -10,6 +11,7 @@ const rate = Number(__ENV.CAP_READ_RATE)
 const seconds = Number(__ENV.CAP_READ_SECONDS)
 const mode = __ENV.CAP_READ_MODE
 const phase = __ENV.CAP_READ_PHASE || 'stable'
+const cap09 = __ENV.CAP_COHORT === 'cap09'
 const abort = __ENV.CAP_READ_ABORT !== '0' && phase === 'stable'
 if (!Number.isInteger(rate) || rate < 1 || rate > 20000 || !Number.isInteger(seconds) || seconds < 1 || seconds > 600 || !['hot', 'multi'].includes(mode)) throw new Error('invalid read load settings')
 
@@ -49,6 +51,7 @@ export default function () {
   // Each VU has at most one bounded diagnostic; success requests do not log.
   const response = http.get(`${fixture.baseUrl}/feed/notes?limit=${fixture.pageSize}`, {
     headers: { authorization: reader.token }, tags: { name: 'feed-20', phase, mode }, timeout: '5s',
+    ...(cap09 ? { redirects: 0 } : {}),
   })
   allLatency.add(response.timings.duration)
   let parsed = null
@@ -56,7 +59,8 @@ export default function () {
   const isSystemError = response.status === 0 || response.status >= 500 || parsed === null
   const isHTTPError = response.status !== 200
   const items = parsed && parsed.success === true && parsed.data ? parsed.data.items : null
-  const correct = Array.isArray(items) && items.length === fixture.pageSize && parsed.data.source === 'database' && items.every((item, i) => item.id === reader.expectedIds[i] && item.userId === reader.authorId && item.liked === 0 && item.comments === 0 && item.likedByMe === false && item.shopId === '1')
+  const correct = cap09 ? validCap09Feed(parsed?.success === true ? parsed.data : null, reader, fixture) :
+    Array.isArray(items) && items.length === fixture.pageSize && parsed.data.source === 'database' && items.every((item, i) => item.id === reader.expectedIds[i] && item.userId === reader.authorId && item.liked === 0 && item.comments === 0 && item.likedByMe === false && item.shopId === '1')
   systemErrors.add(isSystemError ? 1 : 0)
   systemErrorRatio.add(isSystemError)
   httpErrors.add(isHTTPError ? 1 : 0)

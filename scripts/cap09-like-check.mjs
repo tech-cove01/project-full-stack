@@ -58,4 +58,30 @@ check('actual native script records its clock once per participating VU', () => 
   assert.deepEqual(values.get('cap_native_scenario_duration_ms'), [45000])
   assert.equal(values.get('cap_like_mutation').reduce((a, b) => a + b), 2)
 })
+check('warm records latency but only stable applies the original latency SLO', () => {
+  const source = readFileSync('scripts/load/cap09-like.js', 'utf8').replace(/^import .*$/gm, '')
+    .replace('export const options', 'const options').replace('export default function ()', 'function invoke()')
+  const byPhase = {}
+  for (const phase of ['warm', 'stable']) {
+    const values = new Map()
+    class Metric { constructor(name) { this.name = name; values.set(name, []) } add(value) { values.get(this.name).push(value) } }
+    const context = { __ENV: { CAP_LIKE_INPUT: 'unused', CAP_LIKE_MODE: 'multi', CAP_LIKE_RATE: '1', CAP_LIKE_SECONDS: '10', CAP_LIKE_PHASE: phase },
+      open: () => JSON.stringify(fixture), Counter: Metric, Rate: Metric, Trend: Metric, stateFromBody, classifyWrite, pairForVU,
+      exec: { vu: { idInTest: 1 }, scenario: { startTime: 1200 } }, console,
+      http: { put: () => ({ status: 200, timings: { duration: 219.66 }, json: () => body(true, 1) }) } }
+    vm.runInNewContext(source + '\nglobalThis.invoke = invoke; globalThis.testOptions = options', context)
+    context.invoke()
+    assert.deepEqual(values.get('cap_like_all_ms'), [219.66])
+    assert.ok(context.testOptions.summaryTrendStats.includes('p(95)') && context.testOptions.summaryTrendStats.includes('p(99)'))
+    byPhase[phase] = JSON.parse(JSON.stringify(context.testOptions.thresholds))
+  }
+  assert.deepEqual(byPhase.stable.cap_like_all_ms, [
+    { threshold: 'p(95)<=200', abortOnFail: true, delayAbortEval: '10s' },
+    { threshold: 'p(99)<=500', abortOnFail: true, delayAbortEval: '10s' }])
+  assert.equal(Object.hasOwn(byPhase.warm, 'cap_like_all_ms'), false)
+  delete byPhase.stable.cap_like_all_ms
+  const neutral = gates => Object.fromEntries(Object.entries(gates).map(([name, rules]) => [name,
+    rules.map(rule => typeof rule === 'object' ? { ...rule, abortOnFail: false } : rule)]))
+  assert.deepEqual(byPhase.warm, neutral(byPhase.stable))
+})
 console.log(JSON.stringify({ checks, failed: 0, servicesStarted: false, loadRuns: 0 }))

@@ -1,0 +1,123 @@
+{
+  "at": "2026-11-01T06:22:17.760161+00:00",
+  "tag": "like-baseline-hot-1",
+  "passed": false,
+  "failedStartOrException": "KeyError",
+  "wrapperExit": 1,
+  "observerExit": 0,
+  "childrenConverged": true,
+  "observerPid": 17608,
+  "wrapperPid": 45476,
+  "loadWaitStartedAt": "2026-11-01T06:22:18.042951+00:00",
+  "loadWaitFinishedAt": "2026-11-01T06:22:31.191224+00:00",
+  "powerEvidence": {
+    "before": {
+      "at": "2026-11-01T06:22:17.760257+00:00",
+      "hostMemoryPercent": 83.1,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "after": {
+      "at": "2026-11-01T06:22:33.079091+00:00",
+      "hostMemoryPercent": 85.9,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "events": {
+      "available": true,
+      "events": []
+    },
+    "valid": true
+  },
+  "observerResources": [
+    {
+      "at": "2026-11-01T06:22:18.065601+00:00",
+      "pid": 17608,
+      "rssBytes": 16269312,
+      "cpuPercentOneCore": 20.2,
+      "cpuIntervalSeconds": 0.2316241999506019,
+      "cpuIntervalValid": false,
+      "power": {
+        "at": "2026-11-01T06:22:18.065169+00:00",
+        "hostMemoryPercent": 83.2,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:22:23.334300+00:00",
+      "pid": 17608,
+      "rssBytes": 16302080,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.268699100008234,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:22:23.333853+00:00",
+        "hostMemoryPercent": 85.1,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:22:28.931949+00:00",
+      "pid": 17608,
+      "rssBytes": 16314368,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.597640299994964,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:22:28.930860+00:00",
+        "hostMemoryPercent": 86.4,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    }
+  ],
+  "toolBytesStable": true,
+  "apiPassed": false,
+  "factsConverged": false,
+  "probeExpectedStopConfirmed": false,
+  "knownOwnedProcesses": [
+    {
+      "pid": 45476,
+      "created": 1793514138.0393257,
+      "name": "python.exe"
+    },
+    {
+      "pid": 29988,
+      "created": 1793514138.0474288,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 62504,
+      "created": 1793514138.2454324,
+      "name": "node.exe"
+    },
+    {
+      "pid": 40584,
+      "created": 1793514138.3000972,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 56492,
+      "created": 1793514138.564268,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 66892,
+      "created": 1793514138.995216,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 50324,
+      "created": 1793514139.0439975,
+      "name": "conhost.exe"
+    }
+  ],
+  "finishedAt": "2026-11-01T06:22:33.085726+00:00"
+}

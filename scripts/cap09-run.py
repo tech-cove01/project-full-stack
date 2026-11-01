@@ -269,7 +269,7 @@ def main():
         report, status = owned.read(load / 'result.json'), owned.read(control / 'exit-status.json')
         state['apiPassed'] = report.get('meetsAPIBudget', report.get('meetsBudget')) is True
         state['factsConverged'] = report.get('finalReconcileValid', args.chain == 'feed') is True
-        state['resourcesPassed'] = status['sampler_exit'] == 0 and not status['errors'] and not status['stop_signal'] and not status['forced'] and status['resource_samples'] == status['complete_resource_samples'] and status['resource_samples'] > 0
+        state['resourcesPassed'] = status.get('sampler_exit') == 0 and not status['errors'] and not status['stop_signal'] and not status['forced'] and status['resource_samples'] == status['complete_resource_samples'] and status['resource_samples'] > 0
         stop_record = owned.read(control / 'stop.json') if (control / 'stop.json').exists() else {}
         state['intentionalStopWritten'] = intentional_stop_written
         observer_summary = owned.read(downstream / 'summary.json')

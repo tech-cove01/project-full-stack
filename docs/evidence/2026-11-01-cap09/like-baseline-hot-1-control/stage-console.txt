@@ -1,0 +1,1 @@
+{"task":"CAP-09","mode":"hot","rate":20,"seconds":45,"meetsAPIBudget":false,"meetsBudget":false,"failure":"warm failed; stable phase not started\n\n99 !== 0\n"}

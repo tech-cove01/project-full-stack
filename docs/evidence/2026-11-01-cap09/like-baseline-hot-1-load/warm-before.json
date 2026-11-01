@@ -1,0 +1,20 @@
+{
+  "label": "before-warm",
+  "startedAt": 1793514138773,
+  "endedAt": 1793514138983,
+  "facts": [],
+  "notes": [
+    {
+      "liked": 0,
+      "noteId": "6913",
+      "activeRelations": 0
+    }
+  ],
+  "events": [],
+  "delivery": [],
+  "receipts": [],
+  "parked": [],
+  "transitions": 0,
+  "eventCount": 0,
+  "scope": "one read-only RR snapshot of the selected synthetic note pool; pre/post captures sequential; global consumer-failure rows include earlier stages in the owned DB"
+}

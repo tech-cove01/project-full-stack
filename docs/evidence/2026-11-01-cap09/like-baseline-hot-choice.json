@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-01T06:22:17.030469+00:00",
+  "task": "CAP-09B deferred single hot-note baseline",
+  "sourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "rate": 20,
+  "seconds": 45,
+  "warmRate": 20,
+  "warmSeconds": 10,
+  "mode": "hot",
+  "reason": "Correctness fault stopped like chain before original hot slot. Its acknowledged-commit cancellation fix is verified; one unused hot slot now tests corrected sourceA with original relay.20/s is below original50/s limited workload and provides fixed same hot conditions for remaining related-change final hot. No replacement if limited.",
+  "fixedConditions": [
+    "one hot note",
+    "512configureduser/relationpool and actualparticipants reported",
+    "same API payload/exclusiveperrelation",
+    "indexedobserver-r2",
+    "tailfalse/no CPU profiling",
+    "same SQL20/Redis10/GOMAX4/ES256/limits/persistence",
+    "same existingcohort/session identities and naturally accumulated event history reported"
+  ],
+  "comparisonLimit": "This is hot-note only, not an optimization-before multi stable capacity. Original main no valid full short stage remains explicit."
+}

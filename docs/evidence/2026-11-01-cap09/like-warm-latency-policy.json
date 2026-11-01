@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T06:27:01.796144+00:00",
+  "task": "CAP-09 measurement policy correction: warm latency vs formal steady gate",
+  "observedEvidence": [
+    "like-baseline-hot-1-load/warm-summary.json",
+    "like-baseline-hot-1-load/result.json",
+    "like-baseline-hot-1-postwarm-audit/reconcile.json"
+  ],
+  "observed": "10s warm completed201/201 actualmutations,unknown/noop/drop/errors0, full readonly facts/Redis/3IGNOREDauditvalid. WarmP95219.6577ms triggeredexit99 after complete10s; no stable45s existed. Originalhotfailed reservation staysconsumed.",
+  "contract": "STATUS CAP-09 correctness3 explicitly applies throughput/latency to formal stable window; warm is setup and is separately reported, not a steady capacity score.",
+  "change": "Only apply originalcap_like_all_ms P95/P99 threshold objects when phase=stable (existingabort boolean). Warm still adds latency metrics/exports summary and retains every other original classification/error/unknown/content/drop/resource/externalstop gate. Stable thresholds, abortOnFail/delay, helper API/facts/pipeline budgets completely unchanged.",
+  "forwardOnly": "No old artifact/pass is recalculated, no retries/replacementnames/newslots. All final main/hot/holds still obey originalstableSLO with full nominal45/180denominators and firstfailureendsgroup.",
+  "comparisonLimits": "Only old/new fullycompleted10s warm metrics can be contrasted at same20hot/finalflags; these are setup observations, not stable throughput. Oldstable main/hot full-valid baseline unavailable remains explicit. Formal after throughput is standalone.",
+  "review": "H independentlyreadSTATUS/nativeoptions foundwarm incorrectlyinheritsend-of-runSLOdespiteabortfalse; rootapprovesboundedtool-onlyfix, further nonauthorreviewbeforefinalstage."
+}

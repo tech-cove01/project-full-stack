@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T06:25:40.582762+00:00",
+  "argv": [
+    "node",
+    "scripts/cap09-like.mjs",
+    "reconcile"
+  ],
+  "exitCode": 0,
+  "mode": "hot",
+  "newLoadRuns": 0,
+  "scope": "readonly facts/Redis/receipts audit after fullycompleted201warm mutations; no stable workload and no retry"
+}

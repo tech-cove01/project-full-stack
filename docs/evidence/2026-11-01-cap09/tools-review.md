@@ -18,3 +18,5 @@ root执行器由点赞审查者独立复审，另9项纯convergence反例通过�
 Like最终同条件对照旗标：生产只有Feed端点启动tail request观察，故root把阶段gate限定为Feed diagnostic才true；Like diagnostic和其余所有purpose均强制false，并在command记录feedTailEnabled。非作者核这两行未改变任何名额、早停、收敛或原始工件；旧Like诊断1原true/旧hash/整体失败保持，新诊断2与最终20档可按同样tailfalse旗标比较。AST解析通过，该采集开关校正不改变应用代码。
 
 20/s诊断在native前被helper的warm<=target保护正确拒绝，runner已由非作者审查仅修为非probe warm=min(25,target)、probe保持1；>=25场景不变，AST通过。该诊断失败与slot2保留，不补跑、不转名额。热点before/after仅用于相同20/s/hot/tailfalse/indexedsampler/warm20场景，main先前无完整有效baseline不报相对优化比例。
+
+Warm/steady政策修正：仅stable保留原200/500ms对象、abort与delay，warm照常输出延迟与全部其它护栏。27项实际options纯检查与非作者审查通过，原hot201warm的SLO失败保持、不补45秒；sampler未启动时get缺字段判资源false、防secondary KeyError亦经独立审查。runner工作文件在读取时再次消失，已复核源码由Git blob保全，尚不代表最终容量执行完成。

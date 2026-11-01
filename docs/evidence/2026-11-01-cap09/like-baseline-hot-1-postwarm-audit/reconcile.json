@@ -1,0 +1,3492 @@
+{
+  "startedAt": 1793514340196,
+  "finishedAt": 1793514340566,
+  "elapsedMs": 370,
+  "valid": true,
+  "errors": [],
+  "facts": {
+    "label": "reconcile",
+    "startedAt": 1793514340196,
+    "endedAt": 1793514340558,
+    "facts": [
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "68",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "69",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "70",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "71",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "72",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "73",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "74",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "75",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "76",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "77",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "78",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "79",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "80",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "81",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "82",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "83",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "84",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "85",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "86",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "87",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "88",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "89",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "90",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "91",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "92",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "93",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "94",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "95",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "96",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "97",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "98",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "99",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "100",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "101",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "102",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "103",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "104",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "105",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "106",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "107",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "108",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "109",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "110",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "111",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "112",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "113",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "114",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "115",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "116",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "117",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "118",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "119",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "120",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "121",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "122",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "123",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "124",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "125",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "126",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "127",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "128",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "129",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "130",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "131",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "132",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "133",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "134",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "135",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "136",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "137",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "138",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "139",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "140",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "141",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "142",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "143",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "144",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "145",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "146",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "147",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "148",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "149",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "150",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "151",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "152",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "153",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "154",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "155",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "156",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "157",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "158",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "159",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "160",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "161",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "162",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "163",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "164",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "165",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "166",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "167",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "168",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "169",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "170",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "171",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "172",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "173",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "174",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "175",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "176",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "177",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "178",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "179",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "180",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "181",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "182",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "183",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "184",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "185",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "186",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "187",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "188",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "189",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "190",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "191",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "192",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "193",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "194",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "195",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "196",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "197",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "198",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "199",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "200",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "201",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "202",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "203",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "204",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "205",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "206",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "207",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "208",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "209",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "210",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "211",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "212",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "213",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "214",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "215",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "216",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "217",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "218",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "219",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "220",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "221",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "222",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "223",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "224",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "225",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "226",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "227",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "228",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "229",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "230",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "231",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "232",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "233",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "234",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "235",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "236",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "237",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "238",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "239",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "240",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "241",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "242",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "243",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "244",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "245",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "246",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "247",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "248",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "249",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "250",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "251",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "252",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "253",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "254",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "255",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "256",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "257",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "258",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "259",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "260",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "261",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "262",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "263",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "264",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "265",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "266",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "267",
+        "version": 1
+      },
+      {
+        "active": 1,
+        "noteId": "6913",
+        "userId": "269",
+        "version": 1
+      }
+    ],
+    "notes": [
+      {
+        "liked": 201,
+        "noteId": "6913",
+        "activeRelations": 201
+      }
+    ],
+    "events": [
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "100",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "101",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "102",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "103",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "104",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "105",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "106",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "107",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "108",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "109",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "110",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "111",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "112",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "113",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "114",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "115",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "116",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "117",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "118",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "119",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "120",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "121",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "122",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "123",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "124",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "125",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "126",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "127",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "128",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "129",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "130",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "131",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "132",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "133",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "134",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "135",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "136",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "137",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "138",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "139",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "140",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "141",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "142",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "143",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "144",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "145",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "146",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "147",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "148",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "149",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "150",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "151",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "152",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "153",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "154",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "155",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "156",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "157",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "158",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "159",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "160",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "161",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "162",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "163",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "164",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "165",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "166",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "167",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "168",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "169",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "170",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "171",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "172",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "173",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "174",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "175",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "176",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "177",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "178",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "179",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "180",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "181",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "182",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "183",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "184",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "185",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "186",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "187",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "188",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "189",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "190",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "191",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "192",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "193",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "194",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "195",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "196",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "197",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "198",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "199",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "200",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "201",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "202",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "203",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "204",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "205",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "206",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "207",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "208",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "209",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "210",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "211",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "212",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "213",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "214",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "215",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "216",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "217",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "218",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "219",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "220",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "221",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "222",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "223",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "224",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "225",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "226",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "227",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "228",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "229",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "230",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "231",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "232",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "233",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "234",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "235",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "236",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "237",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "238",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "239",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "240",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "241",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "242",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "243",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "244",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "245",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "246",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "247",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "248",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "249",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "250",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "251",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "252",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "253",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "254",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "255",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "256",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "257",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "258",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "259",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "260",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "261",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "262",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "263",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "264",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "265",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "266",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "267",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "269",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "68",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "69",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "70",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "71",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "72",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "73",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "74",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "75",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "76",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "77",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "78",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "79",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "80",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "81",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "82",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "83",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "84",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "85",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "86",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "87",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "88",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "89",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "90",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "91",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "92",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "93",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "94",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "95",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "96",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "97",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "98",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      },
+      {
+        "count": 1,
+        "noteId": "6913",
+        "userId": "99",
+        "invalid": 0,
+        "maxVersion": 1,
+        "minVersion": 1,
+        "distinctVersions": 1
+      }
+    ],
+    "delivery": [
+      {
+        "count": 201,
+        "status": "DONE"
+      }
+    ],
+    "receipts": [
+      {
+        "count": 201,
+        "state": "IGNORED",
+        "projection": "feed-v1"
+      },
+      {
+        "count": 201,
+        "state": "IGNORED",
+        "projection": "follow-v1"
+      },
+      {
+        "count": 201,
+        "state": "IGNORED",
+        "projection": "search-v1"
+      }
+    ],
+    "parked": [],
+    "transitions": 201,
+    "eventCount": 201,
+    "scope": "one read-only RR snapshot of the selected synthetic note pool; pre/post captures sequential; global consumer-failure rows include earlier stages in the owned DB"
+  },
+  "derived": {
+    "available": true,
+    "errors": [],
+    "notes": [
+      {
+        "noteId": "6913",
+        "members": [
+          "68",
+          "69",
+          "70",
+          "71",
+          "72",
+          "73",
+          "74",
+          "75",
+          "76",
+          "77",
+          "78",
+          "79",
+          "80",
+          "81",
+          "82",
+          "83",
+          "84",
+          "85",
+          "86",
+          "87",
+          "88",
+          "89",
+          "90",
+          "91",
+          "92",
+          "93",
+          "94",
+          "95",
+          "96",
+          "97",
+          "98",
+          "99",
+          "100",
+          "101",
+          "102",
+          "103",
+          "104",
+          "105",
+          "106",
+          "107",
+          "108",
+          "109",
+          "110",
+          "111",
+          "112",
+          "113",
+          "114",
+          "115",
+          "116",
+          "117",
+          "118",
+          "119",
+          "120",
+          "121",
+          "122",
+          "123",
+          "124",
+          "125",
+          "126",
+          "127",
+          "128",
+          "129",
+          "130",
+          "131",
+          "132",
+          "133",
+          "134",
+          "135",
+          "136",
+          "137",
+          "138",
+          "139",
+          "140",
+          "141",
+          "142",
+          "143",
+          "144",
+          "145",
+          "146",
+          "147",
+          "148",
+          "149",
+          "150",
+          "151",
+          "152",
+          "153",
+          "154",
+          "155",
+          "156",
+          "157",
+          "158",
+          "159",
+          "160",
+          "161",
+          "162",
+          "163",
+          "164",
+          "165",
+          "166",
+          "167",
+          "168",
+          "169",
+          "170",
+          "171",
+          "172",
+          "173",
+          "174",
+          "175",
+          "176",
+          "177",
+          "178",
+          "179",
+          "180",
+          "181",
+          "182",
+          "183",
+          "184",
+          "185",
+          "186",
+          "187",
+          "188",
+          "189",
+          "190",
+          "191",
+          "192",
+          "193",
+          "194",
+          "195",
+          "196",
+          "197",
+          "198",
+          "199",
+          "200",
+          "201",
+          "202",
+          "203",
+          "204",
+          "205",
+          "206",
+          "207",
+          "208",
+          "209",
+          "210",
+          "211",
+          "212",
+          "213",
+          "214",
+          "215",
+          "216",
+          "217",
+          "218",
+          "219",
+          "220",
+          "221",
+          "222",
+          "223",
+          "224",
+          "225",
+          "226",
+          "227",
+          "228",
+          "229",
+          "230",
+          "231",
+          "232",
+          "233",
+          "234",
+          "235",
+          "236",
+          "237",
+          "238",
+          "239",
+          "240",
+          "241",
+          "242",
+          "243",
+          "244",
+          "245",
+          "246",
+          "247",
+          "248",
+          "249",
+          "250",
+          "251",
+          "252",
+          "253",
+          "254",
+          "255",
+          "256",
+          "257",
+          "258",
+          "259",
+          "260",
+          "261",
+          "262",
+          "263",
+          "264",
+          "265",
+          "266",
+          "267",
+          "269"
+        ],
+        "versions": {
+          "68": "1",
+          "69": "1",
+          "70": "1",
+          "71": "1",
+          "72": "1",
+          "73": "1",
+          "74": "1",
+          "75": "1",
+          "76": "1",
+          "77": "1",
+          "78": "1",
+          "79": "1",
+          "80": "1",
+          "81": "1",
+          "82": "1",
+          "83": "1",
+          "84": "1",
+          "85": "1",
+          "86": "1",
+          "87": "1",
+          "88": "1",
+          "89": "1",
+          "90": "1",
+          "91": "1",
+          "92": "1",
+          "93": "1",
+          "94": "1",
+          "95": "1",
+          "96": "1",
+          "97": "1",
+          "98": "1",
+          "99": "1",
+          "100": "1",
+          "101": "1",
+          "102": "1",
+          "103": "1",
+          "104": "1",
+          "105": "1",
+          "106": "1",
+          "107": "1",
+          "108": "1",
+          "109": "1",
+          "110": "1",
+          "111": "1",
+          "112": "1",
+          "113": "1",
+          "114": "1",
+          "115": "1",
+          "116": "1",
+          "117": "1",
+          "118": "1",
+          "119": "1",
+          "120": "1",
+          "121": "1",
+          "122": "1",
+          "123": "1",
+          "124": "1",
+          "125": "1",
+          "126": "1",
+          "127": "1",
+          "128": "1",
+          "129": "1",
+          "130": "1",
+          "131": "1",
+          "132": "1",
+          "133": "1",
+          "134": "1",
+          "135": "1",
+          "136": "1",
+          "137": "1",
+          "138": "1",
+          "139": "1",
+          "140": "1",
+          "141": "1",
+          "142": "1",
+          "143": "1",
+          "144": "1",
+          "145": "1",
+          "146": "1",
+          "147": "1",
+          "148": "1",
+          "149": "1",
+          "150": "1",
+          "151": "1",
+          "152": "1",
+          "153": "1",
+          "154": "1",
+          "155": "1",
+          "156": "1",
+          "157": "1",
+          "158": "1",
+          "159": "1",
+          "160": "1",
+          "161": "1",
+          "162": "1",
+          "163": "1",
+          "164": "1",
+          "165": "1",
+          "166": "1",
+          "167": "1",
+          "168": "1",
+          "169": "1",
+          "170": "1",
+          "171": "1",
+          "172": "1",
+          "173": "1",
+          "174": "1",
+          "175": "1",
+          "176": "1",
+          "177": "1",
+          "178": "1",
+          "179": "1",
+          "180": "1",
+          "181": "1",
+          "182": "1",
+          "183": "1",
+          "184": "1",
+          "185": "1",
+          "186": "1",
+          "187": "1",
+          "188": "1",
+          "189": "1",
+          "190": "1",
+          "191": "1",
+          "192": "1",
+          "193": "1",
+          "194": "1",
+          "195": "1",
+          "196": "1",
+          "197": "1",
+          "198": "1",
+          "199": "1",
+          "200": "1",
+          "201": "1",
+          "202": "1",
+          "203": "1",
+          "204": "1",
+          "205": "1",
+          "206": "1",
+          "207": "1",
+          "208": "1",
+          "209": "1",
+          "210": "1",
+          "211": "1",
+          "212": "1",
+          "213": "1",
+          "214": "1",
+          "215": "1",
+          "216": "1",
+          "217": "1",
+          "218": "1",
+          "219": "1",
+          "220": "1",
+          "221": "1",
+          "222": "1",
+          "223": "1",
+          "224": "1",
+          "225": "1",
+          "226": "1",
+          "227": "1",
+          "228": "1",
+          "229": "1",
+          "230": "1",
+          "231": "1",
+          "232": "1",
+          "233": "1",
+          "234": "1",
+          "235": "1",
+          "236": "1",
+          "237": "1",
+          "238": "1",
+          "239": "1",
+          "240": "1",
+          "241": "1",
+          "242": "1",
+          "243": "1",
+          "244": "1",
+          "245": "1",
+          "246": "1",
+          "247": "1",
+          "248": "1",
+          "249": "1",
+          "250": "1",
+          "251": "1",
+          "252": "1",
+          "253": "1",
+          "254": "1",
+          "255": "1",
+          "256": "1",
+          "257": "1",
+          "258": "1",
+          "259": "1",
+          "260": "1",
+          "261": "1",
+          "262": "1",
+          "263": "1",
+          "264": "1",
+          "265": "1",
+          "266": "1",
+          "267": "1",
+          "269": "1"
+        }
+      }
+    ],
+    "scope": "selected note set membership and per-user version hash; __complete is optional and not treated as a count proof"
+  },
+  "timeline": [
+    {
+      "at": "2026-11-01T06:25:40.559Z",
+      "transitions": 201,
+      "eventCount": 201,
+      "pending": 0,
+      "parked": 0,
+      "receiptErrors": []
+    }
+  ],
+  "limitations": "Final convergence is not steady-state proof; the common stage observer must separately record last-minute backlog/lag and the 60s recovery deadline."
+}

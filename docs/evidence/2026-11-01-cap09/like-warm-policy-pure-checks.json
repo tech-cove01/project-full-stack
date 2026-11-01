@@ -1,0 +1,11 @@
+{
+  "at": "2026-11-01T06:31:23.990390+00:00",
+  "argv": [
+    "node",
+    "scripts/cap09-like-check.mjs"
+  ],
+  "exitCode": 0,
+  "noServicesOrLoad": true,
+  "runnerASTParsedFromGitBecauseWorkingFileRemoved": true,
+  "runnerStagedBlob": "69764bff1e624f767905f814d3b1ef90df5b6da8"
+}

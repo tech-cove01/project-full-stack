@@ -1,0 +1,51 @@
+{
+  "task": "CAP-09",
+  "mode": "hot",
+  "rate": 20,
+  "seconds": 45,
+  "warmSeconds": 10,
+  "warmRate": 20,
+  "preVUs": 256,
+  "maxVUs": 512,
+  "fixture": "caplike-0b423bbb4e",
+  "apiSourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "apiExpectedRevision": "capacity-e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "fixtureSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "fixtureManifestSHA256": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224",
+  "configuredPool": {
+    "users": 512,
+    "notes": 1,
+    "exclusiveRelationships": 512,
+    "authors": 1,
+    "noteBodyBytes": 256
+  },
+  "started": "2026-11-01T06:22:18.770Z",
+  "nativeScenario": {
+    "complete": false,
+    "scope": "native timing not yet verified; no completed scenario claim"
+  },
+  "thresholds": {
+    "actualOfferedRatioMin": 0.99,
+    "mutationFractionMin": 0.99,
+    "unexpectedNoopMax": 0,
+    "contentErrorsMax": 0,
+    "unknownMax": 0,
+    "droppedMax": 0,
+    "systemAndHTTPErrorRatesMaxExclusive": 0.01,
+    "p95MsMax": 200,
+    "p99MsMax": 500
+  },
+  "scope": "main attempts are real PUT state changes; pre-phase hydration is outside native workload. Non-mutation outcomes GET the fact and retire that relation for this phase, because one read can race a late unknown commit. Only a later phase after drain and fresh RR facts can resume it. Recovery GETs/cost are separate; API invalidate/read/Mark remain in PUT latency",
+  "scriptSHA256": {
+    "scripts/cap09-like.mjs": "f9352b0c52d1650bd20b3656ca465b6274f13ee74bcc63ce2b6512df4253e85e",
+    "scripts/load/cap09-like.js": "f363e9a2c9b251d8618a9acb8793ffed9af0fd6ae7acf10f1fc56cbee2a188f5",
+    "scripts/load/cap09-like-contract.mjs": "01f9f65c91daeddd4cb749c5af58e9b2e38f92fc92221af375c7585633950a7f",
+    "scripts/load/cap09-native-window.mjs": "bc09fd05fad0ddd14de8a2ad4e39fb9a13d40ee2c2f1bc468da9e9e4eba0e490"
+  },
+  "warmExit": 99,
+  "warmExternalStop": null,
+  "failure": "warm failed; stable phase not started\n\n99 !== 0\n",
+  "meetsBudget": false,
+  "meetsAPIBudget": false,
+  "finished": "2026-11-01T06:22:31.122Z"
+}

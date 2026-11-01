@@ -1,0 +1,6 @@
+{
+  "phase": "stable",
+  "helper_pid": 55444,
+  "k6_pid": 45880,
+  "k6_started_unix_ms": 1793514931728
+}

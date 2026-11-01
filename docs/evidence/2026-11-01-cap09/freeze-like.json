@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-01T06:42:12.740520+00:00",
+  "chain": "like",
+  "mode": "multi",
+  "rate": 20,
+  "seconds": 180,
+  "rounds": 2,
+  "sourceSha": "7a80186b568b521c54736b735c08dce8ef962e19",
+  "binarySHA256": "9f70db9ad869eaac4935f714c00980f3e5c173404fe584c9b725fdb943405fd7",
+  "environmentSHA256": "a1e1abff73f147cbc04933b7c27cef4bf169c2f1f9618c6e323fc57d77dc9e97",
+  "fixtureSHA256": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224",
+  "shortStageEvidence": [
+    "like-final-stair-1"
+  ],
+  "relatedChecksPassed": true,
+  "sourceCIPassed": true,
+  "sourceCIEvidence": "ci-b.json",
+  "selectionBasis": {
+    "highestCompleteShortRate": 20,
+    "firstLimitedRate": 50,
+    "shortAllP95Ms": 58.8572,
+    "shortAllP99Ms": 178.8933,
+    "shortTrueMutations": 901,
+    "unknownNoopDrop": 0,
+    "queueGrowthMaximum": 7,
+    "shortBudget": 8,
+    "scope": "20 chosen from complete actual45s event/fact proof with strong API/resource margins and2.5x belowfirstlimited50. Shortqueuebudgetonly1eventspare: formal must independentlypassactualfinal60s1%/native60srecovery, no predicted pass or denominator inflation."
+  },
+  "firstFailureEndsGroup": true,
+  "noLowerReplacementGroup": true,
+  "scope": "currentdevelopmentlaptop/fullsyncwrite+3realIGNOREDconsumerchain, notproductioncapacityorindependentrerun"
+}

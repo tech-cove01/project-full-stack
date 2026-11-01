@@ -1,0 +1,362 @@
+{
+  "at": "2026-11-01T06:37:05.763135+00:00",
+  "tag": "like-final-stair-2",
+  "passed": false,
+  "failedStartOrException": null,
+  "wrapperExit": 1,
+  "observerExit": 0,
+  "childrenConverged": true,
+  "observerPid": 13440,
+  "wrapperPid": 59300,
+  "loadWaitStartedAt": "2026-11-01T06:37:06.040071+00:00",
+  "earlyNormalObserverCompletion": true,
+  "loadWaitFinishedAt": "2026-11-01T06:37:51.998798+00:00",
+  "powerEvidence": {
+    "before": {
+      "at": "2026-11-01T06:37:05.763286+00:00",
+      "hostMemoryPercent": 73.5,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "after": {
+      "at": "2026-11-01T06:37:52.232847+00:00",
+      "hostMemoryPercent": 74.3,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "events": {
+      "available": true,
+      "events": []
+    },
+    "valid": true
+  },
+  "observerResources": [
+    {
+      "at": "2026-11-01T06:37:06.062265+00:00",
+      "pid": 13440,
+      "rssBytes": 16490496,
+      "cpuPercentOneCore": 27.0,
+      "cpuIntervalSeconds": 0.2313671000301838,
+      "cpuIntervalValid": false,
+      "power": {
+        "at": "2026-11-01T06:37:06.061852+00:00",
+        "hostMemoryPercent": 73.6,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:11.292482+00:00",
+      "pid": 13440,
+      "rssBytes": 16269312,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.230211999965832,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:11.291870+00:00",
+        "hostMemoryPercent": 74.9,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:16.524895+00:00",
+      "pid": 13440,
+      "rssBytes": 16527360,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.232419100007974,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:16.524461+00:00",
+        "hostMemoryPercent": 74.9,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:21.791587+00:00",
+      "pid": 13440,
+      "rssBytes": 16658432,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.2666861999896355,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:21.790830+00:00",
+        "hostMemoryPercent": 75.1,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:27.262765+00:00",
+      "pid": 13440,
+      "rssBytes": 16588800,
+      "cpuPercentOneCore": 0.6,
+      "cpuIntervalSeconds": 5.471172500052489,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:27.261630+00:00",
+        "hostMemoryPercent": 75.5,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:32.946995+00:00",
+      "pid": 13440,
+      "rssBytes": 16633856,
+      "cpuPercentOneCore": 0.5,
+      "cpuIntervalSeconds": 5.684237299952656,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:32.946292+00:00",
+        "hostMemoryPercent": 75.8,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:38.461970+00:00",
+      "pid": 13440,
+      "rssBytes": 16674816,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.5149759000050835,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:38.461393+00:00",
+        "hostMemoryPercent": 76.0,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:44.110577+00:00",
+      "pid": 13440,
+      "rssBytes": 16814080,
+      "cpuPercentOneCore": 1.1,
+      "cpuIntervalSeconds": 5.648604999994859,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:44.109951+00:00",
+        "hostMemoryPercent": 73.8,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:37:49.767636+00:00",
+      "pid": 13440,
+      "rssBytes": 16834560,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.657035700045526,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:37:49.765802+00:00",
+        "hostMemoryPercent": 74.5,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    }
+  ],
+  "toolBytesStable": true,
+  "apiPassed": false,
+  "factsConverged": true,
+  "resourcesPassed": true,
+  "intentionalStopWritten": false,
+  "probeExpectedStopConfirmed": false,
+  "pipeline": {
+    "passed": false,
+    "nativeScenarioComplete": false,
+    "nativeRecoveryBudgetVerified": false,
+    "scope": "failed/early-stop stage has no verified complete native offer window; raw scheduled timing is retained but no full-window pipeline claim is made"
+  },
+  "knownOwnedProcesses": [
+    {
+      "pid": 59300,
+      "created": 1793515026.036327,
+      "name": "python.exe"
+    },
+    {
+      "pid": 45484,
+      "created": 1793515026.0430677,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 5364,
+      "created": 1793515026.24394,
+      "name": "node.exe"
+    },
+    {
+      "pid": 38180,
+      "created": 1793515026.2862856,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 66488,
+      "created": 1793515026.5223265,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 27248,
+      "created": 1793515026.5502295,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 50480,
+      "created": 1793515027.0753644,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 18828,
+      "created": 1793515027.1171677,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 28040,
+      "created": 1793515038.9192455,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 50888,
+      "created": 1793515038.9595835,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 40496,
+      "created": 1793515039.36841,
+      "name": "python.exe"
+    },
+    {
+      "pid": 67900,
+      "created": 1793515039.3759987,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 71564,
+      "created": 1793515039.2182395,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 34356,
+      "created": 1793515039.257596,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 3424,
+      "created": 1793515040.1346836,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 46096,
+      "created": 1793515040.4457397,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 71288,
+      "created": 1793515045.4837916,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 38592,
+      "created": 1793515050.7041469,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 71188,
+      "created": 1793515052.792895,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 69308,
+      "created": 1793515052.847872,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 67148,
+      "created": 1793515059.0325592,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 33788,
+      "created": 1793515059.0769737,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 60808,
+      "created": 1793515060.6296809,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 69896,
+      "created": 1793515062.1081104,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 57036,
+      "created": 1793515062.3392572,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 62052,
+      "created": 1793515063.767882,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 38272,
+      "created": 1793515063.8310332,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 29192,
+      "created": 1793515065.6865845,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 51680,
+      "created": 1793515065.73909,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 10960,
+      "created": 1793515067.5916505,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 63896,
+      "created": 1793515067.769739,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 3596,
+      "created": 1793515069.2977943,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 48488,
+      "created": 1793515069.3500063,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 37440,
+      "created": 1793515070.9591331,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 60484,
+      "created": 1793515071.007431,
+      "name": "conhost.exe"
+    }
+  ],
+  "finishedAt": "2026-11-01T06:37:52.241684+00:00"
+}

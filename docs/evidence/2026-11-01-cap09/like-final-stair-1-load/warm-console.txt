@@ -1,0 +1,151 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: scripts/load/cap09-like.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 512 max VUs, 20s max duration (incl. graceful stop):
+              * write: 20.00 iterations/s for 10s (maxVUs: 256-512, gracefulStop: 10s)
+
+
+running (00.4s), 001/256 VUs, 7 complete and 0 interrupted iterations
+write   [   4% ] 001/256 VUs  00.4s/10s  20.00 iters/s
+
+running (01.4s), 001/256 VUs, 27 complete and 0 interrupted iterations
+write   [  14% ] 001/256 VUs  01.4s/10s  20.00 iters/s
+
+running (02.4s), 001/256 VUs, 47 complete and 0 interrupted iterations
+write   [  24% ] 001/256 VUs  02.4s/10s  20.00 iters/s
+
+running (03.4s), 001/256 VUs, 67 complete and 0 interrupted iterations
+write   [  34% ] 001/256 VUs  03.4s/10s  20.00 iters/s
+
+running (04.4s), 001/256 VUs, 87 complete and 0 interrupted iterations
+write   [  44% ] 001/256 VUs  04.4s/10s  20.00 iters/s
+
+running (05.4s), 000/256 VUs, 108 complete and 0 interrupted iterations
+write   [  54% ] 000/256 VUs  05.4s/10s  20.00 iters/s
+
+running (06.4s), 001/256 VUs, 127 complete and 0 interrupted iterations
+write   [  64% ] 001/256 VUs  06.4s/10s  20.00 iters/s
+
+running (07.4s), 001/256 VUs, 147 complete and 0 interrupted iterations
+write   [  74% ] 001/256 VUs  07.4s/10s  20.00 iters/s
+
+running (08.4s), 001/256 VUs, 167 complete and 0 interrupted iterations
+write   [  84% ] 001/256 VUs  08.4s/10s  20.00 iters/s
+
+running (09.4s), 001/256 VUs, 187 complete and 0 interrupted iterations
+write   [  94% ] 001/256 VUs  09.4s/10s  20.00 iters/s
+
+
+  █ THRESHOLDS 
+
+    cap_like_attempted
+    ✓ 'count>=0' count=200
+
+    cap_like_completed
+    ✓ 'count>=0' count=200
+
+    cap_like_content_errors
+    ✓ 'count==0' count=0
+
+    cap_like_effect_unknown
+    ✓ 'count==0' count=0
+
+    cap_like_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_like_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_like_mutation
+    ✓ 'count>=0' count=200
+
+    cap_like_noop
+    ✓ 'count==0' count=0
+
+    cap_like_recovery_failed
+    ✓ 'count>=0' count=0
+
+    cap_like_recovery_reads
+    ✓ 'count>=0' count=0
+
+    cap_like_rejected
+    ✓ 'count>=0' count=0
+
+    cap_like_retired_relations
+    ✓ 'count>=0' count=0
+
+    cap_like_success
+    ✓ 'count>=0' count=200
+
+    cap_like_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_like_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+    http_reqs{name:like-recover}
+    ✓ 'count>=0' count=0
+
+    http_reqs{name:like-write}
+    ✓ 'count>=0' count=200
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_like_all_ms.....................: avg=29.83ms       med=27.42ms       min=20.92ms       p(95)=44.27ms       p(99)=75.54ms       max=87.58ms      
+    cap_like_attempted..................: 200   19.998423/s
+    cap_like_completed..................: 200   19.998423/s
+    cap_like_content_errors.............: 0     0/s
+    cap_like_effect_unknown.............: 0     0/s
+    cap_like_failure_ratio..............: 0.00% 0 out of 200
+    cap_like_http_errors................: 0     0/s
+    cap_like_mutation...................: 200   19.998423/s
+    cap_like_mutation_ms................: avg=29.83ms       med=27.42ms       min=20.92ms       p(95)=44.27ms       p(99)=75.54ms       max=87.58ms      
+    cap_like_noop.......................: 0     0/s
+    cap_like_recovery_failed............: 0     0/s
+    cap_like_recovery_reads.............: 0     0/s
+    cap_like_rejected...................: 0     0/s
+    cap_like_retired_relations..........: 0     0/s
+    cap_like_success....................: 200   19.998423/s
+    cap_like_system_error_ratio.........: 0.00% 0 out of 200
+    cap_like_system_errors..............: 0     0/s
+    cap_native_scenario_duration_ms.....: avg=10000         med=10000         min=10000         p(95)=10000         p(99)=10000         max=10000        
+    cap_native_scenario_start_unix_ms...: avg=1793514919056 med=1793514919056 min=1793514919056 p(95)=1793514919056 p(99)=1793514919056 max=1793514919056
+
+    HTTP
+    http_req_duration...................: avg=29.83ms       med=27.42ms       min=20.92ms       p(95)=44.27ms       p(99)=75.54ms       max=87.58ms      
+      { expected_response:true }........: avg=29.83ms       med=27.42ms       min=20.92ms       p(95)=44.27ms       p(99)=75.54ms       max=87.58ms      
+    http_req_failed.....................: 0.00% 0 out of 200
+    http_reqs...........................: 200   19.998423/s
+      { name:like-recover }.............: 0     0/s
+      { name:like-write }...............: 200   19.998423/s
+
+    EXECUTION
+    dropped_iterations..................: 0     0/s
+    iteration_duration..................: avg=30.95ms       med=28.3ms        min=21.72ms       p(95)=45.03ms       p(99)=77.13ms       max=88.65ms      
+    iterations..........................: 200   19.998423/s
+    vus.................................: 1     min=0        max=1  
+    vus_max.............................: 256   min=256      max=256
+
+    NETWORK
+    data_received.......................: 40 kB 4.0 kB/s
+    data_sent...........................: 40 kB 4.0 kB/s
+
+
+
+
+running (10.0s), 000/256 VUs, 200 complete and 0 interrupted iterations
+write ✓ [ 100% ] 000/256 VUs  10s  20.00 iters/s

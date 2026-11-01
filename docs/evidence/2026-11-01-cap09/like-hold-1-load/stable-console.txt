@@ -1,0 +1,162 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: scripts/load/cap09-like.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 512 max VUs, 3m10s max duration (incl. graceful stop):
+              * write: 20.00 iterations/s for 3m0s (maxVUs: 256-512, gracefulStop: 10s)
+
+
+running (0m00.5s), 001/256 VUs, 9 complete and 0 interrupted iterations
+write   [   0% ] 001/256 VUs  0m00.5s/3m0s  20.00 iters/s
+
+running (0m01.5s), 001/256 VUs, 29 complete and 0 interrupted iterations
+write   [   1% ] 001/256 VUs  0m01.5s/3m0s  20.00 iters/s
+
+running (0m02.5s), 001/256 VUs, 49 complete and 0 interrupted iterations
+write   [   1% ] 001/256 VUs  0m02.5s/3m0s  20.00 iters/s
+
+running (0m03.5s), 001/256 VUs, 69 complete and 0 interrupted iterations
+write   [   2% ] 001/256 VUs  0m03.5s/3m0s  20.00 iters/s
+
+running (0m04.5s), 001/256 VUs, 89 complete and 0 interrupted iterations
+write   [   2% ] 001/256 VUs  0m04.5s/3m0s  20.00 iters/s
+
+running (0m05.5s), 001/256 VUs, 109 complete and 0 interrupted iterations
+write   [   3% ] 001/256 VUs  0m05.5s/3m0s  20.00 iters/s
+
+running (0m06.5s), 002/256 VUs, 128 complete and 0 interrupted iterations
+write   [   4% ] 002/256 VUs  0m06.5s/3m0s  20.00 iters/s
+
+running (0m07.5s), 001/256 VUs, 149 complete and 0 interrupted iterations
+write   [   4% ] 001/256 VUs  0m07.5s/3m0s  20.00 iters/s
+
+running (0m08.5s), 001/256 VUs, 169 complete and 0 interrupted iterations
+write   [   5% ] 001/256 VUs  0m08.5s/3m0s  20.00 iters/s
+
+running (0m09.5s), 002/256 VUs, 188 complete and 0 interrupted iterations
+write   [   5% ] 002/256 VUs  0m09.5s/3m0s  20.00 iters/s
+
+running (0m10.5s), 001/256 VUs, 209 complete and 0 interrupted iterations
+write   [   6% ] 001/256 VUs  0m10.5s/3m0s  20.00 iters/s
+
+running (0m11.5s), 001/256 VUs, 229 complete and 0 interrupted iterations
+write   [   6% ] 001/256 VUs  0m11.5s/3m0s  20.00 iters/s
+
+
+  █ THRESHOLDS 
+
+    cap_like_all_ms
+    ✗ 'p(95)<=200' p(95)=201.61ms
+    ✓ 'p(99)<=500' p(99)=264ms
+
+    cap_like_attempted
+    ✓ 'count>=0' count=230
+
+    cap_like_completed
+    ✓ 'count>=0' count=229
+
+    cap_like_content_errors
+    ✓ 'count==0' count=0
+
+    cap_like_effect_unknown
+    ✓ 'count==0' count=0
+
+    cap_like_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_like_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_like_mutation
+    ✓ 'count>=0' count=229
+
+    cap_like_noop
+    ✓ 'count==0' count=0
+
+    cap_like_recovery_failed
+    ✓ 'count>=0' count=0
+
+    cap_like_recovery_reads
+    ✓ 'count>=0' count=0
+
+    cap_like_rejected
+    ✓ 'count>=0' count=0
+
+    cap_like_retired_relations
+    ✓ 'count>=0' count=0
+
+    cap_like_success
+    ✓ 'count>=0' count=229
+
+    cap_like_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_like_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+    http_reqs{name:like-recover}
+    ✓ 'count>=0' count=0
+
+    http_reqs{name:like-write}
+    ✓ 'count>=0' count=229
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_like_all_ms.....................: avg=67.53ms       med=45.03ms       min=25.55ms       p(95)=201.61ms      p(99)=264ms         max=357.31ms     
+    cap_like_attempted..................: 230   20.0253/s
+    cap_like_completed..................: 229   19.938233/s
+    cap_like_content_errors.............: 0     0/s
+    cap_like_effect_unknown.............: 0     0/s
+    cap_like_failure_ratio..............: 0.00% 0 out of 229
+    cap_like_http_errors................: 0     0/s
+    cap_like_mutation...................: 229   19.938233/s
+    cap_like_mutation_ms................: avg=67.53ms       med=45.03ms       min=25.55ms       p(95)=201.61ms      p(99)=264ms         max=357.31ms     
+    cap_like_noop.......................: 0     0/s
+    cap_like_recovery_failed............: 0     0/s
+    cap_like_recovery_reads.............: 0     0/s
+    cap_like_rejected...................: 0     0/s
+    cap_like_retired_relations..........: 0     0/s
+    cap_like_success....................: 229   19.938233/s
+    cap_like_system_error_ratio.........: 0.00% 0 out of 229
+    cap_like_system_errors..............: 0     0/s
+    cap_native_scenario_duration_ms.....: avg=180000        med=180000        min=180000        p(95)=180000        p(99)=180000        max=180000       
+    cap_native_scenario_start_unix_ms...: avg=1793515592752 med=1793515592752 min=1793515592752 p(95)=1793515592752 p(99)=1793515592752 max=1793515592752
+
+    HTTP
+    http_req_duration...................: avg=67.53ms       med=45.03ms       min=25.55ms       p(95)=201.61ms      p(99)=264ms         max=357.31ms     
+      { expected_response:true }........: avg=67.53ms       med=45.03ms       min=25.55ms       p(95)=201.61ms      p(99)=264ms         max=357.31ms     
+    http_req_failed.....................: 0.00% 0 out of 229
+    http_reqs...........................: 229   19.938233/s
+      { name:like-recover }.............: 0     0/s
+      { name:like-write }...............: 229   19.938233/s
+
+    EXECUTION
+    dropped_iterations..................: 0     0/s
+    iteration_duration..................: avg=70.2ms        med=46.43ms       min=26.66ms       p(95)=217.39ms      p(99)=274.61ms      max=359.53ms     
+    iterations..........................: 229   19.938233/s
+    vus.................................: 1     min=1        max=2  
+    vus_max.............................: 256   min=256      max=256
+
+    NETWORK
+    data_received.......................: 46 kB 4.0 kB/s
+    data_sent...........................: 46 kB 4.0 kB/s
+
+
+
+
+running (0m11.7s), 000/256 VUs, 229 complete and 1 interrupted iterations
+write ✗ [   6% ] 001/256 VUs  0m11.5s/3m0s  20.00 iters/s
+time="2026-11-01T14:46:45+08:00" level=error msg="thresholds on metrics 'cap_like_all_ms' were crossed; at least one has abortOnFail enabled, stopping test prematurely"

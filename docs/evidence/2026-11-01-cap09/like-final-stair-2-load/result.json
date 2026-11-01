@@ -1,0 +1,3736 @@
+{
+  "task": "CAP-09",
+  "mode": "multi",
+  "rate": 50,
+  "seconds": 45,
+  "warmSeconds": 10,
+  "warmRate": 25,
+  "preVUs": 256,
+  "maxVUs": 512,
+  "fixture": "caplike-0b423bbb4e",
+  "apiSourceSha": "7a80186b568b521c54736b735c08dce8ef962e19",
+  "apiExpectedRevision": "capacity-7a80186b568b521c54736b735c08dce8ef962e19",
+  "fixtureSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "fixtureManifestSHA256": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224",
+  "configuredPool": {
+    "users": 512,
+    "notes": 512,
+    "exclusiveRelationships": 512,
+    "authors": 1,
+    "noteBodyBytes": 256
+  },
+  "started": "2026-11-01T06:37:06.721Z",
+  "nativeScenario": {
+    "startedAt": 1793515039963,
+    "durationMs": 45000,
+    "scheduledEndedAt": 1793515084963,
+    "complete": false,
+    "startMetric": {
+      "min": 1793515039963,
+      "max": 1793515039963
+    },
+    "durationMetric": {
+      "min": 45000,
+      "max": 45000
+    },
+    "scope": "k6 scenario.startTime plus configured native offer duration. Complete requires successful unsignalled process coverage; failed/early-stop stages retain scheduled end without claiming actual completion or an exact stop timestamp."
+  },
+  "thresholds": {
+    "actualOfferedRatioMin": 0.99,
+    "mutationFractionMin": 0.99,
+    "unexpectedNoopMax": 0,
+    "contentErrorsMax": 0,
+    "unknownMax": 0,
+    "droppedMax": 0,
+    "systemAndHTTPErrorRatesMaxExclusive": 0.01,
+    "p95MsMax": 200,
+    "p99MsMax": 500
+  },
+  "scope": "main attempts are real PUT state changes; pre-phase hydration is outside native workload. Non-mutation outcomes GET the fact and retire that relation for this phase, because one read can race a late unknown commit. Only a later phase after drain and fresh RR facts can resume it. Recovery GETs/cost are separate; API invalidate/read/Mark remain in PUT latency",
+  "scriptSHA256": {
+    "scripts/cap09-like.mjs": "f9352b0c52d1650bd20b3656ca465b6274f13ee74bcc63ce2b6512df4253e85e",
+    "scripts/load/cap09-like.js": "3c51fe178352c1d26ed79a39d428dd91c341140dc832daea6396a2487cceb64a",
+    "scripts/load/cap09-like-contract.mjs": "01f9f65c91daeddd4cb749c5af58e9b2e38f92fc92221af375c7585633950a7f",
+    "scripts/load/cap09-native-window.mjs": "bc09fd05fad0ddd14de8a2ad4e39fb9a13d40ee2c2f1bc468da9e9e4eba0e490"
+  },
+  "warmExit": 0,
+  "warmExternalStop": null,
+  "stableStartedAt": 1793515039209,
+  "stableExit": 99,
+  "stableExternalStop": null,
+  "stableEndedAt": 1793515052787,
+  "stableWrapperStartedAt": 1793515039209,
+  "stableWrapperEndedAt": 1793515052787,
+  "stableCommandElapsedMs": 13578,
+  "verifiedChangedParticipants": {
+    "stable": {
+      "relationships": 256,
+      "users": 256,
+      "notes": 256,
+      "mutations": 569,
+      "mutationsPerRelationship": {
+        "2": 199,
+        "3": 57
+      },
+      "relations": [
+        {
+          "noteId": "6401",
+          "userId": "68",
+          "beforeVersion": 29,
+          "afterVersion": 32,
+          "mutations": 3
+        },
+        {
+          "noteId": "6402",
+          "userId": "69",
+          "beforeVersion": 23,
+          "afterVersion": 26,
+          "mutations": 3
+        },
+        {
+          "noteId": "6403",
+          "userId": "70",
+          "beforeVersion": 20,
+          "afterVersion": 23,
+          "mutations": 3
+        },
+        {
+          "noteId": "6404",
+          "userId": "71",
+          "beforeVersion": 20,
+          "afterVersion": 23,
+          "mutations": 3
+        },
+        {
+          "noteId": "6405",
+          "userId": "72",
+          "beforeVersion": 20,
+          "afterVersion": 23,
+          "mutations": 3
+        },
+        {
+          "noteId": "6406",
+          "userId": "73",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6407",
+          "userId": "74",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6408",
+          "userId": "75",
+          "beforeVersion": 20,
+          "afterVersion": 23,
+          "mutations": 3
+        },
+        {
+          "noteId": "6409",
+          "userId": "76",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6410",
+          "userId": "77",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6411",
+          "userId": "78",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6412",
+          "userId": "79",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6413",
+          "userId": "80",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6414",
+          "userId": "81",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6415",
+          "userId": "82",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6416",
+          "userId": "83",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6417",
+          "userId": "84",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6418",
+          "userId": "85",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6419",
+          "userId": "86",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6420",
+          "userId": "87",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6421",
+          "userId": "88",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6422",
+          "userId": "89",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6423",
+          "userId": "90",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6424",
+          "userId": "91",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6425",
+          "userId": "92",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6426",
+          "userId": "93",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6427",
+          "userId": "94",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6428",
+          "userId": "95",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6429",
+          "userId": "96",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6430",
+          "userId": "97",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6431",
+          "userId": "98",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6432",
+          "userId": "99",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6433",
+          "userId": "100",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6434",
+          "userId": "101",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6435",
+          "userId": "102",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6436",
+          "userId": "103",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6437",
+          "userId": "104",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6438",
+          "userId": "105",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6439",
+          "userId": "106",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6440",
+          "userId": "107",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6441",
+          "userId": "108",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6442",
+          "userId": "109",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6443",
+          "userId": "110",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6444",
+          "userId": "111",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6445",
+          "userId": "112",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6446",
+          "userId": "113",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6447",
+          "userId": "114",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6448",
+          "userId": "115",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6449",
+          "userId": "116",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6450",
+          "userId": "117",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6451",
+          "userId": "118",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6452",
+          "userId": "119",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6453",
+          "userId": "120",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6454",
+          "userId": "121",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6455",
+          "userId": "122",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6456",
+          "userId": "123",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6457",
+          "userId": "124",
+          "beforeVersion": 19,
+          "afterVersion": 22,
+          "mutations": 3
+        },
+        {
+          "noteId": "6458",
+          "userId": "125",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6459",
+          "userId": "126",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6460",
+          "userId": "127",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6461",
+          "userId": "128",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6462",
+          "userId": "129",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6463",
+          "userId": "130",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6464",
+          "userId": "131",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6465",
+          "userId": "132",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6466",
+          "userId": "133",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6467",
+          "userId": "134",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6468",
+          "userId": "135",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6469",
+          "userId": "136",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6470",
+          "userId": "137",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6471",
+          "userId": "138",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6472",
+          "userId": "139",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6473",
+          "userId": "140",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6474",
+          "userId": "141",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6475",
+          "userId": "142",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6476",
+          "userId": "143",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6477",
+          "userId": "144",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6478",
+          "userId": "145",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6479",
+          "userId": "146",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6480",
+          "userId": "147",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6481",
+          "userId": "148",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6482",
+          "userId": "149",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6483",
+          "userId": "150",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6484",
+          "userId": "151",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6485",
+          "userId": "152",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6486",
+          "userId": "153",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6487",
+          "userId": "154",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6488",
+          "userId": "155",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6489",
+          "userId": "156",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6490",
+          "userId": "157",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6491",
+          "userId": "158",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6492",
+          "userId": "159",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6493",
+          "userId": "160",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6494",
+          "userId": "161",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6495",
+          "userId": "162",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6496",
+          "userId": "163",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6497",
+          "userId": "164",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6498",
+          "userId": "165",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6499",
+          "userId": "166",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6500",
+          "userId": "167",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6501",
+          "userId": "168",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6502",
+          "userId": "169",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6503",
+          "userId": "170",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6504",
+          "userId": "171",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6505",
+          "userId": "172",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6506",
+          "userId": "173",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6507",
+          "userId": "174",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6508",
+          "userId": "175",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6509",
+          "userId": "176",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6510",
+          "userId": "177",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6511",
+          "userId": "178",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6512",
+          "userId": "179",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6513",
+          "userId": "180",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6514",
+          "userId": "181",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6515",
+          "userId": "182",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6516",
+          "userId": "183",
+          "beforeVersion": 19,
+          "afterVersion": 21,
+          "mutations": 2
+        },
+        {
+          "noteId": "6517",
+          "userId": "184",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6518",
+          "userId": "185",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6519",
+          "userId": "186",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6520",
+          "userId": "187",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6521",
+          "userId": "188",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6522",
+          "userId": "189",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6523",
+          "userId": "190",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6524",
+          "userId": "191",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6525",
+          "userId": "192",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6526",
+          "userId": "193",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6527",
+          "userId": "194",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6528",
+          "userId": "195",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6529",
+          "userId": "196",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6530",
+          "userId": "197",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6531",
+          "userId": "198",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6532",
+          "userId": "199",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6533",
+          "userId": "200",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6534",
+          "userId": "201",
+          "beforeVersion": 18,
+          "afterVersion": 20,
+          "mutations": 2
+        },
+        {
+          "noteId": "6535",
+          "userId": "202",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6536",
+          "userId": "203",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6537",
+          "userId": "204",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6538",
+          "userId": "205",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6539",
+          "userId": "206",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6540",
+          "userId": "207",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6541",
+          "userId": "208",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6542",
+          "userId": "209",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6543",
+          "userId": "210",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6544",
+          "userId": "211",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6545",
+          "userId": "212",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6546",
+          "userId": "213",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6547",
+          "userId": "214",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6548",
+          "userId": "215",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6549",
+          "userId": "216",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6550",
+          "userId": "217",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6551",
+          "userId": "218",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6552",
+          "userId": "219",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6553",
+          "userId": "220",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6554",
+          "userId": "221",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6555",
+          "userId": "222",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6556",
+          "userId": "223",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6557",
+          "userId": "224",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6558",
+          "userId": "225",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6559",
+          "userId": "226",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6560",
+          "userId": "227",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6561",
+          "userId": "228",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6562",
+          "userId": "229",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6563",
+          "userId": "230",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6564",
+          "userId": "231",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6565",
+          "userId": "232",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6566",
+          "userId": "233",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6567",
+          "userId": "234",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6568",
+          "userId": "235",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6569",
+          "userId": "236",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6570",
+          "userId": "237",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6571",
+          "userId": "238",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6572",
+          "userId": "239",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6573",
+          "userId": "240",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6574",
+          "userId": "241",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6575",
+          "userId": "242",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6576",
+          "userId": "243",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6577",
+          "userId": "244",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6578",
+          "userId": "245",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6579",
+          "userId": "246",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6580",
+          "userId": "247",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6581",
+          "userId": "248",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6582",
+          "userId": "249",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6583",
+          "userId": "250",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6584",
+          "userId": "251",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6585",
+          "userId": "252",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6586",
+          "userId": "253",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6587",
+          "userId": "254",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6588",
+          "userId": "255",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6589",
+          "userId": "256",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6590",
+          "userId": "257",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6591",
+          "userId": "258",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6592",
+          "userId": "259",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6593",
+          "userId": "260",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6594",
+          "userId": "261",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6595",
+          "userId": "262",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6596",
+          "userId": "263",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6597",
+          "userId": "264",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6598",
+          "userId": "265",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6599",
+          "userId": "266",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6600",
+          "userId": "267",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6601",
+          "userId": "268",
+          "beforeVersion": 17,
+          "afterVersion": 19,
+          "mutations": 2
+        },
+        {
+          "noteId": "6602",
+          "userId": "269",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6603",
+          "userId": "270",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6604",
+          "userId": "271",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6605",
+          "userId": "272",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6606",
+          "userId": "273",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6607",
+          "userId": "274",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6608",
+          "userId": "275",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6609",
+          "userId": "276",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6610",
+          "userId": "277",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6611",
+          "userId": "278",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6612",
+          "userId": "279",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6613",
+          "userId": "280",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6614",
+          "userId": "281",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6615",
+          "userId": "282",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6616",
+          "userId": "283",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6617",
+          "userId": "284",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6618",
+          "userId": "285",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6619",
+          "userId": "286",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6620",
+          "userId": "287",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6621",
+          "userId": "288",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6622",
+          "userId": "289",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6623",
+          "userId": "290",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6624",
+          "userId": "291",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6625",
+          "userId": "292",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6626",
+          "userId": "293",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6627",
+          "userId": "294",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6628",
+          "userId": "295",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6629",
+          "userId": "296",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6630",
+          "userId": "297",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6631",
+          "userId": "298",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6632",
+          "userId": "299",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6633",
+          "userId": "300",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6634",
+          "userId": "301",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6635",
+          "userId": "302",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6636",
+          "userId": "303",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6637",
+          "userId": "304",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6638",
+          "userId": "305",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6639",
+          "userId": "306",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6640",
+          "userId": "307",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6641",
+          "userId": "308",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6642",
+          "userId": "309",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6643",
+          "userId": "310",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6644",
+          "userId": "311",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6645",
+          "userId": "312",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6646",
+          "userId": "313",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6647",
+          "userId": "314",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6648",
+          "userId": "315",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6649",
+          "userId": "316",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6650",
+          "userId": "317",
+          "beforeVersion": 16,
+          "afterVersion": 18,
+          "mutations": 2
+        },
+        {
+          "noteId": "6651",
+          "userId": "318",
+          "beforeVersion": 15,
+          "afterVersion": 17,
+          "mutations": 2
+        },
+        {
+          "noteId": "6652",
+          "userId": "319",
+          "beforeVersion": 14,
+          "afterVersion": 16,
+          "mutations": 2
+        },
+        {
+          "noteId": "6653",
+          "userId": "320",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        },
+        {
+          "noteId": "6654",
+          "userId": "321",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        },
+        {
+          "noteId": "6655",
+          "userId": "322",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        },
+        {
+          "noteId": "6656",
+          "userId": "323",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        }
+      ],
+      "scope": "verified positive authoritative relation-version changes between these RR snapshots; configured pool is separate. Failed/unknown phases do not establish complete native participation."
+    },
+    "warmAndStable": {
+      "relationships": 256,
+      "users": 256,
+      "notes": 256,
+      "mutations": 820,
+      "mutationsPerRelationship": {
+        "2": 5,
+        "3": 194,
+        "4": 57
+      },
+      "relations": [
+        {
+          "noteId": "6401",
+          "userId": "68",
+          "beforeVersion": 28,
+          "afterVersion": 32,
+          "mutations": 4
+        },
+        {
+          "noteId": "6402",
+          "userId": "69",
+          "beforeVersion": 22,
+          "afterVersion": 26,
+          "mutations": 4
+        },
+        {
+          "noteId": "6403",
+          "userId": "70",
+          "beforeVersion": 19,
+          "afterVersion": 23,
+          "mutations": 4
+        },
+        {
+          "noteId": "6404",
+          "userId": "71",
+          "beforeVersion": 19,
+          "afterVersion": 23,
+          "mutations": 4
+        },
+        {
+          "noteId": "6405",
+          "userId": "72",
+          "beforeVersion": 19,
+          "afterVersion": 23,
+          "mutations": 4
+        },
+        {
+          "noteId": "6406",
+          "userId": "73",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6407",
+          "userId": "74",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6408",
+          "userId": "75",
+          "beforeVersion": 19,
+          "afterVersion": 23,
+          "mutations": 4
+        },
+        {
+          "noteId": "6409",
+          "userId": "76",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6410",
+          "userId": "77",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6411",
+          "userId": "78",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6412",
+          "userId": "79",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6413",
+          "userId": "80",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6414",
+          "userId": "81",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6415",
+          "userId": "82",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6416",
+          "userId": "83",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6417",
+          "userId": "84",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6418",
+          "userId": "85",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6419",
+          "userId": "86",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6420",
+          "userId": "87",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6421",
+          "userId": "88",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6422",
+          "userId": "89",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6423",
+          "userId": "90",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6424",
+          "userId": "91",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6425",
+          "userId": "92",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6426",
+          "userId": "93",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6427",
+          "userId": "94",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6428",
+          "userId": "95",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6429",
+          "userId": "96",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6430",
+          "userId": "97",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6431",
+          "userId": "98",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6432",
+          "userId": "99",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6433",
+          "userId": "100",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6434",
+          "userId": "101",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6435",
+          "userId": "102",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6436",
+          "userId": "103",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6437",
+          "userId": "104",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6438",
+          "userId": "105",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6439",
+          "userId": "106",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6440",
+          "userId": "107",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6441",
+          "userId": "108",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6442",
+          "userId": "109",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6443",
+          "userId": "110",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6444",
+          "userId": "111",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6445",
+          "userId": "112",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6446",
+          "userId": "113",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6447",
+          "userId": "114",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6448",
+          "userId": "115",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6449",
+          "userId": "116",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6450",
+          "userId": "117",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6451",
+          "userId": "118",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6452",
+          "userId": "119",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6453",
+          "userId": "120",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6454",
+          "userId": "121",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6455",
+          "userId": "122",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6456",
+          "userId": "123",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6457",
+          "userId": "124",
+          "beforeVersion": 18,
+          "afterVersion": 22,
+          "mutations": 4
+        },
+        {
+          "noteId": "6458",
+          "userId": "125",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6459",
+          "userId": "126",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6460",
+          "userId": "127",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6461",
+          "userId": "128",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6462",
+          "userId": "129",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6463",
+          "userId": "130",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6464",
+          "userId": "131",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6465",
+          "userId": "132",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6466",
+          "userId": "133",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6467",
+          "userId": "134",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6468",
+          "userId": "135",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6469",
+          "userId": "136",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6470",
+          "userId": "137",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6471",
+          "userId": "138",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6472",
+          "userId": "139",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6473",
+          "userId": "140",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6474",
+          "userId": "141",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6475",
+          "userId": "142",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6476",
+          "userId": "143",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6477",
+          "userId": "144",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6478",
+          "userId": "145",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6479",
+          "userId": "146",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6480",
+          "userId": "147",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6481",
+          "userId": "148",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6482",
+          "userId": "149",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6483",
+          "userId": "150",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6484",
+          "userId": "151",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6485",
+          "userId": "152",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6486",
+          "userId": "153",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6487",
+          "userId": "154",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6488",
+          "userId": "155",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6489",
+          "userId": "156",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6490",
+          "userId": "157",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6491",
+          "userId": "158",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6492",
+          "userId": "159",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6493",
+          "userId": "160",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6494",
+          "userId": "161",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6495",
+          "userId": "162",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6496",
+          "userId": "163",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6497",
+          "userId": "164",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6498",
+          "userId": "165",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6499",
+          "userId": "166",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6500",
+          "userId": "167",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6501",
+          "userId": "168",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6502",
+          "userId": "169",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6503",
+          "userId": "170",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6504",
+          "userId": "171",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6505",
+          "userId": "172",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6506",
+          "userId": "173",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6507",
+          "userId": "174",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6508",
+          "userId": "175",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6509",
+          "userId": "176",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6510",
+          "userId": "177",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6511",
+          "userId": "178",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6512",
+          "userId": "179",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6513",
+          "userId": "180",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6514",
+          "userId": "181",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6515",
+          "userId": "182",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6516",
+          "userId": "183",
+          "beforeVersion": 18,
+          "afterVersion": 21,
+          "mutations": 3
+        },
+        {
+          "noteId": "6517",
+          "userId": "184",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6518",
+          "userId": "185",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6519",
+          "userId": "186",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6520",
+          "userId": "187",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6521",
+          "userId": "188",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6522",
+          "userId": "189",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6523",
+          "userId": "190",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6524",
+          "userId": "191",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6525",
+          "userId": "192",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6526",
+          "userId": "193",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6527",
+          "userId": "194",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6528",
+          "userId": "195",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6529",
+          "userId": "196",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6530",
+          "userId": "197",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6531",
+          "userId": "198",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6532",
+          "userId": "199",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6533",
+          "userId": "200",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6534",
+          "userId": "201",
+          "beforeVersion": 17,
+          "afterVersion": 20,
+          "mutations": 3
+        },
+        {
+          "noteId": "6535",
+          "userId": "202",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6536",
+          "userId": "203",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6537",
+          "userId": "204",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6538",
+          "userId": "205",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6539",
+          "userId": "206",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6540",
+          "userId": "207",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6541",
+          "userId": "208",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6542",
+          "userId": "209",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6543",
+          "userId": "210",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6544",
+          "userId": "211",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6545",
+          "userId": "212",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6546",
+          "userId": "213",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6547",
+          "userId": "214",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6548",
+          "userId": "215",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6549",
+          "userId": "216",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6550",
+          "userId": "217",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6551",
+          "userId": "218",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6552",
+          "userId": "219",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6553",
+          "userId": "220",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6554",
+          "userId": "221",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6555",
+          "userId": "222",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6556",
+          "userId": "223",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6557",
+          "userId": "224",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6558",
+          "userId": "225",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6559",
+          "userId": "226",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6560",
+          "userId": "227",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6561",
+          "userId": "228",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6562",
+          "userId": "229",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6563",
+          "userId": "230",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6564",
+          "userId": "231",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6565",
+          "userId": "232",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6566",
+          "userId": "233",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6567",
+          "userId": "234",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6568",
+          "userId": "235",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6569",
+          "userId": "236",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6570",
+          "userId": "237",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6571",
+          "userId": "238",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6572",
+          "userId": "239",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6573",
+          "userId": "240",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6574",
+          "userId": "241",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6575",
+          "userId": "242",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6576",
+          "userId": "243",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6577",
+          "userId": "244",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6578",
+          "userId": "245",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6579",
+          "userId": "246",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6580",
+          "userId": "247",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6581",
+          "userId": "248",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6582",
+          "userId": "249",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6583",
+          "userId": "250",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6584",
+          "userId": "251",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6585",
+          "userId": "252",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6586",
+          "userId": "253",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6587",
+          "userId": "254",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6588",
+          "userId": "255",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6589",
+          "userId": "256",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6590",
+          "userId": "257",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6591",
+          "userId": "258",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6592",
+          "userId": "259",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6593",
+          "userId": "260",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6594",
+          "userId": "261",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6595",
+          "userId": "262",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6596",
+          "userId": "263",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6597",
+          "userId": "264",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6598",
+          "userId": "265",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6599",
+          "userId": "266",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6600",
+          "userId": "267",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6601",
+          "userId": "268",
+          "beforeVersion": 16,
+          "afterVersion": 19,
+          "mutations": 3
+        },
+        {
+          "noteId": "6602",
+          "userId": "269",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6603",
+          "userId": "270",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6604",
+          "userId": "271",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6605",
+          "userId": "272",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6606",
+          "userId": "273",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6607",
+          "userId": "274",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6608",
+          "userId": "275",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6609",
+          "userId": "276",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6610",
+          "userId": "277",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6611",
+          "userId": "278",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6612",
+          "userId": "279",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6613",
+          "userId": "280",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6614",
+          "userId": "281",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6615",
+          "userId": "282",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6616",
+          "userId": "283",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6617",
+          "userId": "284",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6618",
+          "userId": "285",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6619",
+          "userId": "286",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6620",
+          "userId": "287",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6621",
+          "userId": "288",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6622",
+          "userId": "289",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6623",
+          "userId": "290",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6624",
+          "userId": "291",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6625",
+          "userId": "292",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6626",
+          "userId": "293",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6627",
+          "userId": "294",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6628",
+          "userId": "295",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6629",
+          "userId": "296",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6630",
+          "userId": "297",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6631",
+          "userId": "298",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6632",
+          "userId": "299",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6633",
+          "userId": "300",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6634",
+          "userId": "301",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6635",
+          "userId": "302",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6636",
+          "userId": "303",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6637",
+          "userId": "304",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6638",
+          "userId": "305",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6639",
+          "userId": "306",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6640",
+          "userId": "307",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6641",
+          "userId": "308",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6642",
+          "userId": "309",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6643",
+          "userId": "310",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6644",
+          "userId": "311",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6645",
+          "userId": "312",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6646",
+          "userId": "313",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6647",
+          "userId": "314",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6648",
+          "userId": "315",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6649",
+          "userId": "316",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6650",
+          "userId": "317",
+          "beforeVersion": 15,
+          "afterVersion": 18,
+          "mutations": 3
+        },
+        {
+          "noteId": "6651",
+          "userId": "318",
+          "beforeVersion": 14,
+          "afterVersion": 17,
+          "mutations": 3
+        },
+        {
+          "noteId": "6652",
+          "userId": "319",
+          "beforeVersion": 14,
+          "afterVersion": 16,
+          "mutations": 2
+        },
+        {
+          "noteId": "6653",
+          "userId": "320",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        },
+        {
+          "noteId": "6654",
+          "userId": "321",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        },
+        {
+          "noteId": "6655",
+          "userId": "322",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        },
+        {
+          "noteId": "6656",
+          "userId": "323",
+          "beforeVersion": 13,
+          "afterVersion": 15,
+          "mutations": 2
+        }
+      ],
+      "scope": "verified positive authoritative relation-version changes between these RR snapshots; configured pool is separate. Failed/unknown phases do not establish complete native participation."
+    }
+  },
+  "ambiguousRequestSettleWaitMs": 5500,
+  "finalReconcileValid": true,
+  "result": {
+    "attempted": 570,
+    "completed": 568,
+    "successful": 568,
+    "mutation": 568,
+    "noop": 0,
+    "rejected": 0,
+    "effectUnknown": 0,
+    "contentErrors": 0,
+    "systemErrors": 0,
+    "httpErrors": 0,
+    "recoveryReads": 0,
+    "recoveryFailed": 0,
+    "retiredRelations": 0,
+    "dropped": 0,
+    "nativeWriteHTTP": 568,
+    "classificationUnknown": 2,
+    "unknown": 2,
+    "unknownIsExact": true,
+    "unknownLowerBound": 2,
+    "unknownUpperBound": 2,
+    "targetOffers": 2250,
+    "actualOfferedRatio": 0.25333333333333335,
+    "mutationFraction": 0.9964912280701754,
+    "mutationPerNominalSecond": 12.622222222222222,
+    "httpPutPerNominalSecond": 12.666666666666666,
+    "allLatency": {
+      "avg": 70.03963362676059,
+      "med": 39.5096,
+      "min": 20.3088,
+      "p(95)": 204.09580999999994,
+      "p(99)": 287.86218200000013,
+      "max": 329.0544,
+      "thresholds": {
+        "p(95)<=200": true,
+        "p(99)<=500": false
+      }
+    },
+    "mutationLatency": {
+      "avg": 70.03963362676059,
+      "med": 39.5096,
+      "min": 20.3088,
+      "p(95)": 204.09580999999994,
+      "p(99)": 287.86218200000013,
+      "max": 329.0544
+    },
+    "recoveryLatency": null,
+    "dbMutations": 569,
+    "eventsAdded": 569,
+    "mutationCounterMatchesDB": false,
+    "unknownScope": "classificationUnknown and effectUnknown can overlap during abort sample loss. Distinct unknown is exact only when lower/upper coincide; otherwise unknown=null and bounds remain. Recovery never erases original uncertainty. Zero-unknown requires both counters zero."
+  },
+  "meetsAPIBudget": false,
+  "meetsBudget": false,
+  "downstreamSteadyStateScope": "final valid means convergence only; common stage lag/last-minute growth gate must additionally pass for a full-chain capacity claim",
+  "finished": "2026-11-01T06:37:51.559Z"
+}

@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T05:42:00.470014+00:00",
+  "argv": [
+    "python",
+    "-B",
+    "-X",
+    "utf8",
+    "scripts/cap09-grade-check.py"
+  ],
+  "exitCode": 0,
+  "scope": "pure tool checks only, no HTTP/SQL/Docker/load"
+}

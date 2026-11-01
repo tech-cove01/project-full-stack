@@ -1,0 +1,20 @@
+test_boundary_events_cannot_enlarge_one_percent_budget (__main__.Checks.test_boundary_events_cannot_enlarge_one_percent_budget) ... ok
+test_clean_like_and_zero_event_feed (__main__.Checks.test_clean_like_and_zero_event_feed) ... ok
+test_crossing_end_sql_still_contributes_boundary_queue_growth (__main__.Checks.test_crossing_end_sql_still_contributes_boundary_queue_growth) ... ok
+test_final_stair_and_hot_require_the_fixed_final_source (__main__.Checks.test_final_stair_and_hot_require_the_fixed_final_source) ... ok
+test_hold_cannot_use_wrong_chain_or_partial_short_stage (__main__.Checks.test_hold_cannot_use_wrong_chain_or_partial_short_stage) ... ok
+test_hold_stops_after_first_failure_and_checks_chain (__main__.Checks.test_hold_stops_after_first_failure_and_checks_chain) ... ok
+test_like_zero_events_is_not_a_write_capacity_result (__main__.Checks.test_like_zero_events_is_not_a_write_capacity_result) ... ok
+test_long_interior_gap_cannot_pass_good_boundaries (__main__.Checks.test_long_interior_gap_cannot_pass_good_boundaries) ... ok
+test_one_staircase_cannot_mix_binaries_or_environments (__main__.Checks.test_one_staircase_cannot_mix_binaries_or_environments) ... ok
+test_recovery_uses_finished_at_not_a_59s_start (__main__.Checks.test_recovery_uses_finished_at_not_a_59s_start) ... ok
+test_short_final_fifteen_second_slope_is_descriptive (__main__.Checks.test_short_final_fifteen_second_slope_is_descriptive) ... ok
+test_sql_crossing_native_end_cannot_supply_denominator_events (__main__.Checks.test_sql_crossing_native_end_cannot_supply_denominator_events) ... ok
+test_unknown_group_and_bad_interval_are_not_zero (__main__.Checks.test_unknown_group_and_bad_interval_are_not_zero) ... ok
+test_wrapper_grace_never_moves_the_native_recovery_deadline (__main__.Checks.test_wrapper_grace_never_moves_the_native_recovery_deadline) ... ok
+test_zero_event_feed_requires_all_observed_queues_zero (__main__.Checks.test_zero_event_feed_requires_all_observed_queues_zero) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 0.236s
+
+OK

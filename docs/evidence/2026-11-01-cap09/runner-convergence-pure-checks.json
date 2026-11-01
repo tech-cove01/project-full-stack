@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-01T05:41:44.976121+00:00",
+  "scriptSHA256": "b04d6d2ef2ef3492b19fbfd7e73e6794a07a621bc95dfaae2bb39298a1ab4fa4",
+  "checks": 6,
+  "passed": 6,
+  "scope": "root executed synthetic missing done/exit, trusted terminal, alive wrapper, same PID/create, live warm marker checks; no service/network/process mutation or load",
+  "newLoadRuns": 0
+}

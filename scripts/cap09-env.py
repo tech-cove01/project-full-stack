@@ -1,0 +1,467 @@
+"""Fixed, owned CAP09 environment lifecycle. No implicit load or global cleanup."""
+import argparse
+import ctypes
+import datetime as dt
+import hashlib
+import ipaddress
+import json
+import os
+from pathlib import Path
+import re
+import secrets
+import socket
+import subprocess
+import sys
+import time
+import urllib.request
+
+import psutil
+
+
+REPO = Path(__file__).resolve().parent.parent
+ROOT = REPO / 'docs/evidence/2026-11-01-cap09'
+PROJECT = 'project-full-stack-cap09'
+PORTS = {'mysql': (3471, '3306/tcp'), 'redis': (6571, '6379/tcp'),
+         'kafka': (9391, '9092/tcp'), 'elasticsearch': (9271, '9200/tcp')}
+LIMITS = {'mysql': (4_000_000_000, 2 << 30), 'redis': (2_000_000_000, 512 << 20),
+          'kafka': (2_000_000_000, 1 << 30), 'elasticsearch': (2_000_000_000, 1 << 30)}
+MOUNTS = {'mysql': '/var/lib/mysql', 'redis': '/data', 'kafka': '/var/lib/kafka/data',
+          'elasticsearch': '/usr/share/elasticsearch/data'}
+VOLUME_KEYS = {'mysql': 'go-mysql-data', 'redis': 'go-redis-data',
+               'kafka': 'go-kafka-data', 'elasticsearch': 'go-search-data'}
+FLAGS = subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+class NoRedirect(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, request, file, code, message, headers, url):
+        return None
+
+
+OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+
+
+def now():
+    return dt.datetime.now(dt.timezone.utc).isoformat()
+
+
+def read(path):
+    return json.loads(Path(path).read_text(encoding='utf-8-sig'))
+
+
+def save(path, value):
+    with Path(path).open('x', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2)
+
+
+def run(argv, *, env=None, input=None, allow_failure=False, timeout=180):
+    result = subprocess.run(argv, cwd=REPO, env=env, input=input, capture_output=True,
+                            text=True, encoding='utf-8', errors='replace',
+                            creationflags=FLAGS, timeout=timeout)
+    if result.returncode and not allow_failure:
+        raise RuntimeError('owned command failed; details suppressed')
+    return result
+
+
+def env(settings):
+    return {**os.environ, **{key: str(value) for key, value in settings.items()}}
+
+
+def port_open(port):
+    with socket.socket() as connection:
+        connection.settimeout(.25)
+        return connection.connect_ex(('127.0.0.1', port)) == 0
+
+
+def power():
+    class Status(ctypes.Structure):
+        _fields_ = [('ACLineStatus', ctypes.c_ubyte), ('BatteryFlag', ctypes.c_ubyte),
+                    ('BatteryLifePercent', ctypes.c_ubyte), ('SystemStatusFlag', ctypes.c_ubyte),
+                    ('BatteryLifeTime', ctypes.c_ulong), ('BatteryFullLifeTime', ctypes.c_ulong)]
+    result = {'at': now(), 'hostMemoryPercent': psutil.virtual_memory().percent}
+    if os.name == 'nt':
+        status = Status()
+        assert ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(status))
+        result.update(ac=status.ACLineStatus, batteryPercent=status.BatteryLifePercent,
+                      batterySaver=status.SystemStatusFlag)
+    return result
+
+
+def private_write(runtime, name, value):
+    assert re.fullmatch(r'env[a-z0-9-]*\.private\.json', name)
+    path = runtime / name
+    save(path, value)
+    save(runtime / ('owned-env-' + secrets.token_hex(5) + '.json'), {'path': str(path)})
+    return path
+
+
+def settings(path):
+    path = Path(path).resolve()
+    assert re.fullmatch(r'env[a-z0-9-]*\.private\.json', path.name)
+    runtime = path.parent
+    assert runtime.parent == REPO.parent and re.fullmatch(r'\.runtime-fullstack-cap09-[a-f0-9]{12}', runtime.name)
+    value = read(path)
+    assert value['CAP09_RUNTIME'] == str(runtime) and value['CAP09_EVIDENCE'] == str(ROOT)
+    assert value['CAP_COHORT'] == 'cap09' and value['MYSQL_HOST'] == value['REDIS_HOST'] == '127.0.0.1'
+    assert value['MYSQL_PORT'] == '3471' and value['REDIS_PORT'] == '6571'
+    assert value['API_BASE'] == 'http://127.0.0.1:8271'
+    assert value['KAFKA_BROKERS'] == '127.0.0.1:9391' and value['ES_URL'] == 'http://127.0.0.1:9271'
+    assert value['CAP09_ENVIRONMENT_METADATA'] == str(ROOT / 'environment.json')
+    return value, runtime
+
+
+def container(service, cid=None, running=None):
+    assert service in PORTS
+    if cid:
+        assert re.fullmatch(r'[a-f0-9]{64}', cid)
+    raw = json.loads(run(['docker', 'inspect', cid or PROJECT + '-' + service + '-1']).stdout)[0]
+    assert raw['Config']['Labels']['com.docker.compose.project'] == PROJECT
+    assert raw['Config']['Labels']['com.docker.compose.service'] == service
+    if cid:
+        assert raw['Id'] == cid
+    if running is not None:
+        assert raw['State']['Running'] is running
+    port, target = PORTS[service]
+    assert any(x['HostIp'] == '127.0.0.1' and x['HostPort'] == str(port)
+               for x in raw['HostConfig']['PortBindings'][target])
+    assert (raw['HostConfig']['NanoCpus'], raw['HostConfig']['Memory']) == LIMITS[service]
+    volumes = [{'name': item['Name'], 'destination': item['Destination']}
+               for item in raw['Mounts'] if item['Type'] == 'volume']
+    assert len(volumes) == 1 and volumes[0]['destination'] == MOUNTS[service]
+    assert re.fullmatch(PROJECT + r'-[a-f0-9]{12}-' + service, volumes[0]['name'])
+    return {'id': raw['Id'], 'name': raw['Name'], 'project': PROJECT, 'service': service,
+            'image': raw['Config']['Image'], 'imageId': raw['Image'],
+            'running': raw['State']['Running'], 'status': raw['State']['Status'],
+            'exitCode': raw['State']['ExitCode'], 'oomKilled': raw['State']['OOMKilled'],
+            'restartCount': raw['RestartCount'], 'cpuNano': raw['HostConfig']['NanoCpus'],
+            'memoryBytes': raw['HostConfig']['Memory'], 'ports': raw['HostConfig']['PortBindings'],
+            'volumes': volumes, 'networkId': raw['NetworkSettings']['Networks'][PROJECT + '_default']['NetworkID']}
+
+
+def get_json(url):
+    with OPENER.open(url, timeout=5) as response:
+        raw = response.read((2 << 20) + 1)
+        assert len(raw) <= 2 << 20
+        return json.loads(raw)
+
+
+def api_identity(metadata, health=False):
+    assert metadata['cohort'] == 'cap09'
+    private, _ = settings(metadata['privateEnvironmentFile'])
+    assert private['CAP_SOURCE_SHA'] == metadata['sourceSha']
+    assert private['CAP_READ_EXPECTED_REVISION'] == metadata['expectedVersion']
+    process = psutil.Process(metadata['pid'])
+    assert abs(process.create_time() * 1000 - metadata['creationUnixMs']) <= 2
+    assert Path(process.exe()).resolve() == Path(metadata['exe']).resolve()
+    assert hashlib.sha256(Path(process.exe()).read_bytes()).hexdigest() == metadata['sha256']
+    if health:
+        body = get_json('http://127.0.0.1:8271/health/ready')
+        # The old app readiness covers SQL/Redis only. Kafka/ES are checked independently.
+        assert body['version'] == metadata['expectedVersion']
+        assert get_json('http://127.0.0.1:8371/debug/capacity')['pid'] == process.pid
+    return process
+
+
+def compose(value):
+    return ['docker', 'compose', '-p', PROJECT, '-f', 'compose.go.yaml', '-f',
+            'scripts/load/compose.capacity.yaml', '-f', value['CAP09_OVERRIDE'],
+            '--profile', 'kafka', '--profile', 'search']
+
+
+def prepare(args):
+    assert not (ROOT / 'preparation.json').exists(), 'preserve partial setup and recovery inputs'
+    assert not any(port_open(p) for p in (3471, 6571, 9391, 9271, 8271, 8371))
+    assert not run(['docker', 'ps', '-aq', '--filter', 'label=com.docker.compose.project=' + PROJECT]).stdout.strip()
+    assert run(['docker', 'network', 'inspect', PROJECT + '_default'], allow_failure=True).returncode != 0
+    subnet = ipaddress.ip_network(args.subnet, strict=True)
+    assert subnet.version == 4 and subnet.is_private and subnet.prefixlen == 24
+    network_ids = run(['docker', 'network', 'ls', '-q']).stdout.split()
+    existing = json.loads(run(['docker', 'network', 'inspect', *network_ids]).stdout)
+    assert not any(subnet.overlaps(ipaddress.ip_network(c['Subnet'], strict=False))
+                   for net in existing for c in (net.get('IPAM', {}).get('Config') or [])
+                   if c.get('Subnet') and ':' not in c['Subnet'])
+    initial_power = power()
+    assert initial_power.get('ac', 1) == 1 and initial_power['hostMemoryPercent'] < 88
+    nonce = secrets.token_hex(6)
+    runtime = REPO.parent / ('.runtime-fullstack-cap09-' + nonce)
+    runtime.mkdir()
+    if os.name == 'nt':
+        identity = run(['whoami']).stdout.strip()
+        run(['icacls', str(runtime), '/inheritance:r', '/grant:r', identity + ':(OI)(CI)F'])
+    else:
+        runtime.chmod(0o700)
+    (runtime / 'tmp').mkdir()
+    volumes = {name: PROJECT + '-' + nonce + '-' + name for name in PORTS}
+    for name in volumes.values():
+        assert run(['docker', 'volume', 'inspect', name], allow_failure=True).returncode != 0
+    override = runtime / 'fresh-volumes.yaml'
+    text = ('services:\n  kafka:\n    cpus: 2\n    mem_limit: 1g\n    environment:\n'
+            '      KAFKA_HEAP_OPTS: "-Xms256m -Xmx512m"\n'
+            '  elasticsearch:\n    cpus: 2\n    mem_limit: 1g\n'
+            'networks:\n  default:\n    ipam:\n      config:\n        - subnet: ' + str(subnet) + '\nvolumes:\n')
+    text += ''.join('  ' + VOLUME_KEYS[name] + ':\n    name: ' + value + '\n' for name, value in volumes.items())
+    override.write_text(text, encoding='utf-8', newline='\n')
+    value = {'CAP_COHORT': 'cap09', 'CAP09_RUNTIME': str(runtime), 'CAP09_EVIDENCE': str(ROOT),
+             'CAP09_ENVIRONMENT_METADATA': str(ROOT / 'environment.json'), 'CAP09_OVERRIDE': str(override),
+             'GO_MYSQL_PORT': '3471', 'GO_REDIS_PORT': '6571', 'GO_KAFKA_PORT': '9391', 'GO_ES_PORT': '9271',
+             'MYSQL_HOST': '127.0.0.1', 'MYSQL_PORT': '3471', 'MYSQL_DATABASE': 'project_full_stack_go',
+             'MYSQL_USER': 'fullstack', 'MYSQL_PASSWORD': 'fullstack_go_dev_only',
+             'MYSQL_BIN': str(Path(args.mysql_bin).resolve()),
+             'REDIS_HOST': '127.0.0.1', 'REDIS_PORT': '6571', 'REDIS_DATABASE': '0', 'REDIS_PASSWORD': '',
+             'API_BASE': 'http://127.0.0.1:8271', 'API_ADDR': '127.0.0.1:8271',
+             'GO_DIAGNOSTICS_ADDR': '127.0.0.1:8371', 'GO_ENV': 'development',
+             'GOMAXPROCS': '4', 'GOMEMLIMIT': '1GiB', 'ORDER_STREAM_WORKERS': '1',
+             'KAFKA_BROKERS': '127.0.0.1:9391', 'KAFKA_TOPIC': 'community.events',
+             'ES_URL': 'http://127.0.0.1:9271', 'ES_INDEX': 'community-notes-v1', 'AI_ENABLED': 'false',
+             'TEMP': str(runtime / 'tmp'), 'TMP': str(runtime / 'tmp'),
+             'CAP_READ_OBSERVER_USER': 'cap09_' + nonce, 'CAP_READ_OBSERVER_PASSWORD': secrets.token_hex(24)}
+    private = private_write(runtime, 'env.private.json', value)
+    save(ROOT / 'preparation.json', {'at': now(), 'project': PROJECT, 'runtime': str(runtime),
+         'privateEnvironmentFile': str(private), 'newVolumes': volumes, 'subnet': str(subnet),
+         'power': initial_power, 'credentialValuesExported': False})
+    run(compose(value) + ['config', '--quiet'], env=env(value))
+    result = run(compose(value) + ['up', '-d', '--wait', 'mysql', 'redis', 'kafka', 'elasticsearch'],
+                 env=env(value), allow_failure=True, timeout=360)
+    (ROOT / 'compose-start.txt').write_text(result.stdout + result.stderr, encoding='utf-8')
+    assert result.returncode == 0, 'preserve partial own setup; no API/load'
+    owned = {name: container(name, running=True) for name in PORTS}
+    assert all(owned[name]['volumes'][0]['name'] == volumes[name] for name in PORTS)
+    save(ROOT / 'environment.json', {'task': 'CAP-09A', 'at': now(), 'project': PROJECT,
+         'runtime': str(runtime), 'privateEnvironmentFile': str(private), 'containers': owned,
+         'newVolumes': volumes, 'subnet': str(subnet), 'powerAfterStart': power(),
+         'groups': ['community.follow-v1', 'community.feed-v1', 'community.search-v1'],
+         'kafkaTopic': 'community.events', 'mysqlMaxOpen': 20, 'redisPoolSize': 10,
+         'gomaxprocs': 4, 'gomemlimit': '1GiB', 'sharedHost': True, 'oldVolumesUntouched': True})
+    result = run(['node', 'scripts/migrate.mjs'], env=env(value), allow_failure=True)
+    (ROOT / 'migrate.txt').write_text(result.stdout + result.stderr, encoding='utf-8')
+    save(ROOT / 'migrate-exit.json', {'at': now(), 'exitCode': result.returncode})
+    assert result.returncode == 0
+    user, password = value['CAP_READ_OBSERVER_USER'], value['CAP_READ_OBSERVER_PASSWORD']
+    run(['docker', 'exec', '-i', owned['mysql']['id'], 'sh', '-c',
+         'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot --default-character-set=utf8mb4'],
+        input=f"CREATE USER '{user}'@'%' IDENTIFIED BY '{password}'; GRANT SELECT ON project_full_stack_go.* TO '{user}'@'%'; GRANT SELECT ON performance_schema.* TO '{user}'@'%';\n")
+    save(ROOT / 'observer-setup.json', {'at': now(), 'user': user, 'passwordExported': False,
+         'privileges': ['SELECT project_full_stack_go.*', 'SELECT performance_schema.*']})
+    run(['docker', 'exec', owned['kafka']['id'], '/opt/kafka/bin/kafka-topics.sh',
+         '--bootstrap-server', 'localhost:9094', '--create', '--if-not-exists', '--topic',
+         'community.events', '--partitions', '1', '--replication-factor', '1'])
+    es_health = get_json('http://127.0.0.1:9271/_cluster/health')
+    assert es_health['status'] in ('yellow', 'green')
+    save(ROOT / 'dependency-health.json', {'at': now(), 'es': es_health,
+         'kafkaTopic': 'community.events', 'topicCreatedBeforeAPI': True})
+    print(json.dumps({'prepared': True, 'privateEnvironmentFile': str(private), 'runtime': str(runtime)}))
+
+
+def start_api(args):
+    value, runtime = settings(args.environment)
+    assert not any(port_open(p) for p in (8271, 8371))
+    assert re.fullmatch(r'[a-f0-9]{40}', args.source_sha) and re.fullmatch(r'[a-z0-9-]{1,30}', args.label)
+    owned = read(ROOT / 'environment.json')['containers']
+    for name in PORTS:
+        container(name, owned[name]['id'], True)
+    binary = Path(args.binary).resolve()
+    info = run(['go', 'version', '-m', str(binary)]).stdout
+    assert 'vcs.revision=' + args.source_sha in info and 'vcs.modified=false' in info
+    current = {**value, 'CAP_SOURCE_SHA': args.source_sha, 'CAP_READ_EXPECTED_REVISION': 'capacity-' + args.source_sha,
+               'GO_FEED_DIAGNOSTICS': 'true' if args.tail else 'false'}
+    private = private_write(runtime, 'env-' + args.label + '.private.json', current)
+    out_path, err_path = (ROOT / ('api-' + args.label + suffix) for suffix in ('.stdout.txt', '.stderr.txt'))
+    with out_path.open('xb') as out, err_path.open('xb') as error:
+        child = subprocess.Popen([str(binary)], cwd=REPO, env=env(current), stdout=out, stderr=error, creationflags=FLAGS)
+    process = psutil.Process(child.pid)
+    metadata = {'at': now(), 'cohort': 'cap09', 'pid': child.pid, 'exe': str(binary),
+                'creationUnixMs': process.create_time() * 1000, 'createdAtUtc': dt.datetime.fromtimestamp(process.create_time(), dt.timezone.utc).isoformat(),
+                'sourceSha': args.source_sha, 'expectedVersion': current['CAP_READ_EXPECTED_REVISION'],
+                'sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'label': args.label,
+                'privateEnvironmentFile': str(private), 'tailEnabledRequested': args.tail}
+    save(ROOT / ('api-' + args.label + '.json'), metadata)
+    (ROOT / ('api-' + args.label + '-build.txt')).write_text(info, encoding='utf-8')
+    ready = False
+    for _ in range(100):
+        if child.poll() is not None:
+            break
+        try:
+            api_identity(metadata, health=True)
+            ready = True
+            break
+        except (OSError, ValueError, AssertionError, psutil.Error):
+            time.sleep(.25)
+    save(ROOT / ('api-' + args.label + '-health.json'), {'at': now(), 'ready': ready,
+         'readyBody': get_json('http://127.0.0.1:8271/health/ready') if ready else None,
+         'capacityBody': get_json('http://127.0.0.1:8371/debug/capacity') if ready else None,
+         'scope': 'App readiness alone does not establish consumer progress; low-speed canary receipts do.'})
+    assert ready
+    print(json.dumps({'startedAPI': child.pid, 'privateEnvironmentFile': str(private)}))
+
+
+def stop_api(args):
+    path = Path(args.api_metadata).resolve()
+    assert path.parent == ROOT
+    metadata = read(path)
+    _, runtime = settings(metadata['privateEnvironmentFile'])
+    assert not (runtime / 'cap09-active.private.json').exists(), 'owned stage remains active'
+    process = api_identity(metadata)
+    process.terminate()
+    save(ROOT / ('api-' + metadata['label'] + '-stop.json'), {'at': now(), 'pid': process.pid,
+         'identityMatched': True, 'exitCode': process.wait(timeout=15), 'goGracefulShutdownClaimed': False})
+    assert not any(port_open(p) for p in (8271, 8371))
+
+
+def own_sessions(tokens):
+    assert tokens and len(tokens) <= 512
+    parts = ['EXISTS'] + ['login:token:' + token for token in tokens]
+    payload = b'*' + str(len(parts)).encode() + b'\r\n'
+    for part in parts:
+        raw = part.encode()
+        payload += b'$' + str(len(raw)).encode() + b'\r\n' + raw + b'\r\n'
+    with socket.create_connection(('127.0.0.1', 6571), timeout=5) as connection:
+        connection.sendall(payload)
+        data = b''
+        while b'\r\n' not in data:
+            chunk = connection.recv(256)
+            assert chunk
+            data += chunk
+        assert data.startswith(b':')
+        return int(data[1:].split(b'\r\n')[0])
+
+
+def credential_tokens(manifest_path, runtime):
+    manifest_path = Path(manifest_path).resolve()
+    assert manifest_path in (ROOT / 'fixture/fixture.json', ROOT / 'like-fixture/fixture.json')
+    path = Path(read(manifest_path)['credentialFile']).resolve()
+    assert path.is_relative_to(runtime / 'tmp') and path.is_file()
+    found = []
+    def walk(value):
+        if isinstance(value, dict):
+            for key, item in value.items():
+                if key == 'token':
+                    assert isinstance(item, str) and item
+                    found.append(item)
+                else:
+                    walk(item)
+        elif isinstance(value, list):
+            for item in value:
+                walk(item)
+    walk(read(path))
+    assert found and len(found) == len(set(found))
+    return path, found
+
+
+def finish(args):
+    value, runtime = settings(args.environment)
+    metadata_path = Path(args.api_metadata).resolve()
+    assert metadata_path.parent == ROOT
+    metadata = read(metadata_path)
+    assert not (runtime / 'cap09-active.private.json').exists(), 'resolve owned stage before cleanup'
+    api_identity(metadata, health=True)
+    owned = read(ROOT / 'environment.json')['containers']
+    for name in PORTS:
+        container(name, owned[name]['id'], True)
+    phase_records = list(ROOT.glob('*-load/warm-process.json')) + list(ROOT.glob('*-load/stable-process.json'))
+    for path in phase_records:
+        detail = read(path)
+        try:
+            candidate = psutil.Process(detail['k6_pid'])
+            assert abs(candidate.create_time() * 1000 - detail['k6_started_unix_ms']) > 2000, 'owned k6 remains active'
+        except psutil.NoSuchProcess:
+            pass
+    progress = ROOT / 'cleanup-progress.json'
+    assert not progress.exists(), 'preserve partial cleanup; choose explicit recovery'
+    record = {'at': now(), 'complete': False, 'steps': [], 'exceptions': [], 'volumesRetained': True}
+    def checkpoint(step):
+        record['steps'].append({'step': step, 'at': now()})
+        temporary = progress.with_suffix('.pending')
+        temporary.write_text(json.dumps(record, ensure_ascii=False, indent=2), encoding='utf-8', newline='\n')
+        temporary.replace(progress)
+    checkpoint('identity_preflight')
+    try:
+        record['cohorts'] = {}
+        for kind, key, script, count in (('read', 'CAP_READ_FIXTURE', 'go073-cap-read.mjs', 32),
+                                          ('like', 'CAP_LIKE_FIXTURE', 'cap09-like.mjs', 512)):
+            if key not in value:
+                continue
+            credentials, tokens = credential_tokens(value[key], runtime)
+            assert len(tokens) == count
+            before = own_sessions(tokens)
+            result = run(['node', 'scripts/' + script, 'finish'], env=env(value), timeout=180)
+            body = json.loads(result.stdout.strip())
+            after = own_sessions(tokens)
+            record['cohorts'][kind] = {'sessionsBeforeLogout': before, 'sessionsAfterLogout': after,
+                                     'finishOutput': body, 'privateInputRemoved': not credentials.exists()}
+            assert after == 0 and not credentials.exists()
+            checkpoint(kind + '_normal_logout_and_private_input_removal')
+        # A killed Node helper can miss its finally block. Only remove exact
+        # phase input paths registered by this cohort after all owned k6 exited.
+        removed_phase_inputs = []
+        for entry in ROOT.glob('*-load/*-private-input.json'):
+            assert entry.name in ('warm-private-input.json', 'stable-private-input.json')
+            registered = read(entry)
+            phase_input = Path(registered['path']).resolve()
+            parent = Path(registered['parent']).resolve()
+            assert phase_input.name == 'input.json' and phase_input.parent == parent
+            assert parent.parent == runtime / 'tmp' and re.fullmatch(r'cap-like-phase-[A-Za-z0-9_-]+', parent.name)
+            if phase_input.exists():
+                phase_input.unlink()
+                removed_phase_inputs.append(str(phase_input))
+            if parent.exists():
+                parent.rmdir()
+        record['removedInterruptedPrivatePhaseInputs'] = removed_phase_inputs
+        checkpoint('registered_phase_private_inputs_removed')
+        user = value['CAP_READ_OBSERVER_USER']
+        assert re.fullmatch(r'cap09_[a-f0-9]{12}', user) and user.endswith(runtime.name[-12:])
+        output = run(['docker', 'exec', '-i', owned['mysql']['id'], 'sh', '-c',
+                      'MYSQL_PWD="$MYSQL_ROOT_PASSWORD" exec mysql -uroot --batch --skip-column-names'],
+                     input=f"DROP USER '{user}'@'%'; SELECT COUNT(*) FROM mysql.user WHERE User='{user}' AND Host='%';\n")
+        assert output.stdout.strip() == '0'
+        checkpoint('observer_removed_and_verified')
+        process = api_identity(metadata)
+        process.terminate()
+        record['apiStop'] = {'pid': process.pid, 'identityMatched': True,
+                             'exitCode': process.wait(timeout=15), 'goGracefulShutdownClaimed': False}
+        assert not any(port_open(p) for p in (8271, 8371))
+        checkpoint('owned_api_stopped')
+        for name in PORTS:
+            container(name, owned[name]['id'], True)
+        run(['docker', 'stop', '--time', '60', *[owned[name]['id'] for name in PORTS]])
+        record['containers'] = {}
+        for name in PORTS:
+            stopped = container(name, owned[name]['id'], False)
+            assert stopped['exitCode'] == 0 and not stopped['oomKilled'] and stopped['volumes'] == owned[name]['volumes']
+            for volume in stopped['volumes']:
+                run(['docker', 'volume', 'inspect', volume['name']])
+            record['containers'][name] = stopped
+        checkpoint('four_exact_container_ids_stopped_and_volumes_retained')
+        removed = []
+        for entry in runtime.glob('owned-env-*.json'):
+            private = Path(read(entry)['path']).resolve()
+            assert private.parent == runtime and re.fullmatch(r'env[a-z0-9-]*\.private\.json', private.name)
+            if private.exists():
+                private.unlink()
+                removed.append(private.name)
+        record['removedPrivateEnvironmentFiles'] = removed
+        record['complete'] = True
+        checkpoint('complete')
+        save(ROOT / 'cleanup.json', record)
+        print(json.dumps({'cleanupComplete': True, 'ownServicesStopped': True, 'volumesRetained': True}))
+    except Exception as error:
+        record['exceptions'].append({'at': now(), 'class': type(error).__name__, 'detailsSuppressed': True})
+        checkpoint('failed_preserve_recovery_inputs')
+        raise
+
+
+def main():
+    assert Path.cwd().resolve() == REPO
+    parser = argparse.ArgumentParser(description=__doc__)
+    sub = parser.add_subparsers(dest='action', required=True)
+    p = sub.add_parser('prepare-deps'); p.add_argument('--subnet', required=True); p.add_argument('--mysql-bin', required=True)
+    p = sub.add_parser('start-api'); p.add_argument('--environment', required=True); p.add_argument('--binary', required=True)
+    p.add_argument('--source-sha', required=True); p.add_argument('--label', required=True); p.add_argument('--tail', action='store_true')
+    p = sub.add_parser('stop-api'); p.add_argument('--api-metadata', required=True)
+    p = sub.add_parser('finish'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)
+    args = parser.parse_args()
+    {'prepare-deps': prepare, 'start-api': start_api, 'stop-api': stop_api, 'finish': finish}[args.action](args)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as error:
+        print('cap09-env: ' + type(error).__name__ + '; details suppressed; retain ownership and recovery inputs')
+        raise SystemExit(1)

@@ -1,0 +1,17 @@
+{
+  "task": "CAP-10 independent synthetic policy checks",
+  "at": "2026-11-01T08:14:59.833337+00:00",
+  "passed": false,
+  "testsRun": 24,
+  "failures": [],
+  "errors": [
+    {
+      "check": "test_sql_interval_crossing_native_end_cannot_enlarge_event_budget (__main__.Checks.test_sql_interval_crossing_native_end_cannot_enlarge_event_budget)",
+      "traceback": "Traceback (most recent call last):\n  File \"D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-grade-check.py\", line 356, in test_sql_interval_crossing_native_end_cannot_enlarge_event_budget\n    self.assertEqual(self.pipeline(crossing)['newEventsInConservativeSampledWindow'], 5000)\n                     ~~~~~~~~~~~~~^^^^^^^^^^\n  File \"D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-grade-check.py\", line 324, in pipeline\n    return grade.pipeline_grade(directory, report, seconds, 'like')\n           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-grade.py\", line 290, in pipeline_grade\n    return _pipeline_grade(directory, report, seconds, chain)\n  File \"D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-grade.py\", line 215, in _pipeline_grade\n    require((window_start - instant(first['at'])).total_seconds() <= 7.5 and\n    ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            (instant(inside_first['sql']['startedAt']) - window_start).total_seconds() <= 7.5 and\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            (ended - instant(inside_last['sql']['finishedAt'])).total_seconds() <= 7.5 and\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n            (instant(post['at']) - ended).total_seconds() <= 7.5, 'downstream boundary gap too large')\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-grade.py\", line 19, in require\n    raise ValueError(message)\nValueError: downstream boundary gap too large\n"
+    }
+  ],
+  "gradeSHA256": "23ba81f255eca671bb3cb55366f147dbe0a75f35c911ef08b8435cc1f835f0c0",
+  "gradeBytesStable": true,
+  "checkerSHA256": "61d26b8f8e22a879a98a31d1245c31716dda780a0d9b4a0ef5e686f06a48c4c6",
+  "scope": "Synthetic files in generated isolated workspace directories only; no real reservations, services, SQL, HTTP or load."
+}

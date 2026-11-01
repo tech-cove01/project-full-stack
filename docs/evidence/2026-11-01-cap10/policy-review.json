@@ -1,0 +1,30 @@
+{
+  "at": "2026-11-01T08:27:20.393117+00:00",
+  "task": "CAP-10 bounded search, candidate and formal admission",
+  "reviewer": "cap09_like_review (non-author for runner/grader)",
+  "passed": true,
+  "sourceSHA256": {
+    "scripts/cap10-run.py": "df4e883d3c7f83a4fc4bfe7940a3b0e6c92f129732f1e1be81baf3a1b3d252c7",
+    "scripts/cap10-grade.py": "23ba81f255eca671bb3cb55366f147dbe0a75f35c911ef08b8435cc1f835f0c0",
+    "scripts/cap10-run-check.py": "c7bb36d4cc3b1e0422b13b779d9382d502af9ba5fc49071169ea0cd34e25b77e",
+    "scripts/cap10-grade-check.py": "5bfc32eb22a4fc05374a8757a9ce6a834e405327531b1e3866389262f22e3ad9"
+  },
+  "checks": [
+    "S1=50;8short slots include comparison/search/candidate and preserve candidate;2formal slots fixed.",
+    "Failedstart/earlystop/capturefailure consume reserved slot; preflightfalse cannot reserveS1.",
+    "Finalsource-onlyL/U,4x/half/integer-midpoint/25% bracket, rollback clearsoldbounds.",
+    "Complete latency-only miss may boundU; measurement/generator failures are not serviceU; unknown/noop/fact/nativeDBmismatch fatal.",
+    "Candidate sole60s confirmation160/400 margin; formal200/500 two180s samefreeze,firstfailureends.",
+    "Nativefull60 and last15 short/last60 formal queue budgets plus real60recovery, setup/warm excluded.",
+    "Prestable guard and stable supervision retained;4exactCIDhealthy/noOOM/restart0beforeafter;512exclusiveability guard."
+  ],
+  "validation": {
+    "runnerCases": 21,
+    "policyCases": 26,
+    "policyRawFinal": "grade-checks-final.json",
+    "policyInitialFixtureFailurePreserved": "grade-checks-initial.json",
+    "authorExecutionRecord": "tools-validation.json"
+  },
+  "actualNativeLoads": 0,
+  "preflightStatus": "failed;S1admissionclosed"
+}

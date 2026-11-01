@@ -6,6 +6,7 @@ import (
 	"errors"
 	"log/slog"
 	"strconv"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -109,18 +110,23 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	if err != nil {
 		return LikeState{}, err
 	}
+	// The transaction has committed. Finish its derived updates even when the
+	// caller disconnects, but keep that synchronous work bounded. A commit error
+	// still returns above: an ambiguous database acknowledgement needs reconciliation.
+	postCommitCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), 2*time.Second)
+	defer cancel()
 	// The counter changed, so the cached copy must go; the next read rebuilds it.
 	if service.counts != nil {
-		_ = service.counts.Invalidate(ctx, note)
+		_ = service.counts.Invalidate(postCommitCtx, note)
 	}
-	state, err := service.LikeState(ctx, userID, noteID)
+	state, err := service.LikeState(postCommitCtx, userID, noteID)
 	if err != nil {
 		return LikeState{}, err
 	}
 	// Read the current committed relation, not the original requested state. The
 	// projection version fences a delayed completion behind a later unlike.
 	if service.likes != nil && state.Version > 0 {
-		if _, markErr := service.likes.Mark(ctx, note, user, state.Liked, state.Version); markErr != nil {
+		if _, markErr := service.likes.Mark(postCommitCtx, note, user, state.Liked, state.Version); markErr != nil {
 			// The projection is repairable, but the failure must be visible.
 			slog.Warn("like bitmap update failed", "note_id", note, "user_id", user, "error", markErr)
 		}

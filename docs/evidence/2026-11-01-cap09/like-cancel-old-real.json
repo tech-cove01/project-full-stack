@@ -1,0 +1,22 @@
+{
+  "startedAt": "2026-11-01T06:00:33.092964+00:00",
+  "finishedAt": "2026-11-01T06:00:36.594977+00:00",
+  "elapsedSeconds": 3.5020087000448257,
+  "argv": [
+    "go",
+    "test",
+    "-count=1",
+    "-v",
+    "-overlay=D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\like-old-overlay.json",
+    "-run",
+    "^TestIntegrationLikeCommitCancellation/postcommit_cancel_finishes_derived_updates$",
+    "./internal/social"
+  ],
+  "exitCode": 1,
+  "expectedExitCode": 1,
+  "credentialsExported": false,
+  "productionSHA256": "379f453d2e49c5bdc4458b1281cd72a679b4d67d6f0f32f376287cbded955a3e",
+  "testSHA256": "64554b15037200196e4ebc42c1e9fef956add721be8cddc66e4f49369e64852b",
+  "oldSourceSHA256": "cc7271b4858388868ee01b61a18494bc1d028c5464644fc69a6a6ab328e99565",
+  "scope": "real owned3471 MySQL/6571Redis; no API/load, only generated exact fixture rows/keys cleaned"
+}

@@ -1,0 +1,21 @@
+{
+  "startedAt": "2026-11-01T06:00:36.596527+00:00",
+  "finishedAt": "2026-11-01T06:00:39.548015+00:00",
+  "elapsedSeconds": 2.9514913000166416,
+  "argv": [
+    "go",
+    "test",
+    "-count=1",
+    "-v",
+    "-run",
+    "^TestIntegrationLikeCommitCancellation$",
+    "./internal/social"
+  ],
+  "exitCode": 0,
+  "expectedExitCode": 0,
+  "credentialsExported": false,
+  "productionSHA256": "379f453d2e49c5bdc4458b1281cd72a679b4d67d6f0f32f376287cbded955a3e",
+  "testSHA256": "64554b15037200196e4ebc42c1e9fef956add721be8cddc66e4f49369e64852b",
+  "oldSourceSHA256": null,
+  "scope": "real owned3471 MySQL/6571Redis; no API/load, only generated exact fixture rows/keys cleaned"
+}

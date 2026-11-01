@@ -148,3 +148,13 @@ root实际HTTP探针的3次状态变更与幂等断言完成后，初版快照SQ
 新suffix的[同HTTP用例回归](like-probe-http-regression-1/probe.json)随后实际通过：先读已存在v3，3次真变更到v4/v5/v6，一次重复false保持v4；模拟已完成200的回执丢失后，GET读回v5再执行v6。它不是真实transport timeout注入。此前已生效的3个事件没有删除或回滚，最终累计6个关系版本/6个DONE事件、三组各6份IGNORED，公开liked=0、Redis派生一致、PARKED为空。probe的try/finally现在保留部分GET/PUT观察及SQL错误码，避免后置对账失败抹去已完成API效果。
 
 上述修复差量和已落原件经非作者只读复核，无剩余阻断；本审查者没有再次执行SQL/API/负载，实际探针属于root控制的09A工具验证，不是09B/09D吞吐成绩。业务Go实现没有因此修改。
+
+## 09C已提交后的取消与派生更新
+
+root的 `like-baseline-stair-1` 在50/s因延迟阈值早停后，精确对账发现 `(note6405,user72)` 的MySQL为inactive/version4，Redis仍为active/version3；781个事实事件均DONE，三组各781份IGNORED。此处事实与事件链路完成，三组IGNORED也不会替请求修复Redis点赞集合。`SetLike` 在事务成功后仍以请求ctx执行失效、事实回查和Mark，调用方取消可以中断这些派生步骤；这是本次正确性修复的范围，不作为该档P95受限的归因。
+
+最小改动只在Transaction成功返回后建立 `context.WithTimeout(context.WithoutCancel(ctx),2*time.Second)`，同步执行Invalidate→LikeState→Mark并共同使用这一个有界ctx；事务继续使用请求ctx，当前事实回查和Redis版本fence保留。没有增加后台任务、改变MySQL同步提交或事件ACK语义。若Commit实际成功但驱动返回不确定错误，代码仍从事务错误分支退出；Redis故障或这个2秒预算耗尽也仍可能留下待核差异，本修复不承诺完整故障恢复。
+
+直接回归位于 `backend/internal/social/like_postcommit_integration_test.go`：首个派生DEL的hook先独立读取SQL证明unlike/version2已提交，再确定性取消调用ctx，无sleep竞争；核对返回事实、两层计数失效、Redis membership/version及精确事件数。另外在Outbox INSERT执行后、Commit之前通过GORM callback取消，核对关系/计数/事件全部回滚；独立用例确认迟到version1 Mark不能覆盖version2 unlike。用例只引用旧版已有API，可对旧53fa的like.go使用overlay保留旧FAIL→新PASS。此段撰写时Feed负载尚在进行，因此尚未执行Go、测试或构建；实际回归结果由root在停止负载后另行留证。
+
+root实际回归现已完成：旧53fa的like.go通过overlay运行相同postcommit子例，稳定出现caller取消后的回查错误、Redis membership/version仍v1及两层计数仍1而FAIL；修复版3个子例全部PASS，见like-cancel-old-real/new-real原始txt及exit JSON。直接social/communitycache两包真实依赖与普通用例共59个通过项、1个明确专用容量测量SKIP，相关vet通过（含子项，不与3项相加）。此证据确认成功提交后取消的具体修复，不完整归因最初P95或排除commit ACK不确定窗口。

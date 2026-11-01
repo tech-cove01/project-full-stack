@@ -1,0 +1,14 @@
+=== RUN   TestIntegrationLikeCommitCancellation
+=== RUN   TestIntegrationLikeCommitCancellation/postcommit_cancel_finishes_derived_updates
+    like_postcommit_integration_test.go:195: derived context must survive caller cancellation with a fresh <=2s deadline: err=context canceled deadline=true remaining=29.9182983s
+    like_postcommit_integration_test.go:198: committed unlike must finish after caller cancellation: {NoteID: Liked:false Version:0 Likes:0} context canceled
+    like_postcommit_integration_test.go:201: projection membership=true err=<nil>, want false
+    like_postcommit_integration_test.go:201: projection version="1" err=<nil>, want "2"
+    like_postcommit_integration_test.go:203: projection Mark lost the original context values
+    like_postcommit_integration_test.go:206: postcommit invalidation left the stale Redis counter: keys=1 err=<nil>
+    like_postcommit_integration_test.go:209: postcommit invalidation left the stale local counter: {Likes:1 Comments:0} <nil>
+--- FAIL: TestIntegrationLikeCommitCancellation (0.11s)
+    --- FAIL: TestIntegrationLikeCommitCancellation/postcommit_cancel_finishes_derived_updates (0.08s)
+FAIL
+FAIL	github.com/cityloop/fullstack-go/internal/social	0.282s
+FAIL

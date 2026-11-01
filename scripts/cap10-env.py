@@ -137,6 +137,7 @@ def container(service, cid=None, running=None):
     return {'id': raw['Id'], 'name': raw['Name'], 'project': PROJECT, 'service': service,
             'image': raw['Config']['Image'], 'imageId': raw['Image'],
             'running': raw['State']['Running'], 'status': raw['State']['Status'],
+            'healthStatus': raw['State'].get('Health', {}).get('Status'),
             'exitCode': raw['State']['ExitCode'], 'oomKilled': raw['State']['OOMKilled'],
             'restartCount': raw['RestartCount'], 'cpuNano': raw['HostConfig']['NanoCpus'],
             'memoryBytes': raw['HostConfig']['Memory'], 'ports': raw['HostConfig']['PortBindings'],

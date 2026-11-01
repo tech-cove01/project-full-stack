@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-01T08:11:06.499591+00:00",
+  "task": "CAP-10A native-boundary database counter observations",
+  "reviewer": "cap09_like_review, non-author",
+  "passed": true,
+  "sourceSHA256": {
+    "scripts/load/cap10-db-observe.mjs": "add23e892fb9993eaf0db0df9365e73b3c3ad64712de0641e17f4d50700fc8d7",
+    "scripts/cap10-env.py": "d3077a2f585aae1f114c9623101732d7332d7a28a8734f4a8aa34c58468ff167"
+  },
+  "evidence": [
+    "database-metric-wiring.json",
+    "database-metric-wiring-2.json"
+  ],
+  "checks": [
+    "Only read-only global and Performance Schema counters, no instrumentation/config changes.",
+    "Statement/file/transaction instrumentation and consumer states retained; unavailable counters not zero.",
+    "String picosecond timers preserve integer precision; nested spans overlap and cumulative maxima are not differenced.",
+    "Endpoint gauges distinguished from cumulative counters; normalized digests contain no SQL literal parameters.",
+    "Only native before/after observations; no continuous profiling or extra load.",
+    "Environment healthStatus addition reports actual health for before/after guards, original environment bytes retained."
+  ],
+  "scope": "Actual read-only wiring2:263rows149ms. Com_begin/commit/rollback absent from this table; not treated as0. No idle or capacity result."
+}

@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-01T07:02:21.818893+00:00",
+  "task": "CAP-09 cleanup tail recovery",
+  "originalProgressSHA256": "626039964bc6649f273e11195501b14a257e1d60c231dcf6aedd97fdb70dec85",
+  "originalProgressPreserved": true,
+  "reason": "All four Docker stops completed. Kafka and Elasticsearch retained SIGTERM exit 143, with shutdown-completed logs and no OOM; strict zero-only assertion stopped the remaining tail.",
+  "allowedActions": [
+    "Reinspect exactly the four recorded container IDs, stopped identity, limits, mounts and exit status.",
+    "Verify all six original volumes still exist; verify owned API and recorded native children are absent by PID plus creation identity.",
+    "Unlink only existing exact registered env[a-z0-9-]*.private.json files whose resolved parent is the owned runtime.",
+    "Write cleanup-recovery-1.json and cleanup.json retaining original exceptions and real exit codes."
+  ],
+  "forbiddenActions": [
+    "No relogin/logout, observer SQL, API restart, docker restart or repeated stop.",
+    "No volume/container removal, recursive delete, global AV/power configuration or new load."
+  ]
+}

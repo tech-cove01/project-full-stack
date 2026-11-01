@@ -1,0 +1,25 @@
+{
+  "task": "CAP-09 cleanup exit-status guard",
+  "reviewer": "cap09_like_harness (non-author for cap09-env.py change)",
+  "passed": true,
+  "checks": [
+    "Kafka/Elasticsearch accept only 0 or SIGTERM143; MySQL/Redis still require0.",
+    "Stopped fullCID/project/service/ports/resource limits and mounts checks remain.",
+    "137/OOM are never accepted.",
+    "Kafka/ES shutdown completion logs corroborate this actual stop; no service restart/repeated logout/load.",
+    "Original partial progress and AssertionError preserved; explicit recovery only finished remaining private-env deletion and final record."
+  ],
+  "verification": "Python AST parses; service-specific exit-code cases reject1/137 and limit143 to Kafka/ES. Actual recovery re-inspected all4 exactstoppedCID, retained6volumes, checked549 ownedprocess identities, removed11 registeredprivate env files.",
+  "evidence": [
+    "cleanup-progress.json",
+    "cleanup-recovery-plan.json",
+    "cleanup-stop-diagnosis.json",
+    "cleanup-kafka-shutdown.txt",
+    "cleanup-elasticsearch-shutdown.txt",
+    "cleanup-tail-recovery.py.txt",
+    "cleanup-recovery-1.json",
+    "cleanup.json"
+  ],
+  "goApplicationChanged": false,
+  "newLoadRounds": 0
+}

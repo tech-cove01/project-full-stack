@@ -457,7 +457,10 @@ def finish(args):
         record['containers'] = {}
         for name in PORTS:
             stopped = container(name, owned[name]['id'], False)
-            assert stopped['exitCode'] == 0 and not stopped['oomKilled'] and stopped['volumes'] == owned[name]['volumes']
+            # These Java images retain SIGTERM (128 + 15) after docker stop.
+            # Other services must still exit zero; never accept OOM or SIGKILL.
+            accepted_exit_codes = (0, 143) if name in ('kafka', 'elasticsearch') else (0,)
+            assert stopped['exitCode'] in accepted_exit_codes and not stopped['oomKilled'] and stopped['volumes'] == owned[name]['volumes']
             for volume in stopped['volumes']:
                 run(['docker', 'volume', 'inspect', volume['name']])
             record['containers'][name] = stopped

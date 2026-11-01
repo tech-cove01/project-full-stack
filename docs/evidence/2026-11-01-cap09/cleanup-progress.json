@@ -1,0 +1,134 @@
+{
+  "at": "2026-11-01T06:58:20.790129+00:00",
+  "complete": false,
+  "steps": [
+    {
+      "step": "identity_preflight",
+      "at": "2026-11-01T06:58:20.790153+00:00"
+    },
+    {
+      "step": "read_normal_logout_and_private_input_removal",
+      "at": "2026-11-01T06:58:21.566812+00:00"
+    },
+    {
+      "step": "like_normal_logout_and_private_input_removal",
+      "at": "2026-11-01T06:58:24.345719+00:00"
+    },
+    {
+      "step": "registered_phase_private_inputs_removed",
+      "at": "2026-11-01T06:58:24.410656+00:00"
+    },
+    {
+      "step": "observer_removed_and_verified",
+      "at": "2026-11-01T06:58:24.679705+00:00"
+    },
+    {
+      "step": "owned_api_stopped",
+      "at": "2026-11-01T06:58:25.283718+00:00"
+    },
+    {
+      "step": "failed_preserve_recovery_inputs",
+      "at": "2026-11-01T06:58:30.512508+00:00"
+    }
+  ],
+  "exceptions": [
+    {
+      "at": "2026-11-01T06:58:30.512490+00:00",
+      "class": "AssertionError",
+      "detailsSuppressed": true
+    }
+  ],
+  "volumesRetained": true,
+  "cohorts": {
+    "read": {
+      "sessionsBeforeLogout": 32,
+      "sessionsAfterLogout": 0,
+      "finishOutput": {
+        "finished": true,
+        "readersLoggedOut": 32,
+        "sqlFixtureRetained": true
+      },
+      "privateInputRemoved": true
+    },
+    "like": {
+      "sessionsBeforeLogout": 512,
+      "sessionsAfterLogout": 0,
+      "finishOutput": {
+        "finished": true,
+        "likersLoggedOut": 512,
+        "credentialInputRemoved": true,
+        "sqlFixtureRetained": true
+      },
+      "privateInputRemoved": true
+    }
+  },
+  "removedInterruptedPrivatePhaseInputs": [],
+  "apiStop": {
+    "pid": 37664,
+    "identityMatched": true,
+    "exitCode": 15,
+    "goGracefulShutdownClaimed": false
+  },
+  "containers": {
+    "mysql": {
+      "id": "cdb236fad2383af616b3a7fd65cbe288741d7de3a0a8c69f920aa4701adb18b1",
+      "name": "/project-full-stack-cap09-mysql-1",
+      "project": "project-full-stack-cap09",
+      "service": "mysql",
+      "image": "mysql:8.4",
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 4000000000,
+      "memoryBytes": 2147483648,
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3471"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap09-a4fc273c7715-mysql",
+          "destination": "/var/lib/mysql"
+        }
+      ],
+      "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+    },
+    "redis": {
+      "id": "c390978f550e16fa46e1716f2bd2c46d0e519d987d783c8d75f06c52f32daad7",
+      "name": "/project-full-stack-cap09-redis-1",
+      "project": "project-full-stack-cap09",
+      "service": "redis",
+      "image": "redis:7.4-alpine",
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "running": false,
+      "status": "exited",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 2000000000,
+      "memoryBytes": 536870912,
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6571"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap09-a4fc273c7715-redis",
+          "destination": "/data"
+        }
+      ],
+      "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+    }
+  }
+}

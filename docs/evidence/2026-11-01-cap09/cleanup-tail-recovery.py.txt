@@ -1,0 +1,92 @@
+"""One fixed CAP09 cleanup recovery; no network writes or repeated service stops."""
+import copy
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+
+import psutil
+
+repo = Path(__file__).resolve().parent.parent / 'project-full-stack'
+runtime = Path(__file__).resolve().parent
+spec = importlib.util.spec_from_file_location('owned_env', repo / 'scripts/cap09-env.py')
+m = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+assert runtime == repo.parent / '.runtime-fullstack-cap09-a4fc273c7715'
+root = m.ROOT
+plan = m.read(root / 'cleanup-recovery-plan.json')
+progress_bytes = (root / 'cleanup-progress.json').read_bytes()
+assert hashlib.sha256(progress_bytes).hexdigest() == plan['originalProgressSHA256']
+previous = json.loads(progress_bytes)
+assert not previous['complete'] and len(previous['exceptions']) == 1
+steps = {s['step'] for s in previous['steps']}
+assert {'read_normal_logout_and_private_input_removal', 'like_normal_logout_and_private_input_removal',
+        'registered_phase_private_inputs_removed', 'observer_removed_and_verified',
+        'owned_api_stopped', 'failed_preserve_recovery_inputs'} <= steps
+for cohort in previous['cohorts'].values():
+    assert cohort['sessionsAfterLogout'] == 0 and cohort['privateInputRemoved']
+assert not (runtime / 'cap09-active.private.json').exists()
+assert not (root / 'cleanup.json').exists()
+assert not (root / 'cleanup-recovery-1.json').exists()
+owned = m.read(root / 'environment.json')['containers']
+containers = {}
+volumes = set()
+for name in m.PORTS:
+    stopped = m.container(name, owned[name]['id'], False)
+    assert stopped['exitCode'] == (143 if name in ('kafka', 'elasticsearch') else 0)
+    assert not stopped['oomKilled'] and stopped['restartCount'] == 0
+    assert stopped['volumes'] == owned[name]['volumes']
+    for volume in stopped['volumes']:
+        inspected = json.loads(m.run(['docker', 'volume', 'inspect', volume['name']]).stdout)
+        assert len(inspected) == 1 and inspected[0]['Name'] == volume['name']
+        volumes.add(volume['name'])
+    containers[name] = stopped
+assert len(volumes) == 6
+assert not any(m.port_open(port) for port in (3471, 6571, 9391, 9271, 8271, 8371))
+metadata = m.read(root / 'api-final.json')
+try:
+    api = psutil.Process(metadata['pid'])
+    assert abs(api.create_time() * 1000 - metadata['creationUnixMs']) > 2, 'owned API still exists'
+except psutil.NoSuchProcess:
+    pass
+checked = 0
+for stage in root.glob('*-stage.json'):
+    for identity in m.read(stage).get('knownOwnedProcesses', []):
+        try:
+            process = psutil.Process(identity['pid'])
+            assert abs(process.create_time() - identity['created']) > .002, 'owned child remains active'
+        except psutil.NoSuchProcess:
+            pass
+        checked += 1
+assert 'Shutdown completed' in (root / 'cleanup-kafka-shutdown.txt').read_text(encoding='utf-8')
+es_log = (root / 'cleanup-elasticsearch-shutdown.txt').read_text(encoding='utf-8')
+assert '"message":"stopped"' in es_log and '"message":"closed"' in es_log
+targets = []
+for registration in runtime.glob('owned-env-*.json'):
+    private = Path(m.read(registration)['path']).resolve()
+    assert private.parent == runtime and m.re.fullmatch(r'env[a-z0-9-]*\.private\.json', private.name)
+    if private.exists():
+        assert private.is_file() and not private.is_symlink()
+        targets.append(private)
+assert targets and len(targets) == len(set(targets))
+record = copy.deepcopy(previous)
+record.update(at=m.now(), complete=False, recoveredFrom='cleanup-progress.json',
+              originalProgressSHA256=plan['originalProgressSHA256'], containers=containers,
+              retainedVolumeCount=len(volumes), verifiedOwnedChildIdentities=checked,
+              allOwnedPortsClosed=True, originalFailurePreserved=True,
+              recoveryScriptSHA256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+record['steps'].append({'step': 'recovery_preflight_stopped_identities_and_six_volumes_verified', 'at': m.now()})
+removed = []
+for private in targets:
+    private.unlink()
+    removed.append(private.name)
+record['removedPrivateEnvironmentFiles'] = sorted(removed)
+assert not any(Path(m.read(r)['path']).exists() for r in runtime.glob('owned-env-*.json'))
+record['steps'].append({'step': 'registered_private_environment_files_removed', 'at': m.now()})
+record['complete'] = True
+record['steps'].append({'step': 'complete_after_explicit_tail_recovery', 'at': m.now()})
+m.save(root / 'cleanup-recovery-1.json', record)
+m.save(root / 'cleanup.json', record)
+assert (root / 'cleanup-progress.json').read_bytes() == progress_bytes
+print(json.dumps({'cleanupComplete': True, 'containersStopped': 4, 'volumesRetained': len(volumes),
+                  'registeredPrivateEnvironmentsRemoved': len(removed), 'originalFailurePreserved': True}))

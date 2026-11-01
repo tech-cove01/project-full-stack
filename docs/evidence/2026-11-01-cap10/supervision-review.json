@@ -1,0 +1,20 @@
+{
+  "at": "2026-11-01T07:55:32.817470+00:00",
+  "task": "CAP-10A resource supervision and one idle gate",
+  "reviewer": "cap09_like_review (non-author)",
+  "passed": true,
+  "files": {
+    "scripts/cap10-stage.py": "4c8acd7fc9f6f3fabb77ad4c970b1a7caf787081dd1a22ff6a8fe47afe30d4a7",
+    "scripts/cap10-resources.py": "367739b005f7476a6df4ea546b6d9aae01ae13b3fd7dc4569e50cb99a7605375",
+    "scripts/cap10-idle.py": "1272bcebd74e141705a58bde1d89227b07c15c39d8d6986c55d4c5f501f714a8"
+  },
+  "checks": [
+    "Like-only CAP10 profile and exact new loopback/project/full4CID ownership.",
+    "Original resource caps/sampling/stop and k6+helper RSS accounting preserved.",
+    "Four verified cgroup-v2 cpu.stat counters read in parallel, raw plus nonnegative deltas and read time retained.",
+    "One idle reservation,13samples/12realCPUintervals,4..7.5second cadence and60second coverage; observation failure not retried.",
+    "Idle maxmemory80/CPUmedian50, livehealth/noOOM/restarts, supply/sleep events, Uptime tolerance and complete clean downstream mandatory."
+  ],
+  "verification": "AST parse and pure profile acceptance/rejection; complete non-author source diff review. Actual unique60s idle not yet started.",
+  "newNativeLoads": 0
+}

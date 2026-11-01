@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-01T08:00:36.420182+00:00",
+  "task": "CAP-10A final owned supervision and cgroup wiring",
+  "reviewer": "cap09_like_review (non-author)",
+  "passed": true,
+  "supersedesStaticCandidate": "supervision-review.json",
+  "files": {
+    "scripts/cap10-stage.py": "4c8acd7fc9f6f3fabb77ad4c970b1a7caf787081dd1a22ff6a8fe47afe30d4a7",
+    "scripts/cap10-resources.py": "4c3e2252576d402f291056af3aa697b1491834b7c67a9e2647fad63a18d369da",
+    "scripts/cap10-idle.py": "07421c05568269b0847871edfc831fe9a11ad0ecee2509f28b9952d50a91c065"
+  },
+  "initialWiringRejectionPreserved": "cgroup-access-precheck-1.json",
+  "checks": [
+    "Actual v1 host namespace resolves exactCID CPU and CPUacct mount roots; VM root group not read.",
+    "Original nanosecond stats retained; normalized microseconds explicitly floor-divided.",
+    "Actual quota/period equals declared4/2/2/2CPU; no resource change.",
+    "ForeignCID/accounting mismatch/duplicate controller rejected; v2 handling retains counter/quota checks.",
+    "Original safety guards and exact helper/k6 combinedRSS remain; idle unique reservation/cadence80%memory/medianCPU50/time/power/downstream gates hold."
+  ],
+  "pureChecks": "cgroup-layout-pure-checks.json",
+  "actualWiring": "cgroup-access-proof.json",
+  "scope": "Preload wiring only; no idle/native load yet. Cumulative startup throttle is not a load-window bottleneck proof."
+}

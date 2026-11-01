@@ -1,0 +1,77 @@
+{
+  "at": "2026-11-01T07:50:11.283567+00:00",
+  "allFourHealthy": true,
+  "containers": {
+    "mysql": {
+      "id": "1b2a03722142d30a2b98441896dd0ed5c3c200b82dffae459ec41d12204b06b0",
+      "health": "healthy",
+      "startedAt": "2026-11-01T07:48:45.093162675Z",
+      "restartCount": 0,
+      "volumes": [
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-mysql",
+          "destination": "/var/lib/mysql"
+        }
+      ]
+    },
+    "redis": {
+      "id": "d8de5a5e31f140a8f163b1aec22a6b6d696f32d626e24adf87fe3d20249b5391",
+      "health": "healthy",
+      "startedAt": "2026-11-01T07:48:45.087805186Z",
+      "restartCount": 0,
+      "volumes": [
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-redis",
+          "destination": "/data"
+        }
+      ]
+    },
+    "kafka": {
+      "id": "4f85dc930229ef790840e112157f2c4d970fbf0c278399e59321d9f0f3d1ddfe",
+      "health": "healthy",
+      "startedAt": "2026-11-01T07:48:45.107994285Z",
+      "restartCount": 0,
+      "volumes": [
+        {
+          "name": "15359290eefd0b1128bd6028a510e4c5cf137c4025680972bd457d4a05151e02",
+          "destination": "/etc/kafka/secrets"
+        },
+        {
+          "name": "87af698a2948f06f6c19a812bb996bbe7ed93aaa1835d72ec05ea65a60c31624",
+          "destination": "/mnt/shared/config"
+        },
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-kafka",
+          "destination": "/var/lib/kafka/data"
+        }
+      ]
+    },
+    "elasticsearch": {
+      "id": "e418abb1dcefe0965ec2109d04a6d3785793ab82e61f0e5bd333d33756beb322",
+      "health": "healthy",
+      "startedAt": "2026-11-01T07:48:45.105519943Z",
+      "restartCount": 0,
+      "volumes": [
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-elasticsearch",
+          "destination": "/usr/share/elasticsearch/data"
+        }
+      ]
+    }
+  },
+  "host": {
+    "logicalCPUs": 20,
+    "memoryTotalBytes": 33960505344,
+    "memoryPercent": 74.8,
+    "freeDiskBytes": 177898856448
+  },
+  "docker": "16572063744 20 \"29.3.1\"",
+  "power": {
+    "at": "2026-11-01T07:50:11.794394+00:00",
+    "hostMemoryPercent": 74.9,
+    "ac": 1,
+    "batteryPercent": 79,
+    "batterySaver": 0
+  },
+  "scope": "Dependency setup only, not the unique60s idle observation or load approval. No native load run."
+}

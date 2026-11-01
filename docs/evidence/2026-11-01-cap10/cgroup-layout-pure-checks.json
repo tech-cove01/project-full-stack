@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T07:59:09.797786+00:00",
+  "passed": true,
+  "checks": [
+    "Actual v1 target-mount resolution.",
+    "ForeignCID rejected.",
+    "CPU/accounting membership mismatch rejected.",
+    "DuplicateCPU mount rejected.",
+    "v2 private namespace supported.",
+    "v2 host membership resolves exactCID child."
+  ],
+  "resourceSourceSHA256": "4c3e2252576d402f291056af3aa697b1491834b7c67a9e2647fad63a18d369da",
+  "actualAccessEvidence": "cgroup-access-proof.json",
+  "newLoadWindows": 0
+}

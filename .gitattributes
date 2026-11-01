@@ -45,3 +45,12 @@ docs/evidence/2026-11-01-cap09/**/*.txt -text
 docs/evidence/2026-11-01-cap09/**/*.log -text
 docs/evidence/2026-11-01-cap09/**/*.gz binary
 docs/evidence/2026-11-01-cap09/**/*.pprof binary
+
+# CAP10 keeps all successful and failed native captures byte-for-byte.
+docs/evidence/2026-11-01-cap10/**/*.json -text
+docs/evidence/2026-11-01-cap10/**/*.ndjson -text
+docs/evidence/2026-11-01-cap10/**/*.jsonl -text
+docs/evidence/2026-11-01-cap10/**/*.txt -text
+docs/evidence/2026-11-01-cap10/**/*.log -text
+docs/evidence/2026-11-01-cap10/**/*.gz binary
+docs/evidence/2026-11-01-cap10/**/*.pprof binary

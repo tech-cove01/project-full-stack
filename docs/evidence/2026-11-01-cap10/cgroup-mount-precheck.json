@@ -1,0 +1,9 @@
+{
+  "at": "2026-11-01T07:57:52.127549+00:00",
+  "cid": "1b2a03722142d30a2b98441896dd0ed5c3c200b82dffae459ec41d12204b06b0",
+  "selectedCPUMounts": [
+    "3179 3176 0:60 /docker/1b2a03722142d30a2b98441896dd0ed5c3c200b82dffae459ec41d12204b06b0 /sys/fs/cgroup/cpu ro,nosuid,nodev,noexec,relatime master:397 - cgroup cgroup rw,cpu",
+    "3184 3176 0:61 /docker/1b2a03722142d30a2b98441896dd0ed5c3c200b82dffae459ec41d12204b06b0 /sys/fs/cgroup/cpuacct ro,nosuid,nodev,noexec,relatime master:398 - cgroup cgroup rw,cpuacct"
+  ],
+  "scope": "Read-only wiring before idle/S1; no workload."
+}

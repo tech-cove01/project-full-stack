@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-01T07:48:44.463453+00:00",
+  "project": "project-full-stack-cap10",
+  "runtime": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\env.private.json",
+  "newVolumes": {
+    "mysql": "project-full-stack-cap10-4485d9a4b114-mysql",
+    "redis": "project-full-stack-cap10-4485d9a4b114-redis",
+    "kafka": "project-full-stack-cap10-4485d9a4b114-kafka",
+    "elasticsearch": "project-full-stack-cap10-4485d9a4b114-elasticsearch"
+  },
+  "subnet": "10.253.81.0/24",
+  "power": {
+    "at": "2026-11-01T07:48:43.816210+00:00",
+    "hostMemoryPercent": 70.6,
+    "ac": 1,
+    "batteryPercent": 79,
+    "batterySaver": 0
+  },
+  "credentialValuesExported": false
+}

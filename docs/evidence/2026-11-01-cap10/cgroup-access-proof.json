@@ -1,0 +1,131 @@
+{
+  "at": "2026-11-01T07:58:52.845724+00:00",
+  "earlierStrictV2NamespaceAssumptionRejectedBeforeIdle": true,
+  "rows": [
+    {
+      "service": "mysql",
+      "id": "1b2a03722142d30a2b98441896dd0ed5c3c200b82dffae459ec41d12204b06b0",
+      "at": "2026-11-01T07:58:52.818870+00:00",
+      "layout": {
+        "version": 1,
+        "membership": "/docker/1b2a03722142d30a2b98441896dd0ed5c3c200b82dffae459ec41d12204b06b0",
+        "paths": [
+          "/sys/fs/cgroup/cpu/cpu.stat",
+          "/sys/fs/cgroup/cpu/cpu.cfs_quota_us",
+          "/sys/fs/cgroup/cpu/cpu.cfs_period_us",
+          "/sys/fs/cgroup/cpuacct/cpuacct.usage"
+        ]
+      },
+      "quotaUsec": 400000,
+      "periodUsec": 100000,
+      "rawCounters": {
+        "nr_periods": 3826,
+        "nr_throttled": 0,
+        "throttled_time": 0
+      },
+      "cpuacctUsageNanoseconds": 22148880300,
+      "counters": {
+        "usage_usec": 22148880,
+        "nr_periods": 3826,
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "read_elapsed_ms": 449.2325999890454
+    },
+    {
+      "service": "redis",
+      "id": "d8de5a5e31f140a8f163b1aec22a6b6d696f32d626e24adf87fe3d20249b5391",
+      "at": "2026-11-01T07:58:52.811476+00:00",
+      "layout": {
+        "version": 1,
+        "membership": "/docker/d8de5a5e31f140a8f163b1aec22a6b6d696f32d626e24adf87fe3d20249b5391",
+        "paths": [
+          "/sys/fs/cgroup/cpu/cpu.stat",
+          "/sys/fs/cgroup/cpu/cpu.cfs_quota_us",
+          "/sys/fs/cgroup/cpu/cpu.cfs_period_us",
+          "/sys/fs/cgroup/cpuacct/cpuacct.usage"
+        ]
+      },
+      "quotaUsec": 200000,
+      "periodUsec": 100000,
+      "rawCounters": {
+        "nr_periods": 4358,
+        "nr_throttled": 0,
+        "throttled_time": 0
+      },
+      "cpuacctUsageNanoseconds": 8914922100,
+      "counters": {
+        "usage_usec": 8914922,
+        "nr_periods": 4358,
+        "nr_throttled": 0,
+        "throttled_usec": 0
+      },
+      "read_elapsed_ms": 441.2711000186391
+    },
+    {
+      "service": "kafka",
+      "id": "4f85dc930229ef790840e112157f2c4d970fbf0c278399e59321d9f0f3d1ddfe",
+      "at": "2026-11-01T07:58:52.845261+00:00",
+      "layout": {
+        "version": 1,
+        "membership": "/docker/4f85dc930229ef790840e112157f2c4d970fbf0c278399e59321d9f0f3d1ddfe",
+        "paths": [
+          "/sys/fs/cgroup/cpu/cpu.stat",
+          "/sys/fs/cgroup/cpu/cpu.cfs_quota_us",
+          "/sys/fs/cgroup/cpu/cpu.cfs_period_us",
+          "/sys/fs/cgroup/cpuacct/cpuacct.usage"
+        ]
+      },
+      "quotaUsec": 200000,
+      "periodUsec": 100000,
+      "rawCounters": {
+        "nr_periods": 5060,
+        "nr_throttled": 939,
+        "throttled_time": 65451900500
+      },
+      "cpuacctUsageNanoseconds": 277527236400,
+      "counters": {
+        "usage_usec": 277527236,
+        "nr_periods": 5060,
+        "nr_throttled": 939,
+        "throttled_usec": 65451900
+      },
+      "read_elapsed_ms": 474.311999976635
+    },
+    {
+      "service": "elasticsearch",
+      "id": "e418abb1dcefe0965ec2109d04a6d3785793ab82e61f0e5bd333d33756beb322",
+      "at": "2026-11-01T07:58:52.831268+00:00",
+      "layout": {
+        "version": 1,
+        "membership": "/docker/e418abb1dcefe0965ec2109d04a6d3785793ab82e61f0e5bd333d33756beb322",
+        "paths": [
+          "/sys/fs/cgroup/cpu/cpu.stat",
+          "/sys/fs/cgroup/cpu/cpu.cfs_quota_us",
+          "/sys/fs/cgroup/cpu/cpu.cfs_period_us",
+          "/sys/fs/cgroup/cpuacct/cpuacct.usage"
+        ]
+      },
+      "quotaUsec": 200000,
+      "periodUsec": 100000,
+      "rawCounters": {
+        "nr_periods": 4268,
+        "nr_throttled": 221,
+        "throttled_time": 13925129300
+      },
+      "cpuacctUsageNanoseconds": 60319292800,
+      "counters": {
+        "usage_usec": 60319292,
+        "nr_periods": 4268,
+        "nr_throttled": 221,
+        "throttled_usec": 13925129
+      },
+      "read_elapsed_ms": 459.5339999650605
+    }
+  ],
+  "kernelReferences": [
+    "https://docs.kernel.org/scheduler/sched-bwc.html",
+    "https://docs.kernel.org/admin-guide/cgroup-v2.html"
+  ],
+  "scope": "One wiring verification after v1 target-mount adaptation, not the60s idle observation or any capacity window. Original ns counters retained; normalized us are floor-divided. No workload."
+}

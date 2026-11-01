@@ -1,0 +1,163 @@
+{
+  "task": "CAP-10A",
+  "at": "2026-11-01T07:49:20.774566+00:00",
+  "project": "project-full-stack-cap10",
+  "runtime": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\env.private.json",
+  "containers": {
+    "mysql": {
+      "id": "1b2a03722142d30a2b98441896dd0ed5c3c200b82dffae459ec41d12204b06b0",
+      "name": "/project-full-stack-cap10-mysql-1",
+      "project": "project-full-stack-cap10",
+      "service": "mysql",
+      "image": "mysql:8.4",
+      "imageId": "sha256:b35575a03e5327131916eb8d39222c4c89590881fb44ed69b5814910e5fefa34",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 4000000000,
+      "memoryBytes": 2147483648,
+      "ports": {
+        "3306/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "3481"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-mysql",
+          "destination": "/var/lib/mysql"
+        }
+      ],
+      "networkId": "f3bc6fa81df4347a1dcc7b175b1eb7fbba29e1c16829db887e8050acb9443840"
+    },
+    "redis": {
+      "id": "d8de5a5e31f140a8f163b1aec22a6b6d696f32d626e24adf87fe3d20249b5391",
+      "name": "/project-full-stack-cap10-redis-1",
+      "project": "project-full-stack-cap10",
+      "service": "redis",
+      "image": "redis:7.4-alpine",
+      "imageId": "sha256:4df5c34dc41256fc4ed293482cb34281e17d133077e9aa3c6a87fda60a356c65",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 2000000000,
+      "memoryBytes": 536870912,
+      "ports": {
+        "6379/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "6581"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-redis",
+          "destination": "/data"
+        }
+      ],
+      "networkId": "f3bc6fa81df4347a1dcc7b175b1eb7fbba29e1c16829db887e8050acb9443840"
+    },
+    "kafka": {
+      "id": "4f85dc930229ef790840e112157f2c4d970fbf0c278399e59321d9f0f3d1ddfe",
+      "name": "/project-full-stack-cap10-kafka-1",
+      "project": "project-full-stack-cap10",
+      "service": "kafka",
+      "image": "apache/kafka:3.9.0",
+      "imageId": "sha256:2956061ba5d3388af8eb3148200f385ccba13ef75bc0eb6dcca5827ebd2d36d4",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 2000000000,
+      "memoryBytes": 1073741824,
+      "ports": {
+        "9092/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9401"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "15359290eefd0b1128bd6028a510e4c5cf137c4025680972bd457d4a05151e02",
+          "destination": "/etc/kafka/secrets"
+        },
+        {
+          "name": "87af698a2948f06f6c19a812bb996bbe7ed93aaa1835d72ec05ea65a60c31624",
+          "destination": "/mnt/shared/config"
+        },
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-kafka",
+          "destination": "/var/lib/kafka/data"
+        }
+      ],
+      "networkId": "f3bc6fa81df4347a1dcc7b175b1eb7fbba29e1c16829db887e8050acb9443840"
+    },
+    "elasticsearch": {
+      "id": "e418abb1dcefe0965ec2109d04a6d3785793ab82e61f0e5bd333d33756beb322",
+      "name": "/project-full-stack-cap10-elasticsearch-1",
+      "project": "project-full-stack-cap10",
+      "service": "elasticsearch",
+      "image": "docker.elastic.co/elasticsearch/elasticsearch:8.19.23",
+      "imageId": "sha256:c8ec58306c7c7b426362a2feb04cc42652e71483b8601591132ef9d583e303b7",
+      "running": true,
+      "status": "running",
+      "exitCode": 0,
+      "oomKilled": false,
+      "restartCount": 0,
+      "cpuNano": 2000000000,
+      "memoryBytes": 1073741824,
+      "ports": {
+        "9200/tcp": [
+          {
+            "HostIp": "127.0.0.1",
+            "HostPort": "9281"
+          }
+        ]
+      },
+      "volumes": [
+        {
+          "name": "project-full-stack-cap10-4485d9a4b114-elasticsearch",
+          "destination": "/usr/share/elasticsearch/data"
+        }
+      ],
+      "networkId": "f3bc6fa81df4347a1dcc7b175b1eb7fbba29e1c16829db887e8050acb9443840"
+    }
+  },
+  "newVolumes": {
+    "mysql": "project-full-stack-cap10-4485d9a4b114-mysql",
+    "redis": "project-full-stack-cap10-4485d9a4b114-redis",
+    "kafka": "project-full-stack-cap10-4485d9a4b114-kafka",
+    "elasticsearch": "project-full-stack-cap10-4485d9a4b114-elasticsearch"
+  },
+  "subnet": "10.253.81.0/24",
+  "powerAfterStart": {
+    "at": "2026-11-01T07:49:20.774658+00:00",
+    "hostMemoryPercent": 75.8,
+    "ac": 1,
+    "batteryPercent": 79,
+    "batterySaver": 0
+  },
+  "groups": [
+    "community.follow-v1",
+    "community.feed-v1",
+    "community.search-v1"
+  ],
+  "kafkaTopic": "community.events",
+  "mysqlMaxOpen": 20,
+  "redisPoolSize": 10,
+  "gomaxprocs": 4,
+  "gomemlimit": "1GiB",
+  "sharedHost": true,
+  "oldVolumesUntouched": true
+}

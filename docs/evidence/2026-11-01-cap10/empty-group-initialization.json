@@ -1,0 +1,126 @@
+{
+  "at": "2026-11-01T07:54:05.368256+00:00",
+  "task": "CAP-10A empty-topic group wiring",
+  "kafkaCID": "4f85dc930229ef790840e112157f2c4d970fbf0c278399e59321d9f0f3d1ddfe",
+  "apiNotStarted": true,
+  "initialGroupsEmpty": true,
+  "initialFirstAndEndOffset": 0,
+  "topicPartitions": [
+    0
+  ],
+  "groups": [
+    "community.follow-v1",
+    "community.feed-v1",
+    "community.search-v1"
+  ],
+  "committedOffsetAfter": 0,
+  "noMessagesPublished": true,
+  "noConsumerProcessingClaim": true,
+  "rawCommands": [
+    {
+      "script": "kafka-consumer-groups.sh",
+      "arguments": [
+        "--list"
+      ],
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "script": "kafka-get-offsets.sh",
+      "arguments": [
+        "--topic",
+        "community.events",
+        "--time",
+        "earliest"
+      ],
+      "stdout": "community.events:0:0\n",
+      "stderr": ""
+    },
+    {
+      "script": "kafka-get-offsets.sh",
+      "arguments": [
+        "--topic",
+        "community.events",
+        "--time",
+        "latest"
+      ],
+      "stdout": "community.events:0:0\n",
+      "stderr": ""
+    },
+    {
+      "script": "kafka-consumer-groups.sh",
+      "arguments": [
+        "--group",
+        "community.follow-v1",
+        "--topic",
+        "community.events:0",
+        "--reset-offsets",
+        "--to-offset",
+        "0",
+        "--execute"
+      ],
+      "stdout": "\nGROUP                          TOPIC                          PARTITION  NEW-OFFSET     community.follow-v1            community.events               0          0              ",
+      "stderr": ""
+    },
+    {
+      "script": "kafka-consumer-groups.sh",
+      "arguments": [
+        "--group",
+        "community.follow-v1",
+        "--describe"
+      ],
+      "stdout": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID\ncommunity.follow-v1 community.events 0          0               0               0               -               -               -",
+      "stderr": "\nConsumer group 'community.follow-v1' has no active members.\n"
+    },
+    {
+      "script": "kafka-consumer-groups.sh",
+      "arguments": [
+        "--group",
+        "community.feed-v1",
+        "--topic",
+        "community.events:0",
+        "--reset-offsets",
+        "--to-offset",
+        "0",
+        "--execute"
+      ],
+      "stdout": "\nGROUP                          TOPIC                          PARTITION  NEW-OFFSET     community.feed-v1              community.events               0          0              ",
+      "stderr": ""
+    },
+    {
+      "script": "kafka-consumer-groups.sh",
+      "arguments": [
+        "--group",
+        "community.feed-v1",
+        "--describe"
+      ],
+      "stdout": "\nGROUP             TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID\ncommunity.feed-v1 community.events 0          0               0               0               -               -               -",
+      "stderr": "\nConsumer group 'community.feed-v1' has no active members.\n"
+    },
+    {
+      "script": "kafka-consumer-groups.sh",
+      "arguments": [
+        "--group",
+        "community.search-v1",
+        "--topic",
+        "community.events:0",
+        "--reset-offsets",
+        "--to-offset",
+        "0",
+        "--execute"
+      ],
+      "stdout": "\nGROUP                          TOPIC                          PARTITION  NEW-OFFSET     community.search-v1            community.events               0          0              ",
+      "stderr": ""
+    },
+    {
+      "script": "kafka-consumer-groups.sh",
+      "arguments": [
+        "--group",
+        "community.search-v1",
+        "--describe"
+      ],
+      "stdout": "\nGROUP               TOPIC            PARTITION  CURRENT-OFFSET  LOG-END-OFFSET  LAG             CONSUMER-ID     HOST            CLIENT-ID\ncommunity.search-v1 community.events 0          0               0               0               -               -               -",
+      "stderr": "\nConsumer group 'community.search-v1' has no active members.\n"
+    }
+  ]
+}

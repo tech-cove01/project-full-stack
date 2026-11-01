@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-11-01T05:58:42.223118+00:00",
+  "finishedAt": "2026-11-01T05:59:12.235096+00:00",
+  "monotonicElapsedSeconds": 30.011962299991865,
+  "requestedSeconds": 30,
+  "path": "feed-diagnostic-1-cpu.pprof",
+  "bytes": 53295,
+  "sha256": "ba6ce5b3decbf4559856e06d7d68696a6577aff7c420e5ca4d3de3aa19e76c67",
+  "apiSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "binarySHA256": "d72c1ea34977bb780bea55c562b7ba14fde3004b6c2abd6c54733d8d7577d3e1",
+  "apiPid": 37160,
+  "scope": "instrumented diagnostic; overlaps actual native interval only as established by timing, not a capacity pass"
+}

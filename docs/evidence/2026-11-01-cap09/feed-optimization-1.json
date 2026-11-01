@@ -1,0 +1,26 @@
+{
+  "at": "2026-11-01T06:05:13.811301+00:00",
+  "task": "CAP-09C Feed repair1/2",
+  "decision": "Cache one immutable IANA Asia/Shanghai Location after material repeated allocation evidence; no SQL/pool/TTL changes.",
+  "evidence": [
+    "feed-diagnostic-1-allocs-top.txt",
+    "feed-diagnostic-1-cpu-zone.txt",
+    "feed-diagnostic-1-cpu.pprof",
+    "feed-diagnostic-1-allocs-before.pprof",
+    "feed-diagnostic-1-allocs-after.pprof"
+  ],
+  "sampledAllocationMB": {
+    "total": 598.95,
+    "zoneCumulative": 103.04,
+    "zonePercent": 17.2,
+    "scope": "one cumulative callchain, never sum nested LoadLocation frames; instrumented diagnostic including warmup/background/natural-GC sampling, not exact per-request allocation"
+  },
+  "cpuSamplesSeconds": {
+    "total": 12.83,
+    "zoneCumulative": 0.32,
+    "zonePercent": 2.49,
+    "scope": "statistical CPU profile, not wall/request latency or proven250 early-stop cause"
+  },
+  "validation": "real social/communitycache59 passing items incl subtests/one explicitTestGO073CacheMeasurementSKIP; related vet passes; new time contracts modern+8/1991winter+8/1991summer+9 and cursor instant. Non-author review passed.",
+  "nextComparison": "Same-condition final unprofiled100/s short stage versus existing baseline100, plus at most one second instrumented100/s45s diagnostic for allocation proof; fixed final app source across both chains. No throughput improvement claimed yet."
+}

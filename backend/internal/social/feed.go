@@ -5,6 +5,7 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	_ "time/tzdata"
 
@@ -45,12 +46,18 @@ type FeedPage struct {
 	Source     string     `json:"source,omitempty"`
 }
 
-func zone() *time.Location {
+// Feed rendering and cursor parsing share immutable IANA rules. Loading once
+// avoids rebuilding the same location for every card while holding a snapshot.
+var feedLocation = sync.OnceValue(func() *time.Location {
 	location, err := time.LoadLocation("Asia/Shanghai")
 	if err != nil {
 		panic("embedded Asia/Shanghai timezone unavailable")
 	}
 	return location
+})
+
+func zone() *time.Location {
+	return feedLocation()
 }
 
 // Feed lists published notes from followed authors with a (publishedAt,id) key.

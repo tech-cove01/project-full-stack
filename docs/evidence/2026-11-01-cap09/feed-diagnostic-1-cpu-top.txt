@@ -1,0 +1,44 @@
+File: capacity.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap09-build-53fa1b3\capacity.exe2026-11-01 13:09:02.4600101 +0800 CST
+Type: cpu
+Time: 2026-11-01 13:58:42 CST
+Duration: 30s, Total samples = 12.83s (42.77%)
+Showing nodes accounting for 6.68s, 52.07% of 12.83s total
+Dropped 618 nodes (cum <= 0.06s)
+Showing top 35 nodes out of 277
+      flat  flat%   sum%        cum   cum%
+     0.02s  0.16%  0.16%      8.51s 66.33%  net/http.(*conn).serve
+         0     0%  0.16%      7.92s 61.73%  net/http.serverHandler.ServeHTTP
+         0     0%  0.16%      7.91s 61.65%  github.com/gin-gonic/gin.(*Engine).ServeHTTP
+     0.01s 0.078%  0.23%      7.91s 61.65%  github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+         0     0%  0.23%      7.89s 61.50%  github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func1
+         0     0%  0.23%      7.89s 61.50%  github.com/cityloop/fullstack-go/internal/social.Register.func5
+         0     0%  0.23%      7.89s 61.50%  github.com/gin-gonic/gin.(*Context).Next
+         0     0%  0.23%      7.82s 60.95%  github.com/cityloop/fullstack-go/internal/auth.RequireLogin.func1
+     0.02s  0.16%  0.39%      6.73s 52.46%  internal/poll.(*FD).execIO
+         0     0%  0.39%      6.59s 51.36%  github.com/cityloop/fullstack-go/internal/social.Register.func6
+     0.01s 0.078%  0.47%      6.52s 50.82%  syscall.syscalln
+     6.43s 50.12% 50.58%      6.51s 50.74%  runtime.cgocall
+         0     0% 50.58%      6.40s 49.88%  syscall.SyscallN
+         0     0% 50.58%      5.83s 45.44%  gorm.io/gorm.(*DB).Transaction
+         0     0% 50.58%      5.81s 45.28%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed
+         0     0% 50.58%      5.75s 44.82%  net.(*conn).Write
+     0.02s  0.16% 50.74%      5.75s 44.82%  net.(*netFD).Write
+     0.06s  0.47% 51.21%      5.71s 44.51%  internal/poll.(*FD).Write
+         0     0% 51.21%      5.52s 43.02%  internal/poll.(*FD).Write.func2
+     0.01s 0.078% 51.29%      5.52s 43.02%  syscall.WSASend
+         0     0% 51.29%      5.50s 42.87%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot
+     0.01s 0.078% 51.36%      4.16s 32.42%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot.func1
+         0     0% 51.36%      4.14s 32.27%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func2
+         0     0% 51.36%      4.14s 32.27%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func3
+         0     0% 51.36%      4.14s 32.27%  github.com/cityloop/fullstack-go/internal/social.(*Service).feedDirectory
+         0     0% 51.36%      3.72s 28.99%  gorm.io/gorm.(*DB).Scan
+     0.04s  0.31% 51.68%      3.21s 25.02%  github.com/go-sql-driver/mysql.(*mysqlConn).writePacket
+     0.02s  0.16% 51.83%      2.41s 18.78%  bufio.(*Writer).Flush
+         0     0% 51.83%      2.39s 18.63%  gorm.io/gorm.(*DB).Rows
+     0.02s  0.16% 51.99%      2.37s 18.47%  gorm.io/gorm.(*processor).Execute
+         0     0% 51.99%      2.28s 17.77%  gorm.io/gorm/callbacks.RowQuery
+         0     0% 51.99%      2.25s 17.54%  database/sql.(*Tx).QueryContext
+         0     0% 51.99%      2.24s 17.46%  database/sql.(*DB).queryDC
+     0.01s 0.078% 52.07%      2.16s 16.84%  database/sql.withLock
+         0     0% 52.07%      2.14s 16.68%  github.com/cityloop/fullstack-go/internal/platform/taildiag.(*observedTransaction).QueryContext

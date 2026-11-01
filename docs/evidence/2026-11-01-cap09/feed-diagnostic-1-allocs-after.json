@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-01T05:59:40.477067+00:00",
+  "path": "feed-diagnostic-1-allocs-after.pprof",
+  "bytes": 27730,
+  "sha256": "e075c765b512a6e871e13c8733f68981408d81063323606310ebac0987601c32",
+  "forcedGC": false,
+  "scope": "after native exit and downstream drain; cumulative sampled allocation profile, natural GC sampling boundary"
+}

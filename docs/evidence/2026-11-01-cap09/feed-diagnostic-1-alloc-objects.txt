@@ -1,0 +1,30 @@
+File: capacity.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap09-build-53fa1b3\capacity.exe2026-11-01 13:09:02.4600101 +0800 CST
+Type: alloc_objects
+Time: 2026-11-01 13:58:21 CST
+Showing nodes accounting for 411658, 8.19% of 5023496 total
+Dropped 183 nodes (cum <= 25117)
+Showing top 22 nodes out of 206
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%    4593433 91.44%  net/http.(*conn).serve
+         0     0%     0%    4455258 88.69%  net/http.serverHandler.ServeHTTP
+         0     0%     0%    4454688 88.68%  github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func1
+         0     0%     0%    4454688 88.68%  github.com/cityloop/fullstack-go/internal/social.Register.func5
+         0     0%     0%    4454688 88.68%  github.com/gin-gonic/gin.(*Context).Next
+         0     0%     0%    4454688 88.68%  github.com/gin-gonic/gin.(*Engine).ServeHTTP
+         0     0%     0%    4454688 88.68%  github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+     21846  0.43%  0.43%    4444538 88.47%  github.com/cityloop/fullstack-go/internal/auth.RequireLogin.func1
+     10923  0.22%  0.65%    4338640 86.37%  github.com/cityloop/fullstack-go/internal/social.Register.func6
+         0     0%  0.65%    4282135 85.24%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed
+         0     0%  0.65%    3334979 66.39%  gorm.io/gorm.(*DB).Transaction
+     32768  0.65%  1.30%    3322734 66.14%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot
+      8192  0.16%  1.47%    3112781 61.96%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot.func1
+         0     0%  1.47%    3104589 61.80%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func2
+         0     0%  1.47%    3104589 61.80%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func3
+    232792  4.63%  6.10%    3104589 61.80%  github.com/cityloop/fullstack-go/internal/social.(*Service).feedDirectory
+     84653  1.69%  7.79%    1680711 33.46%  gorm.io/gorm.(*DB).Scan
+      8195  0.16%  7.95%    1303388 25.95%  github.com/cityloop/fullstack-go/internal/social.(*Service).feedDirectory.func1
+         0     0%  7.95%     903056 17.98%  gorm.io/gorm.(*DB).ScanRows
+     12289  0.24%  8.19%     886672 17.65%  gorm.io/gorm.Scan
+         0     0%  8.19%     643030 12.80%  gorm.io/gorm.(*DB).Rows
+         0     0%  8.19%     612445 12.19%  gorm.io/gorm.(*processor).Execute

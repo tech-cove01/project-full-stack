@@ -1,0 +1,199 @@
+{
+  "at": "2026-11-01T05:56:51.7868049Z",
+  "baseline": {
+    "at": "2026-11-01T05:56:51.165223Z",
+    "elapsedSeconds": 0,
+    "durationMs": 621.5819,
+    "sql": {
+      "startedAt": "2026-11-01T05:56:51.165223Z",
+      "finishedAt": "2026-11-01T05:56:51.770377Z",
+      "afterWatermark": 0,
+      "maxOutboxId": 781,
+      "counts": {
+        "events": 781,
+        "pending": 0,
+        "processing": 0,
+        "done": 781,
+        "needsReview": 0,
+        "other": 0
+      },
+      "receipts": [
+        {
+          "projection": "follow-v1",
+          "missing": 0,
+          "applied": 0,
+          "ignored": 781
+        },
+        {
+          "projection": "feed-v1",
+          "missing": 0,
+          "applied": 0,
+          "ignored": 781
+        },
+        {
+          "projection": "search-v1",
+          "missing": 0,
+          "applied": 0,
+          "ignored": 781
+        }
+      ],
+      "parked": 0
+    },
+    "kafka": {
+      "startedAt": "2026-11-01T05:56:51.770377Z",
+      "finishedAt": "2026-11-01T05:56:51.7868049Z",
+      "topic": "community.events",
+      "groups": [
+        {
+          "group": "community.follow-v1",
+          "partitions": [
+            {
+              "partition": 0,
+              "firstOffset": 0,
+              "endOffset": 781,
+              "committedOffset": 781,
+              "lag": 0,
+              "initialized": true
+            }
+          ],
+          "lag": 0,
+          "initialized": true
+        },
+        {
+          "group": "community.feed-v1",
+          "partitions": [
+            {
+              "partition": 0,
+              "firstOffset": 0,
+              "endOffset": 781,
+              "committedOffset": 781,
+              "lag": 0,
+              "initialized": true
+            }
+          ],
+          "lag": 0,
+          "initialized": true
+        },
+        {
+          "group": "community.search-v1",
+          "partitions": [
+            {
+              "partition": 0,
+              "firstOffset": 0,
+              "endOffset": 781,
+              "committedOffset": 781,
+              "lag": 0,
+              "initialized": true
+            }
+          ],
+          "lag": 0,
+          "initialized": true
+        }
+      ]
+    },
+    "errors": [],
+    "semanticViolations": []
+  },
+  "fixedProject": "project-full-stack-cap09",
+  "fixtureSHA256": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224",
+  "noteCount": 513,
+  "observerPid": 56960,
+  "ready": true,
+  "scope": "bounded pre-load readiness attempts retained; initial cumulative LIKE baseline requires no pre-existing pending/receipt/park/lag before load",
+  "startupAttempts": [
+    {
+      "at": "2026-11-01T05:56:51.165223Z",
+      "elapsedSeconds": 0,
+      "durationMs": 621.5819,
+      "sql": {
+        "startedAt": "2026-11-01T05:56:51.165223Z",
+        "finishedAt": "2026-11-01T05:56:51.770377Z",
+        "afterWatermark": 0,
+        "maxOutboxId": 781,
+        "counts": {
+          "events": 781,
+          "pending": 0,
+          "processing": 0,
+          "done": 781,
+          "needsReview": 0,
+          "other": 0
+        },
+        "receipts": [
+          {
+            "projection": "follow-v1",
+            "missing": 0,
+            "applied": 0,
+            "ignored": 781
+          },
+          {
+            "projection": "feed-v1",
+            "missing": 0,
+            "applied": 0,
+            "ignored": 781
+          },
+          {
+            "projection": "search-v1",
+            "missing": 0,
+            "applied": 0,
+            "ignored": 781
+          }
+        ],
+        "parked": 0
+      },
+      "kafka": {
+        "startedAt": "2026-11-01T05:56:51.770377Z",
+        "finishedAt": "2026-11-01T05:56:51.7868049Z",
+        "topic": "community.events",
+        "groups": [
+          {
+            "group": "community.follow-v1",
+            "partitions": [
+              {
+                "partition": 0,
+                "firstOffset": 0,
+                "endOffset": 781,
+                "committedOffset": 781,
+                "lag": 0,
+                "initialized": true
+              }
+            ],
+            "lag": 0,
+            "initialized": true
+          },
+          {
+            "group": "community.feed-v1",
+            "partitions": [
+              {
+                "partition": 0,
+                "firstOffset": 0,
+                "endOffset": 781,
+                "committedOffset": 781,
+                "lag": 0,
+                "initialized": true
+              }
+            ],
+            "lag": 0,
+            "initialized": true
+          },
+          {
+            "group": "community.search-v1",
+            "partitions": [
+              {
+                "partition": 0,
+                "firstOffset": 0,
+                "endOffset": 781,
+                "committedOffset": 781,
+                "lag": 0,
+                "initialized": true
+              }
+            ],
+            "lag": 0,
+            "initialized": true
+          }
+        ]
+      },
+      "errors": [],
+      "semanticViolations": []
+    }
+  ]
+}

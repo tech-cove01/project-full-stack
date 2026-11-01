@@ -1,0 +1,123 @@
+{
+  "task": "CAP-09-Feed",
+  "mode": "hot",
+  "rate": 100,
+  "seconds": 45,
+  "warmSeconds": 10,
+  "warmRate": 25,
+  "preVUs": 256,
+  "maxVUs": 512,
+  "fixture": "capread-a6fa4347d7",
+  "apiSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "apiExpectedRevision": "capacity-53fa1b34843486dd546ac3212a187e963621890b",
+  "fixtureSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "fixtureExpectedRevision": "capacity-53fa1b34843486dd546ac3212a187e963621890b",
+  "fixtureManifestSHA256": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+  "pageSize": 20,
+  "activeReaders": 1,
+  "activeCountKeys": 20,
+  "thresholds": {
+    "actualOfferedRatioMin": 0.99,
+    "successfulFractionMin": 0.99,
+    "incompleteOrUnclassifiedMax": 0,
+    "droppedMax": 0,
+    "systemErrorRateMaxExclusive": 0.01,
+    "p95MsMax": 200,
+    "p99MsMax": 500,
+    "successfulP95MsMax": 200,
+    "successfulP99MsMax": 500,
+    "contentErrorsMax": 0
+  },
+  "started": "2026-11-01T05:56:52.479Z",
+  "fullContentContract": "IDs/order/author/shop/counts/own-state/title/256B body/images/createTime/nextCursor; classification CPU is observed on the generator",
+  "nativeScenario": {
+    "startedAt": 1793512625398,
+    "durationMs": 45000,
+    "scheduledEndedAt": 1793512670398,
+    "complete": true,
+    "startMetric": {
+      "min": 1793512625398,
+      "max": 1793512625398
+    },
+    "durationMetric": {
+      "min": 45000,
+      "max": 45000
+    },
+    "scope": "k6 scenario.startTime plus configured native offer duration. Complete requires successful unsignalled process coverage; failed/early-stop stages retain scheduled end without claiming actual completion or an exact stop timestamp."
+  },
+  "performanceSchemaConsumers": "events_statements_current\tYES\r\nstatements_digest\tYES",
+  "selectInstrument": "YES\tYES",
+  "scriptSHA256": {
+    "scripts/go073-cap-read.mjs": "c372fc868d3dca9014f1ee8466fcd58822af0854dce0d518de223b4acc07a918",
+    "scripts/load/go073-cap-read.js": "0cf21840d530d0685d69dc3b486312c4c08cc2a1c0a22f06fc7f241010328ad7",
+    "scripts/load/cap09-feed-contract.js": "de0bf8965d4d20ced9ecb791d84f3dcf231f4f36fbf3838e93bfa14042b429e1",
+    "scripts/load/cap09-native-window.mjs": "bc09fd05fad0ddd14de8a2ad4e39fb9a13d40ee2c2f1bc468da9e9e4eba0e490"
+  },
+  "warmExit": 0,
+  "warmExternalStop": null,
+  "stableStartedAt": 1793512625007,
+  "stableWrapperStartedAt": 1793512625007,
+  "stableExit": 0,
+  "stableExternalStop": null,
+  "stableEndedAt": 1793512671460,
+  "stableCommandElapsedMs": 46453,
+  "stableWrapperEndedAt": 1793512671460,
+  "result": {
+    "attempted": 4500,
+    "completedHttpRequests": 4500,
+    "completed": 4500,
+    "incompleteOrUnclassified": 0,
+    "completedButUnclassified": 0,
+    "classificationCoverage": 1,
+    "successful": 4500,
+    "systemErrors": 0,
+    "contentErrors": 0,
+    "httpErrors": 0,
+    "dropped": 0,
+    "targetOffers": 4500,
+    "actualOfferedRatio": 1,
+    "issuedPerNominalSecond": 100,
+    "successfulPerNominalSecond": 100,
+    "systemErrorRate": 0,
+    "systemErrorRatePerCompleted": 0,
+    "allLatency": {
+      "min": 10.9223,
+      "med": 15.694199999999999,
+      "p(95)": 158.35130000000007,
+      "p(99)": 231.37871400000012,
+      "max": 288.1518,
+      "avg": 34.335871066666655,
+      "thresholds": {
+        "p(95)<=200": false,
+        "p(99)<=500": false
+      }
+    },
+    "successfulLatency": {
+      "med": 15.694199999999999,
+      "p(95)": 158.35130000000007,
+      "p(99)": 231.37871400000012,
+      "max": 288.1518,
+      "avg": 34.335871066666655,
+      "min": 10.9223
+    },
+    "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+    "k6Metrics": {
+      "vus": {
+        "value": 2,
+        "min": 1,
+        "max": 16
+      },
+      "vusMax": {
+        "max": 256,
+        "value": 256,
+        "min": 256
+      },
+      "dataReceived": {
+        "count": 42399000,
+        "rate": 942118.0922530595
+      }
+    }
+  },
+  "meetsBudget": true,
+  "finished": "2026-11-01T05:57:51.850Z"
+}

@@ -1,0 +1,71 @@
+
+
+  █ THRESHOLDS 
+
+    cap_read_all_ms
+    ✓ 'p(95)<=200' p(95)=29.97ms
+    ✓ 'p(99)<=500' p(99)=134.63ms
+
+    cap_read_attempted
+    ✓ 'count>=0' count=250
+
+    cap_read_completed
+    ✓ 'count>=0' count=250
+
+    cap_read_content_errors
+    ✓ 'count==0' count=0
+
+    cap_read_failure_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_http_errors
+    ✓ 'count>=0' count=0
+
+    cap_read_success
+    ✓ 'count>=0' count=250
+
+    cap_read_system_error_ratio
+    ✓ 'rate<0.01' rate=0.00%
+
+    cap_read_system_errors
+    ✓ 'count>=0' count=0
+
+    dropped_iterations
+    ✓ 'count==0' count=0
+
+
+  █ TOTAL RESULTS 
+
+    CUSTOM
+    cap_native_scenario_duration_ms.....: avg=10000         min=10000         med=10000         p(95)=10000         p(99)=10000         max=10000        
+    cap_native_scenario_start_unix_ms...: avg=1793512613528 min=1793512613528 med=1793512613528 p(95)=1793512613528 p(99)=1793512613528 max=1793512613528
+    cap_read_all_ms.....................: avg=19.51ms       min=12.18ms       med=15.05ms       p(95)=29.97ms       p(99)=134.63ms      max=182.35ms     
+    cap_read_attempted..................: 250    24.999611/s
+    cap_read_completed..................: 250    24.999611/s
+    cap_read_content_errors.............: 0      0/s
+    cap_read_failure_ratio..............: 0.00%  0 out of 250
+    cap_read_http_errors................: 0      0/s
+    cap_read_success....................: 250    24.999611/s
+    cap_read_success_ms.................: avg=19.51ms       min=12.18ms       med=15.05ms       p(95)=29.97ms       p(99)=134.63ms      max=182.35ms     
+    cap_read_system_error_ratio.........: 0.00%  0 out of 250
+    cap_read_system_errors..............: 0      0/s
+
+    HTTP
+    http_req_duration...................: avg=19.51ms       min=12.18ms       med=15.05ms       p(95)=29.97ms       p(99)=134.63ms      max=182.35ms     
+      { expected_response:true }........: avg=19.51ms       min=12.18ms       med=15.05ms       p(95)=29.97ms       p(99)=134.63ms      max=182.35ms     
+    http_req_failed.....................: 0.00%  0 out of 250
+    http_reqs...........................: 250    24.999611/s
+
+    EXECUTION
+    dropped_iterations..................: 0      0/s
+    iteration_duration..................: avg=21.51ms       min=13.73ms       med=16.63ms       p(95)=32.35ms       p(99)=154.98ms      max=186.05ms     
+    iterations..........................: 250    24.999611/s
+    vus.................................: 0      min=0        max=0  
+    vus_max.............................: 256    min=256      max=256
+
+    NETWORK
+    data_received.......................: 2.4 MB 236 kB/s
+    data_sent...........................: 35 kB  3.4 kB/s
+
+
+

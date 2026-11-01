@@ -1,0 +1,43 @@
+File: capacity.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap09-build-53fa1b3\capacity.exe2026-11-01 13:09:02.4600101 +0800 CST
+Type: alloc_space
+Time: 2026-11-01 13:58:21 CST
+Showing nodes accounting for 215.44MB, 35.97% of 598.95MB total
+Dropped 215 nodes (cum <= 2.99MB)
+Showing top 35 nodes out of 174
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%   555.21MB 92.70%  net/http.(*conn).serve
+         0     0%     0%   545.20MB 91.03%  net/http.serverHandler.ServeHTTP
+         0     0%     0%   536.40MB 89.56%  github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func1
+         0     0%     0%   536.40MB 89.56%  github.com/cityloop/fullstack-go/internal/social.Register.func5
+         0     0%     0%   536.40MB 89.56%  github.com/gin-gonic/gin.(*Context).Next
+         0     0%     0%   536.40MB 89.56%  github.com/gin-gonic/gin.(*Engine).ServeHTTP
+         0     0%     0%   536.40MB 89.56%  github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+       1MB  0.17%  0.17%   470.58MB 78.57%  github.com/cityloop/fullstack-go/internal/auth.RequireLogin.func1
+    0.50MB 0.083%  0.25%   459.58MB 76.73%  github.com/cityloop/fullstack-go/internal/social.Register.func6
+         0     0%  0.25%   412.72MB 68.91%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed
+         0     0%  0.25%   313.66MB 52.37%  gorm.io/gorm.(*DB).Transaction
+    0.50MB 0.083%  0.33%   306.66MB 51.20%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot
+    0.50MB 0.083%  0.42%   291.15MB 48.61%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot.func1
+         0     0%  0.42%   290.65MB 48.53%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func2
+         0     0%  0.42%   290.65MB 48.53%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func3
+   40.08MB  6.69%  7.11%   290.65MB 48.53%  github.com/cityloop/fullstack-go/internal/social.(*Service).feedDirectory
+         0     0%  7.11%   103.04MB 17.20%  github.com/cityloop/fullstack-go/internal/social.zone (inline)
+         0     0%  7.11%   103.04MB 17.20%  time.LoadLocation
+   39.02MB  6.51% 13.62%   103.04MB 17.20%  time.loadLocation
+       4MB  0.67% 14.29%    94.52MB 15.78%  gorm.io/gorm.(*DB).Scan
+         0     0% 14.29%    71.05MB 11.86%  github.com/cityloop/fullstack-go/internal/communitycards.(*Cache).GetMany
+       3MB   0.5% 14.79%    65.01MB 10.85%  github.com/cityloop/fullstack-go/internal/social.(*Service).feedDirectory.func1
+   63.02MB 10.52% 25.31%    64.02MB 10.69%  time.LoadLocationFromTZData
+   63.82MB 10.66% 35.97%    63.82MB 10.66%  github.com/cityloop/fullstack-go/internal/platform/taildiag.start
+         0     0% 35.97%    63.31MB 10.57%  github.com/cityloop/fullstack-go/internal/platform/taildiag.Start
+         0     0% 35.97%    58.02MB  9.69%  gorm.io/gorm.(*DB).Rows
+         0     0% 35.97%    54.52MB  9.10%  gorm.io/gorm.(*processor).Execute
+         0     0% 35.97%    47.02MB  7.85%  github.com/cityloop/fullstack-go/internal/communitycards.(*Cache).cachedRedis
+         0     0% 35.97%    43.86MB  7.32%  github.com/gin-gonic/gin.(*Context).JSON (inline)
+         0     0% 35.97%    43.86MB  7.32%  github.com/gin-gonic/gin.(*Context).Render
+         0     0% 35.97%    43.86MB  7.32%  github.com/gin-gonic/gin/render.JSON.Render
+         0     0% 35.97%    43.86MB  7.32%  github.com/gin-gonic/gin/render.WriteJSON
+         0     0% 35.97%    43.36MB  7.24%  encoding/json.Marshal (inline)
+         0     0% 35.97%    43.36MB  7.24%  encoding/json/v2.Marshal
+         0     0% 35.97%    42.36MB  7.07%  github.com/gin-gonic/gin/codec/json.jsonApi.Marshal

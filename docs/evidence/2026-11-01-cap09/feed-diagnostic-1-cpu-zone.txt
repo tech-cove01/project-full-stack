@@ -1,0 +1,32 @@
+File: capacity.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap09-build-53fa1b3\capacity.exe2026-11-01 13:09:02.4600101 +0800 CST
+Type: cpu
+Time: 2026-11-01 13:58:42 CST
+Duration: 30s, Total samples = 12.83s (42.77%)
+Active filters:
+   focus=time.LoadLocation|social.zone
+Showing nodes accounting for 0.20s, 1.56% of 12.83s total
+Showing top 22 nodes out of 70
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/auth.RequireLogin.func1
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/platform/httpapi.NewRouter.func1
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func2
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.(*Service).Feed.func3
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.(*Service).feedDirectory
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.(*Service).readSnapshot.func1
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.Register.func5
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.Register.func6
+         0     0%     0%      0.32s  2.49%  github.com/cityloop/fullstack-go/internal/social.zone (inline)
+         0     0%     0%      0.32s  2.49%  github.com/gin-gonic/gin.(*Context).Next
+         0     0%     0%      0.32s  2.49%  github.com/gin-gonic/gin.(*Engine).ServeHTTP
+         0     0%     0%      0.32s  2.49%  github.com/gin-gonic/gin.(*Engine).handleHTTPRequest
+         0     0%     0%      0.32s  2.49%  gorm.io/gorm.(*DB).Transaction
+         0     0%     0%      0.32s  2.49%  net/http.(*conn).serve
+         0     0%     0%      0.32s  2.49%  net/http.serverHandler.ServeHTTP
+         0     0%     0%      0.32s  2.49%  time.LoadLocation
+         0     0%     0%      0.32s  2.49%  time.loadLocation
+     0.18s  1.40%  1.40%      0.20s  1.56%  time/tzdata.loadFromEmbeddedTZData
+     0.01s 0.078%  1.48%      0.09s   0.7%  runtime.mallocgc
+     0.01s 0.078%  1.56%      0.09s   0.7%  time.LoadLocationFromTZData

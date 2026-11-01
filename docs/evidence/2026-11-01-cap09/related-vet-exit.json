@@ -1,0 +1,21 @@
+{
+  "startedAt": "2026-11-01T06:02:16.616045+00:00",
+  "finishedAt": "2026-11-01T06:02:18.095993+00:00",
+  "elapsedSeconds": 1.4799548999872059,
+  "argv": [
+    "go",
+    "vet",
+    "./internal/social",
+    "./internal/communitycache"
+  ],
+  "exitCode": 0,
+  "testActions": null,
+  "filesSHA256": {
+    "backend/internal/social/like.go": "379f453d2e49c5bdc4458b1281cd72a679b4d67d6f0f32f376287cbded955a3e",
+    "backend/internal/social/like_postcommit_integration_test.go": "64554b15037200196e4ebc42c1e9fef956add721be8cddc66e4f49369e64852b",
+    "backend/internal/social/feed.go": "b84764dc3410ea68372b629c88d9effc95cfe6bbafea2514cce6216fb4babd1e",
+    "backend/internal/social/feed_zone_test.go": "a4a0bb5073ece7520b9dcbd064493085489ec756e633f57b74be371112c688e2"
+  },
+  "scope": "real owned MySQL3471/Redis6571; exact isolated test rows and keys; no API/load; subtests counted, not separate unique scenarios",
+  "credentialsExported": false
+}

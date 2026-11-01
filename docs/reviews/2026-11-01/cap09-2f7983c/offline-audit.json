@@ -1,0 +1,181 @@
+{
+  "prepared_on": "2026-11-01",
+  "scope": "Independent existing-evidence audit only. No application tests, SQL, HTTP load, services, host sampling or cloud actions.",
+  "source_commit": "2f7983c472da4e580bb54c54a28679c6f49063e4",
+  "application_commit": "7a80186b568b521c54736b735c08dce8ef962e19",
+  "manifest_sha256": "017021d942ac47508830330a82b6b931f57ada56e7d8f17150e3fc0683c48881",
+  "raw_integrity": {
+    "files": 798,
+    "bytes": 13068226,
+    "working_mismatches": [],
+    "git_blob_mismatches": [],
+    "method": "Hash actual bytes and git cat-file --batch blobs at source_commit; compare every manifest entry."
+  },
+  "stages": [
+    {
+      "tag": "like-final-stair-1",
+      "rate": 20,
+      "planned_seconds": 45,
+      "native_complete": true,
+      "stable_exit": 0,
+      "native_latency_ms": {
+        "avg": 32.919251165371776,
+        "p(95)": 58.8572,
+        "p(99)": 178.8933,
+        "max": 233.0773
+      },
+      "native_waiting_ms": {
+        "p(95)": 58.8572,
+        "p(99)": 176.929
+      },
+      "counter_scope": "original stage result classification, cross-checked with native summary; not newly generated requests",
+      "counts": {
+        "attempted": 901,
+        "completed": 901,
+        "mutation": 901,
+        "noop": 0,
+        "effectUnknown": 0,
+        "classificationUnknown": 0,
+        "contentErrors": 0,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "dbMutations": 901,
+        "eventsAdded": 901
+      }
+    },
+    {
+      "tag": "like-final-stair-2",
+      "rate": 50,
+      "planned_seconds": 45,
+      "native_complete": false,
+      "stable_exit": 99,
+      "native_latency_ms": {
+        "avg": 70.03963362676059,
+        "p(95)": 204.09580999999994,
+        "p(99)": 287.86218200000013,
+        "max": 329.0544
+      },
+      "native_waiting_ms": {
+        "p(95)": 202.2798,
+        "p(99)": 287.2845770000001
+      },
+      "counter_scope": "original stage result classification, cross-checked with native summary; not newly generated requests",
+      "counts": {
+        "attempted": 570,
+        "completed": 568,
+        "mutation": 568,
+        "noop": 0,
+        "effectUnknown": 0,
+        "classificationUnknown": 2,
+        "contentErrors": 0,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "dbMutations": 569,
+        "eventsAdded": 569
+      }
+    },
+    {
+      "tag": "like-hold-1",
+      "rate": 20,
+      "planned_seconds": 180,
+      "native_complete": false,
+      "stable_exit": 99,
+      "native_latency_ms": {
+        "avg": 67.53411615720525,
+        "p(95)": 201.61157999999998,
+        "p(99)": 264.009124,
+        "max": 357.3137
+      },
+      "native_waiting_ms": {
+        "p(95)": 201.00977999999995,
+        "p(99)": 263.585116
+      },
+      "counter_scope": "original stage result classification, cross-checked with native summary; not newly generated requests",
+      "counts": {
+        "attempted": 230,
+        "completed": 229,
+        "mutation": 229,
+        "noop": 0,
+        "effectUnknown": 0,
+        "classificationUnknown": 1,
+        "contentErrors": 0,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "dbMutations": 229,
+        "eventsAdded": 229
+      }
+    },
+    {
+      "tag": "feed-hold-1",
+      "rate": 50,
+      "planned_seconds": 180,
+      "native_complete": true,
+      "stable_exit": 0,
+      "native_latency_ms": {
+        "avg": 26.91173796666671,
+        "p(95)": 99.41803499999997,
+        "p(99)": 215.303151,
+        "max": 409.721
+      },
+      "native_waiting_ms": {
+        "p(95)": 98.37618999999997,
+        "p(99)": 214.95202700000004
+      },
+      "counter_scope": "original stage result classification, cross-checked with native summary; not newly generated requests",
+      "counts": {
+        "attempted": 9000,
+        "completed": 9000,
+        "successful": 9000,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "contentErrors": 0,
+        "dropped": 0,
+        "incompleteOrUnclassified": 0
+      }
+    },
+    {
+      "tag": "feed-hold-2",
+      "rate": 50,
+      "planned_seconds": 180,
+      "native_complete": true,
+      "stable_exit": 0,
+      "native_latency_ms": {
+        "avg": 24.965774002888637,
+        "p(95)": 63.8898,
+        "p(99)": 201.049,
+        "max": 1255.8166
+      },
+      "native_waiting_ms": {
+        "p(95)": 62.7603,
+        "p(99)": 200.8392
+      },
+      "counter_scope": "original stage result classification, cross-checked with native summary; not newly generated requests",
+      "counts": {
+        "attempted": 9001,
+        "completed": 9001,
+        "successful": 9001,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "contentErrors": 0,
+        "dropped": 0,
+        "incompleteOrUnclassified": 0
+      }
+    }
+  ],
+  "formal_like_pool_window": {
+    "scope": "pre-warm through post-wrapper/drain, not stable-only",
+    "sql_wait_count_before": 117,
+    "sql_wait_count_after": 117,
+    "sql_wait_duration_delta_ns": 0,
+    "redis_wait_count_before": 50,
+    "redis_wait_count_after": 50,
+    "redis_wait_duration_delta_ns": 0,
+    "gc_pause_delta_ns": 3224100
+  },
+  "new_load_runs": 0,
+  "feed_rerun": false,
+  "root_cause": "Not determined; early P95 abort verified, per-like-request phase evidence absent."
+}

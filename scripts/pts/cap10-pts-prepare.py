@@ -1,4 +1,4 @@
-"""Prepare/register a private PTS upload packet and bind a user-created scene.
+"""Prepare/register, bind and precisely clean a private PTS upload packet.
 
 No cloud API, dependency, service or load calls. Actual CLI packet/bind require
 the authorized native Linux CAP10 runtime. Node receives secrets via stdin only.
@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 import re
 import secrets
+import stat
 import subprocess
 import sys
 
@@ -151,6 +152,78 @@ def bind(owned, environment, scene_id):
     return public
 
 
+def cleanup_packet(owned, environment):
+    """Delete only registered packet files; private env/config cleanup is separate."""
+    _, runtime = validate_owned(owned, environment)
+    plan_path, result_path = owned.ROOT / 'pts-packet-cleanup-plan.json', owned.ROOT / 'pts-packet-cleanup.json'
+    if plan_path.exists() or result_path.exists():
+        raise ValueError('preserve prior packet cleanup evidence; no automatic repeat')
+    registrations = sorted(runtime.glob('owned-pts-upload-*.json'))
+    if not registrations:
+        raise ValueError('explicit upload registration required')
+    entries = []
+    # Validate every registration and the complete actual directory contents
+    # before deleting anything. Partial bundle outputs may contain fewer files.
+    for registration in registrations:
+        match = re.fullmatch(r'owned-pts-upload-([a-f0-9]{12})\.json', registration.name)
+        if not match or registration.is_symlink() or registration.resolve().parent != runtime or not registration.is_file():
+            raise ValueError('owned regular upload registration required')
+        directory = runtime / ('pts-upload-' + match[1])
+        expected = [directory / name for name in PACKET_FILES]
+        value = owned.read(registration)
+        if (not isinstance(value, dict) or value.get('version') != 1 or value.get('registeredBeforeSecretWrite') is not True
+                or value.get('parent') != str(directory)
+                or value.get('privateInputPath') != str(directory / 'cap10-pts-private.json')
+                or value.get('files') != [str(path) for path in expected]):
+            raise ValueError('registered packet paths differ from exact owned packet')
+        if directory.is_symlink() or directory.resolve() != directory or directory.parent != runtime:
+            raise ValueError('packet directory resolves outside owned runtime')
+        if directory.exists() and not directory.is_dir():
+            raise ValueError('packet parent is not a directory')
+        if directory.exists() and not set(directory.iterdir()).issubset(set(expected)):
+            raise ValueError('packet contains an unregistered entry')
+        files = []
+        for path in expected:
+            if path.is_symlink() or path.resolve() != path or path.parent != directory:
+                raise ValueError('packet file resolves outside exact owned parent')
+            present = path.exists()
+            if present and not stat.S_ISREG(path.lstat().st_mode):
+                raise ValueError('packet entries must be regular files')
+            files.append({'path': str(path), 'presentBefore': present, 'deleted': False})
+        entries.append({'registration': str(registration),
+            'registrationSHA256': hashlib.sha256(registration.read_bytes()).hexdigest(),
+            'packetDirectory': str(directory), 'directoryPresentBefore': directory.exists(),
+            'files': files, 'directoryRemoved': False, 'registrationRetained': True})
+    owned.save(plan_path, {'version': 1, 'entries': entries, 'cloudCalled': False})
+    result = {'version': 1, 'complete': False, 'entries': entries, 'cloudCalled': False,
+              'privateConfigurationCleanup': 'separate-owned-env-cleanup', 'externalCredentialsTouched': False}
+    try:
+        for entry in entries:
+            directory = Path(entry['packetDirectory'])
+            registration = Path(entry['registration'])
+            if registration.is_symlink() or hashlib.sha256(registration.read_bytes()).hexdigest() != entry['registrationSHA256']:
+                raise ValueError('registration changed after cleanup preflight')
+            for item in entry['files']:
+                path = Path(item['path'])
+                if path.is_symlink() or directory.is_symlink() or path.resolve() != path:
+                    raise ValueError('packet path changed after cleanup preflight')
+                if path.exists():
+                    if not item['presentBefore'] or not stat.S_ISREG(path.lstat().st_mode):
+                        raise ValueError('packet entry changed after cleanup preflight')
+                    path.unlink()
+                    item['deleted'] = True
+            if directory.exists():
+                directory.rmdir()  # Fails on unknown entries; never recurse.
+                entry['directoryRemoved'] = True
+        result['complete'] = True
+    except BaseException as error:
+        result['errorClass'] = type(error).__name__
+        raise
+    finally:
+        owned.save(result_path, result)
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     actions = parser.add_subparsers(dest='action', required=True)
@@ -158,12 +231,18 @@ def main():
     first.add_argument('--ecs-private-ip', required=True); first.add_argument('--credentials-file')
     first.add_argument('--region', default='cn-shanghai')
     second = actions.add_parser('bind'); second.add_argument('--environment', required=True); second.add_argument('--scene-id', required=True)
+    third = actions.add_parser('cleanup-packet'); third.add_argument('--environment', required=True)
     args = parser.parse_args()
     if sys.platform != 'linux' or Path.cwd().resolve() != REPO:
-        raise ValueError('actual packet/bind CLI requires native Linux repository cwd')
+        raise ValueError('actual packet/bind/cleanup CLI requires native Linux repository cwd')
     spec = importlib.util.spec_from_file_location('cap10_pts_prepare_owned', REPO / 'scripts/cap10-env.py')
     owned = importlib.util.module_from_spec(spec); spec.loader.exec_module(owned)
-    result = packet(owned, args.environment, args.ecs_private_ip, args.credentials_file, args.region) if args.action == 'packet' else bind(owned, args.environment, args.scene_id)
+    if args.action == 'packet':
+        result = packet(owned, args.environment, args.ecs_private_ip, args.credentials_file, args.region)
+    elif args.action == 'bind':
+        result = bind(owned, args.environment, args.scene_id)
+    else:
+        result = cleanup_packet(owned, args.environment)
     print(json.dumps(result, ensure_ascii=False))
 
 

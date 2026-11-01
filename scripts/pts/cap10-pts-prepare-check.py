@@ -1,4 +1,4 @@
-"""Offline packet/binding checks; real local Node bundle, no owned service/cloud."""
+"""Offline packet/binding/cleanup checks; local Node bundle, no service/cloud."""
 import hashlib
 import importlib.util
 import json
@@ -107,6 +107,65 @@ def main():
         rejected(lambda: prepare.packet(other, other_env, '192.168.2.10', bundle_runner=partial), 'partial bundle failure retains pre-registered exact recovery path')
         check(len(list(other_runtime.glob('owned-pts-upload-*.json'))) == 1, 'failed packet remains registered for exact cleanup')
         rejected(lambda: prepare.packet(other, other_env, '192.168.2.10'), 'partial setup cannot silently create a second packet')
+        # Clean the actual generated packet, leaving all independently registered
+        # private configurations/environments and an external credential intact.
+        external = target / 'external-credential.private.json'; external.write_text('PRIVATE-EXTERNAL-SENTINEL')
+        registry = Path(public['privatePaths']['cleanupRegistration']); registry_bytes = registry.read_bytes()
+        private_files = {path: path.read_bytes() for path in runtime.glob('env*.private.json')}
+        cleaned = prepare.cleanup_packet(owned, bound['privatePaths']['environment'])
+        check(cleaned['complete'] and not packet.exists() and all(row['deleted'] for row in cleaned['entries'][0]['files']), 'complete packet cleanup deletes exactly three uploads plus manifest and empty parent')
+        check(registry.read_bytes() == registry_bytes and all(path.read_bytes() == content for path, content in private_files.items()) and external.read_text() == 'PRIVATE-EXTERNAL-SENTINEL', 'cleanup preserves registration, private env/config and external credentials')
+        check(cfg['controlToken'] not in json.dumps(cleaned) and owned.read(owned.ROOT / 'pts-packet-cleanup.json')['complete'] and not cleaned['cloudCalled'], 'public cleanup result records completed deletion without secret/cloud calls')
+        rejected(lambda: prepare.cleanup_packet(owned, bound['privatePaths']['environment']), 'cleanup cannot overwrite prior cleanup evidence')
+        partial_cleaned = prepare.cleanup_packet(other, other_env)
+        check(partial_cleaned['complete'] and sum(row['deleted'] for row in partial_cleaned['entries'][0]['files']) == 1 and not Path(partial_cleaned['entries'][0]['packetDirectory']).exists(), 'partial bundle cleanup removes registered secret and tolerates never-written files')
+
+        def registered(name, present=True):
+            owner, run, env = fixture(target / name)
+            nonce = uuid.uuid4().hex[:12]; directory = run / ('pts-upload-' + nonce)
+            registration = run / ('owned-pts-upload-' + nonce + '.json')
+            value = {'version': 1, 'parent': str(directory), 'privateInputPath': str(directory / 'cap10-pts-private.json'),
+                'files': [str(directory / name) for name in prepare.PACKET_FILES], 'registeredBeforeSecretWrite': True}
+            owner.save(registration, value)
+            if present:
+                directory.mkdir(mode=0o700)
+                for filename in prepare.PACKET_FILES:
+                    (directory / filename).write_text('PRIVATE-UPLOAD-SENTINEL')
+            return owner, run, env, directory, registration, value
+
+        absent, _, absent_env, absent_dir, _, _ = registered('never-created', present=False)
+        check(prepare.cleanup_packet(absent, absent_env)['complete'] and not absent_dir.exists(), 'registration before failed directory creation can be cleanly closed')
+        for kind in ('unknown-file', 'unknown-directory', 'registered-directory', 'foreign-parent', 'foreign-file', 'wrong-private', 'missing-file-registration', 'missing-proof', 'foreign-nonce'):
+            owner, run, env, directory, registration, value = registered('reject-' + kind)
+            sentinel = directory / 'cap10-pts-private.json'
+            if kind == 'unknown-file':
+                (directory / 'unknown.txt').write_text('DO-NOT-DELETE')
+            elif kind == 'unknown-directory':
+                (directory / 'unknown').mkdir()
+            elif kind == 'registered-directory':
+                (directory / 'slots.csv').unlink(); (directory / 'slots.csv').mkdir()
+            elif kind == 'foreign-parent':
+                value['parent'] = str(external.parent)
+            elif kind == 'foreign-file':
+                value['files'][0] = str(external)
+            elif kind == 'wrong-private':
+                value['privateInputPath'] = str(external)
+            elif kind == 'missing-file-registration':
+                value['files'].pop()
+            elif kind == 'missing-proof':
+                value['registeredBeforeSecretWrite'] = False
+            else:
+                value['parent'] = str(run / ('pts-upload-' + '0' * 12))
+            registration.write_text(json.dumps(value), encoding='utf-8')
+            rejected(lambda: prepare.cleanup_packet(owner, env), 'preflight rejects ' + kind)
+            check(sentinel.read_text() == 'PRIVATE-UPLOAD-SENTINEL' and external.read_text() == 'PRIVATE-EXTERNAL-SENTINEL', 'rejection deletes no registered or external file: ' + kind)
+        # A valid first registration cannot be deleted before a later invalid one
+        # has been inspected; this catches per-registration validate/delete loops.
+        owner, run, env, directory, _, _ = registered('all-preflight')
+        other_directory = run / ('pts-upload-' + 'f' * 12)
+        owner.save(run / ('owned-pts-upload-' + 'f' * 12 + '.json'), {'parent': str(other_directory), 'files': []})
+        rejected(lambda: prepare.cleanup_packet(owner, env), 'all registrations must pass before first deletion')
+        check(all((directory / name).is_file() for name in prepare.PACKET_FILES), 'later invalid registration preserves every earlier valid packet file')
     print(json.dumps({'checks': checks, 'failed': 0, 'cloudCalls': 0, 'dependencyCalls': 0, 'loadWindows': 0, 'localNodeBundles': 1}))
 
 

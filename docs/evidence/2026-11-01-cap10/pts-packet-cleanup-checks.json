@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-01T09:48:46.455904+00:00",
+  "checksPassed": 43,
+  "scope": "17 packet/bind plus26 exact registered cleanup checks; actual local bundle once, no cloud/business load.",
+  "sourceSHA256": "8f92db1fab1504ae074f3f2bb8f525ebf60ac4d7dc041679049f31aa8cdd5df6",
+  "checkerSHA256": "dbdf8a8c3719285fe463c019c6e8711ddde43e8c8eacf936a0c293cfbf9719ee",
+  "nonAuthorReview": "cap09_like_review read-only PASS: preflight all entries before any unlink; no recursive deletion, preserve registration/unknown/external keys."
+}

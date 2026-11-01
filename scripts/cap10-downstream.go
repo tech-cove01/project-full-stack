@@ -299,10 +299,14 @@ func mainRun() error {
 	output := flag.String("output", "", "new stage-downstream directory")
 	doneFile := flag.String("done-file", "", "owned control/done.json")
 	likeFixture := flag.String("like-fixture", "", "public like fixture; must match private env")
-	maxSeconds := flag.Int("max-seconds", 360, "finite wall-time budget, at most 360 seconds")
+	maxSeconds := flag.Int("max-seconds", 360, "finite wall-time budget; explicitly selected PTS permits 600 seconds")
 	flag.Parse()
-	if *maxSeconds < 1 || *maxSeconds > 360 {
-		return errors.New("max-seconds must be 1..360")
+	wallLimit := 360
+	if os.Getenv("CAP10_LOAD_BACKEND") == "pts" && os.Getenv("CAP_COHORT") == "cap10" {
+		wallLimit = 600
+	}
+	if *maxSeconds < 1 || *maxSeconds > wallLimit {
+		return errors.New("max-seconds exceeds the selected backend's finite lifecycle budget")
 	}
 	cwd, err := os.Getwd()
 	if err != nil {

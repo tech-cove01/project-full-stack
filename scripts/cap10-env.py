@@ -512,6 +512,23 @@ def credential_tokens(manifest_path, runtime):
     return path, found
 
 
+def phase_terminated(detail, load):
+    """Require both remote termination and absence of the exact local process."""
+    pts = detail.get('backend') == 'pts'
+    if pts:
+        remote = Path(detail['remoteEvidence']).resolve()
+        if detail['phase'] not in ('warm', 'stable') or remote.parent != Path(load).resolve() or remote.name != detail['phase'] + '-pts':
+            raise ValueError('PTS phase termination evidence is outside its owned load directory')
+        if read(remote / 'terminal.json').get('remoteConverged') is not True:
+            return False
+    try:
+        candidate = psutil.Process(detail['controller_pid'] if pts else detail['k6_pid'])
+        created = detail['controller_started_unix_ms'] if pts else detail['k6_started_unix_ms']
+        return abs(candidate.create_time() * 1000 - created) > 2000
+    except psutil.NoSuchProcess:
+        return True
+
+
 def finish(args):
     value, runtime = settings(args.environment)
     metadata_path = Path(args.api_metadata).resolve()
@@ -525,11 +542,10 @@ def finish(args):
     phase_records = list(ROOT.glob('*-load/warm-process.json')) + list(ROOT.glob('*-load/stable-process.json'))
     for path in phase_records:
         detail = read(path)
-        try:
-            candidate = psutil.Process(detail['k6_pid'])
-            assert abs(candidate.create_time() * 1000 - detail['k6_started_unix_ms']) > 2000, 'owned k6 remains active'
-        except psutil.NoSuchProcess:
-            pass
+        pts = detail.get('backend') == 'pts'
+        if pts:
+            assert value.get('CAP10_LOAD_BACKEND') == 'pts'
+        assert phase_terminated(detail, path.parent), 'owned workload controller or remote PTS termination unproved'
     progress = ROOT / 'cleanup-progress.json'
     assert not progress.exists(), 'preserve partial cleanup; choose explicit recovery'
     record = {'at': now(), 'complete': False, 'steps': [], 'exceptions': [], 'volumesRetained': True}
@@ -571,6 +587,11 @@ def finish(args):
                 parent.rmdir()
         record['removedInterruptedPrivatePhaseInputs'] = removed_phase_inputs
         checkpoint('registered_phase_private_inputs_removed')
+        if value.get('CAP10_LOAD_BACKEND') == 'pts':
+            result = run([sys.executable, '-B', '-X', 'utf8', 'scripts/pts/cap10-pts-prepare.py',
+                          'cleanup-packet', '--environment', str(Path(args.environment).resolve())], timeout=30)
+            record['ptsPacketCleanup'] = json.loads(result.stdout)
+            checkpoint('registered_pts_upload_packet_removed')
         user = value['CAP_READ_OBSERVER_USER']
         assert re.fullmatch(r'cap10_[a-f0-9]{12}', user) and user.endswith(runtime.name[-12:])
         output = run(['docker', 'exec', '-i', owned['mysql']['id'], 'sh', '-c',

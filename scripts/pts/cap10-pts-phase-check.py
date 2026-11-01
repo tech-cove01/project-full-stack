@@ -1,0 +1,194 @@
+"""Actual phase envelope/auth checks; synthetic loopback collector only."""
+import ast
+import copy
+from http.server import ThreadingHTTPServer
+import importlib.util
+import json
+from pathlib import Path
+import threading
+from types import SimpleNamespace
+import unittest
+import urllib.error
+import urllib.request
+import uuid
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parents[1]
+
+
+def load(name):
+    spec = importlib.util.spec_from_file_location(name, HERE / (name + '.py'))
+    value = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(value)
+    return value
+
+
+phase = load('cap10-pts-phase')
+collector = load('cap10-pts-collector')
+
+
+def full_summary():
+    return {'complete': True, 'collectionValid': True, 'unknownIsExact': True, 'unknown': 0,
+        'startUnixMs': 1800000000000, 'endUnixMs': 1800000060000, 'stop': False,
+        'counts': {'planned': 60, 'attempted': 60, 'completed': 60, 'mutation': 60,
+                   'noop': 0, 'uncertain': 0, 'rejected': 0, 'invalid': 0, 'dropped': 0},
+        'systemErrors': 0, 'httpErrors': 0, 'quantileMethod': 'full raw R7',
+        'allLatency': {'avg': 2, 'med': 2, 'min': 1, 'p(95)': 3, 'p(99)': 4, 'max': 5},
+        'mutationLatency': {'avg': 2, 'med': 2, 'min': 1, 'p(95)': 3, 'p(99)': 4, 'max': 5}}
+
+
+class EnvelopeChecks(unittest.TestCase):
+    def test_full_jmeter_envelope_has_explicit_provenance(self):
+        value = phase.normalized(full_summary(), 60)
+        self.assertIn('JMeter', value['sourceEngine'])
+        self.assertTrue(value['nativeScenario']['complete'])
+        self.assertEqual(value['metrics']['cap_like_mutation']['count'], 60)
+        self.assertEqual(value['metrics']['cap_like_all_ms']['p(99)'], 4)
+
+    def test_incomplete_collector_never_fills_unknown_zero(self):
+        for field in ('complete', 'collectionValid', 'unknownIsExact'):
+            with self.subTest(field=field):
+                value = full_summary(); value[field] = False; value['unknown'] = None
+                with self.assertRaises(ValueError): phase.normalized(value, 60)
+
+    def test_missing_http_classification_rejected(self):
+        value = full_summary(); del value['systemErrors']
+        with self.assertRaises(ValueError): phase.normalized(value, 60)
+
+    def test_unclassified_inflight_cannot_become_completion(self):
+        value = full_summary(); value['counts']['completed'] -= 1
+        with self.assertRaises(ValueError): phase.normalized(value, 60)
+
+    def test_unknown_effect_not_erased(self):
+        value = full_summary(); value['counts']['uncertain'] = 1
+        with self.assertRaises(ValueError): phase.normalized(value, 60)
+
+    def test_missing_percentiles_not_taken_from_platform_report(self):
+        value = full_summary(); value['allLatency'] = {'p(90)': 5, 'max': 10}
+        with self.assertRaises(ValueError): phase.normalized(value, 60)
+
+    def test_nonfinite_or_negative_percentiles_rejected(self):
+        for sample in (float('nan'), float('inf'), -1):
+            value = full_summary(); value['allLatency']['p(95)'] = sample
+            with self.assertRaises(ValueError): phase.normalized(value, 60)
+
+    def test_native_duration_never_shrinks_to_observed_time(self):
+        with self.assertRaises(ValueError): phase.normalized(full_summary(), 180)
+
+    def test_safety_stop_cannot_claim_complete_window(self):
+        value = full_summary(); value['stop'] = True
+        self.assertFalse(phase.normalized(value, 60)['nativeScenario']['complete'])
+
+    def test_bounded_private_endpoints(self):
+        self.assertEqual(phase.private_url('http://10.2.3.4:8481', 8481), '10.2.3.4')
+        for url in ('http://127.0.0.1:8481', 'http://8.8.8.8:8481', 'http://10.2.3.4:8281',
+                    'http://name.invalid:8481', 'http://user@10.2.3.4:8481', 'http://10.2.3.4:8481/?x=1'):
+            with self.subTest(url=url):
+                with self.assertRaises(ValueError): phase.private_url(url, 8481)
+
+
+class CollectorHTTPChecks(unittest.TestCase):
+    def setUp(self):
+        self.root = REPO.parent / ('.qa-cap10-pts-phase-' + uuid.uuid4().hex)
+        self.root.mkdir()
+        self.token = 'synthetic-control-' + 'a' * 64
+        config = {'runId': 'synthetic-run', 'phase': 'warm', 'rate': 1, 'seconds': 10,
+                  'fixtureSHA256': 'a' * 64, 'scriptSHA256': 'b' * 64, 'expectedEngines': 2,
+                  'controlToken': self.token, 'apiUrl': 'http://10.2.3.4:8281',
+                  'relations': [{'slot': slot, 'userId': str(slot + 1), 'noteId': str(slot + 1000),
+                      'active': 0, 'version': 0, 'token': 'synthetic-session-' + str(slot)} for slot in range(512)]}
+        self.store = collector.EngineStore(config, self.root / 'records.ndjson')
+        self.server = ThreadingHTTPServer(('127.0.0.1', 0), phase.handler_type(self.store, self.token, threading.RLock()))
+        self.server.daemon_threads = True
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True); self.thread.start()
+        self.base = 'http://127.0.0.1:' + str(self.server.server_port)
+        self.addCleanup(self.cleanup)
+
+    def cleanup(self):
+        self.server.shutdown(); self.server.server_close(); self.thread.join(timeout=3); self.store.close()
+        self.assertEqual(self.root.resolve().parent, REPO.parent)
+        self.assertTrue(self.root.name.startswith('.qa-cap10-pts-phase-'))
+        for path in self.root.iterdir():
+            self.assertTrue(path.is_file()); path.unlink()
+        self.root.rmdir()
+
+    def request(self, path, token=True, payload=None):
+        req = urllib.request.Request(self.base + path,
+            data=None if payload is None else json.dumps(payload).encode(),
+            headers={'Authorization': 'Bearer ' + self.token} if token else {})
+        try:
+            opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+            with opener.open(req, timeout=2) as response:
+                return response.status, json.load(response)
+        except urllib.error.HTTPError as error:
+            return error.code, json.load(error)
+
+    def test_all_paths_require_private_bearer(self):
+        for path in ('/control', '/register', '/batch', '/complete'):
+            self.assertEqual(self.request(path, token=False)[0], 403)
+
+    def test_control_has_binding_and_no_session_credentials(self):
+        status, value = self.request('/control')
+        self.assertEqual(status, 200); self.assertEqual(value['seconds'], 10)
+        self.assertNotIn(self.token, json.dumps(value)); self.assertNotIn('relations', value)
+
+    def test_unknown_route_never_exposes_files(self):
+        self.assertEqual(self.request('/../private.json')[0], 404)
+
+    def test_bad_batch_locks_stop_and_does_not_echo_payload(self):
+        status, value = self.request('/batch', payload={'token': 'synthetic-sensitive-payload'})
+        self.assertEqual(status, 409)
+        self.assertNotIn('synthetic-sensitive-payload', json.dumps(value))
+        self.assertTrue(self.store.control()['stop'])
+
+    def test_journal_contains_no_control_or_session_token(self):
+        self.request('/control')
+        content = (self.root / 'records.ndjson').read_text(encoding='utf-8')
+        self.assertNotIn(self.token, content); self.assertNotIn('synthetic-session', content)
+
+
+class TerminationChecks(unittest.TestCase):
+    def setUp(self):
+        self.root = REPO.parent / ('.qa-cap10-pts-termination-' + uuid.uuid4().hex)
+        self.load = self.root / 'S1-load'; self.remote = self.load / 'warm-pts'
+        self.remote.mkdir(parents=True)
+        self.terminal = self.remote / 'terminal.json'
+        self.terminal.write_text('{"remoteConverged":true}', encoding='utf-8')
+        source = REPO / 'scripts/cap10-env.py'
+        tree = ast.parse(source.read_text(encoding='utf-8'))
+        body = ast.Module(body=[node for node in tree.body if isinstance(node, ast.FunctionDef) and node.name == 'phase_terminated'], type_ignores=[])
+        class Missing(Exception): pass
+        def absent(_): raise Missing()
+        self.psutil = SimpleNamespace(Process=absent, NoSuchProcess=Missing)
+        self.namespace = {'Path': Path, 'psutil': self.psutil,
+            'read': lambda path: json.loads(Path(path).read_text(encoding='utf-8'))}
+        exec(compile(body, str(source) + ' actual isolated termination function', 'exec'), self.namespace)
+        self.check = self.namespace['phase_terminated']
+        self.detail = {'phase': 'warm', 'backend': 'pts', 'controller_pid': 123,
+            'controller_started_unix_ms': 100000, 'remoteEvidence': str(self.remote)}
+        self.addCleanup(self.cleanup)
+
+    def cleanup(self):
+        self.assertEqual(self.root.resolve().parent, REPO.parent)
+        self.assertTrue(self.root.name.startswith('.qa-cap10-pts-termination-'))
+        self.terminal.unlink(); self.remote.rmdir(); self.load.rmdir(); self.root.rmdir()
+
+    def test_absent_local_controller_is_insufficient_without_remote_proof(self):
+        self.assertTrue(self.check(self.detail, self.load))
+        self.terminal.write_text('{"remoteConverged":false}', encoding='utf-8')
+        self.assertFalse(self.check(self.detail, self.load))
+
+    def test_matching_live_controller_prevents_cleanup(self):
+        self.psutil.Process = lambda _: SimpleNamespace(create_time=lambda: 100.0)
+        self.assertFalse(self.check(self.detail, self.load))
+        self.psutil.Process = lambda _: SimpleNamespace(create_time=lambda: 200.0)
+        self.assertTrue(self.check(self.detail, self.load))
+
+    def test_foreign_terminal_is_rejected_and_legacy_path_preserved(self):
+        foreign = {**self.detail, 'remoteEvidence': str(self.root / 'foreign-pts')}
+        with self.assertRaises(ValueError): self.check(foreign, self.load)
+        self.assertTrue(self.check({'k6_pid': 123, 'k6_started_unix_ms': 100000}, self.load))
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

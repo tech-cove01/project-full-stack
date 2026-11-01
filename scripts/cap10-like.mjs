@@ -489,6 +489,11 @@ if (action === 'prepare') {
         unknownMax: 0, droppedMax: 0, systemAndHTTPErrorRatesMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500 },
       phaseProcesses: 'warm and stable use separate k6 processes with fresh authoritative RR hydration', initialDistributions: {},
       scope: 'real authenticated PUT mutations; no same-pair overlap. Correctness/unknown/noop abort the batch; authoritative facts are reconciled after settle, without resuming uncertain pairs. API invalidate/read/Mark remain in PUT latency. Latency is evaluated only after the complete target window.' }
+    if (process.env.CAP10_LOAD_BACKEND === 'pts') {
+      report.loadBackend = 'pts'
+      report.phaseProcesses = 'warm and stable use separate Alibaba PTS ReportIds, each with two managed JMeter engines and fresh authoritative RR hydration'
+      report.generatorResourceScope = 'ECS Python collector plus Node helper <2GiB; each remote JMeter engine separately <2GiB. Same PTS topology is required for every comparison.'
+    }
     let warmBefore = null
     async function runPhase(phase, duration, state) {
       assert.equal(await stopPresent(), false, 'resource stop blocks next native phase')
@@ -501,9 +506,17 @@ if (action === 'prepare') {
         // Register the exact cleanup path before a credential can reach disk.
         await save(join(dir, phase + '-private-input.json'), { path, parent: privateDir, credentialValuesExported: false })
         await writeFile(path, json(input), { mode: 0o600, flag: 'wx' })
-        return await command(process.env.K6_BIN || 'k6', ['run', '--summary-export', join(dir, phase + '-summary.json'), 'scripts/load/cap10-like.js'],
+        const pts = process.env.CAP10_LOAD_BACKEND === 'pts'
+        const binary = pts ? process.env.CAP10_PYTHON_BIN : process.env.K6_BIN || 'k6'
+        assert.ok(binary, 'explicit Python executable required for PTS controller')
+        const argv = pts ? ['-B', '-X', 'utf8', 'scripts/pts/cap10-pts-phase.py', '--input', path,
+          '--summary', join(dir, phase + '-summary.json'), '--evidence', join(dir, phase + '-pts')]
+          : ['run', '--summary-export', join(dir, phase + '-summary.json'), 'scripts/load/cap10-like.js']
+        return await command(binary, argv,
         { env, output: join(dir, phase + '-console.txt'), stopFile: process.env.CAP_STOP_FILE, onStart(pid) {
-          const detail = json({ phase, helper_pid: process.pid, k6_pid: pid, k6_started_unix_ms: Date.now() })
+          const detail = json(pts ? { phase, backend: 'pts', helper_pid: process.pid, controller_pid: pid,
+            controller_started_unix_ms: Date.now(), remoteEvidence: join(dir, phase + '-pts') }
+            : { phase, helper_pid: process.pid, k6_pid: pid, k6_started_unix_ms: Date.now() })
           return Promise.all([save(join(dir, phase + '-process.json'), JSON.parse(detail)), writeFile(join(dir, 'process.json'), detail)])
         } })
       } finally {
@@ -543,7 +556,8 @@ if (action === 'prepare') {
       report.finalReconcileValid = final.valid
       report.finalFactsValid = final.factsValid; report.downstreamConverged = final.downstreamConverged
       const native = JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8'))
-      report.nativeScenario = nativeScenarioWindow({ metric: native.metrics?.cap_native_scenario_start_unix_ms,
+      report.sourceEngine = native.sourceEngine || 'k6'
+      report.nativeScenario = process.env.CAP10_LOAD_BACKEND === 'pts' ? native.nativeScenario : nativeScenarioWindow({ metric: native.metrics?.cap_native_scenario_start_unix_ms,
         durationMetric: native.metrics?.cap_native_scenario_duration_ms, seconds,
         wrapperStartedAt: report.stableWrapperStartedAt, wrapperEndedAt: report.stableWrapperEndedAt,
         exit: stable.code, externalStop: stable.externalStop, metrics: native.metrics })

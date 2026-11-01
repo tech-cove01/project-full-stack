@@ -321,21 +321,63 @@ def main():
             try:
                 identity_file = json.loads(args.load_pid_file.read_text(encoding='utf-8-sig'))
                 if generator is None:
-                    candidate = psutil.Process(int(identity_file['k6_pid']))
+                    pts = identity_file.get('backend') == 'pts'
+                    if pts and (args.cohort != 'cap10' or os.environ.get('CAP10_LOAD_BACKEND') != 'pts'):
+                        raise ValueError('explicit CAP10 PTS backend required')
+                    candidate = psutil.Process(int(identity_file['controller_pid'] if pts else identity_file['k6_pid']))
                     created = candidate.create_time()
-                    if candidate.name().lower() not in ('k6', 'k6.exe') or not any(args.load_script in arg for arg in candidate.cmdline()):
+                    valid_name = candidate.name().lower().startswith('python') if pts else candidate.name().lower() in ('k6', 'k6.exe')
+                    expected_script = 'cap10-pts-phase.py' if pts else args.load_script
+                    if not valid_name or not any(expected_script in arg for arg in candidate.cmdline()):
                         raise ValueError('generator executable/script identity mismatch')
-                    if abs(created * 1000 - identity_file['k6_started_unix_ms']) > 2000:
+                    declared_created = identity_file['controller_started_unix_ms'] if pts else identity_file['k6_started_unix_ms']
+                    if abs(created * 1000 - declared_created) > 2000:
                         raise ValueError('generator creation time mismatch')
                     candidate.cpu_percent(None)
                     generator, generator_identity = candidate, created
                     generator_cpu_at = time.monotonic()
-                if not generator.is_running() or generator.pid != int(identity_file['k6_pid']) or generator.create_time() != generator_identity:
+                actual_pid = identity_file['controller_pid'] if identity_file.get('backend') == 'pts' else identity_file['k6_pid']
+                if not generator.is_running() or generator.pid != int(actual_pid) or generator.create_time() != generator_identity:
                     raise ValueError('generator identity changed')
                 generator_now = time.monotonic()
                 generator_interval = generator_now - generator_cpu_at
                 generators.append({'pid': generator.pid, 'rss_bytes': generator.memory_info().rss, 'cpu_percent_one_core': generator.cpu_percent(None), 'cpu_interval_seconds': generator_interval, 'cpu_interval_valid': generator_interval >= 1, 'threads': generator.num_threads()})
                 generator_cpu_at = generator_now
+                if identity_file.get('backend') == 'pts':
+                    remote_path = Path(identity_file['remoteEvidence']).resolve()
+                    if remote_path.parent != args.load_pid_file.resolve().parent or not remote_path.name.endswith('-pts'):
+                        raise ValueError('PTS resource evidence path differs')
+                    latest = remote_path / 'latest.json'
+                    if latest.is_file():
+                        frame = json.loads(latest.read_text(encoding='utf-8'))
+                        stamp = dt.datetime.fromisoformat(frame['at'].replace('Z', '+00:00'))
+                        if stamp.tzinfo is None or not -1 <= (dt.datetime.now(dt.timezone.utc) - stamp).total_seconds() <= 15:
+                            raise ValueError('PTS collector resource snapshot stale')
+                        remote = frame['summary']
+                        row['pts'] = remote
+                        if remote.get('startUnixMs') is not None and time.time() * 1000 >= remote['startUnixMs']:
+                            engines = remote.get('engines', [])
+                            if len(engines) != 2:
+                                raise ValueError('both PTS engine resources required')
+                            row['remoteGenerators'] = []
+                            for engine in engines:
+                                resources = engine['resources']
+                                if not isinstance(resources, dict) or not any(sample.get('intervalValid') is True for sample in engine.get('cpuSamples', [])):
+                                    raise ValueError('PTS engine native CPU interval unavailable')
+                                if not engine.get('complete') and not 0 <= time.time() * 1000 - engine['lastResourceUnixMs'] <= 15000:
+                                    raise ValueError('PTS engine resource observation stale')
+                                rss = resources['rssBytes']
+                                if type(rss) is not int or rss <= 0 or type(resources['logicalCPUs']) is not int or resources['logicalCPUs'] <= 0:
+                                    raise ValueError('real PTS process RSS/CPU capacity missing')
+                                row['remoteGenerators'].append({'engineId': engine['engineId'], 'rss_bytes': rss,
+                                    'source': 'JMeter MXBean/proc native resources via authenticated collector',
+                                    'resources': resources})
+                                if rss >= 2147483648:
+                                    signal('one remote PTS engine RSS reached its declared 2 GiB cap')
+                            if remote.get('stop'):
+                                signal('PTS collector locked a safety/evidence stop')
+                    else:
+                        raise ValueError('PTS collector resource snapshot missing')
             except Exception as error:
                 row['errors'].append('owned generator observation unavailable: ' + type(error).__name__)
             row['generators'] = generators

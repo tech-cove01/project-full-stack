@@ -30,6 +30,9 @@ KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
 TOOL_NAMES = ('cap10-run.py', 'cap10-grade.py', 'cap10-env.py', 'cap10-stage.py', 'cap10-resources.py',
               'load/cap10-native-window.mjs', 'cap10-like.mjs', 'load/cap10-like.js',
               'load/cap10-like-contract.mjs', 'load/cap10-db-observe.mjs', 'cap10-downstream.go')
+PTS_TOOLS = ('pts/cap10-pts-phase.py', 'pts/cap10-pts-api.py', 'pts/cap10-pts-collector.py',
+             'pts/cap10-jmeter.groovy', 'pts/cap10-pts-contract.groovy', 'pts/cap10-jmeter.mjs', 'pts/cap10-jmeter.jmx',
+             'pts/cap10-pts-prepare.py')
 
 
 def sha(path):
@@ -42,9 +45,24 @@ def reserve(args, api, value):
         if path is not None:
             assert path.resolve().is_relative_to(ROOT) and path.is_file()
     prediction = owned.read(args.prediction) if args.prediction else None
+    if value.get('CAP10_LOAD_BACKEND') == 'pts':
+        admission = owned.read(ROOT / 'pts-scene-admission.json')
+        configuration = owned.read(value['CAP10_PTS_CONFIG'])
+        preparation = module('cap10_pts_admission_contract', 'pts/cap10-pts-prepare.py')
+        assert admission.get('passed') is True and admission['sceneId'] == configuration['sceneId']
+        assert admission['sceneFilesMD5'] == configuration['sceneFiles']
+        assert admission['sourceSHA256'] == preparation.source_hashes()
+        assert admission['configurationReference'] == value['CAP10_PTS_CONFIG']
+        pts_identity = {'loadBackend': 'pts', 'ptsPacketSHA256': sha(ROOT / 'pts-packet.json'),
+                        'ptsAdmissionSHA256': sha(ROOT / 'pts-scene-admission.json')}
+        for prior in grade.history(ROOT):
+            assert all(prior.get(key) == digest for key, digest in pts_identity.items()), 'same PTS packet/admission must cover the entire batch'
     freeze_path = ROOT / 'freeze-like.json'
     freeze = owned.read(freeze_path) if args.kind == 'formal' else None
-    tools = {name: sha(REPO / 'scripts' / name) for name in TOOL_NAMES}
+    if freeze is not None and value.get('CAP10_LOAD_BACKEND') == 'pts':
+        assert all(freeze.get(key) == digest for key, digest in pts_identity.items()), 'formal PTS identity differs from candidate freeze'
+    names = TOOL_NAMES + (PTS_TOOLS if value.get('CAP10_LOAD_BACKEND') == 'pts' else ())
+    tools = {name: sha(REPO / 'scripts' / name) for name in names}
     observer_hash = sha(args.observer)
     reservation = grade.check_reservation(ROOT, args.kind, args.rate, args.seconds, api,
         value['CAP_LIKE_FIXTURE'], owned.read(args.preflight), owned.read(args.ability),
@@ -65,6 +83,10 @@ def reserve(args, api, value):
                'predictionSHA256': sha(args.prediction) if args.prediction else None,
                'setupNormalization': {'existing': 512, 'active': 0, 'allWindows': True},
                'failedStartsConsumeSlot': True}
+    command['loadBackend'] = value.get('CAP10_LOAD_BACKEND', 'k6')
+    if command['loadBackend'] == 'pts':
+        command['ptsPacketSHA256'] = sha(ROOT / 'pts-packet.json')
+        command['ptsAdmissionSHA256'] = sha(ROOT / 'pts-scene-admission.json')
     owned.save(ROOT / ('slot-' + tag + '.json'), command)
     owned.save(ROOT / (tag + '-command.json'), command)
     return command
@@ -152,17 +174,23 @@ def pre_stable_guard(api, load, identities, expected_containers, cpu_interval_se
         if marker.is_file():
             detail = owned.read(marker)
             try:
-                child = psutil.Process(detail['k6_pid'])
-                if abs(child.create_time() * 1000 - detail['k6_started_unix_ms']) <= 2000:
-                    assert 'cap10-like.js' in ' '.join(child.cmdline())
-                    row['warmK6RSSBytes'] = child.memory_info().rss; row['warmK6PID'] = child.pid
+                pts = detail.get('backend') == 'pts'
+                child = psutil.Process(detail['controller_pid'] if pts else detail['k6_pid'])
+                created = detail['controller_started_unix_ms'] if pts else detail['k6_started_unix_ms']
+                if abs(child.create_time() * 1000 - created) <= 2000:
+                    assert ('cap10-pts-phase.py' if pts else 'cap10-like.js') in ' '.join(child.cmdline())
+                    if pts:
+                        row['warmControllerRSSBytes'] = child.memory_info().rss
+                        row['warmControllerPID'] = child.pid
+                    else:
+                        row['warmK6RSSBytes'] = child.memory_info().rss; row['warmK6PID'] = child.pid
                     row['phase'] = 'warm'
                 else:
                     row['warmK6AbsentConfirmed'] = True; row['phase'] = 'setup'
             except psutil.NoSuchProcess:
                 row['warmK6AbsentConfirmed'] = True; row['phase'] = 'setup'
         assert row['helperRSSBytes'] is not None or row['phase'] == 'waiting-for-harness'
-        row['ownedLoadRSSBytes'] = (row['helperRSSBytes'] or 0) + (row['warmK6RSSBytes'] or 0)
+        row['ownedLoadRSSBytes'] = (row['helperRSSBytes'] or 0) + (row['warmK6RSSBytes'] or 0) + row.get('warmControllerRSSBytes', 0)
         result = owned.run(['docker', 'stats', '--no-stream', '--format', '{{json .}}',
                             *[c['id'] for c in expected_containers.values()]], timeout=12)
         stats = [json.loads(line) for line in result.stdout.splitlines() if line]
@@ -219,8 +247,15 @@ def children_converged(wrapper, observer, control, load, identities):
         # Markers also cover short-lived descendants missed between ticks.
         for marker in load.glob('*-process.json'):
             detail = owned.read(marker)
+            pts = detail.get('backend') == 'pts'
+            if pts:
+                if not owned.phase_terminated(detail, load):
+                    return False
+                continue
             try:
-                if abs(psutil.Process(detail['k6_pid']).create_time() * 1000 - detail['k6_started_unix_ms']) <= 2000:
+                pid = detail['controller_pid'] if pts else detail['k6_pid']
+                created = detail['controller_started_unix_ms'] if pts else detail['k6_started_unix_ms']
+                if abs(psutil.Process(pid).create_time() * 1000 - created) <= 2000:
                     return False
             except psutil.NoSuchProcess:
                 pass
@@ -272,6 +307,8 @@ def main():
     assert args.api_metadata.resolve().parent == ROOT
     grade = module('cap10_native_downstream_grade', 'cap10-grade.py')
     value, runtime = owned.settings(args.environment)
+    pts = value.get('CAP10_LOAD_BACKEND') == 'pts'
+    stage_deadline = '600' if pts else '360'
     api = owned.read(args.api_metadata); owned.api_identity(api, health=True)
     assert value['CAP_SOURCE_SHA'] == api['sourceSha']
     assert api['tailEnabledRequested'] is False
@@ -299,14 +336,17 @@ def main():
         owned.save(ROOT / (tag + '-capacity-before.json'), {'at': owned.now(), 'capacity': owned.get_json('http://127.0.0.1:8381/debug/capacity'), 'scope': 'parsed pre-warm snapshot'})
         log = (ROOT / (tag + '-observer.txt')).open('xb'); handles.append(log)
         observer = subprocess.Popen([str(args.observer.resolve()), '--environment', str(args.environment.resolve()),
-            '--output', str(downstream), '--done-file', str(control / 'done.json'), '--max-seconds', '360'],
-            cwd=REPO, stdout=log, stderr=subprocess.STDOUT, creationflags=owned.FLAGS)
+            '--output', str(downstream), '--done-file', str(control / 'done.json'), '--max-seconds', stage_deadline],
+            cwd=REPO, env=owned.env(value), stdout=log, stderr=subprocess.STDOUT, creationflags=owned.FLAGS)
         process = psutil.Process(observer.pid); created = process.create_time(); process.cpu_percent(None); cpu_at = time.monotonic()
         state['observerPid'] = observer.pid; deadline = time.monotonic() + 30
         while not (downstream / 'ready.json').exists() and observer.poll() is None and time.monotonic() < deadline:
             time.sleep(.1)
         assert (downstream / 'ready.json').exists() and owned.read(downstream / 'ready.json')['ready']
         native = {**value, 'CAP_STOP_FILE': str(control / 'stop.json'), 'CAP_API_PID': str(api['pid']), 'CAP10_DOWNSTREAM_EVIDENCE': str(downstream), 'CAP10_FORMAL': '1' if args.kind == 'formal' else '0'}
+        if pts:
+            native['CAP10_PYTHON_BIN'] = sys.executable
+            native['CAP10_RESERVATION_FILE'] = str(ROOT / (tag + '-command.json'))
         prefix = 'CAP_LIKE_'
         native.update({prefix + key: str(command[field]) for key, field in
                        (('MODE', 'mode'), ('RATE', 'rate'), ('SECONDS', 'seconds'), ('WARM_SECONDS', 'warmSeconds'),
@@ -316,7 +356,7 @@ def main():
         argv = [sys.executable, '-B', '-X', 'utf8', 'scripts/cap10-stage.py', '--cohort', 'cap10',
                 '--mode', 'like', '--control-dir', str(control),
                 '--api-pid', str(api['pid']), '--diagnostics', 'http://127.0.0.1:8381/debug/capacity',
-                '--interval', '5', '--max-seconds', '360', '--stop-grace-seconds', '90', '--', 'node', 'scripts/' + script, 'run']
+                '--interval', '5', '--max-seconds', stage_deadline, '--stop-grace-seconds', '90', '--', 'node', 'scripts/' + script, 'run']
         owned.save(ROOT / (tag + '-invocation.json'), {'argv': argv, 'environmentValuesExported': False})
         log = (ROOT / (tag + '-console.txt')).open('xb'); handles.append(log)
         wrapper = subprocess.Popen(argv, cwd=REPO, env=owned.env(native), stdout=log, stderr=subprocess.STDOUT, creationflags=owned.FLAGS)

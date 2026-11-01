@@ -147,17 +147,25 @@ def main():
         if args.mode in ('read', 'like') and detail.get('phase') != 'stable':
             return None
         helper = psutil.Process(int(detail['helper_pid']))
-        candidate = psutil.Process(int(detail['k6_pid']))
+        pts = detail.get('backend') == 'pts'
+        if pts and (args.cohort != 'cap10' or os.environ.get('CAP10_LOAD_BACKEND') != 'pts'):
+            raise RuntimeError('PTS backend not explicitly authorized for CAP10')
+        if pts and not (Path(detail['remoteEvidence']) / 'latest.json').is_file():
+            raise FileNotFoundError('PTS controller initialization snapshot not ready')
+        candidate = psutil.Process(int(detail['controller_pid'] if pts else detail['k6_pid']))
         root = psutil.Process(child.pid)
         if root.create_time() != child_identity:
             raise RuntimeError('owned harness identity changed')
         descendants = {p.pid for p in root.children(recursive=True)} | {root.pid}
         if helper.pid not in descendants or candidate.pid not in descendants or candidate.pid == api.pid:
             raise RuntimeError('generator/helper is not owned by this stage')
-        if candidate.name().lower() not in ('k6', 'k6.exe') or not any(script in arg for arg in candidate.cmdline()):
+        valid_name = candidate.name().lower().startswith('python') if pts else candidate.name().lower() in ('k6', 'k6.exe')
+        expected_script = 'cap10-pts-phase.py' if pts else script
+        if not valid_name or not any(expected_script in arg for arg in candidate.cmdline()):
             raise RuntimeError('owned generator executable/script mismatch')
         identity = candidate.create_time()
-        if abs(identity * 1000 - float(detail['k6_started_unix_ms'])) > 2000:
+        created = detail['controller_started_unix_ms'] if pts else detail['k6_started_unix_ms']
+        if abs(identity * 1000 - float(created)) > 2000:
             raise RuntimeError('owned generator creation time mismatch')
         return candidate, identity
 
@@ -242,7 +250,8 @@ def main():
                     # mode we start only at stable; trade uses one process.
                     try:
                         current = json.loads((load / 'process.json').read_text(encoding='utf-8-sig'))
-                        if int(current['k6_pid']) != candidate.pid:
+                        current_pid = current['controller_pid'] if current.get('backend') == 'pts' else current['k6_pid']
+                        if int(current_pid) != candidate.pid:
                             signal('generator PID changed after sampling began; no automatic switch')
                     except (OSError, ValueError, KeyError):
                         pass  # sampler separately validates its exact PID file

@@ -1,0 +1,37 @@
+{
+  "at": "2026-11-01T10:01:39.516710+00:00",
+  "checks": {
+    "actualPhaseEnvelopeHTTPAndTermination": 18,
+    "existingLike": 34,
+    "existingRunner": 21,
+    "existingPolicy": 34
+  },
+  "scope": "Only synthetic HTTP loopback/isolated PID/contract checks. No Alibaba API, dependency service, Go business mutation or CAP10 S/H window. Linux runtime remains pending.",
+  "sourceSHA256": {
+    "scripts/cap10-env.py": "ece533cd355796537c4d1c594edd5c0745466ff2daa9450d35a66dfa0eb0445e",
+    "scripts/cap10-run.py": "a4d4d12490d0969b0006815418f78b387ba84f094dc5350cc07637c8b6059dd2",
+    "scripts/cap10-stage.py": "ee2619b953fc316637a6c52eec6b8a9e25264fae2df5ef81b80c43a00cc12a1d",
+    "scripts/cap10-resources.py": "828038984723798148b390f0c8bd5b1c0bd3360aea81ea62a6422a4e4164fa6e",
+    "scripts/cap10-like.mjs": "0c99ca6a79402b0c7f5a706b259b782fe7f7cea22903d563665fb90b15dff3bf",
+    "scripts/cap10-downstream.go": "b3b3415ddee1a21d53505dd6b632d5435fa201a27289acae0052debfe2b599c3",
+    "scripts/pts/cap10-pts-phase.py": "aedaa69fe0bc582e463f3532e5e8d09c941081b038dc1c7bd8300e91d1f275ed",
+    "scripts/pts/cap10-pts-phase-check.py": "97f67a41b961571b6bf9ad393fed05bee535b1b966a098bc94cb20430bacef8e"
+  },
+  "nonAuthorReview": "cap09_like_harness and cap09_like_review final read-only cross review PASS; reserved tag/source/rate/ancestor identity/admission, same formal PTS identity, remote+local termination and registered cleanup included.",
+  "earlierAttempts": [
+    {
+      "scope": "default sandbox HTTP checks",
+      "outcome": "WinError10013 loopback connect refused; proxy bypass did not change result; no cloud/business"
+    },
+    {
+      "scope": "first elevated HTTP check",
+      "outcome": "Found Handler.request/socket name collision before any cloud work; renamed handle_operation, retained old failed tool output; final HTTP+envelope/termination18 PASS"
+    },
+    {
+      "scope": "policy CLI invocation",
+      "outcome": "First two invocations rejected missing --output then wrong output prefix before running tests; corrected frozen grade-check output path,34 PASS"
+    }
+  ],
+  "permissions": "Bounded loopback tests passed using approved require_escalated; no security software/global power changes.",
+  "nativeLoadWindowsAdded": 0
+}

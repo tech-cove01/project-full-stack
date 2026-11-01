@@ -1,0 +1,82 @@
+{
+  "at": "2026-11-01T06:39:02.653741+00:00",
+  "capacity": {
+    "at": "2026-11-01T06:39:02.6547427Z",
+    "uptime_ms": 226474,
+    "pid": 37664,
+    "runtime": {
+      "goroutines": 58,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 5191128,
+      "heap_sys_bytes": 27164672,
+      "heap_inuse_bytes": 8445952,
+      "total_alloc_bytes": 321754728,
+      "mallocs": 4998701,
+      "frees": 4957914,
+      "num_gc": 68,
+      "pause_total_ns": 8355400,
+      "last_gc_unix_ns": 1793515138392227200,
+      "gc_cpu_fraction": 0.00015786849946949712
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 9,
+      "in_use": 0,
+      "idle": 9,
+      "wait_count": 1,
+      "wait_duration_ns": 550000,
+      "max_idle_closed": 46,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 12131,
+      "misses": 8,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 8,
+      "idle_connections": 8,
+      "stale_connections": 0
+    },
+    "tail": {
+      "enabled": false,
+      "slow_threshold_ms": 0,
+      "max_slow_traces": 0,
+      "max_spans_per_trace": 0,
+      "latest_sequence": 0,
+      "requests": 0,
+      "shared_tasks": 0,
+      "stages": null,
+      "slow_traces": null,
+      "missing_measurements": null
+    },
+    "cards": {
+      "coalescing": true,
+      "requests": 0,
+      "l1_hits": 0,
+      "redis_hits": 0,
+      "miss_items": 0,
+      "loads_started": 0,
+      "flight_started": 0,
+      "flight_joins": 0,
+      "content_sql_batches": 0,
+      "content_sql_rows": 0,
+      "content_bytes": 0,
+      "load_errors": 0,
+      "oversize_uncached": 0,
+      "redis_errors": 0,
+      "invalid_payloads": 0,
+      "busy_rejected": 0,
+      "expired": 0,
+      "evictions": 0,
+      "inflight": 0,
+      "active_loads": 0,
+      "waiting_callers": 0,
+      "l1_entries": 0,
+      "l1_bytes": 0
+    }
+  },
+  "scope": "parsed pre-warm snapshot"
+}

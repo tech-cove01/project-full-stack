@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-01T06:46:16.553206+00:00",
+  "chain": "feed",
+  "mode": "multi",
+  "rate": 50,
+  "seconds": 180,
+  "rounds": 2,
+  "sourceSha": "7a80186b568b521c54736b735c08dce8ef962e19",
+  "binarySHA256": "9f70db9ad869eaac4935f714c00980f3e5c173404fe584c9b725fdb943405fd7",
+  "environmentSHA256": "a1e1abff73f147cbc04933b7c27cef4bf169c2f1f9618c6e323fc57d77dc9e97",
+  "fixtureSHA256": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+  "shortStageEvidence": [
+    "feed-final-stair-1"
+  ],
+  "relatedChecksPassed": true,
+  "sourceCIPassed": true,
+  "sourceCIEvidence": "ci-b.json",
+  "selectionBasis": {
+    "highestCompleteShortRate": 50,
+    "firstLimitedRate": 100,
+    "shortAllP95Ms": 24.374889999999972,
+    "shortAllP99Ms": 35.90285799999964,
+    "shortSuccesses": 2250,
+    "unknownContentErrorsDropped": 0,
+    "limitedP95Ms": 225.0062,
+    "limitedUnknown": 7,
+    "scope": "50haslarge measuredlatency/resourceheadroom and0queues throughout;100firstlimitedendsstair.No interpolationclaimorexactceiling. Earlierbaseline150passisdifferent time/version/sample, not evidenceof finalcapacity150."
+  },
+  "firstFailureEndsGroup": true,
+  "noLowerReplacementGroup": true,
+  "scope": "current developmentlaptop fixedfull20cardRRPagedFeed, no productioncapacityclaim"
+}

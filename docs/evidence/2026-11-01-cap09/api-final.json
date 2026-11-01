@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-01T06:35:16.114673+00:00",
+  "cohort": "cap09",
+  "pid": 37664,
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-7a80186\\capacity.exe",
+  "creationUnixMs": 1793514915746.3862,
+  "createdAtUtc": "2026-11-01T06:35:15.746386+00:00",
+  "sourceSha": "7a80186b568b521c54736b735c08dce8ef962e19",
+  "expectedVersion": "capacity-7a80186b568b521c54736b735c08dce8ef962e19",
+  "sha256": "9f70db9ad869eaac4935f714c00980f3e5c173404fe584c9b725fdb943405fd7",
+  "label": "final",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\env-final.private.json",
+  "tailEnabledRequested": false
+}

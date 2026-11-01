@@ -1,0 +1,23 @@
+{
+  "at": "2026-11-01T06:34:07.860049+00:00",
+  "sourceSha": "7a80186b568b521c54736b735c08dce8ef962e19",
+  "binarySHA256": "9f70db9ad869eaac4935f714c00980f3e5c173404fe584c9b725fdb943405fd7",
+  "buildEvidence": "build-b.json",
+  "environmentSHA256": "a1e1abff73f147cbc04933b7c27cef4bf169c2f1f9618c6e323fc57d77dc9e97",
+  "fixtureSHA256": {
+    "feed": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+    "like": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224"
+  },
+  "tailEnabled": false,
+  "extraCPUProfileEnabled": false,
+  "indexedObserverBinarySHA256": "4c264849341926a97956484c28977798e19735edbf30316fb26a1da9d748a8b5",
+  "sharedFinalApplicationForBothChains": true,
+  "relatedChecks": [
+    "related-real-exit.json",
+    "related-vet-exit.json",
+    "relay-real-exit.json",
+    "relay-vet-exit.json",
+    "like-warm-policy-pure-checks.json"
+  ],
+  "sourceCIRequiredBeforeFormalHold": true
+}

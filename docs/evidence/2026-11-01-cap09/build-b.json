@@ -1,0 +1,27 @@
+{
+  "task": "CAP-09D final sourceB",
+  "startedAt": "2026-11-01T06:33:52.847009+00:00",
+  "finishedAt": "2026-11-01T06:34:07.717737+00:00",
+  "elapsedSeconds": 14.870724199980032,
+  "sourceSha": "7a80186b568b521c54736b735c08dce8ef962e19",
+  "expectedVersion": "capacity-7a80186b568b521c54736b735c08dce8ef962e19",
+  "exe": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-7a80186\\capacity.exe",
+  "sha256": "9f70db9ad869eaac4935f714c00980f3e5c173404fe584c9b725fdb943405fd7",
+  "worktree": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-7a80186\\source",
+  "detached": true,
+  "worktreeCleanBeforeAndAfter": true,
+  "goVersion": "go version go1.27.0 windows/amd64",
+  "buildExitCode": 0,
+  "argv": [
+    "go",
+    "build",
+    "-ldflags",
+    "-X main.revision=capacity-7a80186b568b521c54736b735c08dce8ef962e19",
+    "-o",
+    "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-7a80186\\capacity.exe",
+    "./cmd/api"
+  ],
+  "noConcurrentLoadOrAPI": true,
+  "sourceA": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "onlyApplicationChangeFromA": "communityrelay.Writer BatchSize1"
+}

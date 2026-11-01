@@ -1,0 +1,31 @@
+{
+  "at": "2026-11-01T05:45:08.954678+00:00",
+  "task": "CAP-09A pre-baseline environment repair",
+  "observedEvidence": [
+    "feed-probe-1-control/resources.ndjson",
+    "feed-probe-1-control/stop.json",
+    "feed-probe-1-es-memory-diagnosis.json"
+  ],
+  "baselineStagesStarted": 0,
+  "reason": "ES docker working-set memory89.11% at idle exceeds existing85% budget; committed512MiB heap plus nonheap/native. Not a Feed bottleneck finding.",
+  "singleVariable": "ES_JAVA_OPTS -Xms512m -Xmx512m -> -Xms256m -Xmx256m",
+  "unchanged": [
+    "ES cgroup1GiB and2CPU",
+    "all resource thresholds",
+    "application clean53fa/binary",
+    "SQL/Redis pools and limits",
+    "Kafka three groups and relay",
+    "same fixtures and sessions and retained volumes",
+    "other three CIDs and all CRM services"
+  ],
+  "prediction": "Committed heap decreases256MiB. JVM max/committed must256MiB, healthy ES working set must<85% before same fixed low-speed Feed regression; otherwise do not start baseline. No environment performance improvement percentage claim.",
+  "originalEnvironmentSHA256": "edf3d5ced2936dc1e62f6e8a392b72343318e56b69b9fe97d75f2ef9fd8f649f",
+  "preservedOriginal": "environment-pre-es256.json",
+  "restartScope": "identity-checked owned API and only owned ES service --no-deps; retain original ES data volume, no down/volume deletion",
+  "probeRegressionOf": "feed-probe-1",
+  "sameLowSpeedCase": true,
+  "differentPredictions": [
+    "If committed heap is the pressure source, idleworking set falls materially with same1GiB limit.",
+    "If nonheap/native dominates and still>=85%, precheck remains failed; do not relax threshold."
+  ]
+}

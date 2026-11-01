@@ -25,7 +25,10 @@ const systemErrorRatio = new Rate('cap_read_system_error_ratio')
 const failureRatio = new Rate('cap_read_failure_ratio')
 const allLatency = new Trend('cap_read_all_ms', true)
 const successfulLatency = new Trend('cap_read_success_ms', true)
+const nativeScenarioStart = cap09 ? new Trend('cap_native_scenario_start_unix_ms') : null
+const nativeScenarioDuration = cap09 ? new Trend('cap_native_scenario_duration_ms') : null
 let errorLogged = false
+let nativeTimingRecorded = false
 
 export const options = {
   scenarios: { read: { executor: 'constant-arrival-rate', rate, timeUnit: '1s', duration: `${seconds}s`, gracefulStop: '10s', preAllocatedVUs: Number(__ENV.CAP_READ_PRE_VUS || 64), maxVUs: Number(__ENV.CAP_READ_MAX_VUS || 512) } },
@@ -39,12 +42,19 @@ export const options = {
     cap_read_content_errors: [{ threshold: 'count==0', abortOnFail: abort, delayAbortEval: '2s' }],
     cap_read_all_ms: [{ threshold: 'p(95)<=200', abortOnFail: abort, delayAbortEval: '10s' }, { threshold: 'p(99)<=500', abortOnFail: abort, delayAbortEval: '10s' }],
   },
-  summaryTrendStats: ['avg', 'med', 'p(95)', 'p(99)', 'max'],
+  summaryTrendStats: cap09 ? ['avg', 'min', 'med', 'p(95)', 'p(99)', 'max'] : ['avg', 'med', 'p(95)', 'p(99)', 'max'],
   // IDs, paths and users are intentionally excluded: metrics stay bounded.
   systemTags: ['status', 'method', 'name', 'scenario', 'error_code', 'expected_response'],
 }
 
 export default function () {
+  if (cap09 && !nativeTimingRecorded) {
+    // One bounded pair per participating VU; this is the scenario clock, not
+    // process startup or gracefulStop. The duration is the configured window.
+    nativeScenarioStart.add(exec.scenario.startTime)
+    nativeScenarioDuration.add(seconds * 1000)
+    nativeTimingRecorded = true
+  }
   const readerIndex = mode === 'hot' ? 0 : exec.scenario.iterationInTest % readers.length
   const reader = readers[readerIndex]
   attempted.add(1)

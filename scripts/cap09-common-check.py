@@ -119,6 +119,44 @@ class Checks(unittest.TestCase):
             with self.subTest(rows=bad), self.assertRaises(ValueError):
                 resources.cap09_stats(bad, identities)
 
+    def test_feed_native_clock_is_bounded_per_vu_and_legacy_is_unchanged(self):
+        source = r"""
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import vm from 'node:vm'
+const source = readFileSync('scripts/load/go073-cap-read.js', 'utf8')
+  .replace(/^import .*$/gm, '').replace('export const options', 'const options')
+  .replace('export default function ()', 'function invoke()')
+for (const cohort of ['cap09', undefined]) {
+  const values = new Map()
+  class Metric { constructor(name) { this.name = name; values.set(name, []) } add(value) { values.get(this.name).push(value) } }
+  const ids = Array.from({ length: 20 }, (_, i) => String(100 - i))
+  const reader = { expectedIds: ids, authorId: '1', token: 'synthetic-public-placeholder' }
+  const fixture = { readers: [reader], pageSize: 20, baseUrl: 'http://127.0.0.1:1' }
+  const context = { __ENV: { CAP_COHORT: cohort, CAP_READ_INPUT: 'unused', CAP_READ_RATE: '1', CAP_READ_SECONDS: '45', CAP_READ_MODE: 'multi' },
+    open: () => JSON.stringify(fixture), SharedArray: function (_, load) { return load() }, Counter: Metric, Rate: Metric, Trend: Metric,
+    exec: { scenario: { startTime: 1720000000000, iterationInTest: 0 } }, validCap09Feed: () => true,
+    http: { get: () => ({ status: 200, timings: { duration: 1 }, json: () => ({ success: true, data: { source: 'database',
+      items: ids.map(id => ({ id, userId: '1', liked: 0, comments: 0, likedByMe: false, shopId: '1' })) } }) }) }, console }
+  vm.runInNewContext(source + '\nglobalThis.invoke = invoke; globalThis.testOptions = options', context)
+  context.invoke(); context.invoke()
+  if (cohort === 'cap09') {
+    assert.deepEqual(values.get('cap_native_scenario_start_unix_ms'), [1720000000000])
+    assert.deepEqual(values.get('cap_native_scenario_duration_ms'), [45000])
+    assert.ok(context.testOptions.summaryTrendStats.includes('min'))
+  } else {
+    assert.equal(values.has('cap_native_scenario_start_unix_ms'), false)
+    assert.equal(values.has('cap_native_scenario_duration_ms'), false)
+    assert.equal(context.testOptions.summaryTrendStats.includes('min'), false)
+  }
+  assert.equal(values.get('cap_read_attempted').length, 2)
+}
+console.log(JSON.stringify({ nativeClockContractPassed: true, servicesStarted: false }))
+"""
+        result = subprocess.run(['node', '--input-type=module', '-e', source], cwd=REPO, capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIs(json.loads(result.stdout)['nativeClockContractPassed'], True)
+
     def test_full_feed_contract_rejects_payload_cursor_and_personal_differences(self):
         # Node imports only the pure contract module: no k6 module, sockets or
         # fixture credentials exist in this deterministic counterexample.

@@ -1,0 +1,12 @@
+test_explicit_cap09_profile_does_not_change_legacy (__main__.Checks.test_explicit_cap09_profile_does_not_change_legacy) ... ok
+test_feed_native_clock_is_bounded_per_vu_and_legacy_is_unchanged (__main__.Checks.test_feed_native_clock_is_bounded_per_vu_and_legacy_is_unchanged) ... ok
+test_four_container_stats_missing_foreign_nonfinite_not_zero (__main__.Checks.test_four_container_stats_missing_foreign_nonfinite_not_zero) ... ok
+test_full_feed_contract_rejects_payload_cursor_and_personal_differences (__main__.Checks.test_full_feed_contract_rejects_payload_cursor_and_personal_differences) ... ok
+test_kafka_keeps_all_three_exact_named_and_anonymous_mounts (__main__.Checks.test_kafka_keeps_all_three_exact_named_and_anonymous_mounts) ... ok
+test_owned_container_rejects_changed_id_limits_namespace_port_mount (__main__.Checks.test_owned_container_rejects_changed_id_limits_namespace_port_mount) ... ok
+test_owned_four_services_and_resource_limits (__main__.Checks.test_owned_four_services_and_resource_limits) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.236s
+
+OK

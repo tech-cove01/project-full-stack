@@ -29,6 +29,8 @@ const systemRatio = new Rate('cap_like_system_error_ratio')
 const allLatency = new Trend('cap_like_all_ms', true)
 const mutationLatency = new Trend('cap_like_mutation_ms', true)
 const recoveryLatency = new Trend('cap_like_recovery_ms', true)
+const scenarioStart = new Trend('cap_native_scenario_start_unix_ms')
+const scenarioDuration = new Trend('cap_native_scenario_duration_ms')
 let relation = null, current = null, retired = false, errorLogged = false
 
 export const options = {
@@ -48,7 +50,7 @@ export const options = {
     cap_like_all_ms: [{ threshold: 'p(95)<=200', abortOnFail: abort, delayAbortEval: '10s' },
       { threshold: 'p(99)<=500', abortOnFail: abort, delayAbortEval: '10s' }],
   },
-  summaryTrendStats: ['avg', 'med', 'p(95)', 'p(99)', 'max'],
+  summaryTrendStats: ['avg', 'med', 'min', 'p(95)', 'p(99)', 'max'],
   systemTags: ['status', 'method', 'name', 'scenario', 'error_code', 'expected_response'],
 }
 
@@ -69,7 +71,7 @@ function recoverAndRetire() {
 
 export default function () {
   if (retired) return
-  if (!relation) { relation = pairForVU(fixture, mode, exec.vu.idInTest); current = relation.initial; recovery.add(0); recoveryFailed.add(0); retiredRelations.add(0) }
+  if (!relation) { relation = pairForVU(fixture, mode, exec.vu.idInTest); current = relation.initial; recovery.add(0); recoveryFailed.add(0); retiredRelations.add(0); scenarioStart.add(exec.scenario.startTime); scenarioDuration.add(seconds * 1000) }
   const wanted = !current.liked
   attempted.add(1)
   const response = http.put(`${fixture.baseUrl}/notes/${relation.noteId}/like`, JSON.stringify({ liked: wanted }), params('like-write'))

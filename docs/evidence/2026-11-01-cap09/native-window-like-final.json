@@ -1,0 +1,9 @@
+{
+  "at": "2026-11-01T05:41:59.543468+00:00",
+  "argv": [
+    "node",
+    "scripts/cap09-like-check.mjs"
+  ],
+  "exitCode": 0,
+  "scope": "pure tool checks only, no HTTP/SQL/Docker/load"
+}

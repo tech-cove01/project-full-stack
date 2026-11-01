@@ -8,6 +8,7 @@ import { tmpdir } from 'node:os'
 import { resolve, dirname, join, basename, relative, sep } from 'node:path'
 import net from 'node:net'
 import { stateFromBody, classifyWrite, unknownBounds } from './load/cap09-like-contract.mjs'
+import { nativeScenarioWindow } from './load/cap09-native-window.mjs'
 
 const owned = { project: 'project-full-stack-cap09', mysql: '3471', redis: '6571', api: 'http://127.0.0.1:8271', database: 'project_full_stack_go' }
 const action = process.argv[2]
@@ -342,6 +343,7 @@ if (action === 'prepare') {
       apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION,
       fixtureSourceSha: manifest.sourceSha, fixtureManifestSHA256: manifestSHA256,
       configuredPool: { users: 512, notes: modeNotes(manifest, mode).length, exclusiveRelationships: 512, authors: 1, noteBodyBytes: 256 }, started: new Date().toISOString(),
+      nativeScenario: { complete: false, scope: 'native timing not yet verified; no completed scenario claim' },
       thresholds: { actualOfferedRatioMin: .99, mutationFractionMin: .99, unexpectedNoopMax: 0, contentErrorsMax: 0,
         unknownMax: 0, droppedMax: 0, systemAndHTTPErrorRatesMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500 },
       scope: 'main attempts are real PUT state changes; pre-phase hydration is outside native workload. Non-mutation outcomes GET the fact and retire that relation for this phase, because one read can race a late unknown commit. Only a later phase after drain and fresh RR facts can resume it. Recovery GETs/cost are separate; API invalidate/read/Mark remain in PUT latency' }
@@ -367,7 +369,7 @@ if (action === 'prepare') {
       }
     }
     try {
-      report.scriptSHA256 = Object.fromEntries(await Promise.all(['scripts/cap09-like.mjs', 'scripts/load/cap09-like.js', 'scripts/load/cap09-like-contract.mjs'].map(async p => [p, hash(await readFile(p))])))
+      report.scriptSHA256 = Object.fromEntries(await Promise.all(['scripts/cap09-like.mjs', 'scripts/load/cap09-like.js', 'scripts/load/cap09-like-contract.mjs', 'scripts/load/cap09-native-window.mjs'].map(async p => [p, hash(await readFile(p))])))
       warmBefore = await snapshot(manifest, mode, 'before-warm'); await save(join(dir, 'warm-before.json'), warmBefore)
       assert.deepEqual(factErrors(manifest, mode, warmBefore), [], 'starting facts invalid')
       const warm = await runPhase('warm', warmSeconds, warmBefore); report.warmExit = warm.code; report.warmExternalStop = warm.externalStop
@@ -376,11 +378,21 @@ if (action === 'prepare') {
       assert.deepEqual(factErrors(manifest, mode, before), [], 'warm facts invalid')
       report.stableStartedAt = Date.now(); const stable = await runPhase('stable', seconds, before)
       Object.assign(report, { stableExit: stable.code, stableExternalStop: stable.externalStop, stableEndedAt: Date.now() })
+      report.stableWrapperStartedAt = report.stableStartedAt; report.stableWrapperEndedAt = report.stableEndedAt
       report.stableCommandElapsedMs = report.stableEndedAt - report.stableStartedAt
       const after = await snapshot(manifest, mode, 'after-stable'); await save(join(dir, 'after.json'), after)
       report.verifiedChangedParticipants = { stable: changedParticipants(before, after),
         warmAndStable: changedParticipants(warmBefore, after) }
+      // Windows can terminate k6 before it writes a summary. Preserve the real
+      // business reconciliation independently; missing native metrics still fail.
+      if (stable.code !== 0 || stable.externalStop) { report.ambiguousRequestSettleWaitMs = 5500; await pause(5500) }
+      const final = await reconcile(manifest, mode, 60); await save(join(dir, 'reconcile.json'), final)
+      report.finalReconcileValid = final.valid
       const native = JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8'))
+      report.nativeScenario = nativeScenarioWindow({ metric: native.metrics?.cap_native_scenario_start_unix_ms,
+        durationMetric: native.metrics?.cap_native_scenario_duration_ms, seconds,
+        wrapperStartedAt: report.stableWrapperStartedAt, wrapperEndedAt: report.stableWrapperEndedAt,
+        exit: stable.code, externalStop: stable.externalStop })
       const metric = name => { const m = native.metrics?.[name]; assert.ok(m, 'missing native metric: ' + name); return m }
       const counter = name => { const value = metric(name).count; assert.ok(Number.isSafeInteger(value) && value >= 0, 'invalid native counter: ' + name); return value }
       const counts = { attempted: counter('cap_like_attempted'), completed: counter('cap_like_completed'), successful: counter('cap_like_success'), mutation: counter('cap_like_mutation'), noop: counter('cap_like_noop'), rejected: counter('cap_like_rejected'), effectUnknown: counter('cap_like_effect_unknown'), contentErrors: counter('cap_like_content_errors'), systemErrors: counter('cap_like_system_errors'), httpErrors: counter('cap_like_http_errors'), recoveryReads: counter('cap_like_recovery_reads'), recoveryFailed: counter('cap_like_recovery_failed'), retiredRelations: counter('cap_like_retired_relations'), dropped: counter('dropped_iterations'), nativeWriteHTTP: counter('http_reqs{name:like-write}') }
@@ -392,11 +404,13 @@ if (action === 'prepare') {
       report.result = { ...counts, classificationUnknown, unknown, unknownIsExact, unknownLowerBound, unknownUpperBound, targetOffers: rate * seconds, actualOfferedRatio: counts.attempted / (rate * seconds), mutationFraction: counts.mutation / Math.max(1, counts.attempted), mutationPerNominalSecond: counts.mutation / seconds, httpPutPerNominalSecond: counts.attempted / seconds, allLatency, mutationLatency, recoveryLatency: native.metrics?.cap_like_recovery_ms || null,
         dbMutations, eventsAdded, mutationCounterMatchesDB: dbMutations === counts.mutation && eventsAdded === counts.mutation,
         unknownScope: 'classificationUnknown and effectUnknown can overlap during abort sample loss. Distinct unknown is exact only when lower/upper coincide; otherwise unknown=null and bounds remain. Recovery never erases original uncertainty. Zero-unknown requires both counters zero.' }
-      if (unknownUpperBound > 0) { report.ambiguousRequestSettleWaitMs = 5500; await pause(5500) }
-      const final = await reconcile(manifest, mode, 60); await save(join(dir, 'reconcile.json'), final)
-      report.finalReconcileValid = final.valid
-      report.meetsAPIBudget = stable.code === 0 && !stable.externalStop && counts.attempted > 0 && counts.attempted === counts.nativeWriteHTTP && counts.attempted === counts.completed && counts.attempted / (rate * seconds) >= .99 && counts.mutation / counts.attempted >= .99 && counts.noop === 0 && counts.rejected === 0 && classificationUnknown === 0 && counts.effectUnknown === 0 && counts.dropped === 0 && counts.contentErrors === 0 && counts.systemErrors / counts.attempted < .01 && counts.httpErrors / counts.attempted < .01 && allLatency['p(95)'] <= 200 && allLatency['p(99)'] <= 500 && mutationLatency['p(95)'] <= 200 && mutationLatency['p(99)'] <= 500 && report.result.mutationCounterMatchesDB
-      report.meetsBudget = report.meetsAPIBudget && final.valid
+      if (unknownUpperBound > 0 && !report.ambiguousRequestSettleWaitMs) {
+        report.ambiguousRequestSettleWaitMs = 5500; await pause(5500)
+        const settled = await reconcile(manifest, mode, 60); await save(join(dir, 'uncertain-reconcile.json'), settled)
+        report.finalReconcileValid = settled.valid
+      }
+      report.meetsAPIBudget = report.nativeScenario.complete && stable.code === 0 && !stable.externalStop && counts.attempted > 0 && counts.attempted === counts.nativeWriteHTTP && counts.attempted === counts.completed && counts.attempted / (rate * seconds) >= .99 && counts.mutation / counts.attempted >= .99 && counts.noop === 0 && counts.rejected === 0 && classificationUnknown === 0 && counts.effectUnknown === 0 && counts.dropped === 0 && counts.contentErrors === 0 && counts.systemErrors / counts.attempted < .01 && counts.httpErrors / counts.attempted < .01 && allLatency['p(95)'] <= 200 && allLatency['p(99)'] <= 500 && mutationLatency['p(95)'] <= 200 && mutationLatency['p(99)'] <= 500 && report.result.mutationCounterMatchesDB
+      report.meetsBudget = report.meetsAPIBudget && report.finalReconcileValid
       report.downstreamSteadyStateScope = 'final valid means convergence only; common stage lag/last-minute growth gate must additionally pass for a full-chain capacity claim'
     } catch (error) { report.failure = error.message; if (error.observerSQLFailure) report.observerSQLFailure = error.observerSQLFailure; report.meetsBudget = false; report.meetsAPIBudget ??= false }
     finally { report.finished = new Date().toISOString(); await save(join(dir, 'result.json'), report) }

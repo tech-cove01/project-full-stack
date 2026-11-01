@@ -8,6 +8,7 @@ import { mkdir, mkdtemp, readFile, writeFile, unlink, rmdir } from 'node:fs/prom
 import { tmpdir } from 'node:os'
 import { resolve, dirname, join } from 'node:path'
 import net from 'node:net'
+import { nativeScenarioWindow } from './load/cap09-native-window.mjs'
 
 assert.ok(process.env.CAP_COHORT === undefined || process.env.CAP_COHORT === 'cap09', 'unsupported fixed read cohort')
 const cap09 = process.env.CAP_COHORT === 'cap09'
@@ -242,6 +243,7 @@ if (action === 'prepare') {
     assert.equal(manifest.cohort, 'cap09'); assert.equal(manifest.bodyBytes, 256)
     assert.ok(runtime.readers.every(reader => reader.expectedTitles?.length === 20 && reader.expectedCreateTimes?.length === 20), 'CAP09 full-content expected metadata required')
     report.fullContentContract = 'IDs/order/author/shop/counts/own-state/title/256B body/images/createTime/nextCursor; classification CPU is observed on the generator'
+    report.nativeScenario = { complete: false, scope: 'native scenario timing not yet observed; wrapper timestamps never establish a complete workload' }
   }
   let beforeWarm = null
   async function runPhase(phase, duration) {
@@ -262,13 +264,17 @@ if (action === 'prepare') {
     report.selectInstrument = await sql("SELECT ENABLED,TIMED FROM performance_schema.setup_instruments WHERE NAME='statement/sql/select'", true)
     assert.equal(report.selectInstrument, 'YES\tYES', 'timed statement/sql/select instrumentation required')
     beforeWarm = await snapshot('before-warm')
-    const hashes = {}; for (const path of ['scripts/go073-cap-read.mjs', 'scripts/load/go073-cap-read.js', ...(cap09 ? ['scripts/load/cap09-feed-contract.js'] : [])]) hashes[path] = createHash('sha256').update(await readFile(path)).digest('hex')
+    const hashes = {}; for (const path of ['scripts/go073-cap-read.mjs', 'scripts/load/go073-cap-read.js', ...(cap09 ? ['scripts/load/cap09-feed-contract.js', 'scripts/load/cap09-native-window.mjs'] : [])]) hashes[path] = createHash('sha256').update(await readFile(path)).digest('hex')
     report.scriptSHA256 = hashes
     const warm = await runPhase('warm', warmSeconds); report.warmExit = warm.code; report.warmExternalStop = warm.externalStop
     assert.equal(report.warmExit, 0, 'warm probe failed; no stable workload started')
     assert.ok(!warm.externalStop, 'warm phase externally stopped; no stable workload started')
     const before = await snapshot('before-stable'); await writeFile(join(dir, 'before.json'), JSON.stringify(before, null, 2) + '\n')
-    report.stableStartedAt = Date.now(); const stable = await runPhase('stable', seconds); report.stableExit = stable.code; report.stableExternalStop = stable.externalStop; report.stableEndedAt = Date.now(); report.stableCommandElapsedMs = report.stableEndedAt - report.stableStartedAt
+    report.stableStartedAt = Date.now()
+    if (cap09) report.stableWrapperStartedAt = report.stableStartedAt
+    const stable = await runPhase('stable', seconds)
+    report.stableExit = stable.code; report.stableExternalStop = stable.externalStop; report.stableEndedAt = Date.now(); report.stableCommandElapsedMs = report.stableEndedAt - report.stableStartedAt
+    if (cap09) report.stableWrapperEndedAt = report.stableEndedAt
     const after = await snapshot('after-stable'); const accessDelta = deltaSnapshots(before, after); await writeFile(join(dir, 'after.json'), JSON.stringify(after, null, 2) + '\n'); await writeFile(join(dir, 'access-delta.json'), JSON.stringify(accessDelta, null, 2) + '\n')
     assert.ok(!accessDelta.counterResets && accessDelta.lostDigestsDelta === 0 && accessDelta.preparedStatementsLostDelta === 0 && accessDelta.missingAfterDigests.length === 0, 'access counters reset, uptime inconsistent or instrumentation lost; no valid access count claim')
     const summary = JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8')), metric = name => { const value = summary.metrics?.[name]; assert.ok(value, 'missing required metric: ' + name); return value }
@@ -278,8 +284,12 @@ if (action === 'prepare') {
     assert.ok(attempted >= completedHttpRequests && completedHttpRequests >= completed && completed >= successful, 'inconsistent started/HTTP/completed/success counts')
     if (successful > 0) assert.ok(successfulLatency && [successfulLatency['p(95)'], successfulLatency['p(99)']].every(Number.isFinite), 'successful request latency missing')
     report.result = { attempted, completedHttpRequests, completed, incompleteOrUnclassified: attempted - completed, completedButUnclassified: completedHttpRequests - completed, classificationCoverage: completed / attempted, successful, systemErrors, contentErrors, httpErrors, dropped, targetOffers: rate * seconds, actualOfferedRatio: attempted / (rate * seconds), issuedPerNominalSecond: attempted / seconds, successfulPerNominalSecond: successful / seconds, systemErrorRate: systemErrors / attempted, systemErrorRatePerCompleted: completed > 0 ? systemErrors / completed : null, allLatency: latency, successfulLatency, countingScope: 'attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop', k6Metrics: { vus: summary.metrics?.vus, vusMax: summary.metrics?.vus_max, dataReceived: summary.metrics?.data_received } }
+    if (cap09) report.nativeScenario = nativeScenarioWindow({ metric: summary.metrics?.cap_native_scenario_start_unix_ms,
+      durationMetric: summary.metrics?.cap_native_scenario_duration_ms, seconds,
+      wrapperStartedAt: report.stableWrapperStartedAt, wrapperEndedAt: report.stableWrapperEndedAt,
+      exit: report.stableExit, externalStop: report.stableExternalStop })
     if (successful > 0) assert.ok(accessDelta.globalCommands.Com_select > 0 && accessDelta.globalCommands.Com_stmt_execute > 0 && accessDelta.statementEvents.some(row => row.event === 'statement/com/Execute' && row.count > 0), 'successful Feed stage lacks measured instance SQL executions; no access count claim')
-    report.meetsBudget = report.stableExit === 0 && !report.stableExternalStop && completed === attempted && completedHttpRequests === attempted && attempted / (rate * seconds) >= .99 && successful / attempted >= .99 && dropped === 0 && systemErrors / attempted < .01 && contentErrors === 0 && httpErrors / attempted < .01 && latency['p(95)'] <= 200 && latency['p(99)'] <= 500 && successfulLatency && successfulLatency['p(95)'] <= 200 && successfulLatency['p(99)'] <= 500
+    report.meetsBudget = report.stableExit === 0 && !report.stableExternalStop && (!cap09 || report.nativeScenario.complete) && completed === attempted && completedHttpRequests === attempted && attempted / (rate * seconds) >= .99 && successful / attempted >= .99 && dropped === 0 && systemErrors / attempted < .01 && contentErrors === 0 && httpErrors / attempted < .01 && latency['p(95)'] <= 200 && latency['p(99)'] <= 500 && successfulLatency && successfulLatency['p(95)'] <= 200 && successfulLatency['p(99)'] <= 500
   } catch (error) { report.failure = error.message; report.meetsBudget = false }
   finally {
     report.finished = new Date().toISOString(); if (beforeWarm) await writeFile(join(dir, 'warm-before.json'), JSON.stringify(beforeWarm, null, 2) + '\n'); await writeFile(join(dir, 'result.json'), JSON.stringify(report, null, 2) + '\n')

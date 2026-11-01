@@ -1,6 +1,9 @@
 // Pure public-contract/cancellation boundary checks. No service, token or load.
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import vm from 'node:vm'
 import { stateFromBody, classifyWrite, pairForVU, unknownBounds } from './load/cap09-like-contract.mjs'
+import { nativeScenarioWindow } from './load/cap09-native-window.mjs'
 
 let checks = 0
 function check(name, fn) { fn(); checks++; console.log('PASS ' + name) }
@@ -33,4 +36,26 @@ check('missing terminals alone retain the exact old-style unknown', () => assert
 check('cancel race cannot double-count overlapping uncertainty as exact', () => { const b = unknownBounds(10, 8, 1); assert.equal(b.unknown, null); assert.equal(b.unknownLowerBound, 2); assert.equal(b.unknownUpperBound, 3) })
 check('classified uncertain commit remains unknown after recovery', () => assert.equal(unknownBounds(10, 10, 1).unknown, 1))
 check('invalid uncertainty counts cannot be clamped into a pass', () => assert.throws(() => unknownBounds(10, 11, 0)))
+const timing = { metric: { min: 1200, max: 1200 }, durationMetric: { min: 45000, max: 45000 }, seconds: 45,
+  wrapperStartedAt: 1000, wrapperEndedAt: 47000, exit: 0, externalStop: null }
+check('native window excludes process startup and trailing grace', () => { const result = nativeScenarioWindow(timing); assert.equal(result.startedAt, 1200); assert.equal(result.scheduledEndedAt, 46200); assert.equal(result.complete, true) })
+check('early abort never claims the scheduled native window completed', () => { assert.equal(nativeScenarioWindow({ ...timing, exit: 99 }).complete, false); assert.equal(nativeScenarioWindow({ ...timing, wrapperEndedAt: 3000 }).complete, false); assert.equal(nativeScenarioWindow({ ...timing, externalStop: { reason: 'stop' } }).complete, false) })
+check('missing or disagreeing native timing fails closed', () => { assert.throws(() => nativeScenarioWindow({ ...timing, metric: null })); assert.throws(() => nativeScenarioWindow({ ...timing, metric: { min: 1200, max: 1201 } })); assert.throws(() => nativeScenarioWindow({ ...timing, durationMetric: { min: 180000, max: 180000 } })) })
+check('native scenario start must fall in the actual wrapper interval', () => assert.throws(() => nativeScenarioWindow({ ...timing, metric: { min: 999, max: 999 } })))
+check('actual native script records its clock once per participating VU', () => {
+  const values = new Map()
+  class Metric { constructor(name) { this.name = name; values.set(name, []) } add(value) { values.get(this.name).push(value) } }
+  const source = readFileSync('scripts/load/cap09-like.js', 'utf8').replace(/^import .*$/gm, '')
+    .replace('export const options', 'const options').replace('export default function ()', 'function invoke()')
+  let version = 0
+  const context = { __ENV: { CAP_LIKE_INPUT: 'unused', CAP_LIKE_MODE: 'multi', CAP_LIKE_RATE: '1', CAP_LIKE_SECONDS: '45' },
+    open: () => JSON.stringify(fixture), Counter: Metric, Rate: Metric, Trend: Metric, stateFromBody, classifyWrite, pairForVU,
+    exec: { vu: { idInTest: 1 }, scenario: { startTime: 1200 } }, console,
+    http: { put: (_, input) => ({ status: 200, timings: { duration: 1 }, json: () => body(JSON.parse(input).liked, ++version) }) } }
+  vm.runInNewContext(source + '\nglobalThis.invoke = invoke', context)
+  context.invoke(); context.invoke()
+  assert.deepEqual(values.get('cap_native_scenario_start_unix_ms'), [1200])
+  assert.deepEqual(values.get('cap_native_scenario_duration_ms'), [45000])
+  assert.equal(values.get('cap_like_mutation').reduce((a, b) => a + b), 2)
+})
 console.log(JSON.stringify({ checks, failed: 0, servicesStarted: false, loadRuns: 0 }))

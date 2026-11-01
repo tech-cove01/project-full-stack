@@ -1,6 +1,6 @@
 {
   "task": "CAP-09A",
-  "at": "2026-11-01T05:19:03.248992+00:00",
+  "at": "2026-11-01T05:46:17.561017+00:00",
   "project": "project-full-stack-cap09",
   "runtime": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715",
   "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\env.private.json",
@@ -104,7 +104,7 @@
       "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
     },
     "elasticsearch": {
-      "id": "7e2826e1e08a876c540ca7e1ba758ce2dfa1987db1f9a93b55ff8e524427c13a",
+      "id": "c7feaf8e186367472f8de34d875a2d63ce8066478086b864ca5a1f8c9855c4fc",
       "name": "/project-full-stack-cap09-elasticsearch-1",
       "project": "project-full-stack-cap09",
       "service": "elasticsearch",
@@ -159,5 +159,13 @@
   "gomaxprocs": 4,
   "gomemlimit": "1GiB",
   "sharedHost": true,
-  "oldVolumesUntouched": true
+  "oldVolumesUntouched": true,
+  "jvmHeapMiB": 256,
+  "preBaselineRepair": {
+    "originalEnvironmentFile": "environment-pre-es256.json",
+    "originalEnvironmentSHA256": "edf3d5ced2936dc1e62f6e8a392b72343318e56b69b9fe97d75f2ef9fd8f649f",
+    "oldElasticsearchCID": "7e2826e1e08a876c540ca7e1ba758ce2dfa1987db1f9a93b55ff8e524427c13a",
+    "repairPlan": "es-heap-repair-plan.json",
+    "baselineStartedBeforeRepair": false
+  }
 }

@@ -1,0 +1,150 @@
+{
+  "at": "2026-11-01T05:42:53.368090+00:00",
+  "tag": "like-probe-1",
+  "passed": false,
+  "failedStartOrException": null,
+  "wrapperExit": 1,
+  "observerExit": 0,
+  "childrenConverged": true,
+  "observerPid": 25064,
+  "wrapperPid": 54588,
+  "loadWaitStartedAt": "2026-11-01T05:42:53.802105+00:00",
+  "earlyNormalObserverCompletion": true,
+  "loadWaitFinishedAt": "2026-11-01T05:43:07.397464+00:00",
+  "powerEvidence": {
+    "before": {
+      "at": "2026-11-01T05:42:53.368165+00:00",
+      "hostMemoryPercent": 84.4,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "after": {
+      "at": "2026-11-01T05:43:07.582679+00:00",
+      "hostMemoryPercent": 84.0,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "events": {
+      "available": true,
+      "events": []
+    },
+    "valid": true
+  },
+  "observerResources": [
+    {
+      "at": "2026-11-01T05:42:53.832828+00:00",
+      "pid": 25064,
+      "rssBytes": 16596992,
+      "cpuPercentOneCore": 45.5,
+      "cpuIntervalSeconds": 0.24045990000013262,
+      "cpuIntervalValid": false,
+      "power": {
+        "at": "2026-11-01T05:42:53.832235+00:00",
+        "hostMemoryPercent": 84.4,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T05:42:59.056062+00:00",
+      "pid": 25064,
+      "rssBytes": 16121856,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.223236199992243,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T05:42:59.055634+00:00",
+        "hostMemoryPercent": 84.5,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    }
+  ],
+  "toolBytesStable": true,
+  "apiPassed": false,
+  "factsConverged": true,
+  "resourcesPassed": false,
+  "intentionalStopWritten": true,
+  "probeExpectedStopConfirmed": true,
+  "pipeline": {
+    "passed": false,
+    "scope": "intentional native stop probe; no throughput pass"
+  },
+  "knownOwnedProcesses": [
+    {
+      "pid": 54588,
+      "created": 1793511773.7983527,
+      "name": "python.exe"
+    },
+    {
+      "pid": 55568,
+      "created": 1793511773.805857,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 63424,
+      "created": 1793511774.0196507,
+      "name": "node.exe"
+    },
+    {
+      "pid": 42320,
+      "created": 1793511774.0668533,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 49176,
+      "created": 1793511774.297226,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 44196,
+      "created": 1793511774.3236136,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 3688,
+      "created": 1793511774.6530128,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 69196,
+      "created": 1793511774.7211263,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 60848,
+      "created": 1793511778.4352188,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 64552,
+      "created": 1793511778.472803,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 41404,
+      "created": 1793511778.5319107,
+      "name": "python.exe"
+    },
+    {
+      "pid": 66708,
+      "created": 1793511778.5390704,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 52244,
+      "created": 1793511778.997728,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 57036,
+      "created": 1793511779.3363092,
+      "name": "docker.exe"
+    }
+  ],
+  "finishedAt": "2026-11-01T05:43:07.589694+00:00"
+}

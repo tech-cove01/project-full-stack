@@ -1,0 +1,1 @@
+{"mode": "like", "harness_exit": 1, "sampler_exit": 0, "stop_signal": true, "supervision_ok": false}

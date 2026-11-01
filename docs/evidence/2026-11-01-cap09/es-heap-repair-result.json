@@ -1,0 +1,134 @@
+{
+  "at": "2026-11-01T05:46:19.246093+00:00",
+  "planSHA256": "d1b31efd71b8621f4e99d8e8a1541f6f6163cb5e195af4883d0b780dc70ddc52",
+  "otherThreeCIDsUnchanged": true,
+  "dataVolumeUnchanged": true,
+  "newElasticsearch": {
+    "id": "c7feaf8e186367472f8de34d875a2d63ce8066478086b864ca5a1f8c9855c4fc",
+    "name": "/project-full-stack-cap09-elasticsearch-1",
+    "project": "project-full-stack-cap09",
+    "service": "elasticsearch",
+    "image": "docker.elastic.co/elasticsearch/elasticsearch:8.19.23",
+    "imageId": "sha256:c8ec58306c7c7b426362a2feb04cc42652e71483b8601591132ef9d583e303b7",
+    "running": true,
+    "status": "running",
+    "exitCode": 0,
+    "oomKilled": false,
+    "restartCount": 0,
+    "cpuNano": 2000000000,
+    "memoryBytes": 1073741824,
+    "ports": {
+      "9200/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "9271"
+        }
+      ]
+    },
+    "volumes": [
+      {
+        "name": "project-full-stack-cap09-a4fc273c7715-elasticsearch",
+        "destination": "/usr/share/elasticsearch/data"
+      }
+    ],
+    "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+  },
+  "jvm": {
+    "nodes": {
+      "SM1Pu3MERvG1SGAkAhDyDA": {
+        "jvm": {
+          "mem": {
+            "heap_used_in_bytes": 193503104,
+            "heap_used_percent": 72,
+            "heap_committed_in_bytes": 268435456,
+            "heap_max_in_bytes": 268435456,
+            "non_heap_used_in_bytes": 193195896,
+            "non_heap_committed_in_bytes": 198639616,
+            "pools": {
+              "CodeHeap 'non-nmethods'": {
+                "used_in_bytes": 2472192,
+                "max_in_bytes": 5828608,
+                "peak_used_in_bytes": 2573312,
+                "peak_max_in_bytes": 5828608
+              },
+              "Metaspace": {
+                "used_in_bytes": 142869568,
+                "max_in_bytes": 0,
+                "peak_used_in_bytes": 142869568,
+                "peak_max_in_bytes": 0
+              },
+              "CodeHeap 'profiled nmethods'": {
+                "used_in_bytes": 12021376,
+                "max_in_bytes": 122916864,
+                "peak_used_in_bytes": 12021376,
+                "peak_max_in_bytes": 122916864
+              },
+              "Compressed Class Space": {
+                "used_in_bytes": 31406136,
+                "max_in_bytes": 1073741824,
+                "peak_used_in_bytes": 31406136,
+                "peak_max_in_bytes": 1073741824
+              },
+              "young": {
+                "used_in_bytes": 121634816,
+                "max_in_bytes": 0,
+                "peak_used_in_bytes": 155189248,
+                "peak_max_in_bytes": 0
+              },
+              "old": {
+                "used_in_bytes": 56790272,
+                "max_in_bytes": 268435456,
+                "peak_used_in_bytes": 56790272,
+                "peak_max_in_bytes": 268435456
+              },
+              "survivor": {
+                "used_in_bytes": 15078016,
+                "max_in_bytes": 0,
+                "peak_used_in_bytes": 20971520,
+                "peak_max_in_bytes": 0
+              },
+              "CodeHeap 'non-profiled nmethods'": {
+                "used_in_bytes": 4427392,
+                "max_in_bytes": 122916864,
+                "peak_used_in_bytes": 4427392,
+                "peak_max_in_bytes": 122916864
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "dockerStats": {
+    "BlockIO": "0B / 0B",
+    "CPUPerc": "1.14%",
+    "Container": "c7feaf8e186367472f8de34d875a2d63ce8066478086b864ca5a1f8c9855c4fc",
+    "ID": "c7feaf8e1863",
+    "MemPerc": "60.99%",
+    "MemUsage": "624.6MiB / 1GiB",
+    "Name": "project-full-stack-cap09-elasticsearch-1",
+    "NetIO": "5.78kB / 7.99kB",
+    "PIDs": "68"
+  },
+  "health": {
+    "cluster_name": "docker-cluster",
+    "status": "green",
+    "timed_out": false,
+    "number_of_nodes": 1,
+    "number_of_data_nodes": 1,
+    "active_primary_shards": 0,
+    "active_shards": 0,
+    "relocating_shards": 0,
+    "initializing_shards": 0,
+    "unassigned_shards": 0,
+    "unassigned_primary_shards": 0,
+    "delayed_unassigned_shards": 0,
+    "number_of_pending_tasks": 0,
+    "number_of_in_flight_fetch": 0,
+    "task_max_waiting_in_queue_millis": 0,
+    "active_shards_percent_as_number": 100.0
+  },
+  "environmentSHA256": "a1e1abff73f147cbc04933b7c27cef4bf169c2f1f9618c6e323fc57d77dc9e97",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\env-prebaseline-es256.private.json",
+  "noDataOrSessionReset": true
+}

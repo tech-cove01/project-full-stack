@@ -1,0 +1,30 @@
+{
+  "id": "7e2826e1e08a876c540ca7e1ba758ce2dfa1987db1f9a93b55ff8e524427c13a",
+  "name": "/project-full-stack-cap09-elasticsearch-1",
+  "project": "project-full-stack-cap09",
+  "service": "elasticsearch",
+  "image": "docker.elastic.co/elasticsearch/elasticsearch:8.19.23",
+  "imageId": "sha256:c8ec58306c7c7b426362a2feb04cc42652e71483b8601591132ef9d583e303b7",
+  "running": true,
+  "status": "running",
+  "exitCode": 0,
+  "oomKilled": false,
+  "restartCount": 0,
+  "cpuNano": 2000000000,
+  "memoryBytes": 1073741824,
+  "ports": {
+    "9200/tcp": [
+      {
+        "HostIp": "127.0.0.1",
+        "HostPort": "9271"
+      }
+    ]
+  },
+  "volumes": [
+    {
+      "name": "project-full-stack-cap09-a4fc273c7715-elasticsearch",
+      "destination": "/usr/share/elasticsearch/data"
+    }
+  ],
+  "networkId": "be5db67f705904602919f661b867e7772e2ef3fb9ad9c6dd12c8b367d66326cb"
+}

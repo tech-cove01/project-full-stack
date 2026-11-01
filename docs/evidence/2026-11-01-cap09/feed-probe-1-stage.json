@@ -1,0 +1,176 @@
+{
+  "at": "2026-11-01T05:43:21.837721+00:00",
+  "tag": "feed-probe-1",
+  "passed": false,
+  "failedStartOrException": null,
+  "wrapperExit": 1,
+  "observerExit": 0,
+  "childrenConverged": true,
+  "observerPid": 33064,
+  "wrapperPid": 60472,
+  "loadWaitStartedAt": "2026-11-01T05:43:22.013258+00:00",
+  "loadWaitFinishedAt": "2026-11-01T05:43:29.860017+00:00",
+  "powerEvidence": {
+    "before": {
+      "at": "2026-11-01T05:43:21.837795+00:00",
+      "hostMemoryPercent": 84.0,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "after": {
+      "at": "2026-11-01T05:43:32.164100+00:00",
+      "hostMemoryPercent": 84.1,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "events": {
+      "available": true,
+      "events": []
+    },
+    "valid": true
+  },
+  "observerResources": [
+    {
+      "at": "2026-11-01T05:43:22.038796+00:00",
+      "pid": 33064,
+      "rssBytes": 16064512,
+      "cpuPercentOneCore": 23.3,
+      "cpuIntervalSeconds": 0.13419890002114698,
+      "cpuIntervalValid": false,
+      "power": {
+        "at": "2026-11-01T05:43:22.038346+00:00",
+        "hostMemoryPercent": 84.0,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T05:43:27.278881+00:00",
+      "pid": 33064,
+      "rssBytes": 16416768,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.240086400008295,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T05:43:27.278472+00:00",
+        "hostMemoryPercent": 84.3,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    }
+  ],
+  "toolBytesStable": true,
+  "apiPassed": false,
+  "factsConverged": true,
+  "resourcesPassed": false,
+  "intentionalStopWritten": false,
+  "probeExpectedStopConfirmed": false,
+  "pipeline": {
+    "passed": false,
+    "nativeScenarioComplete": false,
+    "nativeRecoveryBudgetVerified": false,
+    "scope": "failed/early-stop stage has no verified complete native offer window; raw scheduled timing is retained but no full-window pipeline claim is made"
+  },
+  "knownOwnedProcesses": [
+    {
+      "pid": 60472,
+      "created": 1793511802.0094564,
+      "name": "python.exe"
+    },
+    {
+      "pid": 71416,
+      "created": 1793511802.0176833,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 15000,
+      "created": 1793511802.2007515,
+      "name": "node.exe"
+    },
+    {
+      "pid": 67000,
+      "created": 1793511802.2411287,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 7336,
+      "created": 1793511802.4786217,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 41512,
+      "created": 1793511802.5083644,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 33928,
+      "created": 1793511802.9414227,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 54368,
+      "created": 1793511802.982462,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 63172,
+      "created": 1793511803.3692062,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 14048,
+      "created": 1793511803.4086137,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 24508,
+      "created": 1793511805.6641245,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 46004,
+      "created": 1793511806.2065003,
+      "name": "python.exe"
+    },
+    {
+      "pid": 13452,
+      "created": 1793511806.2136824,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 47740,
+      "created": 1793511806.0788853,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 25476,
+      "created": 1793511806.1160657,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 44940,
+      "created": 1793511806.68468,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 24432,
+      "created": 1793511807.0028596,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 70860,
+      "created": 1793511809.293515,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 29220,
+      "created": 1793511809.3347776,
+      "name": "conhost.exe"
+    }
+  ],
+  "finishedAt": "2026-11-01T05:43:32.171286+00:00"
+}

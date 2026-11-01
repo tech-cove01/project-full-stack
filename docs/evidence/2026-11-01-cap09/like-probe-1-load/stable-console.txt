@@ -1,0 +1,21 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: scripts/load/cap09-like.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 2 max VUs, 18s max duration (incl. graceful stop):
+              * write: 2.00 iterations/s for 8s (maxVUs: 2, gracefulStop: 10s)
+
+
+running (01.0s), 0/2 VUs, 2 complete and 0 interrupted iterations
+write   [  12% ] 0/2 VUs  1.0s/8s  2.00 iters/s
+
+running (02.0s), 0/2 VUs, 4 complete and 0 interrupted iterations
+write   [  25% ] 0/2 VUs  2.0s/8s  2.00 iters/s

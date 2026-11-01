@@ -1,0 +1,124 @@
+{
+  "task": "CAP-09",
+  "mode": "multi",
+  "rate": 2,
+  "seconds": 8,
+  "warmSeconds": 1,
+  "warmRate": 1,
+  "preVUs": 2,
+  "maxVUs": 2,
+  "fixture": "caplike-0b423bbb4e",
+  "apiSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "apiExpectedRevision": "capacity-53fa1b34843486dd546ac3212a187e963621890b",
+  "fixtureSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "fixtureManifestSHA256": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224",
+  "configuredPool": {
+    "users": 512,
+    "notes": 512,
+    "exclusiveRelationships": 512,
+    "authors": 1,
+    "noteBodyBytes": 256
+  },
+  "started": "2026-11-01T05:42:54.484Z",
+  "nativeScenario": {
+    "complete": false,
+    "scope": "native timing not yet verified; no completed scenario claim"
+  },
+  "thresholds": {
+    "actualOfferedRatioMin": 0.99,
+    "mutationFractionMin": 0.99,
+    "unexpectedNoopMax": 0,
+    "contentErrorsMax": 0,
+    "unknownMax": 0,
+    "droppedMax": 0,
+    "systemAndHTTPErrorRatesMaxExclusive": 0.01,
+    "p95MsMax": 200,
+    "p99MsMax": 500
+  },
+  "scope": "main attempts are real PUT state changes; pre-phase hydration is outside native workload. Non-mutation outcomes GET the fact and retire that relation for this phase, because one read can race a late unknown commit. Only a later phase after drain and fresh RR facts can resume it. Recovery GETs/cost are separate; API invalidate/read/Mark remain in PUT latency",
+  "scriptSHA256": {
+    "scripts/cap09-like.mjs": "f9352b0c52d1650bd20b3656ca465b6274f13ee74bcc63ce2b6512df4253e85e",
+    "scripts/load/cap09-like.js": "f363e9a2c9b251d8618a9acb8793ffed9af0fd6ae7acf10f1fc56cbee2a188f5",
+    "scripts/load/cap09-like-contract.mjs": "01f9f65c91daeddd4cb749c5af58e9b2e38f92fc92221af375c7585633950a7f",
+    "scripts/load/cap09-native-window.mjs": "bc09fd05fad0ddd14de8a2ad4e39fb9a13d40ee2c2f1bc468da9e9e4eba0e490"
+  },
+  "warmExit": 0,
+  "warmExternalStop": null,
+  "stableStartedAt": 1793511778426,
+  "stableExit": null,
+  "stableExternalStop": {
+    "at": 1793511781007,
+    "reason": {
+      "at": "2026-11-01T05:43:00.638824+00:00",
+      "source": "cap09-run",
+      "tag": "like-probe-1",
+      "reason": "predeclared native low-speed stop probe"
+    }
+  },
+  "stableEndedAt": 1793511781016,
+  "stableWrapperStartedAt": 1793511778426,
+  "stableWrapperEndedAt": 1793511781016,
+  "stableCommandElapsedMs": 2590,
+  "verifiedChangedParticipants": {
+    "stable": {
+      "relationships": 2,
+      "users": 2,
+      "notes": 2,
+      "mutations": 5,
+      "mutationsPerRelationship": {
+        "2": 1,
+        "3": 1
+      },
+      "relations": [
+        {
+          "noteId": "6401",
+          "userId": "68",
+          "beforeVersion": 7,
+          "afterVersion": 9,
+          "mutations": 2
+        },
+        {
+          "noteId": "6402",
+          "userId": "69",
+          "beforeVersion": 1,
+          "afterVersion": 4,
+          "mutations": 3
+        }
+      ],
+      "scope": "verified positive authoritative relation-version changes between these RR snapshots; configured pool is separate. Failed/unknown phases do not establish complete native participation."
+    },
+    "warmAndStable": {
+      "relationships": 2,
+      "users": 2,
+      "notes": 2,
+      "mutations": 7,
+      "mutationsPerRelationship": {
+        "3": 1,
+        "4": 1
+      },
+      "relations": [
+        {
+          "noteId": "6401",
+          "userId": "68",
+          "beforeVersion": 6,
+          "afterVersion": 9,
+          "mutations": 3
+        },
+        {
+          "noteId": "6402",
+          "userId": "69",
+          "beforeVersion": 0,
+          "afterVersion": 4,
+          "mutations": 4
+        }
+      ],
+      "scope": "verified positive authoritative relation-version changes between these RR snapshots; configured pool is separate. Failed/unknown phases do not establish complete native participation."
+    }
+  },
+  "ambiguousRequestSettleWaitMs": 5500,
+  "finalReconcileValid": true,
+  "failure": "ENOENT: no such file or directory, open 'D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-11-01-cap09\\like-probe-1-load\\stable-summary.json'",
+  "meetsBudget": false,
+  "meetsAPIBudget": false,
+  "finished": "2026-11-01T05:43:06.832Z"
+}

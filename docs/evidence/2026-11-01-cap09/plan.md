@@ -24,7 +24,7 @@
 
 首次实态准备发现Kafka镜像还自动创建`/etc/kafka/secrets`与`/mnt/shared/config`两只匿名卷；初始严格单卷检查停止于健康后、迁移前，原始失败保留。按新CID与匿名卷标签独立确认归属后，记录全部三只Kafka卷与精确目标（另三服务仍一只数据卷；MySQL初始化只读bind另列），准备恢复仅从该检查点继续迁移/observer，不重新compose或换卷。原件见preparation-recovery-1.json，所有匿名卷同样保留。
 
-MySQL4CPU/2GiB、Redis2CPU/512MiB/AOF everysec、Kafka2CPU/1GiB（heap256–512MiB）、ES2CPU/1GiB（heap512MiB）；API SQL20/Redis10/GOMAXPROCS4/GOMEMLIMIT1GiB/workers1，001—013。Kafka relay和实际三组 `community.follow-v1`、`community.feed-v1`、`community.search-v1` 正常开启；ES开启以装配第3组。没有metrics组。LIKE在三组均属IGNORED收据，不冒充APPLIED或Redis投影更新；点赞Redis Mark在HTTP提交后同步路径。[点赞契约](like-contract.md)
+MySQL4CPU/2GiB、Redis2CPU/512MiB/AOF everysec、Kafka2CPU/1GiB（heap256–512MiB）、ES2CPU/1GiB（初始heap512MiB；0 baseline前经资源stop实态修复为固定heap256MiB，见下段）；API SQL20/Redis10/GOMAXPROCS4/GOMEMLIMIT1GiB/workers1，001—013。Kafka relay和实际三组 `community.follow-v1`、`community.feed-v1`、`community.search-v1` 正常开启；ES开启以装配第3组。没有metrics组。LIKE在三组均属IGNORED收据，不冒充APPLIED或Redis投影更新；点赞Redis Mark在HTTP提交后同步路径。[点赞契约](like-contract.md)
 
 同一Windows宿主，20逻辑CPU，Docker约16GiB内存；开始预检宿主内存80.4%、AC供电且电池保护关闭。启动后再次核88%安全预算，余量不足不发压。记录供电/原生盖子和睡眠事件；仅用本任务进程级保持唤醒请求，不改全局电源配置，不人为合盖/暂停Docker。任何实际供电/待机转换保留为失败/无效档。
 
@@ -49,3 +49,7 @@ Feed为6400篇/32作者/32读者/正文256B/页20，multi均匀读者轮转640ke
 优化只针对已测瓶颈，固定数据分布、正文、池/资源/持久化/消费者/TTL等条件，保留同条件代码A/B。换Linux/分离生成器若另选必须重测baseline、与代码收益分开；当前先用已可用环境。改Redis受理＋异步落库需先交具体设计和独立审查确认，不把吞吐压力当语义变更授权。
 
 最后先正常注销两cohort自有会话/Redis剩0、删observer核0，再按完整PID/创建/exe/hash与四CID停自有服务留卷，精确删除登记私有env/token输入；中断保留身份/progress，不按名称全杀或删旧数据。完整SHA、所有失败、对照、对账、下游限制与清理交独立核验，不先更新简历/prepare，不发付费AI或部署。
+
+## 09A 基线前ES堆修复（保留首失败）
+
+首Feed2/s×8秒工具探针因ES工作集89.11%触发85%保护，未进入吞吐阶梯，不归因Feed。真实JVM固定512MiB committed/max，堆外另占约206MB；只将自有ES的Xms/Xmx同时改256MiB，容器1GiB/2CPU及85%门槛保持。经非作者审查后仅ES --no-deps重建，保留数据卷与另三完整CID；初始environment原字节保留environment-pre-es256.json，旧probe记录的hash仍指向该原件，active environment.json记录新ES CID和修复历史。同53fa应用以新label/PID启动，两cohort事实和会话不重造。实态堆256MiB、health green，首修后Docker内存60.99%；冷启动下降不当作Feed优化比例。只允许原固定低速用例1次修复回归新tag，旧失败与名额均保留；两链路后续基线/对照/正式组统一固定256堆。

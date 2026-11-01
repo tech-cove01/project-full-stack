@@ -1,0 +1,30 @@
+{
+  "argv": [
+    "D:\\Python\\python.exe",
+    "-B",
+    "-X",
+    "utf8",
+    "scripts/capacity-stage.py",
+    "--cohort",
+    "cap09",
+    "--mode",
+    "like",
+    "--control-dir",
+    "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-11-01-cap09\\like-probe-1-control",
+    "--api-pid",
+    "45484",
+    "--diagnostics",
+    "http://127.0.0.1:8371/debug/capacity",
+    "--interval",
+    "5",
+    "--max-seconds",
+    "360",
+    "--stop-grace-seconds",
+    "90",
+    "--",
+    "node",
+    "scripts/cap09-like.mjs",
+    "run"
+  ],
+  "environmentValuesExported": false
+}

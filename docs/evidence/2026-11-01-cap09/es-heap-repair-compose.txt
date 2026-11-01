@@ -1,0 +1,6 @@
+ Container project-full-stack-cap09-elasticsearch-1 Recreate 
+ Container project-full-stack-cap09-elasticsearch-1 Recreated 
+ Container project-full-stack-cap09-elasticsearch-1 Starting 
+ Container project-full-stack-cap09-elasticsearch-1 Started 
+ Container project-full-stack-cap09-elasticsearch-1 Waiting 
+ Container project-full-stack-cap09-elasticsearch-1 Healthy 

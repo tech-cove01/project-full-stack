@@ -1,0 +1,1 @@
+{"task":"CAP-09","mode":"multi","rate":2,"seconds":8,"meetsAPIBudget":false,"meetsBudget":false,"failure":"ENOENT: no such file or directory, open 'D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-11-01-cap09\\like-probe-1-load\\stable-summary.json'"}

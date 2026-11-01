@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-01T05:21:04.025733+00:00",
+  "sourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "manifest": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-11-01-cap09\\fixture\\fixture.json",
+  "manifestSHA256": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\env-feed.private.json",
+  "readers": 32,
+  "notes": 6400,
+  "cohort": "cap09"
+}

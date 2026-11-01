@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-01T05:29:32.765677+00:00",
+  "manifest": "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-11-01-cap09\\like-fixture\\fixture.json",
+  "manifestSHA256": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224",
+  "privateEnvironmentFile": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\env-cohorts.private.json",
+  "sourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "likers": 512,
+  "notes": 513,
+  "bothFixturesPreparedBeforeEitherBaseline": true
+}

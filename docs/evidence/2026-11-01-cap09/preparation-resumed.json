@@ -1,0 +1,7 @@
+{
+  "at": "2026-11-01T05:19:03.245344+00:00",
+  "reason": "strict Kafka image ancillary-mount adaptation",
+  "exactIdsAndVolumesRevalidated": true,
+  "composeRepeated": false,
+  "volumesDeleted": false
+}

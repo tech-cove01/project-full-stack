@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T05:29:23.694068+00:00",
+  "sourceFile": "scripts/cap09-downstream.go",
+  "sourceSHA256": "8c66f740a60ad859bab5238fd80353b5262b7b32a85813d178862c34a27bb773",
+  "toolSourceSha": "97493a09f858ffd7f54f8707c6b3f27a9013fa91",
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\cap09-downstream.exe",
+  "sha256": "03be12cdb9a000dee02e3ab683af2975434cccebcffce03307ca5734fe520ecd",
+  "buildExit": 0,
+  "existingBackendModule": true,
+  "dependencyChange": false,
+  "serviceOrLoadStarted": false
+}

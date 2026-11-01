@@ -5,6 +5,7 @@ import datetime as dt
 import hashlib
 import ipaddress
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -14,12 +15,17 @@ import subprocess
 import sys
 import time
 import urllib.request
+import xml.etree.ElementTree as ET
 
 import psutil
 
 
 REPO = Path(__file__).resolve().parent.parent
-ROOT = REPO / 'docs/evidence/2026-11-01-cap10'
+BATCH_ROOT = REPO / 'docs/evidence/2026-11-01-cap10'
+PLATFORM = 'windows' if os.name == 'nt' else 'linux'
+assert os.name == 'nt' or sys.platform == 'linux', 'CAP10 supports Windows and the single Linux transition only'
+assert os.environ.get('CAP10_PLATFORM', PLATFORM) == PLATFORM
+ROOT = BATCH_ROOT / 'linux' if PLATFORM == 'linux' else BATCH_ROOT
 PROJECT = 'project-full-stack-cap10'
 PORTS = {'mysql': (3481, '3306/tcp'), 'redis': (6581, '6379/tcp'),
          'kafka': (9401, '9092/tcp'), 'elasticsearch': (9281, '9200/tcp')}
@@ -70,18 +76,129 @@ def port_open(port):
         return connection.connect_ex(('127.0.0.1', port)) == 0
 
 
+def clock_sample():
+    first = time.monotonic()
+    wall = time.time()
+    boot_time = time.clock_gettime(time.CLOCK_BOOTTIME) if PLATFORM == 'linux' else None
+    last = time.monotonic()
+    boot_id = Path('/proc/sys/kernel/random/boot_id').read_text().strip() if PLATFORM == 'linux' else None
+    return {'wallUnixSeconds': wall, 'monotonicSeconds': (first + last) / 2,
+            'boottimeSeconds': boot_time, 'bootId': boot_id, 'uncertaintySeconds': (last - first) / 2}
+
+
 def power():
     class Status(ctypes.Structure):
         _fields_ = [('ACLineStatus', ctypes.c_ubyte), ('BatteryFlag', ctypes.c_ubyte),
                     ('BatteryLifePercent', ctypes.c_ubyte), ('SystemStatusFlag', ctypes.c_ubyte),
                     ('BatteryLifeTime', ctypes.c_ulong), ('BatteryFullLifeTime', ctypes.c_ulong)]
-    result = {'at': now(), 'hostMemoryPercent': psutil.virtual_memory().percent}
+    result = {'at': now(), 'hostMemoryPercent': psutil.virtual_memory().percent,
+              'platform': PLATFORM, 'clock': clock_sample()}
     if os.name == 'nt':
         status = Status()
         assert ctypes.windll.kernel32.GetSystemPowerStatus(ctypes.byref(status))
         result.update(ac=status.ACLineStatus, batteryPercent=status.BatteryLifePercent,
                       batterySaver=status.SystemStatusFlag)
+    else:
+        supplies = Path('/sys/class/power_supply')
+        entries = [{'name': p.name, 'type': (p / 'type').read_text().strip()} for p in supplies.iterdir()]
+        result.update(ac=None, batterySaver=None, batteryApplicable=any(e['type'] == 'Battery' for e in entries),
+                      powerSupplyDirectoryPresent=supplies.is_dir(), powerSupplyEntries=entries,
+                      powerCheck='server_without_battery; physical AC/battery saver are not applicable')
     return result
+
+
+def clock_valid(clock, linux=False):
+    required = ('wallUnixSeconds', 'monotonicSeconds', 'uncertaintySeconds') + (('boottimeSeconds',) if linux else ())
+    return (all(type(clock.get(k)) in (int, float) and math.isfinite(clock[k]) for k in required) and
+            clock['wallUnixSeconds'] > 0 and clock['monotonicSeconds'] >= 0 and
+            0 <= clock['uncertaintySeconds'] <= 1 and
+            (not linux or (clock['boottimeSeconds'] + clock['uncertaintySeconds'] + .001 >= clock['monotonicSeconds'] and
+             bool(re.fullmatch(r'[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}', clock.get('bootId', ''))))))
+
+
+def power_valid(value):
+    if value.get('platform', 'windows') == 'windows':
+        return value.get('ac') == 1 and value.get('batterySaver') == 0
+    clock = value.get('clock', {})
+    return (value.get('platform') == 'linux' and value.get('batteryApplicable') is False and
+            value.get('powerSupplyDirectoryPresent') is True and value.get('ac') is None and
+            value.get('batterySaver') is None and clock_valid(clock, linux=True))
+
+
+def power_window_evidence(before, after, since, lightweight=False):
+    valid = power_valid(before) and power_valid(after)
+    events = []
+    left, right = before.get('clock', {}), after.get('clock', {})
+    same_platform = before.get('platform', 'windows') == after.get('platform', 'windows') == PLATFORM
+    linux = after.get('platform') == 'linux'
+    clock_ok = same_platform and clock_valid(left, linux) and clock_valid(right, linux)
+    clock_available = clock_ok
+    comparison = {'available': clock_ok, 'toleranceSeconds': None}
+    if clock_ok:
+        tolerance = .25 + left['uncertaintySeconds'] + right['uncertaintySeconds']
+        mono = right['monotonicSeconds'] - left['monotonicSeconds']
+        wall = right['wallUnixSeconds'] - left['wallUnixSeconds']
+        comparison.update(monotonicSeconds=mono, wallSeconds=wall, toleranceSeconds=tolerance)
+        clock_ok = mono >= 0 and abs(wall - mono) <= tolerance
+        if linux:
+            boot = right['boottimeSeconds'] - left['boottimeSeconds']
+            comparison.update(boottimeSeconds=boot, bootIdUnchanged=left['bootId'] == right['bootId'])
+            clock_ok = clock_ok and left['bootId'] == right['bootId'] and abs(boot - mono) <= tolerance
+        if not clock_ok:
+            events.append({'kind': 'clock_or_suspend_disagreement'})
+    available = clock_available
+    source = 'Linux boot_id and BOOTTIME/MONOTONIC/UTC snapshots' if PLATFORM == 'linux' else 'Windows power and clock snapshots'
+    if PLATFORM == 'windows' and not lightweight:
+        dt.datetime.fromisoformat(since.replace('Z', '+00:00'))
+        query = "*[System[Provider[@Name='Microsoft-Windows-Kernel-Power'] and (EventID=506 or EventID=507) and TimeCreated[@SystemTime >= '" + since.replace('+00:00', 'Z') + "']]]"
+        result = subprocess.run(['wevtutil', 'qe', 'System', '/q:' + query, '/f:xml', '/rd:true', '/c:32', '/e:Events'],
+                                capture_output=True, creationflags=FLAGS, timeout=15)
+        available = result.returncode == 0 and clock_available
+        if result.returncode == 0 and result.stdout.strip():
+            body = result.stdout.decode('utf-16' if result.stdout.startswith(b'\xff\xfe') else 'utf-8-sig')
+            ns = {'e': 'http://schemas.microsoft.com/win/2004/08/events/event'}
+            for event in ET.fromstring(body).findall('e:Event', ns):
+                system = event.find('e:System', ns)
+                events.append({'id': int(system.find('e:EventID', ns).text),
+                               'at': system.find('e:TimeCreated', ns).attrib['SystemTime']})
+        source += ' and Kernel-Power event query'
+    return {'valid': bool(valid and clock_ok and available and not events), 'available': available,
+            'events': events, 'source': source, 'clockComparison': comparison,
+            'journalEventsAvailable': False,
+            'limitations': 'No Linux journal events collected. Snapshot comparisons do not prove absence of hypervisor pauses; Windows lightweight calls defer event query until final.'}
+
+
+def transition():
+    if PLATFORM == 'windows':
+        return None
+    path = BATCH_ROOT / 'environment-transition.json'
+    value = read(path)
+    assert value['batch'] == 'CAP-10' and type(value['version']) is type(value['switchCount']) is int
+    assert value['version'] == value['switchCount'] == 1 and value['authorized'] is True
+    assert value['fromPlatform'] == 'windows' and value['toPlatform'] == 'linux'
+    assert value['userAuthorizationReference'] and value['hostLabel']
+    assert re.fullmatch(r'[a-f0-9]{40}', value['localCheckpointSHA'])
+    assert dt.datetime.fromisoformat(value['recordedAt'].replace('Z', '+00:00')).tzinfo is not None
+    for key, filename in [('localEnvironmentSHA256', 'environment.json'), ('localIdleResultSHA256', 'idle-result.json'),
+                          ('localCleanupSHA256', 'cleanup.json'), ('localRawManifestSHA256', 'raw-manifest.json'),
+                          ('budgetHandoffSHA256', 'budget-handoff.json')]:
+        assert value[key] == hashlib.sha256((BATCH_ROOT / filename).read_bytes()).hexdigest()
+    assert not read(BATCH_ROOT / 'idle-result.json')['passed'] and read(BATCH_ROOT / 'cleanup.json')['complete']
+    assert not list(BATCH_ROOT.glob('slot-*.json')) and not list(BATCH_ROOT.glob('*-command.json'))
+    for key in ('shortSlotsUsedBeforeSwitch', 'formalSlotsUsedBeforeSwitch', 'optimizationsUsedBeforeSwitch', 'mainLoadSecondsUsedBeforeSwitch'):
+        assert type(value[key]) is int and value[key] == 0
+    for key, expected in [('maxShortWindows', 8), ('maxFormalWindows', 2), ('maxMainLoadSeconds', 840),
+                          ('maxOptimizations', 1), ('effectiveWorkSecondsMaximum', 10800)]:
+        assert type(value[key]) is int and value[key] == expected
+    used, remaining = value['effectiveWorkSecondsUsedBeforeSwitch'], value['effectiveWorkSecondsRemaining']
+    handoff = read(BATCH_ROOT / 'budget-handoff.json')
+    counted = handoff['countedEffectiveWorkSecondsUpperBound']
+    remaining_handoff = handoff['remainingEffectiveWorkSecondsLowerBound']
+    assert handoff['maxEffectiveWorkSeconds'] == 10800 and type(counted) is type(remaining_handoff) is int
+    assert counted >= 4200 and remaining_handoff >= 0 and counted + remaining_handoff == 10800
+    assert type(used) is int and type(remaining) is int and used >= counted
+    assert remaining > 0 and used + remaining == 10800
+    return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
 def private_write(runtime, name, value):
@@ -106,6 +223,9 @@ def settings(path):
     assert value['API_BASE'] == 'http://127.0.0.1:8281'
     assert value['KAFKA_BROKERS'] == '127.0.0.1:9401' and value['ES_URL'] == 'http://127.0.0.1:9281'
     assert value['CAP10_ENVIRONMENT_METADATA'] == str(ROOT / 'environment.json')
+    assert value.get('CAP10_PLATFORM', 'windows') == PLATFORM
+    if PLATFORM == 'linux':
+        assert value['CAP10_TRANSITION_SHA256'] == transition()
     return value, runtime
 
 
@@ -155,6 +275,9 @@ def get_json(url):
 
 def api_identity(metadata, health=False):
     assert metadata['cohort'] == 'cap10'
+    assert metadata.get('executionPlatform', 'windows') == PLATFORM
+    if PLATFORM == 'linux':
+        assert metadata['transitionSHA256'] == transition()
     private, _ = settings(metadata['privateEnvironmentFile'])
     assert private['CAP_SOURCE_SHA'] == metadata['sourceSha']
     assert private['CAP_READ_EXPECTED_REVISION'] == metadata['expectedVersion']
@@ -177,6 +300,8 @@ def compose(value):
 
 
 def prepare(args):
+    transition_sha = transition()
+    ROOT.mkdir(exist_ok=True)
     assert not (ROOT / 'preparation.json').exists(), 'preserve partial setup and recovery inputs'
     assert not any(port_open(p) for p in (3481, 6581, 9401, 9281, 8281, 8381))
     assert not run(['docker', 'ps', '-aq', '--filter', 'label=com.docker.compose.project=' + PROJECT]).stdout.strip()
@@ -189,7 +314,7 @@ def prepare(args):
                    for net in existing for c in (net.get('IPAM', {}).get('Config') or [])
                    if c.get('Subnet') and ':' not in c['Subnet'])
     initial_power = power()
-    assert initial_power.get('ac', 1) == 1 and initial_power['hostMemoryPercent'] < 88
+    assert power_valid(initial_power) and initial_power['hostMemoryPercent'] < 88
     nonce = secrets.token_hex(6)
     runtime = REPO.parent / ('.runtime-fullstack-cap10-' + nonce)
     runtime.mkdir(mode=0o700)
@@ -210,6 +335,7 @@ def prepare(args):
     text += ''.join('  ' + VOLUME_KEYS[name] + ':\n    name: ' + value + '\n' for name, value in volumes.items())
     override.write_text(text, encoding='utf-8', newline='\n')
     value = {'CAP_COHORT': 'cap10', 'CAP10_RUNTIME': str(runtime), 'CAP10_EVIDENCE': str(ROOT),
+             'CAP10_PLATFORM': PLATFORM, 'CAP10_TRANSITION_SHA256': transition_sha,
              'CAP10_ENVIRONMENT_METADATA': str(ROOT / 'environment.json'), 'CAP10_OVERRIDE': str(override),
              'GO_MYSQL_PORT': '3481', 'GO_REDIS_PORT': '6581', 'GO_KAFKA_PORT': '9401', 'GO_ES_PORT': '9281',
              'MYSQL_HOST': '127.0.0.1', 'MYSQL_PORT': '3481', 'MYSQL_DATABASE': 'project_full_stack_go',
@@ -222,6 +348,7 @@ def prepare(args):
              'KAFKA_BROKERS': '127.0.0.1:9401', 'KAFKA_TOPIC': 'community.events',
              'ES_URL': 'http://127.0.0.1:9281', 'ES_INDEX': 'community-notes-v1', 'AI_ENABLED': 'false',
              'TEMP': str(runtime / 'tmp'), 'TMP': str(runtime / 'tmp'),
+             'TMPDIR': str(runtime / 'tmp'),
              'CAP_READ_OBSERVER_USER': 'cap10_' + nonce, 'CAP_READ_OBSERVER_PASSWORD': secrets.token_hex(24)}
     private = private_write(runtime, 'env.private.json', value)
     save(ROOT / 'preparation.json', {'at': now(), 'project': PROJECT, 'runtime': str(runtime),
@@ -241,6 +368,7 @@ def prepare(args):
 def complete_dependencies(value, runtime, private, owned):
     preparation = read(ROOT / 'preparation.json')
     save(ROOT / 'environment.json', {'task': 'CAP-10A', 'at': now(), 'project': PROJECT,
+         'executionPlatform': PLATFORM, 'transitionSHA256': transition(),
          'runtime': str(runtime), 'privateEnvironmentFile': str(private), 'containers': owned,
          'newVolumes': preparation['newVolumes'], 'subnet': preparation['subnet'], 'powerAfterStart': power(),
          'groups': ['community.follow-v1', 'community.feed-v1', 'community.search-v1'],
@@ -305,6 +433,7 @@ def start_api(args):
         child = subprocess.Popen([str(binary)], cwd=REPO, env=env(current), stdout=out, stderr=error, creationflags=FLAGS)
     process = psutil.Process(child.pid)
     metadata = {'at': now(), 'cohort': 'cap10', 'pid': child.pid, 'exe': str(binary),
+                'executionPlatform': PLATFORM, 'transitionSHA256': transition(),
                 'creationUnixMs': process.create_time() * 1000, 'createdAtUtc': dt.datetime.fromtimestamp(process.create_time(), dt.timezone.utc).isoformat(),
                 'sourceSha': args.source_sha, 'expectedVersion': current['CAP_READ_EXPECTED_REVISION'],
                 'sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'label': args.label,

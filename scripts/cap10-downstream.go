@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	platform "runtime"
 	"sort"
 	"strings"
 	"time"
@@ -307,7 +308,14 @@ func mainRun() error {
 	if err != nil {
 		return errors.New("repository cwd unavailable")
 	}
-	root := filepath.Join(cwd, "docs", "evidence", "2026-11-01-cap10")
+	batchRoot := filepath.Join(cwd, "docs", "evidence", "2026-11-01-cap10")
+	root := batchRoot
+	executionPlatform := platform.GOOS
+	if executionPlatform == "linux" {
+		root = filepath.Join(batchRoot, "linux")
+	} else if executionPlatform != "windows" {
+		return errors.New("unsupported CAP10 native executor")
+	}
 	envPath, err := filepath.Abs(*environment)
 	if err != nil {
 		return errors.New("private env path invalid")
@@ -319,6 +327,29 @@ func mainRun() error {
 	env := map[string]string{}
 	if read(envPath, &env) != nil {
 		return errors.New("private environment unreadable")
+	}
+	if env["CAP10_PLATFORM"] != executionPlatform || env["CAP10_ENVIRONMENT_METADATA"] != filepath.Join(root, "environment.json") {
+		return errors.New("native platform or evidence metadata differs")
+	}
+	if executionPlatform == "linux" {
+		raw, readErr := os.ReadFile(filepath.Join(batchRoot, "environment-transition.json"))
+		if readErr != nil {
+			return errors.New("Linux transition unavailable")
+		}
+		digest := sha256.Sum256(raw)
+		var transition struct {
+			Version     int    `json:"version"`
+			Batch       string `json:"batch"`
+			From        string `json:"fromPlatform"`
+			To          string `json:"toPlatform"`
+			SwitchCount int    `json:"switchCount"`
+			Authorized  bool   `json:"authorized"`
+			Host        string `json:"hostLabel"`
+			Reference   string `json:"userAuthorizationReference"`
+		}
+		if hex.EncodeToString(digest[:]) != env["CAP10_TRANSITION_SHA256"] || json.Unmarshal(raw, &transition) != nil || transition.Version != 1 || transition.Batch != "CAP-10" || transition.From != "windows" || transition.To != "linux" || transition.SwitchCount != 1 || !transition.Authorized || transition.Host == "" || transition.Reference == "" {
+			return errors.New("Linux transition identity differs")
+		}
 	}
 	if env["CAP10_RUNTIME"] != runtime || env["CAP10_EVIDENCE"] != root || env["MYSQL_HOST"] != "127.0.0.1" || env["MYSQL_PORT"] != "3481" || env["MYSQL_DATABASE"] != "project_full_stack_go" || env["KAFKA_BROKERS"] != "127.0.0.1:9401" || env["KAFKA_TOPIC"] != "community.events" {
 		return errors.New("fixed cohort environment differs")

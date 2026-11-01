@@ -53,7 +53,9 @@ class Checks(unittest.TestCase):
         path.write_text(json.dumps(value), encoding='utf-8')
         return path
 
-    def add(self, tag, rate, outcome='pass', kind=None, source=None, latency=(100, 250), **terminal):
+    def add(self, tag, rate, outcome='pass', kind=None, source=None, latency=(100, 250), execution_root=None, **terminal):
+        execution_root = execution_root or self.root
+        prefix = 'linux/' if execution_root == self.root / 'linux' else ''
         kind = kind or ('formal' if tag.startswith('H') else 'diagnostic' if tag == 'S1' else 'search')
         number = int(tag[1:]) + (20 if tag.startswith('H') else 0)
         command = {
@@ -62,6 +64,8 @@ class Checks(unittest.TestCase):
             'at': (self.now + dt.timedelta(seconds=number)).isoformat(),
             'apiSourceSha': source or self.source,
             **{k: v for k, v in self.identity.items() if k != 'sourceSha'},
+            'environmentSHA256': grade.sha(execution_root / 'environment.json'),
+            'fixtureSHA256': grade.sha(execution_root / 'fixture.json'),
             'scriptHashes': self.tools.copy(), 'observerBinarySHA256': self.observer,
         }
         if kind == 'formal':
@@ -72,19 +76,21 @@ class Checks(unittest.TestCase):
             'candidateMarginPassed': kind == 'candidate' and latency[0] <= 160 and latency[1] <= 400,
             **terminal,
         }
-        self.put(tag + '-command.json', command)
-        self.put(tag + '-stage.json', state)
-        self.put(tag + '-load/result.json', {'result': {'allLatency': {'p(95)': latency[0], 'p(99)': latency[1]}}})
+        self.put(prefix + tag + '-command.json', command)
+        self.put(prefix + tag + '-stage.json', state)
+        self.put(prefix + tag + '-load/result.json', {'result': {'allLatency': {'p(95)': latency[0], 'p(99)': latency[1]}}})
         return command
 
-    def reserve(self, kind, rate, source=None, freeze=None, **overrides):
+    def reserve(self, kind, rate, source=None, freeze=None, execution_root=None, **overrides):
+        execution_root = execution_root or self.root
         source = source or self.source
         api = {
             'sourceSha': source, 'sha256': self.identity['binarySHA256'], 'exe': str(self.binary),
             'expectedVersion': 'capacity-' + source,
+            'executionPlatform': 'windows',
             'likeDiagnosticsRequested': kind in ('diagnostic', 'comparison'), 'tailEnabledRequested': False,
         }
-        preflight = {'passed': True, 'environmentSHA256': self.identity['environmentSHA256']}
+        preflight = {'passed': True, 'environmentSHA256': grade.sha(execution_root / 'environment.json')}
         ability = {'rate': rate, 'sufficient': True, 'maxVUs': 512, 'exclusiveRelationships': 512,
                    'classificationIncluded': True, 'evidence': ['synthetic measured iteration cost'], 'estimatedInFlight': 20}
         options = {'freeze': freeze, 'prediction': {'observedEvidence': ['synthetic old artifact'],
@@ -95,8 +101,8 @@ class Checks(unittest.TestCase):
             target = {'api': api, 'preflight': preflight, 'ability': ability}[name]
             target.update(overrides.pop(name, {}))
         options.update(overrides)
-        return grade.check_reservation(self.root, kind, rate, 180 if kind == 'formal' else 60,
-                                       api, self.fixture, preflight, ability, **options)
+        return grade.check_reservation(execution_root, kind, rate, 180 if kind == 'formal' else 60,
+                                       api, execution_root / 'fixture.json', preflight, ability, **options)
 
     def bounds(self, source=None):
         return grade.search_state(self.root, source or self.source)
@@ -317,6 +323,133 @@ class Checks(unittest.TestCase):
         self.add('S2', 50, kind='candidate', candidateMarginPassed=False)
         with self.assertRaises(ValueError):
             self.reserve('formal', 50, freeze=freeze)
+
+    def linux_transition(self, used=4200):
+        anchor = self.now - dt.timedelta(seconds=600)
+        self.put('idle-result.json', {'passed': False, 'synthetic': 'retained local timing failure'})
+        self.put('cleanup.json', {'complete': True, 'synthetic': 'owned local cleanup'})
+        self.put('raw-manifest.json', {'synthetic': 'retained local inventory'})
+        self.put('budget-handoff.json', {
+            'version': 1, 'batch': 'CAP-10', 'recordedAt': (anchor - dt.timedelta(seconds=60)).isoformat(),
+            'maxEffectiveWorkSeconds': 10800, 'countedEffectiveWorkSecondsUpperBound': 4200,
+            'remainingEffectiveWorkSecondsLowerBound': 6600,
+        })
+        transition = {
+            'version': 1, 'batch': 'CAP-10', 'fromPlatform': 'windows', 'toPlatform': 'linux',
+            'switchCount': 1, 'authorized': True, 'hostLabel': 'synthetic-linux',
+            'userAuthorizationReference': 'synthetic explicit host approval', 'localCheckpointSHA': 'c' * 40,
+            'recordedAt': anchor.isoformat(), 'effectiveWorkSecondsUsedBeforeSwitch': used,
+            'effectiveWorkSecondsRemaining': 10800 - used, 'effectiveWorkSecondsMaximum': 10800,
+            'shortSlotsUsedBeforeSwitch': 0, 'formalSlotsUsedBeforeSwitch': 0,
+            'optimizationsUsedBeforeSwitch': 0, 'mainLoadSecondsUsedBeforeSwitch': 0,
+            'maxShortWindows': 8, 'maxFormalWindows': 2, 'maxMainLoadSeconds': 840, 'maxOptimizations': 1,
+        }
+        for key, name in (('localEnvironmentSHA256', 'environment.json'), ('localIdleResultSHA256', 'idle-result.json'),
+                          ('localCleanupSHA256', 'cleanup.json'), ('localRawManifestSHA256', 'raw-manifest.json'),
+                          ('budgetHandoffSHA256', 'budget-handoff.json')):
+            transition[key] = grade.sha(self.root / name)
+        self.put('environment-transition.json', transition)
+        self.put('linux/environment.json', {'synthetic': 'new Linux identity, same batch'})
+        self.put('linux/fixture.json', {'synthetic': 'new Linux exclusive relations'})
+        self.put('linux/final-application.json', {**self.identity,
+            'environmentSHA256': grade.sha(self.root / 'linux/environment.json'),
+            'fixtureSHA256': grade.sha(self.root / 'linux/fixture.json')})
+        api = {'executionPlatform': 'linux', 'transitionSHA256': grade.sha(self.root / 'environment-transition.json')}
+        return self.root / 'linux', transition, api, anchor
+
+    def reseal_transition(self, transition, api):
+        self.put('environment-transition.json', transition)
+        return {**api, 'transitionSHA256': grade.sha(self.root / 'environment-transition.json')}
+
+    def test_linux_inherits_checkpoint_and_counts_offline_adaptation(self):
+        directory, transition, api, anchor = self.linux_transition(used=4500)
+        budget = grade.effective_work_budget(directory, api, now=self.now)
+        self.assertEqual(budget['effectiveSecondsUpperBound'], 5100)
+        self.assertEqual(budget['usedBeforeSwitch'], 4500)
+        self.assertEqual(budget['provedLoadWaitSecondsDeducted'], 0)
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(self.root, {'executionPlatform': 'windows'}, now=self.now)
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=anchor - dt.timedelta(seconds=1))
+
+    def test_linux_cannot_reset_handoff_even_when_resealed_consistently(self):
+        directory, transition, api, anchor = self.linux_transition()
+        changed = {**transition, 'effectiveWorkSecondsUsedBeforeSwitch': 4199, 'effectiveWorkSecondsRemaining': 6601}
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, self.reseal_transition(changed, api), now=self.now)
+        handoff = grade.read(self.root / 'budget-handoff.json')
+        handoff.update(countedEffectiveWorkSecondsUpperBound=0, remainingEffectiveWorkSecondsLowerBound=10800)
+        self.put('budget-handoff.json', handoff)
+        changed.update(effectiveWorkSecondsUsedBeforeSwitch=0, effectiveWorkSecondsRemaining=10800,
+                       budgetHandoffSHA256=grade.sha(self.root / 'budget-handoff.json'))
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, self.reseal_transition(changed, api), now=self.now)
+
+    def test_linux_budget_boundary_is_original_three_hours(self):
+        directory, transition, api, anchor = self.linux_transition()
+        self.assertEqual(grade.effective_work_budget(directory, api, now=anchor + dt.timedelta(seconds=6600))['effectiveSecondsUpperBound'], 10800)
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=anchor + dt.timedelta(seconds=6601))
+
+    def test_linux_requires_explicit_single_switch_and_retained_bytes(self):
+        directory, transition, api, anchor = self.linux_transition()
+        for key, value in (('authorized', False), ('switchCount', 2), ('hostLabel', ''),
+                           ('userAuthorizationReference', ''), ('localCheckpointSHA', 'invalid'),
+                           ('maxShortWindows', 9), ('shortSlotsUsedBeforeSwitch', 1)):
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                grade.effective_work_budget(directory, self.reseal_transition({**transition, key: value}, api), now=self.now)
+        api = self.reseal_transition(transition, api)
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, {**api, 'transitionSHA256': 'f' * 64}, now=self.now)
+        self.put('idle-result.json', {'passed': True, 'synthetic': 'cannot rewrite the retained failure'})
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=self.now)
+
+    def test_wait_union_clips_and_never_double_deducts(self):
+        start = self.now
+        end = start + dt.timedelta(seconds=100)
+        at = lambda seconds: (start + dt.timedelta(seconds=seconds)).isoformat()
+        intervals = [(at(-50), at(30)), (at(20), at(70)), (at(90), at(150)), (at(110), at(120))]
+        self.assertEqual(grade.merged_wait_seconds(intervals + intervals, start, end), 80)
+        self.assertEqual(grade.merged_wait_seconds([(at(0), at(10)), (at(10), at(20))], start, end), 20)
+        with self.assertRaises(ValueError):
+            grade.merged_wait_seconds([(at(-10), at(-20))], start, end)
+
+    def test_linux_wait_deduction_starts_at_transition_not_local_history(self):
+        directory, transition, api, anchor = self.linux_transition()
+        at = lambda seconds: (anchor + dt.timedelta(seconds=seconds)).isoformat()
+        for i, (begin, finish) in enumerate(((-100, -10), (100, 200), (150, 300)), 1):
+            self.add('S' + str(i), 50, execution_root=directory,
+                     loadWaitStartedAt=at(begin), loadWaitFinishedAt=at(finish))
+        self.add('S4', 50, execution_root=directory, loadWaitStartedAt=at(400))
+        budget = grade.effective_work_budget(directory, api, now=self.now)
+        self.assertEqual(budget['provedLoadWaitSecondsDeducted'], 200)
+        self.assertEqual(budget['effectiveSecondsUpperBound'], 4600)
+        self.add('S5', 50, execution_root=directory, loadWaitStartedAt=at(-100), loadWaitFinishedAt=at(900))
+        budget = grade.effective_work_budget(directory, api, now=self.now)
+        self.assertEqual(budget['provedLoadWaitSecondsDeducted'], 600)
+        self.assertEqual(budget['effectiveSecondsUpperBound'], 4200)
+
+    def test_linux_history_does_not_reissue_local_or_duplicate_slots(self):
+        directory, transition, api, anchor = self.linux_transition()
+        self.add('S1', 50, execution_root=directory)
+        self.add('S2', 200, execution_root=directory)
+        reservation = self.reserve('search', 800, execution_root=directory, api=api)
+        self.assertEqual((reservation['tag'], reservation['shortSlotsUsedAfter']), ('S3', 3))
+        self.assertEqual(reservation['mainSecondsReservedAfter'], 180)
+        self.add('S1', 50)
+        with self.assertRaises(ValueError):
+            grade.history(directory)
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=self.now)
+
+    def test_terminal_artifact_is_unique_across_execution_directories(self):
+        directory, transition, api, anchor = self.linux_transition()
+        command = self.add('S1', 50, execution_root=directory)
+        self.assertTrue(grade.stage(directory, command)['passed'])
+        self.put('S1-stage.json', {'passed': True})
+        with self.assertRaises(ValueError):
+            grade.stage(directory, command)
 
     def pipeline(self, mutate=None, seconds=60, summary=None):
         base = dt.datetime(2026, 11, 1, tzinfo=dt.timezone.utc)

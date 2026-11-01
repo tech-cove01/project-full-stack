@@ -1,0 +1,112 @@
+cap10-env.py
+usage: cap10-env.py [-h]
+                    {prepare-deps,resume-preparation,start-api,stop-api,finish} ...
+
+Fixed, owned CAP10 environment lifecycle. No implicit load or global cleanup.
+
+positional arguments:
+  {prepare-deps,resume-preparation,start-api,stop-api,finish}
+
+options:
+  -h, --help            show this help message and exit
+
+cap10-run.py
+usage: cap10-run.py [-h] --environment ENVIRONMENT --api-metadata API_METADATA
+                    --observer OBSERVER [--chain {like}]
+                    --kind {diagnostic,comparison,search,candidate,formal}
+                    [--mode {multi}] --rate RATE --seconds SECONDS
+                    [--prediction PREDICTION] --preflight PREFLIGHT
+                    --ability ABILITY
+
+Execute one bounded CAP10 stage with the existing owned supervisor.
+
+options:
+  -h, --help            show this help message and exit
+  --environment ENVIRONMENT
+  --api-metadata API_METADATA
+  --observer OBSERVER
+  --chain {like}
+  --kind {diagnostic,comparison,search,candidate,formal}
+  --mode {multi}
+  --rate RATE
+  --seconds SECONDS
+  --prediction PREDICTION
+  --preflight PREFLIGHT
+  --ability ABILITY
+
+cap10-stage.py
+usage: cap10-stage.py [-h] --mode {trade,read,like} [--cohort {legacy,cap10}]
+                      --control-dir CONTROL_DIR --api-pid API_PID
+                      --diagnostics DIAGNOSTICS [--interval INTERVAL]
+                      [--max-seconds MAX_SECONDS]
+                      [--stop-grace-seconds STOP_GRACE_SECONDS]
+                      ...
+
+Run one existing CAP harness with an owned resource sampler. The workload
+keeps all connection/configuration settings in its inherited environment. This
+wrapper never exports environment values or command lines. The control
+directory is separate from the harness's new output directory. Read warmup
+uses a separate k6 process: sampling starts only at stable phase.
+
+positional arguments:
+  command               existing harness command after --; credentials belong
+                        in environment
+
+options:
+  -h, --help            show this help message and exit
+  --mode {trade,read,like}
+  --cohort {legacy,cap10}
+  --control-dir CONTROL_DIR
+                        new directory for sampler, stop/done signals and exit
+                        status
+  --api-pid API_PID
+  --diagnostics DIAGNOSTICS
+  --interval INTERVAL
+  --max-seconds MAX_SECONDS
+                        whole stage deadline, including preparation and drain
+  --stop-grace-seconds STOP_GRACE_SECONDS
+                        allow the harness to stop owned k6 and reconcile after
+                        stop
+
+cap10-resources.py
+usage: cap10-resources.py [-h] --api-pid API_PID --diagnostics DIAGNOSTICS
+                          --project PROJECT [--cohort {legacy,cap10}]
+                          [--ownership OWNERSHIP] --container CONTAINER
+                          --load-script {capacity-trade.js,go073-cap-read.js,capacity-health.js,cap10-like.js}
+                          --load-pid-file LOAD_PID_FILE --output OUTPUT
+                          --stop-file STOP_FILE --done-file DONE_FILE
+                          [--interval INTERVAL] [--max-seconds MAX_SECONDS]
+
+GO-073-CAP external sampler; never changes or kills a service. Requires the
+already installed psutil. Writes bounded-rate NDJSON and an owned stop signal
+for the workload supervisor if the predeclared resource cap is hit. No command
+line, environment, credential, request body or SQL text is exported.
+
+options:
+  -h, --help            show this help message and exit
+  --api-pid API_PID
+  --diagnostics DIAGNOSTICS
+  --project PROJECT
+  --cohort {legacy,cap10}
+  --ownership OWNERSHIP
+  --container CONTAINER
+  --load-script {capacity-trade.js,go073-cap-read.js,capacity-health.js,cap10-like.js}
+  --load-pid-file LOAD_PID_FILE
+  --output OUTPUT
+  --stop-file STOP_FILE
+  --done-file DONE_FILE
+  --interval INTERVAL
+  --max-seconds MAX_SECONDS
+
+cap10-idle.py
+usage: cap10-idle.py [-h] --environment ENVIRONMENT
+                     --api-metadata API_METADATA --observer OBSERVER
+
+One owned CAP10 60-second idle observation. Never starts a workload.
+
+options:
+  -h, --help            show this help message and exit
+  --environment ENVIRONMENT
+  --api-metadata API_METADATA
+  --observer OBSERVER
+

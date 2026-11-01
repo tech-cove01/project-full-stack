@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
+import { posix } from 'node:path'
 import { stateFromBody, classifyWrite, pairForVU, unknownBounds } from './load/cap10-like-contract.mjs'
 import { nativeScenarioWindow } from './load/cap10-native-window.mjs'
 
@@ -106,6 +107,25 @@ await check('actual native script retires and aborts on noop or unknown after re
   }
 })
 const helperSource = readFileSync('scripts/cap10-like.mjs', 'utf8')
+await check('actual helper fixes Linux evidence to the same batch and requires explicit native-platform transition', async () => {
+  const source = helperSource.slice(helperSource.indexOf('const executionPlatform ='), helperSource.indexOf('const privateRoot ='))
+  const transition = { version: 1, batch: 'CAP-10', fromPlatform: 'windows', toPlatform: 'linux', switchCount: 1, authorized: true, hostLabel: 'synthetic-owned-host', userAuthorizationReference: 'synthetic-explicit-authorization' }
+  const base = '/repo/docs/evidence/2026-11-01-cap10'
+  const evaluate = (platform, changes = {}, evidence = transition) => {
+    const root = platform === 'linux' ? base + '/linux' : base
+    const context = { assert, join: posix.join, resolve: path => '/repo/' + path, hash: () => 'frozen-transition-hash',
+      process: { platform, env: { CAP10_PLATFORM: platform === 'win32' ? 'windows' : platform, CAP10_EVIDENCE: root, CAP10_ENVIRONMENT_METADATA: root + '/environment.json', CAP10_TRANSITION_SHA256: 'frozen-transition-hash', ...changes } },
+      readFile: async () => JSON.stringify(evidence) }
+    return vm.runInNewContext('(async () => {' + source + '; return evidenceRoot })()', context)
+  }
+  assert.equal(await evaluate('linux'), base + '/linux')
+  assert.equal(await evaluate('win32'), base)
+  await assert.rejects(evaluate('linux', { CAP10_PLATFORM: 'windows' }))
+  await assert.rejects(evaluate('linux', { CAP10_EVIDENCE: base }))
+  await assert.rejects(evaluate('linux', { CAP10_TRANSITION_SHA256: 'different' }))
+  await assert.rejects(evaluate('linux', {}, { ...transition, authorized: false }))
+  await assert.rejects(evaluate('darwin'))
+})
 await check('actual phase registers cleanup before secret write and removes partial files on faults', async () => {
   const phaseSource = helperSource.match(/^    async function runPhase[\s\S]*?^    }\n    try/m)[0].replace(/\n    try$/, '')
   for (const fault of [null, 'registration', 'private-write']) {

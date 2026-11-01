@@ -30,13 +30,82 @@ def instant(value):
     return result
 
 def history(root):
-    records = [read(path) for path in Path(root).glob('*-command.json')]
-    return sorted((r for r in records if r.get('task') == 'CAP-10' and re.fullmatch(r'[SH][1-8]', r.get('tag', ''))), key=lambda r: r['at'])
+    require(Path(root).resolve() in (ROOT, ROOT / 'linux'), 'fixed CAP10 executor root required')
+    records = [read(path) for directory in (ROOT, ROOT / 'linux') for path in directory.glob('*-command.json')]
+    records = sorted((r for r in records if r.get('task') == 'CAP-10' and re.fullmatch(r'[SH][1-8]', r.get('tag', ''))), key=lambda r: r['at'])
+    require(len({r['tag'] for r in records}) == len(records), 'same CAP10 reservation cannot be reset across environments')
+    return records
 
 def stage(root, command):
-    path = Path(root) / (command['tag'] + '-stage.json')
-    require(path.is_file(), 'previous reservation has no terminal artifact; preserve it')
-    return read(path)
+    paths = {directory / (command['tag'] + '-stage.json') for directory in (ROOT, ROOT / 'linux')}
+    found = [path for path in paths if path.is_file()]
+    require(len(found) == 1, 'previous reservation has no unique terminal artifact; preserve it')
+    return read(found[0])
+
+
+def merged_wait_seconds(intervals, started, ended):
+    """Clip and union only proved completed load/drain waits, never double count."""
+    require(ended >= started, 'budget clock moved backwards')
+    clipped = []
+    for first, last in intervals:
+        first, last = instant(first), instant(last)
+        require(last >= first, 'negative completed-stage wait is invalid')
+        first, last = max(started, first), min(ended, last)
+        if last > first:
+            clipped.append((first, last))
+    total, current = 0.0, None
+    for first, last in sorted(clipped):
+        if current is None:
+            current = (first, last)
+        elif first <= current[1]:
+            current = (current[0], max(current[1], last))
+        else:
+            total += (current[1] - current[0]).total_seconds()
+            current = (first, last)
+    if current:
+        total += (current[1] - current[0]).total_seconds()
+    require(0 <= total <= (ended - started).total_seconds(), 'invalid proved-wait deduction')
+    return total
+
+
+def effective_work_budget(root, api_metadata, now=None):
+    now = now or dt.datetime.now(dt.timezone.utc)
+    if root == ROOT:
+        require(api_metadata.get('executionPlatform') == 'windows', 'Windows metadata platform differs')
+        require(not (ROOT / 'environment-transition.json').exists(), 'Windows execution closed after the single Linux switch')
+        elapsed = (now - instant(read(ROOT / 'start.json')['effectiveWorkStartConservativeUTC'])).total_seconds()
+        require(0 <= elapsed <= 10800, 'conservative three-hour development bound exhausted')
+        return {'effectiveSecondsUpperBound': elapsed, 'provedLoadWaitSecondsDeducted': 0, 'maximumSeconds': 10800, 'platform': 'windows'}
+    require(root == ROOT / 'linux' and api_metadata.get('executionPlatform') == 'linux', 'fixed Linux metadata platform required')
+    path = ROOT / 'environment-transition.json'
+    require(api_metadata.get('transitionSHA256') == sha(path), 'Linux transition hash differs')
+    transition, handoff = read(path), read(ROOT / 'budget-handoff.json')
+    require(transition.get('version') == 1 and transition.get('batch') == 'CAP-10' and transition.get('fromPlatform') == 'windows' and transition.get('toPlatform') == 'linux' and transition.get('switchCount') == 1 and transition.get('authorized') is True and transition.get('hostLabel') and transition.get('userAuthorizationReference'), 'one explicit host-authorized Linux switch required')
+    require(re.fullmatch(r'[a-f0-9]{40}', transition.get('localCheckpointSHA', '')), 'retained local checkpoint revision required')
+    for key, filename in (('localEnvironmentSHA256', 'environment.json'), ('localIdleResultSHA256', 'idle-result.json'), ('localCleanupSHA256', 'cleanup.json'), ('localRawManifestSHA256', 'raw-manifest.json'), ('budgetHandoffSHA256', 'budget-handoff.json')):
+        require(transition.get(key) == sha(ROOT / filename), 'retained local evidence differs: ' + key)
+    constants = {'shortSlotsUsedBeforeSwitch': 0, 'formalSlotsUsedBeforeSwitch': 0, 'optimizationsUsedBeforeSwitch': 0, 'mainLoadSecondsUsedBeforeSwitch': 0, 'maxShortWindows': 8, 'maxFormalWindows': 2, 'maxMainLoadSeconds': 840, 'maxOptimizations': 1, 'effectiveWorkSecondsMaximum': 10800}
+    require(all(type(transition.get(k)) is int and transition[k] == v for k, v in constants.items()), 'Linux switch must carry the same unused CAP10 quota')
+    require(not any(ROOT.glob('slot-[SH]*.json')) and not any(ROOT.glob('[SH]*-command.json')), 'local slots cannot be reset by switching environment')
+    require(handoff.get('version') == 1 and handoff.get('batch') == 'CAP-10' and handoff.get('maxEffectiveWorkSeconds') == 10800, 'original work-budget handoff invalid')
+    used, remaining = transition.get('effectiveWorkSecondsUsedBeforeSwitch'), transition.get('effectiveWorkSecondsRemaining')
+    prior = handoff.get('countedEffectiveWorkSecondsUpperBound')
+    require(all(type(value) is int for value in (used, remaining, prior, handoff.get('remainingEffectiveWorkSecondsLowerBound'))) and prior >= 4200 and prior + handoff['remainingEffectiveWorkSecondsLowerBound'] == 10800 and used >= prior and remaining >= 0 and used + remaining == 10800, 'effective development budget cannot reset the retained 4200s checkpoint or increase its remainder')
+    anchor = instant(transition['recordedAt'])
+    require(anchor >= instant(handoff['recordedAt']), 'transition predates its original handoff')
+    intervals = []
+    for command in history(root):
+        filename = root / (command['tag'] + '-stage.json')
+        if filename.is_file():
+            terminal = read(filename)
+            first, last = terminal.get('loadWaitStartedAt'), terminal.get('loadWaitFinishedAt')
+            if first is not None and last is not None:
+                intervals.append((first, last))
+    wall = (now - anchor).total_seconds()
+    deducted = merged_wait_seconds(intervals, anchor, now)
+    elapsed = used + wall - deducted
+    require(0 <= elapsed <= 10800, 'continued three-hour effective development bound exhausted')
+    return {'effectiveSecondsUpperBound': elapsed, 'provedLoadWaitSecondsDeducted': deducted, 'maximumSeconds': 10800, 'platform': 'linux', 'usedBeforeSwitch': used, 'anchor': transition['recordedAt']}
 
 def search_state(root, source_sha):
     records = history(root)
@@ -80,7 +149,7 @@ def search_state(root, source_sha):
 
 def check_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze=None, prediction=None, current_tools=None, observer_hash=None):
     root, fixture = Path(root).resolve(), Path(fixture).resolve()
-    require(root == ROOT and fixture.is_file() and fixture.is_relative_to(ROOT), 'fixed CAP10 public paths required')
+    require(root in (ROOT, ROOT / 'linux') and fixture.is_file() and fixture.is_relative_to(root), 'fixed CAP10 public paths required')
     require(kind in KINDS and type(rate) is int and 1 <= rate <= 5000, 'invalid CAP10 purpose/rate')
     require(seconds == (180 if kind == 'formal' else 60), 'CAP10 duration differs from purpose')
     source = api_metadata['sourceSha']; binary = api_metadata['sha256']
@@ -91,8 +160,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     require(ability.get('rate') == rate and ability.get('sufficient') is True and ability.get('maxVUs') == 512 and ability.get('exclusiveRelationships') == 512 and ability.get('classificationIncluded') is True and ability.get('evidence'), 'declared generator ability evidence required for every window')
     require(type(ability.get('estimatedInFlight')) in (int, float) and 0 <= ability['estimatedInFlight'] <= 512, 'estimated in-flight work exceeds exclusive VU pool')
     require(api_metadata.get('likeDiagnosticsRequested') is (kind in ('diagnostic', 'comparison')) and api_metadata.get('tailEnabledRequested') is False, 'Like/Feed observation switches differ from purpose')
-    elapsed = (dt.datetime.now(dt.timezone.utc) - instant(read(root / 'start.json')['effectiveWorkStartConservativeUTC'])).total_seconds()
-    require(0 <= elapsed <= 10800, 'conservative three-hour development bound exhausted')
+    budget = effective_work_budget(root, api_metadata)
     records = history(root)
     shorts = [c for c in records if c['tag'].startswith('S')]; formals = [c for c in records if c['tag'].startswith('H')]
     require(sum(c['seconds'] for c in records) + seconds <= 840, '840s total main-load budget exhausted')
@@ -142,7 +210,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
                 require(not any(c['rate'] == rate and c['tag'] in bound['boundaryTags'] for c in shorts), 'do not replay an already measured search rate')
     require(not (root / ('slot-' + tag + '.json')).exists() and not (root / (tag + '-command.json')).exists(), 'existing/orphan reservation is not reusable')
     return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'), 'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds,
-            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': elapsed, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
+            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
 
 def _grade_tail15(rows, ended, vector, finished):
     start = ended - dt.timedelta(seconds=15)

@@ -79,10 +79,14 @@ def main():
         if os.environ.get('CAP_COHORT') != 'cap10':
             parser.error('CAP10 requires explicit CAP_COHORT=cap10')
         ownership = Path(os.environ.get('CAP10_ENVIRONMENT_METADATA', '')).resolve()
-        expected = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap10/environment.json'
+        batch_root = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap10'
+        expected = batch_root / 'linux/environment.json' if sys.platform == 'linux' else batch_root / 'environment.json'
         if ownership != expected or not ownership.is_file():
             parser.error('fixed CAP10 ownership metadata required')
         environment = json.loads(ownership.read_text(encoding='utf-8-sig'))
+        platform = 'linux' if sys.platform == 'linux' else 'windows'
+        if os.environ.get('CAP10_PLATFORM', 'windows') != platform or environment.get('executionPlatform', 'windows') != platform:
+            parser.error('CAP10 native platform/environment mismatch')
         if environment.get('project') != profile['project'] or set(environment.get('containers', {})) != {'mysql', 'redis', 'kafka', 'elasticsearch'}:
             parser.error('CAP10 environment/project/services differ')
         container_ids = [environment['containers'][name]['id'] for name in ('mysql', 'redis', 'kafka', 'elasticsearch')]

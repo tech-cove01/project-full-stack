@@ -1,7 +1,6 @@
 """One owned CAP10 60-second idle observation. Never starts a workload."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
-import datetime as dt
 import hashlib
 import importlib.util
 import json
@@ -9,7 +8,6 @@ from pathlib import Path
 import statistics
 import subprocess
 import time
-import xml.etree.ElementTree as ET
 
 import psutil
 
@@ -22,25 +20,6 @@ def module(name, filename):
     value = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(value)
     return value
-
-
-def sleep_events(since):
-    query = "*[System[Provider[@Name='Microsoft-Windows-Kernel-Power'] and (EventID=506 or EventID=507) and TimeCreated[@SystemTime >= '" + since.replace('+00:00', 'Z') + "']]]"
-    result = subprocess.run(['wevtutil', 'qe', 'System', '/q:' + query, '/f:xml', '/rd:true', '/c:32', '/e:Events'],
-                            capture_output=True, creationflags=subprocess.CREATE_NO_WINDOW, timeout=15)
-    if result.returncode:
-        return {'available': False, 'events': []}
-    if not result.stdout.strip():
-        return {'available': True, 'events': []}
-    text = result.stdout.decode('utf-16' if result.stdout.startswith(b'\xff\xfe') else 'utf-8-sig')
-    root = ET.fromstring(text)
-    ns = {'e': 'http://schemas.microsoft.com/win/2004/08/events/event'}
-    rows = []
-    for event in root.findall('e:Event', ns):
-        system = event.find('e:System', ns)
-        rows.append({'id': int(system.find('e:EventID', ns).text),
-                     'at': system.find('e:TimeCreated', ns).attrib['SystemTime']})
-    return {'available': True, 'events': rows}
 
 
 def main():
@@ -63,7 +42,8 @@ def main():
     assert not list(root.glob('slot-*.json')), 'idle observation must precede S1'
     reservation = root / 'idle-reservation.json'
     owned.save(reservation, {'at': owned.now(), 'seconds': 60, 'intervalSeconds': 5,
-                            'attempt': 1, 'failedAttemptConsumesOnlyIdleObservation': True})
+                            'attempt': 1, 'failedAttemptConsumesOnlyIdleObservation': True,
+                            'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition()})
     owned_containers = owned.read(root / 'environment.json')['containers']
     for service, container in owned_containers.items():
         checked = owned.container(service, container['id'], True)
@@ -75,6 +55,8 @@ def main():
     downstream = root / 'idle-downstream'
     result = {'at': owned.now(), 'passed': False, 'seconds': 60, 'samples': [], 'errors': [],
               'noWorkloadStarted': True, 'apiPid': api.pid, 'sourceSha': api_metadata['sourceSha'],
+              'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition(),
+              'scriptSHA256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               'environmentSHA256': hashlib.sha256((root / 'environment.json').read_bytes()).hexdigest()}
     observer = None
     try:
@@ -149,7 +131,10 @@ def main():
             for service, container in owned_containers.items():
                 checked = owned.container(service, container['id'], True)
                 assert checked['volumes'] == container['volumes']
-            result['powerEvents'] = sleep_events(result['at'])
+            result['powerEvents'] = owned.power_window_evidence(result['samples'][0]['power'],
+                result['samples'][-1]['power'], result['at'])
+            result['clockIntervals'] = [owned.power_window_evidence(left['power'], right['power'], result['at'], lightweight=True)
+                                       for left, right in zip(result['samples'], result['samples'][1:])]
             result['uptime'] = uptime_rows
             elapsed = uptime_rows[1]['midpointMonotonic'] - uptime_rows[0]['midpointMonotonic']
             delta = uptime_rows[1]['uptimeSeconds'] - uptime_rows[0]['uptimeSeconds']
@@ -166,8 +151,8 @@ def main():
                 all(4 <= r['cpuIntervalSeconds'] <= 7.5 for r in result['samples'][1:]))
             result['passed'] = (result['hostCPUMedian'] <= 50 and result['hostMemoryMaxPercent'] <= 80 and
                 result['cadenceValid'] and not result['threeConsecutiveBusy'] and result['uptimeValid'] and
-                result['powerEvents']['available'] and not result['powerEvents']['events'] and
-                all(r['power']['ac'] == 1 and r['power']['batterySaver'] == 0 and
+                result['powerEvents']['valid'] and all(c['valid'] for c in result['clockIntervals']) and
+                all(owned.power_valid(r['power']) and
                     r['observationElapsedMs'] < 5000 and r['apiRSSBytes'] < 1610612736 and
                     all(float(c['MemPerc'].rstrip('%')) < 85 for c in r['containerResources'])
                     for r in result['samples']))

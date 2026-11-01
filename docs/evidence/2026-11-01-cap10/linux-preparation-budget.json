@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "batch": "CAP-10",
+  "recordedAt": "2026-11-01T09:18:52.716678+00:00",
+  "baseHandoffSHA256": "2dd47a1378f1b7c91527df77e9f88197efdbdfd990863bfd210718302217d025",
+  "localCheckpointSHA": "ed9f91a7bd28f46e1ae0782c768870b9fef3eee8",
+  "baseCountedEffectiveWorkSecondsUpperBound": 4200,
+  "offlinePreparationCountedSecondsUpperBound": 1980,
+  "countedEffectiveWorkSecondsUpperBound": 6180,
+  "remainingEffectiveWorkSecondsLowerBound": 4620,
+  "maxEffectiveWorkSeconds": 10800,
+  "accounting": "Conservatively includes all wall time since original checkpoint, plus 180s for final commit/push/handoff. No wait deducted. Future user host-creation idle wait is not work; any subsequent active work must be added. Original immutable handoff remains unchanged.",
+  "shortSlotsUsed": 0,
+  "formalSlotsUsed": 0,
+  "optimizationsUsed": 0,
+  "mainLoadSecondsUsed": 0
+}

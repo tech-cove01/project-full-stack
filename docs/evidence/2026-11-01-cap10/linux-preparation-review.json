@@ -1,0 +1,36 @@
+{
+  "at": "2026-11-01T09:15:33.604298+00:00",
+  "scope": "OfflineLinuxreadiness only; no new host connection/service/clock observation/native load. Original localcaptures unchanged.",
+  "reviews": {
+    "runnerHelperObserver": "cap09_feed_review and cap09_like_review non-author review",
+    "grader": "cap09_like_review non-author review",
+    "envIdleStageResources": "cap09_like_harness non-author review"
+  },
+  "checks": {
+    "like": 34,
+    "runner": 21,
+    "policy": 34,
+    "platform": 15
+  },
+  "sourceSHA256": {
+    "scripts/cap10-env.py": "bc1c340d4812e192780cf545a679448c905a773903020767bfe05d69ddc0ec26",
+    "scripts/cap10-idle.py": "becd026b3ba88c5978508532f9ec3dbc4d6f61a02b9fe2b5fd84e9460d70e48f",
+    "scripts/cap10-stage.py": "ca75bd7578172879ab4b11998de1fed2cc8dc1cd14c8b269bad98bdd65fe268f",
+    "scripts/cap10-resources.py": "a779c54d1c9d6d27f51771208d10b500c6027695cb8cb415f3ad0af3849d9638",
+    "scripts/cap10-run.py": "46a25b45a9fb0da5c8237092c42931cf32ec0befdd56a3e8e2a775bb917475a1",
+    "scripts/cap10-grade.py": "39e5dd0c7745f27e29ed5058ef7766f7e0c1af1fa337a546ea2a5d256cbecf96",
+    "scripts/cap10-like.mjs": "3a5113bed6e7635a536d35fc0c0ab89c54dc8f90ffb89a1e22555e1a42c069ff",
+    "scripts/cap10-downstream.go": "ba59588f2edfa27c8aca3871f1256e3c2679f72a88506d4fc33f3bacf6a0c4dd",
+    "scripts/cap10-platform-check.py": "e69fd35c59bd893caa68c03ff40af7fa6379438a2d9bc90cadea06f88ce04a2e",
+    "scripts/cap10-grade-check.py": "26f5cb160cc29dfe27401decdf2471219f663e11a9664d84c2423125d732597f",
+    "scripts/cap10-like-check.mjs": "4f7c02408f43d79ddc1c33792a9b72b3bb893a87d57b84d5a8ffe19a8d390a63"
+  },
+  "rawEvidence": [
+    "grade-checks-linux.json",
+    "linux-port-cli-smoke.json",
+    "linux-port-observer-build.json"
+  ],
+  "runtimeValidationPending": true,
+  "sourceBusinessGoChanged": false,
+  "pressureWindowsAdded": 0
+}

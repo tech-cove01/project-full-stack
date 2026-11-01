@@ -42,7 +42,22 @@ async function capacitySnapshot() {
   return { startedAt, finishedAt: Date.now(), bytes: size, data, scope: 'bounded loopback capacity snapshot around only the native stable phase; not a profile or business request' }
 }
 const sqlBin = process.env.MYSQL_BIN || 'mysql'
-const evidenceRoot = resolve('docs/evidence/2026-11-01-cap10')
+const executionPlatform = process.platform === 'win32' ? 'windows' : process.platform === 'linux' ? 'linux' : null
+assert.ok(executionPlatform, 'CAP10 supports only the declared Windows/Linux executors')
+assert.equal(process.env.CAP10_PLATFORM, executionPlatform, 'CAP10 platform must match the native executor')
+const batchRoot = resolve('docs/evidence/2026-11-01-cap10')
+const evidenceRoot = executionPlatform === 'linux' ? join(batchRoot, 'linux') : batchRoot
+assert.equal(process.env.CAP10_EVIDENCE, evidenceRoot)
+assert.equal(process.env.CAP10_ENVIRONMENT_METADATA, join(evidenceRoot, 'environment.json'))
+if (executionPlatform === 'linux') {
+  const raw = await readFile(join(batchRoot, 'environment-transition.json'))
+  assert.equal(process.env.CAP10_TRANSITION_SHA256, hash(raw), 'Linux transition bytes differ')
+  const transition = JSON.parse(raw)
+  assert.equal(transition.version, 1); assert.equal(transition.batch, 'CAP-10')
+  assert.equal(transition.fromPlatform, 'windows'); assert.equal(transition.toPlatform, 'linux')
+  assert.equal(transition.switchCount, 1); assert.equal(transition.authorized, true)
+  assert.ok(transition.hostLabel && transition.userAuthorizationReference, 'explicit host authorization required')
+}
 const privateRoot = resolve(process.env.CAP10_RUNTIME || '')
 assert.ok(process.env.CAP10_RUNTIME, 'explicit private CAP10_RUNTIME required')
 assert.equal(dirname(privateRoot), resolve('..')); assert.match(basename(privateRoot), /^\.runtime-fullstack-cap10-[a-f0-9]{12}$/)
@@ -164,6 +179,8 @@ async function loadFixture() {
   evidence(fixturePath)
   const bytes = await readFile(fixturePath), manifest = JSON.parse(bytes)
   assert.equal(manifest.project, owned.project); assert.equal(manifest.baseUrl, owned.api)
+  assert.equal(manifest.executionPlatform, executionPlatform, 'fixture belongs to another executor')
+  assert.equal(manifest.transitionSHA256, process.env.CAP10_TRANSITION_SHA256 || null, 'fixture transition differs')
   assert.ok(manifest.status === 'READY' || (action === 'finish' && manifest.status === 'PREPARING'), 'new fixture must be ready')
   assert.match(manifest.sourceSha, /^[a-f0-9]{40}$/); assert.equal(manifest.expectedRevision, 'capacity-' + manifest.sourceSha)
   assert.ok(under(manifest.credentialFile, join(privateRoot, 'tmp')) && basename(manifest.credentialFile) === 'input.json', 'private fixture input must stay in owned runtime/tmp')
@@ -371,6 +388,7 @@ if (action === 'prepare') {
   const dir = evidence(process.env.CAP_LIKE_FIXTURE_DIR); await mkdir(dir, { recursive: false })
   const fixture = 'caplike-' + randomBytes(5).toString('hex'), privateDir = await mkdtemp(join(tmpdir(), 'cap-like-')), credentialFile = join(privateDir, 'input.json')
   const manifest = { task: 'CAP-10', fixture, project: owned.project, baseUrl: owned.api, sourceSha: process.env.CAP_SOURCE_SHA,
+    executionPlatform, transitionSHA256: process.env.CAP10_TRANSITION_SHA256 || null,
     expectedRevision: process.env.CAP_READ_EXPECTED_REVISION, credentialFile, created: new Date().toISOString(), status: 'PREPARING',
     users: 512, multiNotes: 512, multiRelations: 512, bodyBytes: 256,
     relationshipSeed: { active: 0, version: 0, events: 0, syntheticFixtureOnly: true } }
@@ -462,6 +480,7 @@ if (action === 'prepare') {
     assert.ok(rate >= 1 && rate <= 5000 && [60, 180].includes(seconds) && warmSeconds === 10 && warmRate === Math.min(25, rate) && preVUs === 512 && maxVUs === 512)
     assert.equal(await stopPresent(), false, 'stop file already exists; no new native phase started')
     const report = { task: 'CAP-10', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture,
+      executionPlatform, transitionSHA256: process.env.CAP10_TRANSITION_SHA256 || null,
       apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION,
       fixtureSourceSha: manifest.sourceSha, fixtureManifestSHA256: manifestSHA256,
       configuredPool: { users: 512, notes: modeNotes(manifest, mode).length, exclusiveRelationships: 512, authors: 1, noteBodyBytes: 256 }, started: new Date().toISOString(),

@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T09:18:52.716678+00:00",
+  "scope": "Final read-only non-author Linux readiness review by cap09_like_review; source/metadata/claims only. No host or services contacted.",
+  "sourceSHA256Verified": 11,
+  "originalCaptureFilesVerified": 71,
+  "originalCaptureBytesVerified": 1152231,
+  "verdict": "PASS",
+  "limitations": [
+    "No real Linux runtime validated",
+    "No pressure windows or optimization used",
+    "User choice and working SSH host pending"
+  ],
+  "privateFileBehaviorChecks": "linux-private-env-checks.json",
+  "earlierReview": "linux-preparation-review.json"
+}

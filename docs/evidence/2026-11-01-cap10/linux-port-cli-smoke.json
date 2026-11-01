@@ -1,0 +1,32 @@
+{
+  "at": "2026-11-01T09:07:38.026834+00:00",
+  "actualHostPlatform": "windows",
+  "scope": "Actual CLI import/help integration only; no power/clock/DB/network/service/native workload. Not a Linux runtime test.",
+  "results": [
+    {
+      "script": "cap10-env.py",
+      "exitCode": 0,
+      "sourceSHA256": "bc1c340d4812e192780cf545a679448c905a773903020767bfe05d69ddc0ec26"
+    },
+    {
+      "script": "cap10-run.py",
+      "exitCode": 0,
+      "sourceSHA256": "46a25b45a9fb0da5c8237092c42931cf32ec0befdd56a3e8e2a775bb917475a1"
+    },
+    {
+      "script": "cap10-stage.py",
+      "exitCode": 0,
+      "sourceSHA256": "ca75bd7578172879ab4b11998de1fed2cc8dc1cd14c8b269bad98bdd65fe268f"
+    },
+    {
+      "script": "cap10-resources.py",
+      "exitCode": 0,
+      "sourceSHA256": "a779c54d1c9d6d27f51771208d10b500c6027695cb8cb415f3ad0af3849d9638"
+    },
+    {
+      "script": "cap10-idle.py",
+      "exitCode": 0,
+      "sourceSHA256": "becd026b3ba88c5978508532f9ec3dbc4d6f61a02b9fe2b5fd84e9460d70e48f"
+    }
+  ]
+}

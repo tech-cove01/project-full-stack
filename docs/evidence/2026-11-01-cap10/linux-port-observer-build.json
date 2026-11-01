@@ -1,0 +1,42 @@
+{
+  "records": [
+    {
+      "targetOS": "windows",
+      "sourceSHA256": "ba59588f2edfa27c8aca3871f1256e3c2679f72a88506d4fc33f3bacf6a0c4dd",
+      "exe": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\cap10-downstream-platform.exe",
+      "binarySHA256": "9d591930f1c1f0674c41e6ec28be6e6d2fef1b3de164062351b8776955d1548e",
+      "startedAt": "2026-11-01T09:04:31.300441+00:00",
+      "finishedAt": "2026-11-01T09:04:32.643554+00:00",
+      "seconds": 1.3431153999990784,
+      "argv": [
+        "go",
+        "build",
+        "-o",
+        "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\cap10-downstream-platform.exe",
+        "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-downstream.go"
+      ],
+      "exitCode": 0,
+      "executed": false
+    },
+    {
+      "targetOS": "linux",
+      "sourceSHA256": "ba59588f2edfa27c8aca3871f1256e3c2679f72a88506d4fc33f3bacf6a0c4dd",
+      "exe": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\cap10-downstream-platform-linux",
+      "binarySHA256": "c8b168f35d940e4e512d38717b9c84b11661ff13556cc5fee4eb57bd1f1abb99",
+      "startedAt": "2026-11-01T09:04:32.643642+00:00",
+      "finishedAt": "2026-11-01T09:04:45.096801+00:00",
+      "seconds": 12.453183199977502,
+      "argv": [
+        "go",
+        "build",
+        "-o",
+        "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\cap10-downstream-platform-linux",
+        "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-downstream.go"
+      ],
+      "exitCode": 0,
+      "executed": false
+    }
+  ],
+  "noServiceOrNativeLoad": true,
+  "historicalWindowsBinaryUnchanged": true
+}

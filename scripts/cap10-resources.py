@@ -14,6 +14,7 @@ import os
 from pathlib import Path
 import re
 import subprocess
+import sys
 import time
 import urllib.parse
 import urllib.request
@@ -213,10 +214,14 @@ def main():
     if args.cohort == 'cap10':
         if args.project != CAP10_PROJECT or args.load_script != 'cap10-like.js' or args.diagnostics != 'http://127.0.0.1:8381/debug/capacity':
             parser.error('fixed CAP10 project/script/diagnostics required')
-        expected_path = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap10/environment.json'
+        batch_root = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap10'
+        expected_path = batch_root / 'linux/environment.json' if sys.platform == 'linux' else batch_root / 'environment.json'
         if args.ownership is None or args.ownership.resolve() != expected_path or not expected_path.is_file():
             parser.error('fixed CAP10 public ownership manifest required')
         ownership = json.loads(expected_path.read_text(encoding='utf-8-sig'))
+        platform = 'linux' if sys.platform == 'linux' else 'windows'
+        if os.environ.get('CAP10_PLATFORM', 'windows') != platform or ownership.get('executionPlatform', 'windows') != platform:
+            parser.error('CAP10 native platform/environment mismatch')
         if ownership.get('project') != CAP10_PROJECT or set(ownership.get('containers', {})) != set(CAP10_LIMITS):
             parser.error('CAP10 ownership services differ')
         expected_ids = {value['id'] for value in ownership['containers'].values()}

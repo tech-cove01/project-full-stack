@@ -10,7 +10,6 @@ from pathlib import Path
 import subprocess
 import sys
 import time
-import xml.etree.ElementTree as ET
 
 import psutil
 
@@ -26,6 +25,7 @@ def module(name, filename):
 
 owned = module('cap10_owned_run', 'cap10-env.py')
 ROOT = owned.ROOT
+BATCH_ROOT = owned.BATCH_ROOT
 KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
 TOOL_NAMES = ('cap10-run.py', 'cap10-grade.py', 'cap10-env.py', 'cap10-stage.py', 'cap10-resources.py',
               'load/cap10-native-window.mjs', 'cap10-like.mjs', 'load/cap10-like.js',
@@ -34,25 +34,6 @@ TOOL_NAMES = ('cap10-run.py', 'cap10-grade.py', 'cap10-env.py', 'cap10-stage.py'
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def sleep_events(since):
-    query = "*[System[Provider[@Name='Microsoft-Windows-Kernel-Power'] and (EventID=506 or EventID=507) and TimeCreated[@SystemTime >= '" + since.replace('+00:00', 'Z') + "']]]"
-    result = subprocess.run(['wevtutil', 'qe', 'System', '/q:' + query, '/f:xml', '/rd:true', '/c:32', '/e:Events'],
-                            capture_output=True, creationflags=owned.FLAGS, timeout=15)
-    if result.returncode:
-        return {'available': False, 'events': []}
-    if not result.stdout.strip():
-        return {'available': True, 'events': []}
-    text = result.stdout.decode('utf-16' if result.stdout.startswith(b'\xff\xfe') else 'utf-8-sig')
-    root = ET.fromstring(text); ns = {'e': 'http://schemas.microsoft.com/win/2004/08/events/event'}
-    rows = []
-    for event in root.findall('e:Event', ns):
-        system = event.find('e:System', ns)
-        rows.append({'id': int(system.find('e:EventID', ns).text),
-                     'recordId': int(system.find('e:EventRecordID', ns).text),
-                     'at': system.find('e:TimeCreated', ns).attrib['SystemTime']})
-    return {'available': True, 'events': rows}
 
 
 def reserve(args, api, value):
@@ -74,6 +55,7 @@ def reserve(args, api, value):
                'warmSeconds': 10, 'warmRate': min(25, args.rate), 'preVUs': 512, 'maxVUs': 512,
                'apiSourceSha': api['sourceSha'], 'apiPid': api['pid'], 'binarySHA256': api['sha256'],
                'likeDiagnosticsEnabled': api['likeDiagnosticsRequested'], 'feedTailEnabled': api['tailEnabledRequested'],
+               'executionPlatform': api['executionPlatform'], 'transitionSHA256': api.get('transitionSHA256'),
                'environmentSHA256': sha(ROOT / 'environment.json'), 'fixtureSHA256': sha(value['CAP_LIKE_FIXTURE']),
                'toolSourceSha': owned.run(['git', 'rev-parse', 'HEAD']).stdout.strip(),
                'scriptHashes': tools,
@@ -303,13 +285,13 @@ def main():
     state = {'at': owned.now(), 'tag': tag, 'passed': False, 'failedStartOrException': None,
              'wrapperExit': None, 'observerExit': None, 'childrenConverged': False}
     wrapper = observer = None; handles = []; observer_samples = []; report = {}
-    identities = {}; pre_guard_samples = []; pre_guard_failures = 0; pre_guard_cpu_high = 0; pending_pre_stop = None
+    identities = {}; pre_guard_samples = []; pre_guard_failures = 0; pre_guard_cpu_high = 0; pending_pre_stop = None; pending_power_stop = None
     pre_guard_at = time.monotonic(); psutil.cpu_percent(None)
     expected_containers = owned.read(ROOT / 'environment.json')['containers']
     start = owned.now(); before_power = {}; power_changed = False
     try:
         before_power = owned.power()
-        assert before_power.get('ac', 1) == 1 and before_power['hostMemoryPercent'] < 88
+        assert owned.power_valid(before_power) and before_power['hostMemoryPercent'] < 88
         state['containersBefore'] = container_snapshot(expected_containers)
         assert state['containersBefore']['valid'], 'dependency state invalid before warm'
         if os.name == 'nt':
@@ -342,8 +324,9 @@ def main():
         next_observation = time.monotonic()
         while wrapper.poll() is None:
             remember_children(wrapper, identities)
-            if pending_pre_stop and control.is_dir() and not (control / 'stop.json').exists():
-                owned.save(control / 'stop.json', {'at': owned.now(), 'source': 'cap10-run-pre-stable', 'reason': pending_pre_stop})
+            pending_stop = pending_power_stop or pending_pre_stop
+            if pending_stop and control.is_dir() and not (control / 'stop.json').exists():
+                owned.save(control / 'stop.json', {'at': owned.now(), 'source': 'cap10-run', 'reason': pending_stop})
             if observer.poll() is not None:
                 summary_path = downstream / 'summary.json'
                 if not ((control / 'done.json').is_file() and observer.returncode == 0 and summary_path.is_file() and
@@ -352,8 +335,14 @@ def main():
                 state['earlyNormalObserverCompletion'] = True
             if time.monotonic() >= next_observation:
                 current_power = owned.power(); stamp = time.monotonic()
+                window_power = owned.power_window_evidence(before_power, current_power, start, lightweight=True)
+                if not owned.power_valid(current_power) or not window_power.get('valid'):
+                    power_changed = True
+                    pending_power_stop = {'kind': 'power/suspend/clock evidence invalid', 'evidence': window_power}
+                    if control.is_dir() and not (control / 'stop.json').exists():
+                        owned.save(control / 'stop.json', {'at': owned.now(), 'source': 'cap10-run', 'reason': pending_power_stop})
                 next_observation = stamp + 5
-                if not (load / 'stable-process.json').exists():
+                if not (load / 'stable-process.json').exists() and not pending_power_stop:
                     guard = pre_stable_guard(api, load, identities, expected_containers, stamp - pre_guard_at)
                     pre_guard_at = stamp; pre_guard_samples.append(guard)
                     pre_guard_failures = pre_guard_failures + 1 if guard['errors'] else 0
@@ -367,19 +356,16 @@ def main():
                         'cpuPercentOneCore': process.cpu_percent(None), 'cpuIntervalSeconds': stamp - cpu_at,
                         'cpuIntervalValid': stamp - cpu_at >= 1, 'power': current_power})
                 cpu_at = stamp
-                if current_power.get('ac', 1) != before_power.get('ac', 1):
-                    power_changed = True
-                    if control.is_dir() and not (control / 'stop.json').exists():
-                        owned.save(control / 'stop.json', {'at': owned.now(), 'reason': 'CAP10 supply transition'})
             time.sleep(.5)
         state.update(wrapperExit=wrapper.returncode, loadWaitFinishedAt=owned.now())
         state['observerExit'] = observer.wait(timeout=90)
         state['containersAfter'] = container_snapshot(expected_containers)
         state['containersValid'] = state['containersBefore']['valid'] and state['containersAfter']['valid']
         owned.save(ROOT / (tag + '-capacity-after.json'), {'at': owned.now(), 'capacity': owned.get_json('http://127.0.0.1:8381/debug/capacity'), 'scope': 'parsed post-wrapper/drain snapshot; includes warm and background'})
-        events = sleep_events(start)
-        state['powerEvidence'] = {'before': before_power, 'after': owned.power(), 'events': events,
-                                 'valid': not power_changed and events['available'] and not events['events']}
+        after_power = owned.power()
+        state['powerEvidence'] = {**owned.power_window_evidence(before_power, after_power, start),
+                                 'before': before_power, 'after': after_power}
+        state['powerEvidence']['valid'] = not power_changed and state['powerEvidence'].get('valid') is True
         state['observerResources'] = observer_samples
         state['toolBytesStable'] = all(sha(REPO / 'scripts' / name) == digest for name, digest in command['scriptHashes'].items())
         report, status = owned.read(load / 'result.json'), owned.read(control / 'exit-status.json')

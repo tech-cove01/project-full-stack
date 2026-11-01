@@ -1,0 +1,33 @@
+{
+  "at": "2026-11-01T06:55:23.692717+00:00",
+  "task": "CAP-09D optional final-hot scope closure",
+  "decisionBy": "implementer judgment following user quick-close preference and Feed repetition status question",
+  "explicitUserStopCommand": false,
+  "currentRequiredWork": "finish already-runningfeed-hold2; if complete evaluateimmutablegroup, then exactcleanup/report/push",
+  "optionalFinalHot": {
+    "feed": {
+      "started": false,
+      "status": "not_run_closed",
+      "plannedRepresentative": 100
+    },
+    "like": {
+      "started": false,
+      "status": "not_run_closed",
+      "plannedRepresentative": 20
+    }
+  },
+  "rationale": [
+    "Both final-hot reruns are at-most optional slots, not requiredformal180rounds.",
+    "Feed already has baselinehot53fa100/45 pass but not samefinalSHA; no false sameSHAreuseclaim.",
+    "Like baselinehot sourceA only201 completedwarmmutations; no stable45pass and no matchedinitialfacts. Extra finalhot cannotrepairfailedmainformalgroup or createcontrolledstableimprovementratio.",
+    "Preserve outcomes and finishcurrentrepeat ratherthanaddmoreoptionalpressure."
+  ],
+  "unchanged": [
+    "finalSource7a80186/bin9f70db9",
+    "formalSLOs/resource/fact/downstreamgates",
+    "alloldfailedreservations",
+    "likeformalfirstfailuregroupclosed",
+    "noextraFeedstairsafter100limited"
+  ],
+  "unusedSlotsDoNotAuthorizeFurtherWork": true
+}

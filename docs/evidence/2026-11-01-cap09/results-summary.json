@@ -1,0 +1,699 @@
+{
+  "at": "2026-11-01T07:03:50.808244+00:00",
+  "task": "CAP-09 final implementer results",
+  "application": {
+    "at": "2026-11-01T06:34:07.860049+00:00",
+    "sourceSha": "7a80186b568b521c54736b735c08dce8ef962e19",
+    "binarySHA256": "9f70db9ad869eaac4935f714c00980f3e5c173404fe584c9b725fdb943405fd7",
+    "buildEvidence": "build-b.json",
+    "environmentSHA256": "a1e1abff73f147cbc04933b7c27cef4bf169c2f1f9618c6e323fc57d77dc9e97",
+    "fixtureSHA256": {
+      "feed": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+      "like": "bc7544b422cc2bc9fbdf797ee653c44aa0e78a7a5a9a648dbd95b0b95e670224"
+    },
+    "tailEnabled": false,
+    "extraCPUProfileEnabled": false,
+    "indexedObserverBinarySHA256": "4c264849341926a97956484c28977798e19735edbf30316fb26a1da9d748a8b5",
+    "sharedFinalApplicationForBothChains": true,
+    "relatedChecks": [
+      "related-real-exit.json",
+      "related-vet-exit.json",
+      "relay-real-exit.json",
+      "relay-vet-exit.json",
+      "like-warm-policy-pure-checks.json"
+    ],
+    "sourceCIRequiredBeforeFormalHold": true
+  },
+  "overall": "partial: Feed formal group passed; Like formal group failed",
+  "feedStableGroup": {
+    "status": "passed",
+    "rate": 50,
+    "secondsPerRound": 180,
+    "rounds": 2,
+    "successfulTotal": 18001,
+    "roundTags": [
+      "feed-hold-1",
+      "feed-hold-2"
+    ]
+  },
+  "likeStableGroup": {
+    "status": "failed",
+    "rate": 20,
+    "plannedSecondsPerRound": 180,
+    "firstRound": "failed early native99; P95 threshold; unknown1",
+    "secondRound": "not_run_closed_after_first_failure",
+    "lowerReplacementGroup": false,
+    "shortCompleteRate": 20,
+    "shortCompleteSeconds": 45,
+    "shortVerifiedMutations": 901
+  },
+  "finalHot": {
+    "feed": "not_run_closed",
+    "like": "not_run_closed",
+    "evidence": "final-scope-closure.json"
+  },
+  "rows": [
+    {
+      "tag": "feed-final-stair-1",
+      "mode": "multi",
+      "rate": 50,
+      "plannedSeconds": 45,
+      "passed": true,
+      "stableExit": 0,
+      "nativeScenarioComplete": true,
+      "result": {
+        "attempted": 2250,
+        "completedHttpRequests": 2250,
+        "completed": 2250,
+        "incompleteOrUnclassified": 0,
+        "completedButUnclassified": 0,
+        "classificationCoverage": 1,
+        "successful": 2250,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "targetOffers": 2250,
+        "actualOfferedRatio": 1,
+        "issuedPerNominalSecond": 50,
+        "successfulPerNominalSecond": 50,
+        "systemErrorRate": 0,
+        "systemErrorRatePerCompleted": 0,
+        "allLatency": {
+          "max": 112.4949,
+          "avg": 15.975481155555563,
+          "min": 10.6563,
+          "med": 14.65305,
+          "p(95)": 24.374889999999972,
+          "p(99)": 35.90285799999964,
+          "thresholds": {
+            "p(95)<=200": false,
+            "p(99)<=500": false
+          }
+        },
+        "successfulLatency": {
+          "avg": 15.975481155555563,
+          "min": 10.6563,
+          "med": 14.65305,
+          "p(95)": 24.374889999999972,
+          "p(99)": 35.90285799999964,
+          "max": 112.4949
+        },
+        "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+        "k6Metrics": {
+          "vus": {
+            "value": 1,
+            "min": 1,
+            "max": 2
+          },
+          "vusMax": {
+            "value": 256,
+            "min": 256,
+            "max": 256
+          },
+          "dataReceived": {
+            "rate": 472562.1956265704,
+            "count": 21265360
+          }
+        }
+      },
+      "factsConverged": true,
+      "resourcesPassed": true,
+      "pipeline": {
+        "passed": true,
+        "chain": "feed",
+        "newEventsInConservativeSampledWindow": 0,
+        "maximumGrowthBudget": 0.0,
+        "growthByQueue": {
+          "outbox": 0,
+          "receipt-follow-v1": 0,
+          "receipt-feed-v1": 0,
+          "receipt-search-v1": 0,
+          "lag-community.follow-v1": 0,
+          "lag-community.feed-v1": 0,
+          "lag-community.search-v1": 0
+        },
+        "shortStageLast15SecondsQueueSlope": {
+          "sampleCount": 3,
+          "firstSample": "2026-11-01T06:39:47.7796056Z",
+          "lastSample": "2026-11-01T06:39:57.7795098Z",
+          "perSecond": {
+            "outbox": 0.0,
+            "receipt-follow-v1": 0.0,
+            "receipt-feed-v1": 0.0,
+            "receipt-search-v1": 0.0,
+            "lag-community.follow-v1": 0.0,
+            "lag-community.feed-v1": 0.0,
+            "lag-community.search-v1": 0.0
+          },
+          "scope": "descriptive least-squares queue slope at sample starts in the final native 15s; underlying SQL/Kafka intervals are non-atomic. No additional pass/fail threshold."
+        },
+        "windowStartTarget": "2026-11-01T06:39:16.666000+00:00",
+        "firstBoundarySample": "2026-11-01T06:39:12.7792796Z",
+        "firstInsideSample": "2026-11-01T06:39:17.7796522Z",
+        "lastInsideSample": "2026-11-01T06:39:57.7795098Z",
+        "firstInsideSQLStartedAt": "2026-11-01T06:39:17.7796522Z",
+        "lastInsideSQLFinishedAt": "2026-11-01T06:39:57.8015361Z",
+        "firstQueueInsideSample": "2026-11-01T06:39:17.7796522Z",
+        "lastQueueInsideSample": "2026-11-01T06:39:57.7795098Z",
+        "firstPostEndSample": "2026-11-01T06:40:02.7793425Z",
+        "nativeEndedAt": "2026-11-01T06:40:01.666000+00:00",
+        "recoveryObservedCompletedAt": "2026-11-01T06:40:02.810808+00:00",
+        "recoverySecondsFromNativeEnd": 1.144808,
+        "maximumSampleStartGapSeconds": 5.000373,
+        "nativeRecoveryBudgetVerified": true,
+        "nativeScenarioComplete": true,
+        "samplingScope": "5s non-atomic observations with every start gap/boundary <=7.5s. Event denominator is fully inside the target window; boundary queue min/max is conservative. Recovery uses latest SQL/Kafka completion, not sample start or control done. Not instantaneous backlog proof."
+      },
+      "evidence": "feed-final-stair-1-load/result.json"
+    },
+    {
+      "tag": "feed-final-stair-2",
+      "mode": "multi",
+      "rate": 100,
+      "plannedSeconds": 45,
+      "passed": false,
+      "stableExit": 99,
+      "nativeScenarioComplete": false,
+      "result": {
+        "attempted": 1158,
+        "completedHttpRequests": 1151,
+        "completed": 1151,
+        "incompleteOrUnclassified": 7,
+        "completedButUnclassified": 0,
+        "classificationCoverage": 0.9939550949913645,
+        "successful": 1151,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "targetOffers": 4500,
+        "actualOfferedRatio": 0.25733333333333336,
+        "issuedPerNominalSecond": 25.733333333333334,
+        "successfulPerNominalSecond": 25.57777777777778,
+        "systemErrorRate": 0,
+        "systemErrorRatePerCompleted": 0,
+        "allLatency": {
+          "min": 11.5348,
+          "med": 23.9544,
+          "p(95)": 225.0062,
+          "p(99)": 263.90459999999996,
+          "max": 279.4534,
+          "avg": 65.4868674196351,
+          "thresholds": {
+            "p(95)<=200": true,
+            "p(99)<=500": false
+          }
+        },
+        "successfulLatency": {
+          "p(95)": 225.0062,
+          "p(99)": 263.90459999999996,
+          "max": 279.4534,
+          "avg": 65.4868674196351,
+          "min": 11.5348,
+          "med": 23.9544
+        },
+        "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+        "k6Metrics": {
+          "vus": {
+            "value": 7,
+            "min": 2,
+            "max": 26
+          },
+          "vusMax": {
+            "value": 256,
+            "min": 256,
+            "max": 256
+          },
+          "dataReceived": {
+            "count": 10878522,
+            "rate": 923156.8616718622
+          }
+        }
+      },
+      "factsConverged": true,
+      "resourcesPassed": true,
+      "pipeline": {
+        "passed": false,
+        "nativeScenarioComplete": false,
+        "nativeRecoveryBudgetVerified": false,
+        "scope": "failed/early-stop stage has no verified complete native offer window; raw scheduled timing is retained but no full-window pipeline claim is made"
+      },
+      "evidence": "feed-final-stair-2-load/result.json"
+    },
+    {
+      "tag": "feed-hold-1",
+      "mode": "multi",
+      "rate": 50,
+      "plannedSeconds": 180,
+      "passed": true,
+      "stableExit": 0,
+      "nativeScenarioComplete": true,
+      "result": {
+        "attempted": 9000,
+        "completedHttpRequests": 9000,
+        "completed": 9000,
+        "incompleteOrUnclassified": 0,
+        "completedButUnclassified": 0,
+        "classificationCoverage": 1,
+        "successful": 9000,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "targetOffers": 9000,
+        "actualOfferedRatio": 1,
+        "issuedPerNominalSecond": 50,
+        "successfulPerNominalSecond": 50,
+        "systemErrorRate": 0,
+        "systemErrorRatePerCompleted": 0,
+        "allLatency": {
+          "med": 15.93035,
+          "p(95)": 99.41803499999997,
+          "p(99)": 215.303151,
+          "max": 409.721,
+          "avg": 26.91173796666671,
+          "min": 10.1335,
+          "thresholds": {
+            "p(95)<=200": false,
+            "p(99)<=500": false
+          }
+        },
+        "successfulLatency": {
+          "avg": 26.91173796666671,
+          "min": 10.1335,
+          "med": 15.93035,
+          "p(95)": 99.41803499999997,
+          "p(99)": 215.303151,
+          "max": 409.721
+        },
+        "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+        "k6Metrics": {
+          "vus": {
+            "value": 1,
+            "min": 0,
+            "max": 18
+          },
+          "vusMax": {
+            "value": 256,
+            "min": 256,
+            "max": 256
+          },
+          "dataReceived": {
+            "count": 85062160,
+            "rate": 472563.95986889204
+          }
+        }
+      },
+      "factsConverged": true,
+      "resourcesPassed": true,
+      "pipeline": {
+        "passed": true,
+        "chain": "feed",
+        "newEventsInConservativeSampledWindow": 0,
+        "maximumGrowthBudget": 0.0,
+        "growthByQueue": {
+          "outbox": 0,
+          "receipt-follow-v1": 0,
+          "receipt-feed-v1": 0,
+          "receipt-search-v1": 0,
+          "lag-community.follow-v1": 0,
+          "lag-community.feed-v1": 0,
+          "lag-community.search-v1": 0
+        },
+        "shortStageLast15SecondsQueueSlope": null,
+        "windowStartTarget": "2026-11-01T06:51:31.959000+00:00",
+        "firstBoundarySample": "2026-11-01T06:51:27.9980625Z",
+        "firstInsideSample": "2026-11-01T06:51:32.9957554Z",
+        "lastInsideSample": "2026-11-01T06:52:27.9957166Z",
+        "firstInsideSQLStartedAt": "2026-11-01T06:51:32.9957554Z",
+        "lastInsideSQLFinishedAt": "2026-11-01T06:52:28.0311967Z",
+        "firstQueueInsideSample": "2026-11-01T06:51:32.9957554Z",
+        "lastQueueInsideSample": "2026-11-01T06:52:27.9957166Z",
+        "firstPostEndSample": "2026-11-01T06:52:32.9960721Z",
+        "nativeEndedAt": "2026-11-01T06:52:31.959000+00:00",
+        "recoveryObservedCompletedAt": "2026-11-01T06:52:33.032073+00:00",
+        "recoverySecondsFromNativeEnd": 1.073073,
+        "maximumSampleStartGapSeconds": 5.005644,
+        "nativeRecoveryBudgetVerified": true,
+        "nativeScenarioComplete": true,
+        "samplingScope": "5s non-atomic observations with every start gap/boundary <=7.5s. Event denominator is fully inside the target window; boundary queue min/max is conservative. Recovery uses latest SQL/Kafka completion, not sample start or control done. Not instantaneous backlog proof."
+      },
+      "evidence": "feed-hold-1-load/result.json"
+    },
+    {
+      "tag": "feed-hold-2",
+      "mode": "multi",
+      "rate": 50,
+      "plannedSeconds": 180,
+      "passed": true,
+      "stableExit": 0,
+      "nativeScenarioComplete": true,
+      "result": {
+        "attempted": 9001,
+        "completedHttpRequests": 9001,
+        "completed": 9001,
+        "incompleteOrUnclassified": 0,
+        "completedButUnclassified": 0,
+        "classificationCoverage": 1,
+        "successful": 9001,
+        "systemErrors": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "dropped": 0,
+        "targetOffers": 9000,
+        "actualOfferedRatio": 1.0001111111111112,
+        "issuedPerNominalSecond": 50.00555555555555,
+        "successfulPerNominalSecond": 50.00555555555555,
+        "systemErrorRate": 0,
+        "systemErrorRatePerCompleted": 0,
+        "allLatency": {
+          "avg": 24.965774002888637,
+          "min": 10.392,
+          "med": 15.4396,
+          "p(95)": 63.8898,
+          "p(99)": 201.049,
+          "max": 1255.8166,
+          "thresholds": {
+            "p(95)<=200": false,
+            "p(99)<=500": false
+          }
+        },
+        "successfulLatency": {
+          "p(99)": 201.049,
+          "max": 1255.8166,
+          "avg": 24.965774002888637,
+          "min": 10.392,
+          "med": 15.4396,
+          "p(95)": 63.8898
+        },
+        "countingScope": "attempted enters the HTTP call; completedHttpRequests is native http_reqs including transport failures; completed reaches terminal classification; unfinished calls are unknown, nominal-second rates retain the full planned denominator even after early stop",
+        "k6Metrics": {
+          "vus": {
+            "value": 3,
+            "min": 0,
+            "max": 9
+          },
+          "vusMax": {
+            "min": 256,
+            "max": 256,
+            "value": 256
+          },
+          "dataReceived": {
+            "count": 85071602,
+            "rate": 469652.93382373266
+          }
+        }
+      },
+      "factsConverged": true,
+      "resourcesPassed": true,
+      "pipeline": {
+        "passed": true,
+        "chain": "feed",
+        "newEventsInConservativeSampledWindow": 0,
+        "maximumGrowthBudget": 0.0,
+        "growthByQueue": {
+          "outbox": 0,
+          "receipt-follow-v1": 0,
+          "receipt-feed-v1": 0,
+          "receipt-search-v1": 0,
+          "lag-community.follow-v1": 0,
+          "lag-community.feed-v1": 0,
+          "lag-community.search-v1": 0
+        },
+        "shortStageLast15SecondsQueueSlope": null,
+        "windowStartTarget": "2026-11-01T06:55:57.282000+00:00",
+        "firstBoundarySample": "2026-11-01T06:55:56.9473732Z",
+        "firstInsideSample": "2026-11-01T06:56:01.9478685Z",
+        "lastInsideSample": "2026-11-01T06:56:51.947892Z",
+        "firstInsideSQLStartedAt": "2026-11-01T06:56:01.9478685Z",
+        "lastInsideSQLFinishedAt": "2026-11-01T06:56:51.9671351Z",
+        "firstQueueInsideSample": "2026-11-01T06:56:01.9478685Z",
+        "lastQueueInsideSample": "2026-11-01T06:56:56.947696Z",
+        "firstPostEndSample": "2026-11-01T06:57:01.9479026Z",
+        "nativeEndedAt": "2026-11-01T06:56:57.282000+00:00",
+        "recoveryObservedCompletedAt": "2026-11-01T06:57:01.981551+00:00",
+        "recoverySecondsFromNativeEnd": 4.699551,
+        "maximumSampleStartGapSeconds": 5.001897,
+        "nativeRecoveryBudgetVerified": true,
+        "nativeScenarioComplete": true,
+        "samplingScope": "5s non-atomic observations with every start gap/boundary <=7.5s. Event denominator is fully inside the target window; boundary queue min/max is conservative. Recovery uses latest SQL/Kafka completion, not sample start or control done. Not instantaneous backlog proof."
+      },
+      "evidence": "feed-hold-2-load/result.json"
+    },
+    {
+      "tag": "like-final-stair-1",
+      "mode": "multi",
+      "rate": 20,
+      "plannedSeconds": 45,
+      "passed": true,
+      "stableExit": 0,
+      "nativeScenarioComplete": true,
+      "result": {
+        "attempted": 901,
+        "completed": 901,
+        "successful": 901,
+        "mutation": 901,
+        "noop": 0,
+        "rejected": 0,
+        "effectUnknown": 0,
+        "contentErrors": 0,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "recoveryReads": 0,
+        "recoveryFailed": 0,
+        "retiredRelations": 0,
+        "dropped": 0,
+        "nativeWriteHTTP": 901,
+        "classificationUnknown": 0,
+        "unknown": 0,
+        "unknownIsExact": true,
+        "unknownLowerBound": 0,
+        "unknownUpperBound": 0,
+        "targetOffers": 900,
+        "actualOfferedRatio": 1.001111111111111,
+        "mutationFraction": 1,
+        "mutationPerNominalSecond": 20.022222222222222,
+        "httpPutPerNominalSecond": 20.022222222222222,
+        "allLatency": {
+          "p(99)": 178.8933,
+          "max": 233.0773,
+          "avg": 32.919251165371776,
+          "med": 27.4512,
+          "min": 18.4364,
+          "p(95)": 58.8572,
+          "thresholds": {
+            "p(99)<=500": false,
+            "p(95)<=200": false
+          }
+        },
+        "mutationLatency": {
+          "p(99)": 178.8933,
+          "max": 233.0773,
+          "avg": 32.919251165371776,
+          "med": 27.4512,
+          "min": 18.4364,
+          "p(95)": 58.8572
+        },
+        "recoveryLatency": null,
+        "dbMutations": 901,
+        "eventsAdded": 901,
+        "mutationCounterMatchesDB": true,
+        "unknownScope": "classificationUnknown and effectUnknown can overlap during abort sample loss. Distinct unknown is exact only when lower/upper coincide; otherwise unknown=null and bounds remain. Recovery never erases original uncertainty. Zero-unknown requires both counters zero."
+      },
+      "factsConverged": true,
+      "resourcesPassed": true,
+      "pipeline": {
+        "passed": true,
+        "chain": "like",
+        "newEventsInConservativeSampledWindow": 800,
+        "maximumGrowthBudget": 8.0,
+        "growthByQueue": {
+          "outbox": 6,
+          "receipt-follow-v1": 7,
+          "receipt-feed-v1": 7,
+          "receipt-search-v1": 7,
+          "lag-community.follow-v1": 2,
+          "lag-community.feed-v1": 2,
+          "lag-community.search-v1": 2
+        },
+        "shortStageLast15SecondsQueueSlope": {
+          "sampleCount": 3,
+          "firstSample": "2026-11-01T06:36:07.1186964Z",
+          "lastSample": "2026-11-01T06:36:17.1191376Z",
+          "perSecond": {
+            "outbox": 0.2999889870368999,
+            "receipt-follow-v1": 0.39998502051971063,
+            "receipt-feed-v1": 0.39998502051971063,
+            "receipt-search-v1": 0.3999841339312429,
+            "lag-community.follow-v1": 0.1999911803771537,
+            "lag-community.feed-v1": 0.1999911803771537,
+            "lag-community.search-v1": 0.1999911803771537
+          },
+          "scope": "descriptive least-squares queue slope at sample starts in the final native 15s; underlying SQL/Kafka intervals are non-atomic. No additional pass/fail threshold."
+        },
+        "windowStartTarget": "2026-11-01T06:35:32.377000+00:00",
+        "firstBoundarySample": "2026-11-01T06:35:32.1186401Z",
+        "firstInsideSample": "2026-11-01T06:35:37.1189907Z",
+        "lastInsideSample": "2026-11-01T06:36:17.1191376Z",
+        "firstInsideSQLStartedAt": "2026-11-01T06:35:37.1189907Z",
+        "lastInsideSQLFinishedAt": "2026-11-01T06:36:17.1673809Z",
+        "firstQueueInsideSample": "2026-11-01T06:35:37.1189907Z",
+        "lastQueueInsideSample": "2026-11-01T06:36:17.1191376Z",
+        "firstPostEndSample": "2026-11-01T06:36:22.118966Z",
+        "nativeEndedAt": "2026-11-01T06:36:17.377000+00:00",
+        "recoveryObservedCompletedAt": "2026-11-01T06:36:22.165239+00:00",
+        "recoverySecondsFromNativeEnd": 4.788239,
+        "maximumSampleStartGapSeconds": 5.00035,
+        "nativeRecoveryBudgetVerified": true,
+        "nativeScenarioComplete": true,
+        "samplingScope": "5s non-atomic observations with every start gap/boundary <=7.5s. Event denominator is fully inside the target window; boundary queue min/max is conservative. Recovery uses latest SQL/Kafka completion, not sample start or control done. Not instantaneous backlog proof."
+      },
+      "evidence": "like-final-stair-1-load/result.json"
+    },
+    {
+      "tag": "like-final-stair-2",
+      "mode": "multi",
+      "rate": 50,
+      "plannedSeconds": 45,
+      "passed": false,
+      "stableExit": 99,
+      "nativeScenarioComplete": false,
+      "result": {
+        "attempted": 570,
+        "completed": 568,
+        "successful": 568,
+        "mutation": 568,
+        "noop": 0,
+        "rejected": 0,
+        "effectUnknown": 0,
+        "contentErrors": 0,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "recoveryReads": 0,
+        "recoveryFailed": 0,
+        "retiredRelations": 0,
+        "dropped": 0,
+        "nativeWriteHTTP": 568,
+        "classificationUnknown": 2,
+        "unknown": 2,
+        "unknownIsExact": true,
+        "unknownLowerBound": 2,
+        "unknownUpperBound": 2,
+        "targetOffers": 2250,
+        "actualOfferedRatio": 0.25333333333333335,
+        "mutationFraction": 0.9964912280701754,
+        "mutationPerNominalSecond": 12.622222222222222,
+        "httpPutPerNominalSecond": 12.666666666666666,
+        "allLatency": {
+          "avg": 70.03963362676059,
+          "med": 39.5096,
+          "min": 20.3088,
+          "p(95)": 204.09580999999994,
+          "p(99)": 287.86218200000013,
+          "max": 329.0544,
+          "thresholds": {
+            "p(95)<=200": true,
+            "p(99)<=500": false
+          }
+        },
+        "mutationLatency": {
+          "avg": 70.03963362676059,
+          "med": 39.5096,
+          "min": 20.3088,
+          "p(95)": 204.09580999999994,
+          "p(99)": 287.86218200000013,
+          "max": 329.0544
+        },
+        "recoveryLatency": null,
+        "dbMutations": 569,
+        "eventsAdded": 569,
+        "mutationCounterMatchesDB": false,
+        "unknownScope": "classificationUnknown and effectUnknown can overlap during abort sample loss. Distinct unknown is exact only when lower/upper coincide; otherwise unknown=null and bounds remain. Recovery never erases original uncertainty. Zero-unknown requires both counters zero."
+      },
+      "factsConverged": true,
+      "resourcesPassed": true,
+      "pipeline": {
+        "passed": false,
+        "nativeScenarioComplete": false,
+        "nativeRecoveryBudgetVerified": false,
+        "scope": "failed/early-stop stage has no verified complete native offer window; raw scheduled timing is retained but no full-window pipeline claim is made"
+      },
+      "evidence": "like-final-stair-2-load/result.json"
+    },
+    {
+      "tag": "like-hold-1",
+      "mode": "multi",
+      "rate": 20,
+      "plannedSeconds": 180,
+      "passed": false,
+      "stableExit": 99,
+      "nativeScenarioComplete": false,
+      "result": {
+        "attempted": 230,
+        "completed": 229,
+        "successful": 229,
+        "mutation": 229,
+        "noop": 0,
+        "rejected": 0,
+        "effectUnknown": 0,
+        "contentErrors": 0,
+        "systemErrors": 0,
+        "httpErrors": 0,
+        "recoveryReads": 0,
+        "recoveryFailed": 0,
+        "retiredRelations": 0,
+        "dropped": 0,
+        "nativeWriteHTTP": 229,
+        "classificationUnknown": 1,
+        "unknown": 1,
+        "unknownIsExact": true,
+        "unknownLowerBound": 1,
+        "unknownUpperBound": 1,
+        "targetOffers": 3600,
+        "actualOfferedRatio": 0.06388888888888888,
+        "mutationFraction": 0.9956521739130435,
+        "mutationPerNominalSecond": 1.2722222222222221,
+        "httpPutPerNominalSecond": 1.2777777777777777,
+        "allLatency": {
+          "avg": 67.53411615720525,
+          "med": 45.0391,
+          "min": 25.5518,
+          "p(95)": 201.61157999999998,
+          "p(99)": 264.009124,
+          "max": 357.3137,
+          "thresholds": {
+            "p(99)<=500": false,
+            "p(95)<=200": true
+          }
+        },
+        "mutationLatency": {
+          "min": 25.5518,
+          "p(95)": 201.61157999999998,
+          "p(99)": 264.009124,
+          "max": 357.3137,
+          "avg": 67.53411615720525,
+          "med": 45.0391
+        },
+        "recoveryLatency": null,
+        "dbMutations": 229,
+        "eventsAdded": 229,
+        "mutationCounterMatchesDB": true,
+        "unknownScope": "classificationUnknown and effectUnknown can overlap during abort sample loss. Distinct unknown is exact only when lower/upper coincide; otherwise unknown=null and bounds remain. Recovery never erases original uncertainty. Zero-unknown requires both counters zero."
+      },
+      "factsConverged": true,
+      "resourcesPassed": true,
+      "pipeline": {
+        "passed": false,
+        "nativeScenarioComplete": false,
+        "nativeRecoveryBudgetVerified": false,
+        "scope": "failed/early-stop stage has no verified complete native offer window; raw scheduled timing is retained but no full-window pipeline claim is made"
+      },
+      "evidence": "like-hold-1-load/result.json"
+    }
+  ],
+  "sourceCI": "ci-b.json",
+  "cleanup": "cleanup.json",
+  "independentRepresentativeRerun": "not executed; CAP-09E pending independent review decision",
+  "scope": "This Windows development laptop, bounded shared Docker resources, exact fixtures and full real request chains. No production ceiling, 5000 QPS or all-site throughput claim. Earlier failures and oldB1 unknown retained."
+}

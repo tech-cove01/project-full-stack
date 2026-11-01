@@ -1,0 +1,14 @@
+{
+  "at": "2026-11-01T09:35:22.660026+00:00",
+  "command": "python -B -X utf8 scripts/pts/cap10-pts-api-check.py",
+  "checksPassed": 29,
+  "checksFailed": 0,
+  "extraActualFunctionChecks": [
+    "provider Code credential echo suppressed",
+    "dictionary key credential echo suppressed"
+  ],
+  "sourceSHA256": "c22f0c2bf2ec888825a1161c2a264d80f2033181ce06b7ea7d8cff662e1a3a27",
+  "checkerSHA256": "4f60694a432149796d5f3322d67179baf2eb256c221cdfa2b037c4ff5c6583da",
+  "review": "Non-author cap09_like_harness static review PASS, including both redaction changes.",
+  "scope": "Actual controller code with synthetic transport and official signing vector; no authenticated API/cloud resources/services/load."
+}

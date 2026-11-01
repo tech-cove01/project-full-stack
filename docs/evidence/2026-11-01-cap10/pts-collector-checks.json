@@ -1,0 +1,22 @@
+{
+  "scope": "Synthetic in-process EngineStore only; no HTTP server, business, cloud or load.",
+  "testsRun": 29,
+  "failures": 0,
+  "errors": 0,
+  "passed": true,
+  "sourceSHA256": "a77eb995101fb50d3d369e6d5371c35325cfac111e7899195aafd3f1acfa76af",
+  "sourceBytesStable": true,
+  "checkerSHA256": "1a4fe30b847bfdb140d69e7952a0fe74bd1c4378a30169bbccafac41b20fe6bb",
+  "nonAuthorReview": {
+    "reviewer": "cap09_feed_review",
+    "passed": true,
+    "sourceSHA256": "a77eb995101fb50d3d369e6d5371c35325cfac111e7899195aafd3f1acfa76af",
+    "checkerSHA256": "1a4fe30b847bfdb140d69e7952a0fe74bd1c4378a30169bbccafac41b20fe6bb",
+    "scope": "Read-only source review, including final null-fact, compact tuple/cache and durable resource-freshness changes; no independent runtime rerun.",
+    "findings": "No blocking issue. Mutation facts remain strict; complete journal facts retained; duplicate/register cannot refresh resource evidence; incomplete terminal evidence never becomes exact zero unknown."
+  },
+  "runtimeValidationPending": true,
+  "cloudCalls": 0,
+  "businessCalls": 0,
+  "pressureWindowsAdded": 0
+}

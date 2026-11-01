@@ -200,6 +200,19 @@ function factErrors(manifest, mode, state) {
   return [...new Set(errors)]
 }
 
+function changedParticipants(before, after) {
+  const prior = new Map(before.facts.map(r => [r.noteId + ':' + r.userId, r.version]))
+  const relations = after.facts.map(row => ({ noteId: row.noteId, userId: row.userId,
+    beforeVersion: prior.get(row.noteId + ':' + row.userId) || 0, afterVersion: row.version }))
+    .map(row => ({ ...row, mutations: row.afterVersion - row.beforeVersion })).filter(row => row.mutations > 0)
+  const distribution = {}
+  for (const row of relations) distribution[row.mutations] = (distribution[row.mutations] || 0) + 1
+  return { relationships: relations.length, users: new Set(relations.map(r => r.userId)).size,
+    notes: new Set(relations.map(r => r.noteId)).size, mutations: relations.reduce((s, r) => s + r.mutations, 0),
+    mutationsPerRelationship: distribution, relations,
+    scope: 'verified positive authoritative relation-version changes between these RR snapshots; configured pool is separate. Failed/unknown phases do not establish complete native participation.' }
+}
+
 async function derived(manifest, mode, state) {
   const notes = modeNotes(manifest, mode)
   const replies = await redisCommands(notes.flatMap(id => [['SMEMBERS', 'community:likes:' + id], ['HGETALL', 'community:likes:versions:' + id]]))
@@ -327,8 +340,8 @@ if (action === 'prepare') {
     assert.equal(await stopPresent(), false, 'stop file already exists; no new native phase started')
     const report = { task: 'CAP-09', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture,
       apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION,
-      fixtureSourceSha: manifest.sourceSha, fixtureManifestSHA256: manifestSHA256, users: 512,
-      notePool: modeNotes(manifest, mode).length, exclusiveRelationPool: 512, started: new Date().toISOString(),
+      fixtureSourceSha: manifest.sourceSha, fixtureManifestSHA256: manifestSHA256,
+      configuredPool: { users: 512, notes: modeNotes(manifest, mode).length, exclusiveRelationships: 512, authors: 1, noteBodyBytes: 256 }, started: new Date().toISOString(),
       thresholds: { actualOfferedRatioMin: .99, mutationFractionMin: .99, unexpectedNoopMax: 0, contentErrorsMax: 0,
         unknownMax: 0, droppedMax: 0, systemAndHTTPErrorRatesMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500 },
       scope: 'main attempts are real PUT state changes; pre-phase hydration is outside native workload. Non-mutation outcomes GET the fact and retire that relation for this phase, because one read can race a late unknown commit. Only a later phase after drain and fresh RR facts can resume it. Recovery GETs/cost are separate; API invalidate/read/Mark remain in PUT latency' }
@@ -365,6 +378,8 @@ if (action === 'prepare') {
       Object.assign(report, { stableExit: stable.code, stableExternalStop: stable.externalStop, stableEndedAt: Date.now() })
       report.stableCommandElapsedMs = report.stableEndedAt - report.stableStartedAt
       const after = await snapshot(manifest, mode, 'after-stable'); await save(join(dir, 'after.json'), after)
+      report.verifiedChangedParticipants = { stable: changedParticipants(before, after),
+        warmAndStable: changedParticipants(warmBefore, after) }
       const native = JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8'))
       const metric = name => { const m = native.metrics?.[name]; assert.ok(m, 'missing native metric: ' + name); return m }
       const counter = name => { const value = metric(name).count; assert.ok(Number.isSafeInteger(value) && value >= 0, 'invalid native counter: ' + name); return value }

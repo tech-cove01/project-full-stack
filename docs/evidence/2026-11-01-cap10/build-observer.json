@@ -1,0 +1,19 @@
+{
+  "startedAt": "2026-11-01T08:04:28.840895+00:00",
+  "finishedAt": "2026-11-01T08:04:30.208761+00:00",
+  "seconds": 1.3678635000251234,
+  "source": "scripts/cap10-downstream.go",
+  "sourceSHA256": "2f83e2d76db877d1a5e784013dc9961b957cc8f797de5ff39bb708478eebb039",
+  "exe": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\cap10-downstream.exe",
+  "binarySHA256": "a30c9721c3f646b23498e8baabc616ab0e70e826b631aa5002214cf12e7ab80a",
+  "argv": [
+    "go",
+    "build",
+    "-o",
+    "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-4485d9a4b114\\cap10-downstream.exe",
+    "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-downstream.go"
+  ],
+  "exitCode": 0,
+  "only512OwnedNotes": true,
+  "noWorkloadOrAPIRead": true
+}

@@ -1,0 +1,17 @@
+D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap10-4485d9a4b114\cap10-downstream.exe: go1.27.0
+	path	command-line-arguments
+	dep	filippo.io/edwards25519	v1.1.0	h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
+	dep	github.com/go-sql-driver/mysql	v1.8.1	h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
+	dep	github.com/klauspost/compress	v1.15.9	h1:wKRjX6JRtDdrE9qwa4b/Cip7ACOshUI4smpCQanqjSY=
+	dep	github.com/pierrec/lz4/v4	v4.1.15	h1:MO0/ucJhngq7299dKLwIMtgTfbkoSPF6AoMYDd8Q4q0=
+	dep	github.com/segmentio/kafka-go	v0.4.47	h1:IqziR4pA3vrZq7YdRxaT3w1/5fvIH5qpCwstUanQQB0=
+	build	-buildmode=exe
+	build	-compiler=gc
+	build	CGO_ENABLED=1
+	build	CGO_CFLAGS=
+	build	CGO_CPPFLAGS=
+	build	CGO_CXXFLAGS=
+	build	CGO_LDFLAGS=
+	build	GOARCH=amd64
+	build	GOOS=windows
+	build	GOAMD64=v1

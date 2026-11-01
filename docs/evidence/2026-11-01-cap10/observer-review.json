@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-01T08:28:20.167943+00:00",
+  "task": "CAP-10A existing indexed observer cohort adaptation",
+  "reviewer": "root (non-author for observer clone)",
+  "passed": true,
+  "sourceSHA256": "2f83e2d76db877d1a5e784013dc9961b957cc8f797de5ff39bb708478eebb039",
+  "binarySHA256": "a30c9721c3f646b23498e8baabc616ab0e70e826b631aa5002214cf12e7ab80a",
+  "changes": [
+    "CAP10 fixed project/ports/private runtime and evidence root.",
+    "512exclusive Like notes only, no Feed/hot.",
+    "Existing fullPK exact join,4s read deadline/5s cadence/3failure behavior unchanged."
+  ],
+  "actualVerification": "Go build cleanexit0 and exactsourcehash, real idle observer readiness/timeline/finishexit0 with empty LIKE baseline and initialized3groupoffset0. No publication throughput claim.",
+  "source": "scripts/cap10-downstream.go",
+  "nativeLoads": 0,
+  "fullSourceDiffChecked": "After fixed CAP09->CAP10/project/port substitutions, entire diff only removes hot manifest field and append; read-only observer core is byte-for-byte unchanged."
+}

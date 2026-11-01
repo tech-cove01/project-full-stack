@@ -1,6 +1,6 @@
 # 一台ECS + 阿里云PTS：准备与操作步骤
 
-2026-11-01。方案是把Go API和现有MySQL / Redis / Kafka / ES部署在一台ECS，由PTS的两个JMeter引擎经VPC私网发压。本文是操作指南；**当前先等本地适配和交叉审查完成，不必先付费开ECS，也不要在PTS点击调试、启动、保存并压测或创建定时任务。** 尚未上传文件、部署云端或取得云端通过结果。
+2026-11-01。方案是把Go API和现有MySQL / Redis / Kafka / ES部署在一台ECS，由PTS的两个JMeter引擎经VPC私网发压。**本地适配、有限模拟接口接线与交叉审查已完成，可以按本清单准备一台ECS和PTS。** 当前尚未上传文件、部署云端或取得云端通过结果；不要在PTS点击调试、启动、保存并压测或创建定时任务，由agent在原名额内统一执行。
 
 本轮继续CAP-10剩余名额：最多8个60秒主窗、最多同档2个180秒正式窗、最多1项有证据的优化；主负载最多840秒。每窗10秒warm另账，准备、引擎租用和报告等待也单列，不因为使用PTS增加压力轮，不重跑Feed。实际执行以[STATUS](../../../STATUS.md)和[计划](plan.md)为准。
 
@@ -8,7 +8,7 @@
 
 1. 确认阿里云账号可登录ECS、VPC、PTS控制台，并能查看本账号的余额、试用资格和按量单价。试用额度、可选机型和地域以账号实际页面为准，不假定16核32GiB或PTS免费。
 2. 准备SSH密钥登录方式；已有密钥可复用公钥，私钥保留在自己的本地私有路径，不粘贴到聊天、Git或截图。
-3. 等agent明确本地准备完成后，再进行下述付费创建。现在无需提供AccessKey值，也无需先开通资源包。
+3. 账号/RAM权限可先准备；付费创建按下述一台ECS配置进行。不需要将AccessKey值发给agent，也无需先买资源包，只提供本地私有配置路径。
 
 PTS启动任务会产生资源消耗，按任务实际VUM结算；warm主窗分成独立平台任务时，两者均可能计费。平台引擎初始化、公共起跑屏障、收尾与日志采样等会使实际计费时长不同于业务主窗。费用预估和试用抵扣应查看本账号；不以14分钟主负载直接等同云账单。[官方计费说明](https://help.aliyun.com/zh/pts/performance-test-pts-3-0/product-overview/pts-3-0-billing-overview/)
 
@@ -51,6 +51,22 @@ agent负责实际监听配置：私网8281必须能到Go API，同时保留本�
 
 API客户端读取标准环境变量`ALIBABA_CLOUD_ACCESS_KEY_ID`、`ALIBABA_CLOUD_ACCESS_KEY_SECRET`、可选`ALIBABA_CLOUD_SECURITY_TOKEN`，或显式私有JSON文件。Linux私有文件权限为0600。不要把AK、STS、collector令牌或签名OSS链接写入命令参数、公开日志、截图或Git。
 
+这一步可以在租ECS前完成。已有STS/专用RAM配置可直接提供私有文件路径；从零配置时：
+
+1. RAM控制台 → 身份管理 → 用户 → 创建用户，建立本批专用程序用户，例如`cap10-runner`。如采用AccessKey方式，只给程序使用，不使用主账号AK；创建时下载保存密钥。[官方创建步骤](https://help.aliyun.com/zh/ram/user-guide/create-a-ram-user)
+2. RAM控制台 → 权限管理 → 权限策略 → 创建权限策略 → 脚本编辑，使用下方JSON，命名例如`CAP10PTSRunner`，再将该策略授权给上述用户。[官方策略步骤](https://help.aliyun.com/zh/ram/create-a-custom-policy)
+3. 将凭据放进本地私有文件，例如`aliyun-cap10.private.json`，结构如下。这里只是字段模板；实际值在本地填写，文件不要放进Git或上传聊天。只提供文件的绝对路径，agent随后安全传到本次私有运行目录；测完撤销本批密钥/临时权限。
+
+```json
+{
+  "ALIBABA_CLOUD_ACCESS_KEY_ID": "在本地填写",
+  "ALIBABA_CLOUD_ACCESS_KEY_SECRET": "在本地填写",
+  "ALIBABA_CLOUD_SECURITY_TOKEN": ""
+}
+```
+
+使用STS时填写真实SecurityToken；使用RAM用户AccessKey时该字段留空。主账号仍可在控制台完成购买、首次场景配置与VPC服务授权，运行客户端只有下列PTS权限。
+
 基础控制/导出所需RAM操作如下；保存/上传场景的控制台权限与ECS管理权限不需要交给压测运行客户端：
 
 ```json
@@ -83,7 +99,7 @@ API客户端读取标准环境变量`ALIBABA_CLOUD_ACCESS_KEY_ID`、`ALIBABA_CLO
 4. **仅对`slots.csv`启用CSV切分**。CSV只含0..511槽号，无业务ID或用户token；两个引擎应取得互斥分片，collector会拒绝重复或缺失槽。私有JSON仅有collector私网URL与控制令牌，不切分、不公开。JMX和私有JSON每个引擎均需可读。[官方JMeter文件/CSV说明](https://help.aliyun.com/zh/pts/performance-test-pts-3-0/user-guide/create-a-jmeter-scenario1/)
 5. 压力来源选上海的阿里云VPC内网，填写前述VPC、交换机和安全组；指定**2个施压引擎**。
 6. 本批脚本普通线程512、tearDown线程1；控制台总并发配置为**513**，固定并发从100%开始，禁用递增/阶梯和自动扩引擎。513是线程配置，不是513 mutation/s；实际发起速率由collector下发的50及后续授权档位控制。PTS会改写普通线程组，并按setUp/tearDown规则分配压力，云端须核对两个引擎合计恰好512个普通槽，不能仅凭控制台数字认为接线已通过。[官方线程改写规则](https://help.aliyun.com/en/pts/performance-test-pts-3-0/getting-started/jmeter-stress-test-quick-start)
-7. 任务时长字段最小填60秒。脚本中的warm只发10秒，主窗发60或180秒；agent每个phase按冻结配置调整足够的**平台总时长**以覆盖引擎初始化、公共起跑屏障和收尾，主窗实际时长由完整样本证实，不能让平台60秒硬截止截断60秒主窗。严禁把warm改成60秒凑平台下限。[场景API时长限制](https://help.aliyun.com/zh/pts/performance-test-pts-3-0/developer-reference/api-pts-2020-10-20-saveopenjmeterscene)
+7. **平台任务时长固定填600秒（10分钟）**，这是覆盖引擎初始化、公共起跑屏障和远端收尾的保护上限。脚本中的warm仍只发10秒，主窗仍发60或180秒；完整结果到齐后工具立即请求停止并确认任务结束，不等待600秒发满。平台任务最短60秒，不应直接把该下限当作60秒主窗的总时长，也不要把warm改成60秒。工具在每次启动前校验600秒与513并发，主窗实际时长另由完整样本证实。[场景API时长限制](https://help.aliyun.com/zh/pts/performance-test-pts-3-0/developer-reference/api-pts-2020-10-20-saveopenjmeterscene)
 8. 使用**仅保存**；不要点击调试、启动、保存并压测、定时执行或平台自动探测。把SceneId和所选版本/并发/2引擎/CSV切分配置提供给主agent。页面若没有仅保存选项，停在确认前反馈。
 
 通用JMX、槽CSV和私有配置首次上传后，后续phase从私网collector获取runId、warm/main、rate、seconds与最新关系状态。无需每窗上传账号token CSV或签名OSS文件；若上传文件确有变更，先冻结新哈希再替换，不能在正式两轮间改包。

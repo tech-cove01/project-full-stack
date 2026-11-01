@@ -1,0 +1,47 @@
+{
+  "at": "2026-11-01T10:04:08.142356+00:00",
+  "batch": "CAP-10",
+  "localPreparationReady": true,
+  "cloudConnected": false,
+  "cloudAdmissionPassed": null,
+  "cloudCapacityPassed": null,
+  "applicationSourceSHA": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "applicationSourceCI": "https://github.com/tech-cove01/project-full-stack/actions/runs/41286794821",
+  "pressureSlotsUsed": {
+    "S": 0,
+    "H": 0
+  },
+  "L": null,
+  "U": null,
+  "R": null,
+  "productionOptimizationsUsed": 0,
+  "extraCapacityRoundsAuthorized": false,
+  "validation": {
+    "apiMock": 34,
+    "collectorPure": 29,
+    "packetBindCleanupSceneAdmission": 62,
+    "phaseHTTPEnvelopeTermination": 18,
+    "groovyContract": 14,
+    "likePure": 34,
+    "runnerPure": 21,
+    "policyPure": 34,
+    "fakeAPIRequestsAcrossFourFunctionalCases": 44,
+    "finalSameScriptFakeMutations": 20
+  },
+  "independentReview": "pts-final-review.json",
+  "steps": "aliyun-ecs-pts-steps.md",
+  "budget": "pts-preparation-budget.json",
+  "codeAndMaterialCommits": [
+    "60e5c02edee3a6a060a2affc28c8c10d56604a98 feat(CAP-10A-PTS4): integrate cloud phases with original quota supervision and reconciliation",
+    "12ef5f8438a3a65c0c9a83c3efef757fd115bba0 feat(CAP-10A-PTS1): add distributed JMeter mutation workload and finite wiring evidence",
+    "b49ddfcb7b4fd717318228d3456d02f1e5354750 chore(CAP-10A-PTS5): stage verified Linux binaries and offline dependency images",
+    "0e7683d50d0b8d22412e837b6c7e377ec7af51cb feat(CAP-10A-PTS5): verify uploaded scene before reserving a load window",
+    "d0abc5e48dfade030c7d812b45d0cc01bdf1c1c0 fix(CAP-10A-PTS3): honor stops immediately before cloud task start",
+    "872d0085f0f4a0c37a164e3146f02a150fe73460 feat(CAP-10A-PTS5): clean only registered private upload packets",
+    "48b4f873005b44eb733b5ca6be6dd181e90a89e0 feat(CAP-10A-PTS5): prepare private upload packets and ECS setup guide",
+    "bd6d479baf66fb3aa8043155e38875871d86487c feat(CAP-10A-PTS2): collect complete JMeter evidence with durable acknowledgements",
+    "657afc7ddbb7dfac3e773dc299603c923273a927 feat(CAP-10A-PTS3): add guarded Alibaba PTS task controller"
+  ],
+  "offlineArtifacts": "See pts-offline-builds.json and pts-dependency-image-pack.json; actual binaries/1.27GB dependency archive stay in ignored sibling runtime, not in Git. Final Git bundle/delivery-index are generated from the final committed main locally.",
+  "nextAction": "User rents one Shanghai ECS and enables PTS; provide SSH/metadata/private credentials path. Agent deploys/does read-only scene admission and one cloud idle admission before original S1, with no extra calibration capacity window."
+}

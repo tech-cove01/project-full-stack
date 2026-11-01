@@ -2,17 +2,23 @@
 
 2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
-## 当前交接：CAP-10 本机预检拒绝，工具已交；等待环境选择（2026-11-01）
+## 当前交接：CAP-10 一台ECS + PTS本地准备完成；等待用户租机（2026-11-01）
+
+当前优先执行[PTS追加规格](evidence/2026-11-01-cap10/pts-preparation-plan.md)与[ECS+PTS逐步清单](evidence/2026-11-01-cap10/aliyun-ecs-pts-steps.md)。用户已经确认该环境方案及先做本地准备，取代此前单机k6/两台ECS建议；agent不采购、目前没有云主机或实际云调用。额外离线准备最多75分钟单列，原3小时工作账本已用至少6180秒（其后原范围活跃工作须补）、原8短窗/2正式/840秒/一优化不增加。完成本地准备和交叉审查后通知用户开通；云上只做必要准入后按原S1开始，不额外加容量校准轮。JMeter完整原始结果/远端终态与平台采样报告分开；Linux交叉编译/双JVM假接口接线都不代表业务容量通过。
+
+**本地交付已经完成：** 34 API模拟/29 collector/62上传绑定清理准入/18 HTTP与终态/14 Groovy合同，以及原34 Like/21 runner/34策略检查通过，非作者审查通过。完整[本地接线原件](evidence/2026-11-01-cap10/pts-jmeter-checks.json)包含44个假PUT四case及0PUT失败；最终同源20/20、两JVM0、完整10秒。Linux API与observer、1.27GB四依赖离线镜像归档已备好，镜像压缩读回校验通过。用户现在可依清单租一台ECS并开通PTS；不需要租第二台ECS。PTS默认2个引擎由平台提供，上传普通512+tearDown1的场景，总并发513、平台保护时长600秒，真实warm10/主60或180不变。packet→bind→显式verify-scene只读准入，成功且哈希固定后才允许预约S1；不要点击控制台调试或另开校准负载。后续freeze必须包含loadBackend、ptsPacketSHA256和ptsAdmissionSHA256，正式两轮不能换包或场景。
+
+**接续预算以[新账本](evidence/2026-11-01-cap10/pts-preparation-budget.json)为准：** 原已用6600秒、剩余4200秒；本次额外准备已关闭，不转给性能定位。实际transition originalUsed不得低于6600，原71份原件不改、linux/仍是同批实测子目录。先核SSH/真实规格/私网与RAM读取权限，加载离线镜像/二进制、新夹具和一次云环境空载，再按原S1=50/s执行。Start/Stop写权限在本地与只读准入均没有被实际云调用证明；运行时结果未知不重试Start，终态未证则不预约下一窗。收尾先证实远端停压和本地controller退出，finish会精确撤销会话、清上传包、停自有API/四CID、保留卷并删除已登记env；外部用户SSH/AK文件不删除，云资源释放由用户完成。原旧B1未知、旧CAP-09失败保留，本批完成后收尾无CAP-11。
 
 先读根[STATUS当前CAP-10](../STATUS.md)。本批已完成默认关闭Like全链观测与真实有限取消用例、容量工具/初态/名额监督及内部非作者审查；实际应用`0602ac08a0b458851b2cc6a8b595bbafb443bdaa`，精确CI四项通过。**没有发压，没有本批L/U/R，没有性能优化效果；8短窗、2正式、唯一优化均未用。**
 
-唯一60秒空载仅时基拒绝：MySQL Uptime+57s，宿主查询中点59.908861s，超既定容差；宿主wall/mono一致，CPU28.2%中位/内存75.1%最高及其余健康/下游均过。Docker/VM计时或调度仅候选，根因未知，不冒称硬件耗尽。已给用户[证据与换环境方案](evidence/2026-11-01-cap10/environment-decision.md)请求选择；目前不自动重开本机预检、S1、云采购部署或新批。等待不代表获授权。
+唯一60秒空载仅时基拒绝：MySQL Uptime+57s，宿主查询中点59.908861s，超既定容差；宿主wall/mono一致，CPU28.2%中位/内存75.1%最高及其余健康/下游均过。Docker/VM计时或调度仅候选，根因未知，不冒称硬件耗尽。原[证据与换环境方案](evidence/2026-11-01-cap10/environment-decision.md)保持；用户现选ECS+PTS，仍不重开本机预检或新批，等其准备好主机/连接后才实际部署与开测。
 
 本地[精确清理已完成](evidence/2026-11-01-cap10/cleanup.json)：512会话/observer撤销、自有API27976/四CID停止，6卷保留、3私有配置删除。旧cohort不可复用。用户若选择已有Linux，用剩余同批预算做必要平台采集适配/新夹具及S1；最终本批结束就收尾，不自动CAP-11或核验追加负载。下方保留执行规格，实际状态以上述及根STATUS为准。
 
-**最新用户追问与准备：** 用户表示需要时可准备云机，并要求后续GitHub静态页的性能/业务截图素材。已说明本地能运行、当前是计时门槛未过，建议Ubuntu24.04LTS amd64、16vCPU/32GiB、100GiBSSD；当前等待主机和SSH连接信息，agent未采购/部署。已读CodeBuddy `web-deploy-github`，只完成[展示素材计划](evidence/2026-11-01-cap10/showcase-capture-plan.md)，不创建站点、不复制私有求职/实习资料、不新增压力轮；Linux适配准备与实际运行分列，原本机拒绝保持。
+**展示素材准备：** 用户要求后续GitHub静态页的性能/业务截图素材；现已选上海ECS、Ubuntu24.04LTS amd64、16vCPU/32GiB、100GiBESSD，PTS同地域/VPC。已读CodeBuddy `web-deploy-github`，只完成[展示素材计划](evidence/2026-11-01-cap10/showcase-capture-plan.md)，不创建站点、不复制私有求职/实习资料、不新增压力轮；本地准备完成后再由用户租机并提供SSH连接，实际运行与本地接线结果分列，原本机拒绝保持。
 
-**离线Linux工具已准备并通过非作者审查：** 见[准备说明](evidence/2026-11-01-cap10/linux-preparation.md)与[源码/检查记录](evidence/2026-11-01-cap10/linux-preparation-review.json)。34 Like/21 runner/34策略/15平台为纯检查，5项CLI仅在当前Windows运行，观察器Linux交叉编译未执行。用户尚在询问云测平台与云机，已建议普通云机；拿到用户选择、可用SSH和真实规格后才能连接部署及建立一次transition。原本机原件/拒绝不覆盖，Linux新证据固定在同批linux/；不能重复本机空载、重发S/H、把交叉编译写成云端通过。继续时将[原预算](evidence/2026-11-01-cap10/budget-handoff.json)与[离线追加账本](evidence/2026-11-01-cap10/linux-preparation-budget.json)合并为transition的已用有效工作时间；等待用户准备主机期间不开发则不计时。原8+2和一项优化名额未用，最多一次换环境、无自动CAP-11。
+**原离线Linux工具已准备并通过非作者审查：** 见[准备说明](evidence/2026-11-01-cap10/linux-preparation.md)与[源码/检查记录](evidence/2026-11-01-cap10/linux-preparation-review.json)。34 Like/21 runner/34策略/15平台为纯检查，5项CLI仅在Windows运行，观察器Linux交叉编译未执行；此前同机k6建议由当前PTS后端替代。取得用户提供的可用SSH和真实规格后才能连接部署及建立一次transition。原本机原件/拒绝不覆盖，Linux新证据固定在同批linux/；不能重复本机空载、重发S/H、把交叉编译写成云端通过。继续时按[原预算](evidence/2026-11-01-cap10/budget-handoff.json)、[离线追加账本](evidence/2026-11-01-cap10/linux-preparation-budget.json)与本次PTS准备交接接续transition已用时间，不能回填旧4200秒；等待用户准备主机期间不开发则不计时。原8+2和一项优化名额未用，最多一次换环境、无自动CAP-11。
 
 用户已纠正目标：**测点赞优化后的实际可持续容量范围，不是固定20/s验证。先读根STATUS顶部CAP-10，上一版固定20/s、4次负载计划已被替代。** 先做一次60秒本机空载预检，首个短窗50/s分段定位，有证据才改一项；最多8个60秒短窗包含诊断、必要同率对照、倍率升档/夹逼和预留候选确认，随后选定R/s×180秒最多两轮。总主负载最多14分钟、有效开发最多3小时；启动失败/早停也占槽，不把多档藏成一次运行，不另跑hot或Feed，不扩功能。
 

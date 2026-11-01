@@ -1,0 +1,22 @@
+{
+  "at": "2026-11-01T06:16:39.832979+00:00",
+  "task": "CAP-09C Feed diagnostic2/2 allocation comparison",
+  "observedEvidence": [
+    "feed-diagnostic-1-cpu-zone.txt",
+    "feed-diagnostic-1-allocs-top.txt",
+    "feed-optimization-1.json",
+    "related-real-exit.json",
+    "ci-a.json"
+  ],
+  "sourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "differentPredictions": {
+    "expected": "Same100/s45s plus10s25/s warm,tail=true32retained traces/256spans/100ms threshold plus30sCPU, sampling allocation beforewarm/afterdrain. Repeated zone allocations should disappear after immutable IANA reuse while full20card content/order/time/cursor/personalization and SQL workload stay consistent.",
+    "alternative": "If material allocations remain in timezone callchain or correctness changes, do not claim improvement; no further load or blind optimization beyond remaining budget.",
+    "latency": "Observed timing may vary with host/DB/Redis; allocation proof is independent of attributing250 old P95 earlystop. Final capacity uses tailfalse/profileoff."
+  },
+  "relatedCallChainEquivalence": "Only Feed zone reuse changes active Feed callchain; acknowledged-commit cancellation change is only in SetLike, which no Feed request invokes. Same app assembly/pools/GOMAXPROCS/limits/TTL/fixture/session identities. Original relay unchanged and allLIKEoutbox alreadyDONE; this Feed phase creates0new events.",
+  "samplerChange": "Indexed collector-r2 only affects receipts matching. Feed stage watermark range has0LIKE events; fullchain0 proof still required. It remains bounded4s/5s/threebad guard. Earlier diag1 collector operated empty stage range too, so its quadratic write-stage cost was not present.",
+  "instrumentationCorrection": "Mirrors actual diagnostic1 32trace config explicitly, see diagnostic-tail-configuration-note.json; neither run captures goroutine stacks.",
+  "plannedCPUSeconds": 30,
+  "diagnosticBudget": "last Feed diagnostic slot; no further diagnostic load or repair planned after this comparison"
+}

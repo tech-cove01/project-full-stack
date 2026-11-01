@@ -1,0 +1,20 @@
+{
+  "startedAt": "2026-11-01T06:15:06.459909+00:00",
+  "finishedAt": "2026-11-01T06:15:07.716777+00:00",
+  "elapsedSeconds": 1.2568633999908343,
+  "argv": [
+    "go",
+    "build",
+    "-o",
+    "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\cap09-downstream-r2.exe",
+    "../scripts/cap09-downstream.go"
+  ],
+  "exitCode": 0,
+  "toolSourceSha": "21e844e64a0a6aa3ca0cb9af4f2977be57dc334c",
+  "sourceFile": "scripts/cap09-downstream.go",
+  "sourceSHA256": "7f9238d00f15c54bd492d2f529dc42df9dfe5ad3d0ffb1d14970db135610d90c",
+  "exe": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\cap09-downstream-r2.exe",
+  "binarySHA256": "4c264849341926a97956484c28977798e19735edbf30316fb26a1da9d748a8b5",
+  "noConcurrentLoadOrAPI": true,
+  "oldObserverRetained": true
+}

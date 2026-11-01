@@ -1,0 +1,406 @@
+{
+  "at": "2026-11-01T06:16:42.776026+00:00",
+  "tag": "feed-diagnostic-2",
+  "passed": true,
+  "failedStartOrException": null,
+  "wrapperExit": 0,
+  "observerExit": 0,
+  "childrenConverged": true,
+  "observerPid": 54552,
+  "wrapperPid": 43892,
+  "loadWaitStartedAt": "2026-11-01T06:16:43.089484+00:00",
+  "loadWaitFinishedAt": "2026-11-01T06:17:46.153361+00:00",
+  "powerEvidence": {
+    "before": {
+      "at": "2026-11-01T06:16:42.776098+00:00",
+      "hostMemoryPercent": 80.3,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "after": {
+      "at": "2026-11-01T06:17:48.220338+00:00",
+      "hostMemoryPercent": 79.6,
+      "ac": 1,
+      "batteryPercent": 79,
+      "batterySaver": 0
+    },
+    "events": {
+      "available": true,
+      "events": []
+    },
+    "valid": true
+  },
+  "observerResources": [
+    {
+      "at": "2026-11-01T06:16:43.108665+00:00",
+      "pid": 54552,
+      "rssBytes": 16494592,
+      "cpuPercentOneCore": 34.3,
+      "cpuIntervalSeconds": 0.22801080002682284,
+      "cpuIntervalValid": false,
+      "power": {
+        "at": "2026-11-01T06:16:43.108256+00:00",
+        "hostMemoryPercent": 79.9,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:16:48.335191+00:00",
+      "pid": 54552,
+      "rssBytes": 16510976,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.226526300015394,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:16:48.334759+00:00",
+        "hostMemoryPercent": 79.1,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:16:53.579561+00:00",
+      "pid": 54552,
+      "rssBytes": 16531456,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.244360499957111,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:16:53.578703+00:00",
+        "hostMemoryPercent": 80.7,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:16:58.895451+00:00",
+      "pid": 54552,
+      "rssBytes": 16625664,
+      "cpuPercentOneCore": 0.6,
+      "cpuIntervalSeconds": 5.315899700042792,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:16:58.895020+00:00",
+        "hostMemoryPercent": 78.8,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:04.138754+00:00",
+      "pid": 54552,
+      "rssBytes": 16666624,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.243302899994887,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:04.138281+00:00",
+        "hostMemoryPercent": 78.9,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:09.361964+00:00",
+      "pid": 54552,
+      "rssBytes": 16715776,
+      "cpuPercentOneCore": 1.2,
+      "cpuIntervalSeconds": 5.223208399955183,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:09.361423+00:00",
+        "hostMemoryPercent": 79.7,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:14.656168+00:00",
+      "pid": 54552,
+      "rssBytes": 16715776,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.294202700024471,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:14.655445+00:00",
+        "hostMemoryPercent": 81.4,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:19.937984+00:00",
+      "pid": 54552,
+      "rssBytes": 16719872,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.281818600022234,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:19.937556+00:00",
+        "hostMemoryPercent": 79.2,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:25.148215+00:00",
+      "pid": 54552,
+      "rssBytes": 16670720,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.210232599987648,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:25.147791+00:00",
+        "hostMemoryPercent": 79.4,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:30.663773+00:00",
+      "pid": 54552,
+      "rssBytes": 16670720,
+      "cpuPercentOneCore": 0.3,
+      "cpuIntervalSeconds": 5.515521899971645,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:30.661692+00:00",
+        "hostMemoryPercent": 80.3,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:36.097380+00:00",
+      "pid": 54552,
+      "rssBytes": 16674816,
+      "cpuPercentOneCore": 0.0,
+      "cpuIntervalSeconds": 5.433639199996833,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:36.096796+00:00",
+        "hostMemoryPercent": 81.6,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    },
+    {
+      "at": "2026-11-01T06:17:41.406142+00:00",
+      "pid": 54552,
+      "rssBytes": 16830464,
+      "cpuPercentOneCore": 0.6,
+      "cpuIntervalSeconds": 5.3087627000059,
+      "cpuIntervalValid": true,
+      "power": {
+        "at": "2026-11-01T06:17:41.405560+00:00",
+        "hostMemoryPercent": 79.6,
+        "ac": 1,
+        "batteryPercent": 79,
+        "batterySaver": 0
+      }
+    }
+  ],
+  "toolBytesStable": true,
+  "apiPassed": true,
+  "factsConverged": true,
+  "resourcesPassed": true,
+  "intentionalStopWritten": false,
+  "probeExpectedStopConfirmed": false,
+  "pipeline": {
+    "passed": true,
+    "chain": "feed",
+    "newEventsInConservativeSampledWindow": 0,
+    "maximumGrowthBudget": 0.0,
+    "growthByQueue": {
+      "outbox": 0,
+      "receipt-follow-v1": 0,
+      "receipt-feed-v1": 0,
+      "receipt-search-v1": 0,
+      "lag-community.follow-v1": 0,
+      "lag-community.feed-v1": 0,
+      "lag-community.search-v1": 0
+    },
+    "shortStageLast15SecondsQueueSlope": {
+      "sampleCount": 3,
+      "firstSample": "2026-11-01T06:17:27.9338346Z",
+      "lastSample": "2026-11-01T06:17:37.9351017Z",
+      "perSecond": {
+        "outbox": 0.0,
+        "receipt-follow-v1": 0.0,
+        "receipt-feed-v1": 0.0,
+        "receipt-search-v1": 0.0,
+        "lag-community.follow-v1": 0.0,
+        "lag-community.feed-v1": 0.0,
+        "lag-community.search-v1": 0.0
+      },
+      "scope": "descriptive least-squares queue slope at sample starts in the final native 15s; underlying SQL/Kafka intervals are non-atomic. No additional pass/fail threshold."
+    },
+    "windowStartTarget": "2026-11-01T06:16:57.011000+00:00",
+    "firstBoundarySample": "2026-11-01T06:16:52.9337645Z",
+    "firstInsideSample": "2026-11-01T06:16:57.933831Z",
+    "lastInsideSample": "2026-11-01T06:17:37.9351017Z",
+    "firstInsideSQLStartedAt": "2026-11-01T06:16:57.933831Z",
+    "lastInsideSQLFinishedAt": "2026-11-01T06:17:38.1104356Z",
+    "firstQueueInsideSample": "2026-11-01T06:16:57.933831Z",
+    "lastQueueInsideSample": "2026-11-01T06:17:37.9351017Z",
+    "firstPostEndSample": "2026-11-01T06:17:42.9342756Z",
+    "nativeEndedAt": "2026-11-01T06:17:42.011000+00:00",
+    "recoveryObservedCompletedAt": "2026-11-01T06:17:42.982498+00:00",
+    "recoverySecondsFromNativeEnd": 0.971498,
+    "maximumSampleStartGapSeconds": 5.001237,
+    "nativeRecoveryBudgetVerified": true,
+    "nativeScenarioComplete": true,
+    "samplingScope": "5s non-atomic observations with every start gap/boundary <=7.5s. Event denominator is fully inside the target window; boundary queue min/max is conservative. Recovery uses latest SQL/Kafka completion, not sample start or control done. Not instantaneous backlog proof."
+  },
+  "knownOwnedProcesses": [
+    {
+      "pid": 43892,
+      "created": 1793513803.0857513,
+      "name": "python.exe"
+    },
+    {
+      "pid": 67656,
+      "created": 1793513803.0933049,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 50156,
+      "created": 1793513803.2694242,
+      "name": "node.exe"
+    },
+    {
+      "pid": 46048,
+      "created": 1793513803.3100436,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 71396,
+      "created": 1793513803.5482683,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 36176,
+      "created": 1793513803.5787115,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 60936,
+      "created": 1793513804.1419847,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 64268,
+      "created": 1793513804.4096007,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 58540,
+      "created": 1793513804.453271,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 32452,
+      "created": 1793513816.1843555,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 59300,
+      "created": 1793513816.491538,
+      "name": "python.exe"
+    },
+    {
+      "pid": 67624,
+      "created": 1793513816.5011816,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 66976,
+      "created": 1793513816.3439045,
+      "name": "k6.exe"
+    },
+    {
+      "pid": 15852,
+      "created": 1793513816.3871193,
+      "name": "conhost.exe"
+    },
+    {
+      "pid": 10948,
+      "created": 1793513817.1599731,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 64568,
+      "created": 1793513817.8370423,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 26344,
+      "created": 1793513822.8388605,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 60876,
+      "created": 1793513827.8310893,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 17464,
+      "created": 1793513832.8463795,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 40148,
+      "created": 1793513837.8759964,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 9476,
+      "created": 1793513842.828971,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 52380,
+      "created": 1793513847.8303075,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 63580,
+      "created": 1793513852.95909,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 54304,
+      "created": 1793513857.8590343,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 16496,
+      "created": 1793513862.8604257,
+      "name": "docker.exe"
+    },
+    {
+      "pid": 44872,
+      "created": 1793513865.0080128,
+      "name": "mysql.exe"
+    },
+    {
+      "pid": 44620,
+      "created": 1793513865.0745797,
+      "name": "conhost.exe"
+    }
+  ],
+  "finishedAt": "2026-11-01T06:17:48.230415+00:00"
+}

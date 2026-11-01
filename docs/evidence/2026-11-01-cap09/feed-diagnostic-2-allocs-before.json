@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-01T06:16:42.182740+00:00",
+  "path": "feed-diagnostic-2-allocs-before.pprof",
+  "bytes": 4672,
+  "sha256": "14d482e66ab43881d4652a06fb4d30bc7e4f4544a188efb2a0b4898703f9f71c",
+  "forcedGC": false,
+  "scope": "before diagnostic warmup cumulative sampled allocations"
+}

@@ -1,0 +1,2 @@
+{"time":"2026-11-01T14:19:20.2821866+08:00","level":"INFO","msg":"isolated capacity diagnostics enabled","address":"127.0.0.1:8371"}
+{"time":"2026-11-01T14:19:20.3455819+08:00","level":"INFO","msg":"Go API ready","service":"project-full-stack-go","runtime":"go","version":"capacity-e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1","address":"127.0.0.1:8271","order_stream_workers":1}

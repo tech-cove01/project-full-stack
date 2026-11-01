@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-01T06:15:46.073861+00:00",
+  "argv": [
+    "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\cap09-downstream-r2.exe",
+    "--environment",
+    "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-a4fc273c7715\\env-diag-a.private.json",
+    "--output",
+    "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-11-01-cap09\\observer-r2-readiness",
+    "--done-file",
+    "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\docs\\evidence\\2026-11-01-cap09\\observer-r2-readiness-control\\done.json",
+    "--max-seconds",
+    "15"
+  ],
+  "exitCode": 1,
+  "newLoadRuns": 0,
+  "scope": "compiled indexed sampler only; full cumulative clean readiness plus empty-watermark completed sample, no API/native workload"
+}

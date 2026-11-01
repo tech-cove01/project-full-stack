@@ -1,0 +1,37 @@
+{
+  "at": "2026-11-01T06:33:18.211816+00:00",
+  "task": "CAP-09D final immutable source workload",
+  "feedStairRates": [
+    50,
+    100,
+    250,
+    500,
+    1000,
+    2000,
+    5000
+  ],
+  "likeStairRates": [
+    20,
+    50,
+    100,
+    250,
+    500,
+    1000,
+    5000
+  ],
+  "secondsPerStair": 45,
+  "maximumStairsPerChain": 7,
+  "stopAtFirstLimitedStage": true,
+  "formalHolds": "freeze one rate <= highest complete45pass with margin;180s twice,firstfailureendsgroup,no lower replacement",
+  "hotFinalRepresentatives": {
+    "feed": 100,
+    "like": 20
+  },
+  "newDiagnosticsAuthorized": false,
+  "newProductionRepairsPlanned": false,
+  "likeBaselineLimit": "No preoptimized valid full45main/hot result. Same20hot complete10s warm can be contrasted only as warm observations; no main stable relative improvement claim.",
+  "warmpolicy": "warm=min(25,target),10s; Like warm latency retained separately,stable200/500 gates unchanged; all oldfailedslots retained",
+  "observer": "r2 indexed exact receipts, same4s/5s budget and real3Kafka groups",
+  "hostSecurity": "user reports securitysoftwaretemporarilydisabled8h; agent changed no securitysetting. Runner restoredfromreviewedGit source aftersecondremoval.",
+  "finishScope": "record actualresults/failedceilings,preserveoldCAP08fail/B1unknown,normal544sessionlogout/dropobserver/stopownedAPI+4exactCIDs/retainall6volumes,smallcommits+normalpush; no CAP10"
+}

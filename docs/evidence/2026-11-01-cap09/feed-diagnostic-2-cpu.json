@@ -1,0 +1,13 @@
+{
+  "startedAt": "2026-11-01T06:16:58.552985+00:00",
+  "finishedAt": "2026-11-01T06:17:28.587227+00:00",
+  "monotonicElapsedSeconds": 30.034245899994858,
+  "requestedSeconds": 30,
+  "path": "feed-diagnostic-2-cpu.pprof",
+  "bytes": 49520,
+  "sha256": "6a921eee809a974d45f1e0c9d6d55dfd357ba1200e94a00371ff0b84c5344e8f",
+  "apiSourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "binarySHA256": "aeaadf4fc3da9f80c736bfe47867767775fcbbf54acf8c34b5dfca37afeff50e",
+  "apiPid": 27844,
+  "scope": "same instrumented diagnostic profile plan; actual native overlap verified later"
+}

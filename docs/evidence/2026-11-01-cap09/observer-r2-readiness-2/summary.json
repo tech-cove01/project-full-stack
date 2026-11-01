@@ -1,0 +1,114 @@
+{
+  "allSamplesComplete": true,
+  "at": "2026-11-01T06:16:04.9560152Z",
+  "baseline": {
+    "at": "2026-11-01T06:16:04.8429226Z",
+    "elapsedSeconds": 0,
+    "durationMs": 81.3661,
+    "sql": {
+      "startedAt": "2026-11-01T06:16:04.8429226Z",
+      "finishedAt": "2026-11-01T06:16:04.9072933Z",
+      "afterWatermark": 0,
+      "maxOutboxId": 3248,
+      "counts": {
+        "events": 3196,
+        "pending": 0,
+        "processing": 0,
+        "done": 3196,
+        "needsReview": 0,
+        "other": 0
+      },
+      "receipts": [
+        {
+          "projection": "follow-v1",
+          "missing": 0,
+          "applied": 0,
+          "ignored": 3196
+        },
+        {
+          "projection": "feed-v1",
+          "missing": 0,
+          "applied": 0,
+          "ignored": 3196
+        },
+        {
+          "projection": "search-v1",
+          "missing": 0,
+          "applied": 0,
+          "ignored": 3196
+        }
+      ],
+      "parked": 0
+    },
+    "kafka": {
+      "startedAt": "2026-11-01T06:16:04.9072933Z",
+      "finishedAt": "2026-11-01T06:16:04.9242887Z",
+      "topic": "community.events",
+      "groups": [
+        {
+          "group": "community.follow-v1",
+          "partitions": [
+            {
+              "partition": 0,
+              "firstOffset": 0,
+              "endOffset": 3196,
+              "committedOffset": 3196,
+              "lag": 0,
+              "initialized": true
+            }
+          ],
+          "lag": 0,
+          "initialized": true
+        },
+        {
+          "group": "community.feed-v1",
+          "partitions": [
+            {
+              "partition": 0,
+              "firstOffset": 0,
+              "endOffset": 3196,
+              "committedOffset": 3196,
+              "lag": 0,
+              "initialized": true
+            }
+          ],
+          "lag": 0,
+          "initialized": true
+        },
+        {
+          "group": "community.search-v1",
+          "partitions": [
+            {
+              "partition": 0,
+              "firstOffset": 0,
+              "endOffset": 3196,
+              "committedOffset": 3196,
+              "lag": 0,
+              "initialized": true
+            }
+          ],
+          "lag": 0,
+          "initialized": true
+        }
+      ]
+    },
+    "errors": [],
+    "semanticViolations": []
+  },
+  "collectionValid": true,
+  "doneObservedAt": "2026-11-01T06:16:04.9560152Z",
+  "failedSamples": 0,
+  "fullChainStableBudgetVerified": false,
+  "maxSeconds": 15,
+  "nativeRecoveryBudgetVerified": false,
+  "postControlDoneConverged": true,
+  "recoveredAt": "2026-11-01T06:16:04.9560152Z",
+  "recoveryFromObservedDoneMs": 0,
+  "samples": 1,
+  "scope": "stage samples read only id\u003estartOutboxWatermark; cumulative cohort counts are the clean baseline plus stage counts. Kafka lag is whole topic, three independent groups, fetched sequentially. Final convergence is not steady-state proof. Grade the 60s native recovery budget from native stableEndedAt and timeline, not delayed helper/control completion.",
+  "semanticViolationCount": 0,
+  "startOutboxWatermark": 3248,
+  "startedAt": "2026-11-01T06:16:04.8429226Z",
+  "valid": true,
+  "validScope": "complete stage collection, no semantic violations and post-control-done convergence only"
+}

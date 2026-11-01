@@ -1,0 +1,360 @@
+{
+  "task": "CAP-09C Feed sampled-allocation comparison",
+  "at": "2026-11-01T06:26:33.043564+00:00",
+  "reviewScope": "Offline public-artifact verification only; this record is not CAP-09E independent capacity acceptance. No Go, SQL, HTTP, profiling endpoint or workload was run by this comparison.",
+  "fixture": {
+    "path": "fixture/fixture.json",
+    "sha256": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+    "notes": 6400,
+    "authors": 32,
+    "configuredReaders": 32,
+    "notesPerAuthor": 200,
+    "bodyBytes": 256,
+    "pageSize": 20,
+    "expectedSource": "database",
+    "publicCountKeys": 640
+  },
+  "records": [
+    {
+      "label": "before",
+      "tag": "feed-diagnostic-1",
+      "applicationSourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+      "binarySHA256": "d72c1ea34977bb780bea55c562b7ba14fde3004b6c2abd6c54733d8d7577d3e1",
+      "binaryBytesVerified": true,
+      "apiPID": 37160,
+      "fixtureSHA256": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+      "environmentSHA256": "a1e1abff73f147cbc04933b7c27cef4bf169c2f1f9618c6e323fc57d77dc9e97",
+      "feedScriptHashes": {
+        "scripts/go073-cap-read.mjs": "c372fc868d3dca9014f1ee8466fcd58822af0854dce0d518de223b4acc07a918",
+        "scripts/load/go073-cap-read.js": "0cf21840d530d0685d69dc3b486312c4c08cc2a1c0a22f06fc7f241010328ad7",
+        "scripts/load/cap09-feed-contract.js": "de0bf8965d4d20ced9ecb791d84f3dcf231f4f36fbf3838e93bfa14042b429e1",
+        "scripts/load/cap09-native-window.mjs": "bc09fd05fad0ddd14de8a2ad4e39fb9a13d40ee2c2f1bc468da9e9e4eba0e490"
+      },
+      "workload": {
+        "mode": "multi",
+        "rate": 100,
+        "seconds": 45,
+        "warmSeconds": 10,
+        "warmRate": 25,
+        "preVUs": 256,
+        "maxVUs": 512
+      },
+      "warm": {
+        "cap_read_attempted": 251,
+        "http_reqs": 251,
+        "cap_read_completed": 251,
+        "cap_read_success": 251,
+        "cap_read_system_errors": 0,
+        "cap_read_http_errors": 0,
+        "cap_read_content_errors": 0,
+        "dropped_iterations": 0
+      },
+      "stable": {
+        "cap_read_attempted": 4501,
+        "http_reqs": 4501,
+        "cap_read_completed": 4501,
+        "cap_read_success": 4501,
+        "cap_read_system_errors": 0,
+        "cap_read_http_errors": 0,
+        "cap_read_content_errors": 0,
+        "dropped_iterations": 0
+      },
+      "totalWarmStableRequests": 4752,
+      "nativeScenario": {
+        "startedAt": 1793512716895,
+        "durationMs": 45000,
+        "scheduledEndedAt": 1793512761895,
+        "complete": true,
+        "startMetric": {
+          "min": 1793512716895,
+          "max": 1793512716895
+        },
+        "durationMetric": {
+          "min": 45000,
+          "max": 45000
+        },
+        "scope": "k6 scenario.startTime plus configured native offer duration. Complete requires successful unsignalled process coverage; failed/early-stop stages retain scheduled end without claiming actual completion or an exact stop timestamp."
+      },
+      "stagePassed": true,
+      "resourcesPassed": true,
+      "powerValid": true,
+      "rawInstrumentedLatencyMS": {
+        "p(95)": 128.8759,
+        "p(99)": 199.1457,
+        "max": 283.19
+      },
+      "tailActual": {
+        "enabled": true,
+        "retainedTraceCapacity": 32,
+        "spansPerTraceCapacity": 256,
+        "slowThresholdMS": 100,
+        "finalRetainedTraceCount": 32,
+        "completedRequests": 4752,
+        "sharedTasks": 36,
+        "latestSequence": 291
+      },
+      "cpuWindow": {
+        "startedAt": "2026-11-01T05:58:42.223118+00:00",
+        "finishedAt": "2026-11-01T05:59:12.235096+00:00",
+        "requestedSeconds": 30,
+        "monotonicElapsedSeconds": 30.011962299991865,
+        "fullyWithinNative": true,
+        "startOffsetFromNativeSeconds": 5.328118,
+        "endOffsetFromNativeSeconds": 35.340096
+      },
+      "allocationWindow": {
+        "beforeAt": "2026-11-01T05:58:21.865055+00:00",
+        "afterAt": "2026-11-01T05:59:40.477067+00:00",
+        "wallSeconds": 78.612012,
+        "afterMinusNativeEndSeconds": 18.582067,
+        "forcedGC": false,
+        "scope": "Sampled cumulative after-minus-before; includes warmup, native stage, API/background/observation work and idle/drain. Natural-GC sampling boundaries, not precise per-request attribution."
+      },
+      "sampledProfileValues": {
+        "allocSpaceBytes": 628040710,
+        "allocObjects": 5023496,
+        "zoneAllocSpaceBytes": 108040796,
+        "zoneAllocObjects": 515183,
+        "cpuTotalNS": 12830000000,
+        "zoneCPUNS": 320000000,
+        "zoneCPUSamples": 32
+      },
+      "rawProfiles": {
+        "allocs-before": {
+          "path": "feed-diagnostic-1-allocs-before.pprof",
+          "bytes": 5500,
+          "sha256": "2ccc0caabafcfcabac8da677d2e5d5f1466c826c0a3abfd3738f73e92dd48515",
+          "metadata": "feed-diagnostic-1-allocs-before.json"
+        },
+        "allocs-after": {
+          "path": "feed-diagnostic-1-allocs-after.pprof",
+          "bytes": 27730,
+          "sha256": "e075c765b512a6e871e13c8733f68981408d81063323606310ebac0987601c32",
+          "metadata": "feed-diagnostic-1-allocs-after.json"
+        },
+        "cpu": {
+          "path": "feed-diagnostic-1-cpu.pprof",
+          "bytes": 53295,
+          "sha256": "ba6ce5b3decbf4559856e06d7d68696a6577aff7c420e5ca4d3de3aa19e76c67",
+          "metadata": "feed-diagnostic-1-cpu.json"
+        }
+      },
+      "observer": {
+        "sourceSHA256": "8c66f740a60ad859bab5238fd80353b5262b7b32a85813d178862c34a27bb773",
+        "binarySHA256": "03be12cdb9a000dee02e3ab683af2975434cccebcffce03307ca5734fe520ecd",
+        "baselineGlobalMaxOutboxID": 781,
+        "baselineCohortLIKEEvents": 781,
+        "stageSampleCount": 14,
+        "stageLIKEEventsEverySample": 0,
+        "pipelinePassed": true,
+        "allQueueGrowth": {
+          "outbox": 0,
+          "receipt-follow-v1": 0,
+          "receipt-feed-v1": 0,
+          "receipt-search-v1": 0,
+          "lag-community.follow-v1": 0,
+          "lag-community.feed-v1": 0,
+          "lag-community.search-v1": 0
+        }
+      }
+    },
+    {
+      "label": "after",
+      "tag": "feed-diagnostic-2",
+      "applicationSourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+      "binarySHA256": "aeaadf4fc3da9f80c736bfe47867767775fcbbf54acf8c34b5dfca37afeff50e",
+      "binaryBytesVerified": true,
+      "apiPID": 27844,
+      "fixtureSHA256": "63d77ccf658b9a5fe69309584a2cdefa794d0b927ebaeca204e4607828d5a150",
+      "environmentSHA256": "a1e1abff73f147cbc04933b7c27cef4bf169c2f1f9618c6e323fc57d77dc9e97",
+      "feedScriptHashes": {
+        "scripts/go073-cap-read.mjs": "c372fc868d3dca9014f1ee8466fcd58822af0854dce0d518de223b4acc07a918",
+        "scripts/load/go073-cap-read.js": "0cf21840d530d0685d69dc3b486312c4c08cc2a1c0a22f06fc7f241010328ad7",
+        "scripts/load/cap09-feed-contract.js": "de0bf8965d4d20ced9ecb791d84f3dcf231f4f36fbf3838e93bfa14042b429e1",
+        "scripts/load/cap09-native-window.mjs": "bc09fd05fad0ddd14de8a2ad4e39fb9a13d40ee2c2f1bc468da9e9e4eba0e490"
+      },
+      "workload": {
+        "mode": "multi",
+        "rate": 100,
+        "seconds": 45,
+        "warmSeconds": 10,
+        "warmRate": 25,
+        "preVUs": 256,
+        "maxVUs": 512
+      },
+      "warm": {
+        "cap_read_attempted": 251,
+        "http_reqs": 251,
+        "cap_read_completed": 251,
+        "cap_read_success": 251,
+        "cap_read_system_errors": 0,
+        "cap_read_http_errors": 0,
+        "cap_read_content_errors": 0,
+        "dropped_iterations": 0
+      },
+      "stable": {
+        "cap_read_attempted": 4500,
+        "http_reqs": 4500,
+        "cap_read_completed": 4500,
+        "cap_read_success": 4500,
+        "cap_read_system_errors": 0,
+        "cap_read_http_errors": 0,
+        "cap_read_content_errors": 0,
+        "dropped_iterations": 0
+      },
+      "totalWarmStableRequests": 4751,
+      "nativeScenario": {
+        "startedAt": 1793513817011,
+        "durationMs": 45000,
+        "scheduledEndedAt": 1793513862011,
+        "complete": true,
+        "startMetric": {
+          "min": 1793513817011,
+          "max": 1793513817011
+        },
+        "durationMetric": {
+          "min": 45000,
+          "max": 45000
+        },
+        "scope": "k6 scenario.startTime plus configured native offer duration. Complete requires successful unsignalled process coverage; failed/early-stop stages retain scheduled end without claiming actual completion or an exact stop timestamp."
+      },
+      "stagePassed": true,
+      "resourcesPassed": true,
+      "powerValid": true,
+      "rawInstrumentedLatencyMS": {
+        "p(95)": 115.19195000000002,
+        "p(99)": 298.547097,
+        "max": 610.7473
+      },
+      "tailActual": {
+        "enabled": true,
+        "retainedTraceCapacity": 32,
+        "spansPerTraceCapacity": 256,
+        "slowThresholdMS": 100,
+        "finalRetainedTraceCount": 32,
+        "completedRequests": 4751,
+        "sharedTasks": 32,
+        "latestSequence": 260
+      },
+      "cpuWindow": {
+        "startedAt": "2026-11-01T06:16:58.552985+00:00",
+        "finishedAt": "2026-11-01T06:17:28.587227+00:00",
+        "requestedSeconds": 30,
+        "monotonicElapsedSeconds": 30.034245899994858,
+        "fullyWithinNative": true,
+        "startOffsetFromNativeSeconds": 1.541985,
+        "endOffsetFromNativeSeconds": 31.576227
+      },
+      "allocationWindow": {
+        "beforeAt": "2026-11-01T06:16:42.182740+00:00",
+        "afterAt": "2026-11-01T06:18:34.864312+00:00",
+        "wallSeconds": 112.681572,
+        "afterMinusNativeEndSeconds": 52.853312,
+        "forcedGC": false,
+        "scope": "Sampled cumulative after-minus-before; includes warmup, native stage, API/background/observation work and idle/drain. Natural-GC sampling boundaries, not precise per-request attribution."
+      },
+      "sampledProfileValues": {
+        "allocSpaceBytes": 519527344,
+        "allocObjects": 4800979,
+        "zoneAllocSpaceBytes": 0,
+        "zoneAllocObjects": 0,
+        "cpuTotalNS": 11220000000,
+        "zoneCPUNS": 0,
+        "zoneCPUSamples": 0
+      },
+      "rawProfiles": {
+        "allocs-before": {
+          "path": "feed-diagnostic-2-allocs-before.pprof",
+          "bytes": 4672,
+          "sha256": "14d482e66ab43881d4652a06fb4d30bc7e4f4544a188efb2a0b4898703f9f71c",
+          "metadata": "feed-diagnostic-2-allocs-before.json"
+        },
+        "allocs-after": {
+          "path": "feed-diagnostic-2-allocs-after.pprof",
+          "bytes": 27328,
+          "sha256": "b032648bcfefeff513f9aa053dc5c332340d37ac0fcca8e08a68f1d76e8ed195",
+          "metadata": "feed-diagnostic-2-allocs-after.json"
+        },
+        "cpu": {
+          "path": "feed-diagnostic-2-cpu.pprof",
+          "bytes": 49520,
+          "sha256": "6a921eee809a974d45f1e0c9d6d55dfd357ba1200e94a00371ff0b84c5344e8f",
+          "metadata": "feed-diagnostic-2-cpu.json"
+        }
+      },
+      "observer": {
+        "sourceSHA256": "7f9238d00f15c54bd492d2f529dc42df9dfe5ad3d0ffb1d14970db135610d90c",
+        "binarySHA256": "4c264849341926a97956484c28977798e19735edbf30316fb26a1da9d748a8b5",
+        "baselineGlobalMaxOutboxID": 3248,
+        "baselineCohortLIKEEvents": 3196,
+        "stageSampleCount": 14,
+        "stageLIKEEventsEverySample": 0,
+        "pipelinePassed": true,
+        "allQueueGrowth": {
+          "outbox": 0,
+          "receipt-follow-v1": 0,
+          "receipt-feed-v1": 0,
+          "receipt-search-v1": 0,
+          "lag-community.follow-v1": 0,
+          "lag-community.feed-v1": 0,
+          "lag-community.search-v1": 0
+        }
+      }
+    }
+  ],
+  "observedChange": {
+    "sampledAllocationBytesDelta": -108513366,
+    "approximateSampledAllocationRelativeChangePercent": -17.27807835896498,
+    "pprofDisplayedTotalMB": {
+      "before": 598.95,
+      "after": 495.46
+    },
+    "oldZoneSampledAllocationSharePercent": 17.202833236718046,
+    "zoneSampledAllocationDeltaAfterMinusBefore": {
+      "before": 108040796,
+      "after": 0
+    },
+    "zoneCPUObservedNS": {
+      "before": 320000000,
+      "after": 0
+    },
+    "interpretation": "The same repeated timezone chain has no matched weighted allocation or CPU samples in the after comparison. This supports the targeted allocation optimization; zero matched samples does not mean literally zero execution or physical allocation."
+  },
+  "analysisMethod": "Raw gzip profile protobuf sample types/values and location/function names were read offline with Python and cross-checked against archived Go pprof text. Values are profiler-weighted sampling estimates, not exact allocation counters. Each allocation result is within-run after-minus-before; CPU is that run's separate 30s sample.",
+  "applicationDiffReview": {
+    "before": "53fa1b34843486dd546ac3212a187e963621890b",
+    "after": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+    "backendChangedFiles": [
+      "internal/social/feed.go",
+      "internal/social/feed_zone_test.go",
+      "internal/social/like.go",
+      "internal/social/like_postcommit_integration_test.go"
+    ],
+    "activeFeedChange": "Only zone uses a lazy immutable IANA Location; Feed routing, SQL, cards/counts, authorization, cursor and API assembly are unchanged.",
+    "otherApplicationChange": "Cancellation handling after a committed SetLike is isolated to SetLike; these GET Feed requests do not invoke it. No stage LIKE events were observed."
+  },
+  "limitations": [
+    "Native request totals differ by one: before4501+251=4752; after4500+251=4751. Both full native windows passed with all requests classified/successful and zero unknown/drop/content/system/HTTP errors.",
+    "Allocation observation windows are unequal and include background/drain/idle work; cumulative global LIKE history also grew between runs. Do not divide sampled totals by HTTP counts as exact per-HTTP allocation.",
+    "CPU phases differ within the 45s native windows; do not compare total CPU percentages or infer a throughput multiplier.",
+    "Both actual tail rings retained32 traces/256spans/100ms threshold. Initial prediction mislabeled retained traces; diagnostic-tail-configuration-note.json preserves that correction.",
+    "Observer changed to full-key receipt lookup. Both Feed stage watermark ranges remained empty of LIKE events, so the measured write-stage quadratic receipt workload was absent. This does not assert byte-identical tools or globally equal database history.",
+    "Archived top texts are truncated views; the no-match statement above uses raw sample/function matching as well as CPU focus output. No matched samples is bounded sampling evidence, not proof of absence of every call.",
+    "Instrumented P95/P99 are archival only: new P95 is lower while new P99 is higher. These diagnostic samples do not establish tail-latency causality or stable capacity.",
+    "This was the second/final Feed diagnostic slot. Capacity comparisons must use the declared final clean application with extra tail/profiling disabled and preserve every earlier failure."
+  ],
+  "otherNativeOverlap": {
+    "likeBaselineHotCommandAt": "2026-11-01T06:22:17.617671+00:00",
+    "afterLatestAllocationCapture": true,
+    "scope": "The only current like-baseline-hot command starts after both allocation captures. No additional workload was started for this comparison."
+  },
+  "evidence": [
+    "feed-diagnostic-1-allocs-top.txt",
+    "feed-diagnostic-1-cpu-top.txt",
+    "feed-diagnostic-1-cpu-zone.txt",
+    "feed-diagnostic-2-allocs-top.txt",
+    "feed-diagnostic-2-cpu-zone.txt",
+    "diagnostic-tail-configuration-note.json",
+    "collector-join-diagnosis-1/count-comparison-summary.json"
+  ]
+}

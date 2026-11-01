@@ -1,0 +1,10 @@
+File: capacity.exe
+Build ID: D:\桌面\The ALL\agent\project\code\.runtime-fullstack-cap09-build-e6bfc77\capacity.exe2026-11-01 14:05:44.0743523 +0800 CST
+Type: cpu
+Time: 2026-11-01 14:16:58 CST
+Duration: 30s, Total samples = 11.22s (37.40%)
+Active filters:
+   focus=time.LoadLocation|social.zone
+Showing nodes accounting for 0, 0% of 11.22s total
+      flat  flat%   sum%        cum   cum%
+Focus expression matched no samples

@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-01T06:18:34.864312+00:00",
+  "path": "feed-diagnostic-2-allocs-after.pprof",
+  "bytes": 27328,
+  "sha256": "b032648bcfefeff513f9aa053dc5c332340d37ac0fcca8e08a68f1d76e8ed195",
+  "forcedGC": false,
+  "scope": "after native/drain; cumulative sampled allocation profile"
+}

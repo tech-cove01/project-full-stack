@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-01T05:52:17.052148+00:00",
+  "task": "CAP-09C like iteration1/2",
+  "observedEvidence": [
+    "like-baseline-stair-1-load/result.json",
+    "like-baseline-stair-1-load/reconcile.json",
+    "like-baseline-stair-1-downstream/timeline.ndjson"
+  ],
+  "nativeFailure": "50/s nominal45s stopped at10.5s on P95>200ms:527attempted/516known mutation/11unknown, no drop or HTTP/content errors. Do not convert517SQL changes to516 or claimednative successes.",
+  "exactDerivedDiff": {
+    "noteId": "6405",
+    "userId": "72",
+    "sqlActive": false,
+    "sqlVersion": 4,
+    "sqlPublicLikes": 0,
+    "redisActive": true,
+    "redisVersion": 3
+  },
+  "factsAndDelivery": "781 cumulative unique canonical LIKE events DONE, all3 groups781IGNORED/APPLIED0, no PARKED; onlyone observed Redis relation/version differs.",
+  "candidate": "Once transaction acknowledged success, cancelable request context still drives count invalidation, authoritative state reread and Redis Mark; cancellation between commit and derived projection can leave persistent stale projection. Exact interrupted statement not proven from this raw run.",
+  "singleVariable": "Keep transaction and synchronous commit semantics; after acknowledged commit use WithoutCancel(ctx) plus bounded2s timeout for synchronous Invalidate/LikeState/Mark. No new queue/goroutine/Redis admission, version fencing remains.",
+  "differentPredictions": [
+    "Deterministically cancel immediately after successful commit: old postcommit reread/Mark cannot run; bounded independent completion must leave SQL/Redis and count state consistent.",
+    "Cancel before commit: transaction must still fail/rollback and produce no effect.",
+    "Budget exhaustion or dependency failure remains visible and may leave derived state unrepaired; this is not durable eventual-delivery proof."
+  ],
+  "plannedValidation": "same-case old FAIL/new PASS real MySQL/Redis regression, focused social tests/vet, clean application build/exact source CI. No load/build overlap. Diagnostic1<=45s same50/s after repair records validity and still-distinct relay backlog.",
+  "repairBudget": "1/2 necessary correctness repairs consumed; no further like native work until related regression succeeds"
+}

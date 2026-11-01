@@ -1,0 +1,6 @@
+{
+  "phase": "warm",
+  "helper_pid": 25968,
+  "k6_pid": 42912,
+  "k6_started_unix_ms": 1793512177628
+}

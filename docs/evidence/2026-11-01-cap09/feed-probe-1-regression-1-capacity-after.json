@@ -1,0 +1,82 @@
+{
+  "at": "2026-11-01T05:48:24.758171+00:00",
+  "capacity": {
+    "at": "2026-11-01T05:48:24.7754683Z",
+    "uptime_ms": 105212,
+    "pid": 31080,
+    "runtime": {
+      "goroutines": 50,
+      "gomaxprocs": 4,
+      "heap_alloc_bytes": 5480336,
+      "heap_sys_bytes": 10813440,
+      "heap_inuse_bytes": 7405568,
+      "total_alloc_bytes": 48856584,
+      "mallocs": 785070,
+      "frees": 735359,
+      "num_gc": 20,
+      "pause_total_ns": 2973600,
+      "last_gc_unix_ns": 1793512100470251800,
+      "gc_cpu_fraction": 6.736451841862479e-05
+    },
+    "sql": {
+      "max_open_connections": 20,
+      "open_connections": 4,
+      "in_use": 0,
+      "idle": 4,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "max_idle_closed": 0,
+      "max_idle_time_closed": 0,
+      "max_lifetime_closed": 0
+    },
+    "redis": {
+      "hits": 3468,
+      "misses": 2,
+      "timeouts": 0,
+      "wait_count": 0,
+      "wait_duration_ns": 0,
+      "unusable": 0,
+      "total_connections": 2,
+      "idle_connections": 2,
+      "stale_connections": 0
+    },
+    "tail": {
+      "enabled": false,
+      "slow_threshold_ms": 0,
+      "max_slow_traces": 0,
+      "max_spans_per_trace": 0,
+      "latest_sequence": 0,
+      "requests": 0,
+      "shared_tasks": 0,
+      "stages": null,
+      "slow_traces": null,
+      "missing_measurements": null
+    },
+    "cards": {
+      "coalescing": true,
+      "requests": 19,
+      "l1_hits": 0,
+      "redis_hits": 40,
+      "miss_items": 340,
+      "loads_started": 17,
+      "flight_started": 17,
+      "flight_joins": 0,
+      "content_sql_batches": 17,
+      "content_sql_rows": 340,
+      "content_bytes": 95340,
+      "load_errors": 0,
+      "oversize_uncached": 0,
+      "redis_errors": 0,
+      "invalid_payloads": 0,
+      "busy_rejected": 0,
+      "expired": 40,
+      "evictions": 0,
+      "inflight": 0,
+      "active_loads": 0,
+      "waiting_callers": 0,
+      "l1_entries": 340,
+      "l1_bytes": 120500
+    }
+  },
+  "scope": "parsed post-wrapper/drain snapshot; includes warm and background"
+}

@@ -1,0 +1,1 @@
+{"task":"CAP-09-Feed","mode":"multi","rate":2,"seconds":8,"meetsBudget":false,"failure":"access counters reset, uptime inconsistent or instrumentation lost; no valid access count claim"}

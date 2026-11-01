@@ -1,0 +1,1877 @@
+<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">2d5fc00ca25b82963907afb8a77c2c02e38d347ff9db63b5c004253f7a8c3a03</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/><ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="512 fixed exclusive relationships" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">512</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></ThreadGroup><hashTree><CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Exclusive slot, once per outer iteration" enabled="true"><stringProp name="filename">slots.csv</stringProp><stringProp name="fileEncoding">UTF-8</stringProp><stringProp name="variableNames"></stringProp><stringProp name="delimiter">,</stringProp><boolProp name="quotedData">false</boolProp><boolProp name="recycle">false</boolProp><boolProp name="stopThread">true</boolProp><stringProp name="shareMode">shareMode.all</stringProp><boolProp name="ignoreFirstLine">false</boolProp></CSVDataSet><hashTree/><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 bind" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">bind</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+
+// Pure contract shared by the uploaded JSR223 script and offline checks.
+class Cap10PTSContract {
+    static final long MAX_SAFE = 9007199254740991L
+    static boolean integer(Object n) {
+        n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
+            new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
+    }
+    static Map classify(int status, String text, String noteId, Map previous, boolean wanted) {
+        if (status == 0 || status &gt;= 500) return [kind:'uncertain']
+        if (status != 200) return [kind:'rejected']
+        def body = null
+        try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
+        def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
+            integer(data.version) &amp;&amp; integer(data.likes)
+        def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
+            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedNoteId:data?.noteId instanceof String ? data.noteId : null]
+        if (!valid || data.liked != wanted) return observed + [kind:'invalid']
+        if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
+        if (data.version == previous.version) return observed + [kind:'noop']
+        observed + [kind:'invalid']
+    }
+    static long ordinal(int slot, long iteration) {
+        if (slot &lt; 0 || slot &gt;= 512 || iteration &lt; 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    }
+    static long dueNano(long startNano, long ordinal, int rate) {
+        if (rate &lt; 1 || rate &gt; 5000 || ordinal &lt; 0) throw new IllegalArgumentException('invalid rate/ordinal')
+        startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
+    }
+    static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
+        long total = (long)rate * seconds
+        slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.LockSupport
+import org.apache.jmeter.services.FileServer
+
+class Cap10PTSRun {
+    final String engineId = UUID.randomUUID().toString()
+    final long resourceOriginNano = System.nanoTime()
+    final String collectorUrl, controlToken, scriptHash
+    final List&lt;Integer&gt; slots
+    final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
+    final Set&lt;Integer&gt; bound = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final Set&lt;Integer&gt; done = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final AtomicBoolean stop = new AtomicBoolean(false)
+    final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
+    final Map&lt;String,AtomicLong&gt; counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final List&lt;Map&gt; pending = []
+    final Object io = new Object(), recordsLock = new Object()
+    volatile Map config, clock
+    volatile boolean anchorFrozen = false, terminalAck = false
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile int readyReported = -1
+    long seq = 0
+    Thread reporter
+
+    Cap10PTSRun(String hash) {
+        scriptHash = hash
+        def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
+        def secret
+        try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
+        if (!(secret instanceof Map) || secret.keySet() != ['collectorUrl','controlToken'] as Set ||
+            !(secret.controlToken instanceof String) || secret.controlToken.size() &lt; 24) throw new IllegalStateException('private collector configuration invalid')
+        def uri = new URI(secret.collectorUrl.toString())
+        if (uri.scheme != 'http' || uri.userInfo || uri.fragment || uri.query || !(uri.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('collector must be explicit loopback/private IPv4 HTTP')
+        collectorUrl = secret.collectorUrl.toString().replaceAll('/+$',''); controlToken = secret.controlToken
+        def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
+        if (lines &amp;&amp; lines[0].trim() == 'slot') lines = lines.drop(1)
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() &gt; 512 || slots.toSet().size() != slots.size() || slots.any { it &lt; 0 || it &gt;= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        control()
+        def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
+        registered.relations.each { r -&gt;
+            if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
+            relations[r.slot as int] = [slot:r.slot as int, userId:r.userId, noteId:r.noteId, liked:r.active == 1, version:r.version as long, token:r.token]
+        }
+        if (relations.keySet() != slots.toSet()) throw new IllegalStateException('private relation coverage differs')
+        reporter = new Thread({ reportLoop() } as Runnable, 'cap10-telemetry')
+        reporter.daemon = true; reporter.start()
+    }
+    Map request(String path, Map body = null) {
+        synchronized (io) {
+            long beforeNano = System.nanoTime(), beforeWall = System.currentTimeMillis()
+            HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
+            c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
+            c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            try {
+                if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
+                if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                c.inputStream.withCloseable { input -&gt; byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n &gt; 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
+                long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
+                Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
+                if (result.serverUnixMs instanceof Number) {
+                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+                    if (uncertainty &gt; 50d || Math.abs((afterWall-beforeWall) - rtt) &gt; 50d) throw new IllegalStateException('collector clock uncertainty invalid')
+                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+                    if (anchorFrozen &amp;&amp; Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) &gt; clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+                    if (!anchorFrozen &amp;&amp; (clock == null || uncertainty &lt; clock.uncertaintyMs)) {
+                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+                    }
+                }
+                if (result.stop == true) stop.set(true)
+                return result
+            } finally { c.disconnect() }
+        }
+    }
+    double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
+    void control() {
+        Map c = request('/control')
+        if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
+            !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+        if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        def api = new URI(c.apiUrl.toString())
+        if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
+            !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
+        if (config != null &amp;&amp; c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
+        config = c
+        if (c.startUnixMs != null &amp;&amp; startNano == Long.MIN_VALUE) {
+            if (!(c.startUnixMs instanceof Number) || c.startUnixMs &lt; serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
+            anchorFrozen = true
+            startNano = anchorNano + ((c.startUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
+    }
+    Map bind(int slot) {
+        if (!relations.containsKey(slot) || !bound.add(slot)) { stop.set(true); throw new IllegalStateException('duplicate/unowned slot') }
+        relations[slot]
+    }
+    Map gate(Map relation, long iteration) {
+        while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
+        if (stop.get()) return null
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() &amp;&amp; System.nanoTime() &lt; deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        if (stop.get()) return null
+        long now = System.nanoTime()
+        if ((now-deadline)/1000000d &gt; 50d) {
+            record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
+            stop.set(true); flush(); return null
+        }
+        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void terminal(Map relation, Map offer, def sample) {
+        int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
+        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        completed.incrementAndGet(); inFlight.decrementAndGet()
+        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+        else stop.set(true)
+        record(event)
+        // Remove credential-bearing sampler context before every listener/PTS log.
+        sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
+        sample.setSuccessful(outcome.kind == 'mutation')
+        if (outcome.kind != 'mutation') flush()
+    }
+    void record(Map record) {
+        counts[record.kind].incrementAndGet()
+        synchronized (recordsLock) { if (pending.size() &gt;= 30000) { stop.set(true); throw new IllegalStateException('bounded telemetry buffer exhausted') }; pending.add(record) }
+    }
+    Map resources() {
+        def bean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.operatingSystemMXBean
+        Long rss = null
+        File status = new File('/proc/self/status')
+        if (status.isFile()) { def line = status.readLines('UTF-8').find { it.startsWith('VmRSS:') }; if (line) rss = line.tokenize()[1].toLong()*1024L }
+        else if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            // Local finite wiring only: actual working set, never JVM heap as RSS.
+            String pid = ManagementFactory.runtimeMXBean.name.tokenize('@')[0]
+            if (!(pid ==~ /\d+/)) throw new IllegalStateException('process identity unavailable')
+            Process child = new ProcessBuilder('powershell.exe','-NoProfile','-NonInteractive','-WindowStyle','Hidden','-Command','(Get-Process -Id '+pid+').WorkingSet64').start()
+            if (child.waitFor(5L,java.util.concurrent.TimeUnit.SECONDS) &amp;&amp; child.exitValue() == 0) {
+                String raw = child.inputStream.getText('UTF-8').trim()
+                if (raw ==~ /\d+/) rss = raw.toLong()
+            } else { child.destroyForcibly() }
+        }
+        [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flush() {
+        synchronized (io) {
+            List&lt;Map&gt; batch
+            synchronized (recordsLock) { batch = new ArrayList&lt;Map&gt;(pending) }
+            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+            Map response = null
+            for (int retry=0; retry&lt;3 &amp;&amp; response == null; retry++) {
+                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            }
+            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+            seq++
+        }
+    }
+    void reportLoop() {
+        try {
+            long nextReport = 0L
+            long setupDeadline = System.nanoTime() + 90000000000L
+            while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
+                if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
+                if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
+                int ready = bound.size()
+                if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
+                control()
+                if (System.nanoTime() &gt;= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
+                Thread.sleep(200L)
+            }
+            flush()
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            counts.each { key,value -&gt; totals[key]=value.get() }
+            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            terminalAck = response.accepted == true
+        } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
+    }
+    void finish(int slot) { done.add(slot) }
+}
+
+// The exact same cached script is used by standard JSR223 nodes; Parameters
+// selects a small lifecycle action. Only private register responses hold tokens.
+try {
+    Cap10PTSRun run
+    synchronized (props) {
+        run = (Cap10PTSRun)props.get('cap10.pts.instance')
+        if (run == null) { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+    }
+    if (Parameters == 'bind') {
+        vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+    } else if (Parameters == 'gate') {
+        Map relation = (Map)vars.getObject('cap10.relation')
+        Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
+        vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
+        if (offer == null) vars.put('cap10.continue','false')
+        else {
+            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
+            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
+        }
+    } else if (Parameters == 'pre') {
+        // Monotonic handoff immediately before the standard HTTP sampler. Its
+        // native elapsed time remains independent of Groovy classification.
+        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+    } else if (Parameters == 'post') {
+        run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
+        vars.remove('cap10.token')
+    } else if (Parameters == 'done') {
+        run.finish(((Map)vars.getObject('cap10.relation')).slot as int)
+    } else if (Parameters == 'finish') {
+        run.reporter.join(20000L)
+        if (run.reporter.alive || !run.terminalAck) throw new IllegalStateException('terminal ACK missing')
+    }
+    if (binding.hasVariable('SampleResult')) SampleResult.setIgnore()
+} catch (Exception ignored) {
+    def run = props.get('cap10.pts.instance'); if (run != null) run.stop.set(true)
+    vars.put('cap10.doWrite','false'); vars.put('cap10.continue','false')
+    throw new IllegalStateException('CAP10 sanitized workload failure; no payload retained')
+}
+</stringProp></JSR223Sampler><hashTree/><WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Fixed relation, absolute ordinal deadlines" enabled="true"><stringProp name="WhileController.condition">${cap10.continue}</stringProp></WhileController><hashTree><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 gate" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">gate</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+
+// Pure contract shared by the uploaded JSR223 script and offline checks.
+class Cap10PTSContract {
+    static final long MAX_SAFE = 9007199254740991L
+    static boolean integer(Object n) {
+        n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
+            new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
+    }
+    static Map classify(int status, String text, String noteId, Map previous, boolean wanted) {
+        if (status == 0 || status &gt;= 500) return [kind:'uncertain']
+        if (status != 200) return [kind:'rejected']
+        def body = null
+        try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
+        def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
+            integer(data.version) &amp;&amp; integer(data.likes)
+        def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
+            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedNoteId:data?.noteId instanceof String ? data.noteId : null]
+        if (!valid || data.liked != wanted) return observed + [kind:'invalid']
+        if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
+        if (data.version == previous.version) return observed + [kind:'noop']
+        observed + [kind:'invalid']
+    }
+    static long ordinal(int slot, long iteration) {
+        if (slot &lt; 0 || slot &gt;= 512 || iteration &lt; 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    }
+    static long dueNano(long startNano, long ordinal, int rate) {
+        if (rate &lt; 1 || rate &gt; 5000 || ordinal &lt; 0) throw new IllegalArgumentException('invalid rate/ordinal')
+        startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
+    }
+    static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
+        long total = (long)rate * seconds
+        slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.LockSupport
+import org.apache.jmeter.services.FileServer
+
+class Cap10PTSRun {
+    final String engineId = UUID.randomUUID().toString()
+    final long resourceOriginNano = System.nanoTime()
+    final String collectorUrl, controlToken, scriptHash
+    final List&lt;Integer&gt; slots
+    final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
+    final Set&lt;Integer&gt; bound = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final Set&lt;Integer&gt; done = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final AtomicBoolean stop = new AtomicBoolean(false)
+    final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
+    final Map&lt;String,AtomicLong&gt; counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final List&lt;Map&gt; pending = []
+    final Object io = new Object(), recordsLock = new Object()
+    volatile Map config, clock
+    volatile boolean anchorFrozen = false, terminalAck = false
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile int readyReported = -1
+    long seq = 0
+    Thread reporter
+
+    Cap10PTSRun(String hash) {
+        scriptHash = hash
+        def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
+        def secret
+        try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
+        if (!(secret instanceof Map) || secret.keySet() != ['collectorUrl','controlToken'] as Set ||
+            !(secret.controlToken instanceof String) || secret.controlToken.size() &lt; 24) throw new IllegalStateException('private collector configuration invalid')
+        def uri = new URI(secret.collectorUrl.toString())
+        if (uri.scheme != 'http' || uri.userInfo || uri.fragment || uri.query || !(uri.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('collector must be explicit loopback/private IPv4 HTTP')
+        collectorUrl = secret.collectorUrl.toString().replaceAll('/+$',''); controlToken = secret.controlToken
+        def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
+        if (lines &amp;&amp; lines[0].trim() == 'slot') lines = lines.drop(1)
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() &gt; 512 || slots.toSet().size() != slots.size() || slots.any { it &lt; 0 || it &gt;= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        control()
+        def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
+        registered.relations.each { r -&gt;
+            if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
+            relations[r.slot as int] = [slot:r.slot as int, userId:r.userId, noteId:r.noteId, liked:r.active == 1, version:r.version as long, token:r.token]
+        }
+        if (relations.keySet() != slots.toSet()) throw new IllegalStateException('private relation coverage differs')
+        reporter = new Thread({ reportLoop() } as Runnable, 'cap10-telemetry')
+        reporter.daemon = true; reporter.start()
+    }
+    Map request(String path, Map body = null) {
+        synchronized (io) {
+            long beforeNano = System.nanoTime(), beforeWall = System.currentTimeMillis()
+            HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
+            c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
+            c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            try {
+                if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
+                if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                c.inputStream.withCloseable { input -&gt; byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n &gt; 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
+                long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
+                Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
+                if (result.serverUnixMs instanceof Number) {
+                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+                    if (uncertainty &gt; 50d || Math.abs((afterWall-beforeWall) - rtt) &gt; 50d) throw new IllegalStateException('collector clock uncertainty invalid')
+                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+                    if (anchorFrozen &amp;&amp; Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) &gt; clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+                    if (!anchorFrozen &amp;&amp; (clock == null || uncertainty &lt; clock.uncertaintyMs)) {
+                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+                    }
+                }
+                if (result.stop == true) stop.set(true)
+                return result
+            } finally { c.disconnect() }
+        }
+    }
+    double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
+    void control() {
+        Map c = request('/control')
+        if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
+            !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+        if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        def api = new URI(c.apiUrl.toString())
+        if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
+            !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
+        if (config != null &amp;&amp; c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
+        config = c
+        if (c.startUnixMs != null &amp;&amp; startNano == Long.MIN_VALUE) {
+            if (!(c.startUnixMs instanceof Number) || c.startUnixMs &lt; serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
+            anchorFrozen = true
+            startNano = anchorNano + ((c.startUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
+    }
+    Map bind(int slot) {
+        if (!relations.containsKey(slot) || !bound.add(slot)) { stop.set(true); throw new IllegalStateException('duplicate/unowned slot') }
+        relations[slot]
+    }
+    Map gate(Map relation, long iteration) {
+        while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
+        if (stop.get()) return null
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() &amp;&amp; System.nanoTime() &lt; deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        if (stop.get()) return null
+        long now = System.nanoTime()
+        if ((now-deadline)/1000000d &gt; 50d) {
+            record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
+            stop.set(true); flush(); return null
+        }
+        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void terminal(Map relation, Map offer, def sample) {
+        int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
+        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        completed.incrementAndGet(); inFlight.decrementAndGet()
+        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+        else stop.set(true)
+        record(event)
+        // Remove credential-bearing sampler context before every listener/PTS log.
+        sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
+        sample.setSuccessful(outcome.kind == 'mutation')
+        if (outcome.kind != 'mutation') flush()
+    }
+    void record(Map record) {
+        counts[record.kind].incrementAndGet()
+        synchronized (recordsLock) { if (pending.size() &gt;= 30000) { stop.set(true); throw new IllegalStateException('bounded telemetry buffer exhausted') }; pending.add(record) }
+    }
+    Map resources() {
+        def bean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.operatingSystemMXBean
+        Long rss = null
+        File status = new File('/proc/self/status')
+        if (status.isFile()) { def line = status.readLines('UTF-8').find { it.startsWith('VmRSS:') }; if (line) rss = line.tokenize()[1].toLong()*1024L }
+        else if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            // Local finite wiring only: actual working set, never JVM heap as RSS.
+            String pid = ManagementFactory.runtimeMXBean.name.tokenize('@')[0]
+            if (!(pid ==~ /\d+/)) throw new IllegalStateException('process identity unavailable')
+            Process child = new ProcessBuilder('powershell.exe','-NoProfile','-NonInteractive','-WindowStyle','Hidden','-Command','(Get-Process -Id '+pid+').WorkingSet64').start()
+            if (child.waitFor(5L,java.util.concurrent.TimeUnit.SECONDS) &amp;&amp; child.exitValue() == 0) {
+                String raw = child.inputStream.getText('UTF-8').trim()
+                if (raw ==~ /\d+/) rss = raw.toLong()
+            } else { child.destroyForcibly() }
+        }
+        [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flush() {
+        synchronized (io) {
+            List&lt;Map&gt; batch
+            synchronized (recordsLock) { batch = new ArrayList&lt;Map&gt;(pending) }
+            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+            Map response = null
+            for (int retry=0; retry&lt;3 &amp;&amp; response == null; retry++) {
+                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            }
+            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+            seq++
+        }
+    }
+    void reportLoop() {
+        try {
+            long nextReport = 0L
+            long setupDeadline = System.nanoTime() + 90000000000L
+            while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
+                if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
+                if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
+                int ready = bound.size()
+                if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
+                control()
+                if (System.nanoTime() &gt;= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
+                Thread.sleep(200L)
+            }
+            flush()
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            counts.each { key,value -&gt; totals[key]=value.get() }
+            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            terminalAck = response.accepted == true
+        } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
+    }
+    void finish(int slot) { done.add(slot) }
+}
+
+// The exact same cached script is used by standard JSR223 nodes; Parameters
+// selects a small lifecycle action. Only private register responses hold tokens.
+try {
+    Cap10PTSRun run
+    synchronized (props) {
+        run = (Cap10PTSRun)props.get('cap10.pts.instance')
+        if (run == null) { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+    }
+    if (Parameters == 'bind') {
+        vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+    } else if (Parameters == 'gate') {
+        Map relation = (Map)vars.getObject('cap10.relation')
+        Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
+        vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
+        if (offer == null) vars.put('cap10.continue','false')
+        else {
+            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
+            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
+        }
+    } else if (Parameters == 'pre') {
+        // Monotonic handoff immediately before the standard HTTP sampler. Its
+        // native elapsed time remains independent of Groovy classification.
+        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+    } else if (Parameters == 'post') {
+        run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
+        vars.remove('cap10.token')
+    } else if (Parameters == 'done') {
+        run.finish(((Map)vars.getObject('cap10.relation')).slot as int)
+    } else if (Parameters == 'finish') {
+        run.reporter.join(20000L)
+        if (run.reporter.alive || !run.terminalAck) throw new IllegalStateException('terminal ACK missing')
+    }
+    if (binding.hasVariable('SampleResult')) SampleResult.setIgnore()
+} catch (Exception ignored) {
+    def run = props.get('cap10.pts.instance'); if (run != null) run.stop.set(true)
+    vars.put('cap10.doWrite','false'); vars.put('cap10.continue','false')
+    throw new IllegalStateException('CAP10 sanitized workload failure; no payload retained')
+}
+</stringProp></JSR223Sampler><hashTree/><IfController guiclass="IfControllerPanel" testclass="IfController" testname="Only a scheduled offer" enabled="true"><stringProp name="IfController.condition">${cap10.doWrite}</stringProp><boolProp name="IfController.evaluateAll">false</boolProp><boolProp name="IfController.useExpression">true</boolProp></IfController><hashTree><HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="CAP10 like-write" enabled="true"><elementProp name="HTTPsampler.Arguments" elementType="Arguments"><collectionProp name="Arguments.arguments"><elementProp name="" elementType="HTTPArgument"><boolProp name="HTTPArgument.always_encode">false</boolProp><stringProp name="Argument.value">{"liked":${cap10.wanted}}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></elementProp><stringProp name="HTTPSampler.domain">${cap10.apiHost}</stringProp><stringProp name="HTTPSampler.port">${cap10.apiPort}</stringProp><stringProp name="HTTPSampler.protocol">http</stringProp><stringProp name="HTTPSampler.contentEncoding">UTF-8</stringProp><stringProp name="HTTPSampler.path">/notes/${cap10.noteId}/like</stringProp><stringProp name="HTTPSampler.method">PUT</stringProp><boolProp name="HTTPSampler.follow_redirects">false</boolProp><boolProp name="HTTPSampler.auto_redirects">false</boolProp><boolProp name="HTTPSampler.use_keepalive">true</boolProp><boolProp name="HTTPSampler.postBodyRaw">true</boolProp><stringProp name="HTTPSampler.connect_timeout">5000</stringProp><stringProp name="HTTPSampler.response_timeout">5000</stringProp></HTTPSamplerProxy><hashTree><JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="CAP10 pre" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">pre</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+
+// Pure contract shared by the uploaded JSR223 script and offline checks.
+class Cap10PTSContract {
+    static final long MAX_SAFE = 9007199254740991L
+    static boolean integer(Object n) {
+        n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
+            new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
+    }
+    static Map classify(int status, String text, String noteId, Map previous, boolean wanted) {
+        if (status == 0 || status &gt;= 500) return [kind:'uncertain']
+        if (status != 200) return [kind:'rejected']
+        def body = null
+        try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
+        def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
+            integer(data.version) &amp;&amp; integer(data.likes)
+        def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
+            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedNoteId:data?.noteId instanceof String ? data.noteId : null]
+        if (!valid || data.liked != wanted) return observed + [kind:'invalid']
+        if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
+        if (data.version == previous.version) return observed + [kind:'noop']
+        observed + [kind:'invalid']
+    }
+    static long ordinal(int slot, long iteration) {
+        if (slot &lt; 0 || slot &gt;= 512 || iteration &lt; 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    }
+    static long dueNano(long startNano, long ordinal, int rate) {
+        if (rate &lt; 1 || rate &gt; 5000 || ordinal &lt; 0) throw new IllegalArgumentException('invalid rate/ordinal')
+        startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
+    }
+    static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
+        long total = (long)rate * seconds
+        slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.LockSupport
+import org.apache.jmeter.services.FileServer
+
+class Cap10PTSRun {
+    final String engineId = UUID.randomUUID().toString()
+    final long resourceOriginNano = System.nanoTime()
+    final String collectorUrl, controlToken, scriptHash
+    final List&lt;Integer&gt; slots
+    final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
+    final Set&lt;Integer&gt; bound = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final Set&lt;Integer&gt; done = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final AtomicBoolean stop = new AtomicBoolean(false)
+    final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
+    final Map&lt;String,AtomicLong&gt; counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final List&lt;Map&gt; pending = []
+    final Object io = new Object(), recordsLock = new Object()
+    volatile Map config, clock
+    volatile boolean anchorFrozen = false, terminalAck = false
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile int readyReported = -1
+    long seq = 0
+    Thread reporter
+
+    Cap10PTSRun(String hash) {
+        scriptHash = hash
+        def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
+        def secret
+        try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
+        if (!(secret instanceof Map) || secret.keySet() != ['collectorUrl','controlToken'] as Set ||
+            !(secret.controlToken instanceof String) || secret.controlToken.size() &lt; 24) throw new IllegalStateException('private collector configuration invalid')
+        def uri = new URI(secret.collectorUrl.toString())
+        if (uri.scheme != 'http' || uri.userInfo || uri.fragment || uri.query || !(uri.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('collector must be explicit loopback/private IPv4 HTTP')
+        collectorUrl = secret.collectorUrl.toString().replaceAll('/+<HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Private headers" enabled="true"><collectionProp name="HeaderManager.headers"><elementProp name="" elementType="Header"><stringProp name="Header.name">authorization</stringProp><stringProp name="Header.value">${cap10.token}</stringProp></elementProp><elementProp name="" elementType="Header"><stringProp name="Header.name">Content-Type</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp></collectionProp></HeaderManager><hashTree/><JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="CAP10 post" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">post</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+
+// Pure contract shared by the uploaded JSR223 script and offline checks.
+class Cap10PTSContract {
+    static final long MAX_SAFE = 9007199254740991L
+    static boolean integer(Object n) {
+        n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
+            new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
+    }
+    static Map classify(int status, String text, String noteId, Map previous, boolean wanted) {
+        if (status == 0 || status &gt;= 500) return [kind:'uncertain']
+        if (status != 200) return [kind:'rejected']
+        def body = null
+        try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
+        def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
+            integer(data.version) &amp;&amp; integer(data.likes)
+        def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
+            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedNoteId:data?.noteId instanceof String ? data.noteId : null]
+        if (!valid || data.liked != wanted) return observed + [kind:'invalid']
+        if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
+        if (data.version == previous.version) return observed + [kind:'noop']
+        observed + [kind:'invalid']
+    }
+    static long ordinal(int slot, long iteration) {
+        if (slot &lt; 0 || slot &gt;= 512 || iteration &lt; 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    }
+    static long dueNano(long startNano, long ordinal, int rate) {
+        if (rate &lt; 1 || rate &gt; 5000 || ordinal &lt; 0) throw new IllegalArgumentException('invalid rate/ordinal')
+        startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
+    }
+    static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
+        long total = (long)rate * seconds
+        slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.LockSupport
+import org.apache.jmeter.services.FileServer
+
+class Cap10PTSRun {
+    final String engineId = UUID.randomUUID().toString()
+    final long resourceOriginNano = System.nanoTime()
+    final String collectorUrl, controlToken, scriptHash
+    final List&lt;Integer&gt; slots
+    final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
+    final Set&lt;Integer&gt; bound = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final Set&lt;Integer&gt; done = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final AtomicBoolean stop = new AtomicBoolean(false)
+    final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
+    final Map&lt;String,AtomicLong&gt; counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final List&lt;Map&gt; pending = []
+    final Object io = new Object(), recordsLock = new Object()
+    volatile Map config, clock
+    volatile boolean anchorFrozen = false, terminalAck = false
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile int readyReported = -1
+    long seq = 0
+    Thread reporter
+
+    Cap10PTSRun(String hash) {
+        scriptHash = hash
+        def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
+        def secret
+        try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
+        if (!(secret instanceof Map) || secret.keySet() != ['collectorUrl','controlToken'] as Set ||
+            !(secret.controlToken instanceof String) || secret.controlToken.size() &lt; 24) throw new IllegalStateException('private collector configuration invalid')
+        def uri = new URI(secret.collectorUrl.toString())
+        if (uri.scheme != 'http' || uri.userInfo || uri.fragment || uri.query || !(uri.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('collector must be explicit loopback/private IPv4 HTTP')
+        collectorUrl = secret.collectorUrl.toString().replaceAll('/+</hashTree></hashTree>,''); controlToken = secret.controlToken
+        def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
+        if (lines &amp;&amp; lines[0].trim() == 'slot') lines = lines.drop(1)
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() &gt; 512 || slots.toSet().size() != slots.size() || slots.any { it &lt; 0 || it &gt;= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        control()
+        def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
+        registered.relations.each { r -&gt;
+            if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
+            relations[r.slot as int] = [slot:r.slot as int, userId:r.userId, noteId:r.noteId, liked:r.active == 1, version:r.version as long, token:r.token]
+        }
+        if (relations.keySet() != slots.toSet()) throw new IllegalStateException('private relation coverage differs')
+        reporter = new Thread({ reportLoop() } as Runnable, 'cap10-telemetry')
+        reporter.daemon = true; reporter.start()
+    }
+    Map request(String path, Map body = null) {
+        synchronized (io) {
+            long beforeNano = System.nanoTime(), beforeWall = System.currentTimeMillis()
+            HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
+            c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
+            c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            try {
+                if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
+                if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                c.inputStream.withCloseable { input -&gt; byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n &gt; 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
+                long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
+                Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
+                if (result.serverUnixMs instanceof Number) {
+                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+                    if (uncertainty &gt; 50d || Math.abs((afterWall-beforeWall) - rtt) &gt; 50d) throw new IllegalStateException('collector clock uncertainty invalid')
+                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+                    if (anchorFrozen &amp;&amp; Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) &gt; clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+                    if (!anchorFrozen &amp;&amp; (clock == null || uncertainty &lt; clock.uncertaintyMs)) {
+                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+                    }
+                }
+                if (result.stop == true) stop.set(true)
+                return result
+            } finally { c.disconnect() }
+        }
+    }
+    double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
+    void control() {
+        Map c = request('/control')
+        if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
+            !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+        if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        def api = new URI(c.apiUrl.toString())
+        if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
+            !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
+        if (config != null &amp;&amp; c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
+        config = c
+        if (c.startUnixMs != null &amp;&amp; startNano == Long.MIN_VALUE) {
+            if (!(c.startUnixMs instanceof Number) || c.startUnixMs &lt; serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
+            anchorFrozen = true
+            startNano = anchorNano + ((c.startUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
+    }
+    Map bind(int slot) {
+        if (!relations.containsKey(slot) || !bound.add(slot)) { stop.set(true); throw new IllegalStateException('duplicate/unowned slot') }
+        relations[slot]
+    }
+    Map gate(Map relation, long iteration) {
+        while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
+        if (stop.get()) return null
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() &amp;&amp; System.nanoTime() &lt; deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        if (stop.get()) return null
+        long now = System.nanoTime()
+        if ((now-deadline)/1000000d &gt; 50d) {
+            record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
+            stop.set(true); flush(); return null
+        }
+        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void terminal(Map relation, Map offer, def sample) {
+        int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
+        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        completed.incrementAndGet(); inFlight.decrementAndGet()
+        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+        else stop.set(true)
+        record(event)
+        // Remove credential-bearing sampler context before every listener/PTS log.
+        sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
+        sample.setSuccessful(outcome.kind == 'mutation')
+        if (outcome.kind != 'mutation') flush()
+    }
+    void record(Map record) {
+        counts[record.kind].incrementAndGet()
+        synchronized (recordsLock) { if (pending.size() &gt;= 30000) { stop.set(true); throw new IllegalStateException('bounded telemetry buffer exhausted') }; pending.add(record) }
+    }
+    Map resources() {
+        def bean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.operatingSystemMXBean
+        Long rss = null
+        File status = new File('/proc/self/status')
+        if (status.isFile()) { def line = status.readLines('UTF-8').find { it.startsWith('VmRSS:') }; if (line) rss = line.tokenize()[1].toLong()*1024L }
+        else if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            // Local finite wiring only: actual working set, never JVM heap as RSS.
+            String pid = ManagementFactory.runtimeMXBean.name.tokenize('@')[0]
+            if (!(pid ==~ /\d+/)) throw new IllegalStateException('process identity unavailable')
+            Process child = new ProcessBuilder('powershell.exe','-NoProfile','-NonInteractive','-WindowStyle','Hidden','-Command','(Get-Process -Id '+pid+').WorkingSet64').start()
+            if (child.waitFor(5L,java.util.concurrent.TimeUnit.SECONDS) &amp;&amp; child.exitValue() == 0) {
+                String raw = child.inputStream.getText('UTF-8').trim()
+                if (raw ==~ /\d+/) rss = raw.toLong()
+            } else { child.destroyForcibly() }
+        }
+        [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flush() {
+        synchronized (io) {
+            List&lt;Map&gt; batch
+            synchronized (recordsLock) { batch = new ArrayList&lt;Map&gt;(pending) }
+            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+            Map response = null
+            for (int retry=0; retry&lt;3 &amp;&amp; response == null; retry++) {
+                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            }
+            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+            seq++
+        }
+    }
+    void reportLoop() {
+        try {
+            long nextReport = 0L
+            long setupDeadline = System.nanoTime() + 90000000000L
+            while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
+                if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
+                if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
+                int ready = bound.size()
+                if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
+                control()
+                if (System.nanoTime() &gt;= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
+                Thread.sleep(200L)
+            }
+            flush()
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            counts.each { key,value -&gt; totals[key]=value.get() }
+            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            terminalAck = response.accepted == true
+        } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
+    }
+    void finish(int slot) { done.add(slot) }
+}
+
+// The exact same cached script is used by standard JSR223 nodes; Parameters
+// selects a small lifecycle action. Only private register responses hold tokens.
+try {
+    Cap10PTSRun run
+    synchronized (props) {
+        run = (Cap10PTSRun)props.get('cap10.pts.instance')
+        if (run == null) { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+    }
+    if (Parameters == 'bind') {
+        vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+    } else if (Parameters == 'gate') {
+        Map relation = (Map)vars.getObject('cap10.relation')
+        Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
+        vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
+        if (offer == null) vars.put('cap10.continue','false')
+        else {
+            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
+            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
+        }
+    } else if (Parameters == 'pre') {
+        // Monotonic handoff immediately before the standard HTTP sampler. Its
+        // native elapsed time remains independent of Groovy classification.
+        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+    } else if (Parameters == 'post') {
+        run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
+        vars.remove('cap10.token')
+    } else if (Parameters == 'done') {
+        run.finish(((Map)vars.getObject('cap10.relation')).slot as int)
+    } else if (Parameters == 'finish') {
+        run.reporter.join(20000L)
+        if (run.reporter.alive || !run.terminalAck) throw new IllegalStateException('terminal ACK missing')
+    }
+    if (binding.hasVariable('SampleResult')) SampleResult.setIgnore()
+} catch (Exception ignored) {
+    def run = props.get('cap10.pts.instance'); if (run != null) run.stop.set(true)
+    vars.put('cap10.doWrite','false'); vars.put('cap10.continue','false')
+    throw new IllegalStateException('CAP10 sanitized workload failure; no payload retained')
+}
+</stringProp></JSR223PostProcessor><hashTree/></hashTree>,''); controlToken = secret.controlToken
+        def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
+        if (lines &amp;&amp; lines[0].trim() == 'slot') lines = lines.drop(1)
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() &gt; 512 || slots.toSet().size() != slots.size() || slots.any { it &lt; 0 || it &gt;= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        control()
+        def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
+        registered.relations.each { r -&gt;
+            if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
+            relations[r.slot as int] = [slot:r.slot as int, userId:r.userId, noteId:r.noteId, liked:r.active == 1, version:r.version as long, token:r.token]
+        }
+        if (relations.keySet() != slots.toSet()) throw new IllegalStateException('private relation coverage differs')
+        reporter = new Thread({ reportLoop() } as Runnable, 'cap10-telemetry')
+        reporter.daemon = true; reporter.start()
+    }
+    Map request(String path, Map body = null) {
+        synchronized (io) {
+            long beforeNano = System.nanoTime(), beforeWall = System.currentTimeMillis()
+            HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
+            c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
+            c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            try {
+                if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
+                if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                c.inputStream.withCloseable { input -&gt; byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n &gt; 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
+                long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
+                Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
+                if (result.serverUnixMs instanceof Number) {
+                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+                    if (uncertainty &gt; 50d || Math.abs((afterWall-beforeWall) - rtt) &gt; 50d) throw new IllegalStateException('collector clock uncertainty invalid')
+                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+                    if (anchorFrozen &amp;&amp; Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) &gt; clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+                    if (!anchorFrozen &amp;&amp; (clock == null || uncertainty &lt; clock.uncertaintyMs)) {
+                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+                    }
+                }
+                if (result.stop == true) stop.set(true)
+                return result
+            } finally { c.disconnect() }
+        }
+    }
+    double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
+    void control() {
+        Map c = request('/control')
+        if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
+            !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+        if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        def api = new URI(c.apiUrl.toString())
+        if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
+            !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
+        if (config != null &amp;&amp; c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
+        config = c
+        if (c.startUnixMs != null &amp;&amp; startNano == Long.MIN_VALUE) {
+            if (!(c.startUnixMs instanceof Number) || c.startUnixMs &lt; serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
+            anchorFrozen = true
+            startNano = anchorNano + ((c.startUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
+    }
+    Map bind(int slot) {
+        if (!relations.containsKey(slot) || !bound.add(slot)) { stop.set(true); throw new IllegalStateException('duplicate/unowned slot') }
+        relations[slot]
+    }
+    Map gate(Map relation, long iteration) {
+        while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
+        if (stop.get()) return null
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() &amp;&amp; System.nanoTime() &lt; deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        if (stop.get()) return null
+        long now = System.nanoTime()
+        if ((now-deadline)/1000000d &gt; 50d) {
+            record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
+            stop.set(true); flush(); return null
+        }
+        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void terminal(Map relation, Map offer, def sample) {
+        int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
+        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        completed.incrementAndGet(); inFlight.decrementAndGet()
+        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+        else stop.set(true)
+        record(event)
+        // Remove credential-bearing sampler context before every listener/PTS log.
+        sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
+        sample.setSuccessful(outcome.kind == 'mutation')
+        if (outcome.kind != 'mutation') flush()
+    }
+    void record(Map record) {
+        counts[record.kind].incrementAndGet()
+        synchronized (recordsLock) { if (pending.size() &gt;= 30000) { stop.set(true); throw new IllegalStateException('bounded telemetry buffer exhausted') }; pending.add(record) }
+    }
+    Map resources() {
+        def bean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.operatingSystemMXBean
+        Long rss = null
+        File status = new File('/proc/self/status')
+        if (status.isFile()) { def line = status.readLines('UTF-8').find { it.startsWith('VmRSS:') }; if (line) rss = line.tokenize()[1].toLong()*1024L }
+        else if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            // Local finite wiring only: actual working set, never JVM heap as RSS.
+            String pid = ManagementFactory.runtimeMXBean.name.tokenize('@')[0]
+            if (!(pid ==~ /\d+/)) throw new IllegalStateException('process identity unavailable')
+            Process child = new ProcessBuilder('powershell.exe','-NoProfile','-NonInteractive','-WindowStyle','Hidden','-Command','(Get-Process -Id '+pid+').WorkingSet64').start()
+            if (child.waitFor(5L,java.util.concurrent.TimeUnit.SECONDS) &amp;&amp; child.exitValue() == 0) {
+                String raw = child.inputStream.getText('UTF-8').trim()
+                if (raw ==~ /\d+/) rss = raw.toLong()
+            } else { child.destroyForcibly() }
+        }
+        [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flush() {
+        synchronized (io) {
+            List&lt;Map&gt; batch
+            synchronized (recordsLock) { batch = new ArrayList&lt;Map&gt;(pending) }
+            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+            Map response = null
+            for (int retry=0; retry&lt;3 &amp;&amp; response == null; retry++) {
+                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            }
+            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+            seq++
+        }
+    }
+    void reportLoop() {
+        try {
+            long nextReport = 0L
+            long setupDeadline = System.nanoTime() + 90000000000L
+            while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
+                if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
+                if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
+                int ready = bound.size()
+                if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
+                control()
+                if (System.nanoTime() &gt;= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
+                Thread.sleep(200L)
+            }
+            flush()
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            counts.each { key,value -&gt; totals[key]=value.get() }
+            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            terminalAck = response.accepted == true
+        } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
+    }
+    void finish(int slot) { done.add(slot) }
+}
+
+// The exact same cached script is used by standard JSR223 nodes; Parameters
+// selects a small lifecycle action. Only private register responses hold tokens.
+try {
+    Cap10PTSRun run
+    synchronized (props) {
+        run = (Cap10PTSRun)props.get('cap10.pts.instance')
+        if (run == null) { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+    }
+    if (Parameters == 'bind') {
+        vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+    } else if (Parameters == 'gate') {
+        Map relation = (Map)vars.getObject('cap10.relation')
+        Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
+        vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
+        if (offer == null) vars.put('cap10.continue','false')
+        else {
+            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
+            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
+        }
+    } else if (Parameters == 'pre') {
+        // Monotonic handoff immediately before the standard HTTP sampler. Its
+        // native elapsed time remains independent of Groovy classification.
+        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+    } else if (Parameters == 'post') {
+        run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
+        vars.remove('cap10.token')
+    } else if (Parameters == 'done') {
+        run.finish(((Map)vars.getObject('cap10.relation')).slot as int)
+    } else if (Parameters == 'finish') {
+        run.reporter.join(20000L)
+        if (run.reporter.alive || !run.terminalAck) throw new IllegalStateException('terminal ACK missing')
+    }
+    if (binding.hasVariable('SampleResult')) SampleResult.setIgnore()
+} catch (Exception ignored) {
+    def run = props.get('cap10.pts.instance'); if (run != null) run.stop.set(true)
+    vars.put('cap10.doWrite','false'); vars.put('cap10.continue','false')
+    throw new IllegalStateException('CAP10 sanitized workload failure; no payload retained')
+}
+</stringProp></JSR223PreProcessor><hashTree/><HeaderManager guiclass="HeaderPanel" testclass="HeaderManager" testname="Private headers" enabled="true"><collectionProp name="HeaderManager.headers"><elementProp name="" elementType="Header"><stringProp name="Header.name">authorization</stringProp><stringProp name="Header.value">${cap10.token}</stringProp></elementProp><elementProp name="" elementType="Header"><stringProp name="Header.name">Content-Type</stringProp><stringProp name="Header.value">application/json</stringProp></elementProp></collectionProp></HeaderManager><hashTree/><JSR223PostProcessor guiclass="TestBeanGUI" testclass="JSR223PostProcessor" testname="CAP10 post" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">post</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+
+// Pure contract shared by the uploaded JSR223 script and offline checks.
+class Cap10PTSContract {
+    static final long MAX_SAFE = 9007199254740991L
+    static boolean integer(Object n) {
+        n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
+            new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
+    }
+    static Map classify(int status, String text, String noteId, Map previous, boolean wanted) {
+        if (status == 0 || status &gt;= 500) return [kind:'uncertain']
+        if (status != 200) return [kind:'rejected']
+        def body = null
+        try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
+        def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
+            integer(data.version) &amp;&amp; integer(data.likes)
+        def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
+            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedNoteId:data?.noteId instanceof String ? data.noteId : null]
+        if (!valid || data.liked != wanted) return observed + [kind:'invalid']
+        if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
+        if (data.version == previous.version) return observed + [kind:'noop']
+        observed + [kind:'invalid']
+    }
+    static long ordinal(int slot, long iteration) {
+        if (slot &lt; 0 || slot &gt;= 512 || iteration &lt; 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    }
+    static long dueNano(long startNano, long ordinal, int rate) {
+        if (rate &lt; 1 || rate &gt; 5000 || ordinal &lt; 0) throw new IllegalArgumentException('invalid rate/ordinal')
+        startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
+    }
+    static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
+        long total = (long)rate * seconds
+        slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.LockSupport
+import org.apache.jmeter.services.FileServer
+
+class Cap10PTSRun {
+    final String engineId = UUID.randomUUID().toString()
+    final long resourceOriginNano = System.nanoTime()
+    final String collectorUrl, controlToken, scriptHash
+    final List&lt;Integer&gt; slots
+    final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
+    final Set&lt;Integer&gt; bound = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final Set&lt;Integer&gt; done = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final AtomicBoolean stop = new AtomicBoolean(false)
+    final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
+    final Map&lt;String,AtomicLong&gt; counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final List&lt;Map&gt; pending = []
+    final Object io = new Object(), recordsLock = new Object()
+    volatile Map config, clock
+    volatile boolean anchorFrozen = false, terminalAck = false
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile int readyReported = -1
+    long seq = 0
+    Thread reporter
+
+    Cap10PTSRun(String hash) {
+        scriptHash = hash
+        def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
+        def secret
+        try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
+        if (!(secret instanceof Map) || secret.keySet() != ['collectorUrl','controlToken'] as Set ||
+            !(secret.controlToken instanceof String) || secret.controlToken.size() &lt; 24) throw new IllegalStateException('private collector configuration invalid')
+        def uri = new URI(secret.collectorUrl.toString())
+        if (uri.scheme != 'http' || uri.userInfo || uri.fragment || uri.query || !(uri.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('collector must be explicit loopback/private IPv4 HTTP')
+        collectorUrl = secret.collectorUrl.toString().replaceAll('/+</hashTree></hashTree>,''); controlToken = secret.controlToken
+        def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
+        if (lines &amp;&amp; lines[0].trim() == 'slot') lines = lines.drop(1)
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() &gt; 512 || slots.toSet().size() != slots.size() || slots.any { it &lt; 0 || it &gt;= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        control()
+        def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
+        registered.relations.each { r -&gt;
+            if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
+            relations[r.slot as int] = [slot:r.slot as int, userId:r.userId, noteId:r.noteId, liked:r.active == 1, version:r.version as long, token:r.token]
+        }
+        if (relations.keySet() != slots.toSet()) throw new IllegalStateException('private relation coverage differs')
+        reporter = new Thread({ reportLoop() } as Runnable, 'cap10-telemetry')
+        reporter.daemon = true; reporter.start()
+    }
+    Map request(String path, Map body = null) {
+        synchronized (io) {
+            long beforeNano = System.nanoTime(), beforeWall = System.currentTimeMillis()
+            HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
+            c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
+            c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            try {
+                if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
+                if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                c.inputStream.withCloseable { input -&gt; byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n &gt; 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
+                long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
+                Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
+                if (result.serverUnixMs instanceof Number) {
+                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+                    if (uncertainty &gt; 50d || Math.abs((afterWall-beforeWall) - rtt) &gt; 50d) throw new IllegalStateException('collector clock uncertainty invalid')
+                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+                    if (anchorFrozen &amp;&amp; Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) &gt; clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+                    if (!anchorFrozen &amp;&amp; (clock == null || uncertainty &lt; clock.uncertaintyMs)) {
+                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+                    }
+                }
+                if (result.stop == true) stop.set(true)
+                return result
+            } finally { c.disconnect() }
+        }
+    }
+    double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
+    void control() {
+        Map c = request('/control')
+        if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
+            !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+        if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        def api = new URI(c.apiUrl.toString())
+        if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
+            !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
+        if (config != null &amp;&amp; c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
+        config = c
+        if (c.startUnixMs != null &amp;&amp; startNano == Long.MIN_VALUE) {
+            if (!(c.startUnixMs instanceof Number) || c.startUnixMs &lt; serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
+            anchorFrozen = true
+            startNano = anchorNano + ((c.startUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
+    }
+    Map bind(int slot) {
+        if (!relations.containsKey(slot) || !bound.add(slot)) { stop.set(true); throw new IllegalStateException('duplicate/unowned slot') }
+        relations[slot]
+    }
+    Map gate(Map relation, long iteration) {
+        while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
+        if (stop.get()) return null
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() &amp;&amp; System.nanoTime() &lt; deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        if (stop.get()) return null
+        long now = System.nanoTime()
+        if ((now-deadline)/1000000d &gt; 50d) {
+            record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
+            stop.set(true); flush(); return null
+        }
+        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void terminal(Map relation, Map offer, def sample) {
+        int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
+        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        completed.incrementAndGet(); inFlight.decrementAndGet()
+        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+        else stop.set(true)
+        record(event)
+        // Remove credential-bearing sampler context before every listener/PTS log.
+        sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
+        sample.setSuccessful(outcome.kind == 'mutation')
+        if (outcome.kind != 'mutation') flush()
+    }
+    void record(Map record) {
+        counts[record.kind].incrementAndGet()
+        synchronized (recordsLock) { if (pending.size() &gt;= 30000) { stop.set(true); throw new IllegalStateException('bounded telemetry buffer exhausted') }; pending.add(record) }
+    }
+    Map resources() {
+        def bean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.operatingSystemMXBean
+        Long rss = null
+        File status = new File('/proc/self/status')
+        if (status.isFile()) { def line = status.readLines('UTF-8').find { it.startsWith('VmRSS:') }; if (line) rss = line.tokenize()[1].toLong()*1024L }
+        else if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            // Local finite wiring only: actual working set, never JVM heap as RSS.
+            String pid = ManagementFactory.runtimeMXBean.name.tokenize('@')[0]
+            if (!(pid ==~ /\d+/)) throw new IllegalStateException('process identity unavailable')
+            Process child = new ProcessBuilder('powershell.exe','-NoProfile','-NonInteractive','-WindowStyle','Hidden','-Command','(Get-Process -Id '+pid+').WorkingSet64').start()
+            if (child.waitFor(5L,java.util.concurrent.TimeUnit.SECONDS) &amp;&amp; child.exitValue() == 0) {
+                String raw = child.inputStream.getText('UTF-8').trim()
+                if (raw ==~ /\d+/) rss = raw.toLong()
+            } else { child.destroyForcibly() }
+        }
+        [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flush() {
+        synchronized (io) {
+            List&lt;Map&gt; batch
+            synchronized (recordsLock) { batch = new ArrayList&lt;Map&gt;(pending) }
+            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+            Map response = null
+            for (int retry=0; retry&lt;3 &amp;&amp; response == null; retry++) {
+                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            }
+            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+            seq++
+        }
+    }
+    void reportLoop() {
+        try {
+            long nextReport = 0L
+            long setupDeadline = System.nanoTime() + 90000000000L
+            while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
+                if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
+                if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
+                int ready = bound.size()
+                if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
+                control()
+                if (System.nanoTime() &gt;= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
+                Thread.sleep(200L)
+            }
+            flush()
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            counts.each { key,value -&gt; totals[key]=value.get() }
+            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            terminalAck = response.accepted == true
+        } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
+    }
+    void finish(int slot) { done.add(slot) }
+}
+
+// The exact same cached script is used by standard JSR223 nodes; Parameters
+// selects a small lifecycle action. Only private register responses hold tokens.
+try {
+    Cap10PTSRun run
+    synchronized (props) {
+        run = (Cap10PTSRun)props.get('cap10.pts.instance')
+        if (run == null) { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+    }
+    if (Parameters == 'bind') {
+        vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+    } else if (Parameters == 'gate') {
+        Map relation = (Map)vars.getObject('cap10.relation')
+        Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
+        vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
+        if (offer == null) vars.put('cap10.continue','false')
+        else {
+            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
+            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
+        }
+    } else if (Parameters == 'pre') {
+        // Monotonic handoff immediately before the standard HTTP sampler. Its
+        // native elapsed time remains independent of Groovy classification.
+        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+    } else if (Parameters == 'post') {
+        run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
+        vars.remove('cap10.token')
+    } else if (Parameters == 'done') {
+        run.finish(((Map)vars.getObject('cap10.relation')).slot as int)
+    } else if (Parameters == 'finish') {
+        run.reporter.join(20000L)
+        if (run.reporter.alive || !run.terminalAck) throw new IllegalStateException('terminal ACK missing')
+    }
+    if (binding.hasVariable('SampleResult')) SampleResult.setIgnore()
+} catch (Exception ignored) {
+    def run = props.get('cap10.pts.instance'); if (run != null) run.stop.set(true)
+    vars.put('cap10.doWrite','false'); vars.put('cap10.continue','false')
+    throw new IllegalStateException('CAP10 sanitized workload failure; no payload retained')
+}
+</stringProp></JSR223PostProcessor><hashTree/></hashTree></hashTree></hashTree><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 done" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">done</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+
+// Pure contract shared by the uploaded JSR223 script and offline checks.
+class Cap10PTSContract {
+    static final long MAX_SAFE = 9007199254740991L
+    static boolean integer(Object n) {
+        n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
+            new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
+    }
+    static Map classify(int status, String text, String noteId, Map previous, boolean wanted) {
+        if (status == 0 || status &gt;= 500) return [kind:'uncertain']
+        if (status != 200) return [kind:'rejected']
+        def body = null
+        try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
+        def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
+            integer(data.version) &amp;&amp; integer(data.likes)
+        def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
+            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedNoteId:data?.noteId instanceof String ? data.noteId : null]
+        if (!valid || data.liked != wanted) return observed + [kind:'invalid']
+        if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
+        if (data.version == previous.version) return observed + [kind:'noop']
+        observed + [kind:'invalid']
+    }
+    static long ordinal(int slot, long iteration) {
+        if (slot &lt; 0 || slot &gt;= 512 || iteration &lt; 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    }
+    static long dueNano(long startNano, long ordinal, int rate) {
+        if (rate &lt; 1 || rate &gt; 5000 || ordinal &lt; 0) throw new IllegalArgumentException('invalid rate/ordinal')
+        startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
+    }
+    static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
+        long total = (long)rate * seconds
+        slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.LockSupport
+import org.apache.jmeter.services.FileServer
+
+class Cap10PTSRun {
+    final String engineId = UUID.randomUUID().toString()
+    final long resourceOriginNano = System.nanoTime()
+    final String collectorUrl, controlToken, scriptHash
+    final List&lt;Integer&gt; slots
+    final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
+    final Set&lt;Integer&gt; bound = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final Set&lt;Integer&gt; done = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final AtomicBoolean stop = new AtomicBoolean(false)
+    final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
+    final Map&lt;String,AtomicLong&gt; counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final List&lt;Map&gt; pending = []
+    final Object io = new Object(), recordsLock = new Object()
+    volatile Map config, clock
+    volatile boolean anchorFrozen = false, terminalAck = false
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile int readyReported = -1
+    long seq = 0
+    Thread reporter
+
+    Cap10PTSRun(String hash) {
+        scriptHash = hash
+        def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
+        def secret
+        try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
+        if (!(secret instanceof Map) || secret.keySet() != ['collectorUrl','controlToken'] as Set ||
+            !(secret.controlToken instanceof String) || secret.controlToken.size() &lt; 24) throw new IllegalStateException('private collector configuration invalid')
+        def uri = new URI(secret.collectorUrl.toString())
+        if (uri.scheme != 'http' || uri.userInfo || uri.fragment || uri.query || !(uri.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('collector must be explicit loopback/private IPv4 HTTP')
+        collectorUrl = secret.collectorUrl.toString().replaceAll('/+$',''); controlToken = secret.controlToken
+        def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
+        if (lines &amp;&amp; lines[0].trim() == 'slot') lines = lines.drop(1)
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() &gt; 512 || slots.toSet().size() != slots.size() || slots.any { it &lt; 0 || it &gt;= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        control()
+        def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
+        registered.relations.each { r -&gt;
+            if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
+            relations[r.slot as int] = [slot:r.slot as int, userId:r.userId, noteId:r.noteId, liked:r.active == 1, version:r.version as long, token:r.token]
+        }
+        if (relations.keySet() != slots.toSet()) throw new IllegalStateException('private relation coverage differs')
+        reporter = new Thread({ reportLoop() } as Runnable, 'cap10-telemetry')
+        reporter.daemon = true; reporter.start()
+    }
+    Map request(String path, Map body = null) {
+        synchronized (io) {
+            long beforeNano = System.nanoTime(), beforeWall = System.currentTimeMillis()
+            HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
+            c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
+            c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            try {
+                if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
+                if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                c.inputStream.withCloseable { input -&gt; byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n &gt; 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
+                long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
+                Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
+                if (result.serverUnixMs instanceof Number) {
+                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+                    if (uncertainty &gt; 50d || Math.abs((afterWall-beforeWall) - rtt) &gt; 50d) throw new IllegalStateException('collector clock uncertainty invalid')
+                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+                    if (anchorFrozen &amp;&amp; Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) &gt; clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+                    if (!anchorFrozen &amp;&amp; (clock == null || uncertainty &lt; clock.uncertaintyMs)) {
+                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+                    }
+                }
+                if (result.stop == true) stop.set(true)
+                return result
+            } finally { c.disconnect() }
+        }
+    }
+    double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
+    void control() {
+        Map c = request('/control')
+        if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
+            !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+        if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        def api = new URI(c.apiUrl.toString())
+        if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
+            !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
+        if (config != null &amp;&amp; c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
+        config = c
+        if (c.startUnixMs != null &amp;&amp; startNano == Long.MIN_VALUE) {
+            if (!(c.startUnixMs instanceof Number) || c.startUnixMs &lt; serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
+            anchorFrozen = true
+            startNano = anchorNano + ((c.startUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
+    }
+    Map bind(int slot) {
+        if (!relations.containsKey(slot) || !bound.add(slot)) { stop.set(true); throw new IllegalStateException('duplicate/unowned slot') }
+        relations[slot]
+    }
+    Map gate(Map relation, long iteration) {
+        while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
+        if (stop.get()) return null
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() &amp;&amp; System.nanoTime() &lt; deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        if (stop.get()) return null
+        long now = System.nanoTime()
+        if ((now-deadline)/1000000d &gt; 50d) {
+            record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
+            stop.set(true); flush(); return null
+        }
+        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void terminal(Map relation, Map offer, def sample) {
+        int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
+        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        completed.incrementAndGet(); inFlight.decrementAndGet()
+        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+        else stop.set(true)
+        record(event)
+        // Remove credential-bearing sampler context before every listener/PTS log.
+        sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
+        sample.setSuccessful(outcome.kind == 'mutation')
+        if (outcome.kind != 'mutation') flush()
+    }
+    void record(Map record) {
+        counts[record.kind].incrementAndGet()
+        synchronized (recordsLock) { if (pending.size() &gt;= 30000) { stop.set(true); throw new IllegalStateException('bounded telemetry buffer exhausted') }; pending.add(record) }
+    }
+    Map resources() {
+        def bean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.operatingSystemMXBean
+        Long rss = null
+        File status = new File('/proc/self/status')
+        if (status.isFile()) { def line = status.readLines('UTF-8').find { it.startsWith('VmRSS:') }; if (line) rss = line.tokenize()[1].toLong()*1024L }
+        else if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            // Local finite wiring only: actual working set, never JVM heap as RSS.
+            String pid = ManagementFactory.runtimeMXBean.name.tokenize('@')[0]
+            if (!(pid ==~ /\d+/)) throw new IllegalStateException('process identity unavailable')
+            Process child = new ProcessBuilder('powershell.exe','-NoProfile','-NonInteractive','-WindowStyle','Hidden','-Command','(Get-Process -Id '+pid+').WorkingSet64').start()
+            if (child.waitFor(5L,java.util.concurrent.TimeUnit.SECONDS) &amp;&amp; child.exitValue() == 0) {
+                String raw = child.inputStream.getText('UTF-8').trim()
+                if (raw ==~ /\d+/) rss = raw.toLong()
+            } else { child.destroyForcibly() }
+        }
+        [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flush() {
+        synchronized (io) {
+            List&lt;Map&gt; batch
+            synchronized (recordsLock) { batch = new ArrayList&lt;Map&gt;(pending) }
+            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+            Map response = null
+            for (int retry=0; retry&lt;3 &amp;&amp; response == null; retry++) {
+                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            }
+            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+            seq++
+        }
+    }
+    void reportLoop() {
+        try {
+            long nextReport = 0L
+            long setupDeadline = System.nanoTime() + 90000000000L
+            while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
+                if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
+                if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
+                int ready = bound.size()
+                if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
+                control()
+                if (System.nanoTime() &gt;= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
+                Thread.sleep(200L)
+            }
+            flush()
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            counts.each { key,value -&gt; totals[key]=value.get() }
+            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            terminalAck = response.accepted == true
+        } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
+    }
+    void finish(int slot) { done.add(slot) }
+}
+
+// The exact same cached script is used by standard JSR223 nodes; Parameters
+// selects a small lifecycle action. Only private register responses hold tokens.
+try {
+    Cap10PTSRun run
+    synchronized (props) {
+        run = (Cap10PTSRun)props.get('cap10.pts.instance')
+        if (run == null) { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+    }
+    if (Parameters == 'bind') {
+        vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+    } else if (Parameters == 'gate') {
+        Map relation = (Map)vars.getObject('cap10.relation')
+        Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
+        vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
+        if (offer == null) vars.put('cap10.continue','false')
+        else {
+            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
+            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
+        }
+    } else if (Parameters == 'pre') {
+        // Monotonic handoff immediately before the standard HTTP sampler. Its
+        // native elapsed time remains independent of Groovy classification.
+        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+    } else if (Parameters == 'post') {
+        run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
+        vars.remove('cap10.token')
+    } else if (Parameters == 'done') {
+        run.finish(((Map)vars.getObject('cap10.relation')).slot as int)
+    } else if (Parameters == 'finish') {
+        run.reporter.join(20000L)
+        if (run.reporter.alive || !run.terminalAck) throw new IllegalStateException('terminal ACK missing')
+    }
+    if (binding.hasVariable('SampleResult')) SampleResult.setIgnore()
+} catch (Exception ignored) {
+    def run = props.get('cap10.pts.instance'); if (run != null) run.stop.set(true)
+    vars.put('cap10.doWrite','false'); vars.put('cap10.continue','false')
+    throw new IllegalStateException('CAP10 sanitized workload failure; no payload retained')
+}
+</stringProp></JSR223Sampler><hashTree/></hashTree><PostThreadGroup guiclass="PostThreadGroupGui" testclass="PostThreadGroup" testname="Terminal durable ACK" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">1</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></PostThreadGroup><hashTree><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 finish" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">finish</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+
+// Pure contract shared by the uploaded JSR223 script and offline checks.
+class Cap10PTSContract {
+    static final long MAX_SAFE = 9007199254740991L
+    static boolean integer(Object n) {
+        n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
+            new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
+    }
+    static Map classify(int status, String text, String noteId, Map previous, boolean wanted) {
+        if (status == 0 || status &gt;= 500) return [kind:'uncertain']
+        if (status != 200) return [kind:'rejected']
+        def body = null
+        try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
+        def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
+            integer(data.version) &amp;&amp; integer(data.likes)
+        def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
+            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedNoteId:data?.noteId instanceof String ? data.noteId : null]
+        if (!valid || data.liked != wanted) return observed + [kind:'invalid']
+        if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
+        if (data.version == previous.version) return observed + [kind:'noop']
+        observed + [kind:'invalid']
+    }
+    static long ordinal(int slot, long iteration) {
+        if (slot &lt; 0 || slot &gt;= 512 || iteration &lt; 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    }
+    static long dueNano(long startNano, long ordinal, int rate) {
+        if (rate &lt; 1 || rate &gt; 5000 || ordinal &lt; 0) throw new IllegalArgumentException('invalid rate/ordinal')
+        startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
+    }
+    static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
+        long total = (long)rate * seconds
+        slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+import java.lang.management.ManagementFactory
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.locks.LockSupport
+import org.apache.jmeter.services.FileServer
+
+class Cap10PTSRun {
+    final String engineId = UUID.randomUUID().toString()
+    final long resourceOriginNano = System.nanoTime()
+    final String collectorUrl, controlToken, scriptHash
+    final List&lt;Integer&gt; slots
+    final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
+    final Set&lt;Integer&gt; bound = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final Set&lt;Integer&gt; done = Collections.newSetFromMap(new ConcurrentHashMap&lt;Integer,Boolean&gt;())
+    final AtomicBoolean stop = new AtomicBoolean(false)
+    final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
+    final Map&lt;String,AtomicLong&gt; counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final List&lt;Map&gt; pending = []
+    final Object io = new Object(), recordsLock = new Object()
+    volatile Map config, clock
+    volatile boolean anchorFrozen = false, terminalAck = false
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile int readyReported = -1
+    long seq = 0
+    Thread reporter
+
+    Cap10PTSRun(String hash) {
+        scriptHash = hash
+        def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
+        def secret
+        try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
+        if (!(secret instanceof Map) || secret.keySet() != ['collectorUrl','controlToken'] as Set ||
+            !(secret.controlToken instanceof String) || secret.controlToken.size() &lt; 24) throw new IllegalStateException('private collector configuration invalid')
+        def uri = new URI(secret.collectorUrl.toString())
+        if (uri.scheme != 'http' || uri.userInfo || uri.fragment || uri.query || !(uri.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('collector must be explicit loopback/private IPv4 HTTP')
+        collectorUrl = secret.collectorUrl.toString().replaceAll('/+$',''); controlToken = secret.controlToken
+        def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
+        if (lines &amp;&amp; lines[0].trim() == 'slot') lines = lines.drop(1)
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() &gt; 512 || slots.toSet().size() != slots.size() || slots.any { it &lt; 0 || it &gt;= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        control()
+        def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
+        registered.relations.each { r -&gt;
+            if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
+            relations[r.slot as int] = [slot:r.slot as int, userId:r.userId, noteId:r.noteId, liked:r.active == 1, version:r.version as long, token:r.token]
+        }
+        if (relations.keySet() != slots.toSet()) throw new IllegalStateException('private relation coverage differs')
+        reporter = new Thread({ reportLoop() } as Runnable, 'cap10-telemetry')
+        reporter.daemon = true; reporter.start()
+    }
+    Map request(String path, Map body = null) {
+        synchronized (io) {
+            long beforeNano = System.nanoTime(), beforeWall = System.currentTimeMillis()
+            HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
+            c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
+            c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            try {
+                if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
+                if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
+                ByteArrayOutputStream bytes = new ByteArrayOutputStream()
+                c.inputStream.withCloseable { input -&gt; byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n &gt; 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
+                long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
+                Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
+                if (result.serverUnixMs instanceof Number) {
+                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+                    if (uncertainty &gt; 50d || Math.abs((afterWall-beforeWall) - rtt) &gt; 50d) throw new IllegalStateException('collector clock uncertainty invalid')
+                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+                    if (anchorFrozen &amp;&amp; Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) &gt; clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+                    if (!anchorFrozen &amp;&amp; (clock == null || uncertainty &lt; clock.uncertaintyMs)) {
+                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+                    }
+                }
+                if (result.stop == true) stop.set(true)
+                return result
+            } finally { c.disconnect() }
+        }
+    }
+    double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
+    void control() {
+        Map c = request('/control')
+        if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
+            !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+        if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        def api = new URI(c.apiUrl.toString())
+        if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
+            !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
+        if (config != null &amp;&amp; c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
+        config = c
+        if (c.startUnixMs != null &amp;&amp; startNano == Long.MIN_VALUE) {
+            if (!(c.startUnixMs instanceof Number) || c.startUnixMs &lt; serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
+            anchorFrozen = true
+            startNano = anchorNano + ((c.startUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
+    }
+    Map bind(int slot) {
+        if (!relations.containsKey(slot) || !bound.add(slot)) { stop.set(true); throw new IllegalStateException('duplicate/unowned slot') }
+        relations[slot]
+    }
+    Map gate(Map relation, long iteration) {
+        while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
+        if (stop.get()) return null
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() &amp;&amp; System.nanoTime() &lt; deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        if (stop.get()) return null
+        long now = System.nanoTime()
+        if ((now-deadline)/1000000d &gt; 50d) {
+            record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
+            stop.set(true); flush(); return null
+        }
+        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void terminal(Map relation, Map offer, def sample) {
+        int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
+        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        completed.incrementAndGet(); inFlight.decrementAndGet()
+        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+        else stop.set(true)
+        record(event)
+        // Remove credential-bearing sampler context before every listener/PTS log.
+        sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
+        sample.setSuccessful(outcome.kind == 'mutation')
+        if (outcome.kind != 'mutation') flush()
+    }
+    void record(Map record) {
+        counts[record.kind].incrementAndGet()
+        synchronized (recordsLock) { if (pending.size() &gt;= 30000) { stop.set(true); throw new IllegalStateException('bounded telemetry buffer exhausted') }; pending.add(record) }
+    }
+    Map resources() {
+        def bean = (com.sun.management.OperatingSystemMXBean)ManagementFactory.operatingSystemMXBean
+        Long rss = null
+        File status = new File('/proc/self/status')
+        if (status.isFile()) { def line = status.readLines('UTF-8').find { it.startsWith('VmRSS:') }; if (line) rss = line.tokenize()[1].toLong()*1024L }
+        else if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+            // Local finite wiring only: actual working set, never JVM heap as RSS.
+            String pid = ManagementFactory.runtimeMXBean.name.tokenize('@')[0]
+            if (!(pid ==~ /\d+/)) throw new IllegalStateException('process identity unavailable')
+            Process child = new ProcessBuilder('powershell.exe','-NoProfile','-NonInteractive','-WindowStyle','Hidden','-Command','(Get-Process -Id '+pid+').WorkingSet64').start()
+            if (child.waitFor(5L,java.util.concurrent.TimeUnit.SECONDS) &amp;&amp; child.exitValue() == 0) {
+                String raw = child.inputStream.getText('UTF-8').trim()
+                if (raw ==~ /\d+/) rss = raw.toLong()
+            } else { child.destroyForcibly() }
+        }
+        [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flush() {
+        synchronized (io) {
+            List&lt;Map&gt; batch
+            synchronized (recordsLock) { batch = new ArrayList&lt;Map&gt;(pending) }
+            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+            Map response = null
+            for (int retry=0; retry&lt;3 &amp;&amp; response == null; retry++) {
+                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            }
+            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+            seq++
+        }
+    }
+    void reportLoop() {
+        try {
+            long nextReport = 0L
+            long setupDeadline = System.nanoTime() + 90000000000L
+            while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
+                if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
+                if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
+                int ready = bound.size()
+                if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
+                control()
+                if (System.nanoTime() &gt;= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
+                Thread.sleep(200L)
+            }
+            flush()
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            counts.each { key,value -&gt; totals[key]=value.get() }
+            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            terminalAck = response.accepted == true
+        } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
+    }
+    void finish(int slot) { done.add(slot) }
+}
+
+// The exact same cached script is used by standard JSR223 nodes; Parameters
+// selects a small lifecycle action. Only private register responses hold tokens.
+try {
+    Cap10PTSRun run
+    synchronized (props) {
+        run = (Cap10PTSRun)props.get('cap10.pts.instance')
+        if (run == null) { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+    }
+    if (Parameters == 'bind') {
+        vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+    } else if (Parameters == 'gate') {
+        Map relation = (Map)vars.getObject('cap10.relation')
+        Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
+        vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
+        if (offer == null) vars.put('cap10.continue','false')
+        else {
+            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
+            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
+        }
+    } else if (Parameters == 'pre') {
+        // Monotonic handoff immediately before the standard HTTP sampler. Its
+        // native elapsed time remains independent of Groovy classification.
+        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+    } else if (Parameters == 'post') {
+        run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
+        vars.remove('cap10.token')
+    } else if (Parameters == 'done') {
+        run.finish(((Map)vars.getObject('cap10.relation')).slot as int)
+    } else if (Parameters == 'finish') {
+        run.reporter.join(20000L)
+        if (run.reporter.alive || !run.terminalAck) throw new IllegalStateException('terminal ACK missing')
+    }
+    if (binding.hasVariable('SampleResult')) SampleResult.setIgnore()
+} catch (Exception ignored) {
+    def run = props.get('cap10.pts.instance'); if (run != null) run.stop.set(true)
+    vars.put('cap10.doWrite','false'); vars.put('cap10.continue','false')
+    throw new IllegalStateException('CAP10 sanitized workload failure; no payload retained')
+}
+</stringProp></JSR223Sampler><hashTree/></hashTree></hashTree></hashTree></jmeterTestPlan>

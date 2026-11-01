@@ -1,0 +1,1 @@
+{"reason": "root HTTP handler interface repair and sandbox loopback denial identified; stop owned finite test before corrected elevated regression", "processes": [{"pid": 3248, "created": 1793526149.664291, "exactOwnedStubIdentity": true}, {"pid": 69720, "created": 1793526149.6493628, "exactOwnedStubIdentity": true}]}

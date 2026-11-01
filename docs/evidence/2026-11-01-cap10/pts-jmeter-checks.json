@@ -1,0 +1,547 @@
+{
+  "scope": "CAP10 local finite JMeter functional preparation only; no cloud API, business service, DB, or S/H capacity window.",
+  "version": 1,
+  "syntheticPUTsTotal": 44,
+  "successfulFunctionalCases": 4,
+  "failedPreparationCases": 4,
+  "pureContractChecks": {
+    "checks": 14,
+    "failed": 0,
+    "command": "Java8 + official Apache JMeter5.6.3 GroovyMain cap10-pts-contract-check.groovy",
+    "stdoutSeparatelyArchived": false
+  },
+  "officialJMeter": {
+    "version": "5.6.3",
+    "downloadUrl": "https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-5.6.3.zip",
+    "sha512": "387fadca903ee0aa30e3f2115fdfedb3898b102e6b9fe7cc3942703094bd2e65b235df2b0c6d0d3248e74c9a7950a36e42625fd74425368342c12e40b0163076",
+    "verifiedBeforeExecution": true,
+    "localJava": "pre-existing Java8; not a claim about the live PTS runtime"
+  },
+  "finalCombinedScriptSHA256": "ba0399b8d25945846e86cef30a391a137acdbd32a3a393cf1b5c224f89da609a",
+  "finalSourceSHA256": {
+    "scripts/pts/cap10-jmeter.groovy": "fe91f55e0d109e660bad4a7f26acd56c6d9ea14b17bdda90e08e738ae0823e90",
+    "scripts/pts/cap10-jmeter.jmx": "120ef90f65e5c39529c5012a9343d5fddf7b7eb0994cdacfd465de378afcf87e",
+    "scripts/pts/cap10-jmeter.mjs": "2e91dcc510115af186bbf6efc16c241deb1531577fa7c4e9547368495df5e42f",
+    "scripts/pts/cap10-pts-contract.groovy": "d7c566684f0baaeee05c4eb4253df4bc9da99094de87f30ef8a7c3f62c3cb02e",
+    "scripts/pts/cap10-pts-contract-check.groovy": "241b450be74f850fcc2f79122142ba54bfee6c780fe7e81a8d2405dce248200b",
+    "scripts/pts/cap10-jmeter-wiring-check.py": "977c464c777ab11a2881463e6803d402ec14d867d53c19b73e0ec5cfd79ea706",
+    "scripts/pts/cap10-jmeter-README.md": "94d9121f171525894180d29c8bd5ad68dc702ffd009168f78b548c0007f67778"
+  },
+  "cases": [
+    {
+      "case": "01-xml-generation-failure",
+      "kind": "failed_before_jmeter",
+      "syntheticPUTs": 0,
+      "note": "Generated XML mismatched tag; failure happened in ET.parse before any JMeter child launch. Raw stderr was only in the tool transcript.",
+      "sourceRuntimeDirectory": "wiring-eb4169fafd6d407ca63a740a7c3de5a9",
+      "resultFilePresent": false
+    },
+    {
+      "case": "02-sandbox-startup-deadline",
+      "kind": "failed_before_registration",
+      "syntheticPUTs": 0,
+      "note": "Bounded startup deadline; no actor registration or common barrier. Saved logs do not establish the exact cause; no separate stdout/exit-status file was written.",
+      "sourceRuntimeDirectory": "wiring-e0e274d85f4741b0855c265d5295561b",
+      "resultFilePresent": false
+    },
+    {
+      "case": "03-owned-startup-stop",
+      "kind": "failed_before_registration",
+      "syntheticPUTs": 0,
+      "note": "Owned two JVMs stopped after source/HTTP/sandbox issues were identified; exact operator-stop record and failed result retained.",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "resultFilePresent": true,
+      "functionalCheckPassed": false,
+      "jvmExitCodes": [
+        15,
+        15
+      ],
+      "scriptSHA256": "2d5fc00ca25b82963907afb8a77c2c02e38d347ff9db63b5c004253f7a8c3a03",
+      "collectorComplete": false,
+      "unknown": null,
+      "counts": {
+        "planned": 20,
+        "attempted": 0,
+        "completed": 0,
+        "mutation": 0,
+        "noop": 0,
+        "uncertain": 0,
+        "rejected": 0,
+        "invalid": 0,
+        "dropped": 0
+      }
+    },
+    {
+      "case": "04-initial-positive",
+      "kind": "positive",
+      "syntheticPUTs": 20,
+      "note": "Earlier-script complete ten-second warm functional wiring; not a capacity result.",
+      "sourceRuntimeDirectory": "wiring-4219753f071a44e893da4371ff05b115",
+      "resultFilePresent": true,
+      "functionalCheckPassed": true,
+      "jvmExitCodes": [
+        0,
+        0
+      ],
+      "scriptSHA256": "cdb712437bc06de0770c540031151d90a2f33fd01f5d0eb2a8ec3057dc2754dc",
+      "collectorComplete": true,
+      "unknown": 0,
+      "counts": {
+        "planned": 20,
+        "attempted": 20,
+        "completed": 20,
+        "mutation": 20,
+        "noop": 0,
+        "uncertain": 0,
+        "rejected": 0,
+        "invalid": 0,
+        "dropped": 0
+      }
+    },
+    {
+      "case": "05-noop-stop",
+      "kind": "expected_noop_failure",
+      "syntheticPUTs": 2,
+      "note": "Two no-op terminals stopped new offers; unissued future ordinals were not fabricated as drops.",
+      "sourceRuntimeDirectory": "wiring-cfbb11d226b7446cbe63c9875a79fb11",
+      "resultFilePresent": true,
+      "functionalCheckPassed": true,
+      "jvmExitCodes": [
+        0,
+        0
+      ],
+      "scriptSHA256": "cdb712437bc06de0770c540031151d90a2f33fd01f5d0eb2a8ec3057dc2754dc",
+      "collectorComplete": false,
+      "unknown": null,
+      "counts": {
+        "planned": 20,
+        "attempted": 2,
+        "completed": 2,
+        "mutation": 0,
+        "noop": 2,
+        "uncertain": 0,
+        "rejected": 0,
+        "invalid": 0,
+        "dropped": 0
+      }
+    },
+    {
+      "case": "06-uncertainty-stop",
+      "kind": "expected_uncertain_failure",
+      "syntheticPUTs": 2,
+      "note": "Two HTTP503 terminals preserve effect uncertainty and stop; no invented full-window completion.",
+      "sourceRuntimeDirectory": "wiring-215546d72dc74103bcb81d3f919f1369",
+      "resultFilePresent": true,
+      "functionalCheckPassed": true,
+      "jvmExitCodes": [
+        0,
+        0
+      ],
+      "scriptSHA256": "cdb712437bc06de0770c540031151d90a2f33fd01f5d0eb2a8ec3057dc2754dc",
+      "collectorComplete": false,
+      "unknown": null,
+      "counts": {
+        "planned": 20,
+        "attempted": 2,
+        "completed": 2,
+        "mutation": 0,
+        "noop": 0,
+        "uncertain": 2,
+        "rejected": 0,
+        "invalid": 0,
+        "dropped": 0
+      }
+    },
+    {
+      "case": "07-post-cleanup-startup-failure",
+      "kind": "failed_before_registration",
+      "syntheticPUTs": 0,
+      "note": "No registration or PUT before sanitized setup failure. Exact setup reason was not recorded; it must not be retroactively called a proven clock failure.",
+      "sourceRuntimeDirectory": "wiring-a71bbeb28d784bea933210e762597dbf",
+      "resultFilePresent": true,
+      "functionalCheckPassed": false,
+      "jvmExitCodes": [
+        0,
+        0
+      ],
+      "scriptSHA256": "94907ec001650166f6b8215dedb5af8957f854833805d1b92f3e6760e9ad614d",
+      "collectorComplete": false,
+      "unknown": null,
+      "counts": {
+        "planned": 20,
+        "attempted": 0,
+        "completed": 0,
+        "mutation": 0,
+        "noop": 0,
+        "uncertain": 0,
+        "rejected": 0,
+        "invalid": 0,
+        "dropped": 0
+      }
+    },
+    {
+      "case": "08-final-positive",
+      "kind": "final_positive",
+      "syntheticPUTs": 20,
+      "note": "Final exact source: complete10s/20mutations/two JVM exit0/collector complete/unknown0.",
+      "sourceRuntimeDirectory": "wiring-80bd86f58a984c82a9402ede3225edfd",
+      "resultFilePresent": true,
+      "functionalCheckPassed": true,
+      "jvmExitCodes": [
+        0,
+        0
+      ],
+      "scriptSHA256": "ba0399b8d25945846e86cef30a391a137acdbd32a3a393cf1b5c224f89da609a",
+      "collectorComplete": true,
+      "unknown": 0,
+      "counts": {
+        "planned": 20,
+        "attempted": 20,
+        "completed": 20,
+        "mutation": 20,
+        "noop": 0,
+        "uncertain": 0,
+        "rejected": 0,
+        "invalid": 0,
+        "dropped": 0
+      }
+    }
+  ],
+  "rawFiles": [
+    {
+      "path": "01-xml-generation-failure/collector.ndjson",
+      "bytes": 549,
+      "sha256": "ccb8edf906ab648d20f17e747141858f13eb070fa815ef6f30fab869978b7f50",
+      "sourceRuntimeDirectory": "wiring-eb4169fafd6d407ca63a740a7c3de5a9",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "01-xml-generation-failure/common/cap10-jmeter.jmx",
+      "bytes": 145303,
+      "sha256": "bfaf1b227ed03bc12083b0655c0aba95f97b71ce9c4eb74cc02bef108a639275",
+      "sourceRuntimeDirectory": "wiring-eb4169fafd6d407ca63a740a7c3de5a9",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "02-sandbox-startup-deadline/collector.ndjson",
+      "bytes": 635,
+      "sha256": "6fd36b13a67c04895afdd43cbe78c25173cadd7ec400fdbae23eaa703ce8f0b0",
+      "sourceRuntimeDirectory": "wiring-e0e274d85f4741b0855c265d5295561b",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "02-sandbox-startup-deadline/engine-0/console.txt",
+      "bytes": 512,
+      "sha256": "53c9a5bec33acd10c70cff8eaa2550cbb66838c8e74cddcce0a238d2d86d450f",
+      "sourceRuntimeDirectory": "wiring-e0e274d85f4741b0855c265d5295561b",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "02-sandbox-startup-deadline/engine-1/console.txt",
+      "bytes": 512,
+      "sha256": "53c9a5bec33acd10c70cff8eaa2550cbb66838c8e74cddcce0a238d2d86d450f",
+      "sourceRuntimeDirectory": "wiring-e0e274d85f4741b0855c265d5295561b",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "02-sandbox-startup-deadline/engine-0/jmeter.log",
+      "bytes": 75,
+      "sha256": "39652d7ed3a98b89fdbb26f9224c2f5bf98e501b24774510e11808fe9771c662",
+      "sourceRuntimeDirectory": "wiring-e0e274d85f4741b0855c265d5295561b",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "02-sandbox-startup-deadline/engine-1/jmeter.log",
+      "bytes": 75,
+      "sha256": "39652d7ed3a98b89fdbb26f9224c2f5bf98e501b24774510e11808fe9771c662",
+      "sourceRuntimeDirectory": "wiring-e0e274d85f4741b0855c265d5295561b",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "03-owned-startup-stop/result.json",
+      "bytes": 3007,
+      "sha256": "2ed5fccc3f6249a42a4809495a41390e6d7a5db0228e13dda6c64209af5d8378",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "03-owned-startup-stop/collector.ndjson",
+      "bytes": 549,
+      "sha256": "01b99081dcb0df6fe971c0e157791eb09b779e41bec566c82b967fa2e5b3087c",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "03-owned-startup-stop/operator-stop.json",
+      "bytes": 319,
+      "sha256": "34eb30f658cf74926e8f6ed56f2e5c47ee6238c7491d6e18f90b60d858d6c10d",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "03-owned-startup-stop/engine-0/console.txt",
+      "bytes": 512,
+      "sha256": "53c9a5bec33acd10c70cff8eaa2550cbb66838c8e74cddcce0a238d2d86d450f",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "03-owned-startup-stop/engine-1/console.txt",
+      "bytes": 512,
+      "sha256": "53c9a5bec33acd10c70cff8eaa2550cbb66838c8e74cddcce0a238d2d86d450f",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "03-owned-startup-stop/engine-0/jmeter.log",
+      "bytes": 75,
+      "sha256": "9cc6edd7524912e888472f9ce95b5f84793f94a5a417e68a9426e6cb958bed15",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "03-owned-startup-stop/engine-1/jmeter.log",
+      "bytes": 75,
+      "sha256": "412c347a8024b9a5a785b15cc7913ed3053d400661bd5d7464dcc39d91871330",
+      "sourceRuntimeDirectory": "wiring-b45c44fcf4cc490cbc9690004eb74c7f",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "04-initial-positive/result.json",
+      "bytes": 9573,
+      "sha256": "7b7efe7f11e4f542e6500a8b9fcb0c0d49003e482220a3a5d212acba33ac0df7",
+      "sourceRuntimeDirectory": "wiring-4219753f071a44e893da4371ff05b115",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "04-initial-positive/collector.ndjson",
+      "bytes": 12291,
+      "sha256": "68221a49c1c794df23967db0523d275247a7b0d9c0b76938d9cec9ad403898da",
+      "sourceRuntimeDirectory": "wiring-4219753f071a44e893da4371ff05b115",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "04-initial-positive/engine-0/console.txt",
+      "bytes": 1049,
+      "sha256": "7185fd4367ad8a52adfd348a00d1ae4c645424d3fc71f45528cbfc79dbb2e731",
+      "sourceRuntimeDirectory": "wiring-4219753f071a44e893da4371ff05b115",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "04-initial-positive/engine-1/console.txt",
+      "bytes": 1049,
+      "sha256": "5399c0c4cef62d6eadc9bb1d38f87bc382ee78eba465ea398def3ecfe9e5549d",
+      "sourceRuntimeDirectory": "wiring-4219753f071a44e893da4371ff05b115",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "04-initial-positive/engine-0/jmeter.log",
+      "bytes": 90140,
+      "sha256": "0e1e8e9d186c667776e2d9d1f565d1f431ca79c6bd177806d2edd17c79867680",
+      "sourceRuntimeDirectory": "wiring-4219753f071a44e893da4371ff05b115",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "04-initial-positive/engine-1/jmeter.log",
+      "bytes": 90140,
+      "sha256": "6bd534ac3f3c4fe06867f854aaa00f9da59aaae59b29bb54c42b492db02ab6d1",
+      "sourceRuntimeDirectory": "wiring-4219753f071a44e893da4371ff05b115",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "05-noop-stop/result.json",
+      "bytes": 9621,
+      "sha256": "64f95b9e26d0e1a0e371ef534c9a11ffa9ce04f2ab0ce1214e047920cdbb77f8",
+      "sourceRuntimeDirectory": "wiring-cfbb11d226b7446cbe63c9875a79fb11",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "05-noop-stop/collector.ndjson",
+      "bytes": 8907,
+      "sha256": "f377147f4ff525a06163f2707a7e1e4534bedebfcf329085419d5e963522c9a0",
+      "sourceRuntimeDirectory": "wiring-cfbb11d226b7446cbe63c9875a79fb11",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "05-noop-stop/engine-0/console.txt",
+      "bytes": 1051,
+      "sha256": "d772801e95e0028853402cf234cce33a49a4b0f46941e8c4ec33da92b41d1e96",
+      "sourceRuntimeDirectory": "wiring-cfbb11d226b7446cbe63c9875a79fb11",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "05-noop-stop/engine-1/console.txt",
+      "bytes": 1051,
+      "sha256": "e611055138d82a6fc7b4da9aa890461c3aff80c32bd40c6ed4dc43cb6b3888d4",
+      "sourceRuntimeDirectory": "wiring-cfbb11d226b7446cbe63c9875a79fb11",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "05-noop-stop/engine-0/jmeter.log",
+      "bytes": 90142,
+      "sha256": "db3bbd19e9ea598f14b47cdf019cecb59a2d93be35d86314f79f410ec64bf76f",
+      "sourceRuntimeDirectory": "wiring-cfbb11d226b7446cbe63c9875a79fb11",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "05-noop-stop/engine-1/jmeter.log",
+      "bytes": 90142,
+      "sha256": "e4a0e5dce588048f0a7c9a6cb6d40aad7baa4a00e3a7f8dc38896268ecee1488",
+      "sourceRuntimeDirectory": "wiring-cfbb11d226b7446cbe63c9875a79fb11",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "06-uncertainty-stop/result.json",
+      "bytes": 9561,
+      "sha256": "64f927882453bdd6f0ba35df8f64ca7c0ee4f737fdea80843260b29614fec6f4",
+      "sourceRuntimeDirectory": "wiring-215546d72dc74103bcb81d3f919f1369",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "06-uncertainty-stop/collector.ndjson",
+      "bytes": 8756,
+      "sha256": "fc4d0c48a3fa4d192420a926390cbaf2c5efae2781a7def22b262b23a9f41f3c",
+      "sourceRuntimeDirectory": "wiring-215546d72dc74103bcb81d3f919f1369",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "06-uncertainty-stop/engine-0/console.txt",
+      "bytes": 1051,
+      "sha256": "7e10806bcc3556af575e15a37e6cbe6b664667a15b93b9d5c403b91e80913b71",
+      "sourceRuntimeDirectory": "wiring-215546d72dc74103bcb81d3f919f1369",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "06-uncertainty-stop/engine-1/console.txt",
+      "bytes": 1051,
+      "sha256": "4fc0716c5d049652814e85d2242932cbaf3f10d00266a06b67c722e4a180d695",
+      "sourceRuntimeDirectory": "wiring-215546d72dc74103bcb81d3f919f1369",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "06-uncertainty-stop/engine-0/jmeter.log",
+      "bytes": 90142,
+      "sha256": "f8f6af493b5925ca716293833580eb931ea34eb1521bdad311294c7589fb984d",
+      "sourceRuntimeDirectory": "wiring-215546d72dc74103bcb81d3f919f1369",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "06-uncertainty-stop/engine-1/jmeter.log",
+      "bytes": 90142,
+      "sha256": "3e56b4ae6ca435cfa6445c130004c82f20b0587b6ea951fc05418a2b037ecc91",
+      "sourceRuntimeDirectory": "wiring-215546d72dc74103bcb81d3f919f1369",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "07-post-cleanup-startup-failure/result.json",
+      "bytes": 3027,
+      "sha256": "cb16d6777d25c5919d4b9b3932a518f65f888841b5d5f6db11911287ca347a5f",
+      "sourceRuntimeDirectory": "wiring-a71bbeb28d784bea933210e762597dbf",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "07-post-cleanup-startup-failure/collector.ndjson",
+      "bytes": 549,
+      "sha256": "496b26157006ab0c85671a02e74dfd88f56479da1da430d91d28a64c28b82dbf",
+      "sourceRuntimeDirectory": "wiring-a71bbeb28d784bea933210e762597dbf",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "07-post-cleanup-startup-failure/engine-0/console.txt",
+      "bytes": 1312,
+      "sha256": "801d87edecc8125df5bac018131b98192ccbdf724ec9c13afbc98d72d436a1e9",
+      "sourceRuntimeDirectory": "wiring-a71bbeb28d784bea933210e762597dbf",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "07-post-cleanup-startup-failure/engine-1/console.txt",
+      "bytes": 1312,
+      "sha256": "08a988961eb179b3cd579bf544dc3348777fbf8c5d64a14a18d038c0ab939ded",
+      "sourceRuntimeDirectory": "wiring-a71bbeb28d784bea933210e762597dbf",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "07-post-cleanup-startup-failure/engine-0/jmeter.log",
+      "bytes": 1314940,
+      "sha256": "80b022d94d82394a912d170d5ed2d1f47ea4a260ec61c687eacd9f7ecf3e9f58",
+      "sourceRuntimeDirectory": "wiring-a71bbeb28d784bea933210e762597dbf",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "07-post-cleanup-startup-failure/engine-1/jmeter.log",
+      "bytes": 1315060,
+      "sha256": "be5b5c7821ae83287bbd2f3db0988ed7a898ca697c9d29ade5360d74ba7910ed",
+      "sourceRuntimeDirectory": "wiring-a71bbeb28d784bea933210e762597dbf",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "08-final-positive/result.json",
+      "bytes": 9559,
+      "sha256": "adacae9c3d36575de3eaecf5ec210133a1de4e4fac4a9977c9b7a5b5dcb73f07",
+      "sourceRuntimeDirectory": "wiring-80bd86f58a984c82a9402ede3225edfd",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "08-final-positive/collector.ndjson",
+      "bytes": 12436,
+      "sha256": "35c6801638948d6d0fff6ea982c15498d8c9092446ae5f8b9f567ff4e8beb0ba",
+      "sourceRuntimeDirectory": "wiring-80bd86f58a984c82a9402ede3225edfd",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "08-final-positive/engine-0/console.txt",
+      "bytes": 1305,
+      "sha256": "6ddf685318d2b6e63ba00308e98c3f2adc3ae7dfb62e9ac631dcbd2162448a6b",
+      "sourceRuntimeDirectory": "wiring-80bd86f58a984c82a9402ede3225edfd",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "08-final-positive/engine-1/console.txt",
+      "bytes": 1305,
+      "sha256": "440db17c9ec4bbe4f641b0f8019ec18986a43fbd6fc3fe45d97fcb033e230c08",
+      "sourceRuntimeDirectory": "wiring-80bd86f58a984c82a9402ede3225edfd",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "08-final-positive/engine-0/jmeter.log",
+      "bytes": 90494,
+      "sha256": "0f8dfc17cc4cee08d74d7b75942ad438c965c7029448d9e57108f1432ef1513f",
+      "sourceRuntimeDirectory": "wiring-80bd86f58a984c82a9402ede3225edfd",
+      "originalBytesPreserved": true
+    },
+    {
+      "path": "08-final-positive/engine-1/jmeter.log",
+      "bytes": 90494,
+      "sha256": "890d27b7254f03a37d77c11e7681237ac89b34693bf2b97623c7f05f5190c89e",
+      "sourceRuntimeDirectory": "wiring-80bd86f58a984c82a9402ede3225edfd",
+      "originalBytesPreserved": true
+    }
+  ],
+  "archivedFileCount": 44,
+  "archivedBytes": 3600362,
+  "finalSourceIdentity": {
+    "sameAsFinalPositive": true,
+    "jmxInlineScriptNodes": 6,
+    "eachDecodedScriptMatchesCombinedSHA256": true
+  },
+  "review": {
+    "author": "/root/cap09_like_harness",
+    "nonAuthor": "/root/cap09_like_review",
+    "result": "read-only final source/raw review PASS; no live cloud validation"
+  },
+  "privacy": {
+    "selectedRawSecretScanPassed": true,
+    "copiedPrivateConfig": false,
+    "copiedPrivateRelations": false,
+    "rawBytesUnchanged": true,
+    "runtimeDirectoriesRetained": true,
+    "note": "Synthetic collector control files were removed by the test finally before this archival task; no remaining runtime directory/private artifact was deleted during archival. PTS provider exports still require independent redaction."
+  },
+  "limits": [
+    "Finite warm10s at2/s with two local real JVMs simulates the PTS CSV/thread split; it is not actual SaaS PTS, ECS resource admission or capacity proof.",
+    "Earlier positive/no-op/uncertainty cases used scriptcdb712437bc06de0770c540031151d90a2f33fd01f5d0eb2a8ec3057dc2754dc. Finalba0399 source additionally clears ACKed JVM props and permits at most3 readonly pre-registration clock handshakes; classification/scheduling unchanged.",
+    "Failed startup cases with no result retain only available original bytes and author/control-barrier evidence; no missing timestamps, stdout or exact setup cause were fabricated.",
+    "Python server stderr keepalive ConnectionResetError diagnostics were returned only in the tool transcript and were not separately archived. Engine console/JMeter logs are copied exact originals; durable counts/ACK establish the final functional result.",
+    "No new cloud purchase/deployment/load was performed; original8short/2formal budget and allWindows failures remain."
+  ]
+}

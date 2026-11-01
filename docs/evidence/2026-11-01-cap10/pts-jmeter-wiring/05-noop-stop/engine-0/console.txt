@@ -1,0 +1,11 @@
+WARN StatusConsoleListener The use of package scanning to locate plugins is deprecated and will be removed in a future release
+WARN StatusConsoleListener The use of package scanning to locate plugins is deprecated and will be removed in a future release
+WARN StatusConsoleListener The use of package scanning to locate plugins is deprecated and will be removed in a future release
+WARN StatusConsoleListener The use of package scanning to locate plugins is deprecated and will be removed in a future release
+Creating summariser <summary>
+Created the tree successfully using D:\桌面\The ALL\agent\project\code\.runtime-cap10-jmeter-tools\wiring-cfbb11d226b7446cbe63c9875a79fb11\engine-0\cap10-jmeter.jmx
+Starting standalone test @ November 1, 2026 5:47:05 PM CST (1793526425644)
+Waiting for possible Shutdown/StopTestNow/HeapDump/ThreadDump message on port 4445
+summary =      1 in 00:00:18 =    0.1/s Avg:    39 Min:    39 Max:    39 Err:     1 (100.00%)
+Tidying up ...    @ November 1, 2026 5:47:23 PM CST (1793526443862)
+... end of run

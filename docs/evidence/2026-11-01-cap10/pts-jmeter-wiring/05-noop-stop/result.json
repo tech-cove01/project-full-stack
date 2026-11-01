@@ -1,0 +1,293 @@
+{
+  "scope": "finite loopback synthetic HTTP; no business DB/cloud/capacity slots",
+  "case": "noop",
+  "exitCodes": [
+    0,
+    0
+  ],
+  "stubPUTs": 2,
+  "collectorSummary": {
+    "runId": "finite-local-warm",
+    "phase": "warm",
+    "rate": 2,
+    "seconds": 10,
+    "apiUrl": "http://127.0.0.1:60371",
+    "fixtureSHA256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "scriptSHA256": "cdb712437bc06de0770c540031151d90a2f33fd01f5d0eb2a8ec3057dc2754dc",
+    "expectedEngines": 2,
+    "version": 1,
+    "jitterBudgetMs": 50,
+    "clockUncertaintyMaxMs": 50,
+    "serverUnixMs": 1793526445718.273,
+    "startUnixMs": 1793526442203,
+    "stop": true,
+    "stopReason": "collector non-mutation native result",
+    "hash": "d3f6c8a4cd074e007fddc135fe63dab2dedec1273db498ed9003a00a42ed08f2",
+    "complete": false,
+    "endUnixMs": 1793526452203,
+    "counts": {
+      "planned": 20,
+      "attempted": 2,
+      "completed": 2,
+      "mutation": 0,
+      "noop": 2,
+      "uncertain": 0,
+      "rejected": 0,
+      "invalid": 0,
+      "dropped": 0
+    },
+    "notOffered": 18,
+    "allLatency": {
+      "avg": 41.0,
+      "med": 41.0,
+      "min": 39.0,
+      "p(95)": 42.8,
+      "p(99)": 42.96,
+      "max": 43.0
+    },
+    "mutationLatency": null,
+    "quantileMethod": "R7; full raw native HTTP elapsedMs, including failed HTTP terminals",
+    "latencyComplete": false,
+    "latencySampleCount": 2,
+    "engines": [
+      {
+        "engineId": "31d80084-1878-47d9-b993-ec9e9b056123",
+        "lastSeenUnixMs": 1793526444065.9548,
+        "complete": false,
+        "stoppedOffering": true,
+        "resources": {
+          "cpuTimeNs": 29453125000,
+          "monotonicNs": 13147323800,
+          "rssBytes": 364044288,
+          "logicalCPUs": 20
+        },
+        "clock": {
+          "uncertaintyMs": 1.5150000000000001,
+          "offsetMs": 0.9150390625,
+          "roundTripMs": 1.03
+        },
+        "lastResourceUnixMs": 1793526444058.141,
+        "lastValidCPUUnixMs": 1793526443042.077,
+        "cpuSamples": [
+          {
+            "atUnixMs": 1793526431983.3423,
+            "raw": {
+              "cpuTimeNs": 27437500000,
+              "monotonicNs": 1069502200,
+              "rssBytes": 408330240,
+              "logicalCPUs": 20
+            },
+            "intervalValid": false,
+            "oneCoreCPUPercent": null,
+            "normalizedCPUPercent": null
+          },
+          {
+            "atUnixMs": 1793526437525.8975,
+            "raw": {
+              "cpuTimeNs": 28812500000,
+              "monotonicNs": 6615612800,
+              "rssBytes": 363466752,
+              "logicalCPUs": 20
+            },
+            "intervalValid": true,
+            "oneCoreCPUPercent": 24.792148934065615,
+            "normalizedCPUPercent": 1.2396074467032807,
+            "intervalSeconds": 5.5461106
+          },
+          {
+            "atUnixMs": 1793526443041.2585,
+            "raw": {
+              "cpuTimeNs": 29421875000,
+              "monotonicNs": 12130995600,
+              "rssBytes": 369164288,
+              "logicalCPUs": 20
+            },
+            "intervalValid": true,
+            "oneCoreCPUPercent": 11.04864380401665,
+            "normalizedCPUPercent": 0.5524321902008326,
+            "intervalSeconds": 5.5153828
+          },
+          {
+            "atUnixMs": 1793526443409.0542,
+            "raw": {
+              "cpuTimeNs": 29437500000,
+              "monotonicNs": 12496834500,
+              "rssBytes": 369475584,
+              "logicalCPUs": 20
+            },
+            "intervalValid": false,
+            "oneCoreCPUPercent": 4.271005625700274,
+            "normalizedCPUPercent": 0.21355028128501372,
+            "intervalSeconds": 0.3658389
+          },
+          {
+            "atUnixMs": 1793526444057.4343,
+            "raw": {
+              "cpuTimeNs": 29453125000,
+              "monotonicNs": 13147323800,
+              "rssBytes": 364044288,
+              "logicalCPUs": 20
+            },
+            "intervalValid": false,
+            "oneCoreCPUPercent": 2.402037973568512,
+            "normalizedCPUPercent": 0.12010189867842562,
+            "intervalSeconds": 0.6504893
+          }
+        ],
+        "lastSeq": 4,
+        "counts": {
+          "planned": 10,
+          "attempted": 1,
+          "completed": 1,
+          "mutation": 0,
+          "noop": 1,
+          "uncertain": 0,
+          "rejected": 0,
+          "invalid": 0,
+          "dropped": 0
+        }
+      },
+      {
+        "engineId": "d3f7060e-241a-4365-9d36-c27f3a033b26",
+        "lastSeenUnixMs": 1793526443852.677,
+        "complete": false,
+        "stoppedOffering": true,
+        "resources": {
+          "cpuTimeNs": 26187500000,
+          "monotonicNs": 12861540200,
+          "rssBytes": 356122624,
+          "logicalCPUs": 20
+        },
+        "clock": {
+          "uncertaintyMs": 1.49255,
+          "offsetMs": 0.5888671875,
+          "roundTripMs": 0.9851
+        },
+        "lastResourceUnixMs": 1793526443824.5867,
+        "lastValidCPUUnixMs": 1793526442772.516,
+        "cpuSamples": [
+          {
+            "atUnixMs": 1793526431959.7495,
+            "raw": {
+              "cpuTimeNs": 23984375000,
+              "monotonicNs": 1010754600,
+              "rssBytes": 402354176,
+              "logicalCPUs": 20
+            },
+            "intervalValid": false,
+            "oneCoreCPUPercent": null,
+            "normalizedCPUPercent": null
+          },
+          {
+            "atUnixMs": 1793526437499.8188,
+            "raw": {
+              "cpuTimeNs": 25515625000,
+              "monotonicNs": 6554813600,
+              "rssBytes": 354471936,
+              "logicalCPUs": 20
+            },
+            "intervalValid": true,
+            "oneCoreCPUPercent": 27.619655562828605,
+            "normalizedCPUPercent": 1.3809827781414301,
+            "intervalSeconds": 5.544059
+          },
+          {
+            "atUnixMs": 1793526442770.6912,
+            "raw": {
+              "cpuTimeNs": 26062500000,
+              "monotonicNs": 11824985900,
+              "rssBytes": 362143744,
+              "logicalCPUs": 20
+            },
+            "intervalValid": true,
+            "oneCoreCPUPercent": 10.376795460748028,
+            "normalizedCPUPercent": 0.5188397730374014,
+            "intervalSeconds": 5.2701723
+          },
+          {
+            "atUnixMs": 1793526443176.0437,
+            "raw": {
+              "cpuTimeNs": 26171875000,
+              "monotonicNs": 12230957200,
+              "rssBytes": 367710208,
+              "logicalCPUs": 20
+            },
+            "intervalValid": false,
+            "oneCoreCPUPercent": 26.941559661976104,
+            "normalizedCPUPercent": 1.3470779830988053,
+            "intervalSeconds": 0.4059713
+          },
+          {
+            "atUnixMs": 1793526443807.0767,
+            "raw": {
+              "cpuTimeNs": 26187500000,
+              "monotonicNs": 12861540200,
+              "rssBytes": 356122624,
+              "logicalCPUs": 20
+            },
+            "intervalValid": false,
+            "oneCoreCPUPercent": 2.477865721086677,
+            "normalizedCPUPercent": 0.12389328605433385,
+            "intervalSeconds": 0.630583
+          }
+        ],
+        "lastSeq": 4,
+        "counts": {
+          "planned": 10,
+          "attempted": 1,
+          "completed": 1,
+          "mutation": 0,
+          "noop": 1,
+          "uncertain": 0,
+          "rejected": 0,
+          "invalid": 0,
+          "dropped": 0
+        }
+      }
+    ],
+    "collectionValid": false,
+    "unknownIsExact": false,
+    "unknown": null,
+    "effectUnknown": 0,
+    "classificationUnknown": null,
+    "httpErrors": 0,
+    "systemErrors": 0,
+    "batchFatal": true,
+    "childrenConverged": true,
+    "violations": [
+      "collector non-mutation native result",
+      "collector native completion incomplete"
+    ],
+    "collectionErrors": [
+      "collector native completion incomplete"
+    ],
+    "resourcesScope": "PTS environment: each independently allocated remote engine must stay below 2 GiB process RSS; the aggregate is displayed, not compared with a shared limit. Local Python collector plus Node classification retain their separate combined 2 GiB limit. This environment adaptation is not API optimization evidence.",
+    "remoteRSSBytes": 720166912,
+    "evidenceSHA256": "f377147f4ff525a06163f2707a7e1e4534bedebfcf329085419d5e963522c9a0"
+  },
+  "manifest": {
+    "generator": "pts-jmeter",
+    "version": 1,
+    "scriptSHA256": "cdb712437bc06de0770c540031151d90a2f33fd01f5d0eb2a8ec3057dc2754dc",
+    "jmxSHA256": "c29d5ee1801bb6a6c8f83e3e69e3c5140db783206e5967573af10cc564c7579f",
+    "slotsSHA256": "c322097cbb9ea3e8fd2974a4c49b2a4ef261c03eaed03dfc49b7f13f7da59fc8",
+    "normalThreads": 512,
+    "setupThreads": 0,
+    "teardownThreads": 1,
+    "ptsConcurrency": 513,
+    "csvSplitRequired": true,
+    "standardJMeter": "5.6.3",
+    "plugins": [],
+    "artifacts": [
+      "cap10-jmeter.jmx",
+      "slots.csv",
+      "cap10-pts-private.json"
+    ],
+    "privacy": "private config has only collector control credential; slots.csv contains no user/note/token. Do not publish raw PTS sampled logs without redaction."
+  },
+  "actualJMeterProcesses": 2,
+  "normalWorkers": 512,
+  "teardownWorkers": 2,
+  "csvSplitSimulation": "even/odd256rows",
+  "passed": true
+}

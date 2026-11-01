@@ -128,3 +128,15 @@ GROUP BY projection,state;
 3. 多个in-flight关系的结果未知恢复只GET事实，保留unknown类别；在相同关系继续写之前确认事实版本，不能猜commit。
 4. 每真实事件有唯一Outbox，三组均IGNORED并提交offset；最终无PARKED/NEEDS_REVIEW、Redis派生与事实匹配。恢复/降载只能证明恢复，不能把受限档改通过。
 5. k6的GET恢复与PUT统计按固定name拆分，`http_reqs`全量不能直接与PUT attempted比较。unknown和真正未开始的dropped分列，HTTP成功率不能替代经SQL核实的mutation/s。
+
+## 09A工具非作者审查（真实探针前）
+
+已只读审查 `cap09-like.mjs`、`load/cap09-like.js`、共享contract/purecheck及 `cap09-downstream.go`。正常负载每VU独占一条512关系池中的关系，阶段前以SQL快照灌入事实；不混入bootstrap GET，未知恢复GET与PUT native子metric分开。pre-warm、pre-stable与post-stable快照分列，稳定mutation不混预热；最终累计事实、连续唯一事件、公开计数、Redis和三组IGNORED均另核。
+
+审查收紧了取消竞争窗口的统计：缺终态与响应效果未知可能重叠，不能直接相加称精确unknown；现保留上下界，只有上下界相同才给确切值，零未知预算要求两通道均0。事件核验增加BLOG、binary canonical ID及严格JSON字段类型/版本全文匹配，避免宽松数字CAST掩盖异常。
+
+下游observer使用一个持久SELECT权限SQL连接、只读RR快照，每5秒观测；新阶段以干净起点水位过滤，Kafka三组真实committed/end offsets顺序采集且保留非原子边界，缺值与负差不补成0。原生库v0.4.47的本地listoffset测试有同partition同时FirstOffsetOf/LastOffsetOf的用法，客户端合成PartitionOffsets符合本工具调用。启动允许最多15秒保留尝试的clean-ready等待，不是重发负载；连续3个不完整样本写安全stop，整体不超过360秒。
+
+observer的 `valid` 仅代表完整采集与control-done后收敛，已明确 `nativeRecoveryBudgetVerified=false` 和 `fullChainStableBudgetVerified=false`。root仍须按native stableEndedAt与timeline独立核60秒恢复及末分钟积压，不能因helper自身先等收敛而延后起算。阶段范围SQL及三组receipt join随事件量增长可能增加观察开销，durationMs/错误必须保留，不把采集自身受限当后端单因。
+
+上述离线代码复核无剩余阻断，可以进入root控制的低速探针；真实SQL、HTTP、三组消费和停止/清理仍需实际证据。这次审查没有执行observer main、连接依赖或发起负载。

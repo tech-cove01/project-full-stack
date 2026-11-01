@@ -1,0 +1,22 @@
+PASS first true is a mutation, not an HTTP-only success
+PASS unlike increments its own relation version
+PASS idempotent repeat is explicitly no-op
+PASS unexpected same version cannot be called mutation
+PASS version jump signals a second writer or invalid state
+PASS wrong note cannot pass response classification
+PASS wrong wanted state is invalid even at version+1
+PASS negative or fractional public counts are not valid
+PASS versions cannot be string, negative or fractional
+PASS HTTP timeout/503 preserve effect uncertainty
+PASS business rejection is separate from effect uncertainty
+PASS a lost receipt recovers fact before choosing next target
+PASS multi VUs own distinct exact relations
+PASS pool exhaustion fails closed instead of aliasing a relation
+PASS hot still has one distinct user per VU
+PASS private initial state cannot refer to another relation
+PASS zero uncertainty is exact only with both channels zero
+PASS missing terminals alone retain the exact old-style unknown
+PASS cancel race cannot double-count overlapping uncertainty as exact
+PASS classified uncertain commit remains unknown after recovery
+PASS invalid uncertainty counts cannot be clamped into a pass
+{"checks":21,"failed":0,"servicesStarted":false,"loadRuns":0}

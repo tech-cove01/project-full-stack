@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T05:33:09.468836+00:00",
+  "purpose": "same fixed low-speed probe regression after actual1055 tool fix; not a baseline stage",
+  "argv": [
+    "node",
+    "scripts/cap09-like.mjs",
+    "probe"
+  ],
+  "toolSHA256": "aaf16d13042fe445864afa6b545251c5d93eb3cddcdd72eae22905ef86b02b30",
+  "originalFailurePreserved": true,
+  "credentialValuesExported": false
+}

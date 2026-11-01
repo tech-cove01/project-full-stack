@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-01T05:31:06.758734+00:00",
+  "method": "reexecute exact failed helper snapshot using read-only observer and read-only RR transaction; credentials only child environment",
+  "exitCode": 1,
+  "errors": [
+    {
+      "code": 1055,
+      "state": "42000",
+      "line": 4,
+      "message": "Expression #1 of SELECT list is not in GROUP BY clause and contains nonaggregated column 'project_full_stack_go.o.payload' which is not functionally dependent on columns in GROUP BY clause; this is incompatible with sql_mode=only_full_group_by"
+    }
+  ],
+  "statementSHA256": "21860007a379c8f19087dcaff9780c646744e6a70e583adf65259351e9b2c872",
+  "harnessSHA256": "af3f1aaae35ca1a93b13b23e04fe703620506a533b8034de8ea73ad39ab2c288",
+  "stdoutRetained": false,
+  "credentialsExported": false,
+  "newLoadRuns": 0
+}

@@ -1,0 +1,29 @@
+{
+  "at": "2026-11-01T05:32:29.526116+00:00",
+  "method": "same read-only observer/RR snapshot, grouped derived-table projection with corrected parentheses; SQL mode unchanged",
+  "exitCode": 0,
+  "errors": [],
+  "statementSHA256": "f39780cab52f08052991e15996ee372ffafc959242e02d904a4fb49e0e7d1abd",
+  "harnessSHA256": "aaf16d13042fe445864afa6b545251c5d93eb3cddcdd72eae22905ef86b02b30",
+  "rowsByKind": {
+    "fact": 1,
+    "note": 512,
+    "event": 1,
+    "delivery": 1,
+    "receipt": 3
+  },
+  "eventSummaries": [
+    {
+      "_kind": "event",
+      "count": 3,
+      "noteId": "6401",
+      "userId": "68",
+      "invalid": 0,
+      "maxVersion": 3,
+      "minVersion": 1,
+      "distinctVersions": 3
+    }
+  ],
+  "credentialsExported": false,
+  "newLoadRuns": 0
+}

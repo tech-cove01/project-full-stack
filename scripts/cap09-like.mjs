@@ -68,7 +68,14 @@ async function sql(statement, observer = false) {
   const result = await command(sqlBin, ['--protocol=TCP', '--host=127.0.0.1', '--port=' + owned.mysql,
     '--user=' + user, '--default-character-set=utf8mb4', '--batch', '--skip-column-names', owned.database],
   { input: `SET NAMES utf8mb4; SET time_zone='+08:00'; ${statement}`, env: { ...process.env, MYSQL_PWD: password } })
-  assert.equal(result.code, 0, 'owned fixture/observer SQL failed; diagnostics suppressed')
+  if (result.code !== 0) {
+    const failure = new Error('owned fixture/observer SQL failed; credentials and statement body suppressed')
+    if (observer) {
+      const line = result.stderr.split(/\r?\n/).map(s => /^ERROR (\d+) \(([A-Z0-9]+)\)(?: at line (\d+))?: (.*)$/.exec(s)).find(Boolean)
+      if (line) failure.observerSQLFailure = { code: Number(line[1]), state: line[2], line: line[3] ? Number(line[3]) : null, message: line[4].slice(0, 1000) }
+    }
+    throw failure
+  }
   return result.stdout.trim()
 }
 
@@ -165,7 +172,7 @@ async function snapshot(manifest, mode, label) {
   const raw = rows(await sql(`SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY;
 SELECT JSON_OBJECT('_kind','fact','noteId',CAST(l.blog_id AS CHAR),'userId',CAST(l.user_id AS CHAR),'active',l.active,'version',l.version) FROM tb_blog_like l WHERE l.blog_id IN (${ids}) ORDER BY l.blog_id,l.user_id;
 SELECT JSON_OBJECT('_kind','note','noteId',CAST(b.id AS CHAR),'liked',b.liked,'activeRelations',(SELECT COUNT(*) FROM tb_blog_like l WHERE l.blog_id=b.id AND l.active=1)) FROM tb_blog b WHERE b.id IN (${ids}) ORDER BY b.id;
-SELECT JSON_OBJECT('_kind','event','noteId',o.aggregate_id,'userId',JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')),'count',COUNT(*),'distinctVersions',COUNT(DISTINCT o.aggregate_version),'minVersion',MIN(o.aggregate_version),'maxVersion',MAX(o.aggregate_version),'invalid',SUM(COALESCE(BINARY o.aggregate_type<>BINARY 'BLOG' OR BINARY o.event_id<>BINARY CONCAT('LIKE:',o.aggregate_id,':',JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')),':',o.aggregate_version) OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.blogId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.userId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.version'))<>'INTEGER' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.liked'))<>'BOOLEAN' OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.blogId'))<>BINARY o.aggregate_id OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.version'))<>BINARY CAST(o.aggregate_version AS CHAR) OR JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.liked'))<>IF(MOD(o.aggregate_version,2)=1,'true','false'),1))) FROM tb_community_outbox o WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id IN (${ids}) GROUP BY o.aggregate_id,JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')) ORDER BY o.aggregate_id,JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId'));
+SELECT JSON_OBJECT('_kind','event','noteId',g.note_id,'userId',g.user_id,'count',g.event_count,'distinctVersions',g.distinct_versions,'minVersion',g.min_version,'maxVersion',g.max_version,'invalid',g.invalid_count) FROM (SELECT o.aggregate_id AS note_id,JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')) AS user_id,COUNT(*) AS event_count,COUNT(DISTINCT o.aggregate_version) AS distinct_versions,MIN(o.aggregate_version) AS min_version,MAX(o.aggregate_version) AS max_version,SUM(COALESCE(BINARY o.aggregate_type<>BINARY 'BLOG' OR BINARY o.event_id<>BINARY CONCAT('LIKE:',o.aggregate_id,':',JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')),':',o.aggregate_version) OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.blogId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.userId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.version'))<>'INTEGER' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.liked'))<>'BOOLEAN' OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.blogId'))<>BINARY o.aggregate_id OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.version'))<>BINARY CAST(o.aggregate_version AS CHAR) OR JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.liked'))<>IF(MOD(o.aggregate_version,2)=1,'true','false'),1)) AS invalid_count FROM tb_community_outbox o WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id IN (${ids}) GROUP BY o.aggregate_id,user_id) g ORDER BY g.note_id,g.user_id;
 SELECT JSON_OBJECT('_kind','delivery','status',delivery_status,'count',COUNT(*)) FROM tb_community_outbox WHERE event_type='LIKE_CHANGED' AND aggregate_id IN (${ids}) GROUP BY delivery_status;
 SELECT JSON_OBJECT('_kind','receipt','projection',r.projection,'state',r.state,'count',COUNT(*)) FROM tb_community_projection_event r JOIN tb_community_outbox o ON o.event_id=r.event_id WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id IN (${ids}) GROUP BY r.projection,r.state;
 SELECT JSON_OBJECT('_kind','parked','projection',projection,'state',state,'count',COUNT(*)) FROM tb_community_consumer_failure GROUP BY projection,state; COMMIT;`, true))
@@ -288,20 +295,30 @@ if (action === 'prepare') {
     console.log(JSON.stringify({ valid: result.valid, errors: result.errors })); process.exitCode = result.valid ? 0 : 1
   } else if (action === 'probe') {
     const user = runtime.users[0], noteId = modeNotes(manifest, mode)[0], records = []
-    const get = async () => { const r = await api('GET', `/notes/${noteId}/like`, undefined, user.token); assert.equal(r.status, 200); const s = stateFromBody(r.body, noteId); assert.ok(s); return s }
-    const put = async (prior, wanted, expected) => { const r = await api('PUT', `/notes/${noteId}/like`, { liked: wanted }, user.token); const outcome = classifyWrite(r.status, r.body, noteId, prior, wanted); assert.equal(outcome.kind, expected); records.push({ status: r.status, kind: outcome.kind, state: outcome.state }); return outcome.state }
-    let prior = await get(); prior = await put(prior, !prior.liked, 'mutation')
-    prior = await put(prior, prior.liked, 'noop') // intentional idempotency, never counted as capacity mutation
-    const discarded = await put(prior, !prior.liked, 'mutation')
-    // Deliberate client receipt loss after an actual committed response, not a
-    // fabricated network timeout. Recover from authoritative GET, then flip.
-    const recovered = await get(); assert.equal(recovered.version, discarded.version); assert.equal(recovered.liked, discarded.liked)
-    prior = await put(recovered, !recovered.liked, 'mutation')
-    const reconciled = await reconcile(manifest, mode, 60)
-    const result = { passed: reconciled.valid, records, simulatedLostReceipt: true, realTransportTimeoutInjected: false,
-      recoveredFromAuthoritativeGET: true, finalState: prior, reconcile: reconciled,
-      scope: 'bounded actual API mutation/no-op/receipt-loss-recovery probe; no throughput or P95/P99 claim' }
-    await save(join(dir, 'probe.json'), result); console.log(JSON.stringify({ passed: result.passed, mutations: 3, intentionalNoops: 1, recoveredFromAuthoritativeGET: true }))
+    const result = { started: new Date().toISOString(), passed: false, records, simulatedLostReceipt: false,
+      realTransportTimeoutInjected: false, recoveredFromAuthoritativeGET: false,
+      scope: 'bounded actual API mutation/no-op/receipt-loss-recovery probe; all partial API observations retained; no throughput or P95/P99 claim' }
+    const get = async () => { const r = await api('GET', `/notes/${noteId}/like`, undefined, user.token); const s = stateFromBody(r.body, noteId); records.push({ method: 'GET', status: r.status, kind: 'fact-read', state: s }); assert.equal(r.status, 200); assert.ok(s); return s }
+    const put = async (prior, wanted, expected) => { const r = await api('PUT', `/notes/${noteId}/like`, { liked: wanted }, user.token); const outcome = classifyWrite(r.status, r.body, noteId, prior, wanted); records.push({ method: 'PUT', status: r.status, kind: outcome.kind, wanted, previous: { liked: prior.liked, version: prior.version }, state: outcome.state }); assert.equal(outcome.kind, expected); return outcome.state }
+    try {
+      let prior = await get(); prior = await put(prior, !prior.liked, 'mutation')
+      prior = await put(prior, prior.liked, 'noop') // intentional idempotency, not capacity mutation
+      const discarded = await put(prior, !prior.liked, 'mutation')
+      result.simulatedLostReceipt = true
+      // Deliberate client receipt loss after an actual completed response.
+      const recovered = await get(); assert.equal(recovered.version, discarded.version); assert.equal(recovered.liked, discarded.liked)
+      result.recoveredFromAuthoritativeGET = true
+      prior = await put(recovered, !recovered.liked, 'mutation'); result.finalState = prior
+      result.reconcile = await reconcile(manifest, mode, 60); result.passed = result.reconcile.valid
+    } catch (error) {
+      result.failure = error.message
+      if (error.observerSQLFailure) result.observerSQLFailure = error.observerSQLFailure
+    } finally {
+      result.finished = new Date().toISOString()
+      await save(join(dir, 'probe.json'), result)
+    }
+    console.log(JSON.stringify({ passed: result.passed, mutations: records.filter(r => r.kind === 'mutation').length,
+      intentionalNoops: records.filter(r => r.kind === 'noop').length, recoveredFromAuthoritativeGET: result.recoveredFromAuthoritativeGET, failure: result.failure || null }))
     process.exitCode = result.passed ? 0 : 1
   } else {
     const rate = Number(process.env.CAP_LIKE_RATE), seconds = Number(process.env.CAP_LIKE_SECONDS || 45), warmSeconds = Number(process.env.CAP_LIKE_WARM_SECONDS || 10), warmRate = Number(process.env.CAP_LIKE_WARM_RATE || Math.min(25, rate)), preVUs = Number(process.env.CAP_LIKE_PRE_VUS || 256), maxVUs = Number(process.env.CAP_LIKE_MAX_VUS || 512)
@@ -366,7 +383,7 @@ if (action === 'prepare') {
       report.meetsAPIBudget = stable.code === 0 && !stable.externalStop && counts.attempted > 0 && counts.attempted === counts.nativeWriteHTTP && counts.attempted === counts.completed && counts.attempted / (rate * seconds) >= .99 && counts.mutation / counts.attempted >= .99 && counts.noop === 0 && counts.rejected === 0 && classificationUnknown === 0 && counts.effectUnknown === 0 && counts.dropped === 0 && counts.contentErrors === 0 && counts.systemErrors / counts.attempted < .01 && counts.httpErrors / counts.attempted < .01 && allLatency['p(95)'] <= 200 && allLatency['p(99)'] <= 500 && mutationLatency['p(95)'] <= 200 && mutationLatency['p(99)'] <= 500 && report.result.mutationCounterMatchesDB
       report.meetsBudget = report.meetsAPIBudget && final.valid
       report.downstreamSteadyStateScope = 'final valid means convergence only; common stage lag/last-minute growth gate must additionally pass for a full-chain capacity claim'
-    } catch (error) { report.failure = error.message; report.meetsBudget = false; report.meetsAPIBudget ??= false }
+    } catch (error) { report.failure = error.message; if (error.observerSQLFailure) report.observerSQLFailure = error.observerSQLFailure; report.meetsBudget = false; report.meetsAPIBudget ??= false }
     finally { report.finished = new Date().toISOString(); await save(join(dir, 'result.json'), report) }
     console.log(JSON.stringify({ task: 'CAP-09', mode, rate, seconds, meetsAPIBudget: report.meetsAPIBudget, meetsBudget: report.meetsBudget, result: report.result, failure: report.failure || null }))
     process.exitCode = report.meetsBudget ? 0 : 1

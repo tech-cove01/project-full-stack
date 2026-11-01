@@ -8,7 +8,7 @@
 - `social/like.go:SetLike` 使用RC事务：先锁公开笔记 `tb_blog ... FOR UPDATE`，再锁 `(blog_id,user_id)` 关系。无关系且请求false为no-op/version0；首次true建立version1；真实翻转每次version+1、公开 `tb_blog.liked` ±1、唯一 `LIKE:<note>:<user>:<version>` 的 LIKE_CHANGED Outbox同事务提交。重复相同目标不增加关系版本或Outbox。
 - 事务提交后，响应前仍执行公共计数缓存Invalidate、LikeState事实回查及Redis Likes.Mark版本更新；本轮完整PUT耗时包括这些步骤。缓存失效错误被忽略，Mark失败记warn，所以HTTP200不是派生状态/下游健康的充分证据。无关系且false的no-op同样会走提交后的失效/回查；不能用重复false制造写吞吐。
 - LikeState已读取当前公开计数，但同一笔记别的用户可继续写，故响应公开likes只校验合理类型/非负，结束降载后再精确对账；每个关系同一时刻至多一个writer时，正常mutation响应的version应恰为之前版本+1且liked等于本次目标。
-- 超时、HTTP0/5xx或分类缺失均不能凭客户端猜测提交结果。先GET事实再恢复该关系；恢复后的继续翻转不消除原unknown。结束时若存在SQL已提交但Redis派生没完成，原差异和失败需保留，不自动repair后宣称原档通过。
+- 超时、HTTP0/5xx或分类缺失均不能凭客户端猜测提交结果。native负载出现非mutation后只GET一次事实，并退休本phase该关系；一次GET可能先于原迟到提交，不立即再翻转。只有后续降载、重新取得RR初始事实的新phase才可恢复，原unknown不消除。结束时若存在SQL已提交但Redis派生没完成，原差异和失败需保留，不自动repair后宣称原档通过。
 
 源码： [HTTP](../../../backend/internal/social/http.go)、[同步写与状态读](../../../backend/internal/social/like.go)、[同事务enqueue](../../../backend/internal/social/follow.go)、[计数失效](../../../backend/internal/communitycache/counts.go)、[Redis版本栅栏](../../../backend/internal/communitycache/bitmap.go)。
 
@@ -125,7 +125,7 @@ GROUP BY projection,state;
 
 1. 同一新关系GET为false/version0；PUT true→v1；重复true保持v1且无新event；PUT false→v2；重复false保持v2。幂等探针单列，不计写吞吐。
 2. 两个不同用户/不同笔记真实flip、单热笔记多用户flip，响应本人状态/版本与最终关系及公开计数一致。不要使用同关系并发toggle充吞吐。
-3. 多个in-flight关系的结果未知恢复只GET事实，保留unknown类别；在相同关系继续写之前确认事实版本，不能猜commit。
+3. 多个in-flight关系的结果未知恢复只GET事实，保留unknown类别，并退休本phase该关系；下一phase前须降载并重新核事实，不猜commit也不让GET旧结果与迟到原提交竞写。
 4. 每真实事件有唯一Outbox，三组均IGNORED并提交offset；最终无PARKED/NEEDS_REVIEW、Redis派生与事实匹配。恢复/降载只能证明恢复，不能把受限档改通过。
 5. k6的GET恢复与PUT统计按固定name拆分，`http_reqs`全量不能直接与PUT attempted比较。unknown和真正未开始的dropped分列，HTTP成功率不能替代经SQL核实的mutation/s。
 
@@ -140,3 +140,11 @@ GROUP BY projection,state;
 observer的 `valid` 仅代表完整采集与control-done后收敛，已明确 `nativeRecoveryBudgetVerified=false` 和 `fullChainStableBudgetVerified=false`。root仍须按native stableEndedAt与timeline独立核60秒恢复及末分钟积压，不能因helper自身先等收敛而延后起算。阶段范围SQL及三组receipt join随事件量增长可能增加观察开销，durationMs/错误必须保留，不把采集自身受限当后端单因。
 
 上述离线代码复核无剩余阻断，可以进入root控制的低速探针；真实SQL、HTTP、三组消费和停止/清理仍需实际证据。这次审查没有执行observer main、连接依赖或发起负载。
+
+## 09A真实HTTP探针与SQL快照修复复核
+
+root实际HTTP探针的3次状态变更与幂等断言完成后，初版快照SQL在严格 `ONLY_FULL_GROUP_BY` 下返回1055。修复把事件按note/user聚合的具名列放入内层derived table，外层仅构造JSON对象；保持原只读RR、SQL mode、身份与canonical事件验证。没有用放宽SQL mode获取通过。[原1055诊断](like-probe-http-sql-diagnosis.json)、[中间括号1064](like-probe-http-sql-regression.json)、[修正只读SQL exit0](like-probe-http-sql-regression-final.json)均保留，最后一份确认版本1..3的3个事件、invalid0；没有额外HTTP或容量重试混入这三份SQL诊断。
+
+新suffix的[同HTTP用例回归](like-probe-http-regression-1/probe.json)随后实际通过：先读已存在v3，3次真变更到v4/v5/v6，一次重复false保持v4；模拟已完成200的回执丢失后，GET读回v5再执行v6。它不是真实transport timeout注入。此前已生效的3个事件没有删除或回滚，最终累计6个关系版本/6个DONE事件、三组各6份IGNORED，公开liked=0、Redis派生一致、PARKED为空。probe的try/finally现在保留部分GET/PUT观察及SQL错误码，避免后置对账失败抹去已完成API效果。
+
+上述修复差量和已落原件经非作者只读复核，无剩余阻断；本审查者没有再次执行SQL/API/负载，实际探针属于root控制的09A工具验证，不是09B/09D吞吐成绩。业务Go实现没有因此修改。

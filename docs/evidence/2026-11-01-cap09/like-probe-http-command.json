@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-01T05:29:50.670147+00:00",
+  "purpose": "CAP09A fixed low-speed semantic probe, not a capacity stage",
+  "argv": [
+    "node",
+    "scripts/cap09-like.mjs",
+    "probe"
+  ],
+  "sourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "toolSHA256": "af3f1aaae35ca1a93b13b23e04fe703620506a533b8034de8ea73ad39ab2c288",
+  "simulatedLostReceiptIsNotRealTransportTimeout": true,
+  "credentialValuesExported": false
+}

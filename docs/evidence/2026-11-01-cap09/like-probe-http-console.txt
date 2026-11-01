@@ -1,0 +1,22 @@
+node:internal/modules/run_main:107
+    triggerUncaughtException(
+    ^
+
+AssertionError [ERR_ASSERTION]: owned fixture/observer SQL failed; diagnostics suppressed
+
+1 !== 0
+
+    at sql (file:///D:/%E6%A1%8C%E9%9D%A2/The%20ALL/agent/project/code/project-full-stack/scripts/cap09-like.mjs:71:10)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async snapshot (file:///D:/%E6%A1%8C%E9%9D%A2/The%20ALL/agent/project/code/project-full-stack/scripts/cap09-like.mjs:165:20)
+    at async reconcile (file:///D:/%E6%A1%8C%E9%9D%A2/The%20ALL/agent/project/code/project-full-stack/scripts/cap09-like.mjs:215:13)
+    at async file:///D:/%E6%A1%8C%E9%9D%A2/The%20ALL/agent/project/code/project-full-stack/scripts/cap09-like.mjs:300:24 {
+  generatedMessage: false,
+  code: 'ERR_ASSERTION',
+  actual: 1,
+  expected: 0,
+  operator: 'strictEqual',
+  diff: 'simple'
+}
+
+Node.js v24.15.0

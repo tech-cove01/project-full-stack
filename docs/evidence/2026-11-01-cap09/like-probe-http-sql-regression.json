@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-01T05:32:03.693655+00:00",
+  "method": "same read-only observer and RR template, JSON projection after grouped derived table; SQL mode unchanged",
+  "exitCode": 1,
+  "errors": [
+    {
+      "code": 1064,
+      "state": "42000",
+      "line": 4,
+      "message": "You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'FROM tb_community_outbox o WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id ' at line 1"
+    }
+  ],
+  "statementSHA256": "8bf669ce21ca48028b5ca307113b858658720747eecc88cb78772359be9e68b9",
+  "harnessSHA256": "a863d5ba7b253ca2962b9ed7c3d3d8e945a3ac6c76d8ea36a02b808414c3c909",
+  "rowsByKind": {},
+  "eventSummaries": [],
+  "credentialsExported": false,
+  "newLoadRuns": 0
+}

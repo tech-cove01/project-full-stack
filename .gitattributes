@@ -36,3 +36,12 @@ docs/evidence/2026-10-30-cap08/**/*.pprof binary
 # Bounded CAP08 follow-up keeps selected host-event and analysis bytes intact.
 docs/evidence/2026-10-31-cap08-followup/**/*.json -text
 docs/evidence/2026-10-31-cap08-followup/**/*.txt -text
+
+# CAP09 captures are evidence bytes, including native CRLF/ANSI output.
+docs/evidence/2026-11-01-cap09/**/*.json -text
+docs/evidence/2026-11-01-cap09/**/*.ndjson -text
+docs/evidence/2026-11-01-cap09/**/*.jsonl -text
+docs/evidence/2026-11-01-cap09/**/*.txt -text
+docs/evidence/2026-11-01-cap09/**/*.log -text
+docs/evidence/2026-11-01-cap09/**/*.gz binary
+docs/evidence/2026-11-01-cap09/**/*.pprof binary

@@ -2,9 +2,9 @@
 
 2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
-## 当前交接：CAP-09 完整 Feed 与点赞写入吞吐待执行（2026-10-31）
+## 当前交接：CAP-09 完整 Feed 与点赞写入性能收尾执行中（2026-11-01）
 
-用户新授权两条吞吐链路的测试、瓶颈定位与必要优化；本轮仅完成计划，下次执行。先读根 [STATUS 顶部 CAP-09](../STATUS.md)，按 09A—09E 分小任务推进，一问题一 commit；完整 Feed 与真实点赞状态变更分别出结果。点赞实际走 `PUT /notes/:id/like` 同步 MySQL 事实/计数/Outbox，no-op 与 mutation 分列，热点和多笔记分列。目标是做出可信的高吞吐成绩，5000 requests/s 只作为可探索档，成绩据实核验。
+用户已于2026-11-01明确执行两条吞吐链路的测试、瓶颈定位与必要优化，作为最后性能收尾。先读根 [STATUS 顶部 CAP-09](../STATUS.md)及[本次执行协议](evidence/2026-11-01-cap09/plan.md)，按09A—09E分小任务推进，一问题一commit；起点53fa，新自有project-cap09/数据/会话/名额，保留旧批失败。完整Feed与真实点赞状态变更分别出结果；点赞走`PUT /notes/:id/like`同步MySQL事实/计数/Outbox及提交后失效/回查/Redis Mark，no-op与mutation、热点与多笔记、API档与完整下游档分列。实际三组为follow-v1/feed-v1/search-v1，LIKE均记IGNORED而非有效投影应用。5000 requests/s仅为探索档，成绩据实核验。
 
 旧 CAP-07/08 失败和旧 B1 未知继续保留。功能已成形，本批不扩收藏、新业务或付费 AI；环境、名额、稳态判据和提交/独立核验要求统一在 STATUS，不在这里另建状态表。
 

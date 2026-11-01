@@ -1,0 +1,34 @@
+{
+  "task": "CAP-09A",
+  "startSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "workingTreeInitiallyClean": true,
+  "conservativeStartedAt": "2026-11-01T05:00:00+00:00",
+  "segmentHours": 4,
+  "maxSegments": 2,
+  "firstSegmentDeadline": "2026-11-01T09:00:00+00:00",
+  "absoluteConservativeUpperBound": "2026-11-01T13:00:00+00:00",
+  "waitingSubtractionSeconds": 0,
+  "at": "2026-11-01T05:07:31.561222+00:00",
+  "baselineApplicationSource": "53fa1b34843486dd546ac3212a187e963621890b",
+  "used": {
+    "feed": {
+      "baselineStairs": 0,
+      "baselineHot": 0,
+      "diagnostics": 0,
+      "repairs": 0,
+      "finalStairs": 0,
+      "holds": 0,
+      "finalHot": 0
+    },
+    "like": {
+      "baselineStairs": 0,
+      "baselineHot": 0,
+      "diagnostics": 0,
+      "repairs": 0,
+      "finalStairs": 0,
+      "holds": 0,
+      "finalHot": 0
+    }
+  },
+  "scope": "Fresh CAP09 authorization, not a reset of CAP06/07/08. Limits from STATUS. Actual waits separately timestamped; conservatively no waiting time is subtracted."
+}

@@ -1,0 +1,17 @@
+{
+  "task": "CAP-09A",
+  "startedAt": "2026-11-01T05:08:35.170834+00:00",
+  "finishedAt": "2026-11-01T05:09:16.029726+00:00",
+  "elapsedSeconds": 40.85889229999157,
+  "sourceSha": "53fa1b34843486dd546ac3212a187e963621890b",
+  "expectedVersion": "capacity-53fa1b34843486dd546ac3212a187e963621890b",
+  "exe": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-53fa1b3\\capacity.exe",
+  "sha256": "d72c1ea34977bb780bea55c562b7ba14fde3004b6c2abd6c54733d8d7577d3e1",
+  "worktree": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-53fa1b3\\source",
+  "detached": true,
+  "worktreeCleanBeforeAndAfter": true,
+  "goVersion": "go version go1.27.0 windows/amd64",
+  "buildExitCode": 0,
+  "primaryWorktreeUsedForBuild": false,
+  "apiOrLoadStarted": false
+}

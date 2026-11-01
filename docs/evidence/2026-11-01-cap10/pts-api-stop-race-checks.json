@@ -1,0 +1,8 @@
+{
+  "at": "2026-11-01T09:50:12.689496+00:00",
+  "checksPassed": 34,
+  "scope": "Actual API code with synthetic transport; stop during idle or immediately after durable start intent prevents cloud Start. No cloud calls.",
+  "sourceSHA256": "4797449bc824c2eb25349a718fb1c71dfb1c00d367b26538279d971f1ed4bbea",
+  "checkerSHA256": "63a7cb4daabcde81b2c42994d9284a54dc4bb8e290572d451b3a0d03e61764bf",
+  "nonAuthorReview": "cap09_like_review static PASS exact freeze; phase caller passes event/file/collector stop callback."
+}

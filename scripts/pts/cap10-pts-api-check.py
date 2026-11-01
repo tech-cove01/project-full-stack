@@ -3,6 +3,7 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlsplit
 
 path = Path(__file__).with_name('cap10-pts-api.py')
@@ -130,6 +131,32 @@ def main():
         expect_error(lambda: second.bind_journal(unknown.start_journal), 'journal_has_no_acknowledged_task')
         expect_error(lambda: second.stop(SCENE, REPORT), 'stop_requires_exclusive_acknowledged_report')
         check(sum(a == 'StartTestingJMeterScene' for a, _ in unknown.calls) == 1, 'unknown start not resent or adopted from unrelated status')
+        # The actual transport sets a stop during the _idle() reads, rather than
+        # replacing _idle() with a mocked implementation.
+        idle_stop = Fake(); idle_stop.start_journal = root / 'stop-in-idle.private.json'
+        stop = [False]
+        def idle_transport(path, headers, timeout):
+            result = idle_stop(path, headers, timeout)
+            if headers['x-acs-action'] == 'GetJMeterSceneRunningData':
+                stop[0] = True
+            return result
+        cancelled = api.Client('cn-shanghai', root / 'idle-stop-audit', AUTH,
+            transport=idle_transport, scene_id=SCENE, exclusive_scene=True)
+        expect_error(lambda: cancelled.start(SCENE, idle_stop.start_journal, should_stop=lambda: stop[0]), 'start_cancelled_before_send')
+        check(not idle_stop.start_journal.exists() and not any(a == 'StartTestingJMeterScene' for a, _ in idle_stop.calls), 'stop arriving during idle reads prevents intent and all Start calls')
+        intent_stop = Fake(); intent_stop.start_journal = root / 'stop-after-intent.private.json'
+        stopped = [False]; original_save = api.private_save
+        def stop_after_intent(path, value, create=False):
+            original_save(path, value, create=create)
+            if create:
+                stopped[0] = True
+        cancelled = api.Client('cn-shanghai', root / 'intent-stop-audit', AUTH,
+            transport=intent_stop, scene_id=SCENE, exclusive_scene=True)
+        with patch.object(api, 'private_save', stop_after_intent):
+            expect_error(lambda: cancelled.start(SCENE, intent_stop.start_journal, should_stop=lambda: stopped[0]), 'start_cancelled_before_send')
+        cancelled_state = json.loads(intent_stop.start_journal.read_text())
+        check(cancelled_state['state'] == 'START_REJECTED' and cancelled_state['cancelledBeforeSend'] is True and cancelled_state['intentAt'] and cancelled_state['reportId'] is None and not any(a == 'StartTestingJMeterScene' for a, _ in intent_stop.calls), 'stop after durable intent preserves cancelled intent evidence and sends zero Start calls')
+        expect_error(lambda: cancelled.start(SCENE, intent_stop.start_journal), 'start_intent_exists_never_repeat_start')
         plain = api.Client('cn-hangzhou', root / 'no-cloud', AUTH)
         expect_error(lambda: plain.running(SCENE), 'cloud_calls_disabled')
         expect_error(lambda: api.Client('localhost', None, AUTH), 'unsupported_official_region')

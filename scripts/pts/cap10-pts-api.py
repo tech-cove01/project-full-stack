@@ -311,19 +311,33 @@ class Client:
         if not self.terminal_evidence(scene_id, report_id)['terminal']:
             raise Error('scene_not_proven_idle')
 
-    def start(self, scene_id, journal_path):
+    def start(self, scene_id, journal_path, should_stop=None):
         self._scene(scene_id)
         if not self.exclusive:
             raise Error('exclusive_scene_required_for_scene_level_stop')
+        if should_stop is not None and not callable(should_stop):
+            raise Error('invalid_start_stop_callback')
+
+        def check_stop():
+            if should_stop is not None:
+                try:
+                    stopped = should_stop()
+                except Exception:
+                    raise Error('start_stop_check_failed') from None
+                if stopped:
+                    raise Error('start_cancelled_before_send')
+
         journal_path = Path(journal_path)
         if journal_path.exists():
             raise Error('start_intent_exists_never_repeat_start')
         self._idle(scene_id)
+        check_stop()  # Read-only idle checks can block while an owned stop arrives.
         state = {'version': 1, 'action': 'StartTestingJMeterScene', 'sceneId': scene_id,
             'regionId': self.region, 'intentAt': utc(), 'state': 'START_INTENT', 'reportId': None,
             'startRetriesAllowed': False, 'sceneLevelStopHasRace': True}
         private_save(journal_path, state, create=True)
         try:
+            check_stop()  # Durable intent does not authorize sending after a stop.
             response = self._call('StartTestingJMeterScene', {'SceneId': scene_id})
             report_id = identity(response.get('ReportId'))
             self.reports.add(report_id)
@@ -332,6 +346,8 @@ class Client:
             return {'reportId': report_id, 'sceneId': scene_id, 'requestId': response.get('RequestId'),
                     'acknowledged': True, 'nativeWindowVerified': False}
         except BaseException as error:
+            if isinstance(error, Error) and error.code == 'start_cancelled_before_send':
+                state['cancelledBeforeSend'] = True
             if state.get('reportId') in self.reports:
                 try:
                     self.stop(scene_id, state['reportId'])

@@ -1,0 +1,18 @@
+{
+  "at": "2026-11-01T08:33:31.556369+00:00",
+  "task": "CAP-10A API/cohort environment equivalence pre-start guard",
+  "reviewers": [
+    "cap09_feed_review",
+    "cap09_like_review"
+  ],
+  "passed": true,
+  "source": "scripts/cap10-idle.py",
+  "finalExecutedSourceSHA256": "99d68e13834d371278247fb23d34ebe5e21edc5826c7c78e03da5b8296aae0ca",
+  "previousStaticCandidate": "supervision-review-2.json",
+  "change": "Allow different registered private files in the same owned runtime only when all nonCAP application settings are identical and CAP_SOURCE_SHA/expectedRevision equal the original API metadata; original PID/creation/exe/hash/health checks remain.",
+  "reason": "API was started before helper fixture path/CAP_API_PID existed. The derived helper env adds only those CAP fields; it does not change application settings. Literal file-name equality would reject this legitimate harness derivation.",
+  "timing": "Fixed by source review before the only cap10-idle invocation and before its reservation; no failed invocation of the old guard, no stderr to retain and no second idle attempt.",
+  "idleOutcome": "Original13sample observation executed once and remainedfailed for Uptime mismatch; no measurement gate or tolerance changed.",
+  "sourceUnchangedSinceObservation": true,
+  "postObservationRecord": true
+}

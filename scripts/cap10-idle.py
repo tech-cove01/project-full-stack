@@ -55,7 +55,11 @@ def main():
     root = owned.ROOT
     api_metadata = owned.read(args.api_metadata)
     api = owned.api_identity(api_metadata, health=True)
-    assert api_metadata['privateEnvironmentFile'] == str(Path(args.environment).resolve())
+    api_values, api_runtime = owned.settings(api_metadata['privateEnvironmentFile'])
+    app_config = lambda settings: {k: v for k, v in settings.items() if not k.startswith('CAP')}
+    assert api_runtime == runtime and app_config(api_values) == app_config(value)
+    assert value['CAP_SOURCE_SHA'] == api_metadata['sourceSha']
+    assert value['CAP_READ_EXPECTED_REVISION'] == api_metadata['expectedVersion']
     assert not list(root.glob('slot-*.json')), 'idle observation must precede S1'
     reservation = root / 'idle-reservation.json'
     owned.save(reservation, {'at': owned.now(), 'seconds': 60, 'intervalSeconds': 5,

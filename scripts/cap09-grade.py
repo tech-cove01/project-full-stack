@@ -64,12 +64,32 @@ def check_reservation(root, chain, kind, rate, seconds, mode, source_sha,
     elapsed = (dt.datetime.now(dt.timezone.utc) - started).total_seconds()
     require(0 <= elapsed <= 8 * 3600, 'conservative development upper bound exhausted')
     prior = history(root, chain, kind)
-    require(len(prior) < LIMITS[kind], 'purpose budget exhausted')
+    regression = isinstance(prediction, dict) and prediction.get('probeRegressionOf') is not None
+    require(not regression or kind == 'probe', 'tool-repair regression is only for the fixed low-speed probe')
+    if regression:
+        original_tag = chain + '-probe-1'
+        require(len(prior) == 1 and prior[0].get('tag') == original_tag and
+                prediction.get('probeRegressionOf') == original_tag, 'exactly one original probe is required for one repair regression')
+        require(prediction.get('sameLowSpeedCase') is True and prediction.get('observedEvidence') and
+                prediction.get('differentPredictions') and re.fullmatch(r'[a-f0-9]{40}', prediction.get('repairCommit') or ''),
+                'probe regression requires a committed repair, observed evidence and the same low-speed case')
+        original = prior[0]
+        require(original['apiSourceSha'] == source_sha and original['binarySHA256'] == api_metadata['sha256'] and
+                original['fixtureSHA256'] == fixture_sha and original['mode'] == mode and
+                original['rate'] == rate and original['seconds'] == seconds, 'probe regression must keep the original application, binary, fixture and workload')
+        require(prediction.get('originalEnvironmentSHA256') == original['environmentSHA256'] and
+                original['environmentSHA256'] != environment_sha, 'environment-only repair must retain and change the original environment hash')
+    else:
+        require(len(prior) < LIMITS[kind], 'purpose budget exhausted')
     for command in prior:
         tag = command.get('tag', '')
         require(re.fullmatch(re.escape(chain + '-' + kind + '-') + r'[1-9]\d*', tag), 'malformed prior slot')
         terminal = root / (tag + '-stage.json')
         require(terminal.is_file(), 'previous attempt lacks terminal artifact; preserve it')
+        if regression:
+            old_stage = read(terminal)
+            require(old_stage.get('passed') is False and old_stage.get('childrenConverged') is True and
+                    old_stage.get('probeExpectedStopConfirmed') is not True, 'only a failed converged probe may receive an environment-repair regression')
         if kind in ('baseline-stair', 'final-stair', 'hold'):
             require(read(terminal).get('passed') is True, 'first failure ended this group')
         if kind in ('baseline-stair', 'final-stair', 'hold'):
@@ -79,7 +99,7 @@ def check_reservation(root, chain, kind, rate, seconds, mode, source_sha,
             require(command['rate'] == rate, 'both holds must use the same frozen rate')
     if prior and kind in ('baseline-stair', 'final-stair'):
         require(rate > prior[-1]['rate'], 'a staircase must advance, not replay or descend')
-    tag = chain + '-' + kind + '-' + str(len(prior) + 1)
+    tag = chain + '-probe-1-regression-1' if regression else chain + '-' + kind + '-' + str(len(prior) + 1)
     require(not (root / ('slot-' + tag + '.json')).exists() and not (root / (tag + '-command.json')).exists(), 'orphan or existing slot is not reusable')
     if kind == 'diagnostic':
         require(isinstance(prediction, dict) and prediction.get('observedEvidence') and prediction.get('differentPredictions'), 'diagnostic requires evidence and differentiating predictions')
@@ -98,7 +118,11 @@ def check_reservation(root, chain, kind, rate, seconds, mode, source_sha,
             require(command['chain'] == chain and command['apiSourceSha'] == source_sha and command['rate'] >= rate and command['mode'] == 'multi' and command['seconds'] == 45, 'short-stage chain/source/rate/duration differs')
             require(command['fixtureSHA256'] == sha(fixture) and command['environmentSHA256'] == freeze['environmentSHA256'] and command['binarySHA256'] == api_metadata['sha256'], 'short-stage fixture/environment/binary differs')
             require(command['kind'] in ('baseline-stair', 'final-stair') and read(root / (stage + '-stage.json')).get('passed') is True, 'stable target exceeds a complete passing exploratory stage')
-    return {'tag': tag, 'slot': len(prior) + 1, 'maximumSlots': LIMITS[kind],
+    return {'tag': tag, 'slot': 1 if regression else len(prior) + 1, 'maximumSlots': LIMITS[kind],
+            'isToolRepairRegression': regression, 'toolRepairRegressionSlot': 1 if regression else None,
+            'maximumToolRepairRegressions': 1 if kind == 'probe' else 0,
+            'probeRegressionOf': prediction['probeRegressionOf'] if regression else None,
+            'originalEnvironmentSHA256': prior[0]['environmentSHA256'] if regression else None,
             'elapsedConservativeSeconds': elapsed, 'maximumConservativeSeconds': 8 * 3600,
             'failedStartsConsumeSlot': True, 'writesPerformed': False}
 

@@ -1,5 +1,6 @@
 """Pure synthetic CAP09 grading counterexamples; never network or a load."""
 import datetime as dt
+import copy
 import importlib.util
 import json
 from pathlib import Path
@@ -236,6 +237,74 @@ class Checks(unittest.TestCase):
         command['chain'] = 'like'; command['seconds'] = 8; path.write_text(json.dumps(command))
         with self.assertRaisesRegex(ValueError, 'chain/source/rate/duration'):
             grade.check_reservation(self.root, 'like', 'hold', 50, 180, 'multi', source, api, fixture, freeze)
+
+    def regression_fixture(self):
+        fixture, source, api = self.reservation_fixture()
+        command = {'at': dt.datetime.now(dt.timezone.utc).isoformat(), 'chain': 'feed', 'kind': 'probe',
+                   'tag': 'feed-probe-1', 'mode': 'multi', 'rate': 2, 'seconds': 8,
+                   'apiSourceSha': source, 'binarySHA256': api['sha256'], 'fixtureSHA256': grade.sha(fixture),
+                   'environmentSHA256': grade.sha(self.root / 'environment.json')}
+        (self.root / 'feed-probe-1-command.json').write_text(json.dumps(command))
+        (self.root / 'feed-probe-1-stage.json').write_text('{"passed":false,"childrenConverged":true,"probeExpectedStopConfirmed":false}')
+        prediction = {'probeRegressionOf': 'feed-probe-1', 'observedEvidence': 'original preserved safety-stop artifact',
+                      'repairCommit': 'c' * 40, 'differentPredictions': 'lower heap should remove the original fixed resource stop',
+                      'sameLowSpeedCase': True, 'originalEnvironmentSHA256': command['environmentSHA256']}
+        (self.root / 'environment.json').write_text('{"synthetic":"repaired environment"}')
+        return fixture, source, api, command, prediction
+
+    def test_exactly_one_environment_repair_regression_preserves_original(self):
+        fixture, source, api, command, prediction = self.regression_fixture()
+        result = grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture, prediction=prediction)
+        self.assertEqual(result['tag'], 'feed-probe-1-regression-1')
+        self.assertTrue(result['isToolRepairRegression'])
+        self.assertEqual(result['maximumSlots'], 1)
+        self.assertEqual(result['originalEnvironmentSHA256'], command['environmentSHA256'])
+        self.assertEqual(grade.read(self.root / 'feed-probe-1-command.json'), command)
+        second = {**command, 'tag': result['tag'], 'at': dt.datetime.now(dt.timezone.utc).isoformat()}
+        (self.root / (result['tag'] + '-command.json')).write_text(json.dumps(second))
+        with self.assertRaisesRegex(ValueError, 'exactly one original'):
+            grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture, prediction=prediction)
+        with self.assertRaisesRegex(ValueError, 'budget exhausted'):
+            grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture)
+
+    def test_probe_regression_requires_committed_repair_and_original_environment(self):
+        fixture, source, api, command, prediction = self.regression_fixture()
+        for key in prediction:
+            changed = copy.deepcopy(prediction); changed.pop(key)
+            with self.subTest(missing=key), self.assertRaises(ValueError):
+                grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture, prediction=changed)
+        with self.assertRaisesRegex(ValueError, 'retain and change'):
+            grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture,
+                                    prediction={**prediction, 'originalEnvironmentSHA256': '0' * 64})
+        (self.root / 'environment.json').write_text('{"synthetic":true}')
+        self.assertEqual(grade.sha(self.root / 'environment.json'), command['environmentSHA256'])
+        with self.assertRaisesRegex(ValueError, 'retain and change'):
+            grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture, prediction=prediction)
+
+    def test_probe_regression_cannot_change_application_fixture_or_rate(self):
+        fixture, source, api, command, prediction = self.regression_fixture()
+        changed_source = 'b' * 40
+        with self.assertRaisesRegex(ValueError, 'original application'):
+            grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', changed_source,
+                                    {**api, 'sourceSha': changed_source, 'expectedVersion': 'capacity-' + changed_source}, fixture, prediction=prediction)
+        with self.assertRaisesRegex(ValueError, 'original application'):
+            grade.check_reservation(self.root, 'feed', 'probe', 3, 8, 'multi', source, api, fixture, prediction=prediction)
+        fixture.write_text('{"synthetic":"different data"}')
+        with self.assertRaisesRegex(ValueError, 'original application'):
+            grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture, prediction=prediction)
+        fixture.write_text('{"synthetic":true}')
+        binary = Path(api['exe']); binary.write_bytes(b'changed synthetic binary')
+        with self.assertRaisesRegex(ValueError, 'original application'):
+            grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source,
+                                    {**api, 'sha256': grade.sha(binary)}, fixture, prediction=prediction)
+
+    def test_probe_regression_requires_failed_converged_unconfirmed_original(self):
+        fixture, source, api, command, prediction = self.regression_fixture()
+        for stage in ({'passed': True, 'childrenConverged': True}, {'passed': False, 'childrenConverged': False},
+                      {'passed': False, 'childrenConverged': True, 'probeExpectedStopConfirmed': True}):
+            (self.root / 'feed-probe-1-stage.json').write_text(json.dumps(stage))
+            with self.subTest(stage=stage), self.assertRaisesRegex(ValueError, 'failed converged'):
+                grade.check_reservation(self.root, 'feed', 'probe', 2, 8, 'multi', source, api, fixture, prediction=prediction)
 
 
 if __name__ == '__main__':

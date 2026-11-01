@@ -1,0 +1,9 @@
+{
+  "at": "2026-11-01T09:43:41.879588+00:00",
+  "command": "python -B -X utf8 scripts/pts/cap10-pts-prepare-check.py",
+  "checksPassed": 17,
+  "scope": "Author actual local Node bundle once plus isolated private runtime/manifest/bind checks; no cloud/services/business load.",
+  "sourceSHA256": "748683eb10c80fc010ab8f2212c251338559516c7cb3893c930fc3b30474a10d",
+  "checkerSHA256": "282b154fee8697f8c1f34697e3d9fb6383010412a5dd20ac502fb29929d5e0a7",
+  "nonAuthorReview": "cap09_like_review static review PASS exact freeze; root reviewed interface and guide."
+}

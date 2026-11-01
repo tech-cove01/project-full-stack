@@ -1,0 +1,175 @@
+"""Prepare/register a private PTS upload packet and bind a user-created scene.
+
+No cloud API, dependency, service or load calls. Actual CLI packet/bind require
+the authorized native Linux CAP10 runtime. Node receives secrets via stdin only.
+Nested cleanup contract: runtime/owned-pts-upload-<nonce>.json records exact
+packet paths before bundle() may write cap10-pts-private.json. Cleanup must use
+those registered paths, never recursively scan/delete an arbitrary directory.
+"""
+import argparse
+import hashlib
+import importlib.util
+import ipaddress
+import json
+import os
+from pathlib import Path
+import re
+import secrets
+import subprocess
+import sys
+
+REPO = Path(__file__).resolve().parents[2]
+UPLOAD_FILES = ('cap10-jmeter.jmx', 'slots.csv', 'cap10-pts-private.json')
+PACKET_FILES = (*UPLOAD_FILES, 'cap10-jmeter-manifest.json')
+NODE_PROGRAM = """import {bundle} from './scripts/pts/cap10-jmeter.mjs';
+let input=''; for await (const chunk of process.stdin) input+=chunk;
+const v=JSON.parse(input); const m=await bundle(v.directory,{collectorUrl:v.collectorUrl,controlToken:v.controlToken});
+process.stdout.write(JSON.stringify(m));"""
+
+
+def source_hashes():
+    return {name: hashlib.sha256((REPO / 'scripts/pts' / name).read_bytes()).hexdigest()
+            for name in ('cap10-pts-prepare.py', 'cap10-jmeter.mjs', 'cap10-jmeter.groovy', 'cap10-pts-contract.groovy')}
+
+
+def private_ip(value):
+    address = ipaddress.IPv4Address(value)
+    if not any(address in ipaddress.ip_network(cidr) for cidr in ('10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16')):
+        raise ValueError('explicit RFC1918 ECS IPv4 required')
+    return str(address)
+
+
+def run_bundle(directory, collector_url, token, runner=subprocess.run):
+    # Fixed script/arguments: credential values are never command-line arguments.
+    argv = ['node', '--input-type=module', '-e', NODE_PROGRAM]
+    safe_env = {k: v for k, v in os.environ.items() if k.upper() in ('PATH', 'SYSTEMROOT', 'TEMP', 'TMP', 'TMPDIR')}
+    result = runner(argv, input=json.dumps({'directory': str(directory), 'collectorUrl': collector_url,
+                    'controlToken': token}), cwd=REPO, env=safe_env, capture_output=True,
+                    text=True, encoding='utf-8', timeout=30)
+    if result.returncode != 0:
+        raise ValueError('local packet generator failed; output suppressed')
+    return json.loads(result.stdout)
+
+
+def validate_owned(owned, environment):
+    value, runtime = owned.settings(environment)
+    runtime = Path(runtime).resolve()
+    if value.get('CAP10_PLATFORM') != 'linux' or not re.fullmatch(r'\.runtime-fullstack-cap10-[a-f0-9]{12}', runtime.name):
+        raise ValueError('native authorized Linux runtime required')
+    if runtime.parent != owned.REPO.parent or Path(value['CAP10_RUNTIME']).resolve() != runtime:
+        raise ValueError('runtime ownership differs')
+    if Path(value['CAP10_EVIDENCE']).resolve() != owned.ROOT:
+        raise ValueError('evidence root differs')
+    return value, runtime
+
+
+def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn-shanghai', bundle_runner=run_bundle):
+    value, runtime = validate_owned(owned, environment)
+    if region != 'cn-shanghai':
+        raise ValueError('this frozen ECS/PTS packet uses Shanghai')
+    host = private_ip(ecs_private_ip)
+    if (owned.ROOT / 'pts-packet.json').exists() or list(runtime.glob('owned-pts-upload-*.json')):
+        raise ValueError('preserve existing or partial upload packet; no automatic repeat')
+    credential_path = None
+    if credentials_file is not None:
+        credential_path = Path(credentials_file).resolve()
+        if not credential_path.is_file() or not credential_path.name.endswith('.private.json') or (os.name != 'nt' and credential_path.stat().st_mode & 0o077):
+            raise ValueError('explicit private credential file required')
+    nonce, token = secrets.token_hex(6), secrets.token_hex(32)
+    directory = runtime / ('pts-upload-' + nonce)
+    if directory.exists():
+        raise ValueError('new packet directory required')
+    registration = runtime / ('owned-pts-upload-' + nonce + '.json')
+    owned.save(registration, {'version': 1, 'parent': str(directory),
+        'privateInputPath': str(directory / 'cap10-pts-private.json'),
+        'files': [str(directory / name) for name in PACKET_FILES], 'registeredBeforeSecretWrite': True})
+    collector_url, api_url = 'http://' + host + ':8481', 'http://' + host + ':8281'
+    before_sources = source_hashes()
+    manifest = bundle_runner(directory, collector_url, token)
+    if source_hashes() != before_sources:
+        raise ValueError('packet sources changed during generation')
+    if manifest.get('standardJMeter') != '5.6.3' or manifest.get('normalThreads') != 512 or manifest.get('ptsConcurrency') != 513 or manifest.get('teardownThreads') != 1 or manifest.get('csvSplitRequired') is not True:
+        raise ValueError('generated JMeter contract differs')
+    if not re.fullmatch(r'[a-f0-9]{64}', manifest.get('scriptSHA256', '')) or not all((directory / name).is_file() for name in PACKET_FILES):
+        raise ValueError('complete upload packet required')
+    if os.name != 'nt' and (directory.stat().st_mode & 0o077 or (directory / 'cap10-pts-private.json').stat().st_mode & 0o077):
+        raise ValueError('packet/private file permission differs')
+    # Check secret-file shape before returning paths, without publishing values.
+    private = json.loads((directory / 'cap10-pts-private.json').read_text(encoding='utf-8'))
+    if private != {'collectorUrl': collector_url, 'controlToken': token}:
+        raise ValueError('generated private collector binding differs')
+    md5s = {name: hashlib.md5((directory / name).read_bytes(), usedforsecurity=False).hexdigest() for name in UPLOAD_FILES}
+    cfg = {'sceneId': 'UNBOUND', 'regionId': region, 'collectorUrl': collector_url, 'apiUrl': api_url,
+           'controlToken': token, 'expectedEngines': 2, 'scriptSHA256': manifest['scriptSHA256'], 'sceneFiles': md5s}
+    if credential_path is not None:
+        cfg['credentialsFile'] = str(credential_path)
+    config_path = owned.private_write(runtime, 'env-pts-control-' + nonce + '.private.json', cfg)
+    updated = {**value, 'CAP10_LOAD_BACKEND': 'pts', 'CAP10_PTS_CONFIG': str(config_path),
+               'CAP10_PYTHON_BIN': sys.executable, 'API_ADDR': '0.0.0.0:8281'}
+    next_env = owned.private_write(runtime, 'env-pts-' + nonce + '.private.json', updated)
+    public = {'version': 1, 'manifest': manifest, 'sourceSHA256': before_sources,
+        'privatePaths': {'packetDirectory': str(directory), 'cleanupRegistration': str(registration),
+                         'configuration': str(config_path), 'environment': str(next_env)}, 'sceneFilesMD5': md5s}
+    if token in json.dumps(public):
+        raise ValueError('public packet metadata contains a credential')
+    owned.save(owned.ROOT / 'pts-packet.json', public)
+    return public
+
+
+def bind(owned, environment, scene_id):
+    value, runtime = validate_owned(owned, environment)
+    if not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', scene_id) or scene_id == 'UNBOUND':
+        raise ValueError('explicit existing SceneId required')
+    if value.get('CAP10_LOAD_BACKEND') != 'pts' or (owned.ROOT / 'pts-scene-binding.json').exists():
+        raise ValueError('new PTS scene binding required')
+    old_path = Path(value['CAP10_PTS_CONFIG']).resolve()
+    if old_path.parent != runtime or not re.fullmatch(r'env-pts-control-[a-f0-9]{12}\.private\.json', old_path.name):
+        raise ValueError('owned packet configuration required')
+    cfg = owned.read(old_path)
+    packet_record = owned.read(owned.ROOT / 'pts-packet.json')
+    if old_path != Path(packet_record['privatePaths']['configuration']).resolve():
+        raise ValueError('binding requires the original registered packet config')
+    upload = Path(packet_record['privatePaths']['packetDirectory']).resolve()
+    if upload.parent != runtime or not re.fullmatch(r'pts-upload-[a-f0-9]{12}', upload.name):
+        raise ValueError('owned upload directory required')
+    actual_md5 = {name: hashlib.md5((upload / name).read_bytes(), usedforsecurity=False).hexdigest() for name in UPLOAD_FILES}
+    uploaded_private = owned.read(upload / 'cap10-pts-private.json')
+    if cfg.get('sceneId') != 'UNBOUND' or set(cfg.get('sceneFiles', {})) != set(UPLOAD_FILES) or cfg['sceneFiles'] != packet_record['sceneFilesMD5']:
+        raise ValueError('unbound original packet configuration required')
+    if cfg['sceneFiles'] != actual_md5 or uploaded_private != {'collectorUrl': cfg['collectorUrl'], 'controlToken': cfg['controlToken']}:
+        raise ValueError('packet files or private binding changed after generation')
+    nonce = secrets.token_hex(6)
+    config_path = owned.private_write(runtime, 'env-pts-control-' + nonce + '.private.json', {**cfg, 'sceneId': scene_id})
+    next_env = owned.private_write(runtime, 'env-pts-bound-' + nonce + '.private.json', {**value, 'CAP10_PTS_CONFIG': str(config_path)})
+    public = {'version': 1, 'sceneId': scene_id, 'sourceSHA256': source_hashes(),
+        'packetManifestSHA256': hashlib.sha256((owned.ROOT / 'pts-packet.json').read_bytes()).hexdigest(),
+        'privatePaths': {'configuration': str(config_path), 'environment': str(next_env)},
+        'sceneFilesMD5': cfg['sceneFiles'], 'cloudCalled': False, 'sceneCreatedByThisTool': False}
+    if cfg['controlToken'] in json.dumps(public):
+        raise ValueError('public binding contains a credential')
+    owned.save(owned.ROOT / 'pts-scene-binding.json', public)
+    return public
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    actions = parser.add_subparsers(dest='action', required=True)
+    first = actions.add_parser('packet'); first.add_argument('--environment', required=True)
+    first.add_argument('--ecs-private-ip', required=True); first.add_argument('--credentials-file')
+    first.add_argument('--region', default='cn-shanghai')
+    second = actions.add_parser('bind'); second.add_argument('--environment', required=True); second.add_argument('--scene-id', required=True)
+    args = parser.parse_args()
+    if sys.platform != 'linux' or Path.cwd().resolve() != REPO:
+        raise ValueError('actual packet/bind CLI requires native Linux repository cwd')
+    spec = importlib.util.spec_from_file_location('cap10_pts_prepare_owned', REPO / 'scripts/cap10-env.py')
+    owned = importlib.util.module_from_spec(spec); spec.loader.exec_module(owned)
+    result = packet(owned, args.environment, args.ecs_private_ip, args.credentials_file, args.region) if args.action == 'packet' else bind(owned, args.environment, args.scene_id)
+    print(json.dumps(result, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (ValueError, OSError, KeyError, AssertionError, subprocess.SubprocessError) as error:
+        print(json.dumps({'prepared': False, 'errorClass': type(error).__name__, 'detailsSuppressed': True}), file=sys.stderr)
+        raise SystemExit(1)

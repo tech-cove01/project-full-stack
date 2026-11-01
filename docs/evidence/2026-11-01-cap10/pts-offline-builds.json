@@ -1,0 +1,69 @@
+{
+  "scope": "Offline compilation only; no Linux execution/services/cloud/load. API from exact clean already-CI-green application source; tooling observer from current PTS source.",
+  "applicationSourceSHA": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "observerSourceSHA256": "b3b3415ddee1a21d53505dd6b632d5435fa201a27289acae0052debfe2b599c3",
+  "records": [
+    {
+      "label": "api-linux",
+      "targetOS": "linux",
+      "targetArch": "amd64",
+      "startedAt": "2026-11-01T09:41:23.411483+00:00",
+      "finishedAt": "2026-11-01T09:41:42.629472+00:00",
+      "seconds": 19.217985299997963,
+      "exitCode": 0,
+      "binaryPath": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\capacity-linux-amd64",
+      "binarySHA256": "9b4a53e74b1d2f13ca6197ab9780efaad2a0ad8ed53c3a347642b83f8c68e23f",
+      "binaryBytes": 45642092,
+      "executed": false,
+      "argv": [
+        "go",
+        "build",
+        "-ldflags",
+        "-X main.revision=capacity-0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+        "-o",
+        "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\capacity-linux-amd64",
+        "./cmd/api"
+      ]
+    },
+    {
+      "label": "observer-windows",
+      "targetOS": "windows",
+      "targetArch": "amd64",
+      "startedAt": "2026-11-01T09:41:23.412020+00:00",
+      "finishedAt": "2026-11-01T09:41:25.912101+00:00",
+      "seconds": 2.5000903999898583,
+      "exitCode": 0,
+      "binaryPath": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\cap10-downstream-pts.exe",
+      "binarySHA256": "a5c0a3f4faf9c229bc729fdbfe4b325b794c02eba715c9eba4fa84723b5fe3ab",
+      "binaryBytes": 11502080,
+      "executed": false,
+      "argv": [
+        "go",
+        "build",
+        "-o",
+        "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\cap10-downstream-pts.exe",
+        "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-downstream.go"
+      ]
+    },
+    {
+      "label": "observer-linux",
+      "targetOS": "linux",
+      "targetArch": "amd64",
+      "startedAt": "2026-11-01T09:41:23.412504+00:00",
+      "finishedAt": "2026-11-01T09:41:25.966344+00:00",
+      "seconds": 2.5538485000142828,
+      "exitCode": 0,
+      "binaryPath": "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\cap10-downstream-pts-linux",
+      "binarySHA256": "d7e085077aa041029ba407295718dda20618b994479a925cdeefb7a00e3d17ed",
+      "binaryBytes": 11329513,
+      "executed": false,
+      "argv": [
+        "go",
+        "build",
+        "-o",
+        "D:\\桌面\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\cap10-downstream-pts-linux",
+        "D:\\桌面\\The ALL\\agent\\project\\code\\project-full-stack\\scripts\\cap10-downstream.go"
+      ]
+    }
+  ]
+}

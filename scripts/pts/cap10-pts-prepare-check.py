@@ -93,6 +93,48 @@ def main():
         check(not bound['cloudCalled'] and not bound['sceneCreatedByThisTool'] and cfg['controlToken'] not in json.dumps(bound), 'binding existing SceneId does not call cloud or disclose a secret')
         rejected(lambda: prepare.bind(owned, public['privatePaths']['environment'], 'OTHER_SCENE'), 'second binding is rejected without overwriting metadata')
         rejected(lambda: prepare.packet(owned, environment, '10.8.0.10'), 'second packet generation is rejected')
+        calls = []
+        scene = {'SceneId': 'CAP10_EXISTING_SCENE', 'Duration': 600, 'Concurrency': 513, 'AgentCount': 2,
+            'FileList': [{'FileName': name, 'Md5': value.upper()} for name, value in cfg['sceneFiles'].items()]}
+        class ReadOnlyClient:
+            def __init__(self, region, evidence, **kwargs):
+                assert region == 'cn-shanghai' and kwargs['allow_live'] is True and kwargs['scene_id'] == 'CAP10_EXISTING_SCENE'
+            def scene(self, scene_id):
+                calls.append('GetOpenJMeterScene')
+                return {'Scene': scene}
+        rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], client_factory=ReadOnlyClient), 'scene verification cannot call cloud without explicit allow-live')
+        admission = prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient)
+        check(admission['passed'] and calls == ['GetOpenJMeterScene'] and admission['readRAMActionVerified'] == 'pts:GetOpenJMeterScene' and not admission['startStopPermissionsVerified'] and not admission['startStopCalled'], 'scene admission verifies frozen files/settings using exactly one read and no Start/Stop')
+        check(cfg['controlToken'] not in json.dumps(admission) and 'PRIVATE-DB-SENTINEL' not in json.dumps(admission), 'public scene admission contains only allowed references/hashes')
+        admission_path = owned.ROOT / 'pts-scene-admission.json'
+        rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient), 'prior scene admission is never overwritten')
+        admission_path.rename(owned.ROOT / 'admission-success-check.json')
+        for key, wrong in (('Duration', 60), ('Concurrency', 512), ('AgentCount', 3), ('SceneId', 'FOREIGN_SCENE')):
+            old = scene[key]; scene[key] = wrong
+            rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient), 'cloud scene mismatch rejected: ' + key)
+            check(owned.read(admission_path)['passed'] is False and owned.read(admission_path)['readRAMActionVerified'] == 'pts:GetOpenJMeterScene', 'read-success/config-failure evidence retained: ' + key)
+            admission_path.rename(owned.ROOT / ('admission-bad-' + key + '-check.json')); scene[key] = old
+        original_md5 = scene['FileList'][0]['Md5']; scene['FileList'][0]['Md5'] = '0' * 32
+        rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient), 'cloud file MD5 mismatch rejected')
+        admission_path.rename(owned.ROOT / 'admission-bad-MD5-check.json'); scene['FileList'][0]['Md5'] = original_md5
+        count_before = len(calls)
+        with patch.object(prepare, 'source_hashes', return_value={}):
+            rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient), 'changed packet source rejected before any cloud read')
+        check(len(calls) == count_before and not owned.read(admission_path)['cloudCalled'], 'local source mismatch preserves failed admission without cloud calls')
+        admission_path.rename(owned.ROOT / 'admission-bad-source-check.json')
+        bound_env = owned.read(bound['privatePaths']['environment'])
+        with patch.object(owned, 'settings', return_value=({**bound_env, 'CAP10_PTS_CONFIG': str(target / 'outside-control.private.json')}, runtime)):
+            rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient), 'foreign private config rejected before cloud read')
+        check(len(calls) == count_before and not owned.read(admission_path)['cloudCalled'], 'foreign config failure leaves admission evidence without reading credentials')
+        admission_path.rename(owned.ROOT / 'admission-bad-config-check.json')
+        frozen_sources = prepare.source_hashes(); hash_calls = [0]
+        def drift_sources():
+            hash_calls[0] += 1
+            return frozen_sources if hash_calls[0] == 1 else {}
+        with patch.object(prepare, 'source_hashes', side_effect=drift_sources):
+            rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient), 'source drift during scene read cannot pass admission')
+        check(owned.read(admission_path)['passed'] is False and len(calls) == count_before + 1, 'post-read source mismatch retains failed result after exactly one mock scene read')
+        admission_path.rename(owned.ROOT / 'admission-source-drift-check.json')
         if os.name != 'nt':
             check(packet.stat().st_mode & 0o077 == 0 and (packet / 'cap10-pts-private.json').stat().st_mode & 0o077 == 0, 'real packet folder/file private permissions')
         for index, address in enumerate(('127.0.0.1', '8.8.8.8', '::1')):

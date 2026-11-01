@@ -1,0 +1,10 @@
+{
+  "at": "2026-11-01T09:52:48.820286+00:00",
+  "checksPassed": 62,
+  "scope": "43 existing packet/bind/cleanup plus19 synthetic read-only scene admission checks; no real cloud calls/load.",
+  "sourceSHA256": "6fdda25e7eea314fa6ee360a1809beab6c481c2fe4373cfc777fa183a7d84019",
+  "checkerSHA256": "601a8fc0f89e304e39b1c964d4b865f056e15a5a387386e32779bf5fd934cd7c",
+  "nonAuthorReview": "cap09_like_review exact-source static PASS.",
+  "liveAdmissionPending": true,
+  "startStopRAMPermissionsNotProven": true
+}

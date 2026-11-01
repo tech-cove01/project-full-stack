@@ -224,6 +224,79 @@ def cleanup_packet(owned, environment):
     return result
 
 
+def verify_scene(owned, environment, allow_live=False, client_factory=None):
+    """Explicit read-only admission; never call Start, Stop, running or _idle."""
+    if allow_live is not True:
+        raise ValueError('verify-scene requires explicit --allow-live')
+    output = owned.ROOT / 'pts-scene-admission.json'
+    if output.exists():
+        raise ValueError('preserve prior scene admission evidence')
+    result = {'version': 1, 'passed': False, 'cloudCalled': False,
+        'readRAMActionVerified': None, 'startStopPermissionsVerified': False, 'startStopCalled': False}
+    try:
+        value, runtime = validate_owned(owned, environment)
+        before = source_hashes()
+        cfg_path = Path(value['CAP10_PTS_CONFIG'])
+        if (value.get('CAP10_LOAD_BACKEND') != 'pts' or cfg_path.is_symlink() or cfg_path.resolve() != cfg_path
+                or cfg_path.parent != runtime or not re.fullmatch(r'env-pts-control-[a-f0-9]{12}\.private\.json', cfg_path.name)
+                or not cfg_path.is_file() or (os.name != 'nt' and cfg_path.stat().st_mode & 0o077)):
+            raise ValueError('owned private bound PTS configuration required')
+        if not any(owned.read(path).get('path') == str(cfg_path) for path in runtime.glob('owned-env-*.json')):
+            raise ValueError('private configuration lacks owned-env registration')
+        cfg = owned.read(cfg_path)
+        if (cfg.get('regionId') != 'cn-shanghai' or cfg.get('expectedEngines') != 2
+                or not re.fullmatch(r'[a-f0-9]{64}', cfg.get('controlToken', ''))):
+            raise ValueError('fixed Shanghai two-engine private configuration required')
+        packet_record = owned.read(owned.ROOT / 'pts-packet.json')
+        binding = owned.read(owned.ROOT / 'pts-scene-binding.json')
+        scene_id = cfg['sceneId']
+        if (not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', scene_id) or scene_id == 'UNBOUND'
+                or binding['sceneId'] != scene_id or Path(binding['privatePaths']['configuration']) != cfg_path
+                or binding['packetManifestSHA256'] != hashlib.sha256((owned.ROOT / 'pts-packet.json').read_bytes()).hexdigest()
+                or packet_record['sourceSHA256'] != before or binding['sourceSHA256'] != before):
+            raise ValueError('bound scene or frozen packet sources differ')
+        upload = Path(packet_record['privatePaths']['packetDirectory'])
+        if upload.is_symlink() or upload.resolve() != upload or upload.parent != runtime or not re.fullmatch(r'pts-upload-[a-f0-9]{12}', upload.name):
+            raise ValueError('owned original packet directory required')
+        if any((upload / name).is_symlink() or not (upload / name).is_file() for name in PACKET_FILES):
+            raise ValueError('original regular packet files required')
+        manifest = packet_record['manifest']
+        script = (REPO / 'scripts/pts/cap10-pts-contract.groovy').read_bytes() + b'\n' + (REPO / 'scripts/pts/cap10-jmeter.groovy').read_bytes()
+        md5s = {name: hashlib.md5((upload / name).read_bytes(), usedforsecurity=False).hexdigest() for name in UPLOAD_FILES}
+        if (owned.read(upload / 'cap10-jmeter-manifest.json') != manifest
+                or manifest['scriptSHA256'] != hashlib.sha256(script).hexdigest() or cfg['scriptSHA256'] != manifest['scriptSHA256']
+                or manifest['jmxSHA256'] != hashlib.sha256((upload / 'cap10-jmeter.jmx').read_bytes()).hexdigest()
+                or manifest['slotsSHA256'] != hashlib.sha256((upload / 'slots.csv').read_bytes()).hexdigest()
+                or md5s != cfg['sceneFiles'] or md5s != packet_record['sceneFilesMD5'] or md5s != binding['sceneFilesMD5']
+                or owned.read(upload / 'cap10-pts-private.json') != {'collectorUrl': cfg['collectorUrl'], 'controlToken': cfg['controlToken']}):
+            raise ValueError('packet bytes or script identity changed')
+        if client_factory is None:
+            spec = importlib.util.spec_from_file_location('cap10_pts_admission_api', Path(__file__).with_name('cap10-pts-api.py'))
+            api = importlib.util.module_from_spec(spec); spec.loader.exec_module(api)
+            client_factory = api.Client
+        client = client_factory(cfg['regionId'], owned.ROOT / 'pts-scene-admission-api',
+            credential_file=cfg.get('credentialsFile'), allow_live=True, scene_id=scene_id)
+        result['cloudCalled'] = True
+        scene = client.scene(scene_id)['Scene']  # Exactly GetOpenJMeterScene.
+        result['readRAMActionVerified'] = 'pts:GetOpenJMeterScene'
+        if (scene.get('SceneId') != scene_id or len(scene.get('FileList', [])) != 3
+                or {item['FileName']: item['Md5'].lower() for item in scene['FileList']} != md5s
+                or any(type(scene.get(key)) is not int or scene[key] != expected for key, expected in
+                    (('Duration', 600), ('Concurrency', 513), ('AgentCount', 2)))):
+            raise ValueError('cloud scene files or lifecycle/engine settings differ')
+        if source_hashes() != before:
+            raise ValueError('packet sources changed during scene admission')
+        result.update(passed=True, sceneId=scene_id, sceneFilesMD5=md5s, sourceSHA256=before,
+            scriptSHA256=manifest['scriptSHA256'], duration=600, concurrency=513, agentCount=2,
+            configurationReference=str(cfg_path), scope='Only GetOpenJMeterScene read permission verified; no Start/Stop permission or cloud workload verified.')
+        return result
+    except BaseException as error:
+        result['errorClass'] = type(error).__name__
+        raise
+    finally:
+        owned.save(output, result)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     actions = parser.add_subparsers(dest='action', required=True)
@@ -232,6 +305,7 @@ def main():
     first.add_argument('--region', default='cn-shanghai')
     second = actions.add_parser('bind'); second.add_argument('--environment', required=True); second.add_argument('--scene-id', required=True)
     third = actions.add_parser('cleanup-packet'); third.add_argument('--environment', required=True)
+    fourth = actions.add_parser('verify-scene'); fourth.add_argument('--environment', required=True); fourth.add_argument('--allow-live', action='store_true')
     args = parser.parse_args()
     if sys.platform != 'linux' or Path.cwd().resolve() != REPO:
         raise ValueError('actual packet/bind/cleanup CLI requires native Linux repository cwd')
@@ -241,14 +315,16 @@ def main():
         result = packet(owned, args.environment, args.ecs_private_ip, args.credentials_file, args.region)
     elif args.action == 'bind':
         result = bind(owned, args.environment, args.scene_id)
-    else:
+    elif args.action == 'cleanup-packet':
         result = cleanup_packet(owned, args.environment)
+    else:
+        result = verify_scene(owned, args.environment, args.allow_live)
     print(json.dumps(result, ensure_ascii=False))
 
 
 if __name__ == '__main__':
     try:
         main()
-    except (ValueError, OSError, KeyError, AssertionError, subprocess.SubprocessError) as error:
+    except Exception as error:
         print(json.dumps({'prepared': False, 'errorClass': type(error).__name__, 'detailsSuppressed': True}), file=sys.stderr)
         raise SystemExit(1)

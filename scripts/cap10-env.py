@@ -87,8 +87,10 @@ def power():
 def private_write(runtime, name, value):
     assert re.fullmatch(r'env[a-z0-9-]*\.private\.json', name)
     path = runtime / name
-    save(path, value)
     save(runtime / ('owned-env-' + secrets.token_hex(5) + '.json'), {'path': str(path)})
+    descriptor = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, 'O_BINARY', 0), 0o600)
+    with os.fdopen(descriptor, 'w', encoding='utf-8', newline='\n') as stream:
+        json.dump(value, stream, ensure_ascii=False, indent=2)
     return path
 
 
@@ -190,13 +192,13 @@ def prepare(args):
     assert initial_power.get('ac', 1) == 1 and initial_power['hostMemoryPercent'] < 88
     nonce = secrets.token_hex(6)
     runtime = REPO.parent / ('.runtime-fullstack-cap10-' + nonce)
-    runtime.mkdir()
+    runtime.mkdir(mode=0o700)
     if os.name == 'nt':
         identity = run(['whoami']).stdout.strip()
         run(['icacls', str(runtime), '/inheritance:r', '/grant:r', identity + ':(OI)(CI)F'])
     else:
         runtime.chmod(0o700)
-    (runtime / 'tmp').mkdir()
+    (runtime / 'tmp').mkdir(mode=0o700)
     volumes = {name: PROJECT + '-' + nonce + '-' + name for name in PORTS}
     for name in volumes.values():
         assert run(['docker', 'volume', 'inspect', name], allow_failure=True).returncode != 0

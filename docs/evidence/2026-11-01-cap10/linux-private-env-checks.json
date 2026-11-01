@@ -1,0 +1,17 @@
+{
+  "at": "2026-11-01T09:18:08.840713+00:00",
+  "scope": "Actual isolated functions, synthetic temporary files only; Windows does not verify POSIX mode enforcement.",
+  "earlierHarnessAttempts": [
+    "NameError: Path absent from isolated namespace",
+    "Assertion from decoding UTF-8 marker with host default encoding"
+  ],
+  "harnessCorrection": "Added Path namespace and explicit UTF-8 test reads; production source unchanged. Both earlier temporary directories cleaned, no service or workload.",
+  "checks": [
+    "JSON created and exact cleanup path registered",
+    "exclusive create preserves existing bytes",
+    "registration precedes 0600 exclusive open; failed write remains registered"
+  ],
+  "passed": true,
+  "serviceOrLoadStarted": false,
+  "nonAuthorReview": "cap09_like_harness; final audit cap09_like_review"
+}

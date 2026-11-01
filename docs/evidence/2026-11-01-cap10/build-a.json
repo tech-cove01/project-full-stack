@@ -1,0 +1,24 @@
+{
+  "task": "CAP-10 instrumented baseline clean build",
+  "startedAt": "2026-11-01T07:56:31.179162+00:00",
+  "finishedAt": "2026-11-01T07:56:46.488264+00:00",
+  "elapsedSeconds": 15.30909509997582,
+  "sourceSha": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "expectedVersion": "capacity-0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "exe": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\capacity.exe",
+  "sha256": "f8e7365497f11b17df1e1ba81ad731ee95f9875aaecd142e262b34bea436dee9",
+  "worktree": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\source",
+  "detached": true,
+  "worktreeCleanBeforeAndAfter": true,
+  "argv": [
+    "go",
+    "build",
+    "-ldflags",
+    "-X main.revision=capacity-0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+    "-o",
+    "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap10-build-0602ac0\\capacity.exe",
+    "./cmd/api"
+  ],
+  "buildExitCode": 0,
+  "noConcurrentLoadOrAPI": true
+}

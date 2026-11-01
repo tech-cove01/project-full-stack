@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-01T08:23:33.618517+00:00",
+  "status": "awaiting_user_environment_decision",
+  "preflightPassed": false,
+  "newNativeLoads": 0,
+  "shortSlotsUsed": 0,
+  "shortSlotsRemaining": 8,
+  "formalSlotsUsed": 0,
+  "formalSlotsRemaining": 2,
+  "optimizationCount": 0,
+  "capacityLowerBound": null,
+  "capacityUpperBound": null,
+  "stableRate": null,
+  "reason": "MySQLUptime57s versus hostQueryMidpoints59.908861s exceeds2.1235839s tolerance; no hostwall/mono disagreement.",
+  "newObservationForAudit": false,
+  "cloudPurchasedOrDeployed": false,
+  "localIdleRetryAllowed": false,
+  "proposal": "environment-decision.md"
+}

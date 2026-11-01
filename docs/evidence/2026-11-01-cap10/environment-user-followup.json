@@ -1,0 +1,12 @@
+{
+  "at": "2026-11-01T08:48:17.626798+00:00",
+  "userFollowup": "User asked whether local could run, offered to prepare a cloud host if needed, and requested attractive real performance results plus later GitHub static-page screenshots.",
+  "response": "Local services and finite real writes run; current preflight timing gate fails. Recommended a dedicated Ubuntu24.04LTS amd64 Linux host16vCPU32GiB100GiBSSD, sameCompose+k6 and same remainingCAP10 budget.",
+  "currentState": "awaiting_user_host_and_SSH_connection_info",
+  "cloudPurchasedOrDeployedByAgent": false,
+  "newNativeLoads": 0,
+  "showcasePlan": "showcase-capture-plan.md",
+  "showcaseSkillRead": "CodeBuddy web-deploy-github",
+  "websiteCreatedOrPublished": false,
+  "addedPressureWindows": 0
+}

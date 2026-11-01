@@ -1,0 +1,39 @@
+{
+  "at": "2026-11-01T08:02:24.101869+00:00",
+  "task": "CAP-10B S1 pre-registered diagnosis",
+  "kind": "diagnostic",
+  "chain": "like",
+  "mode": "multi",
+  "rate": 50,
+  "seconds": 60,
+  "applicationSourceSha": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "likeDiagnostics": true,
+  "feedDiagnostics": false,
+  "extraCPUProfile": false,
+  "previousEvidence": "CAP09 Like50 earlystop: outbox22->123->282, SQLInUse18/20 and Kafka~2CPU; old20 earlyP95 did not prove resource exhaustion. Not a currentcapacitybound.",
+  "hypotheses": [
+    {
+      "candidate": "auth/Redis roundtrip or pool wait",
+      "supports": "auth.resolve dominates completed slow request envelopes, matching native Redis timing/pool waits; no transaction timing substitute",
+      "rejects": "auth small and no new pool waits while another stage accounts for tail"
+    },
+    {
+      "candidate": "synchronous transaction/commit or postcommit state roundtrips",
+      "supports": "fixed transaction_total/commit_call or postcommit_state envelopes dominate slow request traces and native cumulative deltas; distinguish driver envelopes/connection wait from SQL execution/row lock",
+      "rejects": "those envelopes small; request time lies elsewhere"
+    },
+    {
+      "candidate": "serial outbox publisher/downstream deployment limit",
+      "supports": "native and final15s outbox growth beyond1% while brokerend/receipts lag behind; target cgroup usage/throttling and SQL/pool counters in same intervals",
+      "rejects": "queues remain within budget and drain promptly; cumulative startup throttle alone irrelevant"
+    },
+    {
+      "candidate": "shared host or generator measurement limit",
+      "supports": "host safety/cadence/power/VM time invalid, or native VU/CPU/RSS/dropped proves generator limit",
+      "consequence": "not service U; stop and notify user beforeformal; no blind optimization"
+    }
+  ],
+  "optimizationRule": "At most one evidence-backed primary variable after validS1. Same50/s60s/initial distribution/diagnostic switches comparison consumes nextshort slot. No convincing benefit -> revert withinbudget, no secondchange.",
+  "analysisScope": "Native before/after snapshots exclude warm/setup/drain. 32 slow ring is bounded/selected, not all latency samples. Nested tx/SQL/hold spans overlap and must not be summed as exclusive time.",
+  "noPrejudgedRootCause": true
+}

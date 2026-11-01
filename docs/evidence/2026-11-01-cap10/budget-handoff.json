@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "batch": "CAP-10",
+  "recordedAt": "2026-11-01T08:48:55.630334+00:00",
+  "maxEffectiveWorkSeconds": 10800,
+  "countedEffectiveWorkSecondsUpperBound": 4200,
+  "remainingEffectiveWorkSecondsLowerBound": 6600,
+  "accounting": "Conservative wall time from07:42UTC includes local idle/dependency/CI waiting plus3min checkpoint-sync allowance. Not a newworksegment; later activeLinuxadaptation must be added, user host-creation idle wait excluded.",
+  "mainLoadSecondsUsed": 0,
+  "shortSlotsUsed": 0,
+  "formalSlotsUsed": 0,
+  "optimizationsUsed": 0,
+  "localPhaseCleanupComplete": true
+}

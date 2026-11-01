@@ -1,0 +1,27 @@
+{
+  "at": "2026-11-01T08:48:55.630334+00:00",
+  "batch": "CAP-10",
+  "localPhaseClosed": true,
+  "batchPerformanceGoalComplete": false,
+  "status": "awaiting_linux_host_connection_info",
+  "localPreflightPassed": false,
+  "nativeShortWindows": 0,
+  "nativeFormalWindows": 0,
+  "productionOptimizations": 0,
+  "L": null,
+  "U": null,
+  "R": null,
+  "slotsRemaining": {
+    "short": 8,
+    "formal": 2
+  },
+  "evidence": {
+    "preflight": "idle-result.json",
+    "clockOffline": "idle-clock-offline-audit.json",
+    "dockerHealthOffline": "idle-health-offline-audit.json",
+    "cleanup": "cleanup.json",
+    "report": "report.md",
+    "showcase": "showcase-capture-plan.md"
+  },
+  "noAutomaticNewBatchOrExtraWindows": true
+}

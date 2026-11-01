@@ -1,0 +1,9 @@
+{
+  "at": "2026-11-01T08:24:40.871Z",
+  "loggedOut": 512,
+  "credentialFileRemoved": true,
+  "sqlFixtureRetained": true,
+  "apiSourceSha": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "fixtureSourceSha": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "fixtureManifestSHA256": "1235b30a713f25765be82550b79367e9b6441e81fb0074cb59968af89887b760"
+}

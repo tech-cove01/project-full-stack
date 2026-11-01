@@ -1,0 +1,103 @@
+{
+  "at": "2026-11-01T08:31:29.072420+00:00",
+  "source": "idle-result.json retained State.Health.Log",
+  "newObservation": false,
+  "newLoad": false,
+  "hostSampleSpan": [
+    "2026-11-01T08:16:11.819401+00:00",
+    "2026-11-01T08:17:11.819894+00:00"
+  ],
+  "flaggedGaps": [
+    {
+      "service": "mysql",
+      "previousEnd": "2026-11-01T08:16:11.502468538Z",
+      "nextStart": "2026-11-01T08:16:17.324708612Z",
+      "endToStartSeconds": 5.82224,
+      "nominalSeconds": 3,
+      "extraSeconds": 2.82224,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    },
+    {
+      "service": "mysql",
+      "previousEnd": "2026-11-01T08:16:41.863424611Z",
+      "nextStart": "2026-11-01T08:16:45.944391506Z",
+      "endToStartSeconds": 4.080967,
+      "nominalSeconds": 3,
+      "extraSeconds": 1.0809670000000002,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    },
+    {
+      "service": "mysql",
+      "previousEnd": "2026-11-01T08:16:46.006416056Z",
+      "nextStart": "2026-11-01T08:16:50.732218947Z",
+      "endToStartSeconds": 4.725802,
+      "nominalSeconds": 3,
+      "extraSeconds": 1.7258019999999998,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    },
+    {
+      "service": "redis",
+      "previousEnd": "2026-11-01T08:16:11.210335659Z",
+      "nextStart": "2026-11-01T08:16:17.033180155Z",
+      "endToStartSeconds": 5.822845,
+      "nominalSeconds": 3,
+      "extraSeconds": 2.822845,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    },
+    {
+      "service": "redis",
+      "previousEnd": "2026-11-01T08:16:44.457802978Z",
+      "nextStart": "2026-11-01T08:16:50.26344819Z",
+      "endToStartSeconds": 5.805646,
+      "nominalSeconds": 3,
+      "extraSeconds": 2.8056460000000003,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    },
+    {
+      "service": "kafka",
+      "previousEnd": "2026-11-01T08:15:34.210733219Z",
+      "nextStart": "2026-11-01T08:15:40.265221243Z",
+      "endToStartSeconds": 6.054488,
+      "nominalSeconds": 5,
+      "extraSeconds": 1.054488,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": false
+    },
+    {
+      "service": "kafka",
+      "previousEnd": "2026-11-01T08:16:44.013759345Z",
+      "nextStart": "2026-11-01T08:16:51.819662911Z",
+      "endToStartSeconds": 7.805903,
+      "nominalSeconds": 5,
+      "extraSeconds": 2.805903,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    },
+    {
+      "service": "elasticsearch",
+      "previousEnd": "2026-11-01T08:16:10.677452506Z",
+      "nextStart": "2026-11-01T08:16:18.499919549Z",
+      "endToStartSeconds": 7.822467,
+      "nominalSeconds": 5,
+      "extraSeconds": 2.8224669999999996,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    },
+    {
+      "service": "elasticsearch",
+      "previousEnd": "2026-11-01T08:16:43.790040756Z",
+      "nextStart": "2026-11-01T08:16:51.594917782Z",
+      "endToStartSeconds": 7.804877,
+      "nominalSeconds": 5,
+      "extraSeconds": 2.8048770000000003,
+      "bothExitZero": true,
+      "overlapsHostIdleSampleSpan": true
+    }
+  ],
+  "scope": "Deduplicated retained Docker health timestamps; same-window correlation only, not independent guest-monotonic or VM-pause proof. Some retained checks predate first host sample; overlap marked."
+}

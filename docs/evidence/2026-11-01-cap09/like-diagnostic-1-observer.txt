@@ -1,0 +1,2 @@
+[mysql] 2026/11/01 14:08:58 connection.go:49: read tcp 127.0.0.1:56774->127.0.0.1:3471: i/o timeout
+cap09-downstream: downstream observation incomplete or recovery budget not met

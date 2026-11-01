@@ -1,0 +1,31 @@
+{
+  "task": "CAP-09C sourceA",
+  "startedAt": "2026-11-01T06:05:30.168677+00:00",
+  "finishedAt": "2026-11-01T06:05:44.620670+00:00",
+  "elapsedSeconds": 14.451990299974568,
+  "sourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "expectedVersion": "capacity-e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "exe": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-e6bfc77\\capacity.exe",
+  "sha256": "aeaadf4fc3da9f80c736bfe47867767775fcbbf54acf8c34b5dfca37afeff50e",
+  "worktree": "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-e6bfc77\\source",
+  "detached": true,
+  "worktreeCleanBeforeAndAfter": true,
+  "goVersion": "go version go1.27.0 windows/amd64",
+  "buildExitCode": 0,
+  "argv": [
+    "go",
+    "build",
+    "-ldflags",
+    "-X main.revision=capacity-e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+    "-o",
+    "D:\\\u684c\u9762\\The ALL\\agent\\project\\code\\.runtime-fullstack-cap09-build-e6bfc77\\capacity.exe",
+    "./cmd/api"
+  ],
+  "primaryWorktreeUsedForBuild": false,
+  "noConcurrentLoad": true,
+  "changesFromBaseline": [
+    "acknowledged-commit like cancellation completion",
+    "immutable Feed timezone reuse"
+  ],
+  "relayBatchSize": "unchanged default100/BatchTimeout10ms"
+}

@@ -1,0 +1,144 @@
+
+         /\      Grafana   /‾‾/  
+    /\  /  \     |\  __   /  /   
+   /  \/    \    | |/ /  /   ‾‾\ 
+  /          \   |   (  |  (‾)  |
+ / __________ \  |_|\_\  \_____/ 
+
+
+     execution: local
+        script: scripts/load/cap09-like.js
+        output: -
+
+     scenarios: (100.00%) 1 scenario, 512 max VUs, 55s max duration (incl. graceful stop):
+              * write: 50.00 iterations/s for 45s (maxVUs: 256-512, gracefulStop: 10s)
+
+
+running (00.3s), 002/256 VUs, 15 complete and 0 interrupted iterations
+write   [   1% ] 002/256 VUs  00.3s/45s  50.00 iters/s
+
+running (01.3s), 002/256 VUs, 65 complete and 0 interrupted iterations
+write   [   3% ] 002/256 VUs  01.3s/45s  50.00 iters/s
+
+running (02.3s), 002/256 VUs, 115 complete and 0 interrupted iterations
+write   [   5% ] 002/256 VUs  02.3s/45s  50.00 iters/s
+
+running (03.3s), 002/256 VUs, 165 complete and 0 interrupted iterations
+write   [   7% ] 002/256 VUs  03.3s/45s  50.00 iters/s
+
+running (04.3s), 002/256 VUs, 215 complete and 0 interrupted iterations
+write   [  10% ] 002/256 VUs  04.3s/45s  50.00 iters/s
+
+running (05.3s), 002/256 VUs, 265 complete and 0 interrupted iterations
+write   [  12% ] 002/256 VUs  05.3s/45s  50.00 iters/s
+
+running (06.3s), 002/256 VUs, 315 complete and 0 interrupted iterations
+write   [  14% ] 002/256 VUs  06.3s/45s  50.00 iters/s
+
+running (07.3s), 002/256 VUs, 365 complete and 0 interrupted iterations
+write   [  16% ] 002/256 VUs  07.3s/45s  50.00 iters/s
+
+running (08.3s), 002/256 VUs, 415 complete and 0 interrupted iterations
+write   [  18% ] 002/256 VUs  08.3s/45s  50.00 iters/s
+
+running (09.3s), 002/256 VUs, 465 complete and 0 interrupted iterations
+write   [  21% ] 002/256 VUs  09.3s/45s  50.00 iters/s
+
+running (10.3s), 002/256 VUs, 515 complete and 0 interrupted iterations
+write   [  23% ] 002/256 VUs  10.3s/45s  50.00 iters/s
+
+running (11.3s), 002/256 VUs, 565 complete and 0 interrupted iterations
+write   [  25% ] 002/256 VUs  11.3s/45s  50.00 iters/s
+
+running (12.3s), 002/256 VUs, 615 complete and 0 interrupted iterations
+write   [  27% ] 002/256 VUs  12.3s/45s  50.00 iters/s
+
+running (13.3s), 002/256 VUs, 665 complete and 0 interrupted iterations
+write   [  30% ] 002/256 VUs  13.3s/45s  50.00 iters/s
+
+running (14.3s), 002/256 VUs, 715 complete and 0 interrupted iterations
+write   [  32% ] 002/256 VUs  14.3s/45s  50.00 iters/s
+
+running (15.3s), 006/256 VUs, 761 complete and 0 interrupted iterations
+write   [  34% ] 006/256 VUs  15.3s/45s  50.00 iters/s
+
+running (16.3s), 002/256 VUs, 815 complete and 0 interrupted iterations
+write   [  36% ] 002/256 VUs  16.3s/45s  50.00 iters/s
+
+running (17.3s), 002/256 VUs, 865 complete and 0 interrupted iterations
+write   [  38% ] 002/256 VUs  17.3s/45s  50.00 iters/s
+
+running (18.3s), 001/256 VUs, 916 complete and 0 interrupted iterations
+write   [  41% ] 001/256 VUs  18.3s/45s  50.00 iters/s
+
+running (19.3s), 002/256 VUs, 965 complete and 0 interrupted iterations
+write   [  43% ] 002/256 VUs  19.3s/45s  50.00 iters/s
+
+running (20.3s), 002/256 VUs, 1015 complete and 0 interrupted iterations
+write   [  45% ] 002/256 VUs  20.3s/45s  50.00 iters/s
+
+running (21.3s), 002/256 VUs, 1065 complete and 0 interrupted iterations
+write   [  47% ] 002/256 VUs  21.3s/45s  50.00 iters/s
+
+running (22.3s), 002/256 VUs, 1115 complete and 0 interrupted iterations
+write   [  50% ] 002/256 VUs  22.3s/45s  50.00 iters/s
+
+running (23.3s), 002/256 VUs, 1165 complete and 0 interrupted iterations
+write   [  52% ] 002/256 VUs  23.3s/45s  50.00 iters/s
+
+running (24.3s), 003/256 VUs, 1214 complete and 0 interrupted iterations
+write   [  54% ] 003/256 VUs  24.3s/45s  50.00 iters/s
+
+running (25.3s), 002/256 VUs, 1265 complete and 0 interrupted iterations
+write   [  56% ] 002/256 VUs  25.3s/45s  50.00 iters/s
+
+running (26.3s), 002/256 VUs, 1315 complete and 0 interrupted iterations
+write   [  58% ] 002/256 VUs  26.3s/45s  50.00 iters/s
+
+running (27.3s), 002/256 VUs, 1365 complete and 0 interrupted iterations
+write   [  61% ] 002/256 VUs  27.3s/45s  50.00 iters/s
+
+running (28.3s), 002/256 VUs, 1415 complete and 0 interrupted iterations
+write   [  63% ] 002/256 VUs  28.3s/45s  50.00 iters/s
+
+running (29.3s), 003/256 VUs, 1464 complete and 0 interrupted iterations
+write   [  65% ] 003/256 VUs  29.3s/45s  50.00 iters/s
+
+running (30.3s), 002/256 VUs, 1515 complete and 0 interrupted iterations
+write   [  67% ] 002/256 VUs  30.3s/45s  50.00 iters/s
+
+running (31.3s), 002/256 VUs, 1565 complete and 0 interrupted iterations
+write   [  70% ] 002/256 VUs  31.3s/45s  50.00 iters/s
+
+running (32.3s), 002/256 VUs, 1615 complete and 0 interrupted iterations
+write   [  72% ] 002/256 VUs  32.3s/45s  50.00 iters/s
+
+running (33.3s), 002/256 VUs, 1665 complete and 0 interrupted iterations
+write   [  74% ] 002/256 VUs  33.3s/45s  50.00 iters/s
+
+running (34.3s), 002/256 VUs, 1715 complete and 0 interrupted iterations
+write   [  76% ] 002/256 VUs  34.3s/45s  50.00 iters/s
+
+running (35.3s), 004/256 VUs, 1763 complete and 0 interrupted iterations
+write   [  78% ] 004/256 VUs  35.3s/45s  50.00 iters/s
+
+running (36.3s), 002/256 VUs, 1815 complete and 0 interrupted iterations
+write   [  81% ] 002/256 VUs  36.3s/45s  50.00 iters/s
+
+running (37.3s), 002/256 VUs, 1865 complete and 0 interrupted iterations
+write   [  83% ] 002/256 VUs  37.3s/45s  50.00 iters/s
+
+running (38.3s), 002/256 VUs, 1915 complete and 0 interrupted iterations
+write   [  85% ] 002/256 VUs  38.3s/45s  50.00 iters/s
+
+running (39.3s), 002/256 VUs, 1965 complete and 0 interrupted iterations
+write   [  87% ] 002/256 VUs  39.3s/45s  50.00 iters/s
+
+running (40.3s), 002/256 VUs, 2015 complete and 0 interrupted iterations
+write   [  90% ] 002/256 VUs  40.3s/45s  50.00 iters/s
+
+running (41.3s), 002/256 VUs, 2065 complete and 0 interrupted iterations
+write   [  92% ] 002/256 VUs  41.3s/45s  50.00 iters/s
+
+running (42.3s), 008/256 VUs, 2109 complete and 0 interrupted iterations
+write   [  94% ] 008/256 VUs  42.3s/45s  50.00 iters/s

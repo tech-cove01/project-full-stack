@@ -1,0 +1,21 @@
+{
+  "at": "2026-11-01T06:07:11.958929+00:00",
+  "task": "CAP-09C like iteration1/2 diagnostic after correctness repair",
+  "observedEvidence": [
+    "like-baseline-stair-1-load/result.json",
+    "like-baseline-stair-1-load/reconcile.json",
+    "like-cancel-old-real.txt",
+    "like-cancel-new-real.txt"
+  ],
+  "repairCommit": "9d8d9f6a91ded7b1cfc972afa6834e1df8c29643",
+  "sourceSha": "e6bfc7710e364bc9a76cc1c6b0f9530d7badebd1",
+  "differentPredictions": {
+    "correctness": "If acknowledged commit completes derived work independently, any cancellation/early abort should not leave old Redis relation version after bounded settle; unknown native outcomes remain unknown. CommitACK ambiguity and dependency failure are not proven repaired.",
+    "relay": "If original serial publish path constrains throughput, original defaultBatchSize100/10ms wait will still show outbox growth at50/s while broker lag remains small; new postcommit cancellation handling does not remove publisher batching.",
+    "http": "If originalP95 was shared resource contention, it may persist or vary after correctness-only change; do not claim latency root cause from cancellation regression."
+  },
+  "case": "same multi50/s45,10swarm25/s,pre256/max512,all fixtures/pools/ES256/limitssame",
+  "instrumentation": "tail enabled but only Feed endpoint starts traces; Like/relay carry no trace, capacity before/after must verify request/shared trace counts0. Still diagnosis, not a capacityA/B percentage.",
+  "unrelatedFeedChange": "Feed zone cache is lazy and only used by Feed; no Feed load in this like diagnostic. No app assembly/pool/dependency/like transaction changes beyond reviewed postcommit completion.",
+  "budget": "diagnostic slot1 of2, correctness repair1/2. First like baseline stair remains failed and is never replayed."
+}

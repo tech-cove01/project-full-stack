@@ -1,0 +1,15 @@
+{
+  "at": "2026-11-01T06:13:32.420111+00:00",
+  "task": "CAP-09C diagnostic instrumentation record correction",
+  "originalPrediction": "feed-diagnosis-1.json",
+  "declaredRetainedSlowTraces": 3,
+  "actualMaxSlowTraces": 32,
+  "actualMaxSpansPerTrace": 256,
+  "actualSlowThresholdMs": 100,
+  "stackCapturesRequested": 0,
+  "evidence": [
+    "api-diag-feed-old-health.json",
+    "feed-diagnostic-1-capacity-after.json"
+  ],
+  "scope": "The prediction mislabeled max3 stacks as retained trace count. Runtime used its existing32-trace bounded ring. All raw captures stay unchanged; diagnosis is instrumented, not a capacity score. Next allocation comparison explicitly retains the same actual32/256/100ms configuration; final capacity disables tail. No safety threshold or native pass is relaxed."
+}

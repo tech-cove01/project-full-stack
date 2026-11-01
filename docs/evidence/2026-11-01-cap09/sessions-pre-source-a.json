@@ -1,0 +1,9 @@
+{
+  "at": "2026-11-01T06:07:11.960251+00:00",
+  "feedOwnedSessions": 32,
+  "likeOwnedSessions": 512,
+  "configuredTotal": 544,
+  "normalSessionTTL": "25days from source auth/service.go",
+  "tokensExported": false,
+  "normalAuthRefreshNotNeeded": true
+}

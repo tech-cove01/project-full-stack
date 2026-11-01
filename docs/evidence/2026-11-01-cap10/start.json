@@ -1,0 +1,19 @@
+{
+  "at": "2026-11-01T07:46:03.473031+00:00",
+  "task": "CAP-10",
+  "startingSHA": "77ff745e7445273fb038ce56f6282012e93ff85c",
+  "startingWorktreeClean": true,
+  "effectiveWorkStartConservativeUTC": "2026-11-01T07:42:00Z",
+  "effectiveWorkBudgetSeconds": 10800,
+  "loadWaitCIExcludedButSeparatelyRecorded": true,
+  "shortWindowsMaximum": 8,
+  "shortSeconds": 60,
+  "formalMaximum": 2,
+  "formalSeconds": 180,
+  "maximumMainLoadSeconds": 840,
+  "preflightIdleObservationsMaximum": 1,
+  "preflightIdleSeconds": 60,
+  "optimizationsMaximum": 1,
+  "feedWindows": 0,
+  "hotWindows": 0
+}

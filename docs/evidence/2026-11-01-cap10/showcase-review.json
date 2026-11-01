@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-01T08:46:31.659819+00:00",
+  "task": "CAP-10 later GitHub static showcase preparation",
+  "source": "CodeBuddy web-deploy-github skill, read-only workflow/design guidance",
+  "author": "cap09_feed_review",
+  "reviewer": "cap09_like_review, non-author",
+  "passed": true,
+  "documentSHA256": "150148285ae06ee83e0b40ce255b0ca07774d4534cf0a0e115155443fb269ebb",
+  "scope": "Capture/export plan only, no website/repository creation, publishing, service/browser execution, private resume/internship copying or extra pressure windows.",
+  "checks": [
+    "Native summary quantiles supportP95/P99 bars/tables, not fabricatedCDF/boxplots/requesttime series.",
+    "Existing5s timelines forqueues/resources;32slowselectedtraces and lifetimeMAX limitations clear.",
+    "Separate historicalFeed/Java screenshots from currentGo/LinuxLike source/environment.",
+    "PNG/SVG/JSON exports withfullSHA/scenario/window captions and correctness/downstream evidence."
+  ]
+}

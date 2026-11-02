@@ -68,14 +68,47 @@ def merged_wait_seconds(intervals, started, ended):
     return total
 
 
+def continuation_authorization(root, now):
+    path = ROOT / 'continuation-authorization.json'
+    records = history(root)
+    records += [read(p) for directory in (ROOT, ROOT / 'linux') for p in directory.glob('slot-[SH]*.json')]
+    def recorded_hash(record):
+        return record.get('reservationCheck', {}).get('effectiveWorkBudget', {}).get('continuationAuthorizationSHA256')
+    if not path.exists():
+        require(all(recorded_hash(record) is None for record in records), 'continuation authorization cannot be removed after reservation')
+        return {'waiveEffectiveWorkTimeLimit': False, 'continuationAuthorizationSHA256': None}
+    require(root == ROOT / 'linux' and path.is_file() and not path.is_symlink(), 'continuation applies only to the owned Linux batch')
+    value, digest = read(path), sha(path)
+    require(isinstance(value, dict) and type(value.get('version')) is int and value['version'] == 1 and value.get('batch') == 'CAP-10', 'invalid continuation authorization identity')
+    require(value.get('authorized') is True, 'continuation authorization must be explicitly approved')
+    require(value.get('waiveEffectiveWorkTimeLimit') is True and type(value.get('maxIdleRetries')) is int and value['maxIdleRetries'] == 1, 'explicit work-time waiver and exactly one idle retry required')
+    require(type(value.get('originalMaximumSeconds', 10800)) is int and value.get('originalMaximumSeconds', 10800) == 10800, 'original work-time maximum remains 10800 seconds')
+    reference = value.get('userAuthorizationReference')
+    require(isinstance(reference, str) and reference.strip(), 'explicit continuation user authorization required')
+    require(value.get('transitionSHA256') == sha(ROOT / 'environment-transition.json'), 'continuation must retain the original transition')
+    failed_path = value.get('failedIdleResultPath')
+    require(isinstance(failed_path, str) and failed_path, 'retained failed idle path required')
+    failed_path = (ROOT / failed_path).resolve()
+    require(failed_path.is_relative_to((ROOT / 'linux').resolve()) and failed_path == (ROOT / 'linux/idle-attempt-1/idle-result.json').resolve() and failed_path.is_file() and value.get('failedIdleResultSHA256') == sha(failed_path) and read(failed_path).get('passed') is False, 'original failed cloud idle bytes must be retained')
+    require(isinstance(value.get('recordedAt'), str), 'continuation registration timestamp required')
+    registered = instant(value['recordedAt'])
+    require(instant(read(ROOT / 'environment-transition.json')['recordedAt']) <= registered <= now, 'continuation registration time differs from batch chronology')
+    require(all(recorded_hash(record) == digest and instant(record['at']) >= registered for record in records), 'continuation must predate the first slot and remain byte-identical')
+    return {'waiveEffectiveWorkTimeLimit': True, 'continuationAuthorizationSHA256': digest}
+
+
 def effective_work_budget(root, api_metadata, now=None):
     now = now or dt.datetime.now(dt.timezone.utc)
     if root == ROOT:
         require(api_metadata.get('executionPlatform') == 'windows', 'Windows metadata platform differs')
         require(not (ROOT / 'environment-transition.json').exists(), 'Windows execution closed after the single Linux switch')
         elapsed = (now - instant(read(ROOT / 'start.json')['effectiveWorkStartConservativeUTC'])).total_seconds()
-        require(0 <= elapsed <= 10800, 'conservative three-hour development bound exhausted')
-        return {'effectiveSecondsUpperBound': elapsed, 'provedLoadWaitSecondsDeducted': 0, 'maximumSeconds': 10800, 'platform': 'windows'}
+        continuation = continuation_authorization(root, now)
+        waived = continuation['waiveEffectiveWorkTimeLimit']
+        require(elapsed >= 0 and (waived or elapsed <= 10800), 'conservative effective development bound exhausted')
+        return {'effectiveSecondsUpperBound': elapsed, 'provedLoadWaitSecondsDeducted': 0,
+                'maximumSeconds': None if waived else 10800, 'remainingSeconds': None if waived else 10800 - elapsed,
+                'originalMaximumSeconds': 10800, 'passed': True, 'platform': 'windows', **continuation}
     require(root == ROOT / 'linux' and api_metadata.get('executionPlatform') == 'linux', 'fixed Linux metadata platform required')
     path = ROOT / 'environment-transition.json'
     require(api_metadata.get('transitionSHA256') == sha(path), 'Linux transition hash differs')
@@ -104,8 +137,13 @@ def effective_work_budget(root, api_metadata, now=None):
     wall = (now - anchor).total_seconds()
     deducted = merged_wait_seconds(intervals, anchor, now)
     elapsed = used + wall - deducted
-    require(0 <= elapsed <= 10800, 'continued three-hour effective development bound exhausted')
-    return {'effectiveSecondsUpperBound': elapsed, 'provedLoadWaitSecondsDeducted': deducted, 'maximumSeconds': 10800, 'platform': 'linux', 'usedBeforeSwitch': used, 'anchor': transition['recordedAt']}
+    continuation = continuation_authorization(root, now)
+    waived = continuation['waiveEffectiveWorkTimeLimit']
+    require(elapsed >= 0 and (waived or elapsed <= 10800), 'continued effective development bound exhausted')
+    return {'effectiveSecondsUpperBound': elapsed, 'provedLoadWaitSecondsDeducted': deducted,
+            'maximumSeconds': None if waived else 10800, 'remainingSeconds': None if waived else 10800 - elapsed,
+            'originalMaximumSeconds': 10800, 'passed': True, 'platform': 'linux',
+            'usedBeforeSwitch': used, 'anchor': transition['recordedAt'], **continuation}
 
 def search_state(root, source_sha):
     records = history(root)

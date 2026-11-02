@@ -22,11 +22,60 @@ def module(name, filename):
     return value
 
 
+def idle_attempt(root, authorization, transition_sha):
+    """Authorize only the retained zero-sample first failure's one retry."""
+    root = Path(root).resolve()
+    archive = root / 'idle-attempt-1'
+    if authorization is None:
+        if archive.exists():
+            raise ValueError('archived idle failure requires explicit retry authorization')
+        return {'attempt': 1}
+    expected = root.parent / 'continuation-authorization.json'
+    path = Path(authorization)
+    if root.name != 'linux' or path.is_symlink() or path.resolve() != expected or not path.is_file():
+        raise ValueError('fixed batch continuation authorization required')
+    raw = path.read_bytes()
+    auth = json.loads(raw)
+    if (not isinstance(auth, dict) or type(auth.get('version')) is not int or auth['version'] != 1
+            or auth.get('batch') != 'CAP-10' or auth.get('authorized') is not True
+            or type(auth.get('maxIdleRetries')) is not int or auth['maxIdleRetries'] != 1
+            or not isinstance(auth.get('userAuthorizationReference'), str)
+            or not auth['userAuthorizationReference'].strip()
+            or auth.get('failedIdleResultPath') != 'linux/idle-attempt-1/idle-result.json'
+            or not isinstance(transition_sha, str) or len(transition_sha) != 64
+            or auth.get('transitionSHA256') != transition_sha):
+        raise ValueError('one explicit same-transition idle retry authorization required')
+    for directory in (root.parent, root):
+        if list(directory.glob('slot-*.json')) or list(directory.glob('[SH]*-command.json')):
+            raise ValueError('idle retry must precede every native reservation')
+    failed_path, reservation_path = archive / 'idle-result.json', archive / 'idle-reservation.json'
+    for original in (failed_path, reservation_path):
+        if original.is_symlink() or original.resolve() != original or not original.is_file():
+            raise ValueError('original regular failed idle artifacts required')
+    failed_raw = failed_path.read_bytes()
+    failure_sha = hashlib.sha256(failed_raw).hexdigest()
+    failed, reservation = json.loads(failed_raw), json.loads(reservation_path.read_bytes())
+    if (auth.get('failedIdleResultSHA256') != failure_sha
+            or not isinstance(failed, dict) or failed.get('passed') is not False
+            or failed.get('samples') != [] or failed.get('noWorkloadStarted') is not True
+            or failed.get('seconds') != 60 or failed.get('executionPlatform') != 'linux'
+            or failed.get('transitionSHA256') != transition_sha
+            or not isinstance(reservation, dict) or type(reservation.get('attempt')) is not int
+            or reservation['attempt'] != 1 or reservation.get('seconds') != 60
+            or reservation.get('failedAttemptConsumesOnlyIdleObservation') is not True
+            or reservation.get('executionPlatform') != 'linux'
+            or reservation.get('transitionSHA256') != transition_sha):
+        raise ValueError('retained zero-sample first idle failure differs')
+    return {'attempt': 2, 'retryAuthorizationSHA256': hashlib.sha256(raw).hexdigest(),
+            'failedIdleResultSHA256': failure_sha}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--environment', required=True)
     parser.add_argument('--api-metadata', required=True)
     parser.add_argument('--observer', required=True)
+    parser.add_argument('--retry-authorization')
     args = parser.parse_args()
     owned = module('cap10_idle_owned', 'cap10-env.py')
     resources = module('cap10_idle_resources', 'cap10-resources.py')
@@ -40,9 +89,10 @@ def main():
     assert value['CAP_SOURCE_SHA'] == api_metadata['sourceSha']
     assert value['CAP_READ_EXPECTED_REVISION'] == api_metadata['expectedVersion']
     assert not list(root.glob('slot-*.json')), 'idle observation must precede S1'
+    attempt = idle_attempt(root, args.retry_authorization, owned.transition())
     reservation = root / 'idle-reservation.json'
     owned.save(reservation, {'at': owned.now(), 'seconds': 60, 'intervalSeconds': 5,
-                            'attempt': 1, 'failedAttemptConsumesOnlyIdleObservation': True,
+                            **attempt, 'failedAttemptConsumesOnlyIdleObservation': True,
                             'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition()})
     owned_containers = owned.read(root / 'environment.json')['containers']
     for service, container in owned_containers.items():
@@ -54,6 +104,7 @@ def main():
     done = control / 'done.json'
     downstream = root / 'idle-downstream'
     result = {'at': owned.now(), 'passed': False, 'seconds': 60, 'samples': [], 'errors': [],
+              **attempt,
               'noWorkloadStarted': True, 'apiPid': api.pid, 'sourceSha': api_metadata['sourceSha'],
               'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition(),
               'scriptSHA256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),

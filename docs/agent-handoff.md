@@ -2,7 +2,11 @@
 
 2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
-## 当前交接：CAP-10 ECS与PTS配置就绪，执行云端准入（2026-11-02）
+## 当前交接：CAP-10云端采集兼容修复，工时上限已取消（2026-11-02）
+
+**最新用户指令覆盖下方历史工时限制：** 继续直到本批压测取得结果，不因原10800秒有效工作上限结束，不自行释放ECS。唯一transition、7800/3000原始快照及真实elapsed保留，批次根`continuation-authorization.json`登记明确取消工时上限、原云端失败SHA和已授权的一次额外空载；首个slot后授权SHA固定。8短窗/2正式/840秒/最多一项优化及正确性、报告终态判据不变。
+
+**云端当前事实：** 第一次空载在host样本前因group offset未初始化拒绝，已按原件哈希归档`linux/idle-attempt-1/`。有限公开笔记初始化、搜索离线重建与原停车坐标重放已完成；三组lag=0/PARKED=0，512关系仍active=0/version=0。获准的attempt2同样host样本0，在`cap10-resources.py`解析真实`core_sched.force_idle_usec`附加键时ValueError；单次只读探针证实其余必需计数/配额正常。正做采集兼容小修，未发真实点赞压力，S/H均0。不得改写两次失败或静默重发额外空载；不得把部署/工具修复算Go性能优化。私有运行路径仅登记在本地受限runtime。
 
 **11-02最新接续：** 用户已恢复并租好上海16vCPU/32GiB c9i，Ubuntu24.04 x86、100GiB ESSD PL1；API、四依赖和512合成关系/会话就绪，PTS三附件已上传且仅CSV切分，513线程/2引擎/600秒/固定100%及私网经真实只读接口核对。云端原始证据继续同批`2026-11-01-cap10/linux/`。控制工具适配真实Provider缺省回显ID和成功但无RunningData的响应，88纯检查、非作者审查及真实只读核对通过；未放宽已启动报告身份/终态证明，见[审查](evidence/2026-11-01-cap10/pts-provider-compatibility-review.json)。Go源码/二进制及上传文件不变，不计业务优化。首次镜像标识/SQL目录权限/只读准入失败分别保留，不覆盖失败。唯一transition承接7800/3000秒快照继续扣账；当前压力S/H仍0，唯一云端空载已启动待判定，不得重复预检或新开名额。私有连接与运行路径仅在本地受限runtime登记；不要把凭据/IP复制进公开文档。下方11-01等待安排均为历史。
 

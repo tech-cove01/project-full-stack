@@ -391,6 +391,80 @@ class Checks(unittest.TestCase):
         with self.assertRaises(ValueError):
             grade.effective_work_budget(directory, api, now=anchor + dt.timedelta(seconds=6601))
 
+    def continuation(self):
+        failed = self.put('linux/idle-attempt-1/idle-result.json', {'passed': False, 'samples': []})
+        authorization = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'waiveEffectiveWorkTimeLimit': True,
+            'originalMaximumSeconds': 10800, 'maxIdleRetries': 1,
+            'userAuthorizationReference': 'synthetic explicit cancellation of time limit and one idle retry',
+            'transitionSHA256': grade.sha(self.root / 'environment-transition.json'),
+            'failedIdleResultPath': 'linux/idle-attempt-1/idle-result.json',
+            'failedIdleResultSHA256': grade.sha(failed),
+            'recordedAt': (self.now - dt.timedelta(seconds=1)).isoformat()}
+        self.put('continuation-authorization.json', authorization)
+        return authorization
+
+    def test_explicit_time_waiver_retains_real_usage_and_original_limits(self):
+        directory, transition, api, anchor = self.linux_transition(used=7800)
+        self.continuation()
+        budget = grade.effective_work_budget(directory, api, now=anchor + dt.timedelta(seconds=200000))
+        self.assertEqual((budget['effectiveSecondsUpperBound'], budget['usedBeforeSwitch']), (207800, 7800))
+        self.assertEqual(budget['anchor'], transition['recordedAt'])
+        self.assertEqual(budget['originalMaximumSeconds'], 10800)
+        self.assertIsNone(budget['maximumSeconds'])
+        self.assertIsNone(budget['remainingSeconds'])
+        self.assertTrue(budget['passed'] and budget['waiveEffectiveWorkTimeLimit'])
+        json.dumps(budget, allow_nan=False)
+        reservation = self.reserve('diagnostic', 50, execution_root=directory, api=api)
+        self.assertEqual((reservation['shortMaximum'], reservation['formalMaximum'], reservation['mainSecondsMaximum']), (8, 2, 840))
+        self.assertEqual(reservation['effectiveWorkBudget']['continuationAuthorizationSHA256'], grade.sha(self.root / 'continuation-authorization.json'))
+
+    def test_time_waiver_requires_exact_authorization_and_retained_evidence(self):
+        directory, transition, api, anchor = self.linux_transition()
+        authorization = self.continuation()
+        for key, value in (('version', True), ('batch', 'CAP-11'), ('authorized', False), ('authorized', 1), ('waiveEffectiveWorkTimeLimit', False),
+                ('waiveEffectiveWorkTimeLimit', 1), ('maxIdleRetries', 2), ('maxIdleRetries', True),
+                ('originalMaximumSeconds', 12000), ('userAuthorizationReference', ''),
+                ('transitionSHA256', 'f' * 64), ('failedIdleResultSHA256', 'f' * 64),
+                ('failedIdleResultPath', 'idle-result.json'), ('recordedAt', None),
+                ('recordedAt', (self.now + dt.timedelta(seconds=1)).isoformat())):
+            self.put('continuation-authorization.json', {**authorization, key: value})
+            with self.subTest(key=key, value=value), self.assertRaises(ValueError):
+                grade.effective_work_budget(directory, api, now=self.now)
+        self.put('continuation-authorization.json', authorization)
+        self.put('linux/idle-attempt-1/idle-result.json', {'passed': True, 'samples': []})
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=self.now)
+
+    def test_time_waiver_cannot_be_added_after_prior_slot(self):
+        directory, transition, api, anchor = self.linux_transition()
+        self.add('S1', 50, execution_root=directory)
+        self.continuation()
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=self.now)
+
+    def test_time_waiver_hash_is_immutable_and_cannot_be_removed(self):
+        directory, transition, api, anchor = self.linux_transition()
+        authorization = self.continuation()
+        budget = grade.effective_work_budget(directory, api, now=self.now)
+        command = self.add('S1', 50, execution_root=directory)
+        command['reservationCheck'] = {'effectiveWorkBudget': budget}
+        self.put('linux/S1-command.json', command)
+        self.put('linux/slot-S1.json', command)
+        self.assertTrue(grade.effective_work_budget(directory, api, now=self.now)['passed'])
+        self.put('continuation-authorization.json', {**authorization, 'userAuthorizationReference': 'changed later'})
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=self.now)
+        (self.root / 'continuation-authorization.json').unlink()
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=self.now)
+
+    def test_time_waiver_cannot_follow_orphan_reservation(self):
+        directory, transition, api, anchor = self.linux_transition()
+        self.put('linux/slot-S1.json', {'at': self.now.isoformat()})
+        self.continuation()
+        with self.assertRaises(ValueError):
+            grade.effective_work_budget(directory, api, now=self.now)
+
     def test_linux_requires_explicit_single_switch_and_retained_bytes(self):
         directory, transition, api, anchor = self.linux_transition()
         for key, value in (('authorized', False), ('switchCount', 2), ('hostLabel', ''),

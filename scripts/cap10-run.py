@@ -45,6 +45,34 @@ def expected_diagnostics(kind, tag, claim_optimization_sha=None):
         kind == 'comparison' and tag == 'S6' and claim_optimization_sha)
 
 
+def observer_terminal_outcome(exit_code, summary, done):
+    """Separate complete recovery-SLO failure from broken observation."""
+    if not isinstance(summary, dict) or not isinstance(done, dict):
+        return None
+    if exit_code == 0 and summary.get('valid') is True and summary.get('collectionValid') is True:
+        return 'converged'
+    if (exit_code != 1 or summary.get('valid') is not False
+            or summary.get('collectionValid') is not True or summary.get('allSamplesComplete') is not True
+            or type(summary.get('failedSamples')) is not int or summary['failedSamples'] != 0
+            or type(summary.get('semanticViolationCount')) is not int or summary['semanticViolationCount'] != 0
+            or type(summary.get('samples')) is not int or summary['samples'] < 13
+            or summary.get('postControlDoneConverged') is not False or summary.get('recoveredAt') is not None
+            or done.get('source') != 'cap10-stage'
+            or done.get('reason') != 'verified owned generator exited; harness reconciliation continues'):
+        return None
+    try:
+        started, observed, finished, controlled = [dt.datetime.fromisoformat(value.replace('Z', '+00:00'))
+            for value in (summary['startedAt'], summary['doneObservedAt'], summary['at'], done['at'])]
+        if (any(value.tzinfo is None for value in (started, observed, finished, controlled))
+                or not started <= controlled <= observed <= finished <= dt.datetime.now(dt.timezone.utc)
+                or not 0 <= (observed - controlled).total_seconds() <= 7.5
+                or not 60 <= (finished - observed).total_seconds() <= 67.5):
+            return None
+    except (KeyError, TypeError, ValueError, AttributeError, OverflowError):
+        return None
+    return 'recovery_limited'
+
+
 def reserve(args, api, value):
     grade = module('cap10_reservation_grade', 'cap10-grade.py')
     for path in (args.preflight, args.ability, args.prediction):
@@ -394,10 +422,14 @@ def main():
                 owned.save(control / 'stop.json', {'at': owned.now(), 'source': 'cap10-run', 'reason': pending_stop})
             if observer.poll() is not None:
                 summary_path = downstream / 'summary.json'
-                if not ((control / 'done.json').is_file() and observer.returncode == 0 and summary_path.is_file() and
-                        owned.read(summary_path).get('valid') is True and owned.read(summary_path).get('collectionValid') is True):
+                outcome = None
+                if (control / 'done.json').is_file() and summary_path.is_file():
+                    outcome = observer_terminal_outcome(observer.returncode, owned.read(summary_path),
+                                                        owned.read(control / 'done.json'))
+                if outcome is None:
                     raise RuntimeError('downstream observer exited without a trusted terminal summary')
-                state['earlyNormalObserverCompletion'] = True
+                state['earlyNormalObserverCompletion'] = outcome == 'converged'
+                state['earlyObserverRecoveryLimit'] = outcome == 'recovery_limited'
             if time.monotonic() >= next_observation:
                 current_power = owned.power(); stamp = time.monotonic()
                 window_power = owned.power_window_evidence(before_power, current_power, start, lightweight=True)

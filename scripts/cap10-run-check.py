@@ -1,5 +1,6 @@
 """Offline checks of the actual runner's classification and warm guard functions."""
 import ast
+import datetime as dt
 import hashlib
 import json
 from pathlib import Path
@@ -8,7 +9,7 @@ import uuid
 
 REPO = Path(__file__).resolve().parent.parent
 source = ast.parse((REPO / 'scripts/cap10-run.py').read_text(encoding='utf-8'))
-names = {'classify', 'pre_stable_guard', 'container_snapshot'}
+names = {'classify', 'pre_stable_guard', 'container_snapshot', 'observer_terminal_outcome'}
 isolated = ast.Module(body=[node for node in source.body if isinstance(node, ast.FunctionDef) and node.name in names], type_ignores=[])
 checks = 0
 
@@ -128,7 +129,8 @@ def main():
         container=lambda name, cid, running: {**expected[name], 'restartCount': 0, 'oomKilled': False, 'healthStatus': 'healthy'})
     psutil = SimpleNamespace(Process=Process, NoSuchProcess=ProcessGone, Error=ProcessGone,
         virtual_memory=lambda: SimpleNamespace(percent=70), cpu_percent=lambda _: 20)
-    scope = {'owned': owned, 'psutil': psutil, 'json': json, 'subprocess': SimpleNamespace(SubprocessError=RuntimeError)}
+    scope = {'owned': owned, 'psutil': psutil, 'json': json, 'dt': dt,
+             'subprocess': SimpleNamespace(SubprocessError=RuntimeError)}
     exec(compile(isolated, 'cap10-run.py(actual pure functions)', 'exec'), scope)
     counters = {'cap_like_attempted': 10, 'cap_like_completed': 10, 'cap_like_noop': 0,
                 'cap_like_effect_unknown': 0, 'cap_like_content_errors': 0, 'cap_like_rejected': 0}
@@ -153,6 +155,35 @@ def main():
         summaries()
         check(classified(state_changes={'passed': True})['outcome'] == 'pass', 'complete valid native artifacts can pass')
         check(classified()['boundaryEligible'] is True, 'complete fact-correct latency or backlog miss can form U')
+        done = {'at': '2026-11-02T10:27:04.828487+00:00', 'source': 'cap10-stage',
+                'reason': 'verified owned generator exited; harness reconciliation continues'}
+        recovered = {'valid': False, 'collectionValid': True, 'allSamplesComplete': True, 'failedSamples': 0,
+            'semanticViolationCount': 0, 'samples': 63, 'postControlDoneConverged': False, 'recoveredAt': None,
+            'startedAt': '2026-11-02T10:22:57.5110783Z', 'doneObservedAt': '2026-11-02T10:27:07.908360981Z',
+            'at': '2026-11-02T10:28:08.015878806Z'}
+        terminal = scope['observer_terminal_outcome']
+        check(terminal(1, recovered, done) == 'recovery_limited',
+              'complete observed recovery timeout is a trusted limited terminal, not an exception')
+        limited = classified(state_changes={'observerExit': 1, 'pipeline': {'recoverySecondsFromNativeEnd': None}})
+        check(limited['outcome'] == 'performance_limited' and not limited['batchFatal']
+              and limited['boundaryEligible'] and not limited['recoveryVerified'],
+              'observer exit1 alone does not invalidate otherwise complete performance evidence')
+        check(terminal(0, {'valid': True, 'collectionValid': True}, done) == 'converged',
+              'legacy converged observer exit0 stays trusted')
+        for changes, label in [({'collectionValid': False}, 'missing collection'),
+                               ({'allSamplesComplete': False}, 'incomplete samples'),
+                               ({'failedSamples': 1}, 'failed observation'),
+                               ({'semanticViolationCount': 1}, 'semantic violation'),
+                               ({'samples': 12}, 'too few recovery samples'),
+                               ({'doneObservedAt': None}, 'no observed controller done'),
+                               ({'at': '2026-11-02T10:28:00Z'}, 'recovery less than60 seconds'),
+                               ({'at': '2026-11-02T10:28:20Z'}, 'unbounded recovery observation gap'),
+                               ({'recoveredAt': recovered['at']}, 'contradictory convergence')]:
+            check(terminal(1, {**recovered, **changes}, done) is None,
+                  label + ' remains an invalid observer terminal')
+        check(terminal(2, recovered, done) is None, 'unexpected observer exit code remains invalid')
+        check(terminal(1, recovered, {**done, 'source': 'unknown'}) is None,
+              'unverified controller done source cannot explain observer exit')
         for key in ('cap_like_noop', 'cap_like_effect_unknown', 'cap_like_content_errors', 'cap_like_rejected'):
             summaries({key: 1})
             check(classified()['batchFatal'], key + ' ends the whole batch')

@@ -118,4 +118,60 @@ check('actual flush keeps resource heartbeat and refuses wrong ACK before remova
     try{bad.flush();return false}catch(IllegalStateException expected){assert expected.message=='telemetry sequence ACK differs'}
     empty.seq==1 && empty.requests.size()==1 && empty.requests[0].records==[] && bad.seq==0 && bad.pending==[[ordinal:0]]
 }
+check('clock mode missing stays legacy and explicit invalid declarations fail') {
+    type.clockProtocol([:])=='embedded-v1' && type.clockProtocol([clockProtocol:'dedicated-v1'])=='dedicated-v1' &&
+        [null,'','unknown',true].every { value -> try { type.clockProtocol([clockProtocol:value]); false } catch(IllegalArgumentException expected) { true } }
+}
+String actualClock=runtimeSource.substring(runtimeSource.indexOf('    void acceptClock('),runtimeSource.indexOf('    double serverAt('))
+def clockType=loader.parseClass('''class Cap10ActualClockCheck {
+    String declaredClockProtocol='dedicated-v1'
+    Map config=[runId:'synthetic',phase:'warm'],clock
+    boolean anchorFrozen=false
+    long anchorNano,anchorServerMs
+    double serverAt(long nano) { anchorServerMs+(nano-anchorNano)/1000000d }
+''' + actualClock + '}')
+def clockResponse={ time -> [version:1,clockProtocol:'dedicated-v1',runId:'synthetic',phase:'warm',serverUnixMs:time] }
+check('dedicated clock selects minimum before freeze and checks frozen drift without moving anchor') {
+    def run=clockType.newInstance()
+    run.acceptClock('/clock',clockResponse(1020),1000000000L,1000L,1040000000L,1040L)
+    run.acceptClock('/clock',clockResponse(2005),2000000000L,2000L,2010000000L,2010L)
+    assert run.clock.uncertaintyMs==6d && run.anchorServerMs==2005L
+    run.anchorFrozen=true
+    run.acceptClock('/clock',clockResponse(3005),3000000000L,3000L,3010000000L,3010L)
+    try { run.acceptClock('/clock',clockResponse(3205),3000000000L,3000L,3010000000L,3010L); return false }
+    catch(IllegalStateException expected) { assert expected.message=='collector clock interval disagrees' }
+    run.anchorServerMs==2005L && run.clock.uncertaintyMs==6d
+}
+check('dedicated clock keeps original 98ms RTT and wall monotonic limits') {
+    def run=clockType.newInstance()
+    run.acceptClock('/clock',clockResponse(1049),1000000000L,1000L,1098000000L,1098L)
+    assert run.clock.uncertaintyMs==50d
+    try { run.acceptClock('/clock',clockResponse(1049),1000000000L,1000L,1099000000L,1099L); return false }
+    catch(IllegalStateException expected) { assert expected.message=='collector clock uncertainty invalid' }
+    try { run.acceptClock('/clock',clockResponse(1001),1000000000L,1000L,1002000000L,1053L); return false }
+    catch(IllegalStateException expected) { assert expected.message=='collector clock uncertainty invalid' }
+    true
+}
+check('dedicated clock rejects mismatched identity missing timestamp and extra fields') {
+    def variants=[clockResponse(1001)+[runId:'other'],clockResponse(1001)+[phase:'stable'],
+        clockResponse(1001)+[clockProtocol:'embedded-v1'],clockResponse(1001)+[serverUnixMs:null],
+        clockResponse(1001)+[extra:true],clockResponse(1001)+[serverUnixMs:Double.NaN]]
+    variants.every { value ->
+        def run=clockType.newInstance()
+        try { run.acceptClock('/clock',value,1000000000L,1000L,1002000000L,1002L); false }
+        catch(IllegalStateException expected) { expected.message=='collector dedicated clock binding invalid' && run.clock==null }
+    }
+}
+check('late durable ACK is metadata in dedicated mode but remains a clock sample in legacy mode') {
+    def run=clockType.newInstance()
+    run.acceptClock('/clock',clockResponse(1001),1000000000L,1000L,1002000000L,1002L)
+    def frozen=new LinkedHashMap(run.clock)
+    ['/control','/register','/batch','/complete'].each { path ->
+        run.acceptClock(path,[serverUnixMs:999999],1000000000L,1000L,2000000000L,2000L)
+    }
+    assert run.clock==frozen && run.anchorServerMs==1001L
+    run.declaredClockProtocol='embedded-v1'
+    try { run.acceptClock('/batch',[serverUnixMs:999999],1000000000L,1000L,2000000000L,2000L); return false }
+    catch(IllegalStateException expected) { expected.message=='collector clock uncertainty invalid' }
+}
 println(groovy.json.JsonOutput.toJson([checks:checks,failed:0,servicesStarted:false,loadWindows:0]))

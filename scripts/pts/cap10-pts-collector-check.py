@@ -457,6 +457,32 @@ class Checks(unittest.TestCase):
         stats = module.quantiles([10, 110])
         self.assertEqual((stats['med'], stats['p(95)'], stats['p(99)']), (60, 105, 109))
 
+    def test_dedicated_clock_is_identity_bound_and_has_no_evidence_side_effect(self):
+        self.store.close()
+        self.config['clockProtocol'] = 'dedicated-v1'
+        self.store = module.EngineStore(self.config, self.root / 'clock.ndjson', clock=lambda: self.stamp)
+        before = (self.root / 'clock.ndjson').read_bytes()
+        with patch.object(self.store, 'tick', side_effect=AssertionError('clock must not tick')):
+            value = self.store.clock(self.config['runId'])
+        self.assertEqual(value, {'version': 1, 'clockProtocol': 'dedicated-v1', 'runId': 'synthetic-run',
+                                'phase': 'stable', 'serverUnixMs': self.stamp})
+        value['runId'] = 'foreign'
+        self.assertEqual(self.store.clock(self.config['runId'])['runId'], 'synthetic-run')
+        for wrong in (None, '', 'foreign'):
+            with self.assertRaises(ValueError): self.store.clock(wrong)
+        self.assertEqual((self.root / 'clock.ndjson').read_bytes(), before)
+        self.assertEqual(self.store.control()['clockProtocol'], 'dedicated-v1')
+
+    def test_clock_missing_is_legacy_and_invalid_modes_fail_before_journal_creation(self):
+        self.assertEqual(module.clock_protocol({}), 'embedded-v1')
+        self.assertNotIn('clockProtocol', self.store.control())
+        with self.assertRaises(ValueError): self.store.clock(self.config['runId'])
+        path = self.root / 'invalid-clock.ndjson'
+        for wrong in (None, '', 'unknown', True):
+            with self.assertRaises(ValueError):
+                module.EngineStore({**self.config, 'clockProtocol': wrong}, path)
+        self.assertFalse(path.exists())
+
     def test_progress_never_computes_percentiles_and_counts_every_durable_terminal(self):
         self.ready(); self.stamp = self.start + 1000
         rows = [self.record(0), self.record(1, kind='invalid', status=503),

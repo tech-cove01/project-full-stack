@@ -10,7 +10,7 @@ import org.apache.jmeter.services.FileServer
 class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
-    final String collectorUrl, controlToken, scriptHash
+    final String collectorUrl, controlToken, scriptHash, declaredClockProtocol
     final int declaredPoolSize, declaredEngines
     final List<Integer> slots
     final Map<Integer,Map> relations = new ConcurrentHashMap<Integer,Map>()
@@ -28,8 +28,9 @@ class Cap10PTSRun {
     long seq = 0
     Thread reporter
 
-    Cap10PTSRun(String hash, int pool = 512, int engines = 2) {
+    Cap10PTSRun(String hash, int pool = 512, int engines = 2, String protocol = 'embedded-v1') {
         scriptHash = hash
+        declaredClockProtocol = Cap10PTSContract.clockProtocol([clockProtocol:protocol])
         declaredPoolSize = Cap10PTSContract.poolSize(pool)
         declaredEngines = Cap10PTSContract.engineCount(engines, pool)
         def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
@@ -65,6 +66,10 @@ class Cap10PTSRun {
             HttpURLConnection c = (HttpURLConnection)new URL(collectorUrl + path).openConnection()
             c.instanceFollowRedirects = false; c.connectTimeout = 5000; c.readTimeout = 5000
             c.setRequestProperty('Authorization','Bearer ' + controlToken)
+            if (path == '/clock' && declaredClockProtocol == 'dedicated-v1') {
+                if (config == null) throw new IllegalStateException('clock requires bound control identity')
+                c.setRequestProperty('X-CAP10-Run-ID',config.runId.toString())
+            }
             try {
                 if (body != null) { c.requestMethod = 'POST'; c.doOutput = true; c.setRequestProperty('Content-Type','application/json'); c.outputStream.withCloseable { it.write(JsonOutput.toJson(body).getBytes('UTF-8')) } }
                 if (c.responseCode != 200) throw new IllegalStateException('collector rejected request')
@@ -72,30 +77,42 @@ class Cap10PTSRun {
                 c.inputStream.withCloseable { input -> byte[] buffer = new byte[8192]; int n; while ((n = input.read(buffer)) != -1) { if (bytes.size() + n > 2097152) throw new IllegalStateException('collector response exceeds bound'); bytes.write(buffer,0,n) } }
                 long afterNano = System.nanoTime(), afterWall = System.currentTimeMillis()
                 Map result = (Map)new JsonSlurper().parseText(bytes.toString('UTF-8'))
-                if (result.serverUnixMs instanceof Number) {
-                    double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
-                    if (uncertainty > 50d || Math.abs((afterWall-beforeWall) - rtt) > 50d) {
-                        System.err.println('CAP10 rejected clock sample rttMs='+rtt+' uncertaintyMs='+uncertainty)
-                        throw new IllegalStateException('collector clock uncertainty invalid')
-                    }
-                    long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
-                    if (anchorFrozen && Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) > clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
-                    if (!anchorFrozen && (clock == null || uncertainty < clock.uncertaintyMs)) {
-                        anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
-                        clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
-                    }
-                }
+                acceptClock(path,result,beforeNano,beforeWall,afterNano,afterWall)
                 if (result.stop == true) stop.set(true)
                 return result
             } finally { c.disconnect() }
         }
     }
+    void acceptClock(String path, Map result, long beforeNano, long beforeWall, long afterNano, long afterWall) {
+        if (declaredClockProtocol == 'dedicated-v1') {
+            if (path != '/clock') return
+            if (config == null || result.keySet() != ['version','clockProtocol','runId','phase','serverUnixMs'] as Set ||
+                result.version != 1 || result.clockProtocol != declaredClockProtocol ||
+                result.runId != config.runId || result.phase != config.phase ||
+                !(result.serverUnixMs instanceof Number) || !Double.isFinite(result.serverUnixMs.doubleValue()) || result.serverUnixMs <= 0) throw new IllegalStateException('collector dedicated clock binding invalid')
+        }
+        if (result.serverUnixMs instanceof Number) {
+            double rtt = (afterNano-beforeNano)/1000000d, uncertainty = rtt/2d + 1d
+            if (uncertainty > 50d || Math.abs((afterWall-beforeWall) - rtt) > 50d) {
+                System.err.println('CAP10 rejected clock sample rttMs='+rtt+' uncertaintyMs='+uncertainty)
+                throw new IllegalStateException('collector clock uncertainty invalid')
+            }
+            long middle = beforeNano + Math.floorDiv(afterNano-beforeNano,2L)
+            if (anchorFrozen && Math.abs(serverAt(middle) - result.serverUnixMs.doubleValue()) > clock.uncertaintyMs + uncertainty + 2d) throw new IllegalStateException('collector clock interval disagrees')
+            if (!anchorFrozen && (clock == null || uncertainty < clock.uncertaintyMs)) {
+                anchorNano = middle; anchorServerMs = result.serverUnixMs.longValue()
+                clock = [uncertaintyMs:uncertainty, offsetMs:result.serverUnixMs.doubleValue()-(beforeWall+afterWall)/2d, roundTripMs:rtt]
+            }
+        }
+    }
     double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
     void control() {
+        if (declaredClockProtocol == 'dedicated-v1' && config != null) request('/clock')
         Map c = request('/control')
         Map dimensions = Cap10PTSContract.dimensions(c)
         if (dimensions.poolSize != declaredPoolSize || dimensions.expectedEngines != declaredEngines) throw new IllegalStateException('JMeter and collector cohort differ')
         c = c + dimensions
+        if (Cap10PTSContract.clockProtocol(c) != declaredClockProtocol) throw new IllegalStateException('collector clock protocol differs')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate < 1 || c.rate > 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
             c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
@@ -107,6 +124,7 @@ class Cap10PTSRun {
             !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
         if (config != null && c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
         config = c
+        if (declaredClockProtocol == 'dedicated-v1' && clock == null) request('/clock')
         if (c.startUnixMs != null && startNano == Long.MIN_VALUE) {
             if (!(c.startUnixMs instanceof Number) || c.startUnixMs < serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
             anchorFrozen = true
@@ -234,7 +252,7 @@ try {
         if (props.get('cap10.pts.initFailure') == true) throw new IllegalStateException('previous sanitized setup failure')
         run = (Cap10PTSRun)props.get('cap10.pts.instance')
         if (run == null) {
-            try { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256'), (vars.get('cap10.poolSize') ?: '512').toInteger(), (vars.get('cap10.expectedEngines') ?: '2').toInteger()); props.put('cap10.pts.instance',run) }
+            try { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256'), (vars.get('cap10.poolSize') ?: '512').toInteger(), (vars.get('cap10.expectedEngines') ?: '2').toInteger(), vars.get('cap10.clockProtocol') == null ? 'embedded-v1' : vars.get('cap10.clockProtocol')); props.put('cap10.pts.instance',run) }
             catch (Exception ignored) { props.put('cap10.pts.initFailure',true); throw new IllegalStateException('sanitized initial setup failure') }
         }
     }

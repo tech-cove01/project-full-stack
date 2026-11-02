@@ -4,6 +4,11 @@ import groovy.json.JsonSlurper
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
     static final int MAX_FRAME_RECORDS = 128
+    static String clockProtocol(Map config) {
+        def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
+        if (!(value instanceof String) || !(value in ['embedded-v1','dedicated-v1'])) throw new IllegalArgumentException('invalid clock protocol')
+        value
+    }
     static List framePrefix(List pending, int remaining) {
         if (remaining < 0 || remaining > pending.size()) throw new IllegalArgumentException('invalid pending frame snapshot')
         new ArrayList(pending.subList(0, Math.min(remaining, MAX_FRAME_RECORDS)))

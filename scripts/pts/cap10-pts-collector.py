@@ -40,6 +40,13 @@ def number(value, minimum=0):
     return type(value) in (int, float) and math.isfinite(value) and value >= minimum
 
 
+def clock_protocol(value):
+    protocol = value.get('clockProtocol', 'embedded-v1')
+    if type(protocol) is not str or protocol not in ('embedded-v1', 'dedicated-v1'):
+        raise ValueError('collector clock protocol invalid')
+    return protocol
+
+
 def planned_total(rate, seconds):
     assert integer(rate, 1, 5000) and type(seconds) is int and seconds in (10, 60, 180), 'fixed native plan required'
     return rate * (seconds * 1000 - (0 if seconds == 10 else 100)) // 1000
@@ -65,6 +72,7 @@ class EngineStore:
         self._clock = clock or (lambda: time.time_ns() / 1000000)
         self._config = copy.deepcopy(config)
         assert isinstance(config, dict), 'fixed collector configuration required'
+        self._clock_protocol = clock_protocol(config)
         for key in ('runId', 'phase', 'controlToken'):
             assert type(config.get(key)) is str and config[key], 'collector identity required'
         assert config['phase'] in ('warm', 'stable'), 'fixed collector phase required'
@@ -90,6 +98,8 @@ class EngineStore:
         self._planned_total = planned_total(config['rate'], config['seconds'])
         self._identity = {key: config[key] for key in ('runId', 'phase', 'rate', 'seconds', 'apiUrl', 'fixtureSHA256', 'scriptSHA256')}
         self._identity['expectedEngines'] = self._expected_engines
+        if 'clockProtocol' in config:
+            self._identity['clockProtocol'] = self._clock_protocol
         # Keep historical missing-field configuration identities unchanged.
         # New explicit dimensions bind their pool and PTS concurrency as well.
         if 'poolSize' in config or 'ptsConcurrency' in config or self._expected_engines != cohort.DEFAULT_ENGINES:
@@ -136,6 +146,15 @@ class EngineStore:
         if not number(value, 1):
             raise ValueError('collector clock invalid')
         return value
+
+    def clock(self, run_id):
+        """Immutable identity plus UTC only; deliberately no record lock or tick."""
+        if (self._clock_protocol != 'dedicated-v1' or type(run_id) is not str
+                or run_id != self._identity['runId']):
+            raise ValueError('dedicated clock binding invalid')
+        return {'version': 1, 'clockProtocol': self._clock_protocol,
+                'runId': self._identity['runId'], 'phase': self._identity['phase'],
+                'serverUnixMs': self._now()}
 
     def _append(self, row):
         # No ACK is possible until the complete frame is written and fsynced.

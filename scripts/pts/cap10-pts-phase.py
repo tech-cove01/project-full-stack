@@ -44,6 +44,8 @@ def phase_preflight(reservation, configuration, root):
 
 def phase_cohort(configuration, source, manifest, reservation, admission):
     """Bind current hydration and cloud admission to their own original pool."""
+    if clock_protocol(configuration) != clock_protocol(admission):
+        raise ValueError('phase clock protocol differs from admission')
     dimensions = cohort.dimensions(configuration, manifest)
     count = dimensions['poolSize']
     for value in (source, reservation, admission):
@@ -67,6 +69,13 @@ def phase_cohort(configuration, source, manifest, reservation, admission):
                 or fact.get('noteId') != manifest['multiNoteIds'][index]):
             raise ValueError('hydrated fact order differs from the exclusive fixture')
     return dimensions
+
+
+def clock_protocol(value):
+    protocol = value.get('clockProtocol', 'embedded-v1')
+    if type(protocol) is not str or protocol not in ('embedded-v1', 'dedicated-v1'):
+        raise ValueError('phase clock protocol invalid')
+    return protocol
 
 
 def read(path):
@@ -164,6 +173,18 @@ def handler_type(store, token, lock):
         def handle_operation(self, method):
             if not secrets.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + token):
                 self.reply(403, {'error': 'unauthorized'})
+                return
+            # Clock reads must not queue behind validation, journal fsync or the
+            # store's record lock. Invalid clock requests also leave it intact.
+            if self.path == '/clock':
+                try:
+                    if method != 'GET':
+                        raise ValueError('wrong clock method')
+                    value = store.clock(self.headers.get('X-CAP10-Run-ID'))
+                except (ValueError, TypeError):
+                    self.reply(409, {'error': 'collector clock rejected'})
+                    return
+                self.reply(200, value)
                 return
             try:
                 if self.path not in ('/control', '/register', '/batch', '/complete'):

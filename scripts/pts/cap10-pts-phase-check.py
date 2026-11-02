@@ -2,6 +2,7 @@
 import ast
 import copy
 import hashlib
+import http.client
 from http.server import ThreadingHTTPServer
 import importlib.util
 import json
@@ -13,7 +14,7 @@ import unittest
 import urllib.error
 import urllib.request
 import uuid
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -110,6 +111,17 @@ class EnvelopeChecks(unittest.TestCase):
         for value in legacy:
             value.pop('poolSize', None)
         self.assertEqual(phase.phase_cohort(*legacy)['poolSize'], 512)
+
+    def test_phase_clock_mode_is_explicit_and_bound_to_admission(self):
+        values = self.phase_fixture(17, 3)
+        self.assertEqual(phase.clock_protocol(values[0]), 'embedded-v1')
+        values[0]['clockProtocol'] = values[4]['clockProtocol'] = 'dedicated-v1'
+        self.assertEqual(phase.phase_cohort(*values)['poolSize'], 17)
+        for invalid in (None, '', 'unknown', 'embedded-v1'):
+            with self.subTest(value=invalid), self.assertRaises(ValueError):
+                phase.phase_cohort(*values[:4], {**values[4], 'clockProtocol': invalid})
+        with self.assertRaises(ValueError):
+            phase.phase_cohort(*values[:4], {key: value for key, value in values[4].items() if key != 'clockProtocol'})
 
     def test_phase_cannot_relabel_legacy_source_command_or_admission(self):
         for index in (1, 3, 4):
@@ -355,7 +367,8 @@ class CollectorHTTPChecks(unittest.TestCase):
                   'relations': [{'slot': slot, 'userId': str(slot + 1), 'noteId': str(slot + 1000),
                       'active': 0, 'version': 0, 'token': 'synthetic-session-' + str(slot)} for slot in range(512)]}
         self.store = collector.EngineStore(config, self.root / 'records.ndjson')
-        self.server = ThreadingHTTPServer(('127.0.0.1', 0), phase.handler_type(self.store, self.token, threading.RLock()))
+        self.handler_lock = threading.RLock()
+        self.server = phase.CollectorHTTPServer(('127.0.0.1', 0), phase.handler_type(self.store, self.token, self.handler_lock))
         self.server.daemon_threads = True
         self.thread = threading.Thread(target=self.server.serve_forever, daemon=True); self.thread.start()
         self.base = 'http://127.0.0.1:' + str(self.server.server_port)
@@ -369,19 +382,27 @@ class CollectorHTTPChecks(unittest.TestCase):
             self.assertTrue(path.is_file()); path.unlink()
         self.root.rmdir()
 
-    def request(self, path, token=True, payload=None):
-        req = urllib.request.Request(self.base + path,
-            data=None if payload is None else json.dumps(payload).encode(),
-            headers={'Authorization': 'Bearer ' + self.token} if token else {})
+    def request(self, path, token=True, payload=None, run_id=None):
+        connection = http.client.HTTPConnection('127.0.0.1', self.server.server_port, timeout=2)
+        headers = {'Authorization': 'Bearer ' + self.token} if token else {}
+        if run_id is not None:
+            headers['X-CAP10-Run-ID'] = run_id
         try:
-            opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
-            with opener.open(req, timeout=2) as response:
-                return response.status, json.load(response)
-        except urllib.error.HTTPError as error:
-            return error.code, json.load(error)
+            connection.request('GET' if payload is None else 'POST', path,
+                               body=None if payload is None else json.dumps(payload).encode(), headers=headers)
+            response = connection.getresponse()
+            return response.status, json.loads(response.read())
+        finally:
+            connection.close()
+
+    def dedicated(self):
+        config = {**self.store._config, 'clockProtocol': 'dedicated-v1'}
+        self.store.close()
+        self.store = collector.EngineStore(config, self.root / 'dedicated.ndjson')
+        self.server.RequestHandlerClass = phase.handler_type(self.store, self.token, self.handler_lock)
 
     def test_all_paths_require_private_bearer(self):
-        for path in ('/control', '/register', '/batch', '/complete'):
+        for path in ('/control', '/register', '/batch', '/complete', '/clock'):
             self.assertEqual(self.request(path, token=False)[0], 403)
 
     def test_control_has_binding_and_no_session_credentials(self):
@@ -402,6 +423,60 @@ class CollectorHTTPChecks(unittest.TestCase):
         self.request('/control')
         content = (self.root / 'records.ndjson').read_text(encoding='utf-8')
         self.assertNotIn(self.token, content); self.assertNotIn('synthetic-session', content)
+
+    def test_dedicated_clock_rejects_wrong_binding_without_mutating_legacy_or_current_store(self):
+        self.assertEqual(self.request('/clock', run_id='synthetic-run')[0], 409)
+        self.assertNotIn('clockProtocol', self.store.control())
+        self.dedicated()
+        before = (self.root / 'dedicated.ndjson').read_bytes()
+        for run_id in (None, '', 'foreign-run'):
+            self.assertEqual(self.request('/clock', run_id=run_id)[0], 409)
+        self.assertEqual(self.request('/clock', payload={}, run_id='synthetic-run')[0], 409)
+        status, value = self.request('/clock', run_id='synthetic-run')
+        self.assertEqual(status, 200)
+        self.assertEqual(set(value), {'version', 'clockProtocol', 'runId', 'phase', 'serverUnixMs'})
+        self.assertEqual((value['clockProtocol'], value['runId'], value['phase']), ('dedicated-v1', 'synthetic-run', 'warm'))
+        self.assertEqual((self.root / 'dedicated.ndjson').read_bytes(), before)
+        self.assertFalse(self.store.control()['stop'])
+
+    def test_clock_bypasses_real_batch_fsync_and_both_record_locks(self):
+        self.dedicated()
+        ids = [str(uuid.UUID(int=index + 1)) for index in range(2)]
+        for index, engine in enumerate(ids):
+            self.store.register({'runId': 'synthetic-run', 'engineId': engine,
+                'slots': list(range(index * 256, (index + 1) * 256)), 'readyWorkers': 256,
+                'scriptSHA256': 'b' * 64, 'fixtureSHA256': 'a' * 64})
+        entered, release = threading.Event(), threading.Event()
+        original_fsync = collector.os.fsync
+        def blocked_fsync(fd):
+            if fd == self.store._fd:
+                entered.set()
+                if not release.wait(timeout=3): raise OSError('synthetic fsync release missing')
+            return original_fsync(fd)
+        outcome = []
+        payload = {'runId': 'synthetic-run', 'engineId': ids[0], 'seq': 0, 'records': [],
+            'clock': {'uncertaintyMs': 1, 'offsetMs': 0, 'roundTripMs': 1},
+            'resources': {'cpuTimeNs': 1, 'monotonicNs': 1, 'rssBytes': 100000000, 'logicalCPUs': 2}}
+        def write():
+            outcome.append(self.request('/batch', payload=payload))
+        writer = threading.Thread(target=write)
+        with patch.object(collector.os, 'fsync', side_effect=blocked_fsync):
+            writer.start()
+            try:
+                self.assertTrue(entered.wait(timeout=2))
+                before = (self.root / 'dedicated.ndjson').read_bytes()
+                digest = self.store._journal_hasher.hexdigest()
+                with patch.object(self.store, 'tick', side_effect=AssertionError('clock must not tick')):
+                    status, value = self.request('/clock', run_id='synthetic-run')
+                self.assertEqual(status, 200)
+                self.assertTrue(writer.is_alive())
+                self.assertFalse(release.is_set())
+                self.assertEqual((self.root / 'dedicated.ndjson').read_bytes(), before)
+                self.assertEqual(self.store._journal_hasher.hexdigest(), digest)
+            finally:
+                release.set(); writer.join(timeout=3)
+        self.assertFalse(writer.is_alive())
+        self.assertEqual((outcome[0][0], outcome[0][1]['ack']), (200, 0))
 
 
 class TerminationChecks(unittest.TestCase):

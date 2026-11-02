@@ -15,6 +15,7 @@ try {
     assert.equal(result.poolSize, poolSize); assert.equal(result.expectedEngines, expectedEngines)
     assert.equal(result.normalThreads, poolSize); assert.equal(result.ptsConcurrency, concurrency)
     assert.equal(result.teardownThreads, 1); assert.equal(result.csvSplitRequired, true)
+    assert.equal(result.clockProtocol, 'dedicated-v1')
     const slots = (await readFile(join(folder, 'slots.csv'), 'utf8')).trim().split('\n')
     assert.equal(slots.shift(), 'slot'); assert.deepEqual(slots.map(Number), Array.from({ length: poolSize }, (_, n) => n))
     const shards = Array.from({ length: expectedEngines }, (_, e) => slots.map(Number).filter(slot => slot % expectedEngines === e))
@@ -22,7 +23,7 @@ try {
     assert.ok(shards.every(shard => shard.length <= Math.floor(concurrency / expectedEngines)))
     const jmx = await readFile(join(folder, 'cap10-jmeter.jmx'), 'utf8')
     assert.ok(jmx.includes(`<stringProp name="ThreadGroup.num_threads">${poolSize}</stringProp>`))
-    for (const [name, value] of [['poolSize', poolSize], ['expectedEngines', expectedEngines]]) {
+    for (const [name, value] of [['poolSize', poolSize], ['expectedEngines', expectedEngines], ['clockProtocol', 'dedicated-v1']]) {
       assert.ok(jmx.includes(`<stringProp name="Argument.name">cap10.${name}</stringProp><stringProp name="Argument.value">${value}</stringProp>`))
     }
     assert.equal(result.jmxSHA256, createHash('sha256').update(jmx).digest('hex'))

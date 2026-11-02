@@ -65,9 +65,10 @@ def main():
     relations = [{'slot': slot, 'userId': str(2001+slot), 'noteId': str(1001+slot), 'active': 0, 'version': 0,
                   'token': 'synthetic-rel-token-'+str(slot)} for slot in range(pool)]
     store = store_module.EngineStore({'runId': 'finite-local-warm', 'phase': 'warm', 'rate': 2, 'seconds': 10,
-        'controlToken': token, **dimensions, 'fixtureSHA256': 'a'*64, 'scriptSHA256': manifest['scriptSHA256'],
+        'controlToken': token, **dimensions, 'clockProtocol': manifest['clockProtocol'],
+        'fixtureSHA256': 'a'*64, 'scriptSHA256': manifest['scriptSHA256'],
         'apiUrl': 'http://127.0.0.1:'+str(api.server_port), 'relations': relations}, root / 'collector.ndjson')
-    collector = ThreadingHTTPServer(('127.0.0.1', 0), phase.handler_type(store, token, threading.RLock()))
+    collector = phase.CollectorHTTPServer(('127.0.0.1', 0), phase.handler_type(store, token, threading.RLock()))
     threading.Thread(target=collector.serve_forever, daemon=True).start()
     children, handles = [], []
     try:

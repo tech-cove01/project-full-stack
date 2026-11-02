@@ -27,27 +27,35 @@ func validCoordinates(projection string, message Message) bool {
 }
 
 func checkedEvent(message Message) error {
+	_, err := decodeCheckedEvent(message)
+	return err
+}
+
+// decodeCheckedEvent returns the same strict canonical Event used to validate
+// the aggregate key and producer headers. Callers needing that event can reuse
+// it without repeating envelope/payload decoding and canonical hashing.
+func decodeCheckedEvent(message Message) (Event, error) {
 	event, err := Decode(message.Body)
 	if err != nil {
-		return err
+		return Event{}, err
 	}
 	if !bytes.Equal(message.Key, []byte(event.AggregateID)) {
-		return ErrInvalid
+		return Event{}, ErrInvalid
 	}
 	expected := map[string]string{"eventId": event.EventID, "eventType": event.EventType, "version": strconv.Itoa(event.Version)}
 	seen := map[string]bool{}
 	for _, header := range message.Headers {
 		if len(header.Key) > 128 || len(header.Value) > 1024 {
-			return ErrInvalid
+			return Event{}, ErrInvalid
 		}
 		if value, present := expected[header.Key]; present {
 			if seen[header.Key] || string(header.Value) != value {
-				return ErrInvalid
+				return Event{}, ErrInvalid
 			}
 			seen[header.Key] = true
 		}
 	}
-	return nil
+	return event, nil
 }
 
 func (runtime *Runtime) Apply(ctx context.Context, projection string, message Message) error {

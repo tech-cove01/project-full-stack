@@ -22,11 +22,11 @@ func (runtime *Runtime) ApplyIgnoredLikes(ctx context.Context, projection string
 		if !validCoordinates(projection, message) || len(message.Key) > 1024 || len(message.Body) > 1<<20 || len(message.Headers) > 32 {
 			return ErrInvalid
 		}
-		if err := checkedEvent(message); err != nil {
+		event, err := decodeCheckedEvent(message)
+		if err != nil {
 			return err
 		}
-		event, err := Decode(message.Body)
-		if err != nil || event.EventType != "LIKE_CHANGED" {
+		if event.EventType != "LIKE_CHANGED" {
 			return ErrInvalid
 		}
 		if previous, exists := expected[event.EventID]; exists {

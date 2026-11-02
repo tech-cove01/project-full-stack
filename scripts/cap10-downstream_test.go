@@ -74,3 +74,62 @@ func TestObserverFixtureRegisteredPath(t *testing.T) {
 		}
 	}
 }
+
+func TestObserverVersionedEnvironmentProfiles(t *testing.T) {
+	root := t.TempDir()
+	legacy := filepath.Join(root, "environment.json")
+	target := filepath.Join(root, "environment-012345abcdef.json")
+	if err := os.WriteFile(legacy, []byte(`{}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(target, []byte(`{"resourceProfile":"mysql8-v1"}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	old := map[string]string{"CAP10_ENVIRONMENT_METADATA": legacy}
+	newEnv := map[string]string{"CAP10_ENVIRONMENT_METADATA": target, "CAP10_RESOURCE_PROFILE": "mysql8-v1"}
+	if profile, err := environmentResourceProfile(old, root); err != nil || profile != "baseline" {
+		t.Fatalf("legacy profile changed: %s %v", profile, err)
+	}
+	if profile, err := environmentResourceProfile(newEnv, root); err != nil || profile != "mysql8-v1" {
+		t.Fatalf("explicit profile failed: %s %v", profile, err)
+	}
+	for _, value := range []map[string]string{
+		{"CAP10_ENVIRONMENT_METADATA": target},
+		{"CAP10_ENVIRONMENT_METADATA": legacy, "CAP10_RESOURCE_PROFILE": "mysql8-v1"},
+		{"CAP10_ENVIRONMENT_METADATA": legacy, "CAP10_RESOURCE_PROFILE": ""},
+		{"CAP10_ENVIRONMENT_METADATA": filepath.Join(root, "foreign.json")},
+	} {
+		if _, err := environmentResourceProfile(value, root); err == nil {
+			t.Fatal("environment profile mismatch or foreign path accepted")
+		}
+	}
+	if err := os.WriteFile(target, []byte(`{"resourceProfile":null}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := environmentResourceProfile(newEnv, root); err == nil {
+		t.Fatal("null profile accepted")
+	}
+	for _, body := range []string{"null", "[]", "true", "1"} {
+		if err := os.WriteFile(legacy, []byte(body), 0600); err != nil {
+			t.Fatal(err)
+		}
+		if _, err := environmentResourceProfile(old, root); err == nil {
+			t.Fatal("non-object environment accepted")
+		}
+	}
+}
+
+func TestObserverRejectsMetadataSymlink(t *testing.T) {
+	root := t.TempDir()
+	foreign := filepath.Join(t.TempDir(), "foreign.json")
+	if err := os.WriteFile(foreign, []byte(`{}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(root, "environment.json")
+	if err := os.Symlink(foreign, path); err != nil {
+		t.Skip("OS does not permit this symlink fixture")
+	}
+	if _, err := environmentResourceProfile(map[string]string{"CAP10_ENVIRONMENT_METADATA": path}, root); err == nil {
+		t.Fatal("environment symlink accepted")
+	}
+}

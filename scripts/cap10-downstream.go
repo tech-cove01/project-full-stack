@@ -165,6 +165,41 @@ func likeFixturePath(path, root string) (string, error) {
 	return abs, nil
 }
 
+func environmentResourceProfile(env map[string]string, root string) (string, error) {
+	path := env["CAP10_ENVIRONMENT_METADATA"]
+	if filepath.Clean(path) != path || filepath.Dir(path) != root || !regexp.MustCompile(`^environment(?:-[a-f0-9]{12})?\.json$`).MatchString(filepath.Base(path)) {
+		return "", errors.New("environment metadata outside its versioned namespace")
+	}
+	info, err := os.Lstat(path)
+	if err != nil || !info.Mode().IsRegular() || info.Mode()&os.ModeSymlink != 0 {
+		return "", errors.New("regular owned environment metadata required")
+	}
+	realPath, pathErr := filepath.EvalSymlinks(path)
+	realRoot, rootErr := filepath.EvalSymlinks(root)
+	if pathErr != nil || rootErr != nil || realPath != filepath.Join(realRoot, filepath.Base(path)) {
+		return "", errors.New("environment metadata resolves outside its original namespace")
+	}
+	profile, present := env["CAP10_RESOURCE_PROFILE"]
+	if !present {
+		profile = "baseline"
+	}
+	if profile != "baseline" && profile != "mysql8-v1" {
+		return "", errors.New("unsupported environment resource profile")
+	}
+	var metadata map[string]json.RawMessage
+	if read(path, &metadata) != nil || metadata == nil {
+		return "", errors.New("environment metadata unavailable")
+	}
+	actual := "baseline"
+	if len(metadata["resourceProfile"]) > 0 && json.Unmarshal(metadata["resourceProfile"], &actual) != nil {
+		return "", errors.New("environment resource profile invalid")
+	}
+	if string(metadata["resourceProfile"]) == "null" || actual != profile {
+		return "", errors.New("private and public environment profiles differ")
+	}
+	return profile, nil
+}
+
 func sqlSnapshot(ctx context.Context, db *sql.DB, after int64, notes []string) (*sqlView, error) {
 	view := &sqlView{StartedAt: time.Now().UTC(), AfterWatermark: after}
 	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
@@ -401,8 +436,11 @@ func mainRun() error {
 	if read(envPath, &env) != nil {
 		return errors.New("private environment unreadable")
 	}
-	if env["CAP10_PLATFORM"] != executionPlatform || env["CAP10_ENVIRONMENT_METADATA"] != filepath.Join(root, "environment.json") {
+	if env["CAP10_PLATFORM"] != executionPlatform {
 		return errors.New("native platform or evidence metadata differs")
+	}
+	if _, err := environmentResourceProfile(env, root); err != nil {
+		return err
 	}
 	if executionPlatform == "linux" {
 		raw, readErr := os.ReadFile(filepath.Join(batchRoot, "environment-transition.json"))

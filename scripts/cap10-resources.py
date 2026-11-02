@@ -174,7 +174,8 @@ def cpu_stat(identity):
     raw = {}
     for line in lines:
         key, value = line.split()
-        if not re.fullmatch(r'[a-z_]+', key) or not value.isdigit() or key in raw:
+        if (not re.fullmatch(r'[a-z_]+(?:\.[a-z_]+)*', key)
+                or not re.fullmatch(r'[0-9]+', value) or key in raw):
             raise ValueError('invalid cgroup CPU counters')
         raw[key] = int(value)
     if layout['version'] == 1:

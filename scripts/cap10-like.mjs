@@ -492,7 +492,7 @@ if (action === 'prepare') {
     if (process.env.CAP10_LOAD_BACKEND === 'pts') {
       report.loadBackend = 'pts'
       report.phaseProcesses = 'warm and stable use separate Alibaba PTS ReportIds, each with two managed JMeter engines and fresh authoritative RR hydration'
-      report.generatorResourceScope = 'ECS Python collector plus Node helper <2GiB; each remote JMeter engine separately <2GiB. Same PTS topology is required for every comparison.'
+      report.generatorResourceScope = 'ECS Python collector plus Node helper <2GiB; each remote JMeter engine separately <6GiB, matching the collector safety limit. Same PTS topology is required for every comparison.'
     }
     let warmBefore = null
     async function runPhase(phase, duration, state) {

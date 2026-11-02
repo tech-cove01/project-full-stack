@@ -42,6 +42,10 @@ func MySQLDSN(cfg config.Config) string {
 // Every partial failure closes resources already acquired. Connection errors are
 // deliberately summarized so driver diagnostics cannot expose credentials.
 func Open(ctx context.Context, cfg config.Config) (*Resources, error) {
+	if cfg.MySQL.MaxOpenConns < 1 || cfg.MySQL.MaxOpenConns > 128 ||
+		cfg.MySQL.MaxIdleConns < 0 || cfg.MySQL.MaxIdleConns > cfg.MySQL.MaxOpenConns {
+		return nil, errors.New("invalid MySQL connection pool configuration")
+	}
 	orm, err := gorm.Open(gormmysql.New(gormmysql.Config{
 		DSN: MySQLDSN(cfg), SkipInitializeWithVersion: true,
 	}), &gorm.Config{
@@ -57,9 +61,7 @@ func Open(ctx context.Context, cfg config.Config) (*Resources, error) {
 		return nil, errors.New("access MySQL pool failed")
 	}
 	resources := &Resources{SQL: sqlDB, ORM: orm}
-	sqlDB.SetMaxOpenConns(20)
-	sqlDB.SetMaxIdleConns(10)
-	sqlDB.SetConnMaxLifetime(30 * time.Minute)
+	configureMySQLPool(sqlDB, cfg.MySQL)
 	if err := sqlDB.PingContext(ctx); err != nil {
 		_ = resources.Close()
 		return nil, errors.New("MySQL startup check failed; verify MYSQL_* configuration and isolated instance")
@@ -75,6 +77,12 @@ func Open(ctx context.Context, cfg config.Config) (*Resources, error) {
 		return nil, errors.New("Redis startup check failed; verify REDIS_* configuration and isolated instance")
 	}
 	return resources, nil
+}
+
+func configureMySQLPool(db *sql.DB, cfg config.MySQL) {
+	db.SetMaxOpenConns(cfg.MaxOpenConns)
+	db.SetMaxIdleConns(cfg.MaxIdleConns)
+	db.SetConnMaxLifetime(30 * time.Minute)
 }
 
 // Check always probes the dependencies; readiness is not a cached startup flag.

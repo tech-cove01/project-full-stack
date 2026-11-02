@@ -97,9 +97,65 @@ func TestExplicitDependenciesAndSafeDefaults(t *testing.T) {
 	if cfg.CommunityConsumerCommitBatch != 1 {
 		t.Fatal("community offset commits must remain per-message by default")
 	}
+	if cfg.MySQL.MaxOpenConns != 20 || cfg.MySQL.MaxIdleConns != 20 {
+		t.Fatal("the default MySQL pool must retain all twenty permitted connections")
+	}
 	_, offset := time.Now().In(cfg.Location).Zone()
 	if cfg.Location.String() != "Asia/Shanghai" || offset != 8*60*60 {
 		t.Fatal("time zone must explicitly be Asia/Shanghai")
+	}
+}
+
+func TestMySQLPoolLimitsAndIdleInheritance(t *testing.T) {
+	for _, test := range []struct {
+		name, open, idle   string
+		wantOpen, wantIdle int
+	}{
+		{"default", "", "", 20, 20},
+		{"minimum_inherits", "1", "", 1, 1},
+		{"override_inherits", "64", "", 64, 64},
+		{"maximum_inherits", "128", "", 128, 128},
+		{"smaller_idle", "64", "16", 64, 16},
+		{"idle_disabled", "1", "0", 1, 0},
+		{"idle_only", "", "7", 20, 7},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			values := validEnvironment()
+			if test.open != "" {
+				values["GO_MYSQL_MAX_OPEN_CONNS"] = test.open
+			}
+			if test.idle != "" {
+				values["GO_MYSQL_MAX_IDLE_CONNS"] = test.idle
+			}
+			cfg, err := fromMap(values)
+			if err != nil || cfg.MySQL.MaxOpenConns != test.wantOpen || cfg.MySQL.MaxIdleConns != test.wantIdle {
+				t.Fatal("bounded MySQL limits and the configured-open idle default must be applied")
+			}
+		})
+	}
+}
+
+func TestMySQLPoolInvalidValuesDoNotLeakTheirContents(t *testing.T) {
+	for _, key := range []string{"GO_MYSQL_MAX_OPEN_CONNS", "GO_MYSQL_MAX_IDLE_CONNS"} {
+		invalid := []string{"", "-1", "129", "1.5", " 20 ", "private-value", "999999999999999999999"}
+		if key == "GO_MYSQL_MAX_OPEN_CONNS" {
+			invalid = append(invalid, "0")
+		} else {
+			invalid = append(invalid, "21")
+		}
+		for _, value := range invalid {
+			values := validEnvironment()
+			values[key] = value
+			_, err := fromMap(values)
+			if err == nil || !strings.Contains(err.Error(), key) || strings.Contains(err.Error(), "private-value") {
+				t.Fatal("invalid MySQL pool values must fail with the variable name and no supplied value")
+			}
+		}
+	}
+	values := validEnvironment()
+	values["GO_MYSQL_MAX_OPEN_CONNS"], values["GO_MYSQL_MAX_IDLE_CONNS"] = "4", "5"
+	if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "GO_MYSQL_MAX_IDLE_CONNS") {
+		t.Fatal("idle capacity must never exceed the configured open limit")
 	}
 }
 

@@ -16,11 +16,13 @@ import (
 var topicPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,249}$`)
 
 type MySQL struct {
-	Host     string
-	Port     int
-	Database string
-	User     string
-	Password string
+	Host         string
+	Port         int
+	Database     string
+	User         string
+	Password     string
+	MaxOpenConns int
+	MaxIdleConns int
 }
 
 type Redis struct {
@@ -63,6 +65,7 @@ func Load() (Config, error) { return load(os.LookupEnv) }
 func load(lookup func(string) (string, bool)) (Config, error) {
 	cfg := Config{
 		Environment: "development", APIAddr: "127.0.0.1:8082",
+		MySQL:          MySQL{MaxOpenConns: 20},
 		StartupTimeout: 8 * time.Second, ProbeTimeout: 2 * time.Second,
 		ShutdownTimeout:              10 * time.Second,
 		OrderPayTimeout:              15 * time.Minute,
@@ -147,6 +150,19 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 			return Config{}, fmt.Errorf("%s must be explicitly configured", item.name)
 		}
 		*item.target, err = parseInt(item.name, value, 1, 65535)
+		if err != nil {
+			return Config{}, err
+		}
+	}
+	if value, ok := lookup("GO_MYSQL_MAX_OPEN_CONNS"); ok {
+		cfg.MySQL.MaxOpenConns, err = parseInt("GO_MYSQL_MAX_OPEN_CONNS", value, 1, 128)
+		if err != nil {
+			return Config{}, err
+		}
+	}
+	cfg.MySQL.MaxIdleConns = cfg.MySQL.MaxOpenConns
+	if value, ok := lookup("GO_MYSQL_MAX_IDLE_CONNS"); ok {
+		cfg.MySQL.MaxIdleConns, err = parseInt("GO_MYSQL_MAX_IDLE_CONNS", value, 0, cfg.MySQL.MaxOpenConns)
 		if err != nil {
 			return Config{}, err
 		}

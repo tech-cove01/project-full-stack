@@ -25,13 +25,14 @@ def module(name, filename):
 
 owned = module('cap10_owned_run', 'cap10-env.py')
 cohort = module('cap10_cohort_run', 'cap10-cohort.py')
+RESOURCE = module('cap10_resource_run', 'cap10-resource-contract.py')
 ROOT = owned.ROOT
 BATCH_ROOT = owned.BATCH_ROOT
 KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
 TOOL_NAMES = ('cap10-run.py', 'cap10-grade.py', 'cap10-env.py', 'cap10-stage.py', 'cap10-resources.py',
               'load/cap10-native-window.mjs', 'cap10-like.mjs', 'load/cap10-like.js',
               'load/cap10-like-contract.mjs', 'load/cap10-db-observe.mjs', 'cap10-downstream.go',
-              'cap10-cohort.py', 'load/cap10-cohort-contract.mjs')
+              'cap10-cohort.py', 'load/cap10-cohort-contract.mjs', 'cap10-resource-contract.py')
 PTS_TOOLS = ('pts/cap10-pts-phase.py', 'pts/cap10-pts-api.py', 'pts/cap10-pts-collector.py',
              'pts/cap10-jmeter.groovy', 'pts/cap10-pts-contract.groovy', 'pts/cap10-jmeter.mjs', 'pts/cap10-jmeter.jmx',
              'pts/cap10-pts-prepare.py')
@@ -45,6 +46,17 @@ def cohort_dimensions(value, manifest):
     configuration = (owned.read(value['CAP10_PTS_CONFIG']) if value.get('CAP10_LOAD_BACKEND') == 'pts'
                      else {'poolSize': cohort.fixture_pool_size(manifest)})
     return cohort.dimensions(configuration, manifest)
+
+
+def environment_identity(value, api):
+    metadata, path, profile = owned.environment(value)
+    assert RESOURCE.application_metadata_path(api, ROOT) == path, 'API belongs to another environment metadata path'
+    assert RESOURCE.profile_name(api.get('resourceProfile', RESOURCE.BASELINE_PROFILE)) == profile
+    if 'environmentSHA256' in api:
+        assert api['environmentSHA256'] == sha(path), 'API environment bytes differ'
+    else:
+        assert path == ROOT / 'environment.json' and profile == RESOURCE.BASELINE_PROFILE, 'new API environment requires its original metadata SHA'
+    return metadata, path, profile
 
 
 def expected_diagnostics(kind, tag, claim_optimization_sha=None):
@@ -104,6 +116,7 @@ def pts_artifact_paths(value, context, repaired):
 
 def reserve(args, api, value):
     grade = module('cap10_reservation_grade', 'cap10-grade.py')
+    _, environment_path, resource_profile = environment_identity(value, api)
     manifest = owned.read(value['CAP_LIKE_FIXTURE'])
     dimensions = cohort_dimensions(value, manifest)
     pool = dimensions['poolSize']
@@ -149,7 +162,8 @@ def reserve(args, api, value):
                'apiSourceSha': api['sourceSha'], 'apiPid': api['pid'], 'binarySHA256': api['sha256'],
                'likeDiagnosticsEnabled': api['likeDiagnosticsRequested'], 'feedTailEnabled': api['tailEnabledRequested'],
                'executionPlatform': api['executionPlatform'], 'transitionSHA256': api.get('transitionSHA256'),
-               'environmentSHA256': sha(ROOT / 'environment.json'), 'fixtureSHA256': sha(value['CAP_LIKE_FIXTURE']),
+               'environmentPath': environment_path.name, 'resourceProfile': resource_profile,
+               'environmentSHA256': sha(environment_path), 'fixtureSHA256': sha(value['CAP_LIKE_FIXTURE']),
                'toolSourceSha': owned.run(['git', 'rev-parse', 'HEAD']).stdout.strip(),
                'scriptHashes': tools,
                'observerBinarySHA256': observer_hash, 'reservationCheck': reservation,
@@ -301,8 +315,8 @@ def pre_stable_guard(api, load, identities, expected_containers, cpu_interval_se
     return row
 
 
-def container_snapshot(expected):
-    values = {name: owned.container(name, detail['id'], True) for name, detail in expected.items()}
+def container_snapshot(expected, resource_profile='baseline'):
+    values = {name: owned.container(name, detail['id'], True, resource_profile=resource_profile) for name, detail in expected.items()}
     valid = all(value['restartCount'] == 0 and value['oomKilled'] is False and value['healthStatus'] == 'healthy' and
                 value['volumes'] == expected[name]['volumes'] for name, value in values.items())
     return {'at': owned.now(), 'valid': valid, 'containers': values}
@@ -394,6 +408,7 @@ def main():
     pts = value.get('CAP10_LOAD_BACKEND') == 'pts'
     stage_deadline = '1200' if pts else '360'
     api = owned.read(args.api_metadata); owned.api_identity(api, health=True)
+    environment_metadata, environment_path, resource_profile = environment_identity(value, api)
     assert value['CAP_SOURCE_SHA'] == api['sourceSha']
     assert api['tailEnabledRequested'] is False
     execution = grade.execution_context(ROOT)
@@ -416,12 +431,12 @@ def main():
     wrapper = observer = None; handles = []; observer_samples = []; report = {}
     identities = {}; pre_guard_samples = []; pre_guard_failures = 0; pre_guard_cpu_high = 0; pending_pre_stop = None; pending_power_stop = None
     pre_guard_at = time.monotonic(); psutil.cpu_percent(None)
-    expected_containers = owned.read(ROOT / 'environment.json')['containers']
+    expected_containers = environment_metadata['containers']
     start = owned.now(); before_power = {}; power_changed = False
     try:
         before_power = owned.power()
         assert owned.power_valid(before_power) and before_power['hostMemoryPercent'] < 88
-        state['containersBefore'] = container_snapshot(expected_containers)
+        state['containersBefore'] = container_snapshot(expected_containers, resource_profile)
         assert state['containersBefore']['valid'], 'dependency state invalid before warm'
         if os.name == 'nt':
             assert ctypes.windll.kernel32.SetThreadExecutionState(0x80000001)
@@ -495,7 +510,7 @@ def main():
             time.sleep(.5)
         state.update(wrapperExit=wrapper.returncode, loadWaitFinishedAt=owned.now())
         state['observerExit'] = observer.wait(timeout=90)
-        state['containersAfter'] = container_snapshot(expected_containers)
+        state['containersAfter'] = container_snapshot(expected_containers, resource_profile)
         state['containersValid'] = state['containersBefore']['valid'] and state['containersAfter']['valid']
         owned.save(ROOT / (tag + '-capacity-after.json'), {'at': owned.now(), 'capacity': owned.get_json('http://127.0.0.1:8381/debug/capacity'), 'scope': 'parsed post-wrapper/drain snapshot; includes warm and background'})
         after_power = owned.power()

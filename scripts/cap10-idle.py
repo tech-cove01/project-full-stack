@@ -24,6 +24,34 @@ def module(name, filename):
     return value
 
 
+RESOURCE = module('cap10_idle_resource_contract', 'cap10-resource-contract.py')
+
+
+def environment_identity(value, api_metadata, api_values, owned, root):
+    metadata, path, profile = owned.environment(value)
+    _, api_path, api_profile = owned.environment(api_values)
+    assert (path, profile) == (api_path, api_profile), 'idle and API private resource environments differ'
+    assert RESOURCE.application_metadata_path(api_metadata, root) == path, 'API environment metadata path differs'
+    assert RESOURCE.profile_name(api_metadata.get('resourceProfile', RESOURCE.BASELINE_PROFILE)) == profile
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if 'environmentSHA256' in api_metadata:
+        assert api_metadata['environmentSHA256'] == digest, 'API environment metadata bytes differ'
+    else:
+        assert path == root / 'environment.json' and profile == RESOURCE.BASELINE_PROFILE, 'new API environment requires its original metadata SHA'
+    return metadata, path, profile, digest
+
+
+def container_identities(containers, resource_profile):
+    limits = RESOURCE.container_limits(resource_profile)
+    identities = []
+    for service, container in containers.items():
+        cpu, memory = limits[service]
+        assert (container['cpuNano'], container['memoryBytes']) == (cpu, memory), 'idle container limits differ from selected profile'
+        identities.append({'id': container['id'], 'service': service, 'resourceProfile': resource_profile,
+                           'cpuNano': cpu, 'memoryBytes': memory})
+    return identities
+
+
 def idle_attempt(root, authorization, transition_sha, additional_authorization=None,
                  interruption_authorization=None, current_boot_id=None):
     """Authorize explicit retries of the retained zero-sample failures."""
@@ -197,8 +225,9 @@ def main():
     value, runtime = owned.settings(args.environment)
     root = owned.ROOT
     api_metadata = owned.read(args.api_metadata)
-    api = owned.api_identity(api_metadata, health=True)
     api_values, api_runtime = owned.settings(api_metadata['privateEnvironmentFile'])
+    environment_metadata, environment_path, resource_profile, environment_sha = environment_identity(value, api_metadata, api_values, owned, root)
+    api = owned.api_identity(api_metadata, health=True)
     app_config = lambda settings: {k: v for k, v in settings.items() if not k.startswith('CAP')}
     assert api_runtime == runtime and app_config(api_values) == app_config(value)
     assert value['CAP_SOURCE_SHA'] == api_metadata['sourceSha']
@@ -210,12 +239,13 @@ def main():
     reservation = root / 'idle-reservation.json'
     owned.save(reservation, {'at': owned.now(), 'seconds': 60, 'intervalSeconds': 5,
                             **attempt, 'failedAttemptConsumesOnlyIdleObservation': True,
+                            'environmentPath': environment_path.name, 'environmentSHA256': environment_sha, 'resourceProfile': resource_profile,
                             'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition()})
-    owned_containers = owned.read(root / 'environment.json')['containers']
+    owned_containers = environment_metadata['containers']
     for service, container in owned_containers.items():
-        checked = owned.container(service, container['id'], True)
+        checked = owned.container(service, container['id'], True, resource_profile=resource_profile)
         assert checked['volumes'] == container['volumes']
-    identities = [{'id': c['id'], 'service': service} for service, c in owned_containers.items()]
+    identities = container_identities(owned_containers, resource_profile)
     control = root / 'idle-control'
     control.mkdir()
     done = control / 'done.json'
@@ -225,7 +255,7 @@ def main():
               'noWorkloadStarted': True, 'apiPid': api.pid, 'sourceSha': api_metadata['sourceSha'],
               'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition(),
               'scriptSHA256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-              'environmentSHA256': hashlib.sha256((root / 'environment.json').read_bytes()).hexdigest()}
+              'environmentPath': environment_path.name, 'environmentSHA256': environment_sha, 'resourceProfile': resource_profile}
     observer = None
     try:
         with (root / 'idle-observer.txt').open('xb') as output:
@@ -297,7 +327,7 @@ def main():
             result['downstreamSamples'] = len(timeline)
             result['downstreamIdleAndComplete'] = True
             for service, container in owned_containers.items():
-                checked = owned.container(service, container['id'], True)
+                checked = owned.container(service, container['id'], True, resource_profile=resource_profile)
                 assert checked['volumes'] == container['volumes']
             result['powerEvents'] = owned.power_window_evidence(result['samples'][0]['power'],
                 result['samples'][-1]['power'], result['at'])

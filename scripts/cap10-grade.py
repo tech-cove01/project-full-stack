@@ -17,6 +17,9 @@ KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
 _cohort_spec = importlib.util.spec_from_file_location('cap10_grade_cohort', Path(__file__).with_name('cap10-cohort.py'))
 cohort = importlib.util.module_from_spec(_cohort_spec)
 _cohort_spec.loader.exec_module(cohort)
+_resource_spec = importlib.util.spec_from_file_location('cap10_grade_resource', Path(__file__).with_name('cap10-resource-contract.py'))
+RESOURCE = importlib.util.module_from_spec(_resource_spec)
+_resource_spec.loader.exec_module(RESOURCE)
 
 def require(condition, message):
     if not condition:
@@ -28,8 +31,21 @@ def read(path):
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
+def environment_identity(record, root, *, require_sha=True):
+    """Resolve this record's immutable environment, never a current alias."""
+    path = RESOURCE.application_metadata_path(record, root)
+    require(path.is_file() and not path.is_symlink() and path.resolve() == path, 'original environment metadata is unavailable')
+    digest = sha(path)
+    profile = RESOURCE.bound_profile({'CAP10_RESOURCE_PROFILE': record.get('resourceProfile', RESOURCE.BASELINE_PROFILE)}, read(path))
+    legacy_without_sha = (not require_sha and 'environmentSHA256' not in record
+                          and path == root / 'environment.json' and profile == RESOURCE.BASELINE_PROFILE)
+    require(legacy_without_sha or record.get('environmentSHA256') == digest,
+            'environment metadata bytes differ from their original identity')
+    return path, digest, profile
+
 def legacy_command_pool(root, command, manifest=None, *, repair_sha=None):
     """Closed S1/S4/S5/S7 proofs retain their own original 512-slot fixture."""
+    environment_identity(command, root)
     if manifest is None:
         require(re.fullmatch(r'[a-f0-9]{64}', repair_sha or ''), 'explicit original fixture proof chain required')
         repair = _authority_ref(root, {'path': 'tool-repair-transition.json', 'sha256': repair_sha})
@@ -465,6 +481,8 @@ def original_command_dimensions(root, command, application):
     require(application.get('sourceSha') == command.get('apiSourceSha') and all(application.get(key) == command.get(key)
             for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')),
             'original command must retain the complete original application identity')
+    require(environment_identity(command, root) == environment_identity(application, root),
+            'original command/application environment paths or profiles differ')
     require(application.get('fixtureSHA256') == command.get('fixtureSHA256'), 'original application fixture differs from command')
     manifest = _authority_ref(root, {'path': application['fixturePath'], 'sha256': command['fixtureSHA256']})
     cohort.command_pool_size(command, manifest)
@@ -508,7 +526,7 @@ def execution_context(root):
     require(not active_path.is_symlink() and active.get('version') == 1 and active.get('batch') == 'CAP-10' and active.get('authorityGeneration') == authority['generation'] and isinstance(active.get('deploymentId'), str) and active['deploymentId'] and re.fullmatch(r'[a-f0-9]{40}', active.get('sourceSha', '')) and re.fullmatch(r'[a-f0-9]{64}', active.get('binarySHA256', '')) and isinstance(active.get('scriptHashes'), dict) and active['scriptHashes'], 'current application and deployment identity required')
     deployment = active.get('deployment', {})
     require(all(type(deployment.get(key)) is int and deployment[key] > 0 for key in ('relayWorkers', 'gomaxprocs', 'mysqlMaxOpen')), 'effective worker and connection/CPU configuration must be declared')
-    require(active.get('environmentSHA256') == sha(Path(root) / 'environment.json'), 'current environment metadata differs')
+    environment_path, _, resource_profile = environment_identity(active, root)
     manifest = _authority_ref(root, {'path': active['fixturePath'], 'sha256': active['fixtureSHA256']})
     packet = _authority_ref(root, {'path': active['ptsPacketPath'], 'sha256': active['ptsPacketSHA256']})
     admission = _authority_ref(root, {'path': active['ptsAdmissionPath'], 'sha256': active['ptsAdmissionSHA256']})
@@ -516,20 +534,24 @@ def execution_context(root):
     dimensions = admitted_cohort_dimensions(active, manifest, packet, admission)
     ready = _authority_ref(root, active['readiness'])
     require(ready.get('ready') is True and ready.get('readyBody', {}).get('version') == 'capacity-' + active['sourceSha'], 'positive readiness must belong to the current source')
-    return {'authority': authority, 'authoritySHA256': digest, 'active': active, 'activeApplicationSHA256': sha(active_path), 'dimensions': dimensions}
+    return {'authority': authority, 'authoritySHA256': digest, 'active': active, 'activeApplicationSHA256': sha(active_path),
+            'dimensions': dimensions, 'environmentPath': environment_path.name, 'resourceProfile': resource_profile}
 
 
 def _active_command(command, context):
     active, reservation = context['active'], command.get('reservationCheck', {})
     try:
         dimensions_match = cohort.dimensions(command, {'poolSize': cohort.command_pool_size(command)}) == active_dimensions(context)
+        environment_match = (command.get('environmentPath', 'environment.json') == active.get('environmentPath', 'environment.json')
+                             and RESOURCE.profile_name(command.get('resourceProfile', RESOURCE.BASELINE_PROFILE))
+                             == RESOURCE.profile_name(active.get('resourceProfile', RESOURCE.BASELINE_PROFILE)))
     except ValueError:
         return False
     return (reservation.get('executionAuthoritySHA256') == context['authoritySHA256'] and
             reservation.get('executionAuthorityGeneration') == context['authority']['generation'] and
             reservation.get('deploymentId') == active['deploymentId'] and command.get('apiSourceSha') == active['sourceSha'] and
             all(command.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and
-            dimensions_match)
+            dimensions_match and environment_match)
 
 
 def zero_start_layout(root, command, previous):
@@ -895,6 +917,8 @@ def formal_start_retirement(root, command, context):
 
 def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ability, freeze, tools, observer_hash, context):
     active, records = context['active'], history(root)
+    require(environment_identity(api, root, require_sha=False) == environment_identity(active, root),
+            'current API must retain the active environment path, profile and bytes')
     dimensions = cohort.dimensions(active, read(fixture))
     pool = dimensions['poolSize']
     require(api.get('sourceSha') == active['sourceSha'] and api.get('sha256') == active['binarySHA256'] and sha(fixture) == active['fixtureSHA256'] and tools == active['scriptHashes'] and observer_hash == active['observerBinarySHA256'], 'window must use the current exact active application and tools')
@@ -946,6 +970,7 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
                 retired[item['tag']] = item['proofSHA256']
         require(len(formal_group) < 2 and all(stage(root, c).get('passed') is True for c in formal_group), 'each exact freeze permits only two formal windows; its first failure ends that group')
         require(isinstance(freeze, dict) and freeze.get('executionAuthoritySHA256') == context['authoritySHA256'] and freeze.get('activeApplicationSHA256') == context['activeApplicationSHA256'] and freeze.get('deploymentId') == active['deploymentId'] and freeze.get('rate') == rate and freeze.get('sourceSha') == active['sourceSha'] and all(freeze.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': pool, 'active': 0, 'relationships': pool} and cohort.fixture_pool_size(freeze) == pool, 'formal requires one exact current-source CI/identity freeze')
+        require(environment_identity(freeze, root) == environment_identity(active, root), 'formal freeze environment path or profile differs')
         candidates = [c for c in records if c['tag'] == freeze.get('candidateTag') and c['kind'] == 'candidate' and c['rate'] == rate and _active_command(c, context)]
         require(len(candidates) == 1 and stage(root, candidates[0]).get('passed') is True and stage(root, candidates[0]).get('candidateMarginPassed') is True and stage(root, candidates[0]).get('recoveryVerified') is True, 'formal requires its completed passing current-identity candidate')
         require(all(_active_command(c, context) and c.get('reservationCheck', {}).get('retiredFormalStarts', {}) == retired for c in formal_group), 'both current-group formals must retain the same application/freeze and unchanged startup proofs')
@@ -1024,9 +1049,11 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     source = api_metadata['sourceSha']; binary = api_metadata['sha256']
     require(re.fullmatch(r'[a-f0-9]{40}', source or '') and api_metadata['expectedVersion'] == 'capacity-' + source, 'clean fixed source/version required')
     require(sha(api_metadata['exe']) == binary, 'application binary bytes differ')
-    environment, fixture_hash = sha(root / 'environment.json'), sha(fixture)
+    environment_path, environment, resource_profile = environment_identity(api_metadata, root, require_sha=False)
+    fixture_hash = sha(fixture)
     pool = cohort.fixture_pool_size(read(fixture))
-    require(preflight.get('passed') is True and preflight.get('environmentSHA256') == environment, 'one valid idle preflight is required before load')
+    require(preflight.get('passed') is True and environment_identity(preflight, root) == (environment_path, environment, resource_profile),
+            'one valid idle preflight bound to this exact environment is required before load')
     require(ability.get('rate') == rate and ability.get('sufficient') is True and type(ability.get('maxVUs')) is int and ability['maxVUs'] == pool and type(ability.get('exclusiveRelationships')) is int and ability['exclusiveRelationships'] == pool and ability.get('classificationIncluded') is True and ability.get('evidence'), 'declared generator ability evidence required for every window')
     require(type(ability.get('estimatedInFlight')) in (int, float) and math.isfinite(ability['estimatedInFlight']) and 0 <= ability['estimatedInFlight'] <= pool, 'estimated in-flight work exceeds exclusive VU pool')
     context = execution_context(root)
@@ -1071,11 +1098,13 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
         require(len(formals) < 2 and shorts, 'formal budget exhausted or no short evidence')
         require(all(stage(root, c).get('passed') is True for c in formals), 'first formal failure ended this group')
         require(isinstance(freeze, dict) and freeze.get('rate') == rate and freeze.get('sourceSha') == source and freeze.get('binarySHA256') == binary and freeze.get('environmentSHA256') == environment and freeze.get('fixtureSHA256') == fixture_hash, 'same immutable formal freeze required')
+        require(environment_identity(freeze, root) == (environment_path, environment, resource_profile), 'formal environment path/profile differs')
         require(freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': pool, 'active': 0, 'relationships': pool} and cohort.fixture_pool_size(freeze) == pool, 'formal checks/CI/initial distribution contract missing')
         require(isinstance(current_tools, dict) and current_tools and freeze.get('scriptHashes') == current_tools and freeze.get('observerBinarySHA256') == observer_hash, 'formal tool/observer bytes differ from freeze')
         candidates = [c for c in shorts if c['kind'] == 'candidate']
         require(len(candidates) == 1 and candidates[0]['rate'] == rate and stage(root, candidates[0]).get('candidateMarginPassed') is True and stage(root, candidates[0]).get('passed') is True, 'one passing candidate with 160/400 margins is required')
         for c in candidates + formals:
+            require(environment_identity(c, root) == (environment_path, environment, resource_profile), 'candidate/formal environment path/profile differs')
             require(c['apiSourceSha'] == source and c['binarySHA256'] == binary and c['environmentSHA256'] == environment and c['fixtureSHA256'] == fixture_hash, 'candidate/formal identity differs')
             require(c.get('scriptHashes') == current_tools and c.get('observerBinarySHA256') == observer_hash, 'candidate/formal tool bytes differ')
         for c in formals:

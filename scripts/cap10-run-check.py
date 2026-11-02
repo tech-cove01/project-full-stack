@@ -11,6 +11,8 @@ import uuid
 REPO = Path(__file__).resolve().parent.parent
 cohort_spec = importlib.util.spec_from_file_location('cap10_runner_check_cohort', REPO / 'scripts/cap10-cohort.py')
 cohort = importlib.util.module_from_spec(cohort_spec); cohort_spec.loader.exec_module(cohort)
+resource_spec = importlib.util.spec_from_file_location('cap10_runner_check_resource', REPO / 'scripts/cap10-resource-contract.py')
+RESOURCE = importlib.util.module_from_spec(resource_spec); resource_spec.loader.exec_module(RESOURCE)
 source = ast.parse((REPO / 'scripts/cap10-run.py').read_text(encoding='utf-8'))
 names = {'classify', 'pre_stable_guard', 'container_snapshot', 'observer_terminal_outcome'}
 isolated = ast.Module(body=[node for node in source.body if isinstance(node, ast.FunctionDef) and node.name in names], type_ignores=[])
@@ -27,8 +29,8 @@ def check(condition, label):
 def authority_wiring(temporary, files):
     """Execute only the actual reservation/diagnostic AST with local doubles."""
     functions = {node.name: node for node in source.body if isinstance(node, ast.FunctionDef)}
-    scope = {'Path': Path, 'hashlib': hashlib, 'cohort': cohort}
-    selected = ast.Module(body=[functions[name] for name in ('sha', 'cohort_dimensions', 'expected_diagnostics', 'pts_artifact_paths', 'reserve')], type_ignores=[])
+    scope = {'Path': Path, 'hashlib': hashlib, 'cohort': cohort, 'RESOURCE': RESOURCE}
+    selected = ast.Module(body=[functions[name] for name in ('sha', 'cohort_dimensions', 'environment_identity', 'expected_diagnostics', 'pts_artifact_paths', 'reserve')], type_ignores=[])
     exec(compile(selected, 'cap10-run.py(actual reservation functions)', 'exec'), scope)
     body = functions['main'].body
     first = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
@@ -89,6 +91,11 @@ def authority_wiring(temporary, files):
     grade = SimpleNamespace(check_reservation=lambda *a, **kw: reservation)
     owned = SimpleNamespace(read=lambda p: json.loads(Path(p).read_bytes()), now=lambda: '2026-11-02T12:00:00Z',
         run=lambda *a: SimpleNamespace(stdout='e' * 40), save=lambda p, value: saved.update({p.name: value}))
+    def environment(value):
+        path = RESOURCE.metadata_path(value, temporary)
+        metadata = owned.read(path)
+        return metadata, path, RESOURCE.bound_profile(value, metadata)
+    owned.environment = environment
     scope.update(ROOT=temporary, REPO=temporary, TOOL_NAMES=(), PTS_TOOLS=(), owned=owned, module=lambda *_: grade)
     args = SimpleNamespace(preflight=temporary / 'preflight.json', ability=temporary / 'ability.json', prediction=None,
         observer=temporary / 'observer', kind='search', rate=800, seconds=60)
@@ -157,6 +164,40 @@ def authority_wiring(temporary, files):
         else:
             rejected = False
         check(rejected and not saved, label + ' fails before either reservation artifact is written')
+    put('fixture.json', {})
+    reservation = {'tag': 'S10', 'poolSize': 512}
+    target = put('environment-012345abcdef.json', {'resourceProfile': 'mysql8-v1', 'containers': {}})
+    new_value = {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json'),
+                 'CAP10_ENVIRONMENT_METADATA': str(target), 'CAP10_RESOURCE_PROFILE': 'mysql8-v1'}
+    new_api = {**api, 'environmentPath': target.name, 'environmentSHA256': scope['sha'](target), 'resourceProfile': 'mysql8-v1'}
+    current = scope['reserve'](args, new_api, new_value)
+    check(current['environmentPath'] == target.name and current['environmentSHA256'] == scope['sha'](target)
+          and current['resourceProfile'] == 'mysql8-v1', 'new reservation freezes its explicit environment filename, bytes and profile')
+    for label, cfg, identity in (
+        ('old API cannot follow current metadata alias', new_value, api),
+        ('API environment SHA mismatch', new_value, {**new_api, 'environmentSHA256': '0' * 64}),
+        ('new API cannot omit its environment SHA', new_value, {k: v for k, v in new_api.items() if k != 'environmentSHA256'}),
+        ('API resource profile mismatch', new_value, {**new_api, 'resourceProfile': 'baseline'}),
+        ('private/public resource profile mismatch', {**new_value, 'CAP10_RESOURCE_PROFILE': 'baseline'}, new_api),
+    ):
+        saved.clear()
+        try:
+            scope['reserve'](args, identity, cfg)
+        except (AssertionError, ValueError):
+            rejected = True
+        else:
+            rejected = False
+        check(rejected and not saved, label + ' rejects before writing a slot')
+    baseline_versioned = put('environment-abcdef012345.json', {'containers': {}})
+    saved.clear()
+    try:
+        scope['reserve'](args, {**api, 'environmentPath': baseline_versioned.name},
+                         {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json'), 'CAP10_ENVIRONMENT_METADATA': str(baseline_versioned)})
+    except (AssertionError, ValueError):
+        rejected = True
+    else:
+        rejected = False
+    check(rejected and not saved, 'versioned baseline API also requires original environment SHA before reserving')
 
 
 def main():
@@ -181,7 +222,7 @@ def main():
     owned = SimpleNamespace(read=lambda p: json.loads(p.read_text()), now=lambda: '2026-11-01T08:00:00Z',
         api_identity=lambda _: Process(1),
         run=lambda *a, **k: SimpleNamespace(stdout='\n'.join(json.dumps(item) for item in stats)),
-        container=lambda name, cid, running: {**expected[name], 'restartCount': 0, 'oomKilled': False, 'healthStatus': 'healthy'})
+        container=lambda name, cid, running, **kwargs: {**expected[name], 'restartCount': 0, 'oomKilled': False, 'healthStatus': 'healthy'})
     psutil = SimpleNamespace(Process=Process, NoSuchProcess=ProcessGone, Error=ProcessGone,
         virtual_memory=lambda: SimpleNamespace(percent=70), cpu_percent=lambda _: 20)
     scope = {'owned': owned, 'psutil': psutil, 'json': json, 'dt': dt,
@@ -263,8 +304,17 @@ def main():
         stats[0]['ID'] = 'unknown'
         check(bool(scope['pre_stable_guard']({}, temporary, identity, expected, 5)['errors']), 'unverified container sample is incomplete rather than zero')
         check(scope['container_snapshot'](expected)['valid'], 'all four healthy unchanged containers can satisfy boundary inspection')
+        baseline_container = owned.container
+        profiles = []
+        def profiled_container(*a, **kw):
+            profiles.append(kw.get('resource_profile'))
+            return baseline_container(*a, **kw)
+        owned.container = profiled_container
+        check(scope['container_snapshot'](expected, 'mysql8-v1')['valid'] and profiles == ['mysql8-v1'] * 4,
+              'all four container identity checks receive the explicitly selected resource profile')
+        owned.container = baseline_container
         previous = owned.container
-        owned.container = lambda *a: {**previous(*a), 'restartCount': 1}
+        owned.container = lambda *a, **kw: {**previous(*a, **kw), 'restartCount': 1}
         check(not scope['container_snapshot'](expected)['valid'], 'fast restart is detected even after container health recovers')
         authority_wiring(temporary, files)
     finally:

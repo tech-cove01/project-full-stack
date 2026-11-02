@@ -5,6 +5,8 @@ import importlib.util
 import json
 from pathlib import Path
 import tempfile
+from types import SimpleNamespace
+from unittest.mock import patch
 
 
 REPO = Path(__file__).resolve().parent.parent
@@ -23,6 +25,63 @@ def main():
     with tempfile.TemporaryDirectory(prefix='.qa-cap10-idle-', dir=REPO.parent) as folder:
         base = Path(folder).resolve()
         assert base.parent == REPO.parent and base.name.startswith('.qa-cap10-idle-')
+        metadata_root = base / 'metadata'; metadata_root.mkdir()
+        original = metadata_root / 'environment.json'; write(original, {})
+        target = metadata_root / 'environment-012345abcdef.json'; write(target, {'resourceProfile': 'mysql8-v1'})
+        def environment(value):
+            path = idle.RESOURCE.metadata_path(value, metadata_root)
+            public = json.loads(path.read_bytes())
+            return public, path, idle.RESOURCE.bound_profile(value, public)
+        owned = SimpleNamespace(environment=environment)
+        _, path, profile, digest = idle.environment_identity({}, {}, {}, owned, metadata_root)
+        assert path == original and profile == 'baseline' and digest == hashlib.sha256(original.read_bytes()).hexdigest()
+        checks += 1
+        config = {'CAP10_ENVIRONMENT_METADATA': str(target), 'CAP10_RESOURCE_PROFILE': 'mysql8-v1'}
+        identity = {'environmentPath': target.name, 'resourceProfile': 'mysql8-v1',
+                    'environmentSHA256': hashlib.sha256(target.read_bytes()).hexdigest()}
+        _, path, profile, digest = idle.environment_identity(config, identity, config, owned, metadata_root)
+        assert path == target and profile == 'mysql8-v1' and digest == identity['environmentSHA256']
+        checks += 1
+        for value, api, api_values in ((config, {}, config), (config, identity, {}),
+                                      (config, {**identity, 'environmentSHA256': '0' * 64}, config),
+                                      (config, {k: v for k, v in identity.items() if k != 'environmentSHA256'}, config),
+                                      (config, {**identity, 'resourceProfile': 'baseline'}, config)):
+            try:
+                idle.environment_identity(value, api, api_values, owned, metadata_root)
+            except (AssertionError, ValueError):
+                checks += 1
+            else:
+                raise AssertionError('idle must reject a different original environment identity')
+        baseline_versioned = metadata_root / 'environment-abcdef012345.json'; write(baseline_versioned, {})
+        baseline_config = {'CAP10_ENVIRONMENT_METADATA': str(baseline_versioned)}
+        try:
+            idle.environment_identity(baseline_config, {'environmentPath': baseline_versioned.name}, baseline_config, owned, metadata_root)
+        except (AssertionError, ValueError):
+            checks += 1
+        else:
+            raise AssertionError('versioned baseline idle API must retain environment SHA')
+
+        resources = idle.module('cap10_idle_cpu_path_check', 'cap10-resources.py')
+        cid = 'a' * 64
+        cpu, memory = idle.RESOURCE.container_limits('mysql8-v1')['mysql']
+        actual_identities = idle.container_identities({'mysql': {'id': cid, 'cpuNano': cpu, 'memoryBytes': memory}}, 'mysql8-v1')
+        assert actual_identities == [{'id': cid, 'service': 'mysql', 'cpuNano': 8_000_000_000,
+                                     'memoryBytes': 8 * 1024 ** 3, 'resourceProfile': 'mysql8-v1'}]
+        checks += 1
+        layout = {'version': 2, 'membership': '/', 'paths': ['/sys/fs/cgroup/cpu.stat', '/sys/fs/cgroup/cpu.max']}
+        counters = 'usage_usec 100000\nnr_periods 100\nnr_throttled 2\nthrottled_usec 1200\n800000 100000\n'
+        with patch.dict(resources.CPU_LAYOUTS, {cid: layout}, clear=True), \
+                patch.object(resources.subprocess, 'run', return_value=SimpleNamespace(stdout=counters)) as mocked_run:
+            assert resources.cpu_stat(actual_identities[0])['quotaUsec'] == 800000
+            mocked_run.assert_called_once_with(['docker', 'exec', cid, 'cat', *layout['paths']],
+                                              capture_output=True, text=True, timeout=4, check=True)
+            checks += 1
+            try:
+                resources.cpu_stat({'id': cid, 'service': 'mysql'})
+            except ValueError:
+                checks += 1
+            else:
+                raise AssertionError('missing resource profile must not validate an eight-CPU cgroup as baseline')
 
         def case():
             nonlocal checks

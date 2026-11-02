@@ -1044,7 +1044,7 @@ class Checks(unittest.TestCase):
         command.update({key: active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes',
                        'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')}, reservationCheck=reservation,
                        at=command_at.isoformat())
-        command.update({key: active[key] for key in ('poolSize', 'expectedEngines', 'ptsConcurrency') if key in active})
+        command.update({key: active[key] for key in ('poolSize', 'expectedEngines', 'ptsConcurrency', 'environmentPath', 'resourceProfile') if key in active})
         self.put('linux/' + tag + '-command.json', command)
         return command
 
@@ -1067,6 +1067,99 @@ class Checks(unittest.TestCase):
             ptsPacketSHA256=grade.sha(packet), ptsAdmissionPath=admission.name, ptsAdmissionSHA256=grade.sha(admission))
         self.put('linux/active-application.json', active)
         return active
+
+    def resource_active(self, directory, api, active):
+        active = copy.deepcopy(active)
+        path = self.put('linux/environment-012345abcdef.json', {'resourceProfile': 'mysql8-v1', 'synthetic': 'explicit new resource metadata'})
+        identity = {'environmentPath': path.name, 'environmentSHA256': grade.sha(path), 'resourceProfile': 'mysql8-v1'}
+        active.update(identity, deploymentId='mysql8-resource-deployment')
+        self.put('linux/active-application.json', active)
+        return {**api, **identity}, active, {'passed': True, **identity}
+
+    def test_environment_identity_never_follows_current_versioned_metadata_for_old_records(self):
+        original = (self.root / 'environment.json').read_bytes()
+        old = {'environmentSHA256': grade.sha(self.root / 'environment.json')}
+        new_path = self.put('environment-012345abcdef.json', {'resourceProfile': 'mysql8-v1'})
+        new = {'environmentPath': new_path.name, 'environmentSHA256': grade.sha(new_path), 'resourceProfile': 'mysql8-v1'}
+        self.assertEqual(grade.environment_identity(old, self.root), (self.root / 'environment.json', old['environmentSHA256'], 'baseline'))
+        self.assertEqual(grade.environment_identity(new, self.root), (new_path, new['environmentSHA256'], 'mysql8-v1'))
+        for change in ({'environmentPath': new_path.name}, {'environmentSHA256': new['environmentSHA256']}, {'resourceProfile': 'mysql8-v1'}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                grade.environment_identity({**old, **change}, self.root)
+        for name in ('../environment.json', 'nested/environment.json', 'environment-wrong.json'):
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                grade.environment_identity({**new, 'environmentPath': name}, self.root)
+        self.assertEqual((self.root / 'environment.json').read_bytes(), original)
+
+    def test_explicit_resource_reservation_requires_api_active_and_idle_path_sha_and_profile(self):
+        directory, api, active = self.authority_fixture()
+        api, active, preflight = self.resource_active(directory, api, active)
+        self.authority_admission(directory, 'S7')
+        self.assertEqual(self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api,
+                                     preflight=preflight)['tag'], 'S7')
+        for api_change, idle_change in (
+            ({'environmentPath': 'environment.json', 'resourceProfile': 'baseline'}, {}),
+            ({'environmentSHA256': 'f' * 64}, {}), ({'resourceProfile': 'baseline'}, {}),
+            ({}, {'environmentPath': 'environment.json'}), ({}, {'environmentSHA256': 'f' * 64}),
+            ({}, {'resourceProfile': 'baseline'}),
+        ):
+            with self.subTest(api=api_change, idle=idle_change), self.assertRaises(ValueError):
+                self.reserve('comparison', 800, source=self.other, execution_root=directory,
+                             api={**api, **api_change}, preflight={**preflight, **idle_change})
+        # A byte-identical versioned file still denotes a distinct explicit source.
+        same = directory / 'environment-abcdef012345.json'
+        same.write_bytes((directory / active['environmentPath']).read_bytes())
+        with self.assertRaises(ValueError):
+            self.reserve('comparison', 800, source=self.other, execution_root=directory,
+                         api={**api, 'environmentPath': same.name}, preflight={**preflight, 'environmentPath': same.name})
+        with self.assertRaises(ValueError):
+            self.reserve('comparison', 800, source=self.other, execution_root=directory,
+                         api={k: v for k, v in api.items() if k != 'environmentSHA256'}, preflight=preflight)
+
+    def test_only_original_baseline_api_can_omit_environment_sha(self):
+        self.assertEqual(grade.environment_identity({}, self.root, require_sha=False)[0], self.root / 'environment.json')
+        for name, metadata, profile in (
+            ('environment-012345abcdef.json', {}, 'baseline'),
+            ('environment-abcdef012345.json', {'resourceProfile': 'mysql8-v1'}, 'mysql8-v1'),
+            ('environment.json', {'resourceProfile': 'mysql8-v1'}, 'mysql8-v1'),
+        ):
+            self.put(name, metadata)
+            with self.subTest(name=name, profile=profile), self.assertRaises(ValueError):
+                grade.environment_identity({'environmentPath': name, 'resourceProfile': profile}, self.root, require_sha=False)
+
+    def test_resource_formal_candidate_and_freeze_cannot_mix_metadata_paths(self):
+        directory, api, active = self.authority_fixture()
+        api, active, preflight = self.resource_active(directory, api, active)
+        self.authority_admission(directory, 'S7')
+        options = {'source': self.other, 'execution_root': directory, 'api': api, 'preflight': preflight}
+        reserved = self.reserve('candidate', 800, **options)
+        self.authority_add(directory, 'S7', 'candidate', 800, reserved, active)
+        context = grade.execution_context(directory)
+        freeze = {**active, 'rate': 800, 'candidateTag': 'S7', 'sourceCIPassed': True, 'relatedChecksPassed': True,
+            'initialDistributionContract': {'existing': 512, 'active': 0, 'relationships': 512},
+            'executionAuthoritySHA256': context['authoritySHA256'], 'activeApplicationSHA256': context['activeApplicationSHA256']}
+        self.put('freeze-like.json', freeze); self.put('linux/freeze-like.json', freeze)
+        self.authority_admission(directory, 'H1')
+        self.assertEqual(self.reserve('formal', 800, freeze=freeze, **options)['tag'], 'H1')
+        same = directory / 'environment-abcdef012345.json'; same.write_bytes((directory / active['environmentPath']).read_bytes())
+        with self.assertRaises(ValueError):
+            self.reserve('formal', 800, freeze={**freeze, 'environmentPath': same.name}, **options)
+        command = grade.read(directory / 'S7-command.json'); command['environmentPath'] = same.name
+        self.assertFalse(grade._active_command(command, context))
+
+    def test_old_retirement_environment_stays_original_after_new_resource_profile(self):
+        directory, api, active, command, proof = self.formal_start_recovery_fixture()
+        old_environment = (directory / 'environment.json').read_bytes()
+        _, active, _ = self.resource_active(directory, api, active)
+        context = grade.execution_context(directory)
+        proof['successorActiveApplicationSHA256'] = context['activeApplicationSHA256']
+        self.put('linux/formal-start-recovery-H1.json', proof)
+        self.assertEqual(grade.formal_start_retirement(directory, command, context)['tag'], 'H1')
+        self.assertEqual((directory / 'environment.json').read_bytes(), old_environment)
+        old_sha = command['reservationCheck']['activeApplicationSHA256']
+        original = grade.read(directory / ('active-applications/' + old_sha + '.json'))
+        with self.assertRaises(ValueError):
+            grade.original_command_dimensions(directory, {**command, 'environmentPath': active['environmentPath']}, original)
 
     def test_explicit_packet_and_admission_reject_tampered_dimensions_or_helper_freeze(self):
         directory, _, active = self.authority_fixture()
@@ -1099,7 +1192,8 @@ class Checks(unittest.TestCase):
         # tool-repair proof supplies like-fixture/fixture.json, and no root alias.
         directory = self.root / 'linux'; directory.mkdir()
         manifest = self.put('linux/like-fixture/fixture.json', {'users': 512, 'multiNotes': 512, 'multiRelations': 512})
-        command = {'tag': 'S5', 'fixtureSHA256': grade.sha(manifest)}
+        environment = self.put('linux/environment.json', {'synthetic': 'retained original environment'})
+        command = {'tag': 'S5', 'fixtureSHA256': grade.sha(manifest), 'environmentSHA256': grade.sha(environment)}
         repair = self.put('linux/tool-repair-transition.json', {'artifacts': {'fixtureManifest':
             {'path': 'like-fixture/fixture.json', 'sha256': grade.sha(manifest)}}})
         self.assertFalse((directory / 'fixture.json').exists())

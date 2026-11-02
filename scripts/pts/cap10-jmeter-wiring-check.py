@@ -26,13 +26,18 @@ def main():
     parser.add_argument('--java', type=Path, required=True)
     parser.add_argument('--jmeter', type=Path, required=True)
     parser.add_argument('--case', choices=('success','noop','uncertain'), default='success')
+    parser.add_argument('--pool-size', type=int, default=512)
+    parser.add_argument('--expected-engines', type=int, default=2)
     args = parser.parse_args()
     assert args.java.is_file() and (args.jmeter / 'bin/ApacheJMeter.jar').is_file()
+    cohort = module('cap10_jmeter_wiring_cohort', REPO / 'scripts/cap10-cohort.py')
+    dimensions = cohort.dimensions({'poolSize': args.pool_size, 'expectedEngines': args.expected_engines}, {'poolSize': args.pool_size})
+    pool, engines = dimensions['poolSize'], dimensions['expectedEngines']
     root = REPO.parent / '.runtime-cap10-jmeter-tools' / ('wiring-' + uuid.uuid4().hex)
     root.mkdir(parents=True, mode=0o700)
     store_module = module('cap10_jmeter_actual_collector', REPO / 'scripts/pts/cap10-pts-collector.py')
     phase = module('cap10_jmeter_actual_http', REPO / 'scripts/pts/cap10-pts-phase.py')
-    facts = {str(1001 + slot): [False, 0] for slot in range(512)}
+    facts = {str(1001 + slot): [False, 0] for slot in range(pool)}
     observations = []
     class Stub(BaseHTTPRequestHandler):
         def log_message(self, *args):
@@ -53,26 +58,28 @@ def main():
     threading.Thread(target=api.serve_forever, daemon=True).start()
     # Generate a public bundle and a private, loopback-only control input.
     common = root / 'common'
-    generated = subprocess.run(['node', 'scripts/pts/cap10-jmeter.mjs', 'bundle', str(common)], cwd=REPO, capture_output=True, check=True)
+    generated = subprocess.run(['node', 'scripts/pts/cap10-jmeter.mjs', 'bundle', str(common),
+        '--pool-size', str(pool), '--expected-engines', str(engines)], cwd=REPO, capture_output=True, check=True)
     manifest = json.loads(generated.stdout)
     token = secrets.token_hex(32)
     relations = [{'slot': slot, 'userId': str(2001+slot), 'noteId': str(1001+slot), 'active': 0, 'version': 0,
-                  'token': 'synthetic-rel-token-'+str(slot)} for slot in range(512)]
+                  'token': 'synthetic-rel-token-'+str(slot)} for slot in range(pool)]
     store = store_module.EngineStore({'runId': 'finite-local-warm', 'phase': 'warm', 'rate': 2, 'seconds': 10,
-        'controlToken': token, 'expectedEngines': 2, 'fixtureSHA256': 'a'*64, 'scriptSHA256': manifest['scriptSHA256'],
+        'controlToken': token, **dimensions, 'fixtureSHA256': 'a'*64, 'scriptSHA256': manifest['scriptSHA256'],
         'apiUrl': 'http://127.0.0.1:'+str(api.server_port), 'relations': relations}, root / 'collector.ndjson')
     collector = ThreadingHTTPServer(('127.0.0.1', 0), phase.handler_type(store, token, threading.RLock()))
     threading.Thread(target=collector.serve_forever, daemon=True).start()
     children, handles = [], []
     try:
-        for index in range(2):
+        workers_per_engine = (pool + engines - 1) // engines
+        for index in range(engines):
             folder = root / ('engine-'+str(index)); folder.mkdir()
             tree = ET.parse(common / 'cap10-jmeter.jmx')
             for group in tree.findall('.//ThreadGroup'):
-                group.find("./stringProp[@name='ThreadGroup.num_threads']").text = '256'
+                group.find("./stringProp[@name='ThreadGroup.num_threads']").text = str(workers_per_engine)
             tree.write(folder / 'cap10-jmeter.jmx', encoding='utf-8', xml_declaration=True)
             # Explicitly simulate PTS splitting, not a different workload source.
-            (folder / 'slots.csv').write_text('slot\n'+'\n'.join(str(s) for s in range(512) if s % 2 == index)+'\n')
+            (folder / 'slots.csv').write_text('slot\n'+'\n'.join(str(s) for s in range(pool) if s % engines == index)+'\n')
             (folder / 'cap10-pts-private.json').write_text(json.dumps({'collectorUrl':'http://127.0.0.1:'+str(collector.server_port), 'controlToken':token}))
             log = (folder / 'console.txt').open('wb'); handles.append(log)
             argv = [str(args.java.resolve()), '-Xms128m', '-Xmx512m', '-Djmeter.home='+str(args.jmeter.resolve()),
@@ -93,7 +100,9 @@ def main():
         expected = summary.get('complete') is True and len(observations)==20 if args.case == 'success' else summary.get('complete') is False and 1 <= len(observations) < 20 and summary['counts'][args.case] >= 1
         result = {'scope':'finite loopback synthetic HTTP; no business DB/cloud/capacity slots', 'case':args.case, 'exitCodes':[c.returncode for c in children],
                   'stubPUTs':len(observations), 'collectorSummary':summary, 'manifest':manifest,
-                  'actualJMeterProcesses':2, 'normalWorkers':512, 'teardownWorkers':2, 'csvSplitSimulation':'even/odd256rows',
+                  'actualJMeterProcesses':engines, 'normalWorkers':workers_per_engine * engines,
+                  'exclusiveRelationships':pool, 'surplusEOFWorkers':workers_per_engine * engines - pool,
+                  'teardownWorkers':engines, 'csvSplitSimulation':'disjoint slot modulo engine count; unequal shards retain EOF surplus workers',
                   'passed':expected and all(c.returncode==0 for c in children)}
         (root / 'result.json').write_text(json.dumps(result, indent=2))
         print(json.dumps({'passed':result['passed'],'artifactDirectory':str(root),'stubPUTs':len(observations),

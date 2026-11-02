@@ -442,6 +442,60 @@ def _active_command(command, context):
             all(command.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')))
 
 
+def zero_start_layout(root, command, previous):
+    """Only an uncreated wrapper and an untouched load path can have no task."""
+    tag = command.get('tag', '')
+    if not (re.fullmatch(r'[SH][1-9][0-9]*', tag) and command.get('loadBackend') == 'pts'
+            and 'wrapperPid' not in previous and 'wrapperExit' in previous and previous['wrapperExit'] is None
+            and type(previous.get('observerPid')) is int and previous['observerPid'] > 0
+            and type(previous.get('observerExit')) is int and previous['observerExit'] != 0
+            and previous.get('knownOwnedProcesses') == [] and previous.get('childrenConverged') is True
+            and previous.get('passed') is False and previous.get('batchFatal') is False
+            and previous.get('outcome') == 'measurement_invalid'
+            and isinstance(previous.get('failedStartOrException'), str) and previous['failedStartOrException']):
+        return None
+    load = Path(root) / (tag + '-load')
+    paths = [load / name for name in ('process.json', 'warm-process.json', 'stable-process.json', 'warm-pts', 'stable-pts', 'result.json')]
+    if load.is_symlink() or load.exists() and not load.is_dir() or any(path.exists() or path.is_symlink() for path in paths):
+        return None
+    if load.exists() and any(path.is_file() or path.is_symlink() or not path.is_dir() for path in load.rglob('*')):
+        return None
+    return {'loadPath': load.relative_to(root).as_posix(), 'loadDirectoryExists': load.exists(),
+            'absentPaths': [path.relative_to(root).as_posix() for path in paths], 'loadFiles': []}
+
+
+def authority_zero_start(root, command, previous, terminal, context):
+    layout = zero_start_layout(root, command, previous)
+    require(layout is not None and terminal.get('reports') == [] and terminal.get('noLoadPaths') == layout,
+            'zero-start recovery requires an uncreated wrapper and no phase or load evidence')
+    require(terminal.get('originalCommand') == {'path': command['tag'] + '-command.json', 'sha256': sha(Path(root) / (command['tag'] + '-command.json'))}
+            and _authority_ref(root, terminal['originalCommand']) == command,
+            'zero-start recovery must retain the exact original command')
+    require(terminal.get('originalStage') == {'path': command['tag'] + '-stage.json', 'sha256': sha(Path(root) / (command['tag'] + '-stage.json'))}
+            and _authority_ref(root, terminal['originalStage']) == previous,
+            'zero-start recovery must retain the exact original failed stage')
+    observed = instant(terminal['zeroStartObservedAt'])
+    require(instant(previous['finishedAt']) <= observed <= dt.datetime.now(dt.timezone.utc)
+            and terminal.get('originalObserverExit') == previous['observerExit']
+            and terminal.get('originalWrapperExit') is None, 'zero-start proof must follow the failed observer exit')
+    observer = terminal.get('zeroStartObserver', {})
+    require(observer.get('pid') == previous['observerPid'] and observer.get('created') is None
+            and observer.get('pidAbsent') is True and observer.get('alive') is False
+            and observer.get('identityChecked') is True and observer in terminal.get('owners', []),
+            'unrecorded observer birth requires proof that its exact PID is completely absent')
+    audit = _authority_ref(root, terminal['zeroStartIdleAudit'])
+    scene = read(Path(root) / context['active']['ptsAdmissionPath']).get('sceneId')
+    raw = audit.get('sanitizedRawResponse', {})
+    require(isinstance(scene, str) and scene and audit.get('sceneId') == scene
+            and audit.get('action') == 'GetJMeterSceneRunningData' and audit.get('regionId') == 'cn-shanghai'
+            and audit.get('httpStatus') == 200 and raw.get('Success') is True
+            and set(raw) == {'RequestId', 'Success'} and isinstance(raw.get('RequestId'), str) and raw['RequestId'].strip()
+            and instant(previous['finishedAt']) <= instant(audit['requestStartedAt'])
+            <= instant(audit['responseFinishedAt']) <= observed,
+            'zero-start recovery needs the real successful exact-empty signed PTS read after failure')
+    return True
+
+
 def authority_search_state(root, context):
     records = [c for c in history(root) if _active_command(c, context) and c['tag'].startswith('S') and c['kind'] != 'candidate']
     relevant = [(c, stage(root, c)) for c in records]
@@ -481,7 +535,11 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
         owners = terminal.get('owners', []); expected = {(p['pid'], p['created']) for p in old_stage.get('knownOwnedProcesses', [])}
         require(expected <= {(p.get('pid'), p.get('created')) for p in owners} and all(p.get('alive') is False and p.get('identityChecked') is True for p in owners), 'previous local process identities must be checked')
         reports = terminal.get('reports', [])
-        require({r.get('phase') for r in reports} == {'warm', 'stable'} and len(reports) == 2 and all(r.get('ended') is True and isinstance(r.get('reportId'), str) and r['reportId'] and isinstance(r.get('startTimeRaw'), str) and isinstance(r.get('endTimeRaw'), str) and len(r['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(r['endTimeRaw']) >= dt.datetime.fromisoformat(r['startTimeRaw']) for r in reports), 'both previous PTS phases require real matching report EndTime')
+        if terminal.get('terminationKind') == 'zero_start':
+            authority_zero_start(root, previous, old_stage, terminal, context)
+            require(instant(terminal['zeroStartObservedAt']) <= admitted, 'zero-start observation must precede its window admission')
+        else:
+            require({r.get('phase') for r in reports} == {'warm', 'stable'} and len(reports) == 2 and all(r.get('ended') is True and isinstance(r.get('reportId'), str) and r['reportId'] and isinstance(r.get('startTimeRaw'), str) and isinstance(r.get('endTimeRaw'), str) and len(r['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(r['endTimeRaw']) >= dt.datetime.fromisoformat(r['startTimeRaw']) for r in reports), 'both previous PTS phases require real matching report EndTime')
         for report in reports:
             marker = Path(root) / (previous['tag'] + '-load') / (report['phase'] + '-pts/terminal.json')
             require(not marker.exists() or read(marker).get('reportId') == report['reportId'], 'terminal report identity differs from its original phase')

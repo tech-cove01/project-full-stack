@@ -1,0 +1,7 @@
+# 未创建发压wrapper的失败接续
+
+S11仅启动只读观察器，基线超时后退出；未创建wrapper、warm/stable进程、PTS任务或业务PUT。原measurement_invalid及command/stage保持，不为不存在的任务编造报告。
+
+新增严格分支只适用于wrapperPid缺失、wrapperExit明确null、观察器失败且PID完全不存在、load目录及所有phase/Start审计均未出现的情形。必须绑定原command/stage SHA、失败之后实际签名的PTS精确空闲响应，以及新的完整事实和下游对账；reports只能为空。已有任一阶段启动证据仍要求原来的真实报告结束时间，业务/native判据不放宽。
+
+策略58项纯检查及接线7项纯检查通过；root独立审查与58项复跑通过。此为零负载工具失败接续，不产生容量成绩，不改判旧失败。

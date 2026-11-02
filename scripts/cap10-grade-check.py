@@ -1077,6 +1077,85 @@ class Checks(unittest.TestCase):
         with self.assertRaises(ValueError):
             grade.execution_context(directory)
 
+    def authority_zero_fixture(self):
+        directory, api, active = self.authority_fixture()
+        self.put('linux/admission.json', {'passed': True, 'sceneFilesMD5': {'plan': 'frozen'}, 'sceneId': 'SCENE'})
+        active['ptsAdmissionSHA256'] = grade.sha(directory / 'admission.json')
+        self.put('linux/active-application.json', active); self.authority_admission(directory, 'S7')
+        reservation = self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api)
+        command = self.authority_add(directory, 'S7', 'comparison', 800, reservation, active, 'measurement_invalid')
+        command['loadBackend'] = 'pts'; self.put('linux/S7-command.json', command)
+        previous = grade.read(directory / 'S7-stage.json')
+        previous.update(wrapperExit=None, observerExit=1, observerPid=45678, knownOwnedProcesses=[],
+                        failedStartOrException='AssertionError', recoveryVerified=False)
+        self.put('linux/S7-stage.json', previous)
+        (directory / 'S7-load/result.json').unlink()
+        admission_path = self.authority_admission(directory, 'S8')
+        finished = grade.instant(previous['finishedAt'])
+        audit = self.put('linux/zero-idle.json', {'action': 'GetJMeterSceneRunningData', 'sceneId': 'SCENE',
+            'regionId': 'cn-shanghai', 'httpStatus': 200, 'sanitizedRawResponse': {'Success': True, 'RequestId': 'read-only-request'},
+            'requestStartedAt': (finished + dt.timedelta(microseconds=1)).isoformat(),
+            'responseFinishedAt': (finished + dt.timedelta(microseconds=2)).isoformat()})
+        observer = {'pid': 45678, 'created': None, 'pidAbsent': True, 'alive': False, 'identityChecked': True}
+        terminal_path = directory / 'terminal-before-S8.json'; terminal = grade.read(terminal_path)
+        terminal.update(terminationKind='zero_start', reports=[], owners=[observer],
+            originalCommand={'path': 'S7-command.json', 'sha256': grade.sha(directory / 'S7-command.json')},
+            originalStage={'path': 'S7-stage.json', 'sha256': grade.sha(directory / 'S7-stage.json')},
+            originalObserverExit=1, originalWrapperExit=None, zeroStartObserver=observer,
+            zeroStartObservedAt=(finished + dt.timedelta(microseconds=3)).isoformat(),
+            zeroStartIdleAudit={'path': audit.name, 'sha256': grade.sha(audit)},
+            noLoadPaths=grade.zero_start_layout(directory, command, previous))
+        self.put('linux/terminal-before-S8.json', terminal)
+        admission = grade.read(admission_path); admission['termination']['sha256'] = grade.sha(terminal_path)
+        self.put('linux/admission-S8.json', admission)
+        return directory, api, active, command, previous, terminal
+
+    def test_authority_zero_start_retains_failure_and_requires_no_invented_reports(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_fixture()
+        before = (directory / 'S7-stage.json').read_bytes()
+        reservation = self.reserve('search', 800, source=self.other, execution_root=directory, api=api)
+        self.assertEqual(reservation['tag'], 'S8')
+        self.assertEqual((directory / 'S7-stage.json').read_bytes(), before)
+        self.assertEqual(grade.search_state(directory, self.other)['boundaryTags'], [])
+        self.assertEqual(terminal['reports'], [])
+
+    def test_authority_zero_start_rejects_any_phase_start_native_file_or_wrapper_identity(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_fixture()
+        for relative in ('warm-process.json', 'stable-process.json', 'warm-pts/api/one-StartTestingJMeterScene.json',
+                         'stable-pts/records.ndjson', 'before.json'):
+            with self.subTest(path=relative):
+                path = self.put('linux/S7-load/' + relative, {})
+                with self.assertRaises(ValueError):
+                    grade.authority_zero_start(directory, command, previous, terminal, {'active': active})
+                path.unlink()
+                # Empty phase directories still reject; remove only these exact
+                # generated empty fixture directories to isolate later cases.
+                if (directory / 'S7-load/warm-pts').exists():
+                    (directory / 'S7-load/warm-pts/api').rmdir(); (directory / 'S7-load/warm-pts').rmdir()
+                if (directory / 'S7-load/stable-pts').exists(): (directory / 'S7-load/stable-pts').rmdir()
+        for key, value in (('wrapperPid', None), ('wrapperPid', 1234), ('wrapperExit', 0)):
+            self.assertIsNone(grade.zero_start_layout(directory, command, {**previous, key: value}))
+
+    def test_authority_zero_start_rejects_forged_idle_owner_hash_report_and_missing_reconcile(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_fixture()
+        bad_cases = []
+        for key, value in (('reports', [{'phase': 'warm'}]), ('originalCommand', terminal['originalStage']),
+                           ('originalStage', terminal['originalCommand']), ('originalObserverExit', 0)):
+            bad_cases.append({**terminal, key: value})
+        bad_cases.append({**terminal, 'zeroStartObserver': {**terminal['zeroStartObserver'], 'pidAbsent': False}})
+        bad_cases.append({**terminal, 'zeroStartIdleAudit': {**terminal['zeroStartIdleAudit'], 'sha256': 'f' * 64}})
+        for bad in bad_cases:
+            with self.assertRaises(ValueError): grade.authority_zero_start(directory, command, previous, bad, {'active': active})
+        idle_path = directory / terminal['zeroStartIdleAudit']['path']; idle = grade.read(idle_path)
+        idle['sanitizedRawResponse']['RunningData'] = {'Status': 'RUNNING'}
+        self.put('linux/' + idle_path.name, idle)
+        altered = {**terminal, 'zeroStartIdleAudit': {'path': idle_path.name, 'sha256': grade.sha(idle_path)}}
+        with self.assertRaises(ValueError): grade.authority_zero_start(directory, command, previous, altered, {'active': active})
+        admission = grade.read(directory / 'admission-S8.json'); admission.pop('reconciliation')
+        self.put('linux/admission-S8.json', admission)
+        with self.assertRaises((ValueError, KeyError)):
+            self.reserve('search', 800, source=self.other, execution_root=directory, api=api)
+
     def test_authority_formal_still_requires_exact_candidate_and_stops_after_first_failure(self):
         directory, api, active = self.authority_fixture()
         reservation = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)

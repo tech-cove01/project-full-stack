@@ -54,6 +54,9 @@ type Worker struct {
 	commitBatchSize     int
 	commitFlushInterval time.Duration
 	commitPending       []kafka.Message
+	receiptPending      []kafka.Message
+	receiptBarrier      *kafka.Message
+	receiptFallback     bool
 	closeOnce           sync.Once
 	closeError          error
 
@@ -178,8 +181,9 @@ func (worker *Worker) Run(ctx context.Context) {
 }
 
 // Poll has one goroutine owner. The default retains a single message until its
-// synchronous ACK. Opt-in batches fetch a successor only after each LIKE effect
-// is DB-durable, hold at most 64 offsets, and stop fetching while an ACK retries.
+// synchronous ACK. Opt-in batches retain at most 64 sources and stop fetching
+// while an ACK retries. A receipt-batch processor may make the whole LIKE prefix
+// DB-durable together; otherwise individual effects precede offset batching.
 // Invalid/non-LIKE messages and parking retain their single-message barrier.
 func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 	if worker.commitBatchSize <= 1 {
@@ -193,6 +197,9 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 	}
 	if len(worker.commitPending) > 0 {
 		return worker.commitDurableBatch(ctx)
+	}
+	if batch, ok := worker.processor.(IgnoredLikeBatchProcessor); ok {
+		return worker.pollIgnoredLikeBatch(ctx, batch)
 	}
 	var flushAt time.Time
 	processedAny := false
@@ -269,7 +276,7 @@ func batchableLike(message kafka.Message) bool {
 	return err == nil && event.EventType == "LIKE_CHANGED"
 }
 
-func (worker *Worker) pollOne(ctx context.Context, collect bool, fetchTimeout time.Duration) (bool, error) {
+func (worker *Worker) fetchPending(ctx context.Context, fetchTimeout time.Duration) (bool, error) {
 	if err := ctx.Err(); err != nil {
 		return false, err
 	}
@@ -315,6 +322,14 @@ func (worker *Worker) pollOne(ctx context.Context, collect bool, fetchTimeout ti
 			return false, errors.New("community message fetch unavailable")
 		}
 		worker.pending = &message
+	}
+	return true, nil
+}
+
+func (worker *Worker) pollOne(ctx context.Context, collect bool, fetchTimeout time.Duration) (bool, error) {
+	processed, err := worker.fetchPending(ctx, fetchTimeout)
+	if err != nil || !processed {
+		return processed, err
 	}
 	if collect && !batchableLike(*worker.pending) {
 		return true, errCommitBatchBarrier
@@ -362,7 +377,7 @@ func (worker *Worker) pollOne(ctx context.Context, collect bool, fetchTimeout ti
 		return true, nil
 	}
 	commitCtx, cancel := context.WithTimeout(ctx, worker.commitTimeout)
-	err := worker.reader.CommitMessages(commitCtx, *worker.pending)
+	err = worker.reader.CommitMessages(commitCtx, *worker.pending)
 	cancel()
 	if err != nil {
 		if ctx.Err() != nil {

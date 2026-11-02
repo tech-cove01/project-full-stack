@@ -32,3 +32,9 @@
 本小票只合并成功 LIKE 的同步 OffsetCommit：`GO_COMMUNITY_CONSUMER_COMMIT_BATCH` 默认1，严格1..64，本批显式32。每条仍独立严格解码、校验源 Key/Header、业务哈希与控制 fence，逐条提交原 DB 收据事务后才进入有界待确认前缀；Kafka `CommitInterval=0` 不变。无确认的整批原样重试，不重做已证明的 DB 效果、不继续 Fetch。非LIKE、非法事件和持久停车先同步确认旧前缀，再按原单条处理与确认，不能跨过缺口。
 
 首条 DB 已提交后，以10ms限制继续取消息组批的等待；每条 Apply/Park 的独立5秒期限及同步 OffsetCommit 的5秒期限不变，10ms不是整个批次的硬执行时长。取消和退出留下未确认前缀供原持久幂等收据重放。Go/SQL/Redis配额、relay=8、Kafka同步生产确认及收据SQL保持不变。验证覆盖未知ACK重试、取消、低流量组批、有效非LIKE隔离、坏源Key/Header停车，以及隔离库/自有Kafka主题中先持久收据、ACK失败、重启重放的有限集成；先同400/s对照，再按实测定档，不预报收益。
+
+## 2026-11-02 LIKE IGNORED 收据事务微批
+
+S9同400/s完成24000次真实变更、无未知/无操作/HTTP错误，但保留1次发压时序违规，原分类为发压器受限；三组收据末段仍净增长，不能据此宣告容量通过。同步Offset合并没有消除逐条收据事务的固定开销，下一小票沿用默认1/显式32的配置，三组processor增加仅LIKE的可选原子收据接口。
+
+worker在最多32条、首条取到后10ms的有界取消息窗口内保留完整原始LIKE前缀，随后逐条执行原严格Envelope/源Key/Header检查，再用一次RC事务共享该projection原控制行锁（follow/feed原FOR SHARE，search原FOR UPDATE），批量写唯一IGNORED收据并在同事务逐一核对全部event_id/hash/state。只有整个DB事务确认成功才同步提交对应Kafka前缀；ACK未知只重试ACK。非LIKE保持原单条屏障；批事务失败或取消保留全部raw，后续按原逐条Apply/重试/Park/单条ACK处理，不跨未确认缺口。收据内容、重建fence、幂等冲突、生产确认和持久化均不放宽，只有事务固定开销被合并。10ms仅取消息组批，整批DB事务仍独立5秒；有限真实集成验证原子回滚、旧hash/state冲突、重建锁阻挡、唯一收据和ACK失败后重启重放。负载和源码对照逐窗记录，不预写通过或提升比例。

@@ -21,6 +21,22 @@ type receiptCommitReader struct {
 	fetched  []int64
 }
 
+type countedReceiptProcessor struct {
+	Processor
+	batch                   IgnoredLikeBatchProcessor
+	batchCalls, singleCalls int
+}
+
+func (processor *countedReceiptProcessor) Apply(ctx context.Context, projection string, message Message) error {
+	processor.singleCalls++
+	return processor.Processor.Apply(ctx, projection, message)
+}
+
+func (processor *countedReceiptProcessor) ApplyIgnoredLikes(ctx context.Context, projection string, messages []Message) error {
+	processor.batchCalls++
+	return processor.batch.ApplyIgnoredLikes(ctx, projection, messages)
+}
+
 func (source *receiptCommitReader) FetchMessage(ctx context.Context) (kafka.Message, error) {
 	message, err := source.reader.FetchMessage(ctx)
 	if err == nil {
@@ -81,7 +97,8 @@ func TestIntegrationSynchronousCommitBatchReplaysDurableReceiptsAfterRestart(t *
 		worker.reader, worker.ready, worker.topicReady = source, true, nil
 		return source
 	}
-	worker := f.worker(t, topic, "follow-v1", group, f.runtime)
+	firstProcessor := &countedReceiptProcessor{Processor: f.runtime, batch: f.runtime}
+	worker := f.worker(t, topic, "follow-v1", group, firstProcessor)
 	first := attach(worker, true)
 	ctx, cancel := context.WithTimeout(context.Background(), 40*time.Second)
 	defer cancel()
@@ -91,13 +108,14 @@ func TestIntegrationSynchronousCommitBatchReplaysDurableReceiptsAfterRestart(t *
 			break
 		}
 	}
-	if first.calls != 1 || len(worker.commitPending) != 4 || len(first.fetched) != 4 {
+	if first.calls != 1 || len(worker.commitPending) != 4 || len(first.fetched) != 4 || firstProcessor.batchCalls != 1 || firstProcessor.singleCalls != 0 {
 		t.Fatal("unconfirmed batch must retain exactly four durable source messages")
 	}
 	if worker.Close() != nil {
 		t.Fatal("first reader failed to close before restart")
 	}
-	restarted, err := newWorkerWithGroup(cfg.Kafka.Brokers, topic, "follow-v1", group, f.runtime)
+	secondProcessor := &countedReceiptProcessor{Processor: f.runtime, batch: f.runtime}
+	restarted, err := newWorkerWithGroup(cfg.Kafka.Brokers, topic, "follow-v1", group, secondProcessor)
 	if err != nil {
 		t.Fatal("private restarted consumer setup failed")
 	}
@@ -108,12 +126,86 @@ func TestIntegrationSynchronousCommitBatchReplaysDurableReceiptsAfterRestart(t *
 			t.Fatal("private restarted batch failed")
 		}
 	}
-	if len(second.fetched) != 8 || second.fetched[0] != 0 || second.calls != 2 || f.offset(t, topic, group) != 8 {
+	if len(second.fetched) != 8 || second.fetched[0] != 0 || second.calls != 2 || f.offset(t, topic, group) != 8 || secondProcessor.batchCalls != 2 || secondProcessor.singleCalls != 0 {
 		t.Fatal("restart did not replay the durable prefix and commit complete batches")
 	}
 	var count int64
 	if err = db.Raw(`SELECT COUNT(*) FROM tb_community_projection_event
 		WHERE projection='follow-v1' AND event_id IN ? AND state='IGNORED'`, f.events).Scan(&count).Error; err != nil || count != 8 {
 		t.Fatal("durable replay must keep exactly one receipt for every source event")
+	}
+}
+
+func TestIntegrationIgnoredLikeReceiptBatchAtomicityAndRebuildFence(t *testing.T) {
+	db, cfg := consumerDatabase(t)
+	f := newConsumerFixture(t, db, cfg)
+	message := func(version int, liked bool) Message {
+		id := "LIKE:" + f.note + ":" + f.user + ":" + strconv.Itoa(version)
+		f.events = append(f.events, id)
+		source := encodedEvent(id, "LIKE_CHANGED", "BLOG", f.note, version,
+			map[string]any{"blogId": f.note, "userId": f.user, "liked": liked, "version": version})
+		source.Topic, source.Partition, source.Offset = "community.go072.receipt."+f.user, 0, int64(version)
+		return sourceMessage(source)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
+	defer cancel()
+	for _, projection := range []string{communityprojection.Follow, communityprojection.Feed} {
+		t.Run(projection, func(t *testing.T) {
+			first, second, third, fourth := message(1, true), message(2, false), message(3, true), message(4, false)
+			firstEvent, _ := communityprojection.Decode(first.Body)
+			secondEvent, _ := communityprojection.Decode(second.Body)
+			thirdEvent, _ := communityprojection.Decode(third.Body)
+			fourthEvent, _ := communityprojection.Decode(fourth.Body)
+			if err := f.runtime.ApplyIgnoredLikes(ctx, projection, []Message{first}); err != nil {
+				t.Fatal("owned first receipt batch failed")
+			}
+			conflict := message(1, false)
+			if err := f.runtime.ApplyIgnoredLikes(ctx, projection, []Message{second, conflict}); !errors.Is(err, communityprojection.ErrConflict) {
+				t.Fatal("changed durable event hash was accepted")
+			}
+			f.scalar(t, `SELECT COUNT(*) FROM tb_community_projection_event WHERE projection=? AND event_id=?`, 0, projection, secondEvent.EventID)
+			var stored struct{ EventHash []byte }
+			if err := db.Raw(`SELECT event_hash FROM tb_community_projection_event WHERE projection=? AND event_id=?`, projection, firstEvent.EventID).Scan(&stored).Error; err != nil || !bytes.Equal(stored.EventHash, firstEvent.Hash[:]) {
+				t.Fatal("conflicting batch overwrote old canonical receipt")
+			}
+			for range 2 {
+				if err := f.runtime.ApplyIgnoredLikes(ctx, projection, []Message{second, third, second}); err != nil {
+					t.Fatal("valid duplicate batch did not commit idempotently")
+				}
+			}
+			f.scalar(t, `SELECT COUNT(*) FROM tb_community_projection_event WHERE projection=? AND event_id IN ? AND state='IGNORED'`, 3, projection, []string{firstEvent.EventID, secondEvent.EventID, thirdEvent.EventID})
+			if err := db.Exec(`UPDATE tb_community_projection_event SET state='APPLIED' WHERE projection=? AND event_id=?`, projection, firstEvent.EventID).Error; err != nil {
+				t.Fatal("cannot create owned state-conflict fixture")
+			}
+			if err := f.runtime.ApplyIgnoredLikes(ctx, projection, []Message{fourth, first}); !errors.Is(err, communityprojection.ErrConflict) {
+				t.Fatal("wrong durable receipt state was accepted")
+			}
+			f.scalar(t, `SELECT COUNT(*) FROM tb_community_projection_event WHERE projection=? AND event_id=?`, 0, projection, fourthEvent.EventID)
+			if err := db.Exec(`UPDATE tb_community_projection_event SET state='IGNORED' WHERE projection=? AND event_id=?`, projection, firstEvent.EventID).Error; err != nil {
+				t.Fatal("cannot restore exact owned state fixture")
+			}
+			lock := db.WithContext(ctx).Begin()
+			if lock.Error != nil {
+				t.Fatal("cannot acquire independent rebuild fence")
+			}
+			defer lock.Rollback()
+			var control string
+			if err := lock.Raw(`SELECT projection FROM tb_community_projection_control WHERE projection=? FOR UPDATE`, projection).Scan(&control).Error; err != nil || control != projection {
+				t.Fatal("isolated control seed missing")
+			}
+			blocked, stop := context.WithTimeout(ctx, 100*time.Millisecond)
+			err := f.runtime.ApplyIgnoredLikes(blocked, projection, []Message{fourth})
+			stop()
+			if err == nil {
+				t.Fatal("receipt batch crossed the existing rebuild control lock")
+			}
+			if lock.Rollback().Error != nil {
+				t.Fatal("cannot release owned rebuild fence")
+			}
+			f.scalar(t, `SELECT COUNT(*) FROM tb_community_projection_event WHERE projection=? AND event_id=?`, 0, projection, fourthEvent.EventID)
+			if err := f.runtime.ApplyIgnoredLikes(ctx, projection, []Message{fourth}); err != nil {
+				t.Fatal("receipt batch did not recover after fence release")
+			}
+		})
 	}
 }

@@ -8,6 +8,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor
 import datetime as dt
 import hashlib
+import importlib.util
 import json
 import math
 import os
@@ -22,6 +23,9 @@ import urllib.request
 import psutil
 
 
+_cohort_spec = importlib.util.spec_from_file_location('cap10_resource_cohort', Path(__file__).with_name('cap10-cohort.py'))
+cohort = importlib.util.module_from_spec(_cohort_spec)
+_cohort_spec.loader.exec_module(cohort)
 CAP10_PROJECT = 'project-full-stack-cap10'
 PTS_ENGINE_RSS_LIMIT = 6 << 30
 CAP10_LIMITS = {
@@ -30,6 +34,31 @@ CAP10_LIMITS = {
     'kafka': (2_000_000_000, 1 << 30, '9092/tcp', '9401', '/var/lib/kafka/data'),
     'elasticsearch': (2_000_000_000, 1 << 30, '9200/tcp', '9281', '/usr/share/elasticsearch/data'),
 }
+
+
+def pts_engine_resources(remote, now_unix_ms):
+    """Validate the frame's own fixed cohort, never the latest deployment's."""
+    dimensions = cohort.dimensions(remote, {'poolSize': remote.get('poolSize', 512)})
+    engines = remote.get('engines', [])
+    if not isinstance(engines, list) or len(engines) != dimensions['expectedEngines']:
+        raise ValueError('all declared PTS engine resources required')
+    result, seen = [], set()
+    for engine in engines:
+        identity = engine.get('engineId')
+        if not isinstance(identity, str) or not identity or identity in seen:
+            raise ValueError('PTS resource engine identity missing or duplicated')
+        seen.add(identity)
+        resources = engine.get('resources')
+        if not isinstance(resources, dict) or not any(sample.get('intervalValid') is True for sample in engine.get('cpuSamples', [])):
+            raise ValueError('PTS engine native CPU interval unavailable')
+        if not engine.get('complete') and not 0 <= now_unix_ms - engine['lastResourceUnixMs'] <= 15000:
+            raise ValueError('PTS engine resource observation stale')
+        rss = resources['rssBytes']
+        if type(rss) is not int or rss <= 0 or type(resources['logicalCPUs']) is not int or resources['logicalCPUs'] <= 0:
+            raise ValueError('real PTS process RSS/CPU capacity missing')
+        result.append({'engineId': identity, 'rss_bytes': rss, 'rss_limit_bytes': PTS_ENGINE_RSS_LIMIT,
+                       'source': 'JMeter MXBean/proc native resources via authenticated collector', 'resources': resources})
+    return result
 
 
 class NoRedirect(urllib.request.HTTPRedirectHandler):
@@ -358,24 +387,9 @@ def main():
                         remote = frame['summary']
                         row['pts'] = remote
                         if remote.get('startUnixMs') is not None and time.time() * 1000 >= remote['startUnixMs']:
-                            engines = remote.get('engines', [])
-                            if len(engines) != 2:
-                                raise ValueError('both PTS engine resources required')
-                            row['remoteGenerators'] = []
-                            for engine in engines:
-                                resources = engine['resources']
-                                if not isinstance(resources, dict) or not any(sample.get('intervalValid') is True for sample in engine.get('cpuSamples', [])):
-                                    raise ValueError('PTS engine native CPU interval unavailable')
-                                if not engine.get('complete') and not 0 <= time.time() * 1000 - engine['lastResourceUnixMs'] <= 15000:
-                                    raise ValueError('PTS engine resource observation stale')
-                                rss = resources['rssBytes']
-                                if type(rss) is not int or rss <= 0 or type(resources['logicalCPUs']) is not int or resources['logicalCPUs'] <= 0:
-                                    raise ValueError('real PTS process RSS/CPU capacity missing')
-                                row['remoteGenerators'].append({'engineId': engine['engineId'], 'rss_bytes': rss,
-                                     'rss_limit_bytes': PTS_ENGINE_RSS_LIMIT,
-                                    'source': 'JMeter MXBean/proc native resources via authenticated collector',
-                                    'resources': resources})
-                                if rss >= PTS_ENGINE_RSS_LIMIT:
+                            row['remoteGenerators'] = pts_engine_resources(remote, time.time() * 1000)
+                            for engine in row['remoteGenerators']:
+                                if engine['rss_bytes'] >= PTS_ENGINE_RSS_LIMIT:
                                     signal('one remote PTS engine RSS reached its declared 6 GiB cap')
                             if remote.get('stop'):
                                 signal('PTS collector locked a safety/evidence stop')

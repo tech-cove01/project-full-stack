@@ -1,5 +1,6 @@
 """Pure CPU-stat compatibility checks; no Docker, cloud or workload calls."""
 import importlib.util
+import copy
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
@@ -17,6 +18,45 @@ BASE = [('usage_usec', '100000'), ('user_usec', '70000'), ('system_usec', '30000
 
 
 class Checks(unittest.TestCase):
+    def remote(self, count=2, *, explicit=False):
+        value = {'expectedEngines': count, 'engines': [
+            {'engineId': 'synthetic-' + str(i), 'resources': {'rssBytes': 4 << 30, 'logicalCPUs': 2},
+             'cpuSamples': [{'intervalValid': True}], 'lastResourceUnixMs': 100000, 'complete': False}
+            for i in range(count)]}
+        if explicit:
+            value.update(poolSize=4096, ptsConcurrency=4105)
+        return value
+
+    def test_resource_frames_keep_legacy_and_nine_engine_identity(self):
+        self.assertEqual(len(resources.pts_engine_resources(self.remote(), 101000)), 2)
+        rows = resources.pts_engine_resources(self.remote(9, explicit=True), 101000)
+        self.assertEqual(len(rows), 9)
+        self.assertEqual(sum(row['rss_bytes'] for row in rows), 36 << 30)
+        self.assertTrue(all(row['rss_limit_bytes'] == 6 << 30 for row in rows))
+
+    def test_missing_or_duplicate_engines_and_dimension_mismatch_fail(self):
+        for change in [lambda v: v['engines'].pop(),
+                       lambda v: v['engines'][-1].update(engineId=v['engines'][0]['engineId']),
+                       lambda v: v.update(poolSize=4097), lambda v: v.update(expectedEngines=True),
+                       lambda v: v.update(ptsConcurrency=513)]:
+            value = self.remote(9, explicit=True)
+            change(value)
+            with self.assertRaises(ValueError):
+                resources.pts_engine_resources(value, 101000)
+
+    def test_native_freshness_cpu_and_per_engine_rss_rules_unchanged(self):
+        original = self.remote(9, explicit=True)
+        for change in [lambda e: e.update(lastResourceUnixMs=1000),
+                       lambda e: e.update(cpuSamples=[]), lambda e: e['resources'].update(rssBytes=True),
+                       lambda e: e['resources'].update(logicalCPUs=0)]:
+            value = copy.deepcopy(original)
+            change(value['engines'][-1])
+            with self.assertRaises(ValueError):
+                resources.pts_engine_resources(value, 101000)
+        original['engines'][-1]['resources']['rssBytes'] = 6 << 30
+        rows = resources.pts_engine_resources(original, 101000)
+        self.assertEqual(rows[-1]['rss_bytes'], rows[-1]['rss_limit_bytes'])
+
     def sample(self, pairs, quota='400000 100000', version=2):
         paths = ['/sys/fs/cgroup/cpu.stat', '/sys/fs/cgroup/cpu.max']
         suffix = quota + '\n'

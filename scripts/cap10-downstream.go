@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"database/sql"
@@ -11,13 +12,17 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"regexp"
 	platform "runtime"
 	"sort"
+	"strconv"
 	"strings"
+	"sync"
 	"time"
+	"unicode/utf8"
 
 	mysql "github.com/go-sql-driver/mysql"
 	"github.com/segmentio/kafka-go"
@@ -76,6 +81,444 @@ type sample struct {
 	Kafka          *kafkaView `json:"kafka"`
 	Errors         []string   `json:"errors"`
 	Violations     []string   `json:"semanticViolations"`
+}
+
+// The like-vector-v1 accounting engine is deliberately not connected to main,
+// SQL or Kafka yet. A caller must supply a separately audited baseline and may
+// publish a proposal only after its read-only transaction and complete sample
+// succeeded. Legacy observation remains the default and only wired method.
+const (
+	likeVectorMaxVersion = int64(1<<31 - 1) // The business version column is INT.
+	likeVectorMaxEvents  = int64(1 << 20)
+	likeVectorMaxBytes   = int64(1 << 30)
+	likeVectorMaxInt64   = int64(1<<63 - 1)
+)
+
+var (
+	errLikeVectorInput     = errors.New("invalid like vector input")
+	errLikeVectorInvariant = errors.New("like vector invariant violation")
+	errLikeVectorLimit     = errors.New("like vector observation bound exceeded")
+	errLikeVectorStale     = errors.New("stale or consumed like vector proposal")
+	errLikeVectorRejected  = errors.New("like vector sample was not accepted")
+)
+
+type likeVectorPair struct{ NoteID, UserID string }
+type likeVectorFact struct {
+	NoteID, UserID string
+	Version        int64
+	Active         int
+}
+type likeVectorPosition struct {
+	Version int64
+	Present bool
+}
+
+// Fingerprints cover the original nullable control columns, not wall-clock
+// sampling time. The SQL adapter must create these in the same RR snapshot.
+type likeVectorControls [3]string
+type likeVectorLimits struct {
+	MaxNewEvents     int64
+	MaxPendingEvents int64
+	MaxTrackedBytes  int64
+}
+type likeVectorKey struct {
+	EventID, NoteID, UserID string
+	Version                 int64
+	SourceID                uint64
+	SourceHash              [32]byte
+	ReceiptMask             uint8
+	SourceDone              bool
+}
+type likeVectorReceipt struct {
+	Projection, EventID, State string
+	Hash                       [32]byte
+}
+type likeVectorSource struct {
+	ID                         uint64
+	EventID, EventType         string
+	AggregateType, AggregateID string
+	Version                    int64
+	Payload                    json.RawMessage
+	DeliveryStatus             string
+	Receipts                   []likeVectorReceipt
+}
+type likeVectorState struct {
+	generation    uint64
+	positions     map[string]likeVectorPosition
+	pending       map[string]likeVectorKey
+	seen, retired int64
+	trackedBytes  int64
+}
+type likeVectorEngine struct {
+	mu       sync.Mutex
+	pairs    []likeVectorPair
+	users    map[string]string
+	controls likeVectorControls
+	limits   likeVectorLimits
+	state    *likeVectorState
+}
+type likeVectorReadSet struct {
+	owner     *likeVectorEngine
+	base      *likeVectorState
+	positions map[string]likeVectorPosition
+	keys      map[string]likeVectorKey
+	newEvents int64
+	readBytes int64
+}
+type likeVectorView struct {
+	Counts              counts
+	Receipts            []receipt
+	RetiredEvents       int64
+	PendingEvents       int64
+	TrackedBytes        int64
+	ReadBytesUpperBound int64
+}
+type likeVectorProposal struct {
+	owner    *likeVectorEngine
+	base     *likeVectorState
+	next     *likeVectorState
+	view     likeVectorView
+	consumed bool
+}
+type likeVectorCommitGate struct{ SQLCommitted, SampleComplete bool }
+type likeVectorSnapshot struct {
+	Generation                uint64
+	Positions                 map[string]likeVectorPosition
+	Pending                   []likeVectorKey
+	SeenEvents, RetiredEvents int64
+	TrackedBytes              int64
+}
+
+func likeVectorID(value string) bool {
+	parsed, err := strconv.ParseUint(value, 10, 64)
+	return err == nil && parsed > 0 && strconv.FormatUint(parsed, 10) == value
+}
+
+func likeVectorControlValid(controls likeVectorControls) bool {
+	for _, value := range controls {
+		decoded, err := hex.DecodeString(value)
+		if err != nil || len(decoded) != sha256.Size || hex.EncodeToString(decoded) != value {
+			return false
+		}
+	}
+	return true
+}
+
+func newLikeVector(pairs []likeVectorPair, baseline []likeVectorFact, controls likeVectorControls, limits likeVectorLimits) (*likeVectorEngine, error) {
+	if len(pairs) < 1 || len(pairs) > 4096 || !likeVectorControlValid(controls) ||
+		limits.MaxNewEvents < 1 || limits.MaxNewEvents > likeVectorMaxEvents ||
+		limits.MaxPendingEvents < 1 || limits.MaxPendingEvents > likeVectorMaxEvents ||
+		limits.MaxTrackedBytes < 1 || limits.MaxTrackedBytes > likeVectorMaxBytes {
+		return nil, errLikeVectorInput
+	}
+	engine := &likeVectorEngine{pairs: append([]likeVectorPair(nil), pairs...), users: make(map[string]string, len(pairs)), controls: controls, limits: limits}
+	users := make(map[string]bool, len(pairs))
+	for _, pair := range engine.pairs {
+		if !likeVectorID(pair.NoteID) || !likeVectorID(pair.UserID) || engine.users[pair.NoteID] != "" || users[pair.UserID] {
+			return nil, errLikeVectorInput
+		}
+		engine.users[pair.NoteID], users[pair.UserID] = pair.UserID, true
+	}
+	sort.Slice(engine.pairs, func(i, j int) bool { return engine.pairs[i].NoteID < engine.pairs[j].NoteID })
+	positions, err := engine.factPositions(baseline, nil)
+	if err != nil {
+		return nil, err
+	}
+	engine.state = &likeVectorState{positions: positions, pending: make(map[string]likeVectorKey)}
+	return engine, nil
+}
+
+func (engine *likeVectorEngine) factPositions(rows []likeVectorFact, previous map[string]likeVectorPosition) (map[string]likeVectorPosition, error) {
+	if len(rows) > len(engine.pairs) {
+		return nil, fmt.Errorf("%w: extra_fact_rows", errLikeVectorInvariant)
+	}
+	positions := make(map[string]likeVectorPosition, len(engine.pairs))
+	for _, pair := range engine.pairs {
+		positions[pair.NoteID] = likeVectorPosition{}
+	}
+	for _, row := range rows {
+		current, expected := positions[row.NoteID]
+		if !expected || current.Present || row.UserID != engine.users[row.NoteID] || row.Version < 0 ||
+			row.Version > likeVectorMaxVersion || row.Active != int(row.Version%2) {
+			return nil, fmt.Errorf("%w: fact_identity_or_version", errLikeVectorInvariant)
+		}
+		positions[row.NoteID] = likeVectorPosition{Version: row.Version, Present: true}
+	}
+	for note, before := range previous {
+		after := positions[note]
+		if before.Present && !after.Present || after.Version < before.Version {
+			return nil, fmt.Errorf("%w: fact_disappeared_or_regressed", errLikeVectorInvariant)
+		}
+	}
+	return positions, nil
+}
+
+func likeVectorEventID(pair likeVectorPair, version int64) string {
+	return "LIKE:" + pair.NoteID + ":" + pair.UserID + ":" + strconv.FormatInt(version, 10)
+}
+
+// This conservative logical accounting bounds owned key/state allocations; it
+// is not an RSS measurement. External process/resource supervision is required.
+func likeVectorKeyBytes(key likeVectorKey) int64 {
+	return int64(512 + len(key.EventID) + len(key.NoteID) + len(key.UserID))
+}
+
+func (engine *likeVectorEngine) Begin(rows []likeVectorFact, controls likeVectorControls) (*likeVectorReadSet, error) {
+	if engine == nil || controls != engine.controls {
+		return nil, fmt.Errorf("%w: maintenance_control_changed", errLikeVectorInvariant)
+	}
+	engine.mu.Lock()
+	base := engine.state
+	engine.mu.Unlock()
+	positions, err := engine.factPositions(rows, base.positions)
+	if err != nil {
+		return nil, err
+	}
+	var added int64
+	readBytes := base.trackedBytes
+	for _, pair := range engine.pairs {
+		version := positions[pair.NoteID].Version
+		delta := version - base.positions[pair.NoteID].Version
+		if delta > engine.limits.MaxNewEvents-added {
+			return nil, fmt.Errorf("%w: new_event_count", errLikeVectorLimit)
+		}
+		added += delta
+		if delta > 0 {
+			upper := likeVectorKeyBytes(likeVectorKey{EventID: likeVectorEventID(pair, version), NoteID: pair.NoteID, UserID: pair.UserID})
+			if delta > (engine.limits.MaxTrackedBytes-readBytes)/upper {
+				return nil, fmt.Errorf("%w: requested_key_bytes", errLikeVectorLimit)
+			}
+			readBytes += delta * upper
+		}
+	}
+	if added > likeVectorMaxInt64-base.seen {
+		return nil, fmt.Errorf("%w: event_counter_overflow", errLikeVectorLimit)
+	}
+	keys := make(map[string]likeVectorKey, len(base.pending)+int(added))
+	for id, key := range base.pending {
+		keys[id] = key
+	}
+	for _, pair := range engine.pairs {
+		for version := base.positions[pair.NoteID].Version + 1; version <= positions[pair.NoteID].Version; version++ {
+			key := likeVectorKey{EventID: likeVectorEventID(pair, version), NoteID: pair.NoteID, UserID: pair.UserID, Version: version}
+			keys[key.EventID] = key
+		}
+	}
+	return &likeVectorReadSet{owner: engine, base: base, positions: positions, keys: keys, newEvents: added, readBytes: readBytes}, nil
+}
+
+func (set *likeVectorReadSet) Keys() []likeVectorKey {
+	if set == nil {
+		return nil
+	}
+	keys := make([]likeVectorKey, 0, len(set.keys))
+	for _, key := range set.keys {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool { return keys[i].EventID < keys[j].EventID })
+	return keys
+}
+
+// Match production communityprojection.Decode's LIKE canonical payload and its
+// six-field envelope hash. Golden fixtures are obtained from that actual codec,
+// not generated by this helper. No internal import may break single-file build.
+func likeVectorSourceHash(key likeVectorKey, row likeVectorSource) ([32]byte, error) {
+	var zero [32]byte
+	if row.ID == 0 || row.EventID != key.EventID || row.EventType != "LIKE_CHANGED" || row.AggregateType != "BLOG" ||
+		row.AggregateID != key.NoteID || row.Version != key.Version || len(row.Payload) == 0 || len(row.Payload) > 1<<20 || !utf8.Valid(row.Payload) {
+		return zero, fmt.Errorf("%w: source_identity", errLikeVectorInvariant)
+	}
+	decoder := json.NewDecoder(bytes.NewReader(row.Payload))
+	token, err := decoder.Token()
+	if err != nil || token != json.Delim('{') {
+		return zero, fmt.Errorf("%w: source_payload", errLikeVectorInvariant)
+	}
+	fields := make(map[string]json.RawMessage, 4)
+	for decoder.More() {
+		token, err := decoder.Token()
+		name, valid := token.(string)
+		if err != nil || !valid || name != "blogId" && name != "userId" && name != "liked" && name != "version" {
+			return zero, fmt.Errorf("%w: source_payload_field", errLikeVectorInvariant)
+		}
+		if _, duplicate := fields[name]; duplicate {
+			return zero, fmt.Errorf("%w: duplicate_source_payload_field", errLikeVectorInvariant)
+		}
+		var raw json.RawMessage
+		if decoder.Decode(&raw) != nil || bytes.Equal(raw, []byte("null")) {
+			return zero, fmt.Errorf("%w: source_payload_value", errLikeVectorInvariant)
+		}
+		fields[name] = raw
+	}
+	if token, err = decoder.Token(); err != nil || token != json.Delim('}') || len(fields) != 4 {
+		return zero, fmt.Errorf("%w: source_payload_object", errLikeVectorInvariant)
+	}
+	var extra any
+	if decoder.Decode(&extra) != io.EOF {
+		return zero, fmt.Errorf("%w: extra_source_payload", errLikeVectorInvariant)
+	}
+	var note, user string
+	var liked bool
+	var version int64
+	if json.Unmarshal(fields["blogId"], &note) != nil || json.Unmarshal(fields["userId"], &user) != nil ||
+		json.Unmarshal(fields["liked"], &liked) != nil || json.Unmarshal(fields["version"], &version) != nil ||
+		note != key.NoteID || user != key.UserID || version != key.Version || liked != (version%2 == 1) {
+		return zero, fmt.Errorf("%w: source_payload_mismatch", errLikeVectorInvariant)
+	}
+	payload, err := json.Marshal(struct {
+		NoteID  string `json:"blogId"`
+		UserID  string `json:"userId"`
+		Liked   bool   `json:"liked"`
+		Version int64  `json:"version"`
+	}{note, user, liked, version})
+	if err != nil {
+		return zero, err
+	}
+	body, err := json.Marshal(struct {
+		EventID       string          `json:"eventId"`
+		EventType     string          `json:"eventType"`
+		AggregateType string          `json:"aggregateType"`
+		AggregateID   string          `json:"aggregateId"`
+		Version       int64           `json:"version"`
+		Payload       json.RawMessage `json:"payload"`
+	}{row.EventID, row.EventType, row.AggregateType, row.AggregateID, version, payload})
+	if err != nil {
+		return zero, err
+	}
+	return sha256.Sum256(body), nil
+}
+
+func (set *likeVectorReadSet) Evaluate(rows []likeVectorSource) (*likeVectorProposal, error) {
+	if set == nil || set.owner == nil || len(rows) != len(set.keys) {
+		return nil, fmt.Errorf("%w: incomplete_source_refresh", errLikeVectorInvariant)
+	}
+	engine := set.owner
+	engine.mu.Lock()
+	stale := engine.state != set.base
+	engine.mu.Unlock()
+	if stale {
+		return nil, errLikeVectorStale
+	}
+	next := &likeVectorState{positions: set.positions, pending: make(map[string]likeVectorKey), seen: set.base.seen + set.newEvents, retired: set.base.retired}
+	view := likeVectorView{Counts: counts{Events: next.seen, Done: next.retired}, ReadBytesUpperBound: set.readBytes}
+	for _, group := range []string{"follow-v1", "feed-v1", "search-v1"} {
+		view.Receipts = append(view.Receipts, receipt{Projection: group, Ignored: next.retired})
+	}
+	seen, sourceIDs := make(map[string]bool, len(rows)), make(map[uint64]bool, len(rows))
+	for _, row := range rows {
+		key, requested := set.keys[row.EventID]
+		if !requested || seen[row.EventID] || sourceIDs[row.ID] {
+			return nil, fmt.Errorf("%w: extra_or_duplicate_source", errLikeVectorInvariant)
+		}
+		seen[row.EventID], sourceIDs[row.ID] = true, true
+		hash, err := likeVectorSourceHash(key, row)
+		if err != nil {
+			return nil, err
+		}
+		if key.SourceID != 0 && (key.SourceID != row.ID || key.SourceHash != hash) {
+			return nil, fmt.Errorf("%w: immutable_source_changed", errLikeVectorInvariant)
+		}
+		if key.SourceDone && row.DeliveryStatus != "DONE" {
+			return nil, fmt.Errorf("%w: done_source_regressed", errLikeVectorInvariant)
+		}
+		key.SourceID, key.SourceHash = row.ID, hash
+		key.SourceDone = row.DeliveryStatus == "DONE"
+		switch row.DeliveryStatus {
+		case "PENDING":
+			view.Counts.Pending++
+		case "PROCESSING":
+			view.Counts.Processing++
+		case "DONE":
+			view.Counts.Done++
+		default:
+			return nil, fmt.Errorf("%w: source_review_or_invalid_status", errLikeVectorInvariant)
+		}
+		if len(row.Receipts) > 3 {
+			return nil, fmt.Errorf("%w: excess_receipts", errLikeVectorInvariant)
+		}
+		present := [3]bool{}
+		var mask uint8
+		for _, actual := range row.Receipts {
+			index := -1
+			for i := range view.Receipts {
+				if actual.Projection == view.Receipts[i].Projection {
+					index = i
+				}
+			}
+			if index < 0 || present[index] || actual.EventID != key.EventID || actual.Hash != hash || actual.State != "IGNORED" {
+				return nil, fmt.Errorf("%w: receipt_identity_hash_or_state", errLikeVectorInvariant)
+			}
+			present[index] = true
+			mask |= 1 << uint(index)
+			view.Receipts[index].Ignored++
+		}
+		if mask&key.ReceiptMask != key.ReceiptMask {
+			return nil, fmt.Errorf("%w: immutable_receipt_disappeared", errLikeVectorInvariant)
+		}
+		key.ReceiptMask = mask
+		if row.DeliveryStatus == "DONE" && present == [3]bool{true, true, true} {
+			next.retired++
+		} else {
+			next.pending[key.EventID] = key
+			next.trackedBytes += likeVectorKeyBytes(key)
+			if int64(len(next.pending)) > engine.limits.MaxPendingEvents || next.trackedBytes > engine.limits.MaxTrackedBytes {
+				return nil, fmt.Errorf("%w: unretired_state", errLikeVectorLimit)
+			}
+		}
+	}
+	for index := range view.Receipts {
+		view.Receipts[index].Missing = next.seen - view.Receipts[index].Ignored
+	}
+	view.RetiredEvents, view.PendingEvents, view.TrackedBytes = next.retired, int64(len(next.pending)), next.trackedBytes
+	return &likeVectorProposal{owner: engine, base: set.base, next: next, view: view}, nil
+}
+
+func (proposal *likeVectorProposal) View() likeVectorView {
+	if proposal == nil {
+		return likeVectorView{}
+	}
+	view := proposal.view
+	view.Receipts = append([]receipt(nil), view.Receipts...)
+	return view
+}
+
+// The gates are set by the future SQL adapter only after the actual read-only
+// commit and complete SQL+Kafka sample succeed. Rejected proposals are consumed;
+// retry must read/evaluate fresh evidence, never later relabel a failed sample.
+func (engine *likeVectorEngine) Commit(proposal *likeVectorProposal, gate likeVectorCommitGate) error {
+	if engine == nil || proposal == nil || proposal.owner != engine {
+		return errLikeVectorStale
+	}
+	engine.mu.Lock()
+	defer engine.mu.Unlock()
+	if proposal.consumed || engine.state != proposal.base {
+		return errLikeVectorStale
+	}
+	proposal.consumed = true
+	if !gate.SQLCommitted || !gate.SampleComplete {
+		return errLikeVectorRejected
+	}
+	if engine.state.generation == ^uint64(0) {
+		return fmt.Errorf("%w: generation_overflow", errLikeVectorLimit)
+	}
+	proposal.next.generation = engine.state.generation + 1
+	engine.state = proposal.next
+	return nil
+}
+
+func (engine *likeVectorEngine) Snapshot() likeVectorSnapshot {
+	engine.mu.Lock()
+	defer engine.mu.Unlock()
+	state := engine.state
+	value := likeVectorSnapshot{Generation: state.generation, Positions: make(map[string]likeVectorPosition, len(state.positions)),
+		SeenEvents: state.seen, RetiredEvents: state.retired, TrackedBytes: state.trackedBytes}
+	for note, position := range state.positions {
+		value.Positions[note] = position
+	}
+	for _, key := range state.pending {
+		value.Pending = append(value.Pending, key)
+	}
+	sort.Slice(value.Pending, func(i, j int) bool { return value.Pending[i].EventID < value.Pending[j].EventID })
+	return value
 }
 
 func read(path string, value any) error {

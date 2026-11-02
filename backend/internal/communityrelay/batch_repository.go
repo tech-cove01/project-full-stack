@@ -22,6 +22,10 @@ var ErrInvalidBatch = errors.New("invalid community outbox batch")
 // Events are returned only after a successful commit; a commit error does not
 // prove that the server rolled back, so the caller must not publish that slice.
 func (repository *Repository) ClaimBatch(ctx context.Context, limit int) ([]Event, error) {
+	return repository.claimBatch(ctx, limit, 0)
+}
+
+func (repository *Repository) claimBatch(ctx context.Context, limit, maxBytes int) ([]Event, error) {
 	if limit < 1 || limit > MaxBatchSize {
 		return nil, ErrInvalidBatch
 	}
@@ -35,6 +39,7 @@ func (repository *Repository) ClaimBatch(ctx context.Context, limit int) ([]Even
 			ORDER BY id LIMIT ? FOR UPDATE SKIP LOCKED`, limit).Scan(&rows).Error; err != nil {
 			return err
 		}
+		remaining := uint64(maxBytes)
 		for _, event := range rows {
 			if event.Attempts >= maxAttempts {
 				if err := fenced(tx.Exec(`UPDATE tb_community_outbox SET delivery_status='NEEDS_REVIEW',
@@ -44,6 +49,18 @@ func (repository *Repository) ClaimBatch(ctx context.Context, limit int) ([]Even
 				}
 				continue
 			}
+			oversizedSingleton := false
+			if maxBytes > 0 {
+				size := eventEncodedUpperBound(event)
+				if size > remaining {
+					if len(claimed) > 0 {
+						break
+					}
+					oversizedSingleton = true
+				} else {
+					remaining -= size
+				}
+			}
 			if err := fenced(tx.Exec(`UPDATE tb_community_outbox
 				SET delivery_status='PROCESSING', attempts=attempts+1,
 				    lease_until=DATE_ADD(NOW(3), INTERVAL ? SECOND), last_error=NULL
@@ -52,6 +69,9 @@ func (repository *Repository) ClaimBatch(ctx context.Context, limit int) ([]Even
 			}
 			event.Attempts++
 			claimed = append(claimed, event)
+			if oversizedSingleton {
+				break
+			}
 		}
 		return nil
 	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})

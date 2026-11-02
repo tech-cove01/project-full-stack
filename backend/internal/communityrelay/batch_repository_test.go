@@ -89,7 +89,8 @@ func (rows *batchRows) Next(values []driver.Value) error {
 	}
 	event := rows.rows[rows.index]
 	rows.index++
-	copy(values, []driver.Value{int64(event.ID), event.EventID, "FOLLOW", "42", int64(1), "FOLLOW_CHANGED", []byte(`{}`), int64(event.Attempts)})
+	copy(values, []driver.Value{int64(event.ID), event.EventID, event.AggregateType, event.AggregateID,
+		int64(event.AggregateVersion), event.EventType, event.Payload, int64(event.Attempts)})
 	return nil
 }
 

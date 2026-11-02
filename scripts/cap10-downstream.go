@@ -100,6 +100,71 @@ func beneath(path, root string) bool {
 	return err == nil && rel != "." && rel != ".." && !strings.HasPrefix(rel, ".."+string(filepath.Separator)) && !filepath.IsAbs(rel)
 }
 
+// Historical manifests without poolSize keep their original 512-note scope.
+// Reading a new deployment must never relabel an old window's observation.
+func likeNotePool(body []byte) ([]string, int, error) {
+	var manifest struct {
+		Project  string          `json:"project"`
+		Status   string          `json:"status"`
+		PoolSize json.RawMessage `json:"poolSize"`
+		Users    json.RawMessage `json:"users"`
+		Notes    json.RawMessage `json:"multiNotes"`
+		Pairs    json.RawMessage `json:"multiRelations"`
+		UserIDs  json.RawMessage `json:"userIds"`
+		Multi    []string        `json:"multiNoteIds"`
+	}
+	if json.Unmarshal(body, &manifest) != nil || manifest.Project != "project-full-stack-cap10" || manifest.Status != "READY" {
+		return nil, 0, errors.New("public like fixture invalid")
+	}
+	count := 512
+	if len(manifest.PoolSize) > 0 && json.Unmarshal(manifest.PoolSize, &count) != nil {
+		return nil, 0, errors.New("fixture pool must be a bounded integer")
+	}
+	if count < 1 || count > 4096 || string(manifest.PoolSize) == "null" || len(manifest.Multi) != count {
+		return nil, 0, errors.New("fixture pool cardinality differs")
+	}
+	for _, raw := range []json.RawMessage{manifest.Users, manifest.Notes, manifest.Pairs} {
+		if len(raw) > 0 {
+			var declared int
+			if json.Unmarshal(raw, &declared) != nil || declared != count {
+				return nil, 0, errors.New("fixture declared counts differ")
+			}
+		}
+	}
+	identities := [][]string{manifest.Multi}
+	if len(manifest.UserIDs) > 0 {
+		var users []string
+		if json.Unmarshal(manifest.UserIDs, &users) != nil || len(users) != count {
+			return nil, 0, errors.New("fixture user pool differs")
+		}
+		identities = append(identities, users)
+	}
+	for _, ids := range identities {
+		seen := make(map[string]bool, count)
+		idPattern := regexp.MustCompile(`^[1-9][0-9]{0,19}$`)
+		for _, id := range ids {
+			if !idPattern.MatchString(id) || seen[id] {
+				return nil, 0, errors.New("synthetic identity pool invalid")
+			}
+			seen[id] = true
+		}
+	}
+	return manifest.Multi, count, nil
+}
+
+func likeFixturePath(path, root string) (string, error) {
+	abs, err := filepath.Abs(path)
+	if err != nil || abs != path || filepath.Base(abs) != "fixture.json" || filepath.Dir(filepath.Dir(abs)) != root || !regexp.MustCompile(`^like-fixture(?:-[a-z0-9-]{1,80})?$`).MatchString(filepath.Base(filepath.Dir(abs))) {
+		return "", errors.New("fixture outside its registered public namespace")
+	}
+	real, err := filepath.EvalSymlinks(abs)
+	realRoot, rootErr := filepath.EvalSymlinks(root)
+	if err != nil || rootErr != nil || !beneath(real, realRoot) {
+		return "", errors.New("fixture resolves outside public evidence")
+	}
+	return abs, nil
+}
+
 func sqlSnapshot(ctx context.Context, db *sql.DB, after int64, notes []string) (*sqlView, error) {
 	view := &sqlView{StartedAt: time.Now().UTC(), AfterWatermark: after}
 	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
@@ -372,24 +437,18 @@ func mainRun() error {
 		}
 		fixture = *likeFixture
 	}
-	if filepath.Clean(fixture) != filepath.Join(root, "like-fixture", "fixture.json") {
-		return errors.New("fixture outside fixed public path")
+	fixture, err = likeFixturePath(fixture, root)
+	if err != nil {
+		return err
 	}
-	var manifest struct {
-		Project string   `json:"project"`
-		Status  string   `json:"status"`
-		Multi   []string `json:"multiNoteIds"`
+	fixtureBytes, err := os.ReadFile(fixture)
+	if err != nil {
+		return errors.New("public like fixture unavailable")
 	}
-	if read(fixture, &manifest) != nil || manifest.Project != "project-full-stack-cap10" || manifest.Status != "READY" || len(manifest.Multi) != 512 {
-		return errors.New("public like fixture invalid")
-	}
-	notes := manifest.Multi
-	seen := map[string]bool{}
-	for _, id := range notes {
-		if !regexp.MustCompile(`^[1-9][0-9]{0,19}$`).MatchString(id) || seen[id] {
-			return errors.New("synthetic note pool invalid")
-		}
-		seen[id] = true
+	fixtureDigest := sha256.Sum256(fixtureBytes)
+	notes, poolSize, err := likeNotePool(fixtureBytes)
+	if err != nil {
+		return err
 	}
 	out, err := filepath.Abs(*output)
 	if err != nil || !beneath(out, root) {
@@ -454,7 +513,7 @@ func mainRun() error {
 		time.Sleep(5 * time.Second)
 	}
 	_ = initialDB.Close()
-	if err = save(filepath.Join(out, "ready.json"), map[string]any{"at": time.Now().UTC(), "ready": ready, "baseline": initial, "startupAttempts": startupAttempts, "observerPid": os.Getpid(), "fixedProject": "project-full-stack-cap10", "noteCount": len(notes), "fixtureSHA256": fileSHA(fixture), "initialBudgetSeconds": 30, "initialReadTimeoutSeconds": 15, "loadBudgetSeconds": 4, "loadReadTimeoutSeconds": 3, "scope": "bounded pre-load full-history readiness; initial cumulative LIKE baseline requires no pre-existing pending/receipt/park/lag before load. In-load observation cadence and budgets are unchanged"}); err != nil {
+	if err = save(filepath.Join(out, "ready.json"), map[string]any{"at": time.Now().UTC(), "ready": ready, "baseline": initial, "startupAttempts": startupAttempts, "observerPid": os.Getpid(), "fixedProject": "project-full-stack-cap10", "noteCount": len(notes), "poolSize": poolSize, "fixtureSHA256": hex.EncodeToString(fixtureDigest[:]), "initialBudgetSeconds": 30, "initialReadTimeoutSeconds": 15, "loadBudgetSeconds": 4, "loadReadTimeoutSeconds": 3, "scope": "bounded pre-load full-history readiness; initial cumulative LIKE baseline requires no pre-existing pending/receipt/park/lag before load. In-load observation cadence and budgets are unchanged"}); err != nil {
 		return errors.New("ready evidence write failed")
 	}
 	if !ready {

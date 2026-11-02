@@ -496,6 +496,77 @@ def authority_zero_start(root, command, previous, terminal, context):
     return True
 
 
+def warm_only_layout(root, command, previous):
+    """A failed warm may have a real report while setup/stable never existed."""
+    tag = command.get('tag', '')
+    if not (re.fullmatch(r'[SH][1-9][0-9]*', tag) and command.get('loadBackend') == 'pts'
+            and previous.get('passed') is False and type(previous.get('wrapperExit')) is int
+            and previous['wrapperExit'] != 0):
+        return None
+    load = Path(root) / (tag + '-load')
+    result_path, marker = load / 'result.json', load / 'warm-process.json'
+    if load.is_symlink() or not result_path.is_file() or result_path.is_symlink() or not marker.is_file() or marker.is_symlink():
+        return None
+    result, process = read(result_path), read(marker)
+    forbidden = ('setup', 'stableExit', 'stableStartedAt', 'stableEndedAt', 'stableWrapperStartedAt',
+                 'stableWrapperEndedAt', 'stableCommandElapsedMs', 'result')
+    if not (result.get('loadBackend') == 'pts' and type(result.get('warmExit')) is int and result['warmExit'] != 0
+            and result.get('nativeScenario', {}).get('complete') is False and not any(result.get(key) is not None for key in forbidden)
+            and process.get('phase') == 'warm' and process.get('backend') == 'pts'
+            and type(process.get('controller_pid')) is int and process['controller_pid'] > 0
+            and type(process.get('controller_started_unix_ms')) in (int, float)):
+        return None
+    absent = [load / name for name in ('stable-process.json', 'stable-pts', 'stable-summary.json',
+        'stable-console.txt', 'stable-private-input.json', 'stable-private-input-removed.json',
+        'stable-db-before.json', 'stable-db-after.json', 'stable-capacity-before.json',
+        'stable-capacity-after.json', 'before.json', 'after.json', 'setup-transaction.json', 'setup-reconcile.json')]
+    if any(path.exists() or path.is_symlink() for path in absent) or any(path.name.startswith('stable') for path in load.rglob('*')):
+        return None
+    current = load / 'process.json'
+    if current.exists() and (current.is_symlink() or read(current) != process):
+        return None
+    starts = list((load / 'warm-pts/api').glob('*StartTestingJMeterScene.json'))
+    if len(starts) != 1:
+        return None
+    return {'absentPaths': [path.relative_to(root).as_posix() for path in absent],
+            'warmStartAuditPath': starts[0].relative_to(root).as_posix()}
+
+
+def authority_warm_only(root, command, previous, terminal, context):
+    layout = warm_only_layout(root, command, previous)
+    reports = terminal.get('reports', [])
+    require(layout is not None and terminal.get('noStablePaths') == layout and len(reports) == 1
+            and reports[0].get('phase') == 'warm', 'warm-only recovery requires failed warm and no setup or stable evidence')
+    for key, suffix in (('originalCommand', '-command.json'), ('originalStage', '-stage.json'), ('originalResult', '-load/result.json')):
+        reference = {'path': command['tag'] + suffix, 'sha256': sha(Path(root) / (command['tag'] + suffix))}
+        require(terminal.get(key) == reference, 'warm-only recovery must bind the exact original ' + key)
+        value = _authority_ref(root, reference)
+        require(key not in ('originalCommand', 'originalStage') or value == (command if key == 'originalCommand' else previous), 'warm-only original bytes differ')
+    process = _authority_ref(root, terminal['warmProcess'])
+    require(terminal['warmProcess']['path'] == command['tag'] + '-load/warm-process.json', 'warm process must be its original marker')
+    require(any(owner.get('pid') == process['controller_pid'] and abs(owner.get('created', 0) - process['controller_started_unix_ms'] / 1000) <= .002
+                and owner.get('alive') is False and owner.get('identityChecked') is True for owner in terminal.get('owners', [])), 'exact warm controller must be stopped')
+    report = reports[0]
+    require(report.get('ended') is True and isinstance(report.get('reportId'), str) and report['reportId']
+            and isinstance(report.get('startTimeRaw'), str) and isinstance(report.get('endTimeRaw'), str)
+            and len(report['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(report['endTimeRaw']) >= dt.datetime.fromisoformat(report['startTimeRaw']), 'warm-only phase needs its real report EndTime')
+    start_ref = report['originalStartAudit']; start = _authority_ref(root, start_ref)
+    scene = read(Path(root) / context['active']['ptsAdmissionPath']).get('sceneId')
+    require(start_ref['path'] == layout['warmStartAuditPath'] and start.get('action') == 'StartTestingJMeterScene'
+            and start.get('sceneId') == scene and start.get('httpStatus') == 200
+            and start.get('sanitizedRawResponse', {}).get('Success') is True
+            and start['sanitizedRawResponse'].get('ReportId') == report['reportId'], 'warm report must match the unique original Start acknowledgement')
+    original_report = _authority_ref(root, terminal['warmReport'])
+    require(all(original_report.get(key) == report.get(key) for key in ('reportId', 'ended', 'startTimeRaw', 'endTimeRaw', 'requestId')), 'warm report projection differs from its bound original')
+    audit = _authority_ref(root, terminal['warmReportAudit']); raw = audit.get('sanitizedRawResponse', {})
+    overview = raw.get('ReportOverView', {})
+    require(audit.get('action') == 'GetJMeterReportDetails' and audit.get('httpStatus') == 200 and raw.get('Success') is True
+            and isinstance(raw.get('RequestId'), str) and raw['RequestId'] and raw['RequestId'] == report.get('requestId')
+            and overview.get('StartTime') == report['startTimeRaw'] and overview.get('EndTime') == report['endTimeRaw']
+            and overview.get('ReportId', report['reportId']) == report['reportId'], 'warm-only EndTime needs the real signed report response')
+    return True
+
+
 def authority_search_state(root, context):
     records = [c for c in history(root) if _active_command(c, context) and c['tag'].startswith('S') and c['kind'] != 'candidate']
     relevant = [(c, stage(root, c)) for c in records]
@@ -538,6 +609,8 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
         if terminal.get('terminationKind') == 'zero_start':
             authority_zero_start(root, previous, old_stage, terminal, context)
             require(instant(terminal['zeroStartObservedAt']) <= admitted, 'zero-start observation must precede its window admission')
+        elif terminal.get('terminationKind') == 'warm_only':
+            authority_warm_only(root, previous, old_stage, terminal, context)
         else:
             require({r.get('phase') for r in reports} == {'warm', 'stable'} and len(reports) == 2 and all(r.get('ended') is True and isinstance(r.get('reportId'), str) and r['reportId'] and isinstance(r.get('startTimeRaw'), str) and isinstance(r.get('endTimeRaw'), str) and len(r['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(r['endTimeRaw']) >= dt.datetime.fromisoformat(r['startTimeRaw']) for r in reports), 'both previous PTS phases require real matching report EndTime')
         for report in reports:

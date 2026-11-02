@@ -1,0 +1,7 @@
+# 仅预热任务已启动的接续
+
+S14在warm阶段因PTS另一引擎未就绪、脚本90秒准备期限到达而退出，stable未启动；原失败、缺失native及原计数保持。真实已启动的warm报告SIQS77HR已核对实际EndTime、所有自有进程退出，新的完整对账通过；28份旧原件SHA前后一致，原锁另存。
+
+接续只允许绑定原command/stage/result及warm进程标记：warmExit非0、主窗和setup均未创建、stable所有文件/目录/Start审计不存在。终态仅含唯一原warm Start ACK匹配的真实报告，额外绑定实际GetReportDetails原件和原签名响应；不编造stable报告。已有stable证据仍走原两个报告判据，原零wrapper规则保持。
+
+策略61项纯检查通过并做非作者审查。此为负载前失败的生命周期接续，不修改JMX、collector、原生完整性、50ms时序、P95/P99、恢复或积压标准；后续同1000/s候选成功后才允许正式两轮。

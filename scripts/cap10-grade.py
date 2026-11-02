@@ -526,7 +526,6 @@ def warm_only_layout(root, command, previous):
             and type(process.get('controller_started_unix_ms')) in (int, float)):
         return None
     if missing_result and not any(owner.get('pid') == process['controller_pid']
-            and abs(owner.get('created', 0) - process['controller_started_unix_ms'] / 1000) <= .002
             for owner in previous['knownOwnedProcesses']):
         return None
     absent = [load / name for name in ('stable-process.json', 'stable-pts', 'stable-summary.json',
@@ -579,8 +578,18 @@ def authority_warm_only(root, command, previous, terminal, context):
         require(key not in ('originalCommand', 'originalStage') or value == (command if key == 'originalCommand' else previous), 'warm-only original bytes differ')
     process = _authority_ref(root, terminal['warmProcess'])
     require(terminal['warmProcess']['path'] == command['tag'] + '-load/warm-process.json', 'warm process must be its original marker')
-    require(any(owner.get('pid') == process['controller_pid'] and abs(owner.get('created', 0) - process['controller_started_unix_ms'] / 1000) <= .002
-                and owner.get('alive') is False and owner.get('identityChecked') is True for owner in terminal.get('owners', [])), 'exact warm controller must be stopped')
+    if missing:
+        # Node records its spawn wall clock in the marker. Only the registered
+        # psutil birth time identifies this exact controller process.
+        registered = [owner for owner in previous['knownOwnedProcesses'] if owner.get('pid') == process['controller_pid']]
+        require(len(registered) == 1 and type(registered[0].get('created')) in (int, float)
+                and math.isfinite(registered[0]['created']) and registered[0]['created'] > 0
+                and any(owner.get('pid') == registered[0]['pid'] and owner.get('created') == registered[0]['created']
+                        and owner.get('alive') is False and owner.get('identityChecked') is True
+                        for owner in terminal.get('owners', [])), 'exact registered warm controller must be stopped')
+    else:
+        require(any(owner.get('pid') == process['controller_pid'] and abs(owner.get('created', 0) - process['controller_started_unix_ms'] / 1000) <= .002
+                    and owner.get('alive') is False and owner.get('identityChecked') is True for owner in terminal.get('owners', [])), 'exact warm controller must be stopped')
     if zero_cancel:
         return authority_warm_zero_native_cancel(root, command, previous, terminal, context, layout)
     report = reports[0]
@@ -657,13 +666,22 @@ def authority_warm_zero_native_cancel(root, command, previous, terminal, context
             'any native register, batch, completion or additional journal record forbids zero-native cancellation')
     identity = journal[0].get('configuration', {})
     identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()).hexdigest()
+    packet = _authority_ref(root, {'path': context['active']['ptsPacketPath'], 'sha256': command['ptsPacketSHA256']})
+    sources = packet.get('sourceSHA256', {})
+    require(packet.get('version') == 1 and set(sources) == {'cap10-pts-prepare.py', 'cap10-jmeter.mjs',
+            'cap10-jmeter.groovy', 'cap10-pts-contract.groovy'}
+            and all(re.fullmatch(r'[a-f0-9]{64}', str(digest))
+                    and digest == command.get('scriptHashes', {}).get('pts/' + name)
+                    for name, digest in sources.items())
+            and re.fullmatch(r'[a-f0-9]{64}', str(packet.get('manifest', {}).get('scriptSHA256', '')))
+            and packet['manifest']['scriptSHA256'] == identity.get('scriptSHA256'),
+            'collector bundle identity must match the original command-bound packet manifest and its source files')
     summary_ref = terminal['nativeSummary']; latest = _authority_ref(root, summary_ref); summary = latest.get('summary', {})
     require(summary_ref['path'] == prefix + 'latest.json' and journal[0].get('hash') == identity_hash == summary.get('hash')
             and all(summary.get(key) == value for key, value in identity.items())
             and identity.get('phase') == 'warm' and identity.get('rate') == command.get('warmRate')
             and identity.get('seconds') == command.get('warmSeconds') and identity.get('expectedEngines') == 2
             and identity.get('fixtureSHA256') == command.get('fixtureSHA256')
-            and identity.get('scriptSHA256') == command.get('scriptHashes', {}).get('pts/cap10-jmeter.groovy')
             and isinstance(identity.get('runId'), str) and identity['runId']
             and summary.get('startUnixMs') is None and summary.get('endUnixMs') is None
             and summary.get('stop') is True and summary.get('complete') is False and summary.get('engines') == []

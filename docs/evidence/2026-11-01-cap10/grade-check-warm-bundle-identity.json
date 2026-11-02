@@ -1,0 +1,12 @@
+{
+  "task": "CAP-10 independent synthetic policy checks",
+  "at": "2026-11-02T14:46:05.572988+00:00",
+  "passed": true,
+  "testsRun": 69,
+  "failures": [],
+  "errors": [],
+  "gradeSHA256": "1e644c7341c8c9ad22fb226c88f5f5ed4d5446094e9b98f607f780e7c7a0e1dc",
+  "gradeBytesStable": true,
+  "checkerSHA256": "390cca1e55b6bf740b8cdaab8125dfcc7691acc721e9d83987bb3e24ee951649",
+  "scope": "Synthetic files in generated isolated workspace directories only; no real reservations, services, SQL, HTTP or load."
+}

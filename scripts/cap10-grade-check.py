@@ -1,5 +1,6 @@
 """Synthetic CAP10 policy counterexamples; no services, SQL, HTTP or workload."""
 import argparse
+import copy
 import datetime as dt
 import hashlib
 import importlib.util
@@ -1284,6 +1285,26 @@ class Checks(unittest.TestCase):
             grade.authority_warm_only(directory, command, previous, terminal, {'active': active})
         result.unlink()
 
+    def test_authority_warm_missing_result_uses_registered_birth_not_spawn_wall_clock(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_native_cancel_fixture()
+        marker_path = directory / 'S7-load/warm-process.json'; marker = grade.read(marker_path)
+        # Actual S18 controller: birth 1793628864.25, Node spawn stamp
+        # 1793628865063ms. These differ by .813s and are different clocks.
+        marker['controller_started_unix_ms'] = (previous['knownOwnedProcesses'][0]['created'] + .813) * 1000
+        marker_path.write_text(json.dumps(marker), encoding='utf-8')
+        self.put('linux/S7-load/process.json', marker)
+        terminal['warmProcess']['sha256'] = grade.sha(marker_path)
+        self.assertIsNotNone(grade.warm_only_layout(directory, command, previous))
+        self.assertTrue(grade.authority_warm_only(directory, command, previous, terminal, {'active': active}))
+        wrong = {**terminal, 'owners': [{**terminal['owners'][0],
+            'created': marker['controller_started_unix_ms'] / 1000}]}
+        with self.assertRaises(ValueError):
+            grade.authority_warm_only(directory, command, previous, wrong, {'active': active})
+        path = self.put('linux/terminal-before-S8.json', terminal)
+        admission = grade.read(directory / 'admission-S8.json'); admission['termination']['sha256'] = grade.sha(path)
+        self.put('linux/admission-S8.json', admission)
+        self.assertEqual(self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)['tag'], 'S8')
+
     def test_authority_warm_missing_result_rejects_setup_owner_report_and_freshness_gaps(self):
         directory, api, active, command, previous, terminal = self.authority_missing_warm_result_fixture()
         for relative in ('stable-console.txt', 'setup-extra.json', 'setup/new-proof.json', 'before.json'):
@@ -1305,8 +1326,23 @@ class Checks(unittest.TestCase):
 
     def authority_zero_native_cancel_fixture(self):
         directory, api, active, command, previous, terminal = self.authority_missing_warm_result_fixture()
+        names = ('cap10-pts-prepare.py', 'cap10-jmeter.mjs', 'cap10-jmeter.groovy', 'cap10-pts-contract.groovy')
+        raw_sources = {name: (REPO / 'scripts/pts' / name).read_bytes() for name in names}
+        sources = {name: hashlib.sha256(raw).hexdigest() for name, raw in raw_sources.items()}
+        bundle = raw_sources['cap10-pts-contract.groovy'] + b'\n' + raw_sources['cap10-jmeter.groovy']
+        bundle_hash = hashlib.sha256(bundle).hexdigest()
+        self.assertNotEqual(bundle_hash, sources['cap10-jmeter.groovy'])
+        packet = {'version': 1, 'sourceSHA256': sources,
+            'manifest': {'version': 1, 'generator': 'pts-jmeter', 'scriptSHA256': bundle_hash,
+                'jmxSHA256': hashlib.sha256(b'synthetic frozen JMX').hexdigest(),
+                'standardJMeter': '5.6.3', 'normalThreads': 512, 'teardownThreads': 1,
+                'ptsConcurrency': 513, 'csvSplitRequired': True}, 'sceneFilesMD5': {'plan': 'frozen'}}
+        packet_path = self.put('linux/packet.json', packet)
         command.update(warmRate=25, warmSeconds=10,
-                       scriptHashes={**command['scriptHashes'], 'pts/cap10-jmeter.groovy': 'c' * 64})
+                       ptsPacketSHA256=grade.sha(packet_path),
+                       scriptHashes={**command['scriptHashes'], **{'pts/' + name: digest for name, digest in sources.items()}})
+        active['ptsPacketSHA256'] = grade.sha(packet_path)
+        self.put('linux/active-application.json', active)
         command_path = self.put('linux/S7-command.json', command)
         ref = lambda p: {'path': p.relative_to(directory).as_posix(), 'sha256': grade.sha(p)}
         at = grade.instant(previous['finishedAt'])
@@ -1327,7 +1363,7 @@ class Checks(unittest.TestCase):
                  'sanitizedRawResponse': {'RequestId': 'idle-' + str(i), 'Success': True}}))
         identity = {'runId': 'never-started-native', 'phase': 'warm', 'rate': 25, 'seconds': 10,
                     'apiUrl': 'http://172.16.1.2:8281', 'expectedEngines': 2,
-                    'fixtureSHA256': command['fixtureSHA256'], 'scriptSHA256': 'c' * 64,
+                    'fixtureSHA256': command['fixtureSHA256'], 'scriptSHA256': bundle_hash,
                     'version': 1, 'jitterBudgetMs': 50, 'clockUncertaintyMaxMs': 50}
         identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
         journal_path = directory / 'S7-load/warm-pts/records.ndjson'
@@ -1354,7 +1390,8 @@ class Checks(unittest.TestCase):
             cancellationReconciliation=ref(reconcile_path))
         terminal_path = self.put('linux/terminal-before-S8.json', terminal)
         admission = grade.read(directory / 'admission-S8.json')
-        admission.update(recordedAt=stamp(7), termination=ref(terminal_path), reconciliation=ref(reconcile_path))
+        admission.update(recordedAt=stamp(7), termination=ref(terminal_path), reconciliation=ref(reconcile_path),
+                         activeApplicationSHA256=grade.sha(directory / 'active-application.json'))
         self.put('linux/admission-S8.json', admission)
         return directory, api, active, command, previous, terminal
 
@@ -1368,6 +1405,31 @@ class Checks(unittest.TestCase):
         self.assertFalse((directory / 'S7-load/result.json').exists())
         self.assertEqual(grade.search_state(directory, self.other)['boundaryTags'], [])
         self.assertTrue(all(path.read_bytes() == raw for path, raw in originals.items()))
+
+    def test_authority_zero_native_cancel_binds_bundle_manifest_and_each_original_source_hash(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_native_cancel_fixture()
+        packet_path = directory / active['ptsPacketPath']; original = packet_path.read_bytes()
+        packet = json.loads(original)
+        self.assertNotEqual(packet['manifest']['scriptSHA256'], command['scriptHashes']['pts/cap10-jmeter.groovy'])
+        self.assertTrue(grade.authority_warm_only(directory, command, previous, terminal, {'active': active}))
+        for mutate in (lambda p: p['manifest'].update(scriptSHA256=p['sourceSHA256']['cap10-jmeter.groovy']),
+                       lambda p: p['sourceSHA256'].update({'cap10-pts-contract.groovy': '0' * 64}),
+                       lambda p: p['sourceSHA256'].pop('cap10-jmeter.mjs')):
+            invalid = copy.deepcopy(packet); mutate(invalid)
+            packet_path.write_text(json.dumps(invalid), encoding='utf-8')
+            # Even a separately re-bound packet cannot change the original source contract.
+            changed = {**command, 'ptsPacketSHA256': grade.sha(packet_path)}
+            command_path = directory / 'S7-command.json'; saved = command_path.read_bytes()
+            command_path.write_text(json.dumps(changed), encoding='utf-8')
+            bad = {**terminal, 'originalCommand': {'path': command_path.name, 'sha256': grade.sha(command_path)}}
+            with self.assertRaises(ValueError):
+                grade.authority_warm_only(directory, changed, previous, bad, {'active': active})
+            command_path.write_bytes(saved)
+        packet_path.write_bytes(original)
+        packet_path.write_bytes(original + b' ')
+        with self.assertRaises(ValueError):
+            grade.authority_warm_only(directory, command, previous, terminal, {'active': active})
+        packet_path.write_bytes(original)
 
     def test_authority_zero_native_cancel_rejects_any_registration_sample_or_changed_fact(self):
         directory, api, active, command, previous, terminal = self.authority_zero_native_cancel_fixture()

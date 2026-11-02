@@ -42,6 +42,12 @@ def full_summary():
 
 
 class EnvelopeChecks(unittest.TestCase):
+    def test_uncomputed_progress_cannot_become_final_percentiles(self):
+        progress = full_summary()
+        progress.update(allLatency=None, mutationLatency=None, latencyComplete=False, latencyStatisticsComputed=False)
+        with self.assertRaisesRegex(ValueError, 'percentiles'):
+            phase.normalized(progress, 60)
+
     def phase_fixture(self, count=4096, engines=9):
         dimensions = {'poolSize': count, 'expectedEngines': engines,
                       'ptsConcurrency': phase.cohort.pts_concurrency(count, engines)}

@@ -312,7 +312,7 @@ def run(args):
         signal.signal(sig, lambda *_: stop_requested.set())
     started = time.monotonic(); report_id = None; stop_sent = False
     try:
-        save(args.evidence / 'latest.json', {'at': dt.datetime.now(dt.timezone.utc).isoformat(), 'summary': store.summary()}, replace=True)
+        save(args.evidence / 'latest.json', {'at': dt.datetime.now(dt.timezone.utc).isoformat(), 'summary': store.progress()}, replace=True)
         scene = client.scene(cfg['sceneId'])['Scene']
         actual_files = {item['FileName']: item['Md5'].lower() for item in scene['FileList']}
         if actual_files != cfg['sceneFiles']:
@@ -331,7 +331,7 @@ def run(args):
                 store.tick()
                 if stop_requested.is_set() or Path(os.environ['CAP_STOP_FILE']).exists():
                     store.fail('owned_supervisor_stop')
-                summary = store.summary()
+                summary = store.progress()
             save(args.evidence / 'latest.json', {'at': dt.datetime.now(dt.timezone.utc).isoformat(), 'summary': summary}, replace=True)
             if summary.get('stop') or summary.get('complete'):
                 stop_sent, report = poll_termination(client, cfg['sceneId'], report_id, stop_sent)

@@ -6,6 +6,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import re
 import statistics
 import subprocess
 import time
@@ -23,14 +24,15 @@ def module(name, filename):
     return value
 
 
-def idle_attempt(root, authorization, transition_sha, additional_authorization=None):
+def idle_attempt(root, authorization, transition_sha, additional_authorization=None,
+                 interruption_authorization=None, current_boot_id=None):
     """Authorize explicit retries of the retained zero-sample failures."""
     root = Path(root).resolve()
     archive = root / 'idle-attempt-1'
-    if (root / 'idle-reservation.json').exists():
+    if (root / 'idle-reservation.json').exists() or (root / 'idle-attempt-4').exists():
         raise ValueError('current idle reservation already consumed; preserve it')
     if authorization is None:
-        if archive.exists() or additional_authorization is not None:
+        if archive.exists() or additional_authorization is not None or interruption_authorization is not None:
             raise ValueError('archived idle failure requires explicit retry authorization')
         return {'attempt': 1}
     expected = root.parent / 'continuation-authorization.json'
@@ -72,7 +74,7 @@ def idle_attempt(root, authorization, transition_sha, additional_authorization=N
     base = {'attempt': 2, 'retryAuthorizationSHA256': hashlib.sha256(raw).hexdigest(),
             'failedIdleResultSHA256': failure_sha}
     if additional_authorization is None:
-        if (root / 'idle-attempt-2').exists():
+        if (root / 'idle-attempt-2').exists() or interruption_authorization is not None:
             raise ValueError('archived second failure requires a new explicit authorization')
         return base
     path = Path(additional_authorization)
@@ -115,9 +117,70 @@ def idle_attempt(root, authorization, transition_sha, additional_authorization=N
             or reservation.get('retryAuthorizationSHA256') != base['retryAuthorizationSHA256']
             or reservation.get('failedIdleResultSHA256') != base['failedIdleResultSHA256']):
         raise ValueError('retained zero-sample second idle failure differs')
-    return {'attempt': 3, 'retryAuthorizationSHA256': hashlib.sha256(extra_raw).hexdigest(),
+    third = {'attempt': 3, 'retryAuthorizationSHA256': hashlib.sha256(extra_raw).hexdigest(),
             'continuationAuthorizationSHA256': base['retryAuthorizationSHA256'],
             'failedIdleResultSHA256': failure_sha, 'firstFailedIdleResultSHA256': base['failedIdleResultSHA256']}
+    if interruption_authorization is None:
+        if (root / 'idle-attempt-3').exists():
+            raise ValueError('archived third interruption requires explicit recovery authorization')
+        return third
+    return interruption_attempt(root, interruption_authorization, transition_sha, third, current_boot_id)
+
+
+def interruption_attempt(root, authorization, transition_sha, third, current_boot_id):
+    path = Path(authorization)
+    if path.is_symlink() or path.resolve() != root.parent / 'idle-retry-4-authorization.json' or not path.is_file():
+        raise ValueError('fixed interruption recovery authorization required')
+    raw = path.read_bytes()
+    auth = json.loads(raw)
+    if (not isinstance(auth, dict) or type(auth.get('version')) is not int or auth['version'] != 1
+            or auth.get('batch') != 'CAP-10' or auth.get('authorized') is not True
+            or type(auth.get('attempt')) is not int or auth['attempt'] != 4
+            or type(auth.get('maxInterruptionRetries')) is not int or auth['maxInterruptionRetries'] != 1
+            or not isinstance(auth.get('userAuthorizationReference'), str) or not auth['userAuthorizationReference'].strip()
+            or auth.get('continuationAuthorizationSHA256') != third['continuationAuthorizationSHA256']
+            or auth.get('additionalRetryAuthorizationSHA256') != third['retryAuthorizationSHA256']
+            or auth.get('transitionSHA256') != transition_sha
+            or auth.get('interruptionRecordPath') != 'linux/idle-attempt-3/interruption-record.json'
+            or not isinstance(auth.get('recordedAt'), str)):
+        raise ValueError('one explicit fourth-attempt interruption recovery required')
+    registered = dt.datetime.fromisoformat(auth['recordedAt'].replace('Z', '+00:00'))
+    if registered.tzinfo is None or registered > dt.datetime.now(dt.timezone.utc):
+        raise ValueError('interruption recovery registration timestamp invalid')
+    archive = root / 'idle-attempt-3'
+    paths = [archive / name for name in ('interruption-record.json', 'idle-reservation.json', 'idle-samples.ndjson')]
+    if (archive / 'idle-result.json').exists():
+        raise ValueError('interruption cannot replace a completed idle result')
+    for original in paths:
+        if original.is_symlink() or original.resolve() != original or not original.is_file():
+            raise ValueError('original regular interrupted idle artifacts required')
+    record_raw, reservation_raw, samples_raw = [original.read_bytes() for original in paths]
+    record, reservation = json.loads(record_raw), json.loads(reservation_raw)
+    samples = [json.loads(line) for line in samples_raw.splitlines() if line.strip()]
+    record_sha = hashlib.sha256(record_raw).hexdigest()
+    samples_sha = hashlib.sha256(samples_raw).hexdigest()
+    boot_pattern = r'[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}'
+    if (auth.get('interruptionRecordSHA256') != record_sha or not isinstance(record, dict)
+            or type(record.get('version')) is not int or record['version'] != 1
+            or record.get('batch') != 'CAP-10' or type(record.get('attempt')) is not int or record['attempt'] != 3
+            or record.get('executionPlatform') != 'linux' or record.get('interruptionKind') != 'ecs_billing_shutdown'
+            or record.get('noWorkloadStarted') is not True or record.get('transitionSHA256') != transition_sha
+            or type(record.get('partialSampleCount')) is not int or record['partialSampleCount'] != 3 or len(samples) != 3
+            or record.get('reservationSHA256') != hashlib.sha256(reservation_raw).hexdigest()
+            or record.get('partialSamplesSHA256') != samples_sha
+            or not isinstance(current_boot_id, str) or not re.fullmatch(boot_pattern, current_boot_id)
+            or record.get('currentBootId') != current_boot_id
+            or not isinstance(record.get('previousBootId'), str) or not re.fullmatch(boot_pattern, record['previousBootId'])
+            or record['previousBootId'] == current_boot_id
+            or any(not isinstance(sample, dict) or sample.get('power', {}).get('clock', {}).get('bootId') != record['previousBootId'] for sample in samples)
+            or not isinstance(reservation, dict) or type(reservation.get('attempt')) is not int or reservation['attempt'] != 3
+            or reservation.get('seconds') != 60 or reservation.get('failedAttemptConsumesOnlyIdleObservation') is not True
+            or reservation.get('executionPlatform') != 'linux' or reservation.get('transitionSHA256') != transition_sha
+            or any(reservation.get(key) != value for key, value in third.items())):
+        raise ValueError('retained third idle interruption or boot evidence differs')
+    return {**third, 'attempt': 4, 'retryAuthorizationSHA256': hashlib.sha256(raw).hexdigest(),
+            'additionalRetryAuthorizationSHA256': third['retryAuthorizationSHA256'],
+            'interruptionRecordSHA256': record_sha, 'partialIdleSamplesSHA256': samples_sha}
 
 
 def main():
@@ -127,6 +190,7 @@ def main():
     parser.add_argument('--observer', required=True)
     parser.add_argument('--retry-authorization')
     parser.add_argument('--additional-retry-authorization')
+    parser.add_argument('--interruption-retry-authorization')
     args = parser.parse_args()
     owned = module('cap10_idle_owned', 'cap10-env.py')
     resources = module('cap10_idle_resources', 'cap10-resources.py')
@@ -140,7 +204,9 @@ def main():
     assert value['CAP_SOURCE_SHA'] == api_metadata['sourceSha']
     assert value['CAP_READ_EXPECTED_REVISION'] == api_metadata['expectedVersion']
     assert not list(root.glob('slot-*.json')), 'idle observation must precede S1'
-    attempt = idle_attempt(root, args.retry_authorization, owned.transition(), args.additional_retry_authorization)
+    boot_id = owned.clock_sample().get('bootId') if args.interruption_retry_authorization else None
+    attempt = idle_attempt(root, args.retry_authorization, owned.transition(), args.additional_retry_authorization,
+                           args.interruption_retry_authorization, boot_id)
     reservation = root / 'idle-reservation.json'
     owned.save(reservation, {'at': owned.now(), 'seconds': 60, 'intervalSeconds': 5,
                             **attempt, 'failedAttemptConsumesOnlyIdleObservation': True,

@@ -170,6 +170,87 @@ def main():
             third_rejected(change)
         third_rejected(lambda root, auth_path, path, auth, failed, reservation: write(root / 'slot-S1.json', {}))
         third_rejected(lambda root, auth_path, path, auth, failed, reservation: write(root.parent / 'H1-command.json', {}))
+
+        old_boot, new_boot = 'a' * 8 + '-aaaa-aaaa-aaaa-' + 'a' * 12, 'b' * 8 + '-bbbb-bbbb-bbbb-' + 'b' * 12
+        def fourth_case():
+            root, auth_path, extra_path, extra, second, second_reservation = third_case()
+            third = idle.idle_attempt(root, auth_path, TRANSITION, extra_path)
+            archive = root / 'idle-attempt-3'
+            archive.mkdir()
+            reservation = {**third, 'seconds': 60, 'failedAttemptConsumesOnlyIdleObservation': True,
+                'executionPlatform': 'linux', 'transitionSHA256': TRANSITION}
+            write(archive / 'idle-reservation.json', reservation)
+            samples = [{'power': {'clock': {'bootId': old_boot}}} for _ in range(3)]
+            (archive / 'idle-samples.ndjson').write_text(''.join(json.dumps(row) + '\n' for row in samples), encoding='utf-8')
+            record = {'version': 1, 'batch': 'CAP-10', 'attempt': 3, 'executionPlatform': 'linux',
+                'interruptionKind': 'ecs_billing_shutdown', 'noWorkloadStarted': True, 'partialSampleCount': 3,
+                'previousBootId': old_boot, 'currentBootId': new_boot, 'transitionSHA256': TRANSITION,
+                'reservationSHA256': hashlib.sha256((archive / 'idle-reservation.json').read_bytes()).hexdigest(),
+                'partialSamplesSHA256': hashlib.sha256((archive / 'idle-samples.ndjson').read_bytes()).hexdigest()}
+            write(archive / 'interruption-record.json', record)
+            auth = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'attempt': 4, 'maxInterruptionRetries': 1,
+                'userAuthorizationReference': 'synthetic continuous authorization and billing shutdown recovery',
+                'recordedAt': dt.datetime.now(dt.timezone.utc).isoformat(),
+                'continuationAuthorizationSHA256': third['continuationAuthorizationSHA256'],
+                'additionalRetryAuthorizationSHA256': third['retryAuthorizationSHA256'], 'transitionSHA256': TRANSITION,
+                'interruptionRecordPath': 'linux/idle-attempt-3/interruption-record.json',
+                'interruptionRecordSHA256': hashlib.sha256((archive / 'interruption-record.json').read_bytes()).hexdigest()}
+            path = root.parent / 'idle-retry-4-authorization.json'
+            write(path, auth)
+            return root, auth_path, extra_path, path, auth, record, reservation
+
+        def fourth_rejected(change):
+            root, auth_path, extra_path, path, auth, record, reservation = fourth_case()
+            change(root, auth_path, extra_path, path, auth, record, reservation)
+            try:
+                idle.idle_attempt(root, auth_path, TRANSITION, extra_path, path, new_boot)
+            except ValueError:
+                return
+            raise AssertionError('invalid interrupted fourth-attempt recovery accepted')
+
+        root, auth_path, extra_path, path, auth, record, reservation = fourth_case()
+        retained = (auth_path.read_bytes(), extra_path.read_bytes())
+        fourth = idle.idle_attempt(root, auth_path, TRANSITION, extra_path, path, new_boot)
+        assert fourth['attempt'] == 4 and fourth['interruptionRecordSHA256'] == auth['interruptionRecordSHA256']
+        assert fourth['additionalRetryAuthorizationSHA256'] == auth['additionalRetryAuthorizationSHA256']
+        assert retained == (auth_path.read_bytes(), extra_path.read_bytes())
+        assert not (root / 'idle-attempt-3/idle-result.json').exists()
+        try:
+            idle.idle_attempt(root, auth_path, TRANSITION, extra_path)
+        except ValueError:
+            checks += 1
+        else:
+            raise AssertionError('interrupted third attempt reused its old authorization')
+        write(root / 'idle-reservation.json', fourth)
+        try:
+            idle.idle_attempt(root, auth_path, TRANSITION, extra_path, path, new_boot)
+        except ValueError:
+            checks += 1
+        else:
+            raise AssertionError('interruption recovery reused consumed fourth attempt')
+        for field, value in [('authorized', False), ('attempt', 5), ('maxInterruptionRetries', 2),
+                ('userAuthorizationReference', ''), ('continuationAuthorizationSHA256', 'c' * 64),
+                ('additionalRetryAuthorizationSHA256', 'c' * 64), ('transitionSHA256', 'c' * 64),
+                ('interruptionRecordPath', 'linux/idle-attempt-2/interruption-record.json'),
+                ('interruptionRecordSHA256', 'c' * 64), ('recordedAt', '2026-11-02T00:00:00')]:
+            def change(root, auth_path, extra_path, path, auth, record, reservation, field=field, value=value):
+                auth[field] = value
+                write(path, auth)
+            fourth_rejected(change)
+        for field, value in [('noWorkloadStarted', False), ('partialSampleCount', 2),
+                ('interruptionKind', 'unknown'), ('previousBootId', new_boot), ('currentBootId', old_boot),
+                ('reservationSHA256', 'c' * 64), ('partialSamplesSHA256', 'c' * 64)]:
+            def change(root, auth_path, extra_path, path, auth, record, reservation, field=field, value=value):
+                record[field] = value
+                original = root / 'idle-attempt-3/interruption-record.json'
+                write(original, record)
+                auth['interruptionRecordSHA256'] = hashlib.sha256(original.read_bytes()).hexdigest()
+                write(path, auth)
+            fourth_rejected(change)
+        fourth_rejected(lambda root, auth_path, extra_path, path, auth, record, reservation:
+            write(root / 'idle-attempt-3/idle-result.json', {'passed': False}))
+        fourth_rejected(lambda root, auth_path, extra_path, path, auth, record, reservation: write(root / 'slot-S1.json', {}))
+        fourth_rejected(lambda root, auth_path, extra_path, path, auth, record, reservation: write(root.parent / 'H1-command.json', {}))
     print(json.dumps({'passed': True, 'checks': checks, 'cloudCalled': False, 'workloadStarted': False}))
 
 

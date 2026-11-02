@@ -33,7 +33,7 @@ KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
 TOOL_NAMES = ('cap10-run.py', 'cap10-grade.py', 'cap10-env.py', 'cap10-stage.py', 'cap10-resources.py',
               'load/cap10-native-window.mjs', 'cap10-like.mjs', 'load/cap10-like.js',
               'load/cap10-like-contract.mjs', 'load/cap10-db-observe.mjs', 'load/cap10-observer-policy.mjs', 'cap10-downstream.go',
-              'cap10-cohort.py', 'load/cap10-cohort-contract.mjs', 'cap10-resource-contract.py', 'cap10-idle-contract.py')
+              'cap10-cohort.py', 'load/cap10-cohort-contract.mjs', 'cap10-resource-contract.py', 'cap10-idle-contract.py', 'cap10-observer-contract.py')
 PTS_TOOLS = ('pts/cap10-pts-phase.py', 'pts/cap10-pts-api.py', 'pts/cap10-pts-collector.py',
              'pts/cap10-jmeter.groovy', 'pts/cap10-pts-contract.groovy', 'pts/cap10-jmeter.mjs', 'pts/cap10-jmeter.jmx',
              'pts/cap10-pts-prepare.py')

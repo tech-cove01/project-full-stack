@@ -3,6 +3,7 @@ import argparse
 import ctypes
 import datetime as dt
 import hashlib
+import importlib.util
 import ipaddress
 import json
 import math
@@ -21,6 +22,9 @@ import psutil
 
 
 REPO = Path(__file__).resolve().parent.parent
+_cohort_spec = importlib.util.spec_from_file_location('cap10_cohort_environment', REPO / 'scripts/cap10-cohort.py')
+COHORT = importlib.util.module_from_spec(_cohort_spec)
+_cohort_spec.loader.exec_module(COHORT)
 BATCH_ROOT = REPO / 'docs/evidence/2026-11-01-cap10'
 PLATFORM = 'windows' if os.name == 'nt' else 'linux'
 assert os.name == 'nt' or sys.platform == 'linux', 'CAP10 supports Windows and the single Linux transition only'
@@ -473,7 +477,9 @@ def stop_api(args):
 
 
 def own_sessions(tokens):
-    assert tokens and len(tokens) <= 512
+    assert isinstance(tokens, list) and len(tokens) <= COHORT.MAX_POOL_SIZE
+    if not tokens:
+        return 0
     parts = ['EXISTS'] + ['login:token:' + token for token in tokens]
     payload = b'*' + str(len(parts)).encode() + b'\r\n'
     for part in parts:
@@ -492,9 +498,15 @@ def own_sessions(tokens):
 
 def credential_tokens(manifest_path, runtime):
     manifest_path = Path(manifest_path).resolve()
-    assert manifest_path in (ROOT / 'fixture/fixture.json', ROOT / 'like-fixture/fixture.json')
-    path = Path(read(manifest_path)['credentialFile']).resolve()
-    assert path.is_relative_to(runtime / 'tmp') and path.is_file()
+    assert manifest_path.name == 'fixture.json' and manifest_path.parent.parent == ROOT
+    assert manifest_path.parent.name in ('fixture', 'like-fixture') or re.fullmatch(r'like-fixture-[a-z0-9-]{1,80}', manifest_path.parent.name)
+    manifest = read(manifest_path)
+    count = COHORT.fixture_pool_size(manifest)
+    path = Path(manifest['credentialFile']).resolve()
+    assert path.is_relative_to(runtime / 'tmp') and path.name == 'input.json'
+    if not path.exists() and manifest['status'] == 'PREPARING':
+        return path, []
+    assert path.is_file()
     found = []
     def walk(value):
         if isinstance(value, dict):
@@ -508,7 +520,8 @@ def credential_tokens(manifest_path, runtime):
             for item in value:
                 walk(item)
     walk(read(path))
-    assert found and len(found) == len(set(found))
+    assert len(found) == len(set(found))
+    assert len(found) == count or (manifest['status'] == 'PREPARING' and len(found) < count)
     return path, found
 
 
@@ -557,16 +570,16 @@ def finish(args):
     checkpoint('identity_preflight')
     try:
         record['cohorts'] = {}
-        for kind, key, script, count in (('like', 'CAP_LIKE_FIXTURE', 'cap10-like.mjs', 512),):
+        for kind, key, script in (('like', 'CAP_LIKE_FIXTURE', 'cap10-like.mjs'),):
             if key not in value:
                 continue
             credentials, tokens = credential_tokens(value[key], runtime)
-            assert len(tokens) == count
+            count = COHORT.fixture_pool_size(read(value[key]))
             before = own_sessions(tokens)
             result = run(['node', 'scripts/' + script, 'finish'], env=env(value), timeout=180)
             body = json.loads(result.stdout.strip())
             after = own_sessions(tokens)
-            record['cohorts'][kind] = {'sessionsBeforeLogout': before, 'sessionsAfterLogout': after,
+            record['cohorts'][kind] = {'poolSize': count, 'registeredSessions': len(tokens), 'sessionsBeforeLogout': before, 'sessionsAfterLogout': after,
                                      'finishOutput': body, 'privateInputRemoved': not credentials.exists()}
             assert after == 0 and not credentials.exists()
             checkpoint(kind + '_normal_logout_and_private_input_removal')

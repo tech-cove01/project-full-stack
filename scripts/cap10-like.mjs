@@ -10,6 +10,7 @@ import net from 'node:net'
 import { stateFromBody, classifyWrite, unknownBounds } from './load/cap10-like-contract.mjs'
 import { nativeScenarioWindow } from './load/cap10-native-window.mjs'
 import { collectDatabase } from './load/cap10-db-observe.mjs'
+import { poolSize, fixturePoolSize } from './load/cap10-cohort-contract.mjs'
 
 const owned = { project: 'project-full-stack-cap10', mysql: '3481', redis: '6581', api: 'http://127.0.0.1:8281', database: 'project_full_stack_go' }
 const action = process.argv[2]
@@ -178,6 +179,7 @@ async function loadFixture() {
   assert.ok(fixturePath, 'explicit CAP_LIKE_FIXTURE required')
   evidence(fixturePath)
   const bytes = await readFile(fixturePath), manifest = JSON.parse(bytes)
+  const count = fixturePoolSize(manifest)
   assert.equal(manifest.project, owned.project); assert.equal(manifest.baseUrl, owned.api)
   assert.equal(manifest.executionPlatform, executionPlatform, 'fixture belongs to another executor')
   assert.equal(manifest.transitionSHA256, process.env.CAP10_TRANSITION_SHA256 || null, 'fixture transition differs')
@@ -191,10 +193,11 @@ async function loadFixture() {
     runtime = { fixture: manifest.fixture, users: [] }
   }
   assert.equal(runtime.fixture, manifest.fixture)
-  assert.ok(runtime.users.length === 512 || (action === 'finish' && runtime.users.length < 512))
+  assert.ok(Array.isArray(runtime.users) && (runtime.users.length === count || (action === 'finish' && manifest.status === 'PREPARING' && runtime.users.length < count)))
   assert.deepEqual(runtime.users.map(u => u.userId), (manifest.userIds || []).slice(0, runtime.users.length))
   if (action !== 'finish') {
-    assert.equal(manifest.userIds.length, 512); assert.equal(manifest.multiNoteIds.length, 512)
+    assert.equal(manifest.userIds.length, count); assert.equal(manifest.multiNoteIds.length, count)
+    assert.equal(new Set(manifest.userIds).size, count); assert.equal(new Set(manifest.multiNoteIds).size, count)
     for (const id of [...manifest.userIds, ...manifest.multiNoteIds]) assert.match(id, /^[1-9]\d*$/)
   }
   return { manifest, runtime, manifestSHA256: hash(bytes) }
@@ -256,17 +259,18 @@ function changedParticipants(before, after) {
 }
 
 function initialDistribution(manifest, state) {
+  const count = fixturePoolSize(manifest)
   const byPair = new Map(state.facts.map(r => [r.noteId + ':' + r.userId, r]))
   const versions = {}, active = { active: 0, inactive: 0, missing: 0 }
-  for (let i = 0; i < 512; i++) {
+  for (let i = 0; i < count; i++) {
     const row = byPair.get(manifest.multiNoteIds[i] + ':' + manifest.userIds[i])
     if (!row) { active.missing++; continue }
     active[row.active === 1 ? 'active' : 'inactive']++
     versions[row.version] = (versions[row.version] || 0) + 1
   }
-  return { configuredRelationships: 512, existing: 512 - active.missing, ...active, versionHistogram: versions,
-    existingFraction: (512 - active.missing) / 512,
-    scope: 'authoritative RR facts for the exact 512 configured pairs; active/version distributions are recorded explicitly, never inferred from fixture hash' }
+  return { configuredRelationships: count, existing: count - active.missing, ...active, versionHistogram: versions,
+    existingFraction: (count - active.missing) / count,
+    scope: 'authoritative RR facts for the exact manifest-bound pairs; active/version distributions are recorded explicitly, never inferred from fixture hash' }
 }
 
 async function derived(manifest, mode, state) {
@@ -317,10 +321,11 @@ async function stopPresent() {
 }
 
 async function normalizeInitialState(manifest, mode, dir) {
+  const count = fixturePoolSize(manifest)
   const startedAt = Date.now(), deadline = startedAt + 60000
   const before = await snapshot(manifest, mode, 'before-setup')
   assert.deepEqual(factErrors(manifest, mode, before), [], 'setup starts only from valid facts')
-  assert.equal(initialDistribution(manifest, before).existing, 512, 'setup requires 512 existing exclusive pairs')
+  assert.equal(initialDistribution(manifest, before).existing, count, 'setup requires every manifest-bound exclusive pair')
   const ids = manifest.multiNoteIds.map(id => `'${id}'`).join(',')
   const pair = `l.user_id=CASE l.blog_id ${manifest.multiNoteIds.map((note, i) => `WHEN ${note} THEN ${manifest.userIds[i]}`).join(' ')} END`
   const raw = rows(await sql(`SET TRANSACTION ISOLATION LEVEL READ COMMITTED; START TRANSACTION;
@@ -335,8 +340,8 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
   await save(join(dir, 'setup-transaction.json'), { startedAt, committedAt, records: raw, countedAsHTTPMutation: false })
   const after = await snapshot(manifest, mode, 'after-setup-commit')
   const expected = before.facts.filter(row => row.active === 1).length
-  assert.equal(raw.filter(row => row._kind === 'locked-note').length, 512)
-  assert.equal(raw.filter(row => row._kind === 'locked-pair').length, 512)
+  assert.equal(raw.filter(row => row._kind === 'locked-note').length, count)
+  assert.equal(raw.filter(row => row._kind === 'locked-pair').length, count)
   assert.deepEqual(factErrors(manifest, mode, after), [], 'setup facts/events invalid')
   assert.equal(after.transitions - before.transitions, expected)
   assert.equal(after.eventCount - before.eventCount, expected)
@@ -354,7 +359,7 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
   await save(join(dir, 'setup-reconcile.json'), audit)
   assert.ok(audit.valid, 'setup derived facts or receipts did not converge')
   const distribution = initialDistribution(manifest, audit.facts)
-  assert.equal(distribution.existing, 512); assert.equal(distribution.active, 0)
+  assert.equal(distribution.existing, count); assert.equal(distribution.active, 0)
   assert.ok(process.env.CAP10_DOWNSTREAM_EVIDENCE, 'setup requires actual downstream baseline evidence')
   const downstream = evidence(process.env.CAP10_DOWNSTREAM_EVIDENCE)
   const ready = JSON.parse(await readFile(join(downstream, 'ready.json'), 'utf8'))
@@ -384,16 +389,17 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
 
 await guard()
 if (action === 'prepare') {
+  const count = poolSize(process.env.CAP_LIKE_POOL_SIZE === undefined ? 512 : Number(process.env.CAP_LIKE_POOL_SIZE))
   assert.ok(process.env.CAP_LIKE_FIXTURE_DIR, 'explicit new CAP_LIKE_FIXTURE_DIR required')
   const dir = evidence(process.env.CAP_LIKE_FIXTURE_DIR); await mkdir(dir, { recursive: false })
   const fixture = 'caplike-' + randomBytes(5).toString('hex'), privateDir = await mkdtemp(join(tmpdir(), 'cap-like-')), credentialFile = join(privateDir, 'input.json')
   const manifest = { task: 'CAP-10', fixture, project: owned.project, baseUrl: owned.api, sourceSha: process.env.CAP_SOURCE_SHA,
     executionPlatform, transitionSHA256: process.env.CAP10_TRANSITION_SHA256 || null,
     expectedRevision: process.env.CAP_READ_EXPECTED_REVISION, credentialFile, created: new Date().toISOString(), status: 'PREPARING',
-    users: 512, multiNotes: 512, multiRelations: 512, bodyBytes: 256,
+    poolSize: count, users: count, multiNotes: count, multiRelations: count, bodyBytes: 256,
     relationshipSeed: { active: 0, version: 0, events: 0, syntheticFixtureOnly: true } }
   await save(join(dir, 'fixture.json'), manifest)
-  const phones = new Set(); while (phones.size < 513) phones.add('137' + randomInt(10000000, 100000000))
+  const phones = new Set(); while (phones.size < count + 1) phones.add('137' + randomInt(10000000, 100000000))
   const phoneList = [...phones], names = phoneList.map((_, i) => fixture + (i === 0 ? '-author' : '-u' + String(i - 1).padStart(3, '0')))
   assert.equal(await sql(`SELECT COUNT(*) FROM tb_user WHERE nick_name LIKE '${fixture}%' OR phone IN (${phoneList.map(p => `'${p}'`).join(',')})`), '0', 'synthetic user collision')
   assert.equal(await sql('SELECT COUNT(*) FROM tb_shop WHERE id=1'), '1')
@@ -401,15 +407,15 @@ if (action === 'prepare') {
   const userRows = (await sql(`SELECT id,nick_name FROM tb_user WHERE nick_name LIKE '${fixture}%' ORDER BY nick_name`)).split(/\r?\n/).map(s => s.split('\t'))
   const byName = new Map(userRows.map(([id, name]) => [name, id])), authorId = byName.get(names[0]), userIds = names.slice(1).map(n => byName.get(n))
   for (const id of [authorId, ...userIds]) assert.match(id || '', /^[1-9]\d*$/)
-  await sql(`INSERT INTO tb_blog(shop_id,user_id,title,images,content,liked,comments,status,publish_version,create_time,update_time) VALUES ${Array.from({ length: 512 }, (_, i) => `(1,${authorId},'${fixture}-n${String(i).padStart(3, '0')}','','${'x'.repeat(256)}',0,0,'PUBLISHED',1,NOW()-INTERVAL 1 HOUR,NOW()-INTERVAL 1 HOUR)`).join(',')};`)
+  await sql(`INSERT INTO tb_blog(shop_id,user_id,title,images,content,liked,comments,status,publish_version,create_time,update_time) VALUES ${Array.from({ length: count }, (_, i) => `(1,${authorId},'${fixture}-n${String(i).padStart(4, '0')}','','${'x'.repeat(256)}',0,0,'PUBLISHED',1,NOW()-INTERVAL 1 HOUR,NOW()-INTERVAL 1 HOUR)`).join(',')};`)
   const notes = (await sql(`SELECT id FROM tb_blog WHERE title LIKE '${fixture}%' ORDER BY title`)).split(/\r?\n/)
-  assert.equal(notes.length, 512)
+  assert.equal(notes.length, count)
   Object.assign(manifest, { authorId, userIds, multiNoteIds: notes })
   await sql(`INSERT INTO tb_blog_like(blog_id,user_id,active,version) VALUES ${notes.map((note, i) => `(${note},${userIds[i]},0,0)`).join(',')};`)
   await writeFile(join(dir, 'fixture.json'), json(manifest))
   const runtime = { fixture, baseUrl: owned.api, users: [] }
   await writeFile(credentialFile, json(runtime), { mode: 0o600, flag: 'wx' })
-  for (let i = 0; i < 512; i++) {
+  for (let i = 0; i < count; i++) {
     const code = await api('POST', '/user/code?phone=' + phoneList[i + 1]); assert.equal(code.body.data?.mode, 'development')
     const login = await api('POST', '/user/login', { phone: phoneList[i + 1], code: code.body.data.code })
     assert.equal(login.body.success, true); assert.equal(typeof login.body.data, 'string')
@@ -417,7 +423,7 @@ if (action === 'prepare') {
     await writeFile(credentialFile, json(runtime), { mode: 0o600 })
   }
   manifest.status = 'READY'; await writeFile(join(dir, 'fixture.json'), json(manifest))
-  console.log(JSON.stringify({ prepared: true, manifest: join(dir, 'fixture.json'), users: 512, notes: 512, privateCredentialValuesExported: false }))
+  console.log(JSON.stringify({ prepared: true, manifest: join(dir, 'fixture.json'), poolSize: count, users: count, notes: count, privateCredentialValuesExported: false }))
 } else if (action === 'finish') {
   const { manifest, runtime, manifestSHA256 } = await loadFixture()
   let loggedOut = 0
@@ -429,6 +435,7 @@ if (action === 'prepare') {
   console.log(JSON.stringify({ finished: true, likersLoggedOut: loggedOut, credentialInputRemoved: true, sqlFixtureRetained: true }))
 } else {
   const { manifest, runtime, manifestSHA256 } = await loadFixture()
+  const count = fixturePoolSize(manifest)
   const mode = process.env.CAP_LIKE_MODE || 'multi'; assert.equal(mode, 'multi')
   assert.ok(process.env.CAP_LIKE_EVIDENCE, 'explicit new CAP_LIKE_EVIDENCE required')
   const dir = evidence(process.env.CAP_LIKE_EVIDENCE); await mkdir(dir, { recursive: false })
@@ -437,7 +444,7 @@ if (action === 'prepare') {
     const projection = await derived(manifest, mode, state)
     const errors = [...factErrors(manifest, mode, state), ...projection.errors]
     const distribution = initialDistribution(manifest, state)
-    if (process.env.CAP10_REQUIRE_ALL_EXISTING === '1' && distribution.existing !== 512) errors.push('formal requires all 512 relationships already existing')
+    if (process.env.CAP10_REQUIRE_ALL_EXISTING === '1' && distribution.existing !== count) errors.push('formal requires all manifest-bound relationships already existing')
     if (process.env.CAP10_REQUIRE_INITIAL_ACTIVE === '0' && distribution.active !== 0) errors.push('formal initial active distribution differs')
     const result = { at: new Date().toISOString(), valid: errors.length === 0, errors, distribution,
       facts: state, derived: projection, reservesCapacitySlot: false }
@@ -475,15 +482,16 @@ if (action === 'prepare') {
       intentionalNoops: records.filter(r => r.kind === 'noop').length, recoveredFromAuthoritativeGET: result.recoveredFromAuthoritativeGET, failure: result.failure || null }))
     process.exitCode = result.passed ? 0 : 1
   } else {
-    const rate = Number(process.env.CAP_LIKE_RATE), seconds = Number(process.env.CAP_LIKE_SECONDS || 60), warmSeconds = Number(process.env.CAP_LIKE_WARM_SECONDS || 10), warmRate = Number(process.env.CAP_LIKE_WARM_RATE || Math.min(25, rate)), preVUs = Number(process.env.CAP_LIKE_PRE_VUS || 512), maxVUs = Number(process.env.CAP_LIKE_MAX_VUS || 512)
+    const rate = Number(process.env.CAP_LIKE_RATE), seconds = Number(process.env.CAP_LIKE_SECONDS || 60), warmSeconds = Number(process.env.CAP_LIKE_WARM_SECONDS || 10), warmRate = Number(process.env.CAP_LIKE_WARM_RATE || Math.min(25, rate)), preVUs = Number(process.env.CAP_LIKE_PRE_VUS || count), maxVUs = Number(process.env.CAP_LIKE_MAX_VUS || count)
     assert.ok([rate, seconds, warmSeconds, warmRate, preVUs, maxVUs].every(Number.isInteger))
-    assert.ok(rate >= 1 && rate <= 5000 && [60, 180].includes(seconds) && warmSeconds === 10 && warmRate === Math.min(25, rate) && preVUs === 512 && maxVUs === 512)
+    assert.ok(rate >= 1 && rate <= 5000 && [60, 180].includes(seconds) && warmSeconds === 10 && warmRate === Math.min(25, rate) && preVUs === count && maxVUs === count)
+    assert.ok(count === 512 || process.env.CAP10_LOAD_BACKEND === 'pts', 'larger cohorts require the explicitly configured PTS backend')
     assert.equal(await stopPresent(), false, 'stop file already exists; no new native phase started')
-    const report = { task: 'CAP-10', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, fixture: manifest.fixture,
+    const report = { task: 'CAP-10', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, poolSize: count, fixture: manifest.fixture,
       executionPlatform, transitionSHA256: process.env.CAP10_TRANSITION_SHA256 || null,
       apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION,
       fixtureSourceSha: manifest.sourceSha, fixtureManifestSHA256: manifestSHA256,
-      configuredPool: { users: 512, notes: modeNotes(manifest, mode).length, exclusiveRelationships: 512, authors: 1, noteBodyBytes: 256 }, started: new Date().toISOString(),
+      configuredPool: { users: count, notes: modeNotes(manifest, mode).length, exclusiveRelationships: count, authors: 1, noteBodyBytes: 256 }, started: new Date().toISOString(),
       nativeScenario: { complete: false, scope: 'native timing not yet verified; no completed scenario claim' },
       thresholds: { actualOfferedRatioMin: .99, mutationFractionMin: .99, unexpectedNoopMax: 0, contentErrorsMax: 0,
         unknownMax: 0, droppedMax: 0, systemAndHTTPErrorRatesMaxExclusive: .01, p95MsMax: 200, p99MsMax: 500 },
@@ -491,14 +499,14 @@ if (action === 'prepare') {
       scope: 'real authenticated PUT mutations; no same-pair overlap. Correctness/unknown/noop abort the batch; authoritative facts are reconciled after settle, without resuming uncertain pairs. API invalidate/read/Mark remain in PUT latency. Latency is evaluated only after the complete target window.' }
     if (process.env.CAP10_LOAD_BACKEND === 'pts') {
       report.loadBackend = 'pts'
-      report.phaseProcesses = 'warm and stable use separate Alibaba PTS ReportIds, each with two managed JMeter engines and fresh authoritative RR hydration'
+      report.phaseProcesses = 'warm and stable use separate Alibaba PTS ReportIds with the packet-bound managed engines and fresh authoritative RR hydration'
       report.generatorResourceScope = 'ECS Python collector plus Node helper <2GiB; each remote JMeter engine separately <6GiB, matching the collector safety limit. Same PTS topology is required for every comparison.'
     }
     let warmBefore = null
     async function runPhase(phase, duration, state) {
       assert.equal(await stopPresent(), false, 'resource stop blocks next native phase')
       const map = new Map(state.facts.map(r => [r.noteId + ':' + r.userId, r]))
-      const input = { fixture: manifest.fixture, baseUrl: owned.api, users: runtime.users, multiNoteIds: manifest.multiNoteIds,
+      const input = { fixture: manifest.fixture, poolSize: count, baseUrl: owned.api, users: runtime.users, multiNoteIds: manifest.multiNoteIds,
         initial: runtime.users.map((user, i) => { const noteId = manifest.multiNoteIds[i]; return { noteId, userId: user.userId, ...(map.get(noteId + ':' + user.userId) || { active: 0, version: 0 }) } }) }
       const privateDir = await mkdtemp(join(tmpdir(), 'cap-like-phase-')), path = join(privateDir, 'input.json')
       const env = { ...process.env, CAP_LIKE_INPUT: path, CAP_LIKE_MODE: mode, CAP_LIKE_RATE: String(phase === 'warm' ? warmRate : rate), CAP_LIKE_SECONDS: String(duration), CAP_LIKE_PHASE: phase, CAP_LIKE_PRE_VUS: String(preVUs), CAP_LIKE_MAX_VUS: String(maxVUs) }
@@ -526,17 +534,17 @@ if (action === 'prepare') {
       }
     }
     try {
-      report.scriptSHA256 = Object.fromEntries(await Promise.all(['scripts/cap10-like.mjs', 'scripts/load/cap10-like.js', 'scripts/load/cap10-like-contract.mjs', 'scripts/load/cap10-native-window.mjs', 'scripts/load/cap10-db-observe.mjs'].map(async p => [p, hash(await readFile(p))])))
+      report.scriptSHA256 = Object.fromEntries(await Promise.all(['scripts/cap10-like.mjs', 'scripts/load/cap10-like.js', 'scripts/load/cap10-like-contract.mjs', 'scripts/load/cap10-native-window.mjs', 'scripts/load/cap10-db-observe.mjs', 'scripts/load/cap10-cohort-contract.mjs'].map(async p => [p, hash(await readFile(p))])))
       warmBefore = await snapshot(manifest, mode, 'before-warm'); await save(join(dir, 'warm-before.json'), warmBefore)
       report.initialDistributions.beforeWarm = initialDistribution(manifest, warmBefore)
       assert.deepEqual(factErrors(manifest, mode, warmBefore), [], 'starting facts invalid')
-      if (process.env.CAP10_FORMAL === '1') assert.equal(report.initialDistributions.beforeWarm.existing, 512, 'formal requires existing relationships before warm')
+      if (process.env.CAP10_FORMAL === '1') assert.equal(report.initialDistributions.beforeWarm.existing, count, 'formal requires all manifest-bound relationships before warm')
       const warm = await runPhase('warm', warmSeconds, warmBefore); report.warmExit = warm.code; report.warmExternalStop = warm.externalStop
       assert.equal(warm.code, 0, 'warm failed; stable phase not started'); assert.equal(warm.externalStop, null)
       report.setup = await normalizeInitialState(manifest, mode, dir)
       const before = await snapshot(manifest, mode, 'before-stable'); await save(join(dir, 'before.json'), before)
       report.initialDistributions.beforeStable = initialDistribution(manifest, before)
-      assert.equal(report.initialDistributions.beforeStable.existing, 512); assert.equal(report.initialDistributions.beforeStable.active, 0)
+      assert.equal(report.initialDistributions.beforeStable.existing, count); assert.equal(report.initialDistributions.beforeStable.active, 0)
       assert.deepEqual(factErrors(manifest, mode, before), [], 'warm facts invalid')
       await save(join(dir, 'stable-db-before.json'), await collectDatabase(statement => sql(statement, true)))
       await save(join(dir, 'stable-capacity-before.json'), await capacitySnapshot())

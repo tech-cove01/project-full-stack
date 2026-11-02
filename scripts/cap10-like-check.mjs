@@ -5,6 +5,7 @@ import vm from 'node:vm'
 import { posix } from 'node:path'
 import { stateFromBody, classifyWrite, pairForVU, unknownBounds } from './load/cap10-like-contract.mjs'
 import { nativeScenarioWindow } from './load/cap10-native-window.mjs'
+import { fixturePoolSize } from './load/cap10-cohort-contract.mjs'
 
 let checks = 0
 async function check(name, fn) { await fn(); checks++; console.log('PASS ' + name) }
@@ -131,7 +132,7 @@ await check('actual phase registers cleanup before secret write and removes part
   for (const fault of [null, 'registration', 'private-write']) {
     const steps = []; let exists = false
     const context = { Map, process: { env: {} }, manifest: nativeFixture, runtime: { users: nativeFixture.users }, mode: 'multi', dir: '/public',
-      owned: { api: 'http://127.0.0.1:8281' }, warmRate: 1, rate: 1, preVUs: 512, maxVUs: 512,
+      owned: { api: 'http://127.0.0.1:8281' }, count: 512, warmRate: 1, rate: 1, preVUs: 512, maxVUs: 512,
       join: (...parts) => parts.join('/'), tmpdir: () => '/owned/tmp', mkdtemp: async () => '/owned/tmp/exact-new',
       stopPresent: async () => false, assert, json: JSON.stringify,
       save: async path => { steps.push(path.includes('-private-input.json') ? 'registered' : 'removed-record'); if (fault === 'registration' && path.includes('-private-input.json')) throw new Error('registration fault') },
@@ -176,5 +177,47 @@ await check('v0 active, membership, explicit hash or foreign inactive-version fi
     const replies = emptyReplies(); replies[0] = members; replies[1] = versions
     assert.ok((await projectionContext(replies).derived(seedManifest, 'multi', zeroState())).errors.length > 0)
   }
+})
+const fixtureCode = helperSource.match(/^async function loadFixture[\s\S]*?^}/m)[0]
+const distributionCode = helperSource.match(/^function initialDistribution[\s\S]*?^}/m)[0]
+function ownedFixture(count, explicit = true) {
+  const manifest = { project: 'owned-project', baseUrl: 'http://127.0.0.1:8281', executionPlatform: 'windows',
+    transitionSHA256: null, sourceSha: 'a'.repeat(40), expectedRevision: 'capacity-' + 'a'.repeat(40),
+    status: 'READY', fixture: 'owned-fixture', credentialFile: '/owned/tmp/cohort/input.json',
+    users: count, multiNotes: count, multiRelations: count,
+    userIds: Array.from({ length: count }, (_, i) => String(i + 1)), multiNoteIds: Array.from({ length: count }, (_, i) => String(i + 10001)) }
+  if (explicit) manifest.poolSize = count
+  return manifest
+}
+function fixtureContext(manifest, action = 'inspect', runtimeCount = manifest.users) {
+  const runtime = { fixture: manifest.fixture, users: manifest.userIds.slice(0, runtimeCount).map(userId => ({ userId, token: 'synthetic-only' })) }
+  const context = { assert, fixturePoolSize, fixturePath: '/public/fixture.json', evidence() {},
+    readFile: async path => JSON.stringify(path === '/public/fixture.json' ? manifest : runtime),
+    hash: () => 'fixture-byte-hash', owned: { project: 'owned-project', api: 'http://127.0.0.1:8281' },
+    executionPlatform: 'windows', process: { env: {} }, action, privateRoot: '/owned', join: posix.join, basename: posix.basename,
+    under: (path, root) => path.startsWith(root + '/') }
+  vm.runInNewContext(fixtureCode + '\n' + distributionCode + '\nglobalThis.loadFixture = loadFixture; globalThis.initialDistribution = initialDistribution', context)
+  return context
+}
+await check('actual fixture loader keeps legacy 512 and accepts complete explicit 4096', async () => {
+  for (const manifest of [ownedFixture(512, false), ownedFixture(4096)]) {
+    const context = fixtureContext(manifest), loaded = await context.loadFixture()
+    assert.equal(loaded.runtime.users.length, manifest.users)
+    const facts = manifest.userIds.map((userId, i) => ({ userId, noteId: manifest.multiNoteIds[i], active: i === manifest.users - 1 ? 1 : 0, version: i === manifest.users - 1 ? 1 : 0 }))
+    const distribution = context.initialDistribution(manifest, { facts })
+    assert.equal(distribution.configuredRelationships, manifest.users); assert.equal(distribution.existing, manifest.users)
+    assert.equal(distribution.active, 1); assert.equal(distribution.inactive, manifest.users - 1)
+  }
+})
+await check('actual fixture loader rejects aliases, cardinality mismatch and partial READY credentials', async () => {
+  const foreignLegacy = ownedFixture(4096, false)
+  await assert.rejects(fixtureContext(foreignLegacy).loadFixture())
+  for (const field of ['userIds', 'multiNoteIds']) {
+    const duplicate = ownedFixture(4096); duplicate[field][4095] = duplicate[field][0]
+    await assert.rejects(fixtureContext(duplicate).loadFixture())
+  }
+  await assert.rejects(fixtureContext(ownedFixture(4096), 'finish', 5).loadFixture())
+  const partial = ownedFixture(4096); partial.status = 'PREPARING'
+  assert.equal((await fixtureContext(partial, 'finish', 5).loadFixture()).runtime.users.length, 5)
 })
 console.log(JSON.stringify({ checks, failed: 0, servicesStarted: false, loadRuns: 0 }))

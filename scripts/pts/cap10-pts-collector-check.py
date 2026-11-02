@@ -457,6 +457,60 @@ class Checks(unittest.TestCase):
         stats = module.quantiles([10, 110])
         self.assertEqual((stats['med'], stats['p(95)'], stats['p(99)']), (60, 105, 109))
 
+    def test_progress_never_computes_percentiles_and_counts_every_durable_terminal(self):
+        self.ready(); self.stamp = self.start + 1000
+        rows = [self.record(0), self.record(1, kind='invalid', status=503),
+                {'ordinal': 2, 'slot': 2, 'kind': 'dropped', 'startedUnixMs': None, 'elapsedMs': None, 'status': None}]
+        self.batch(records=rows)
+        with patch.object(module, 'quantiles', side_effect=AssertionError('progress must not sort latency')):
+            progress = self.store.progress()
+        self.assertIsNone(progress['allLatency']); self.assertIsNone(progress['mutationLatency'])
+        self.assertIs(progress['latencyComplete'], False)
+        self.assertIs(progress['latencyStatisticsComputed'], False)
+        self.assertEqual((progress['counts']['attempted'], progress['counts']['completed'], progress['counts']['mutation'],
+                          progress['counts']['invalid'], progress['counts']['dropped'], progress['latencySampleCount'],
+                          progress['httpErrors'], progress['systemErrors']), (2, 2, 1, 1, 1, 2, 1, 1))
+        final = self.store.summary()
+        self.assertTrue(final['latencyStatisticsComputed'])
+        self.assertEqual(final['allLatency'], module.quantiles([1, 2]))
+        self.assertEqual(progress['counts'], final['counts'])
+        by_engine = self.store._raw_counts(ENGINE_IDS[0])
+        self.assertEqual({key: value for key, value in progress['counts'].items() if key != 'planned'},
+                         {key: value for key, value in by_engine.items() if key != 'planned'})
+
+    def test_durable_counters_ignore_duplicate_frames_and_rejected_or_unsynced_prefixes(self):
+        self.ready(); self.stamp = self.start + 1000
+        first = [self.record()]
+        self.batch(records=first, seq=0)
+        self.batch(records=first, seq=0)
+        self.assertEqual(self.store.progress()['counts']['mutation'], 1)
+        with self.assertRaises(ValueError):
+            self.batch(records=[self.record(1), self.record(2, observedVersion=999)], seq=1)
+        self.assertEqual(self.store.progress()['counts']['mutation'], 1)
+        self.assertEqual(self.store._raw_counts(ENGINE_IDS[0])['mutation'], 1)
+
+    def test_unsynced_frame_cannot_update_progress_counters(self):
+        self.ready(); self.stamp = self.start + 1000
+        with patch.object(module.os, 'fsync', side_effect=OSError('synthetic sync failure')):
+            with self.assertRaises(ValueError):
+                self.batch(records=[self.record()])
+        self.assertEqual(self.store.progress()['counts']['mutation'], 0)
+        self.assertEqual(self.store._raw_counts(ENGINE_IDS[0])['mutation'], 0)
+        self.assertEqual(len(self.store._records), 0)
+
+    def test_full_r7_preserves_high_cardinality_fractional_samples_after_progress(self):
+        self.ready(); self.stamp = self.start + 5000
+        values = [((ordinal * 173) % 997) / 997 + 1 for ordinal in range(200)]
+        self.batch(records=[self.record(ordinal, elapsedMs=value) for ordinal, value in enumerate(values)])
+        self.assertEqual(len(set(values)), len(values))
+        with patch.object(module, 'quantiles', side_effect=AssertionError('progress must not round or sample')):
+            progress = self.store.progress()
+        result = self.store.summary()
+        self.assertEqual(result['allLatency'], module.quantiles(values))
+        self.assertEqual(result['mutationLatency'], module.quantiles(values))
+        self.assertEqual(result['allLatency']['max'], max(values))
+        self.assertEqual(progress['counts'], result['counts'])
+
     def cohort(self, pool, engines):
         self.store.close()
         self.config.update(poolSize=pool, expectedEngines=engines,

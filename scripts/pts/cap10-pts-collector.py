@@ -104,6 +104,10 @@ class EngineStore:
         self._last_http_end = {}
         self._retired_slots = set()
         self._records = {}
+        self._kind_counts = Counter()
+        self._engine_kind_counts = {}
+        self._http_errors = 0
+        self._system_errors = 0
         self._stats_version = -1
         self._stats_cache = None
         self._start = None
@@ -214,6 +218,7 @@ class EngineStore:
                 self._engines[engine_id] = {'slots': slots, 'lastSeenUnixMs': self._now(), 'batches': {}, 'complete': None,
                                            'readyWorkers': 0, 'resources': None, 'lastResourceUnixMs': None,
                                            'lastValidCPUUnixMs': None, 'clock': None, 'highCPUStreak': 0, 'cpuSamples': []}
+                self._engine_kind_counts[engine_id] = Counter()
                 self._owners.update({slot: engine_id for slot in slots})
                 self._append({'kind': 'register', 'engineId': engine_id, 'slots': slots, 'readyWorkers': 0})
             if payload['readyWorkers'] > self._engines[engine_id]['readyWorkers']:
@@ -353,6 +358,15 @@ class EngineStore:
                 for ordinal in added_ordinals:
                     self._records.pop(ordinal, None)
                 raise
+            # Only durable, completely accepted frames contribute counters.
+            # Duplicate sequence retries return above and never count twice.
+            for record in records:
+                kind, status = record['kind'], record['status']
+                self._kind_counts[kind] += 1
+                self._engine_kind_counts[engine_id][kind] += 1
+                if kind != 'dropped':
+                    self._http_errors += status in (None, 0) or status >= 400
+                    self._system_errors += status in (None, 0) or status >= 500
             engine['batches'][payload['seq']] = frame_hash
             engine['lastSeenUnixMs'] = self._now()
             engine['lastResourceUnixMs'] = engine['lastSeenUnixMs']
@@ -365,7 +379,7 @@ class EngineStore:
         return sum((total - 1 - slot) // self._pool_size + 1 for slot in slots if slot < total)
 
     def _raw_counts(self, engine_id=None):
-        kinds = Counter(r[1] for r in self._records.values() if engine_id is None or self._owners[r[0]] == engine_id)
+        kinds = self._kind_counts if engine_id is None else self._engine_kind_counts[engine_id]
         attempted = sum(kinds.values()) - kinds['dropped']
         return {'planned': self._planned_total if engine_id is None else self._planned(self._engines[engine_id]['slots']),
                 'attempted': attempted, 'completed': attempted, **{key: kinds[key] for key in KINDS}}
@@ -376,8 +390,7 @@ class EngineStore:
             mutation_elapsed = [r[3] for r in self._records.values() if r[1] == 'mutation']
             self._stats_cache = {'counts': self._raw_counts(), 'allLatency': quantiles(all_elapsed),
                 'mutationLatency': quantiles(mutation_elapsed), 'latencySampleCount': len(all_elapsed),
-                'httpErrors': sum(r[1] != 'dropped' and (r[2] in (None, 0) or r[2] >= 400) for r in self._records.values()),
-                'systemErrors': sum(r[1] != 'dropped' and (r[2] in (None, 0) or r[2] >= 500) for r in self._records.values())}
+                'httpErrors': self._http_errors, 'systemErrors': self._system_errors}
             self._stats_version = len(self._records)
         return copy.deepcopy(self._stats_cache)
 
@@ -433,10 +446,17 @@ class EngineStore:
                         self._stop_for('collector native terminal deadline missing', collection=True)
             return self._control()
 
-    def summary(self):
+    def progress(self):
+        """Exact durable counters/resources only; no live percentile calculation."""
+        return self.summary(include_latency=False)
+
+    def summary(self, *, include_latency=True):
         with self._lock:
             self.tick()
-            statistics = self._statistics()
+            statistics = self._statistics() if include_latency else {
+                'counts': self._raw_counts(), 'allLatency': None, 'mutationLatency': None,
+                'latencySampleCount': self._raw_counts()['attempted'],
+                'httpErrors': self._http_errors, 'systemErrors': self._system_errors}
             raw = statistics['counts']
             engines = [{'engineId': engine_id, 'lastSeenUnixMs': engine['lastSeenUnixMs'],
                         'complete': engine['complete'] is not None and engine['complete']['valid'],
@@ -453,7 +473,9 @@ class EngineStore:
                     'counts': raw, 'notOffered': raw['planned'] - raw['attempted'] - raw['dropped'],
                     'allLatency': statistics['allLatency'], 'mutationLatency': statistics['mutationLatency'],
                     'quantileMethod': 'R7; full raw native HTTP elapsedMs, including failed HTTP terminals',
-                    'latencyComplete': collection_valid, 'latencySampleCount': statistics['latencySampleCount'],
+                    'latencyComplete': collection_valid and include_latency,
+                    'latencyStatisticsComputed': include_latency,
+                    'latencySampleCount': statistics['latencySampleCount'],
                     'engines': engines, 'collectionValid': collection_valid,
                     'unknownIsExact': unknown_exact, 'unknown': raw['uncertain'] if unknown_exact else None,
                     'effectUnknown': raw['uncertain'], 'classificationUnknown': 0 if unknown_exact else None,

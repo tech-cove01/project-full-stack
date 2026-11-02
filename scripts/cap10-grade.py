@@ -505,22 +505,37 @@ def warm_only_layout(root, command, previous):
         return None
     load = Path(root) / (tag + '-load')
     result_path, marker = load / 'result.json', load / 'warm-process.json'
-    if load.is_symlink() or not result_path.is_file() or result_path.is_symlink() or not marker.is_file() or marker.is_symlink():
+    if load.is_symlink() or result_path.is_symlink() or not marker.is_file() or marker.is_symlink():
         return None
-    result, process = read(result_path), read(marker)
+    missing_result = not result_path.exists()
+    if not missing_result and not result_path.is_file():
+        return None
+    if missing_result and not (previous.get('outcome') == 'correctness_stop'
+            and previous.get('failedStartOrException') == 'FileNotFoundError'
+            and previous.get('childrenConverged') is False and previous.get('batchFatal') is True
+            and type(previous.get('observerExit')) is int and previous.get('knownOwnedProcesses')):
+        return None
+    result, process = (None if missing_result else read(result_path)), read(marker)
     forbidden = ('setup', 'stableExit', 'stableStartedAt', 'stableEndedAt', 'stableWrapperStartedAt',
                  'stableWrapperEndedAt', 'stableCommandElapsedMs', 'result')
-    if not (result.get('loadBackend') == 'pts' and type(result.get('warmExit')) is int and result['warmExit'] != 0
-            and result.get('nativeScenario', {}).get('complete') is False and not any(result.get(key) is not None for key in forbidden)
-            and process.get('phase') == 'warm' and process.get('backend') == 'pts'
+    if not missing_result and not (result.get('loadBackend') == 'pts' and type(result.get('warmExit')) is int and result['warmExit'] != 0
+            and result.get('nativeScenario', {}).get('complete') is False and not any(result.get(key) is not None for key in forbidden)):
+        return None
+    if not (process.get('phase') == 'warm' and process.get('backend') == 'pts'
             and type(process.get('controller_pid')) is int and process['controller_pid'] > 0
             and type(process.get('controller_started_unix_ms')) in (int, float)):
+        return None
+    if missing_result and not any(owner.get('pid') == process['controller_pid']
+            and abs(owner.get('created', 0) - process['controller_started_unix_ms'] / 1000) <= .002
+            for owner in previous['knownOwnedProcesses']):
         return None
     absent = [load / name for name in ('stable-process.json', 'stable-pts', 'stable-summary.json',
         'stable-console.txt', 'stable-private-input.json', 'stable-private-input-removed.json',
         'stable-db-before.json', 'stable-db-after.json', 'stable-capacity-before.json',
         'stable-capacity-after.json', 'before.json', 'after.json', 'setup-transaction.json', 'setup-reconcile.json')]
     if any(path.exists() or path.is_symlink() for path in absent) or any(path.name.startswith('stable') for path in load.rglob('*')):
+        return None
+    if missing_result and any(path.name.startswith('setup') for path in load.rglob('*')):
         return None
     current = load / 'process.json'
     if current.exists() and (current.is_symlink() or read(current) != process):
@@ -529,15 +544,35 @@ def warm_only_layout(root, command, previous):
     if len(starts) != 1:
         return None
     return {'absentPaths': [path.relative_to(root).as_posix() for path in absent],
-            'warmStartAuditPath': starts[0].relative_to(root).as_posix()}
+            'warmStartAuditPath': starts[0].relative_to(root).as_posix(),
+            **({'missingResult': {'path': result_path.relative_to(root).as_posix(), 'exists': False}}
+               if missing_result else {})}
 
 
 def authority_warm_only(root, command, previous, terminal, context):
     layout = warm_only_layout(root, command, previous)
     reports = terminal.get('reports', [])
-    require(layout is not None and terminal.get('noStablePaths') == layout and len(reports) == 1
-            and reports[0].get('phase') == 'warm', 'warm-only recovery requires failed warm and no setup or stable evidence')
-    for key, suffix in (('originalCommand', '-command.json'), ('originalStage', '-stage.json'), ('originalResult', '-load/result.json')):
+    zero_cancel = terminal.get('terminationKind') == 'warm_zero_native_cancel'
+    require(layout is not None and terminal.get('noStablePaths') == layout
+            and (layout.get('missingResult') and reports == [] if zero_cancel
+                 else len(reports) == 1 and reports[0].get('phase') == 'warm'),
+            'warm-only recovery requires failed warm and no setup or stable evidence')
+    missing = layout.get('missingResult')
+    originals = [('originalCommand', '-command.json'), ('originalStage', '-stage.json')]
+    if missing:
+        require('originalResult' in terminal and terminal['originalResult'] is None
+                and terminal.get('missingOriginalResult') == missing,
+                'missing wrapper result must be explicitly bound as absent, never fabricated')
+        expected = {(owner['pid'], owner['created']) for owner in previous['knownOwnedProcesses']}
+        owners = terminal.get('owners', [])
+        require(all(terminal.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive'))
+                and expected <= {(owner.get('pid'), owner.get('created')) for owner in owners}
+                and all(owner.get('alive') is False and owner.get('identityChecked') is True for owner in owners),
+                'missing-result recovery requires every exact original owner to have exited')
+    else:
+        require(terminal.get('missingOriginalResult') is None, 'an existing result cannot be declared missing')
+        originals.append(('originalResult', '-load/result.json'))
+    for key, suffix in originals:
         reference = {'path': command['tag'] + suffix, 'sha256': sha(Path(root) / (command['tag'] + suffix))}
         require(terminal.get(key) == reference, 'warm-only recovery must bind the exact original ' + key)
         value = _authority_ref(root, reference)
@@ -546,6 +581,8 @@ def authority_warm_only(root, command, previous, terminal, context):
     require(terminal['warmProcess']['path'] == command['tag'] + '-load/warm-process.json', 'warm process must be its original marker')
     require(any(owner.get('pid') == process['controller_pid'] and abs(owner.get('created', 0) - process['controller_started_unix_ms'] / 1000) <= .002
                 and owner.get('alive') is False and owner.get('identityChecked') is True for owner in terminal.get('owners', [])), 'exact warm controller must be stopped')
+    if zero_cancel:
+        return authority_warm_zero_native_cancel(root, command, previous, terminal, context, layout)
     report = reports[0]
     require(report.get('ended') is True and isinstance(report.get('reportId'), str) and report['reportId']
             and isinstance(report.get('startTimeRaw'), str) and isinstance(report.get('endTimeRaw'), str)
@@ -564,6 +601,91 @@ def authority_warm_only(root, command, previous, terminal, context):
             and isinstance(raw.get('RequestId'), str) and raw['RequestId'] and raw['RequestId'] == report.get('requestId')
             and overview.get('StartTime') == report['startTimeRaw'] and overview.get('EndTime') == report['endTimeRaw']
             and overview.get('ReportId', report['reportId']) == report['reportId'], 'warm-only EndTime needs the real signed report response')
+    return True
+
+
+def authority_warm_zero_native_cancel(root, command, previous, terminal, context, layout):
+    """Cancellation before any collector registration is never an ended report."""
+    root = Path(root); prefix = command['tag'] + '-load/warm-pts/'
+    scene = read(root / context['active']['ptsAdmissionPath']).get('sceneId')
+    start_ref = terminal['originalStartAudit']; start = _authority_ref(root, start_ref)
+    report_id = terminal.get('cancelledReportId')
+    require(isinstance(report_id, str) and report_id and start_ref['path'] == layout['warmStartAuditPath']
+            and start.get('action') == 'StartTestingJMeterScene' and start.get('sceneId') == scene
+            and start.get('regionId') == 'cn-shanghai' and start.get('httpStatus') == 200
+            and start.get('sanitizedRawResponse', {}).get('Success') is True
+            and start['sanitizedRawResponse'].get('ReportId') == report_id,
+            'zero-native cancellation must bind the exact original acknowledged Start')
+    stop_ref = terminal['originalStopAudit']; stop = _authority_ref(root, stop_ref)
+    raw = stop.get('sanitizedRawResponse', {})
+    require(stop_ref['path'].startswith(prefix + 'api/') and stop.get('action') == 'StopTestingJMeterScene'
+            and stop.get('sceneId') == scene and stop.get('regionId') == 'cn-shanghai'
+            and stop.get('httpStatus') == 200 and raw.get('Success') is True and raw.get('Code', '') == ''
+            and isinstance(raw.get('RequestId'), str) and raw['RequestId'].strip(),
+            'zero-native cancellation requires the original successful signed scene Stop acknowledgement')
+    observed = instant(terminal['cancellationObservedAt'])
+    require(instant(start['requestStartedAt']) <= instant(start['responseFinishedAt'])
+            <= instant(stop['requestStartedAt']) <= instant(stop['responseFinishedAt'])
+            <= observed <= dt.datetime.now(dt.timezone.utc), 'cancellation audit chronology differs')
+    idle_refs = terminal.get('emptyRunningAudits', [])
+    require(len(idle_refs) == 2 and idle_refs[0] != idle_refs[1], 'two independent post-stop empty running reads required')
+    idle_times, request_ids = [], set()
+    for reference in idle_refs:
+        audit = _authority_ref(root, reference); response = audit.get('sanitizedRawResponse', {})
+        began, ended = instant(audit['requestStartedAt']), instant(audit['responseFinishedAt'])
+        require(audit.get('action') == 'GetJMeterSceneRunningData' and audit.get('sceneId') == scene
+                and audit.get('regionId') == 'cn-shanghai' and audit.get('httpStatus') == 200
+                and set(response) == {'RequestId', 'Success'} and response.get('Success') is True
+                and isinstance(response.get('RequestId'), str) and response['RequestId'].strip()
+                and response['RequestId'] not in request_ids
+                and max(instant(stop['responseFinishedAt']), instant(previous['finishedAt'])) <= began <= ended <= observed,
+                'post-stop reads must be exact successful signed empty responses after the failed stage')
+        request_ids.add(response['RequestId']); idle_times.append((began, ended))
+    require(idle_times[1][0] >= idle_times[0][1] + dt.timedelta(seconds=2), 'empty running observations must be at least two seconds apart')
+    for path in root.rglob('*StartTestingJMeterScene.json'):
+        audit = read(path)
+        if audit.get('sceneId') == scene and audit.get('action') == 'StartTestingJMeterScene':
+            began = instant(audit['requestStartedAt'])
+            require(not instant(start['requestStartedAt']) <= began <= observed
+                    or path == root / start_ref['path'], 'a different Start exists inside the cancellation observation interval')
+    journal_ref = terminal['nativeJournal']; journal_path = root / journal_ref['path']
+    require(journal_ref['path'] == prefix + 'records.ndjson' and journal_path.is_file()
+            and not journal_path.is_symlink() and journal_path.resolve() == journal_path
+            and journal_ref.get('sha256') == sha(journal_path), 'original zero-native journal bytes must be retained')
+    journal = [json.loads(line) for line in journal_path.read_bytes().splitlines()]
+    require(len(journal) == 2 and [row.get('kind') for row in journal] == ['configuration', 'stop'],
+            'any native register, batch, completion or additional journal record forbids zero-native cancellation')
+    identity = journal[0].get('configuration', {})
+    identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()).hexdigest()
+    summary_ref = terminal['nativeSummary']; latest = _authority_ref(root, summary_ref); summary = latest.get('summary', {})
+    require(summary_ref['path'] == prefix + 'latest.json' and journal[0].get('hash') == identity_hash == summary.get('hash')
+            and all(summary.get(key) == value for key, value in identity.items())
+            and identity.get('phase') == 'warm' and identity.get('rate') == command.get('warmRate')
+            and identity.get('seconds') == command.get('warmSeconds') and identity.get('expectedEngines') == 2
+            and identity.get('fixtureSHA256') == command.get('fixtureSHA256')
+            and identity.get('scriptSHA256') == command.get('scriptHashes', {}).get('pts/cap10-jmeter.groovy')
+            and isinstance(identity.get('runId'), str) and identity['runId']
+            and summary.get('startUnixMs') is None and summary.get('endUnixMs') is None
+            and summary.get('stop') is True and summary.get('complete') is False and summary.get('engines') == []
+            and isinstance(journal[1].get('reason'), str) and journal[1]['reason'] == summary.get('stopReason')
+            and summary.get('evidenceSHA256') == journal_ref['sha256'],
+            'zero-native summary must match the exact frozen unregistered stopped collector identity and journal')
+    counts = summary.get('counts', {})
+    require(counts.get('planned') == command['warmRate'] * command['warmSeconds']
+            and all(type(counts.get(key)) is int and counts[key] == 0 for key in
+                    ('attempted', 'completed', 'mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')),
+            'zero-native cancellation cannot contain any offered or terminal native request')
+    before_ref = terminal['beforeWarm']; before = _authority_ref(root, before_ref)
+    reconciliation = _authority_ref(root, terminal['cancellationReconciliation']); after = reconciliation.get('facts', {})
+    require(before_ref['path'] == command['tag'] + '-load/warm-before.json'
+            and reconciliation.get('valid') is True and reconciliation.get('factsValid') is True
+            and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == []
+            and instant(previous['finishedAt']).timestamp() * 1000 <= reconciliation.get('startedAt', 0)
+            <= reconciliation.get('finishedAt', 0) <= observed.timestamp() * 1000
+            and len(before.get('facts', [])) == len(before.get('notes', [])) == 512
+            and all(key in before and key in after and before[key] == after[key]
+                    for key in ('facts', 'notes', 'events', 'transitions', 'eventCount')),
+            'zero-native cancellation needs later complete reconciliation with no authoritative fixture fact or event change')
     return True
 
 
@@ -609,8 +731,11 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
         if terminal.get('terminationKind') == 'zero_start':
             authority_zero_start(root, previous, old_stage, terminal, context)
             require(instant(terminal['zeroStartObservedAt']) <= admitted, 'zero-start observation must precede its window admission')
-        elif terminal.get('terminationKind') == 'warm_only':
+        elif terminal.get('terminationKind') in ('warm_only', 'warm_zero_native_cancel'):
             authority_warm_only(root, previous, old_stage, terminal, context)
+            if terminal['terminationKind'] == 'warm_zero_native_cancel':
+                require(admission.get('reconciliation') == terminal['cancellationReconciliation'],
+                        'zero-native cancellation must use the same fresh full reconciliation as the next admission')
         else:
             require({r.get('phase') for r in reports} == {'warm', 'stable'} and len(reports) == 2 and all(r.get('ended') is True and isinstance(r.get('reportId'), str) and r['reportId'] and isinstance(r.get('startTimeRaw'), str) and isinstance(r.get('endTimeRaw'), str) and len(r['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(r['endTimeRaw']) >= dt.datetime.fromisoformat(r['startTimeRaw']) for r in reports), 'both previous PTS phases require real matching report EndTime')
         for report in reports:

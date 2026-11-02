@@ -1240,6 +1240,188 @@ class Checks(unittest.TestCase):
         with self.assertRaises((ValueError, KeyError)):
             self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)
 
+    def authority_missing_warm_result_fixture(self):
+        directory, api, active, command, previous, terminal = self.authority_warm_fixture()
+        (directory / 'S7-load/result.json').unlink()
+        previous.update(outcome='correctness_stop', failedStartOrException='FileNotFoundError',
+                        childrenConverged=False, batchFatal=True)
+        path = self.put('linux/S7-stage.json', previous)
+        terminal.update(originalStage={'path': path.name, 'sha256': grade.sha(path)}, originalResult=None,
+                        missingOriginalResult={'path': 'S7-load/result.json', 'exists': False},
+                        noStablePaths=grade.warm_only_layout(directory, command, previous))
+        terminal_path = self.put('linux/terminal-before-S8.json', terminal)
+        admission = grade.read(directory / 'admission-S8.json')
+        admission['termination']['sha256'] = grade.sha(terminal_path)
+        self.put('linux/admission-S8.json', admission)
+        return directory, api, active, command, previous, terminal
+
+    def test_authority_warm_missing_result_accepts_ended_warm_without_creating_result(self):
+        directory, api, active, command, previous, terminal = self.authority_missing_warm_result_fixture()
+        originals = {path: path.read_bytes() for path in (directory / 'S7-command.json',
+            directory / 'S7-stage.json', directory / 'S7-load/warm-process.json')}
+        self.assertEqual(terminal['noStablePaths']['missingResult'], terminal['missingOriginalResult'])
+        reservation = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)
+        self.assertEqual(reservation['tag'], 'S8')
+        self.assertEqual(grade.search_state(directory, self.other)['boundaryTags'], [])
+        self.assertFalse((directory / 'S7-load/result.json').exists())
+        self.assertFalse((directory / 'S7-load/stable-pts').exists())
+        self.assertTrue(all(path.read_bytes() == raw for path, raw in originals.items()))
+
+    def test_authority_warm_missing_result_requires_exact_absence_and_original_failure(self):
+        directory, api, active, command, previous, terminal = self.authority_missing_warm_result_fixture()
+        for change in ({'originalResult': terminal['originalStage']}, {'missingOriginalResult': None},
+                {'missingOriginalResult': {'path': 'S8-load/result.json', 'exists': False}},
+                {'missingOriginalResult': {'path': 'S7-load/result.json', 'exists': True}}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                grade.authority_warm_only(directory, command, previous, {**terminal, **change}, {'active': active})
+        for change in ({'outcome': 'performance_limited'}, {'failedStartOrException': 'OtherError'},
+                {'childrenConverged': True}, {'batchFatal': False}, {'knownOwnedProcesses': []},
+                {'knownOwnedProcesses': [{'pid': 99999, 'created': 456.5}]}):
+            self.assertIsNone(grade.warm_only_layout(directory, command, {**previous, **change}))
+        result = self.put('linux/S7-load/result.json', {'loadBackend': 'pts', 'warmExit': 1,
+            'nativeScenario': {'complete': False}, 'result': None})
+        with self.assertRaises(ValueError):
+            grade.authority_warm_only(directory, command, previous, terminal, {'active': active})
+        result.unlink()
+
+    def test_authority_warm_missing_result_rejects_setup_owner_report_and_freshness_gaps(self):
+        directory, api, active, command, previous, terminal = self.authority_missing_warm_result_fixture()
+        for relative in ('stable-console.txt', 'setup-extra.json', 'setup/new-proof.json', 'before.json'):
+            path = self.put('linux/S7-load/' + relative, {})
+            self.assertIsNone(grade.warm_only_layout(directory, command, previous))
+            path.unlink()
+            if path.parent.name == 'setup':
+                path.parent.rmdir()
+        for change in ({'owners': []}, {'controllerAlive': True},
+                {'owners': [{**terminal['owners'][0], 'alive': True}]},
+                {'reports': []}, {'warmReportAudit': terminal['warmReport']},
+                {'reports': [{**terminal['reports'][0], 'reportId': 'OTHER'}]}):
+            with self.subTest(change=change), self.assertRaises((ValueError, KeyError)):
+                grade.authority_warm_only(directory, command, previous, {**terminal, **change}, {'active': active})
+        admission = grade.read(directory / 'admission-S8.json'); admission.pop('reconciliation')
+        self.put('linux/admission-S8.json', admission)
+        with self.assertRaises((ValueError, KeyError)):
+            self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)
+
+    def authority_zero_native_cancel_fixture(self):
+        directory, api, active, command, previous, terminal = self.authority_missing_warm_result_fixture()
+        command.update(warmRate=25, warmSeconds=10,
+                       scriptHashes={**command['scriptHashes'], 'pts/cap10-jmeter.groovy': 'c' * 64})
+        command_path = self.put('linux/S7-command.json', command)
+        ref = lambda p: {'path': p.relative_to(directory).as_posix(), 'sha256': grade.sha(p)}
+        at = grade.instant(previous['finishedAt'])
+        stamp = lambda seconds: (at + dt.timedelta(seconds=seconds)).isoformat()
+        start_path = directory / terminal['noStablePaths']['warmStartAuditPath']
+        start = grade.read(start_path)
+        start.update(regionId='cn-shanghai', requestStartedAt=stamp(-10), responseFinishedAt=stamp(-9))
+        start_path.write_text(json.dumps(start), encoding='utf-8')
+        stop_path = self.put('linux/S7-load/warm-pts/api/one-StopTestingJMeterScene.json',
+            {'action': 'StopTestingJMeterScene', 'regionId': 'cn-shanghai', 'sceneId': 'SCENE',
+             'requestStartedAt': stamp(-2), 'responseFinishedAt': stamp(-1), 'httpStatus': 200,
+             'sanitizedRawResponse': {'RequestId': 'stop-request', 'Success': True, 'Code': ''}})
+        idle_paths = []
+        for i in (1, 4):
+            idle_paths.append(self.put(f'linux/cancel-idle-{i}.json',
+                {'action': 'GetJMeterSceneRunningData', 'regionId': 'cn-shanghai', 'sceneId': 'SCENE',
+                 'requestStartedAt': stamp(i), 'responseFinishedAt': stamp(i + .1), 'httpStatus': 200,
+                 'sanitizedRawResponse': {'RequestId': 'idle-' + str(i), 'Success': True}}))
+        identity = {'runId': 'never-started-native', 'phase': 'warm', 'rate': 25, 'seconds': 10,
+                    'apiUrl': 'http://172.16.1.2:8281', 'expectedEngines': 2,
+                    'fixtureSHA256': command['fixtureSHA256'], 'scriptSHA256': 'c' * 64,
+                    'version': 1, 'jitterBudgetMs': 50, 'clockUncertaintyMaxMs': 50}
+        identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        journal_path = directory / 'S7-load/warm-pts/records.ndjson'
+        journal_path.write_text('\n'.join(json.dumps(row) for row in (
+            {'kind': 'configuration', 'configuration': identity, 'hash': identity_hash},
+            {'kind': 'stop', 'atUnixMs': int(at.timestamp() * 1000), 'reason': 'owned_supervisor_stop'})) + '\n', encoding='utf-8')
+        summary = {**identity, 'hash': identity_hash, 'startUnixMs': None, 'endUnixMs': None,
+                   'stop': True, 'stopReason': 'owned_supervisor_stop', 'complete': False, 'engines': [],
+                   'counts': {'planned': 250, **{key: 0 for key in ('attempted', 'completed', 'mutation',
+                       'noop', 'uncertain', 'rejected', 'invalid', 'dropped')}},
+                   'evidenceSHA256': grade.sha(journal_path)}
+        summary_path = self.put('linux/S7-load/warm-pts/latest.json', {'at': stamp(0), 'summary': summary})
+        reconcile_path = directory / 'reconcile-before-S8.json'; reconciliation = grade.read(reconcile_path)
+        reconciliation['facts']['events'] = []
+        reconciliation.update(startedAt=int((at.timestamp() + 5) * 1000), finishedAt=int((at.timestamp() + 5.1) * 1000))
+        reconcile_path.write_text(json.dumps(reconciliation), encoding='utf-8')
+        before_path = self.put('linux/S7-load/warm-before.json', reconciliation['facts'])
+        for key in ('warmReport', 'warmReportAudit'):
+            terminal.pop(key)
+        terminal.update(terminationKind='warm_zero_native_cancel', reports=[], cancelledReportId='WARM_ONLY',
+            originalCommand=ref(command_path), originalStartAudit=ref(start_path), originalStopAudit=ref(stop_path),
+            emptyRunningAudits=[ref(p) for p in idle_paths], cancellationObservedAt=stamp(6),
+            nativeJournal=ref(journal_path), nativeSummary=ref(summary_path), beforeWarm=ref(before_path),
+            cancellationReconciliation=ref(reconcile_path))
+        terminal_path = self.put('linux/terminal-before-S8.json', terminal)
+        admission = grade.read(directory / 'admission-S8.json')
+        admission.update(recordedAt=stamp(7), termination=ref(terminal_path), reconciliation=ref(reconcile_path))
+        self.put('linux/admission-S8.json', admission)
+        return directory, api, active, command, previous, terminal
+
+    def test_authority_zero_native_cancel_accepts_only_unregistered_stopped_warm(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_native_cancel_fixture()
+        originals = {path: path.read_bytes() for path in (directory / 'S7-command.json',
+            directory / 'S7-stage.json', directory / 'S7-load/warm-pts/records.ndjson')}
+        reservation = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)
+        self.assertEqual(reservation['tag'], 'S8')
+        self.assertEqual(terminal['reports'], [])
+        self.assertFalse((directory / 'S7-load/result.json').exists())
+        self.assertEqual(grade.search_state(directory, self.other)['boundaryTags'], [])
+        self.assertTrue(all(path.read_bytes() == raw for path, raw in originals.items()))
+
+    def test_authority_zero_native_cancel_rejects_any_registration_sample_or_changed_fact(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_native_cancel_fixture()
+        for key, mutate in (
+                ('nativeSummary', lambda v: v['summary'].update(engines=[{'engineId': 'registered'}])),
+                ('nativeSummary', lambda v: v['summary'].update(startUnixMs=1)),
+                ('nativeSummary', lambda v: v['summary']['counts'].update(attempted=1)),
+                ('nativeSummary', lambda v: v['summary'].update(evidenceSHA256='0' * 64)),
+                ('cancellationReconciliation', lambda v: v['facts'].update(eventCount=1)),
+                ('cancellationReconciliation', lambda v: v['facts']['facts'][0].update(version=1))):
+            path = directory / terminal[key]['path']; original = path.read_bytes()
+            value = json.loads(original); mutate(value); path.write_text(json.dumps(value), encoding='utf-8')
+            bad = {**terminal, key: {**terminal[key], 'sha256': grade.sha(path)}}
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                grade.authority_warm_only(directory, command, previous, bad, {'active': active})
+            path.write_bytes(original)
+        path = directory / terminal['nativeJournal']['path']; original = path.read_bytes()
+        path.write_bytes(original + b'{"kind":"register"}\n')
+        bad = {**terminal, 'nativeJournal': {**terminal['nativeJournal'], 'sha256': grade.sha(path)}}
+        with self.assertRaises(ValueError):
+            grade.authority_warm_only(directory, command, previous, bad, {'active': active})
+        path.write_bytes(original)
+
+    def test_authority_zero_native_cancel_rejects_wrong_stop_running_or_later_start(self):
+        directory, api, active, command, previous, terminal = self.authority_zero_native_cancel_fixture()
+        for key, mutate in (
+                ('originalStopAudit', lambda v: v['sanitizedRawResponse'].update(Code='Rejected')),
+                ('originalStopAudit', lambda v: v.update(sceneId='OTHER')),
+                ('originalStartAudit', lambda v: v['sanitizedRawResponse'].update(ReportId='OTHER'))):
+            path = directory / terminal[key]['path']; original = path.read_bytes()
+            value = json.loads(original); mutate(value); path.write_text(json.dumps(value), encoding='utf-8')
+            bad = {**terminal, key: {**terminal[key], 'sha256': grade.sha(path)}}
+            with self.subTest(key=key), self.assertRaises(ValueError):
+                grade.authority_warm_only(directory, command, previous, bad, {'active': active})
+            path.write_bytes(original)
+        path = directory / terminal['emptyRunningAudits'][1]['path']; original = path.read_bytes()
+        for mutate in (lambda v: v['sanitizedRawResponse'].update(RunningData={}),
+                       lambda v: v.update(requestStartedAt=grade.read(directory / terminal['emptyRunningAudits'][0]['path'])['responseFinishedAt'])):
+            value = json.loads(original); mutate(value); path.write_text(json.dumps(value), encoding='utf-8')
+            bad = {**terminal, 'emptyRunningAudits': [terminal['emptyRunningAudits'][0],
+                {**terminal['emptyRunningAudits'][1], 'sha256': grade.sha(path)}]}
+            with self.assertRaises(ValueError):
+                grade.authority_warm_only(directory, command, previous, bad, {'active': active})
+        path.write_bytes(original)
+        extra = self.put('linux/other-api/late-StartTestingJMeterScene.json',
+            {'action': 'StartTestingJMeterScene', 'sceneId': 'SCENE', 'requestStartedAt': previous['finishedAt']})
+        with self.assertRaises(ValueError):
+            grade.authority_warm_only(directory, command, previous, terminal, {'active': active})
+        extra.unlink()
+        admission = grade.read(directory / 'admission-S8.json'); admission.pop('reconciliation')
+        self.put('linux/admission-S8.json', admission)
+        with self.assertRaises((ValueError, KeyError)):
+            self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)
+
     def test_authority_formal_still_requires_exact_candidate_and_stops_after_first_failure(self):
         directory, api, active = self.authority_fixture()
         reservation = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)

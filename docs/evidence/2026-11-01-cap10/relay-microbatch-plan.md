@@ -17,9 +17,9 @@ S16在1000/s时，完整60000次HTTP状态变更通过，Outbox保守增长6068�
 | MYSQL-POOL-1 / `a4c3231` | Open/Idle有界配置、空闲默认跟随Open；已提交，实际database/sql与真实依赖正确性回归通过，收益未测。 |
 | RELAY-BATCH-1 / `c5d0a2a` | 最多64条ClaimBatch/DoneBatch；保留RC、活跃索引、租约和attempt fence；普通、独审及真实MySQL通过。 |
 | RELAY-BYTES-1 / `03a7781` | 事务内只租约认领适合字节预算的有序前缀，尾项不增加attempt；真实MySQL4顶层+2边界子例通过。 |
-| RELAY-PUBLISH-1 / `3c26e83` | 每lane独占同步Writer，单次未决调用、错误后真实drain；8项真实SDK协议测试、focused race及独审通过，实际broker尚待验证。 |
-| RELAY-RUNNER / 待完成 | 组合认领、坏payload停车、发布、批完成与原重试；真实MySQL/Kafka回归后单独提交。 |
-| RELAY-WIRING / 待完成 | 默认仍单条，显式开启批次才使用新路径；接应用取消/等待与配置。全套普通检查、独审及精确源码CI单列。 |
+| RELAY-PUBLISH-1 / `3c26e83` | 每lane独占同步Writer，单次未决调用、错误后真实drain；8项真实SDK协议测试、focused race及独审通过，后续runner完成真实broker验证。 |
+| RELAY-RUNNER / `c744072` | 组合认领、坏payload停车、发布、批完成与原重试；真实MySQL/Kafka4顶层回归通过，包含丢ACK后重放、过期fence和超大消息停车/tail。 |
+| RELAY-WIRING / `bf74d58` | 默认批次1保留原路径；显式`GO_COMMUNITY_RELAY_BATCH`（1–64，候选32）接应用实际workerCtx、取消与等待。相关race/vet与双独审通过，全套普通test/vet通过。包含此后端的精确`ab2d4cc`远端CI通过，仍非容量成绩。 |
 
 ## 边界与代价
 
@@ -38,3 +38,9 @@ S16在1000/s时，完整60000次HTTP状态变更通过，Outbox保守增长6068�
 资源方案、连接池、业务代码、发压工具分别冻结。比较必须沿用同一资源、关系分布、原生计量与业务初态，并记录实际版本/配置和数据历史；无法单独归因时报告组合效果。历史800候选/1000受限/失败H1不重判。
 
 新窗口仍按完整60/180秒实际成功变更计算QPS，保留P95/P99、unknown/drop/timing、完整事实/计数/Outbox/Redis/三组收据对账及下游稳态、60秒恢复。最终稳定值取同一冻结版本两轮180秒较低值。资源调整或新的业务确认语义都不得包装成原代码的优化倍率。
+
+## 未采纳的额外完成SQL改写
+
+额外研究尝试把多项DoneBatch的逐条UPDATE改为有序PK锁定+一条set UPDATE，单项仍原Done。实际MySQL下N1/N32为PRIMARY单点/范围，但N64锁查询选择完整PRIMARY index扫描192行；FORCE INDEX不能保证范围访问。完成事务仍为RR，潜在非目标锁/跨lane等待风险未解决。不能仅放宽断言、增大测试历史或假设32在所有统计下都安全。
+
+首轮3顶层中2通过、1失败，另2子例通过；未运行后续旧路径组，未提交候选代码。三份候选源码和接受/旧提案均已私有归档，最终25件核验manifest SHA256=`7cf4fab472e5d1a594430836bf74fe57c95a95e843f3541aa4c043d2c915816f`，候选源归档manifest SHA256=`2514832d03081722080c4b8bcb39fc1867c41e1e81088ef91db4f69966ee4ead`。两份tracked源码已逐字节恢复HEAD，新增测试移入私有归档；保留原DoneBatch单事务逐条fence，没有新SQL往返或吞吐收益。

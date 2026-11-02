@@ -27,9 +27,13 @@ S9/S17的发生器时序违例、S10/S13的采集错误、S11/S14/S18/H1等启�
 
 ## 已交付仓储微批：CAP-10-RELAY-BATCH-1
 
-提交`c5d0a2a6fe4b5323243acb7ff403e0162c99eb84`增加最多64条的ClaimBatch/DoneBatch仓储接口。认领保留显式RC、活跃索引、SKIP LOCKED、30秒租约、逐条attempt和8次上限；完成事务逐条核对原attempt/lease fence，任一失效全批回滚。原单条路径及worker尚未改变；下一票先约束发布字节前缀，再接同步Kafka ACK后的批完成。
+提交`c5d0a2a6fe4b5323243acb7ff403e0162c99eb84`增加最多64条的ClaimBatch/DoneBatch仓储接口。认领保留显式RC、活跃索引、SKIP LOCKED、30秒租约、逐条attempt和8次上限；完成事务逐条核对原attempt/lease fence，任一失效全批回滚。后续`03a7781`限制256KiB保守字节前缀，`3c26e83`提供每lane独占同步Writer，`c744072`接ACK/完成/重放，`bf74d58`接应用配置，默认批次1仍走原路径；详见[微批设计与取舍](relay-microbatch-plan.md)。
 
 直接普通测试/vet、双独审通过；独立真实MySQL5顶层+2失效子例通过，覆盖资格/耗尽停车、取消回滚、失效中间项全批回滚、RC锁冲突、8路256条唯一认领。该次20份原件manifest SHA256为`ccf355ffb6cb929c23c050f0aef2ce7b5e04b607a8bd249b1598c38cbbd7db5b`。仅为仓储正确性证据，尚无真实吞吐或延迟改善。
+
+字节前缀真实4顶层+2子例通过，20件manifest SHA256=`4226d9cae4cffdc22f03eee4ee5f6c800b871725aa573d9a26c5a6e37a09d705`；runner真实MySQL/Kafka4顶层通过，20件manifest SHA256=`a9c3f4e3463303ccdeac3c387027cb7eebd2ecd9e4db0bfe7944a2b7c3f4f627`。各次均验证原资源保护、只停本轮自有3CID、卷保留。后端完整普通test/vet通过，包含该后端的精确`ab2d4cc260bebb223988aae5ed19f6148c58c141`[远端CI通过](https://github.com/tech-cove01/project-full-stack/actions/runs/41490639199)。均不等于5000容量通过。
+
+额外DoneBatch set UPDATE研究因真实N64扫描计划失败而未采纳，原失败与候选源码全部存档，当前源已恢复原逐条fence；没有包装成修复或收益。细节与SHA见上述设计文档。
 
 ## 测量工具改动独立归档
 
@@ -46,6 +50,10 @@ S9/S17的发生器时序违例、S10/S13的采集错误、S11/S14/S18/H1等启�
 若改变同步确认、持久化、租约/attempt fence、幂等或消费者ACK语义，明确指出新旧契约及其代价；不得用Redis异步受理成绩替代原同步MySQL写入成绩。资源扩容、代码改动与发压器变更各自披露；未复测的收益只记“待验证”。
 
 5000准备还需解决512关系池每102.4ms重用与P99预算的冲突，不能只调PTS并发数字。维度纯合同`da3058a`已保留历史512/2引擎/513VU，新增显式4096/9/4105及失配拒绝，纯检查和独审通过；统一fixture/生成器/分片/计量/启动关闭的接线仍在进行。这是准备要求，不是5000保证。
+
+关系池/生成器/collector/phase/资源帧/历史grade现已分别接显式维度并分票提交。实际本地JMeter17关系/3进程/20假PUT接线通过，三个JVM退出0；此前两次受限环境在启动阶段0PUT失败保留，不能归因安全软件。合成899500记录的完整180秒模型核对通过，并提前发现live全量分位重算的最长1.23秒临界区：`23d80b3`/`3228e43`将运行中观察改为精确已落盘计数、最终仍全raw R7，`ab2d4cc`去掉已限定不可变标量记录的逐字段递归复制。同harness低基数组合观察由111.6009→25.1936秒、summary峰1234.061→4.6817ms；这是工具本机模型，并非业务QPS。单帧峰137.9612ms仍超时基风险门槛，高基数模型也发现119.0791ms，故继续限制遥测帧并验证9路HTTP并发，尚未宣布全部发压准备通过。
+
+资源合同`e8d4def`、生命周期`0ba0b4a`与历史绑定`c0d1158`允许显式候选mysql8-v1（MySQL8CPU/8GiB，其他依赖保持原上限），使用新environment-12hex文件保留原metadata SHA；旧缺path始终原environment.json。只有准备代码，没有实际扩资源或新profile准入。新资源必须先完成独立版本化空载证据，不能借旧4CPU预检冒充。
 
 ## 原件存档
 

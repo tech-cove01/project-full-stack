@@ -112,15 +112,23 @@ await check('actual helper fixes Linux evidence to the same batch and requires e
   const source = helperSource.slice(helperSource.indexOf('const executionPlatform ='), helperSource.indexOf('const privateRoot ='))
   const transition = { version: 1, batch: 'CAP-10', fromPlatform: 'windows', toPlatform: 'linux', switchCount: 1, authorized: true, hostLabel: 'synthetic-owned-host', userAuthorizationReference: 'synthetic-explicit-authorization' }
   const base = '/repo/docs/evidence/2026-11-01-cap10'
-  const evaluate = (platform, changes = {}, evidence = transition) => {
+  const evaluate = (platform, changes = {}, evidence = transition, resources = { resourceProfile: 'baseline' }, file = {}) => {
     const root = platform === 'linux' ? base + '/linux' : base
-    const context = { assert, join: posix.join, resolve: path => '/repo/' + path, hash: () => 'frozen-transition-hash',
+    const context = { assert, join: posix.join, dirname: posix.dirname, basename: posix.basename, resolve: path => '/repo/' + path, hash: () => 'frozen-transition-hash',
       process: { platform, env: { CAP10_PLATFORM: platform === 'win32' ? 'windows' : platform, CAP10_EVIDENCE: root, CAP10_ENVIRONMENT_METADATA: root + '/environment.json', CAP10_TRANSITION_SHA256: 'frozen-transition-hash', ...changes } },
-      readFile: async () => JSON.stringify(evidence) }
+      lstat: async () => ({ isFile: () => file.regular !== false, isSymbolicLink: () => file.symlink === true }),
+      realpath: async path => path.endsWith('.json') && file.outside ? '/foreign/environment.json' : path,
+      readFile: async path => JSON.stringify(path.endsWith('environment-transition.json') ? evidence : resources) }
     return vm.runInNewContext('(async () => {' + source + '; return evidenceRoot })()', context)
   }
   assert.equal(await evaluate('linux'), base + '/linux')
   assert.equal(await evaluate('win32'), base)
+  assert.equal(await evaluate('linux', { CAP10_ENVIRONMENT_METADATA: base + '/linux/environment-012345abcdef.json' }), base + '/linux')
+  assert.equal(await evaluate('linux', { CAP10_ENVIRONMENT_METADATA: base + '/linux/environment-012345abcdef.json', CAP10_RESOURCE_PROFILE: 'mysql8-v1' }, transition, { resourceProfile: 'mysql8-v1' }), base + '/linux')
+  await assert.rejects(evaluate('linux', { CAP10_RESOURCE_PROFILE: 'mysql8-v1' }))
+  await assert.rejects(evaluate('linux', { CAP10_ENVIRONMENT_METADATA: base + '/linux/input.json' }))
+  for (const resources of [null, [], true, 1]) await assert.rejects(evaluate('linux', {}, transition, resources))
+  for (const file of [{ regular: false }, { symlink: true }, { outside: true }]) await assert.rejects(evaluate('linux', {}, transition, {}, file))
   await assert.rejects(evaluate('linux', { CAP10_PLATFORM: 'windows' }))
   await assert.rejects(evaluate('linux', { CAP10_EVIDENCE: base }))
   await assert.rejects(evaluate('linux', { CAP10_TRANSITION_SHA256: 'different' }))

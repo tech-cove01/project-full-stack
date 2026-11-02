@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { randomBytes, randomInt, createHash } from 'node:crypto'
 import { spawn } from 'node:child_process'
 import { createWriteStream } from 'node:fs'
-import { mkdir, mkdtemp, readFile, writeFile, unlink, rmdir } from 'node:fs/promises'
+import { mkdir, mkdtemp, readFile, writeFile, unlink, rmdir, lstat, realpath } from 'node:fs/promises'
 import { tmpdir } from 'node:os'
 import { resolve, dirname, join, basename, relative, sep } from 'node:path'
 import net from 'node:net'
@@ -49,7 +49,16 @@ assert.equal(process.env.CAP10_PLATFORM, executionPlatform, 'CAP10 platform must
 const batchRoot = resolve('docs/evidence/2026-11-01-cap10')
 const evidenceRoot = executionPlatform === 'linux' ? join(batchRoot, 'linux') : batchRoot
 assert.equal(process.env.CAP10_EVIDENCE, evidenceRoot)
-assert.equal(process.env.CAP10_ENVIRONMENT_METADATA, join(evidenceRoot, 'environment.json'))
+assert.equal(dirname(process.env.CAP10_ENVIRONMENT_METADATA || ''), evidenceRoot)
+assert.match(basename(process.env.CAP10_ENVIRONMENT_METADATA), /^environment(?:-[a-f0-9]{12})?\.json$/)
+const metadataStat = await lstat(process.env.CAP10_ENVIRONMENT_METADATA)
+assert.ok(metadataStat.isFile() && !metadataStat.isSymbolicLink(), 'regular owned environment metadata required')
+assert.equal(await realpath(process.env.CAP10_ENVIRONMENT_METADATA), join(await realpath(evidenceRoot), basename(process.env.CAP10_ENVIRONMENT_METADATA)), 'environment metadata resolves outside its original namespace')
+const resourceProfile = process.env.CAP10_RESOURCE_PROFILE ?? 'baseline'
+assert.ok(['baseline', 'mysql8-v1'].includes(resourceProfile), 'explicit bounded resource profile required')
+const resourceMetadata = JSON.parse(await readFile(process.env.CAP10_ENVIRONMENT_METADATA))
+assert.ok(resourceMetadata && typeof resourceMetadata === 'object' && !Array.isArray(resourceMetadata), 'environment metadata object required')
+assert.equal(Object.hasOwn(resourceMetadata, 'resourceProfile') ? resourceMetadata.resourceProfile : 'baseline', resourceProfile, 'private and public resource profiles differ')
 if (executionPlatform === 'linux') {
   const raw = await readFile(join(batchRoot, 'environment-transition.json'))
   assert.equal(process.env.CAP10_TRANSITION_SHA256, hash(raw), 'Linux transition bytes differ')

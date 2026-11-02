@@ -6,9 +6,21 @@ import { posix } from 'node:path'
 import { stateFromBody, classifyWrite, pairForVU, unknownBounds } from './load/cap10-like-contract.mjs'
 import { nativeScenarioWindow } from './load/cap10-native-window.mjs'
 import { fixturePoolSize } from './load/cap10-cohort-contract.mjs'
+import { observerPolicy } from './load/cap10-observer-policy.mjs'
 
 let checks = 0
 async function check(name, fn) { await fn(); checks++; console.log('PASS ' + name) }
+await check('audit policy keeps the legacy budget and explicitly selects only the vector audit budget', () => {
+  for (const env of [{}, { CAP10_OBSERVER_MODE: 'full-history-v1' }]) {
+    assert.deepEqual(observerPolicy(env), { mode: 'full-history-v1', fullAuditTimeoutMs: 30000, scope: 'full-snapshot-audit-only' })
+  }
+  assert.deepEqual(observerPolicy({ CAP10_OBSERVER_MODE: 'like-vector-v1' }), { mode: 'like-vector-v1', fullAuditTimeoutMs: 120000, scope: 'full-snapshot-audit-only' })
+  assert.equal(Object.isFrozen(observerPolicy()), true)
+  for (const value of ['', null, undefined, 'full-history-v2', 'LIKE-VECTOR-V1', 120000, {}, true]) {
+    assert.throws(() => observerPolicy({ CAP10_OBSERVER_MODE: value }))
+  }
+  for (const value of [null, [], 'like-vector-v1']) assert.throws(() => observerPolicy(value))
+})
 const body = (liked, version, likes = 1, noteId = '101') => ({ success: true, data: { noteId, liked, version, likes } })
 await check('first true is a mutation, not an HTTP-only success', () => assert.equal(classifyWrite(200, body(true, 1), '101', { liked: false, version: 0 }, true).kind, 'mutation'))
 await check('unlike increments its own relation version', () => assert.equal(classifyWrite(200, body(false, 8, 0), '101', { liked: true, version: 7 }, false).kind, 'mutation'))
@@ -108,6 +120,39 @@ await check('actual native script retires and aborts on noop or unknown after re
   }
 })
 const helperSource = readFileSync('scripts/cap10-like.mjs', 'utf8')
+const auditCode = ['sql', 'snapshot'].map(name => helperSource.match(new RegExp('^async function ' + name + '[\\s\\S]*?^}', 'm'))[0]).join('\n')
+function auditContext(policy, reply = { code: 0, stdout: '', stderr: '', timedOut: false }) {
+  const calls = []
+  const context = { assert, observationPolicy: policy, sqlBin: 'synthetic-mysql', owned: { mysql: '3481', database: 'synthetic-owned' },
+    process: { env: { MYSQL_USER: 'synthetic-owner', MYSQL_PASSWORD: 'synthetic-only', CAP_READ_OBSERVER_USER: 'synthetic-reader', CAP_READ_OBSERVER_PASSWORD: 'synthetic-only' } },
+    command: async (binary, argv, options) => { calls.push({ binary, argv, options }); return reply },
+    modeNotes: manifest => manifest.multiNoteIds,
+    rows: raw => raw ? raw.split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line)) : [] }
+  vm.runInNewContext(auditCode + '\nglobalThis.sql = sql; globalThis.snapshot = snapshot', context)
+  return { context, calls }
+}
+await check('actual snapshot alone receives the selected full-audit timeout and records its policy', async () => {
+  const records = [{ _kind: 'fact', noteId: '101', userId: '1', active: 0, version: 2 }, { _kind: 'event', count: 2 }]
+  for (const mode of ['full-history-v1', 'like-vector-v1']) {
+    const policy = observerPolicy({ CAP10_OBSERVER_MODE: mode })
+    const { context, calls } = auditContext(policy, { code: 0, stdout: records.map(row => JSON.stringify(row)).join('\n'), stderr: '', timedOut: false })
+    await context.sql('SELECT 1')
+    const state = await context.snapshot({ multiNoteIds: ['101'] }, 'multi', 'synthetic-audit')
+    assert.equal(calls.length, 2)
+    assert.equal(calls[0].options.timeoutMs, 30000)
+    assert.equal(calls[1].options.timeoutMs, policy.fullAuditTimeoutMs)
+    assert.ok(calls[1].argv.includes('--user=synthetic-reader'))
+    assert.match(calls[1].options.input, /START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY;/)
+    assert.match(calls[1].options.input, /COMMIT;$/)
+    assert.deepEqual(state.observerPolicy, policy)
+    assert.equal(state.transitions, 2); assert.equal(state.eventCount, 2)
+  }
+})
+await check('a timed-out complete audit rejects instead of fabricating empty facts or a passing report', async () => {
+  const { context, calls } = auditContext(observerPolicy({ CAP10_OBSERVER_MODE: 'like-vector-v1' }), { code: null, stdout: '', stderr: '', timedOut: true })
+  await assert.rejects(context.snapshot({ multiNoteIds: ['101'] }, 'multi', 'synthetic-audit'), /SQL timeout/)
+  assert.equal(calls.length, 1); assert.equal(calls[0].options.timeoutMs, 120000)
+})
 await check('actual helper fixes Linux evidence to the same batch and requires explicit native-platform transition', async () => {
   const source = helperSource.slice(helperSource.indexOf('const executionPlatform ='), helperSource.indexOf('const privateRoot ='))
   const transition = { version: 1, batch: 'CAP-10', fromPlatform: 'windows', toPlatform: 'linux', switchCount: 1, authorized: true, hostLabel: 'synthetic-owned-host', userAuthorizationReference: 'synthetic-explicit-authorization' }

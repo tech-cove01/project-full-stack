@@ -11,9 +11,11 @@ import { stateFromBody, classifyWrite, unknownBounds } from './load/cap10-like-c
 import { nativeScenarioWindow } from './load/cap10-native-window.mjs'
 import { collectDatabase } from './load/cap10-db-observe.mjs'
 import { poolSize, fixturePoolSize } from './load/cap10-cohort-contract.mjs'
+import { observerPolicy } from './load/cap10-observer-policy.mjs'
 
 const owned = { project: 'project-full-stack-cap10', mysql: '3481', redis: '6581', api: 'http://127.0.0.1:8281', database: 'project_full_stack_go' }
 const action = process.argv[2]
+const observationPolicy = observerPolicy(process.env)
 assert.ok(['prepare', 'probe', 'run', 'inspect', 'reconcile', 'finish'].includes(action), 'use prepare/probe/run/inspect/reconcile/finish')
 assert.equal(process.env.CAP_COHORT, 'cap10')
 for (const key of ['MYSQL_USER', 'MYSQL_PASSWORD', 'CAP_SOURCE_SHA', 'CAP_READ_EXPECTED_REVISION']) assert.ok(process.env[key], `explicit ${key} required`)
@@ -225,11 +227,11 @@ SELECT JSON_OBJECT('_kind','note','noteId',CAST(b.id AS CHAR),'liked',b.liked,'a
 SELECT JSON_OBJECT('_kind','event','noteId',g.note_id,'userId',g.user_id,'count',g.event_count,'distinctVersions',g.distinct_versions,'minVersion',g.min_version,'maxVersion',g.max_version,'invalid',g.invalid_count) FROM (SELECT o.aggregate_id AS note_id,JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')) AS user_id,COUNT(*) AS event_count,COUNT(DISTINCT o.aggregate_version) AS distinct_versions,MIN(o.aggregate_version) AS min_version,MAX(o.aggregate_version) AS max_version,SUM(COALESCE(BINARY o.aggregate_type<>BINARY 'BLOG' OR BINARY o.event_id<>BINARY CONCAT('LIKE:',o.aggregate_id,':',JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')),':',o.aggregate_version) OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.blogId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.userId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.version'))<>'INTEGER' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.liked'))<>'BOOLEAN' OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.blogId'))<>BINARY o.aggregate_id OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.version'))<>BINARY CAST(o.aggregate_version AS CHAR) OR JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.liked'))<>IF(MOD(o.aggregate_version,2)=1,'true','false'),1)) AS invalid_count FROM tb_community_outbox o WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id IN (${ids}) GROUP BY o.aggregate_id,user_id) g ORDER BY g.note_id,g.user_id;
 SELECT JSON_OBJECT('_kind','delivery','status',delivery_status,'count',COUNT(*)) FROM tb_community_outbox WHERE event_type='LIKE_CHANGED' AND aggregate_id IN (${ids}) GROUP BY delivery_status;
 SELECT JSON_OBJECT('_kind','receipt','projection',r.projection,'state',r.state,'count',COUNT(*)) FROM tb_community_projection_event r JOIN tb_community_outbox o ON o.event_id=r.event_id WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id IN (${ids}) GROUP BY r.projection,r.state;
-SELECT JSON_OBJECT('_kind','parked','projection',projection,'state',state,'count',COUNT(*)) FROM tb_community_consumer_failure GROUP BY projection,state; COMMIT;`, true))
+SELECT JSON_OBJECT('_kind','parked','projection',projection,'state',state,'count',COUNT(*)) FROM tb_community_consumer_failure GROUP BY projection,state; COMMIT;`, true, observationPolicy.fullAuditTimeoutMs))
   const take = kind => raw.filter(row => row._kind === kind).map(({ _kind, ...row }) => row)
   assert.ok(raw.every(row => ['fact', 'note', 'event', 'delivery', 'receipt', 'parked'].includes(row._kind)))
   const facts = take('fact'), notes = take('note'), events = take('event'), delivery = take('delivery'), receipts = take('receipt'), parked = take('parked')
-  return { label, startedAt: start, endedAt: Date.now(), facts, notes, events, delivery, receipts, parked,
+  return { label, startedAt: start, endedAt: Date.now(), observerPolicy: observationPolicy, facts, notes, events, delivery, receipts, parked,
     transitions: facts.reduce((sum, row) => sum + row.version, 0), eventCount: events.reduce((sum, row) => sum + row.count, 0),
     scope: 'one read-only RR snapshot of the selected synthetic note pool; pre/post captures sequential; global consumer-failure rows include earlier stages in the owned DB' }
 }
@@ -496,7 +498,7 @@ if (action === 'prepare') {
     assert.ok(rate >= 1 && rate <= 5000 && [60, 180].includes(seconds) && warmSeconds === 10 && warmRate === Math.min(25, rate) && preVUs === count && maxVUs === count)
     assert.ok(count === 512 || process.env.CAP10_LOAD_BACKEND === 'pts', 'larger cohorts require the explicitly configured PTS backend')
     assert.equal(await stopPresent(), false, 'stop file already exists; no new native phase started')
-    const report = { task: 'CAP-10', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, poolSize: count, fixture: manifest.fixture,
+    const report = { task: 'CAP-10', mode, rate, seconds, warmSeconds, warmRate, preVUs, maxVUs, poolSize: count, fixture: manifest.fixture, observerPolicy: observationPolicy,
       executionPlatform, transitionSHA256: process.env.CAP10_TRANSITION_SHA256 || null,
       apiSourceSha: process.env.CAP_SOURCE_SHA, apiExpectedRevision: process.env.CAP_READ_EXPECTED_REVISION,
       fixtureSourceSha: manifest.sourceSha, fixtureManifestSHA256: manifestSHA256,

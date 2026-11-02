@@ -521,6 +521,415 @@ func (engine *likeVectorEngine) Snapshot() likeVectorSnapshot {
 	return value
 }
 
+// OBS-V2 remains unwired. These bounds apply to one SQL observation, never to
+// the separate full-audit budget or a business request/transaction.
+const (
+	likeVectorSQLChunk      = 256
+	likeVectorPayloadBytes  = int64(1 << 20)
+	likeVectorSQLValueBytes = int64(256 << 20)
+)
+
+type likeVectorSQLStats struct {
+	StartedAt, FinishedAt time.Time
+	Phase                 string
+	ConnectionID          uint64
+	SourceCollation       string
+	// SourcePrepares counts only explicit reusable source SELECT prepares. The
+	// independent driver may additionally prepare parameterized fact queries;
+	// this is not the server's total Com_stmt_prepare/execute/close counter.
+	Queries, SourcePrepares, FactRows, SourceRows int
+	RequestedKeys, PreviousPending                int
+	NewEvents, LogicalBytes, SourceValueBytes     int64
+	SQLCommitted                                  bool
+}
+
+// This narrow interface enables controlled errors around real read-only Tx
+// operations without replacing the production driver or using global hooks.
+type likeVectorSQLTx interface {
+	QueryContext(context.Context, string, ...any) (*sql.Rows, error)
+	QueryRowContext(context.Context, string, ...any) *sql.Row
+	PrepareContext(context.Context, string) (*sql.Stmt, error)
+	Commit() error
+	Rollback() error
+}
+
+type likeVectorSQLCandidate struct {
+	engine       *likeVectorEngine
+	proposal     *likeVectorProposal
+	view         sqlView
+	sqlCommitted bool
+}
+
+func (candidate *likeVectorSQLCandidate) SQLView() *sqlView {
+	if candidate == nil {
+		return nil
+	}
+	view := candidate.view
+	view.Receipts = append([]receipt(nil), view.Receipts...)
+	return &view
+}
+
+// No SQL adapter may assume Kafka succeeded. The future whole-sample caller
+// explicitly supplies that gate; rejection consumes the proposal unchanged.
+func (candidate *likeVectorSQLCandidate) Accept(sampleComplete bool) error {
+	if candidate == nil {
+		return errLikeVectorStale
+	}
+	return candidate.engine.Commit(candidate.proposal, likeVectorCommitGate{candidate.sqlCommitted, sampleComplete})
+}
+
+func likeVectorControlsSQL(ctx context.Context, tx likeVectorSQLTx, stats *likeVectorSQLStats) (likeVectorControls, error) {
+	var controls likeVectorControls
+	stats.Phase = "controls"
+	stats.Queries++
+	rows, err := tx.QueryContext(ctx, `SELECT projection,rebuilt_at FROM tb_community_projection_control
+ WHERE projection IN ('follow-v1','feed-v1') ORDER BY projection`)
+	if err != nil {
+		return controls, err
+	}
+	seen := map[string]bool{}
+	for rows.Next() {
+		var projection string
+		var rebuilt sql.NullString
+		if err = rows.Scan(&projection, &rebuilt); err != nil {
+			_ = rows.Close()
+			return controls, err
+		}
+		index := -1
+		if projection == "follow-v1" {
+			index = 0
+		} else if projection == "feed-v1" {
+			index = 1
+		}
+		if index < 0 || seen[projection] {
+			_ = rows.Close()
+			return controls, fmt.Errorf("%w: control_rows", errLikeVectorInvariant)
+		}
+		seen[projection] = true
+		body, err := json.Marshal(struct {
+			Projection string
+			RebuiltAt  sql.NullString
+		}{projection, rebuilt})
+		if err != nil {
+			_ = rows.Close()
+			return controls, err
+		}
+		digest := sha256.Sum256(body)
+		controls[index] = hex.EncodeToString(digest[:])
+	}
+	if err = rows.Err(); err == nil {
+		err = rows.Close()
+	} else {
+		_ = rows.Close()
+	}
+	if err != nil {
+		return controls, err
+	}
+	if len(seen) != 2 {
+		return controls, fmt.Errorf("%w: missing_control", errLikeVectorInvariant)
+	}
+	stats.Queries++
+	var name, alias, generation string
+	var rebuilt sql.NullString
+	if err = tx.QueryRowContext(ctx, `SELECT name,index_alias,active_generation,rebuilt_at
+ FROM tb_note_search_control WHERE name='search-v1'`).Scan(&name, &alias, &generation, &rebuilt); err != nil {
+		return controls, err
+	}
+	if name != "search-v1" {
+		return controls, fmt.Errorf("%w: search_control", errLikeVectorInvariant)
+	}
+	body, err := json.Marshal(struct {
+		Name, IndexAlias, ActiveGeneration string
+		RebuiltAt                          sql.NullString
+	}{name, alias, generation, rebuilt})
+	if err != nil {
+		return controls, err
+	}
+	digest := sha256.Sum256(body)
+	controls[2] = hex.EncodeToString(digest[:])
+	return controls, nil
+}
+
+func likeVectorFactsQuery(pairs []likeVectorPair) (string, []any, error) {
+	if len(pairs) < 1 || len(pairs) > 4096 {
+		return "", nil, errLikeVectorInput
+	}
+	args := make([]any, 0, len(pairs)+1)
+	for _, pair := range pairs {
+		id, err := strconv.ParseUint(pair.NoteID, 10, 64)
+		if err != nil {
+			return "", nil, errLikeVectorInput
+		}
+		args = append(args, id)
+	}
+	args = append(args, len(pairs)+1)
+	query := `SELECT CAST(blog_id AS CHAR),CAST(user_id AS CHAR),version,active
+ FROM tb_blog_like FORCE INDEX (uk_blog_like) WHERE blog_id IN (` +
+		strings.TrimSuffix(strings.Repeat("?,", len(pairs)), ",") + `) ORDER BY blog_id,user_id LIMIT ?`
+	return query, args, nil
+}
+
+func likeVectorFactsSQL(ctx context.Context, tx likeVectorSQLTx, engine *likeVectorEngine, stats *likeVectorSQLStats) ([]likeVectorFact, error) {
+	stats.Phase = "facts"
+	query, args, err := likeVectorFactsQuery(engine.pairs)
+	if err != nil {
+		return nil, err
+	}
+	stats.Queries++
+	rows, err := tx.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	facts := make([]likeVectorFact, 0, len(engine.pairs))
+	for rows.Next() {
+		var row likeVectorFact
+		if err := rows.Scan(&row.NoteID, &row.UserID, &row.Version, &row.Active); err != nil {
+			return nil, err
+		}
+		stats.FactRows++
+		facts = append(facts, row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	return facts, nil
+}
+
+func likeVectorSourceSchema(ctx context.Context, tx likeVectorSQLTx, stats *likeVectorSQLStats) (string, error) {
+	stats.Phase = "source_schema"
+	stats.Queries++
+	var charset, collation string
+	if err := tx.QueryRowContext(ctx, `SELECT CHARACTER_SET_NAME,COLLATION_NAME FROM INFORMATION_SCHEMA.COLUMNS
+ WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='tb_community_outbox' AND COLUMN_NAME='event_id'`).Scan(&charset, &collation); err != nil {
+		return "", err
+	}
+	stats.SourceCollation = collation
+	if charset != "utf8mb4" || collation != "utf8mb4_0900_ai_ci" {
+		return "", fmt.Errorf("%w: source_key_collation", errLikeVectorInvariant)
+	}
+	return collation, nil
+}
+
+func likeVectorSourceQuery(size int, collation string) (string, error) {
+	// The reviewed whitelist is checked from actual I_S metadata on every
+	// nonempty sample; arbitrary server/config values never enter SQL text.
+	if size < 1 || size > likeVectorSQLChunk || collation != "utf8mb4_0900_ai_ci" {
+		return "", errLikeVectorInput
+	}
+	keys := make([]string, size)
+	for index := range keys {
+		keys[index] = "SELECT CAST(? AS CHAR CHARACTER SET utf8mb4) COLLATE " + collation + " AS event_id"
+	}
+	query := `SELECT o.id,o.event_id,o.event_type,o.aggregate_type,o.aggregate_id,o.aggregate_version,
+ OCTET_LENGTH(o.payload),CASE WHEN OCTET_LENGTH(o.payload)<=1048576 THEN o.payload ELSE NULL END,o.delivery_status,
+ rf.event_id,rf.event_hash,rf.state,rd.event_id,rd.event_hash,rd.state,rs.event_id,rs.event_hash,rs.state
+ FROM (` + strings.Join(keys, " UNION ALL ") + ` LIMIT 256) k
+ STRAIGHT_JOIN tb_community_outbox o FORCE INDEX (uk_community_event)
+ ON o.event_id=k.event_id AND BINARY o.event_id=BINARY k.event_id
+ LEFT JOIN tb_community_projection_event rf FORCE INDEX (PRIMARY)
+ ON rf.projection='follow-v1' AND BINARY rf.projection=BINARY 'follow-v1' AND rf.event_id=CONVERT(o.event_id USING ascii) COLLATE ascii_bin AND BINARY rf.event_id=BINARY o.event_id
+ LEFT JOIN tb_community_projection_event rd FORCE INDEX (PRIMARY)
+ ON rd.projection='feed-v1' AND BINARY rd.projection=BINARY 'feed-v1' AND rd.event_id=CONVERT(o.event_id USING ascii) COLLATE ascii_bin AND BINARY rd.event_id=BINARY o.event_id
+ LEFT JOIN tb_community_projection_event rs FORCE INDEX (PRIMARY)
+ ON rs.projection='search-v1' AND BINARY rs.projection=BINARY 'search-v1' AND rs.event_id=CONVERT(o.event_id USING ascii) COLLATE ascii_bin AND BINARY rs.event_id=BINARY o.event_id`
+	return query, nil
+}
+
+func likeVectorScanSources(rows *sql.Rows, stats *likeVectorSQLStats, result *[]likeVectorSource) error {
+	for rows.Next() {
+		var row likeVectorSource
+		var payloadLength int64
+		var payload sql.RawBytes
+		var received [3]struct {
+			EventID, State sql.NullString
+			Hash           sql.RawBytes
+		}
+		values := []any{&row.ID, &row.EventID, &row.EventType, &row.AggregateType, &row.AggregateID, &row.Version,
+			&payloadLength, &payload, &row.DeliveryStatus}
+		for index := range received {
+			values = append(values, &received[index].EventID, &received[index].Hash, &received[index].State)
+		}
+		if err := rows.Scan(values...); err != nil {
+			return err
+		}
+		stats.SourceRows++
+		if payloadLength < 0 || payloadLength > likeVectorPayloadBytes {
+			return fmt.Errorf("%w: source_payload_bytes", errLikeVectorLimit)
+		}
+		if int64(len(payload)) != payloadLength || payload == nil {
+			return fmt.Errorf("%w: source_payload_length", errLikeVectorInvariant)
+		}
+		valueBytes := int64(16 + len(payload) + len(row.EventID) + len(row.EventType) + len(row.AggregateType) + len(row.AggregateID) + len(row.DeliveryStatus))
+		for _, actual := range received {
+			valueBytes += int64(len(actual.EventID.String) + len(actual.State.String) + len(actual.Hash))
+		}
+		if valueBytes > likeVectorSQLValueBytes-stats.SourceValueBytes {
+			return fmt.Errorf("%w: source_result_value_bytes", errLikeVectorLimit)
+		}
+		stats.SourceValueBytes += valueBytes
+		// Check the cumulative bound before retaining large payload arrays.
+		row.Payload = append(json.RawMessage(nil), payload...)
+		for index, projection := range []string{"follow-v1", "feed-v1", "search-v1"} {
+			actual := received[index]
+			if !actual.EventID.Valid && !actual.State.Valid && actual.Hash == nil {
+				continue
+			}
+			if !actual.EventID.Valid || !actual.State.Valid || len(actual.Hash) != sha256.Size {
+				return fmt.Errorf("%w: partial_receipt_columns", errLikeVectorInvariant)
+			}
+			r := likeVectorReceipt{Projection: projection, EventID: actual.EventID.String, State: actual.State.String}
+			copy(r.Hash[:], actual.Hash)
+			row.Receipts = append(row.Receipts, r)
+		}
+		*result = append(*result, row)
+	}
+	return rows.Err()
+}
+
+func readLikeVectorSQL(ctx context.Context, db *sql.DB, engine *likeVectorEngine, after int64) (*likeVectorSQLCandidate, *likeVectorSQLStats, error) {
+	stats := &likeVectorSQLStats{StartedAt: time.Now().UTC(), Phase: "begin"}
+	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
+	defer cancel()
+	if db == nil || engine == nil || after < 0 {
+		stats.FinishedAt = time.Now().UTC()
+		return nil, stats, errLikeVectorInput
+	}
+	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
+	if err != nil {
+		stats.FinishedAt = time.Now().UTC()
+		return nil, stats, err
+	}
+	return readLikeVectorSQLTx(ctx, tx, engine, after, stats)
+}
+
+func readLikeVectorSQLTx(ctx context.Context, tx likeVectorSQLTx, engine *likeVectorEngine, after int64, stats *likeVectorSQLStats) (*likeVectorSQLCandidate, *likeVectorSQLStats, error) {
+	defer func() { stats.FinishedAt = time.Now().UTC() }()
+	defer tx.Rollback()
+	stats.Phase = "connection_identity"
+	stats.Queries++
+	if err := tx.QueryRowContext(ctx, "SELECT CONNECTION_ID()").Scan(&stats.ConnectionID); err != nil {
+		return nil, stats, err
+	}
+	controls, err := likeVectorControlsSQL(ctx, tx, stats)
+	if err != nil {
+		return nil, stats, err
+	}
+	facts, err := likeVectorFactsSQL(ctx, tx, engine, stats)
+	if err != nil {
+		return nil, stats, err
+	}
+	stats.Phase = "vector_begin"
+	set, err := engine.Begin(facts, controls)
+	if err != nil {
+		return nil, stats, err
+	}
+	keys := set.Keys()
+	stats.RequestedKeys, stats.PreviousPending, stats.NewEvents, stats.LogicalBytes = len(keys), len(set.base.pending), set.newEvents, set.readBytes
+	sources := make([]likeVectorSource, 0, len(keys))
+	var collation string
+	if len(keys) > 0 {
+		collation, err = likeVectorSourceSchema(ctx, tx, stats)
+		if err != nil {
+			return nil, stats, err
+		}
+	}
+	statements := map[int]*sql.Stmt{}
+	defer func() {
+		for _, statement := range statements {
+			_ = statement.Close()
+		}
+	}()
+	for offset := 0; offset < len(keys); {
+		if err := ctx.Err(); err != nil {
+			return nil, stats, err
+		}
+		size := len(keys) - offset
+		if size > likeVectorSQLChunk {
+			size = likeVectorSQLChunk
+		}
+		statement := statements[size]
+		if statement == nil {
+			stats.Phase = "prepare_sources"
+			query, err := likeVectorSourceQuery(size, collation)
+			if err != nil {
+				return nil, stats, err
+			}
+			stats.SourcePrepares++
+			statement, err = tx.PrepareContext(ctx, query)
+			if err != nil {
+				return nil, stats, err
+			}
+			statements[size] = statement
+		}
+		args := make([]any, 0, size)
+		for _, key := range keys[offset : offset+size] {
+			args = append(args, key.EventID)
+		}
+		stats.Phase = "source_rows"
+		stats.Queries++
+		rows, err := statement.QueryContext(ctx, args...)
+		if err != nil {
+			return nil, stats, err
+		}
+		readErr := likeVectorScanSources(rows, stats, &sources)
+		closeErr := rows.Close()
+		if readErr != nil {
+			return nil, stats, readErr
+		}
+		if closeErr != nil {
+			return nil, stats, closeErr
+		}
+		offset += size
+	}
+	stats.Phase = "close_prepared_sources"
+	for size, statement := range statements {
+		if err := statement.Close(); err != nil {
+			return nil, stats, err
+		}
+		delete(statements, size)
+	}
+	stats.Phase = "evaluate"
+	proposal, err := set.Evaluate(sources)
+	if err != nil {
+		return nil, stats, err
+	}
+	stats.Phase = "global_parked"
+	stats.Queries++
+	var parked int64
+	if err := tx.QueryRowContext(ctx, "SELECT COUNT(*) FROM tb_community_consumer_failure WHERE state='PARKED'").Scan(&parked); err != nil {
+		return nil, stats, err
+	}
+	if parked != 0 {
+		return nil, stats, fmt.Errorf("%w: global_parked", errLikeVectorInvariant)
+	}
+	stats.Phase = "diagnostic_max_id"
+	stats.Queries++
+	var maxID int64
+	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(id),0) FROM tb_community_outbox").Scan(&maxID); err != nil {
+		return nil, stats, err
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, stats, err
+	}
+	stats.Phase = "commit"
+	if err := tx.Commit(); err != nil {
+		return nil, stats, err
+	}
+	stats.SQLCommitted = true
+	if err := ctx.Err(); err != nil {
+		return nil, stats, err
+	}
+	stats.Phase = "complete"
+	view := proposal.View()
+	return &likeVectorSQLCandidate{engine: engine, proposal: proposal, sqlCommitted: true,
+		view: sqlView{StartedAt: stats.StartedAt, FinishedAt: time.Now().UTC(), AfterWatermark: after,
+			MaxOutboxID: maxID, Counts: view.Counts, Receipts: view.Receipts, Parked: parked}}, stats, nil
+}
+
 func read(path string, value any) error {
 	body, err := os.ReadFile(path)
 	if err != nil {

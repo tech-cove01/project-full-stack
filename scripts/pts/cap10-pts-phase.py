@@ -9,6 +9,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import secrets
 import signal
 import sys
@@ -158,6 +159,14 @@ def poll_termination(client, scene_id, report_id, stop_sent):
 
 def scene_admission_path(root, reservation):
     root = Path(root)
+    authority = root.parent / 'execution-authority-20261102.json'
+    authority_hash = reservation.get('reservationCheck', {}).get('executionAuthoritySHA256')
+    if (isinstance(reservation.get('tag'), str)
+            and re.fullmatch(r'[SH][1-9][0-9]*', reservation['tag'])
+            and isinstance(authority_hash, str) and len(authority_hash) == 64
+            and authority.is_file() and not authority.is_symlink()
+            and hashlib.sha256(authority.read_bytes()).hexdigest() == authority_hash):
+        return root / 'pts-scene-admission-repair1.json'
     transition = root / 'tool-repair-transition.json'
     repair_hash = reservation.get('reservationCheck', {}).get('toolRepairTransitionSHA256')
     if (reservation.get('tag') in {'S5', 'S6', 'S7', 'S8', 'H1', 'H2'}

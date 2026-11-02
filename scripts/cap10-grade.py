@@ -32,7 +32,7 @@ def instant(value):
 def history(root):
     require(Path(root).resolve() in (ROOT, ROOT / 'linux'), 'fixed CAP10 executor root required')
     records = [read(path) for directory in (ROOT, ROOT / 'linux') for path in directory.glob('*-command.json')]
-    records = sorted((r for r in records if r.get('task') == 'CAP-10' and re.fullmatch(r'[SH][1-8]', r.get('tag', ''))), key=lambda r: r['at'])
+    records = sorted((r for r in records if r.get('task') == 'CAP-10' and re.fullmatch(r'[SH][1-9][0-9]*', r.get('tag', ''))), key=lambda r: r['at'])
     require(len({r['tag'] for r in records}) == len(records), 'same CAP10 reservation cannot be reset across environments')
     return records
 
@@ -220,6 +220,90 @@ def pre_load_recovery(root, records):
     return {'sha256': digest, 'failedTag': 'S1', 'nextDiagnosticTag': 'S2'}
 
 
+def claim_optimization(root, records):
+    """One indexed Claim access-path optimization, compared at S5's 800/s."""
+    path = Path(root) / 'S5-optimization-proof.json'
+    if not path.exists():
+        require(not any(c.get('reservationCheck', {}).get('claimOptimizationSHA256') for c in records), 'Claim optimization proof cannot be removed')
+        return None
+    require(root == ROOT / 'linux' and path.is_file() and not path.is_symlink(), 'fixed Claim optimization proof required')
+    value, digest = read(path), sha(path)
+    require(isinstance(value, dict) and type(value.get('version')) is int and value['version'] == 1 and value.get('batch') == 'CAP-10' and value.get('authorized') is True and value.get('optimizationKind') == 'outbox-claim-access-path' and value.get('baselineTag') == 'S5' and value.get('nextComparisonTag') == 'S6' and value.get('rate') == 800 and value.get('seconds') == 60 and value.get('diagnostics') is False, 'only one fixed S5 to S6 indexed Claim comparison is authorized')
+    require(isinstance(value.get('userAuthorizationReference'), str) and value['userAuthorizationReference'].strip() and isinstance(value.get('recordedAt'), str) and isinstance(value.get('artifacts'), dict), 'explicit Claim optimization evidence required')
+    registered = instant(value['recordedAt'])
+    require(registered <= dt.datetime.now(dt.timezone.utc) and len(records) >= 5 and [c['tag'] for c in records[:5]] == ['S1', 'S2', 'S3', 'S4', 'S5'], 'optimization must follow the retained S5 baseline')
+    require(value.get('toolRepairTransitionSHA256') == sha(Path(root) / 'tool-repair-transition.json'), 'original tool repair transition must not change')
+    def artifact(name):
+        ref = value['artifacts'].get(name, {})
+        require(isinstance(ref, dict) and isinstance(ref.get('path'), str), 'optimization artifact missing: ' + name)
+        relative = Path(ref['path']); candidate = Path(root) / relative
+        require(not relative.is_absolute() and '..' not in relative.parts and candidate.is_file() and not candidate.is_symlink() and candidate.resolve() == candidate and candidate.is_relative_to(root) and ref.get('sha256') == sha(candidate), 'optimization artifact bytes or path differ: ' + name)
+        return read(candidate)
+    command, previous, result = artifact('command'), artifact('stage'), artifact('result')
+    require(value['artifacts']['command']['path'] == 'S5-command.json' and value['artifacts']['stage']['path'] == 'S5-stage.json' and value['artifacts']['result']['path'] == 'S5-load/result.json' and command == records[4] and previous == stage(root, command) and previous.get('outcome') == 'performance_limited' and previous.get('passed') is False and previous.get('recoveryVerified') is False and command['kind'] == 'search' and command['rate'] == 800 and command['seconds'] == 60 and instant(previous['finishedAt']) <= registered, 'S5 failed recovery and effective performance baseline must remain unchanged')
+    metrics = result.get('result', {})
+    require(result.get('nativeScenario', {}).get('complete') is True and result.get('meetsAPIBudget') is True and result.get('finalFactsValid') is True and result.get('phaseAccountingValid') is True and metrics.get('mutationCounterMatchesDB') is True and metrics.get('attempted') == metrics.get('completed') == metrics.get('mutation') == 48000 and all(type(metrics.get(key)) is int and metrics[key] == 0 for key in ('noop', 'rejected', 'contentErrors', 'dropped', 'unknown', 'classificationUnknown', 'effectUnknown')), 'S5 must be a complete correctly measured 48000-mutation baseline')
+    before, after = value.get('beforeIdentity'), value.get('afterIdentity')
+    require(isinstance(before, dict) and isinstance(after, dict), 'before and after Claim identities required')
+    baseline = {'sourceSha': command['apiSourceSha'], **{key: command[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')}}
+    require(all(before.get(key) == actual for key, actual in baseline.items()) and re.fullmatch(r'[a-f0-9]{40}', after.get('sourceSha', '')) and after['sourceSha'] != before['sourceSha'] and re.fullmatch(r'[a-f0-9]{64}', after.get('binarySHA256', '')) and after['binarySHA256'] != before['binarySHA256'], 'one clean new Go source and binary required for the Claim predicate/index optimization')
+    require(all(after.get(key) == before[key] for key in ('environmentSHA256', 'fixtureSHA256', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and isinstance(after.get('scriptHashes'), dict) and set(after['scriptHashes']) == set(before['scriptHashes']) and all(after['scriptHashes'][key] == before['scriptHashes'][key] for key in before['scriptHashes'] if key not in ('cap10-grade.py', 'cap10-run.py')), 'only grade/runner comparison protocol may change; workload, collector, observer and resources remain fixed')
+    index, checks = artifact('indexReceipt'), artifact('relatedChecks')
+    require(index.get('table') == 'tb_community_outbox' and index.get('column') == 'claim_active' and isinstance(index.get('extra'), str) and 'VIRTUAL' in index['extra'].upper() and index.get('indexColumns') == ['claim_active', 'id'] and isinstance(index.get('indexName'), str) and index['indexName'] and index.get('explainKey') == index['indexName'], 'physical generated-column/index and actual chosen Claim access path required')
+    require(checks.get('passed') is True and checks.get('sourceSha') == after['sourceSha'] and isinstance(checks.get('checks'), list) and checks['checks'], 'related checks must pass on the exact new Claim source')
+    for phase in ('warm', 'stable'):
+        terminal = artifact(phase + 'Terminal')
+        require(terminal.get('backend') == 'pts' and terminal.get('remoteConverged') is True and terminal.get('nativeEvidenceComplete') is True and isinstance(terminal.get('reportId'), str) and terminal['reportId'], 'S5 actual PUT phases must have their original proved remote terminal')
+    reconciliation = artifact('reconciliation')
+    require(reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and type(reconciliation.get('finishedAt')) in (int, float) and reconciliation['finishedAt'] / 1000 <= registered.timestamp(), 'new API must drain and reconcile before the Claim comparison proof is frozen')
+    facts, derived, timeline = reconciliation.get('facts', {}), reconciliation.get('derived', {}), reconciliation.get('timeline', [])
+    require(timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == [] and derived.get('available') is True and derived.get('errors') == [] and len(derived.get('notes', [])) == 512 and len(facts.get('facts', [])) == len(facts.get('notes', [])) == 512 and facts.get('transitions') == facts.get('eventCount') and not any(p.get('state') == 'PARKED' and p.get('count', 0) for p in facts.get('parked', [])), 'full facts, Redis and independent receipt convergence required before comparison')
+    require(sum(row.get('version', -1) for row in facts['facts']) == facts['eventCount'] and facts['eventCount'] >= metrics['mutation'] and all(type(row.get('version')) is int and row['version'] >= 0 and row.get('active') == row['version'] % 2 for row in facts['facts']) and all(note.get('liked') == note.get('activeRelations') and note.get('liked', -1) >= 0 for note in facts['notes']), 'reconciled relation versions and public counts must agree')
+    total = facts['eventCount']; receipts = facts.get('receipts', [])
+    require(sum(d.get('count', 0) for d in facts.get('delivery', []) if d.get('status') == 'DONE') == total and not any(d.get('status') != 'DONE' and d.get('count', 0) for d in facts.get('delivery', [])) and all(sum(r.get('count', 0) for r in receipts if r.get('projection') == group and r.get('state') == 'IGNORED') == total for group in ('follow-v1', 'feed-v1', 'search-v1')), 'all reconciled Outbox effects and three LIKE receipt groups must be complete')
+    for c in records[5:]:
+        require(c.get('reservationCheck', {}).get('claimOptimizationSHA256') == digest and instant(c['at']) >= registered and c.get('apiSourceSha') == after['sourceSha'] and all(c.get(key) == after[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')), 'S6 onward must use the one fixed optimized Claim identity')
+    return {**value, 'sha256': digest}
+
+
+def delayed_recovery(root, records, optimization):
+    """Permit only S8 after a fully measured S7 overload later drains."""
+    path = Path(root) / 'S7-delayed-recovery.json'
+    if not path.exists():
+        require(not any(c.get('reservationCheck', {}).get('delayedRecoverySHA256') for c in records), 'S7 delayed recovery proof cannot be removed')
+        return None
+    require(root == ROOT / 'linux' and optimization and path.is_file() and not path.is_symlink(), 'fixed optimized S7 delayed recovery proof required')
+    value, digest = read(path), sha(path); final = optimization['afterIdentity']
+    require(isinstance(value, dict) and type(value.get('version')) is int and value['version'] == 1 and value.get('batch') == 'CAP-10' and value.get('authorized') is True and value.get('failedTag') == 'S7' and value.get('nextTag') == 'S8' and value.get('claimOptimizationSHA256') == optimization['sha256'] and value.get('sourceSha') == final['sourceSha'] and value.get('binarySHA256') == final['binarySHA256'], 'only the fixed final-source S7 to S8 continuation is allowed')
+    require(isinstance(value.get('userAuthorizationReference'), str) and value['userAuthorizationReference'].strip() and isinstance(value.get('recordedAt'), str) and isinstance(value.get('artifacts'), dict), 'explicit same-session delayed recovery evidence required')
+    registered = instant(value['recordedAt'])
+    require(registered <= dt.datetime.now(dt.timezone.utc) and len(records) >= 7 and records[6]['tag'] == 'S7', 'delayed recovery must follow the consumed S7 slot')
+    def artifact(name):
+        ref = value['artifacts'].get(name, {}); require(isinstance(ref, dict) and isinstance(ref.get('path'), str), 'delayed recovery artifact missing: ' + name)
+        relative = Path(ref['path']); candidate = Path(root) / relative
+        require(not relative.is_absolute() and '..' not in relative.parts and candidate.is_file() and not candidate.is_symlink() and candidate.resolve() == candidate and candidate.is_relative_to(root) and ref.get('sha256') == sha(candidate), 'delayed recovery artifact bytes or path differ: ' + name)
+        return read(candidate)
+    command, previous, result = artifact('command'), artifact('stage'), artifact('result')
+    require(value['artifacts']['command']['path'] == 'S7-command.json' and value['artifacts']['stage']['path'] == 'S7-stage.json' and value['artifacts']['result']['path'] == 'S7-load/result.json' and command == records[6] and previous == stage(root, command) and previous.get('outcome') == 'performance_limited' and previous.get('passed') is False and previous.get('recoveryVerified') is False and previous.get('batchFatal') is False and previous.get('childrenConverged') is True and previous.get('boundaryEligible') is True and command['kind'] == 'search' and command['seconds'] == 60 and instant(previous['finishedAt']) <= registered, 'original S7 failed recovery and genuine upper-bound evidence must remain')
+    metrics = result.get('result', {})
+    require(result.get('nativeScenario', {}).get('complete') is True and result.get('finalFactsValid') is True and result.get('phaseAccountingValid') is True and result.get('fixtureManifestSHA256') == final['fixtureSHA256'] and metrics.get('mutationCounterMatchesDB') is True and type(metrics.get('attempted')) is int and metrics['attempted'] > 0 and metrics['attempted'] == metrics.get('completed') == metrics.get('mutation') and metrics.get('actualOfferedRatio', 0) >= .99 and all(type(metrics.get(key)) is int and metrics[key] == 0 for key in ('noop', 'rejected', 'contentErrors', 'dropped', 'unknown', 'classificationUnknown', 'effectUnknown', 'httpErrors', 'systemErrors')), 'only complete error-free S7 performance overload may await later drain')
+    for phase in ('warm', 'stable'):
+        terminal, report = artifact(phase + 'Terminal'), artifact(phase + 'Report')
+        require(terminal.get('backend') == 'pts' and terminal.get('remoteConverged') is True and terminal.get('nativeEvidenceComplete') is True and terminal.get('reportId') == report.get('reportId') and isinstance(report.get('reportId'), str) and report['reportId'] and report.get('ended') is True and isinstance(report.get('startTimeRaw'), str) and isinstance(report.get('endTimeRaw'), str) and len(report['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(report['endTimeRaw']) >= dt.datetime.fromisoformat(report['startTimeRaw']), 'both actual S7 PUT phases require matching real provider EndTime')
+    exited = artifact('localExit'); owners = exited.get('owners', [])
+    expected = {(p['pid'], p['created']) for p in previous.get('knownOwnedProcesses', [])}
+    require(owners and expected and expected <= {(p.get('pid'), p.get('created')) for p in owners} and all(p.get('alive') is False and p.get('identityChecked') is True for p in owners) and all(exited.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive')), 'all original S7 local load owners must be gone before the candidate')
+    reconciliation = artifact('reconciliation')
+    facts, derived, timeline = reconciliation.get('facts', {}), reconciliation.get('derived', {}), reconciliation.get('timeline', [])
+    require(reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and type(reconciliation.get('startedAt')) in (int, float) and type(reconciliation.get('finishedAt')) in (int, float) and instant(previous['finishedAt']).timestamp() <= reconciliation['startedAt'] / 1000 <= reconciliation['finishedAt'] / 1000 <= registered.timestamp(), 'supplementary later reconciliation cannot rewrite S7 sixty-second recovery')
+    require(timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == [] and derived.get('available') is True and derived.get('errors') == [] and len(derived.get('notes', [])) == 512 and len(facts.get('facts', [])) == len(facts.get('notes', [])) == 512 and facts.get('transitions') == facts.get('eventCount') and facts['eventCount'] >= metrics['mutation'] and sum(r.get('version', -1) for r in facts['facts']) == facts['eventCount'] and all(type(r.get('version')) is int and r['version'] >= 0 and r.get('active') == r['version'] % 2 for r in facts['facts']) and all(n.get('liked') == n.get('activeRelations') for n in facts['notes']), 'all later authoritative facts, versions, counters and Redis projections must converge')
+    total = facts['eventCount']; receipts = facts.get('receipts', [])
+    require(sum(d.get('count', 0) for d in facts.get('delivery', []) if d.get('status') == 'DONE') == total and not any(d.get('status') != 'DONE' and d.get('count', 0) for d in facts.get('delivery', [])) and not any(p.get('state') == 'PARKED' and p.get('count', 0) for p in facts.get('parked', [])) and all(sum(r.get('count', 0) for r in receipts if r.get('projection') == group and r.get('state') == 'IGNORED') == total for group in ('follow-v1', 'feed-v1', 'search-v1')), 'all delayed Outbox and independent consumer receipts must drain')
+    for c in records[7:]:
+        require(c['tag'] in ('S8', 'H1', 'H2') and c.get('reservationCheck', {}).get('delayedRecoverySHA256') == digest and instant(c['at']) >= registered, 'only the reserved candidate and two formals can follow fixed S7 delayed recovery')
+    return {**value, 'sha256': digest}
+
+
 def tool_repair_transition(root, records):
     """Permit one S4 tool failure to consume its slot, retaining its unknowns."""
     path = Path(root) / 'tool-repair-transition.json'
@@ -256,8 +340,10 @@ def tool_repair_transition(root, records):
         require(new.get(key) == sha(Path(root) / filename), 'new PTS packet/admission bytes differ')
     packet, admission = read(Path(root) / new['ptsPacketPath']), read(Path(root) / new['ptsAdmissionPath'])
     require(admission.get('passed') is True and admission.get('agentCount') == 2 and admission.get('concurrency') == 513 and admission.get('duration') == 600 and packet.get('sceneFilesMD5') == admission.get('sceneFilesMD5'), 'new PTS packet must have matching read-only scene admission')
-    for c in records[4:]:
-        require(c.get('reservationCheck', {}).get('toolRepairTransitionSHA256') == digest and instant(c['at']) >= registered and c.get('apiSourceSha') == value['sourceSha'] and c.get('binarySHA256') == value['binarySHA256'] and all(c.get(key) == new[key] for key in ('scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')), 'S5 onward must use the one fixed repaired tool identity')
+    optimization = claim_optimization(root, records)
+    for index, c in enumerate(records[4:], 4):
+        identity = optimization['afterIdentity'] if optimization and index >= 5 else {**new, 'sourceSha': value['sourceSha'], 'binarySHA256': value['binarySHA256']}
+        require(c.get('reservationCheck', {}).get('toolRepairTransitionSHA256') == digest and instant(c['at']) >= registered and c.get('apiSourceSha') == identity['sourceSha'] and c.get('binarySHA256') == identity['binarySHA256'] and all(c.get(key) == identity[key] for key in ('scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')), 'S5 onward must use the repaired tools or the single proved Claim optimization')
     collector = artifact('collectorTerminal'); artifact('collectorRecords', True)
     if value['artifacts']['collectorTerminal']['path'] == 'S4-load/stable-pts/latest.json':
         original = Path(root) / 'S4-load/stable-pts/collector-terminal.json'
@@ -303,11 +389,143 @@ def tool_repair_transition(root, records):
     return {**value, 'sha256': digest}
 
 
+def _authority_ref(root, reference):
+    require(isinstance(reference, dict) and isinstance(reference.get('path'), str), 'bound artifact reference required')
+    relative = Path(reference['path']); path = Path(root) / relative
+    require(not relative.is_absolute() and '..' not in relative.parts and path.is_file() and not path.is_symlink() and path.resolve() == path and path.is_relative_to(root) and reference.get('sha256') == sha(path), 'bound artifact path or bytes differ')
+    return read(path)
+
+
+def execution_context(root):
+    path = ROOT / 'execution-authority-20261102.json'
+    if not path.exists():
+        require(not any(c.get('reservationCheck', {}).get('executionAuthoritySHA256') for c in history(root)), 'execution authority cannot be removed')
+        return None
+    require(root == ROOT / 'linux' and not path.is_symlink(), 'execution authority belongs to the existing Linux batch')
+    authority, digest = read(path), sha(path)
+    require(isinstance(authority, dict) and authority.get('version') == 1 and authority.get('batch') == 'CAP-10' and authority.get('authorized') is True and authority.get('workflowLimitsWaived') is True and type(authority.get('generation')) is int and authority['generation'] >= 1 and isinstance(authority.get('userAuthorizationReference'), str) and authority['userAuthorizationReference'].strip(), 'explicit superseding workflow authority required')
+    registered = instant(authority['recordedAt']); require(registered <= dt.datetime.now(dt.timezone.utc), 'execution authority cannot be future-dated')
+    records, tags, retained = history(root), authority.get('retainedTags'), authority.get('retainedArtifacts')
+    require(isinstance(tags, list) and tags and len(tags) == len(set(tags)) and isinstance(retained, dict) and [c['tag'] for c in records[:len(tags)]] == tags, 'all original reservation tags must remain retained')
+    for relative, expected in retained.items(): _authority_ref(ROOT, {'path': relative, 'sha256': expected})
+    for command in records[:len(tags)]:
+        for suffix in ('-command.json', '-stage.json'):
+            matches = [directory / (command['tag'] + suffix) for directory in (ROOT, ROOT / 'linux') if (directory / (command['tag'] + suffix)).is_file()]
+            require(len(matches) == 1 and retained.get(matches[0].relative_to(ROOT).as_posix()) == sha(matches[0]), 'original commands and stages cannot be changed or omitted')
+    for relative in ('environment-transition.json', 'continuation-authorization.json', 'idle-retry-3-authorization.json', 'idle-retry-4-authorization.json', 'linux/pre-load-recovery.json', 'linux/pre-load-recovery-proof.json', 'linux/tool-repair-transition.json', 'linux/S5-optimization-proof.json'):
+        original = ROOT / relative
+        require(not original.exists() or retained.get(relative) == sha(original), 'existing recovery and optimization proofs must remain retained')
+    for command in records[len(tags):]:
+        reservation = command.get('reservationCheck', {})
+        require(reservation.get('executionAuthoritySHA256') == digest and reservation.get('executionAuthorityGeneration') == authority['generation'] and instant(command['at']) >= registered, 'new reservations must bind the fixed execution authority')
+        admission_path = Path(root) / ('admission-' + command['tag'] + '.json')
+        require(admission_path.is_file() and reservation.get('admissionSHA256') == sha(admission_path) and instant(read(admission_path)['recordedAt']) <= instant(command['at']), 'each new reservation must retain its original independent admission')
+    active_path = Path(root) / 'active-application.json'; active = read(active_path)
+    require(not active_path.is_symlink() and active.get('version') == 1 and active.get('batch') == 'CAP-10' and active.get('authorityGeneration') == authority['generation'] and isinstance(active.get('deploymentId'), str) and active['deploymentId'] and re.fullmatch(r'[a-f0-9]{40}', active.get('sourceSha', '')) and re.fullmatch(r'[a-f0-9]{64}', active.get('binarySHA256', '')) and isinstance(active.get('scriptHashes'), dict) and active['scriptHashes'], 'current application and deployment identity required')
+    deployment = active.get('deployment', {})
+    require(all(type(deployment.get(key)) is int and deployment[key] > 0 for key in ('relayWorkers', 'gomaxprocs', 'mysqlMaxOpen')), 'effective worker and connection/CPU configuration must be declared')
+    require(active.get('environmentSHA256') == sha(Path(root) / 'environment.json'), 'current environment metadata differs')
+    _authority_ref(root, {'path': active['fixturePath'], 'sha256': active['fixtureSHA256']})
+    packet = _authority_ref(root, {'path': active['ptsPacketPath'], 'sha256': active['ptsPacketSHA256']})
+    admission = _authority_ref(root, {'path': active['ptsAdmissionPath'], 'sha256': active['ptsAdmissionSHA256']})
+    require(admission.get('passed') is True and packet.get('sceneFilesMD5') == admission.get('sceneFilesMD5'), 'current PTS packet must retain its real scene admission')
+    ready = _authority_ref(root, active['readiness'])
+    require(ready.get('ready') is True and ready.get('readyBody', {}).get('version') == 'capacity-' + active['sourceSha'], 'positive readiness must belong to the current source')
+    return {'authority': authority, 'authoritySHA256': digest, 'active': active, 'activeApplicationSHA256': sha(active_path)}
+
+
+def _active_command(command, context):
+    active, reservation = context['active'], command.get('reservationCheck', {})
+    return (reservation.get('executionAuthoritySHA256') == context['authoritySHA256'] and
+            reservation.get('executionAuthorityGeneration') == context['authority']['generation'] and
+            reservation.get('deploymentId') == active['deploymentId'] and command.get('apiSourceSha') == active['sourceSha'] and
+            all(command.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')))
+
+
+def authority_search_state(root, context):
+    records = [c for c in history(root) if _active_command(c, context) and c['tag'].startswith('S') and c['kind'] != 'candidate']
+    relevant = [(c, stage(root, c)) for c in records]
+    passes = [(c, s) for c, s in relevant if s.get('outcome') == 'pass' and s.get('passed') is True]
+    limited = [c for c, s in relevant if s.get('outcome') == 'performance_limited' and s.get('boundaryEligible') is True]
+    best = max(passes, key=lambda pair: pair[0]['rate'], default=None); lower = best[0]['rate'] if best else None
+    upper = min((c['rate'] for c in limited if lower is None or c['rate'] > lower), default=None)
+    finished = lower is not None and (lower == 5000 or upper is not None and (upper - lower <= lower * .25 or upper - lower <= 1))
+    candidate = None
+    if best:
+        latency = read(Path(root) / (best[0]['tag'] + '-load/result.json'))['result']['allLatency']
+        candidate = lower if latency['p(95)'] <= 160 and latency['p(99)'] <= 400 else max(1, math.floor(.8 * lower))
+    next_rate = (None if finished else min(4 * lower, 5000) if upper is None else (lower + upper) // 2) if lower else max(1, upper // 2) if upper else context['active'].get('initialRate', 50)
+    return {'L': lower, 'U': upper, 'nextRate': next_rate, 'candidateRate': candidate, 'searchFinished': finished,
+            'sourceSha': context['active']['sourceSha'], 'deploymentId': context['active']['deploymentId'],
+            'boundaryTags': [c['tag'] for c, s in relevant if s.get('outcome') == 'pass' and s.get('passed') is True or s.get('outcome') == 'performance_limited' and s.get('boundaryEligible') is True]}
+
+
+def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ability, freeze, tools, observer_hash, context):
+    active, records = context['active'], history(root)
+    require(api.get('sourceSha') == active['sourceSha'] and api.get('sha256') == active['binarySHA256'] and sha(fixture) == active['fixtureSHA256'] and tools == active['scriptHashes'] and observer_hash == active['observerBinarySHA256'], 'window must use the current exact active application and tools')
+    expected_diagnostics = kind == 'diagnostic'
+    require(api.get('likeDiagnosticsRequested') is expected_diagnostics and api.get('tailEnabledRequested') is False, 'comparison and capacity windows keep diagnostics disabled')
+    shorts, formals = [c for c in records if c['tag'].startswith('S')], [c for c in records if c['tag'].startswith('H')]
+    prefix = 'H' if kind == 'formal' else 'S'
+    used_numbers = [int(c['tag'][1:]) for c in records if c['tag'].startswith(prefix)]
+    used_numbers += [int(p.stem[6:]) for directory in (ROOT, ROOT / 'linux') for p in directory.glob('slot-' + prefix + '*.json') if re.fullmatch(r'slot-' + prefix + r'[1-9][0-9]*', p.stem)]
+    tag = prefix + str(max(used_numbers, default=0) + 1)
+    require(not any((directory / ('slot-' + tag + '.json')).exists() or (directory / (tag + '-command.json')).exists() for directory in (ROOT, ROOT / 'linux')), 'reservation tag cannot be reused')
+    admission_path = Path(root) / ('admission-' + tag + '.json'); admission = read(admission_path)
+    require(not admission_path.is_symlink() and admission.get('version') == 1 and admission.get('batch') == 'CAP-10' and admission.get('tag') == tag and admission.get('authoritySHA256') == context['authoritySHA256'] and admission.get('activeApplicationSHA256') == context['activeApplicationSHA256'], 'one current application admission required for each independent window')
+    admitted = instant(admission['recordedAt']); require(admitted <= dt.datetime.now(dt.timezone.utc), 'window admission cannot be future-dated')
+    previous = records[-1] if records else None
+    if previous:
+        terminal = _authority_ref(root, admission['termination']); old_stage = stage(root, previous)
+        require(terminal.get('tag') == previous['tag'] and all(terminal.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive')), 'previous exact load owners must be stopped')
+        owners = terminal.get('owners', []); expected = {(p['pid'], p['created']) for p in old_stage.get('knownOwnedProcesses', [])}
+        require(expected <= {(p.get('pid'), p.get('created')) for p in owners} and all(p.get('alive') is False and p.get('identityChecked') is True for p in owners), 'previous local process identities must be checked')
+        reports = terminal.get('reports', [])
+        require({r.get('phase') for r in reports} == {'warm', 'stable'} and len(reports) == 2 and all(r.get('ended') is True and isinstance(r.get('reportId'), str) and r['reportId'] and isinstance(r.get('startTimeRaw'), str) and isinstance(r.get('endTimeRaw'), str) and len(r['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(r['endTimeRaw']) >= dt.datetime.fromisoformat(r['startTimeRaw']) for r in reports), 'both previous PTS phases require real matching report EndTime')
+        for report in reports:
+            marker = Path(root) / (previous['tag'] + '-load') / (report['phase'] + '-pts/terminal.json')
+            require(not marker.exists() or read(marker).get('reportId') == report['reportId'], 'terminal report identity differs from its original phase')
+    require_reconciliation = previous is None or not _active_command(previous, context) or stage(root, previous).get('passed') is not True
+    if require_reconciliation or admission.get('reconciliation'):
+        reconciliation = _authority_ref(root, admission['reconciliation'])
+        facts, derived, timeline = reconciliation.get('facts', {}), reconciliation.get('derived', {}), reconciliation.get('timeline', [])
+        require(reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and derived.get('available') is True and derived.get('errors') == [] and len(facts.get('facts', [])) == len(facts.get('notes', [])) == len(derived.get('notes', [])) == 512 and facts.get('transitions') == facts.get('eventCount') and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == [] and reconciliation.get('finishedAt', float('inf')) / 1000 <= admitted.timestamp(), 'fresh complete authoritative reconciliation required before continuing')
+        if previous and old_stage.get('passed') is not True:
+            require(reconciliation.get('startedAt', 0) / 1000 >= instant(old_stage['finishedAt']).timestamp(), 'failed window requires later reconciliation, without rewriting its old recovery result')
+    if kind == 'formal':
+        require(len(formals) < 2 and all(stage(root, c).get('passed') is True for c in formals), 'only the original two-formal group is supported; first formal failure ends it')
+        require(isinstance(freeze, dict) and freeze.get('executionAuthoritySHA256') == context['authoritySHA256'] and freeze.get('activeApplicationSHA256') == context['activeApplicationSHA256'] and freeze.get('deploymentId') == active['deploymentId'] and freeze.get('rate') == rate and freeze.get('sourceSha') == active['sourceSha'] and all(freeze.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': 512, 'active': 0, 'relationships': 512}, 'formal requires one exact current-source CI/identity freeze')
+        candidates = [c for c in records if c['tag'] == freeze.get('candidateTag') and c['kind'] == 'candidate' and c['rate'] == rate and _active_command(c, context)]
+        require(len(candidates) == 1 and stage(root, candidates[0]).get('passed') is True and stage(root, candidates[0]).get('candidateMarginPassed') is True and stage(root, candidates[0]).get('recoveryVerified') is True, 'formal requires its completed passing current-identity candidate')
+        require(all(_active_command(c, context) and c.get('freezeSHA256') == sha(Path(root) / 'freeze-like.json') for c in formals), 'both formals must retain the same application and freeze')
+    transition = read(ROOT / 'environment-transition.json'); anchor = instant(transition['recordedAt']); now = dt.datetime.now(dt.timezone.utc)
+    intervals = [(s['loadWaitStartedAt'], s['loadWaitFinishedAt']) for c in records for s in [stage(root, c)] if s.get('loadWaitStartedAt') and s.get('loadWaitFinishedAt')]
+    deducted = merged_wait_seconds(intervals, anchor, now); used = transition['effectiveWorkSecondsUsedBeforeSwitch']
+    budget = {'passed': True, 'effectiveSecondsUpperBound': used + (now - anchor).total_seconds() - deducted,
+              'usedBeforeSwitch': used, 'anchor': transition['recordedAt'], 'provedLoadWaitSecondsDeducted': deducted,
+              'remainingBeforeSwitch': transition.get('effectiveWorkSecondsRemaining'),
+              'continuationAuthorizationSHA256': sha(ROOT / 'continuation-authorization.json') if (ROOT / 'continuation-authorization.json').is_file() else None,
+              'executionAuthorityGeneration': context['authority']['generation'],
+              'originalMaximumSeconds': 10800, 'maximumSeconds': None, 'remainingSeconds': None, 'workflowLimitsWaived': True}
+    return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'),
+            'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds, 'shortMaximum': None, 'formalMaximum': 2,
+            'mainSecondsMaximum': None, 'S8ReservedForCandidate': False, 'effectiveWorkBudget': budget,
+            'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'executionAuthoritySHA256': context['authoritySHA256'],
+            'executionAuthorityGeneration': context['authority']['generation'], 'deploymentId': active['deploymentId'],
+            'activeApplicationSHA256': context['activeApplicationSHA256'], 'admissionSHA256': sha(admission_path),
+            'expectedDiagnostics': expected_diagnostics, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
+
+
 def search_state(root, source_sha):
+    context = execution_context(root)
+    if context:
+        require(source_sha == context['active']['sourceSha'], 'search bounds belong to the current active source')
+        return authority_search_state(root, context)
     records = history(root)
     recovery = pre_load_recovery(root, records)
     repair = tool_repair_transition(root, records)
-    boundary_records = records[4:] if repair else records
+    optimization = claim_optimization(root, records)
+    boundary_records = records[5:] if optimization else records[4:] if repair else records
     final_path = Path(root) / 'final-application.json'
     if final_path.is_file() and not repair:
         final = read(final_path)
@@ -327,7 +545,7 @@ def search_state(root, source_sha):
               'boundaryTags': [c['tag'] for c, _ in relevant]}
     used = sum(c['tag'].startswith('S') for c in records)
     if not relevant:
-        result['nextRate'] = repair['firstRate'] if repair else 50
+        result['nextRate'] = 800 if optimization else repair['firstRate'] if repair else 50
     elif lower is None:
         current = relevant[-1][0]['rate']
         if current == 1 or used >= 7:
@@ -357,31 +575,45 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     require(preflight.get('passed') is True and preflight.get('environmentSHA256') == environment, 'one valid idle preflight is required before load')
     require(ability.get('rate') == rate and ability.get('sufficient') is True and ability.get('maxVUs') == 512 and ability.get('exclusiveRelationships') == 512 and ability.get('classificationIncluded') is True and ability.get('evidence'), 'declared generator ability evidence required for every window')
     require(type(ability.get('estimatedInFlight')) in (int, float) and 0 <= ability['estimatedInFlight'] <= 512, 'estimated in-flight work exceeds exclusive VU pool')
-    require(api_metadata.get('likeDiagnosticsRequested') is (kind in ('diagnostic', 'comparison')) and api_metadata.get('tailEnabledRequested') is False, 'Like/Feed observation switches differ from purpose')
+    context = execution_context(root)
+    if context:
+        return authority_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze, current_tools, observer_hash, context)
+    records = history(root)
+    optimization = claim_optimization(root, records)
+    expected_diagnostics = kind == 'diagnostic' or kind == 'comparison' and not optimization
+    require(api_metadata.get('likeDiagnosticsRequested') is expected_diagnostics and api_metadata.get('tailEnabledRequested') is False, 'Like/Feed observation switches differ from purpose')
     budget = effective_work_budget(root, api_metadata)
     records = history(root)
     recovery = pre_load_recovery(root, records)
     repair = tool_repair_transition(root, records)
+    delayed = delayed_recovery(root, records, optimization)
     shorts = [c for c in records if c['tag'].startswith('S')]; formals = [c for c in records if c['tag'].startswith('H')]
-    effective_shorts = [c for c in shorts if (not recovery or c['tag'] != recovery['failedTag']) and (not repair or int(c['tag'][1:]) >= 5)]
-    if repair:
+    effective_shorts = [c for c in shorts if (not recovery or c['tag'] != recovery['failedTag']) and (not repair or int(c['tag'][1:]) >= 5) and (not optimization or int(c['tag'][1:]) >= 6)]
+    if optimization:
+        final_identity = optimization['afterIdentity']
+        require(kind != 'diagnostic' and source == final_identity['sourceSha'] and binary == final_identity['binarySHA256'] and environment == final_identity['environmentSHA256'] and fixture_hash == final_identity['fixtureSHA256'] and current_tools == final_identity['scriptHashes'] and observer_hash == final_identity['observerBinarySHA256'], 'one optimized Claim identity and unchanged comparison workload required')
+    elif repair:
         new = repair['newIdentity']
         require(kind not in ('diagnostic', 'comparison') and source == repair['sourceSha'] and binary == repair['binarySHA256'] and environment == repair['environmentSHA256'] and fixture_hash == repair['fixtureSHA256'] and current_tools == new['scriptHashes'] and observer_hash == new['observerBinarySHA256'], 'tool repair cannot change business code or its fixed new tools')
     elif recovery and effective_shorts:
         require(current_tools == effective_shorts[0].get('scriptHashes') and observer_hash == effective_shorts[0].get('observerBinarySHA256'), 'recovered tools and observer are frozen from S2 onward')
     require(sum(c['seconds'] for c in records) + seconds <= 840, '840s total main-load budget exhausted')
     for c in records:
-        if recovery and c['tag'] == recovery['failedTag'] or repair and c['tag'] == 'S4':
+        if recovery and c['tag'] == recovery['failedTag'] or repair and c['tag'] == 'S4' or optimization and c['tag'] == 'S5':
             continue  # The immutable failed slot remains consumed, never passed.
         previous = stage(root, c)
         require(previous.get('childrenConverged') is True, 'prior owned children have not converged')
         require(previous.get('batchFatal') is not True, 'correctness/unknown/noop ended the batch')
         require(previous.get('outcome') in ('pass', 'performance_limited'), 'measurement/generator/environment pause: do not invent a service upper bound')
-        require(previous.get('recoveryVerified') is True, 'previous window did not recover within its 60s budget')
+        require(previous.get('recoveryVerified') is True or delayed and c['tag'] == 'S7', 'previous window did not recover within its 60s budget')
     require(not any(c['kind'] == 'candidate' for c in shorts) or kind == 'formal', 'one candidate only; no later search or replacement')
     if kind == 'formal':
         if repair:
             require(freeze and freeze.get('toolRepairTransitionSHA256') == repair['sha256'], 'formal freeze must bind the one tool repair transition')
+        if optimization:
+            require(freeze and freeze.get('claimOptimizationSHA256') == optimization['sha256'], 'formal freeze must bind the one Claim optimization')
+        if delayed:
+            require(freeze and freeze.get('delayedRecoverySHA256') == delayed['sha256'], 'formal freeze must retain S7 delayed recovery without relabeling it')
         require(len(formals) < 2 and shorts, 'formal budget exhausted or no short evidence')
         require(all(stage(root, c).get('passed') is True for c in formals), 'first formal failure ended this group')
         require(isinstance(freeze, dict) and freeze.get('rate') == rate and freeze.get('sourceSha') == source and freeze.get('binarySHA256') == binary and freeze.get('environmentSHA256') == environment and freeze.get('fixtureSHA256') == fixture_hash, 'same immutable formal freeze required')
@@ -398,8 +630,12 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     else:
         require(not formals and len(shorts) < 8, 'short-window budget closed')
         tag = 'S' + str(len(shorts) + 1)
+        if delayed:
+            require(kind == 'candidate' and tag == 'S8', 'delayed S7 recovery permits only its reserved S8 candidate')
         if not effective_shorts:
-            if repair:
+            if optimization:
+                require(kind == 'comparison' and tag == 'S6' and rate == 800, 'one S6 comparison at the unchanged S5 800/s rate is required')
+            elif repair:
                 require(kind == 'search' and tag == 'S5' and rate == 800, 'repaired tool starts one independent S5 800/s search')
             else:
                 require(kind == 'diagnostic' and rate == 50, 'first effective window must be 50/s diagnostic')
@@ -411,11 +647,12 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
             require(kind in ('search', 'candidate'), 'no repeated diagnostic or second optimization comparison')
             final = read(root / 'final-application.json')
             require(final['sourceSha'] == source and final['binarySHA256'] == binary and final['environmentSHA256'] == environment and final['fixtureSHA256'] == fixture_hash, 'freeze final search application before continuing')
-            require(any(c['kind'] == 'comparison' for c in effective_shorts) or effective_shorts[0]['apiSourceSha'] == source, 'changed version requires immediate comparison')
-            comparisons = [c for c in effective_shorts if c['kind'] == 'comparison']
-            require(source in {effective_shorts[0]['apiSourceSha'], *[c['apiSourceSha'] for c in comparisons]}, 'one optimization only; final source must be original or compared source')
-            if comparisons and source == effective_shorts[0]['apiSourceSha']:
-                require(final.get('boundaryEvidenceAfter') == comparisons[0]['tag'] and final.get('rollbackEvidence'), 'rollback must reset old boundaries with explicit evidence')
+            if not optimization:
+                require(any(c['kind'] == 'comparison' for c in effective_shorts) or effective_shorts[0]['apiSourceSha'] == source, 'changed version requires immediate comparison')
+                comparisons = [c for c in effective_shorts if c['kind'] == 'comparison']
+                require(source in {effective_shorts[0]['apiSourceSha'], *[c['apiSourceSha'] for c in comparisons]}, 'one optimization only; final source must be original or compared source')
+                if comparisons and source == effective_shorts[0]['apiSourceSha']:
+                    require(final.get('boundaryEvidenceAfter') == comparisons[0]['tag'] and final.get('rollbackEvidence'), 'rollback must reset old boundaries with explicit evidence')
             bound = search_state(root, source)
             if kind == 'candidate':
                 require(bound['L'] is not None and rate == bound['candidateRate'], 'candidate must be L with margin or floor(.8L); never use S8 to find the first pass')
@@ -424,7 +661,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
                 require(not any(c['rate'] == rate and c['tag'] in bound['boundaryTags'] for c in shorts), 'do not replay an already measured search rate')
     require(not (root / ('slot-' + tag + '.json')).exists() and not (root / (tag + '-command.json')).exists(), 'existing/orphan reservation is not reusable')
     return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'), 'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds,
-            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'toolRepairTransitionSHA256': repair['sha256'] if repair else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
+            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'toolRepairTransitionSHA256': repair['sha256'] if repair else None, 'claimOptimizationSHA256': optimization['sha256'] if optimization else None, 'delayedRecoverySHA256': delayed['sha256'] if delayed else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
 
 def _grade_tail15(rows, ended, vector, finished):
     start = ended - dt.timedelta(seconds=15)

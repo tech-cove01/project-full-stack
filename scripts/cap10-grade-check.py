@@ -779,6 +779,321 @@ class Checks(unittest.TestCase):
             self.reserve('search', 800, execution_root=directory, api=api,
                          current_tools=transition['newIdentity']['scriptHashes'])
 
+    def claim_baseline(self):
+        directory, api, transition = self.repaired_s4()
+        new = transition['newIdentity']
+        new['scriptHashes'].update({'cap10-grade.py': '1' * 64, 'cap10-run.py': '2' * 64})
+        self.put('linux/tool-repair-transition.json', transition)
+        reservation = self.reserve('search', 800, execution_root=directory, api=api, current_tools=new['scriptHashes'])
+        command = self.add('S5', 800, 'performance_limited', execution_root=directory, recoveryVerified=False,
+            finishedAt=(self.now + dt.timedelta(seconds=21)).isoformat())
+        command.update(new, reservationCheck=reservation, at=(self.now + dt.timedelta(seconds=20)).isoformat())
+        self.put('linux/S5-command.json', command)
+        metrics = dict.fromkeys(('noop', 'rejected', 'contentErrors', 'dropped', 'unknown', 'classificationUnknown', 'effectUnknown'), 0)
+        metrics.update(attempted=48000, completed=48000, mutation=48000, mutationCounterMatchesDB=True,
+                       allLatency={'p(95)': 53, 'p(99)': 95})
+        self.put('linux/S5-load/result.json', {'nativeScenario': {'complete': True}, 'meetsAPIBudget': True,
+            'finalFactsValid': True, 'phaseAccountingValid': True, 'result': metrics})
+        before = {'sourceSha': self.source, **{key: command[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256',
+                  'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')}}
+        binary = directory / 'optimized-never-executed.bin'; binary.write_bytes(b'synthetic optimized Claim; never executed')
+        after = {**before, 'sourceSha': self.other, 'binarySHA256': grade.sha(binary),
+                 'scriptHashes': {**before['scriptHashes'], 'cap10-grade.py': '3' * 64, 'cap10-run.py': '4' * 64}}
+        optimized_api = {**api, 'exe': str(binary), 'sha256': after['binarySHA256'], 'likeDiagnosticsRequested': False}
+        for phase in ('warm', 'stable'):
+            self.put('linux/claim-opt/' + phase + '-terminal.json', {'backend': 'pts', 'remoteConverged': True,
+                'nativeEvidenceComplete': True, 'reportId': 'S5-' + phase})
+        self.put('linux/claim-opt/index.json', {'table': 'tb_community_outbox', 'column': 'claim_active',
+            'extra': 'VIRTUAL GENERATED', 'indexColumns': ['claim_active', 'id'], 'indexName': 'idx_claim_active_id',
+            'explainKey': 'idx_claim_active_id'})
+        self.put('linux/claim-opt/checks.json', {'passed': True, 'sourceSha': after['sourceSha'],
+            'checks': ['synthetic related Claim locks and fence checks']})
+        reconciliation = grade.read(directory / 'tool-repair/reconcile.json')
+        reconciliation.update(startedAt=int((self.now + dt.timedelta(seconds=27)).timestamp() * 1000),
+                              finishedAt=int((self.now + dt.timedelta(seconds=28)).timestamp() * 1000),
+                              timeline=[{'pending': 0, 'parked': 0, 'receiptErrors': []}])
+        facts = reconciliation['facts']; total = 51200
+        facts.update(transitions=total, eventCount=total)
+        for row in facts['facts']: row.update(active=0, version=100)
+        for note in facts['notes']: note.update(liked=0, activeRelations=0)
+        for event in facts['events']: event.update(count=100, distinctVersions=100, maxVersion=100)
+        facts['delivery'][0]['count'] = total
+        for receipt in facts['receipts']: receipt['count'] = total
+        for note in reconciliation['derived']['notes']:
+            user = next(iter(note['versions'])); note.update(members=[], versions={user: '100'})
+        self.put('linux/claim-opt/reconcile.json', reconciliation)
+        names = {'command': 'S5-command.json', 'stage': 'S5-stage.json', 'result': 'S5-load/result.json',
+            'warmTerminal': 'claim-opt/warm-terminal.json', 'stableTerminal': 'claim-opt/stable-terminal.json',
+            'indexReceipt': 'claim-opt/index.json', 'relatedChecks': 'claim-opt/checks.json',
+            'reconciliation': 'claim-opt/reconcile.json'}
+        proof = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'optimizationKind': 'outbox-claim-access-path',
+            'baselineTag': 'S5', 'nextComparisonTag': 'S6', 'rate': 800, 'seconds': 60, 'diagnostics': False,
+            'userAuthorizationReference': 'synthetic one logical Claim virtual-column/index/predicate optimization',
+            'recordedAt': (self.now + dt.timedelta(seconds=30)).isoformat(),
+            'toolRepairTransitionSHA256': grade.sha(directory / 'tool-repair-transition.json'),
+            'beforeIdentity': before, 'afterIdentity': after,
+            'artifacts': {key: {'path': value, 'sha256': grade.sha(directory / value)} for key, value in names.items()}}
+        self.put('linux/S5-optimization-proof.json', proof)
+        self.put('linux/final-application.json', {key: after[key] for key in ('sourceSha', 'binarySHA256', 'environmentSHA256', 'fixtureSHA256')})
+        return directory, optimized_api, proof
+
+    def test_Claim_optimization_requires_S6_comparison800_without_diagnostics(self):
+        directory, api, proof = self.claim_baseline()
+        original = (directory / 'S5-stage.json').read_bytes()
+        reservation = self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api,
+                                   current_tools=proof['afterIdentity']['scriptHashes'])
+        self.assertEqual((reservation['tag'], reservation['mainSecondsReservedAfter']), ('S6', 360))
+        self.assertEqual((directory / 'S5-stage.json').read_bytes(), original)
+        for kind, rate, edits in [('comparison', 800, {'likeDiagnosticsRequested': True}),
+                                  ('comparison', 50, {}), ('search', 800, {}), ('diagnostic', 800, {})]:
+            with self.subTest(kind=kind, rate=rate), self.assertRaises(ValueError):
+                self.reserve(kind, rate, source=self.other, execution_root=directory, api={**api, **edits},
+                             current_tools=proof['afterIdentity']['scriptHashes'])
+
+    def test_Claim_optimization_retains_all_eight_slots_and_same_two_formals(self):
+        directory, api, proof = self.claim_baseline(); after = proof['afterIdentity']
+        for tag, kind, rate in [('S6', 'comparison', 800), ('S7', 'search', 3200), ('S8', 'candidate', 3200)]:
+            reservation = self.reserve(kind, rate, source=self.other, execution_root=directory, api=api,
+                                       current_tools=after['scriptHashes'])
+            command = self.add(tag, rate, kind=kind, source=self.other, execution_root=directory)
+            command.update({key: after[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes',
+                           'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')},
+                           reservationCheck=reservation, at=(self.now + dt.timedelta(seconds=30 + int(tag[1:]))).isoformat())
+            self.put('linux/' + tag + '-command.json', command)
+        bound = grade.search_state(directory, self.other)
+        self.assertEqual((bound['L'], bound['boundaryTags']), (3200, ['S6', 'S7']))
+        freeze = {**after, 'rate': 3200, 'sourceCIPassed': True, 'relatedChecksPassed': True,
+            'initialDistributionContract': {'existing': 512, 'active': 0, 'relationships': 512},
+            'toolRepairTransitionSHA256': proof['toolRepairTransitionSHA256'],
+            'claimOptimizationSHA256': grade.sha(directory / 'S5-optimization-proof.json')}
+        self.put('freeze-like.json', freeze)
+        self.assertEqual(self.reserve('formal', 3200, source=self.other, freeze=freeze, execution_root=directory,
+                                     api=api, current_tools=after['scriptHashes'])['mainSecondsReservedAfter'], 660)
+
+    def test_Claim_optimization_cannot_change_workload_or_skip_drain(self):
+        directory, api, proof = self.claim_baseline()
+        original = json.loads(json.dumps(proof))
+        for mutate in (lambda value: value['afterIdentity']['scriptHashes'].update({'synthetic-tool.py': '9' * 64}),
+                       lambda value: value['afterIdentity'].update(fixtureSHA256='9' * 64),
+                       lambda value: value.update(diagnostics=True)):
+            changed = json.loads(json.dumps(original)); mutate(changed)
+            self.put('linux/S5-optimization-proof.json', changed)
+            with self.assertRaises(ValueError):
+                self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api,
+                             current_tools=proof['afterIdentity']['scriptHashes'])
+
+    def delayed_s7(self):
+        directory, api, optimization = self.claim_baseline(); after = optimization['afterIdentity']
+        for tag, kind, rate in [('S6', 'comparison', 800), ('S7', 'search', 3200)]:
+            reservation = self.reserve(kind, rate, source=self.other, execution_root=directory, api=api,
+                                       current_tools=after['scriptHashes'])
+            terminal = {} if tag == 'S6' else {'recoveryVerified': False,
+                'finishedAt': (self.now + dt.timedelta(seconds=40)).isoformat(),
+                'knownOwnedProcesses': [{'pid': 34567, 'created': 345.5}]}
+            command = self.add(tag, rate, 'pass' if tag == 'S6' else 'performance_limited', kind=kind,
+                               source=self.other, execution_root=directory, **terminal)
+            command.update({key: after[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes',
+                           'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')},
+                           reservationCheck=reservation, at=(self.now + dt.timedelta(seconds=30 + int(tag[1:]))).isoformat())
+            self.put('linux/' + tag + '-command.json', command)
+        metrics = dict.fromkeys(('noop', 'rejected', 'contentErrors', 'dropped', 'unknown', 'classificationUnknown',
+                                 'effectUnknown', 'httpErrors', 'systemErrors'), 0)
+        metrics.update(attempted=192000, completed=192000, mutation=192000, mutationCounterMatchesDB=True,
+                       actualOfferedRatio=1, allLatency={'p(95)': 100, 'p(99)': 600})
+        self.put('linux/S7-load/result.json', {'nativeScenario': {'complete': True}, 'finalFactsValid': True,
+            'phaseAccountingValid': True, 'fixtureManifestSHA256': after['fixtureSHA256'], 'result': metrics})
+        for phase in ('warm', 'stable'):
+            self.put('linux/S7-late/' + phase + '-terminal.json', {'backend': 'pts', 'remoteConverged': True,
+                'nativeEvidenceComplete': True, 'reportId': 'S7-' + phase})
+            self.put('linux/S7-late/' + phase + '-report.json', {'reportId': 'S7-' + phase, 'ended': True,
+                'startTimeRaw': '2026-11-02 00:00:00', 'endTimeRaw': '2026-11-02 00:01:00'})
+        self.put('linux/S7-late/exit.json', {'owners': [{'pid': 34567, 'created': 345.5, 'alive': False, 'identityChecked': True}],
+            'observerAlive': False, 'controllerAlive': False, 'wrapperAlive': False})
+        reconciliation = grade.read(directory / 'claim-opt/reconcile.json'); total = 512000
+        reconciliation.update(startedAt=int((self.now + dt.timedelta(seconds=43)).timestamp() * 1000),
+                              finishedAt=int((self.now + dt.timedelta(seconds=44)).timestamp() * 1000))
+        facts = reconciliation['facts']; facts.update(transitions=total, eventCount=total)
+        for row in facts['facts']: row['version'] = 1000
+        for event in facts['events']: event.update(count=1000, distinctVersions=1000, maxVersion=1000)
+        facts['delivery'][0]['count'] = total
+        for receipt in facts['receipts']: receipt['count'] = total
+        for note in reconciliation['derived']['notes']:
+            user = next(iter(note['versions'])); note['versions'][user] = '1000'
+        self.put('linux/S7-late/reconcile.json', reconciliation)
+        names = {'command': 'S7-command.json', 'stage': 'S7-stage.json', 'result': 'S7-load/result.json',
+            'warmTerminal': 'S7-late/warm-terminal.json', 'stableTerminal': 'S7-late/stable-terminal.json',
+            'warmReport': 'S7-late/warm-report.json', 'stableReport': 'S7-late/stable-report.json',
+            'localExit': 'S7-late/exit.json', 'reconciliation': 'S7-late/reconcile.json'}
+        proof = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'failedTag': 'S7', 'nextTag': 'S8',
+            'claimOptimizationSHA256': grade.sha(directory / 'S5-optimization-proof.json'),
+            'sourceSha': after['sourceSha'], 'binarySHA256': after['binarySHA256'],
+            'userAuthorizationReference': 'synthetic one later drain before the already reserved candidate',
+            'recordedAt': (self.now + dt.timedelta(seconds=45)).isoformat(),
+            'artifacts': {key: {'path': value, 'sha256': grade.sha(directory / value)} for key, value in names.items()}}
+        self.put('linux/S7-delayed-recovery.json', proof)
+        return directory, api, optimization, proof
+
+    def test_delayed_S7_recovery_preserves_failure_and_upper_bound_for_only_S8(self):
+        directory, api, optimization, proof = self.delayed_s7(); after = optimization['afterIdentity']
+        original = (directory / 'S7-stage.json').read_bytes()
+        bound = grade.search_state(directory, self.other)
+        self.assertEqual((bound['L'], bound['U'], bound['candidateRate']), (800, 3200, 800))
+        reservation = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api,
+                                   current_tools=after['scriptHashes'])
+        self.assertEqual((reservation['tag'], reservation['mainSecondsReservedAfter']), ('S8', 480))
+        self.assertEqual((directory / 'S7-stage.json').read_bytes(), original)
+        with self.assertRaises(ValueError):
+            self.reserve('search', 800, source=self.other, execution_root=directory, api=api,
+                         current_tools=after['scriptHashes'])
+        command = self.add('S8', 800, kind='candidate', source=self.other, execution_root=directory, recoveryVerified=False)
+        command.update({key: after[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes',
+                       'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')}, reservationCheck=reservation,
+                       at=(self.now + dt.timedelta(seconds=50)).isoformat())
+        self.put('linux/S8-command.json', command)
+        freeze = {**after, 'rate': 800, 'sourceCIPassed': True, 'relatedChecksPassed': True,
+            'initialDistributionContract': {'existing': 512, 'active': 0, 'relationships': 512},
+            'toolRepairTransitionSHA256': optimization['toolRepairTransitionSHA256'],
+            'claimOptimizationSHA256': proof['claimOptimizationSHA256'],
+            'delayedRecoverySHA256': grade.sha(directory / 'S7-delayed-recovery.json')}
+        with self.assertRaises(ValueError):
+            self.reserve('formal', 800, source=self.other, freeze=freeze, execution_root=directory,
+                         api=api, current_tools=after['scriptHashes'])
+
+    def test_delayed_S7_recovery_rejects_unknown_live_owner_or_incomplete_drain(self):
+        directory, api, optimization, proof = self.delayed_s7()
+        for name, mutate in [('result', lambda value: value['result'].update(unknown=1)),
+                ('localExit', lambda value: value['owners'][0].update(alive=True)),
+                ('stableReport', lambda value: value.update(endTimeRaw='')),
+                ('reconciliation', lambda value: value['timeline'][-1].update(pending=1))]:
+            path = directory / proof['artifacts'][name]['path']; retained = path.read_bytes()
+            value = grade.read(path); mutate(value); path.write_text(json.dumps(value), encoding='utf-8')
+            proof['artifacts'][name]['sha256'] = grade.sha(path)
+            self.put('linux/S7-delayed-recovery.json', proof)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api,
+                             current_tools=optimization['afterIdentity']['scriptHashes'])
+            path.write_bytes(retained); proof['artifacts'][name]['sha256'] = grade.sha(path)
+
+    def authority_fixture(self):
+        self.now -= dt.timedelta(seconds=100)
+        self.put('linux/environment.json', {'synthetic': 'retained 4CPU/DB20 environment'})
+        self.put('linux/fixture.json', {'synthetic': 'retained 512 relationships'})
+        self.put('environment-transition.json', {'recordedAt': (self.now - dt.timedelta(seconds=600)).isoformat(),
+            'effectiveWorkSecondsUsedBeforeSwitch': 7800, 'effectiveWorkSecondsRemaining': 3000})
+        directory = self.root / 'linux'
+        for i in range(1, 7):
+            self.add('S' + str(i), 800, 'performance_limited', execution_root=directory, recoveryVerified=False,
+                finishedAt=(self.now + dt.timedelta(seconds=i + 1)).isoformat(),
+                knownOwnedProcesses=[{'pid': 45678, 'created': 456.5}])
+        retained = {'environment-transition.json': grade.sha(self.root / 'environment-transition.json')}
+        retained.update({p.relative_to(self.root).as_posix(): grade.sha(p) for p in directory.glob('S*-*.json')
+                         if p.name.endswith(('-command.json', '-stage.json'))})
+        authority = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'generation': 1,
+            'workflowLimitsWaived': True, 'userAuthorizationReference': 'synthetic explicit removal of workflow limits',
+            'recordedAt': (self.now + dt.timedelta(seconds=9)).isoformat(),
+            'retainedTags': ['S' + str(i) for i in range(1, 7)], 'retainedArtifacts': retained}
+        self.put('execution-authority-20261102.json', authority)
+        binary = directory / 'authority-never-executed.bin'; binary.write_bytes(b'synthetic current worker8 binary')
+        self.put('linux/packet.json', {'sceneFilesMD5': {'plan': 'frozen'}})
+        self.put('linux/admission.json', {'passed': True, 'sceneFilesMD5': {'plan': 'frozen'}})
+        ready = self.put('linux/new-api-health.json', {'at': (self.now + dt.timedelta(seconds=10)).isoformat(),
+            'ready': True, 'readyBody': {'version': 'capacity-' + self.other}})
+        active = {'version': 1, 'batch': 'CAP-10', 'authorityGeneration': 1, 'deploymentId': 'worker8-current',
+            'sourceSha': self.other, 'binarySHA256': grade.sha(binary), 'environmentSHA256': grade.sha(directory / 'environment.json'),
+            'fixtureSHA256': grade.sha(directory / 'fixture.json'), 'fixturePath': 'fixture.json',
+            'scriptHashes': self.tools.copy(), 'observerBinarySHA256': self.observer,
+            'ptsPacketPath': 'packet.json', 'ptsPacketSHA256': grade.sha(directory / 'packet.json'),
+            'ptsAdmissionPath': 'admission.json', 'ptsAdmissionSHA256': grade.sha(directory / 'admission.json'),
+            'deployment': {'relayWorkers': 8, 'gomaxprocs': 4, 'mysqlMaxOpen': 20},
+            'readiness': {'path': ready.name, 'sha256': grade.sha(ready)}, 'initialRate': 800}
+        self.put('linux/active-application.json', active)
+        api = {'executionPlatform': 'linux', 'transitionSHA256': grade.sha(self.root / 'environment-transition.json'),
+               'exe': str(binary), 'sha256': active['binarySHA256'], 'likeDiagnosticsRequested': False}
+        self.authority_admission(directory, 'S7')
+        return directory, api, active
+
+    def authority_admission(self, directory, tag):
+        context = grade.execution_context(directory); previous = grade.history(directory)[-1]
+        old_stage = grade.stage(directory, previous)
+        terminal = {'tag': previous['tag'], 'reports': [{'phase': phase, 'reportId': previous['tag'] + '-' + phase,
+            'ended': True, 'startTimeRaw': '2026-11-02 00:00:00', 'endTimeRaw': '2026-11-02 00:01:00'} for phase in ('warm', 'stable')],
+            'owners': [{**p, 'alive': False, 'identityChecked': True} for p in old_stage.get('knownOwnedProcesses', [])],
+            'observerAlive': False, 'controllerAlive': False, 'wrapperAlive': False}
+        terminal_path = self.put('linux/terminal-before-' + tag + '.json', terminal)
+        finished = max(self.now + dt.timedelta(seconds=20), grade.instant(old_stage['finishedAt']) + dt.timedelta(milliseconds=2))
+        reconciliation = {'valid': True, 'factsValid': True, 'downstreamConverged': True, 'errors': [],
+            'startedAt': int((finished - dt.timedelta(milliseconds=1)).timestamp() * 1000), 'finishedAt': int(finished.timestamp() * 1000),
+            'facts': {'facts': [{}] * 512, 'notes': [{}] * 512, 'transitions': 0, 'eventCount': 0},
+            'derived': {'available': True, 'errors': [], 'notes': [{}] * 512},
+            'timeline': [{'pending': 0, 'parked': 0, 'receiptErrors': []}]}
+        reconcile_path = self.put('linux/reconcile-before-' + tag + '.json', reconciliation)
+        return self.put('linux/admission-' + tag + '.json', {'version': 1, 'batch': 'CAP-10', 'tag': tag,
+            'authoritySHA256': context['authoritySHA256'], 'activeApplicationSHA256': context['activeApplicationSHA256'],
+            'recordedAt': (finished + dt.timedelta(milliseconds=1)).isoformat(),
+            'termination': {'path': terminal_path.name, 'sha256': grade.sha(terminal_path)},
+            'reconciliation': {'path': reconcile_path.name, 'sha256': grade.sha(reconcile_path)}})
+
+    def authority_add(self, directory, tag, kind, rate, reservation, active, outcome='pass'):
+        command_at = max(self.now + dt.timedelta(seconds=25 + int(tag[1:])),
+                         grade.instant(grade.read(directory / ('admission-' + tag + '.json'))['recordedAt']) + dt.timedelta(milliseconds=1))
+        command = self.add(tag, rate, outcome, kind=kind, source=active['sourceSha'], execution_root=directory,
+            finishedAt=(command_at + dt.timedelta(milliseconds=1)).isoformat())
+        command.update({key: active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes',
+                       'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')}, reservationCheck=reservation,
+                       at=command_at.isoformat())
+        self.put('linux/' + tag + '-command.json', command)
+        return command
+
+    def test_authority_preserves_failures_and_uses_worker8_comparison_without_old_caps(self):
+        directory, api, active = self.authority_fixture()
+        original = (directory / 'S6-stage.json').read_bytes()
+        reservation = self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api)
+        self.assertEqual(reservation['tag'], 'S7')
+        self.assertFalse(reservation['expectedDiagnostics'])
+        self.assertIsNone(reservation['shortMaximum']); self.assertIsNone(reservation['mainSecondsMaximum'])
+        self.assertEqual((reservation['effectiveWorkBudget']['usedBeforeSwitch'], reservation['effectiveWorkBudget']['remainingBeforeSwitch']), (7800, 3000))
+        self.assertEqual((directory / 'S6-stage.json').read_bytes(), original)
+        self.authority_add(directory, 'S7', 'comparison', 800, reservation, active)
+        for number in range(8, 16):
+            context = grade.execution_context(directory)
+            admission = self.authority_admission(directory, 'S' + str(number))
+            fake = {**reservation, 'tag': 'S' + str(number), 'admissionSHA256': grade.sha(admission)}
+            self.authority_add(directory, 'S' + str(number), 'search', 800, fake, active, 'measurement_invalid')
+        self.authority_admission(directory, 'S16')
+        next_window = self.reserve('search', 3200, source=self.other, execution_root=directory, api=api)
+        self.assertEqual((next_window['tag'], next_window['mainSecondsReservedAfter']), ('S16', 960))
+        bound = grade.search_state(directory, self.other)
+        self.assertEqual((bound['L'], bound['U'], bound['boundaryTags']), (800, None, ['S7']))
+        active['deploymentId'] = 'new-deployment-same-source'; self.put('linux/active-application.json', active)
+        self.assertIsNone(grade.search_state(directory, self.other)['L'])
+
+    def test_authority_rejects_modified_legacy_artifact_or_missing_failed_window_reconciliation(self):
+        directory, api, active = self.authority_fixture()
+        admission = grade.read(directory / 'admission-S7.json')
+        admission.pop('reconciliation'); self.put('linux/admission-S7.json', admission)
+        with self.assertRaises((ValueError, KeyError)):
+            self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api)
+        self.put('linux/S6-stage.json', {'passed': True})
+        with self.assertRaises(ValueError):
+            grade.execution_context(directory)
+
+    def test_authority_formal_still_requires_exact_candidate_and_stops_after_first_failure(self):
+        directory, api, active = self.authority_fixture()
+        reservation = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)
+        self.authority_add(directory, 'S7', 'candidate', 800, reservation, active)
+        context = grade.execution_context(directory)
+        freeze = {**active, 'rate': 800, 'candidateTag': 'S7', 'sourceCIPassed': True, 'relatedChecksPassed': True,
+            'initialDistributionContract': {'existing': 512, 'active': 0, 'relationships': 512},
+            'executionAuthoritySHA256': context['authoritySHA256'], 'activeApplicationSHA256': context['activeApplicationSHA256']}
+        self.put('freeze-like.json', freeze); self.put('linux/freeze-like.json', freeze)
+        self.authority_admission(directory, 'H1')
+        first = self.reserve('formal', 800, source=self.other, freeze=freeze, execution_root=directory, api=api)
+        self.assertEqual(first['tag'], 'H1')
+        self.authority_add(directory, 'H1', 'formal', 800, first, active, 'performance_limited')
+        self.authority_admission(directory, 'H2')
+        with self.assertRaises(ValueError):
+            self.reserve('formal', 800, source=self.other, freeze=freeze, execution_root=directory, api=api)
+
     def pipeline(self, mutate=None, seconds=60, summary=None):
         base = dt.datetime(2026, 11, 1, tzinfo=dt.timezone.utc)
         at = lambda value: (base + dt.timedelta(seconds=value)).isoformat()

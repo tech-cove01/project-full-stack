@@ -42,6 +42,30 @@ def full_summary():
 
 
 class EnvelopeChecks(unittest.TestCase):
+    def test_execution_authority_selects_existing_repair_for_positive_future_tags_only(self):
+        with tempfile.TemporaryDirectory(prefix='.qa-cap10-authority-', dir=REPO.parent) as folder:
+            batch = Path(folder); root = batch / 'linux'; root.mkdir()
+            authority = batch / 'execution-authority-20261102.json'
+            authority.write_bytes(b'{"authority":1}\n')
+            digest = hashlib.sha256(authority.read_bytes()).hexdigest()
+            for tag in ('S1', 'S5', 'S9', 'S10', 'S123', 'H1', 'H2', 'H10'):
+                reservation = {'tag': tag, 'reservationCheck': {'executionAuthoritySHA256': digest}}
+                self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission-repair1.json')
+            for tag in ('S0', 'H0', 'S01', 'H01', 'S-1', 'S1x', 'S1\n', 'X10', None, 10):
+                reservation = {'tag': tag, 'reservationCheck': {'executionAuthoritySHA256': digest}}
+                self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission.json')
+            for marker in (None, '', 'a' * 64, 123):
+                reservation = {'tag': 'S10', 'reservationCheck': {'executionAuthoritySHA256': marker}}
+                self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission.json')
+            authority.write_bytes(b'{"authority":2}\n')
+            reservation = {'tag': 'S10', 'reservationCheck': {'executionAuthoritySHA256': digest}}
+            self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission.json')
+            authority.unlink()
+            # A similarly named Linux-local file cannot stand in for batch authority.
+            local = root / authority.name; local.write_bytes(b'{"authority":1}\n')
+            self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission.json')
+            local.unlink(); root.rmdir()
+
     def test_complete_timing_invalid_warm_returns_failure_after_preserving_summary(self):
         good = full_summary()
         self.assertEqual(phase.phase_exit_code(good), 0)

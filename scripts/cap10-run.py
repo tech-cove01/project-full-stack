@@ -39,6 +39,12 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def expected_diagnostics(kind, tag, claim_optimization_sha=None):
+    # S5 was measured without diagnostics; its sole S6 comparison must match.
+    return kind in ('diagnostic', 'comparison') and not (
+        kind == 'comparison' and tag == 'S6' and claim_optimization_sha)
+
+
 def reserve(args, api, value):
     grade = module('cap10_reservation_grade', 'cap10-grade.py')
     for path in (args.preflight, args.ability, args.prediction):
@@ -90,6 +96,10 @@ def reserve(args, api, value):
                'setupNormalization': {'existing': 512, 'active': 0, 'allWindows': True},
                'failedStartsConsumeSlot': True}
     command['loadBackend'] = value.get('CAP10_LOAD_BACKEND', 'k6')
+    for key in ('executionAuthoritySHA256', 'executionAuthorityGeneration', 'deploymentId',
+                'activeApplicationSHA256', 'admissionSHA256'):
+        if key in reservation:
+            command[key] = reservation[key]
     if command['loadBackend'] == 'pts':
         command['ptsPacketSHA256'] = pts_identity['ptsPacketSHA256']
         command['ptsAdmissionSHA256'] = pts_identity['ptsAdmissionSHA256']
@@ -319,7 +329,15 @@ def main():
     api = owned.read(args.api_metadata); owned.api_identity(api, health=True)
     assert value['CAP_SOURCE_SHA'] == api['sourceSha']
     assert api['tailEnabledRequested'] is False
-    assert api['likeDiagnosticsRequested'] is (args.kind in ('diagnostic', 'comparison'))
+    execution = grade.execution_context(ROOT)
+    if execution:
+        assert api['likeDiagnosticsRequested'] is (args.kind == 'diagnostic')
+    else:
+        prior = grade.history(ROOT)
+        optimization = grade.claim_optimization(ROOT, prior)
+        next_tag = 'S' + str(1 + sum(c['tag'].startswith('S') for c in prior))
+        assert api['likeDiagnosticsRequested'] is bool(expected_diagnostics(
+            args.kind, next_tag, optimization['sha256'] if optimization else None))
     lock = runtime / 'cap10-active.private.json'
     assert not lock.exists(), 'prior owned stage still holds exclusivity'
     command = reserve(args, api, value); tag = command['tag']
@@ -424,7 +442,12 @@ def main():
         state['collectionValid'] = observed.get('collectionValid') is True and observed.get('semanticViolationCount') == 0
         rows = [json.loads(line) for line in (control / 'resources.ndjson').read_text(encoding='utf-8-sig').splitlines() if line]
         samples = [row for row in rows if row.get('kind') == 'sample']
-        expected_trace = args.kind in ('diagnostic', 'comparison')
+        if command['reservationCheck'].get('executionAuthoritySHA256'):
+            expected_trace = command['reservationCheck']['expectedDiagnostics']
+            assert type(expected_trace) is bool
+        else:
+            expected_trace = bool(expected_diagnostics(args.kind, tag,
+                command['reservationCheck'].get('claimOptimizationSHA256')))
         state['traceSwitchesValid'] = bool(samples) and all(row.get('diagnostics', {}).get('tail', {}).get('enabled') is expected_trace for row in samples)
         result = report.get('result') or {}
         state['candidateMarginPassed'] = kind_margin = args.kind != 'candidate' or all((result.get(key) or {}).get('p(95)', float('inf')) <= 160 and (result.get(key) or {}).get('p(99)', float('inf')) <= 400 for key in ('allLatency', 'mutationLatency'))

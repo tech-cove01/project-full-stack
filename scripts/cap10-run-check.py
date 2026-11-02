@@ -1,5 +1,6 @@
 """Offline checks of the actual runner's classification and warm guard functions."""
 import ast
+import hashlib
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -17,6 +18,89 @@ def check(condition, label):
     assert condition, label
     checks += 1
     print('PASS ' + label)
+
+
+def authority_wiring(temporary, files):
+    """Execute only the actual reservation/diagnostic AST with local doubles."""
+    functions = {node.name: node for node in source.body if isinstance(node, ast.FunctionDef)}
+    scope = {'Path': Path, 'hashlib': hashlib}
+    selected = ast.Module(body=[functions[name] for name in ('sha', 'expected_diagnostics', 'reserve')], type_ignores=[])
+    exec(compile(selected, 'cap10-run.py(actual reservation functions)', 'exec'), scope)
+    body = functions['main'].body
+    first = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
+                 and any(isinstance(target, ast.Name) and target.id == 'execution' for target in node.targets))
+    diagnostic_ast = ast.Module(body=body[first:first + 2], type_ignores=[])
+    def diagnostics(context, kind, enabled, optimization=None):
+        calls = []
+        grade = SimpleNamespace(execution_context=lambda _: calls.append('authority') or context,
+            history=lambda _: calls.append('history') or [{'tag': 'S' + str(i)} for i in range(1, 6)],
+            claim_optimization=lambda *_: calls.append('claim') or optimization)
+        local = {**scope, 'grade': grade, 'ROOT': temporary, 'args': SimpleNamespace(kind=kind),
+                 'api': {'likeDiagnosticsRequested': enabled}}
+        exec(compile(diagnostic_ast, 'cap10-run.py(actual main diagnostic branch)', 'exec'), local)
+        return calls
+    for kind, enabled in (('comparison', False), ('diagnostic', True), ('search', False)):
+        check(diagnostics({'authority': True}, kind, enabled) == ['authority'],
+              'authority ' + kind + ' bypasses superseded Claim proof before load')
+    try:
+        diagnostics({'authority': True}, 'comparison', True)
+    except AssertionError:
+        rejected = True
+    else:
+        rejected = False
+    check(rejected, 'authority comparison cannot silently enable diagnostics')
+    check(diagnostics(None, 'comparison', False, {'sha256': 'c' * 64}) == ['authority', 'history', 'claim'],
+          'legacy S6 Claim comparison keeps its diagnostics exception')
+    check(diagnostics(None, 'comparison', True) == ['authority', 'history', 'claim'],
+          'ordinary legacy comparison keeps diagnostics enabled')
+    trace_node = next(node for node in ast.walk(functions['main']) if isinstance(node, ast.If)
+                      and 'executionAuthoritySHA256' in ast.unparse(node.test)
+                      and 'expected_trace' in ast.unparse(node))
+    trace_ast = ast.Module(body=[trace_node], type_ignores=[])
+    for authority, expected, kind, tag, claim in [(True, False, 'comparison', 'S10', None),
+                                               (True, True, 'diagnostic', 'S11', None),
+                                               (False, False, 'comparison', 'S6', 'c' * 64),
+                                               (False, True, 'comparison', 'S3', None)]:
+        reservation = {'claimOptimizationSHA256': claim}
+        if authority:
+            reservation.update(executionAuthoritySHA256='a' * 64, expectedDiagnostics=expected)
+        local = {**scope, 'command': {'reservationCheck': reservation}, 'args': SimpleNamespace(kind=kind), 'tag': tag}
+        exec(compile(trace_ast, 'cap10-run.py(actual trace branch)', 'exec'), local)
+        check(local['expected_trace'] is expected, 'actual sample trace switch matches ' + tag + ' admission')
+    local = {**scope, 'command': {'reservationCheck': {'executionAuthoritySHA256': 'a' * 64,
+             'expectedDiagnostics': 'false'}}, 'args': SimpleNamespace(kind='search'), 'tag': 'S10'}
+    try:
+        exec(compile(trace_ast, 'cap10-run.py(actual trace branch)', 'exec'), local)
+    except AssertionError:
+        rejected = True
+    else:
+        rejected = False
+    check(rejected, 'nonboolean authority trace expectation cannot be coerced')
+    for name in ('preflight.json', 'ability.json', 'fixture.json', 'environment.json', 'observer'):
+        path = temporary / name; path.write_text('{}'); files.append(path)
+    saved = {}
+    reservation = {'tag': 'S10', 'expectedDiagnostics': False,
+        'executionAuthoritySHA256': 'a' * 64, 'executionAuthorityGeneration': 1,
+        'deploymentId': 'pool8', 'activeApplicationSHA256': 'b' * 64, 'admissionSHA256': 'd' * 64}
+    grade = SimpleNamespace(check_reservation=lambda *a, **kw: reservation)
+    owned = SimpleNamespace(read=lambda p: json.loads(Path(p).read_bytes()), now=lambda: '2026-11-02T12:00:00Z',
+        run=lambda *a: SimpleNamespace(stdout='e' * 40), save=lambda p, value: saved.update({p.name: value}))
+    scope.update(ROOT=temporary, REPO=temporary, TOOL_NAMES=(), PTS_TOOLS=(), owned=owned, module=lambda *_: grade)
+    args = SimpleNamespace(preflight=temporary / 'preflight.json', ability=temporary / 'ability.json', prediction=None,
+        observer=temporary / 'observer', kind='search', rate=800, seconds=60)
+    api = {'sourceSha': 'f' * 40, 'pid': 100, 'sha256': '9' * 64,
+        'likeDiagnosticsRequested': False, 'tailEnabledRequested': False, 'executionPlatform': 'linux'}
+    result = scope['reserve'](args, api, {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json')})
+    keys = ('executionAuthoritySHA256', 'executionAuthorityGeneration', 'deploymentId',
+            'activeApplicationSHA256', 'admissionSHA256')
+    check(all(result[key] == reservation[key] for key in keys),
+          'all five verified authority identities are retained at command top level')
+    check(saved['slot-S10.json'] == saved['S10-command.json'] == result,
+          'reservation and command retain the same authority and independent admission')
+    for key in keys:
+        reservation.pop(key)
+    legacy = scope['reserve'](args, api, {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json')})
+    check(not any(key in legacy for key in keys), 'legacy reservation gains no invented authority fields')
 
 
 def main():
@@ -96,6 +180,7 @@ def main():
         previous = owned.container
         owned.container = lambda *a: {**previous(*a), 'restartCount': 1}
         check(not scope['container_snapshot'](expected)['valid'], 'fast restart is detected even after container health recovers')
+        authority_wiring(temporary, files)
     finally:
         for path in files:
             if path.exists():

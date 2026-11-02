@@ -20,6 +20,7 @@ import (
 type batchScript struct {
 	rows                   []Event
 	execIDs                []uint64
+	execCalls              int
 	beginOptions           []driver.TxOptions
 	limit                  int64
 	zeroAt, failAt         int
@@ -59,21 +60,30 @@ func (connection *batchConnection) QueryContext(_ context.Context, query string,
 	return &batchRows{rows: connection.script.rows}, nil
 }
 func (connection *batchConnection) ExecContext(_ context.Context, query string, args []driver.NamedValue) (driver.Result, error) {
-	idIndex := 0
-	if strings.Contains(query, "attempts=attempts+1") {
-		idIndex = 1
+	query = strings.ReplaceAll(query, "o.", "")
+	var ids []uint64
+	if strings.Contains(query, " AS selected ") {
+		for i := 0; i < len(args)/2; i++ {
+			ids = append(ids, uint64(args[2*i].Value.(int64)))
+		}
+	} else {
+		position := 0
+		if strings.Contains(query, "attempts=attempts+1") {
+			position = 1
+		}
+		ids = []uint64{uint64(args[position].Value.(int64))}
 	}
-	id := args[idIndex].Value.(int64)
-	connection.script.execIDs = append(connection.script.execIDs, uint64(id))
-	position := len(connection.script.execIDs)
-	if position == connection.script.failAt {
+	connection.script.execIDs = append(connection.script.execIDs, ids...)
+	connection.script.execCalls++
+	if connection.script.execCalls == connection.script.failAt {
 		return nil, connection.script.execError
 	}
-	if position == connection.script.zeroAt {
+	if connection.script.execCalls == connection.script.zeroAt {
 		return driver.RowsAffected(0), nil
 	}
-	return driver.RowsAffected(1), nil
+	return driver.RowsAffected(len(ids)), nil
 }
+
 func (transaction *batchTransaction) Commit() error {
 	transaction.script.commits++
 	return transaction.script.commitError
@@ -129,15 +139,15 @@ func TestClaimBatchCommitsOnceAndPreservesPerRowAttemptFences(t *testing.T) {
 	}
 	if script.limit != MaxBatchSize || script.commits != 1 || script.rollbacks != 0 ||
 		len(script.beginOptions) != 1 || script.beginOptions[0].Isolation != driver.IsolationLevel(sql.LevelReadCommitted) ||
-		!reflect.DeepEqual(script.execIDs, []uint64{1, 2, 3}) {
-		t.Fatal("one bounded RC transaction must claim/park rows in their original ID order")
+		!reflect.DeepEqual(script.execIDs, []uint64{2, 1, 3}) {
+		t.Fatal("one bounded RC transaction must retain the ordered decisions and whole-group fences")
 	}
 }
 
 func TestClaimBatchReturnsNoPublishableSliceOnStatementOrCommitError(t *testing.T) {
 	cause := errors.New("synthetic database failure")
 	for _, commit := range []bool{false, true} {
-		script := &batchScript{rows: []Event{{ID: 1}, {ID: 2}}}
+		script := &batchScript{rows: []Event{{ID: 1, Attempts: 8}, {ID: 2}, {ID: 3}}}
 		if commit {
 			script.commitError = cause
 		} else {

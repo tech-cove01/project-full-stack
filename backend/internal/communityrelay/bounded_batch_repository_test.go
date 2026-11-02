@@ -176,7 +176,7 @@ func TestClaimBatchBoundedLargeSingletonAndExhaustedHead(t *testing.T) {
 func TestClaimBatchBoundedRollbackAndOriginalUnboundedContract(t *testing.T) {
 	rows := []Event{boundedEvent(1, "one"), boundedEvent(2, "two")}
 	cause := errors.New("synthetic update failure")
-	script := &batchScript{rows: rows, failAt: 2, execError: cause}
+	script := &batchScript{rows: rows, failAt: 1, execError: cause}
 	if events, err := scriptedBatchRepository(t, script).ClaimBatchBounded(context.Background(), 2, MaxBatchBytes); events != nil || !errors.Is(err, cause) || script.rollbacks != 1 {
 		t.Fatal("bounded claim failure must roll back the leased prefix and expose no events")
 	}

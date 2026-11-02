@@ -154,7 +154,7 @@ type batchCancelTrace struct {
 
 func (trace *batchCancelTrace) Trace(_ context.Context, _ time.Time, query func() (string, int64), err error) {
 	text, _ := query()
-	if err == nil && strings.Contains(text, "attempts=attempts+1") {
+	if err == nil && strings.Contains(strings.ReplaceAll(text, "o.", ""), "attempts=attempts+1") {
 		trace.once.Do(trace.cancel)
 	}
 }

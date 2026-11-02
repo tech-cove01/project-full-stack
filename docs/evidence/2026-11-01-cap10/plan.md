@@ -38,3 +38,9 @@
 S9同400/s完成24000次真实变更、无未知/无操作/HTTP错误，但保留1次发压时序违规，原分类为发压器受限；三组收据末段仍净增长，不能据此宣告容量通过。同步Offset合并没有消除逐条收据事务的固定开销，下一小票沿用默认1/显式32的配置，三组processor增加仅LIKE的可选原子收据接口。
 
 worker在最多32条、首条取到后10ms的有界取消息窗口内保留完整原始LIKE前缀，随后逐条执行原严格Envelope/源Key/Header检查，再用一次RC事务共享该projection原控制行锁（follow/feed原FOR SHARE，search原FOR UPDATE），批量写唯一IGNORED收据并在同事务逐一核对全部event_id/hash/state。只有整个DB事务确认成功才同步提交对应Kafka前缀；ACK未知只重试ACK。非LIKE保持原单条屏障；批事务失败或取消保留全部raw，后续按原逐条Apply/重试/Park/单条ACK处理，不跨未确认缺口。收据内容、重建fence、幂等冲突、生产确认和持久化均不放宽，只有事务固定开销被合并。10ms仅取消息组批，整批DB事务仍独立5秒；有限真实集成验证原子回滚、旧hash/state冲突、重建锁阻挡、唯一收据和ACK失败后重启重放。负载和源码对照逐窗记录，不预写通过或提升比例。
+
+## 2026-11-02 Claim 释放未匹配活租约的扫描锁
+
+独立登记的空集成库使用真实 `Repository.Claim`，预置未到期 PROCESSING 头行和到期 PENDING 尾行；仅通过 GORM Trace 在真实锁定 SELECT 返回后、事务提交前暂停。原代码继承会话 RR 时，另一 owner 的 `Done` 对未匹配头行阻塞超过500ms，释放 Claim 后503.632ms才完成；只将该会话预设为RC的对照，`Done` 在 Claim 仍暂停时1.164ms完成。原红回归和两种会话预设均保留，不以此冒称吞吐已提升。
+
+本小票仅为 Claim 的事务显式指定 `sql.LevelReadCommitted`，释放扫描后未匹配的活租约行锁；原 active 索引、OR到期条件、ID顺序、SKIP LOCKED、30秒租约、attempt fence、重试与同步生产确认不变。真实回归要求两种会话预设下均能在 Claim 提交前完成旧 owner 的 Done，另重验既有到期资格/跳锁和8路64事件无重复收敛。主业务事务及 MySQL 全局 RR 不变。独立的 buffer pool 128→512MiB属于容量配置变化，须另列实际部署身份与前后证据，不计为本代码单项收益；后续正式容量仅据完整实测窗口判定。

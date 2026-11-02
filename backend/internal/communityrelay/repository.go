@@ -5,6 +5,7 @@ package communityrelay
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"strings"
 
@@ -39,7 +40,9 @@ type Repository struct{ db *gorm.DB }
 func NewRepository(db *gorm.DB) *Repository { return &Repository{db: db} }
 
 // Claim takes one due event under a 30 s lease and increments the attempts fence
-// in the same transaction, so a reclaimed row cannot be finished twice.
+// in the same transaction, so a reclaimed row cannot be finished twice. RC also
+// releases scanned but ineligible live-lease rows, allowing their owner to finish
+// while another relay claims a later due event under SKIP LOCKED.
 func (repository *Repository) Claim(ctx context.Context) (*Event, error) {
 	var claimed *Event
 	err := repository.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -72,7 +75,7 @@ func (repository *Repository) Claim(ctx context.Context) (*Event, error) {
 		event.Attempts++
 		claimed = &event
 		return nil
-	})
+	}, &sql.TxOptions{Isolation: sql.LevelReadCommitted})
 	if err != nil {
 		return nil, err
 	}

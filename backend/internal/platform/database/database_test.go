@@ -98,3 +98,21 @@ func TestMySQLDSNPreservesCredentialsAndExplicitTimeZone(t *testing.T) {
 		t.Fatal("DSN must preserve credentials, IPv6 address, and time zone")
 	}
 }
+
+func TestMySQLInterpolationOnlyChangesTheExplicitDriverOption(t *testing.T) {
+	location, err := time.LoadLocation("Asia/Shanghai")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, enabled := range []bool{false, true} {
+		cfg := config.Config{MySQL: config.MySQL{Host: "::1", Port: 3308, Database: "go_test", User: "local",
+			Password: "p@ss:/?&word", InterpolateParams: enabled}, Location: location, StartupTimeout: 3 * time.Second}
+		parsed, err := mysqldriver.ParseDSN(MySQLDSN(cfg))
+		if err != nil || parsed.InterpolateParams != enabled || parsed.MultiStatements || parsed.ClientFoundRows ||
+			parsed.Params["charset"] != "utf8mb4" || parsed.Params["time_zone"] != "'+08:00'" ||
+			!parsed.ParseTime || parsed.Loc.String() != location.String() || parsed.Passwd != cfg.MySQL.Password || parsed.Addr != "[::1]:3308" ||
+			parsed.Timeout != cfg.StartupTimeout || parsed.ReadTimeout != cfg.StartupTimeout || parsed.WriteTimeout != cfg.StartupTimeout {
+			t.Fatal("interpolation changed a separate charset, row-count, timeout or credential contract")
+		}
+	}
+}

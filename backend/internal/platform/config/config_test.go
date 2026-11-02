@@ -103,9 +103,30 @@ func TestExplicitDependenciesAndSafeDefaults(t *testing.T) {
 	if cfg.MySQL.MaxOpenConns != 20 || cfg.MySQL.MaxIdleConns != 20 {
 		t.Fatal("the default MySQL pool must retain all twenty permitted connections")
 	}
+	if cfg.MySQL.InterpolateParams {
+		t.Fatal("MySQL parameter interpolation must stay opt-in")
+	}
 	_, offset := time.Now().In(cfg.Location).Zone()
 	if cfg.Location.String() != "Asia/Shanghai" || offset != 8*60*60 {
 		t.Fatal("time zone must explicitly be Asia/Shanghai")
+	}
+}
+
+func TestMySQLInterpolationRequiresStrictExplicitBoolean(t *testing.T) {
+	for _, value := range []string{"false", "true"} {
+		values := validEnvironment()
+		values["GO_MYSQL_INTERPOLATE_PARAMS"] = value
+		cfg, err := fromMap(values)
+		if err != nil || cfg.MySQL.InterpolateParams != (value == "true") {
+			t.Fatal("explicit MySQL interpolation setting was not applied")
+		}
+	}
+	for _, value := range []string{"", "0", "1", "TRUE", "False", " true ", "private-value"} {
+		values := validEnvironment()
+		values["GO_MYSQL_INTERPOLATE_PARAMS"] = value
+		if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "GO_MYSQL_INTERPOLATE_PARAMS") || strings.Contains(err.Error(), "private-value") {
+			t.Fatal("invalid interpolation setting must fail without exposing its value")
+		}
 	}
 }
 

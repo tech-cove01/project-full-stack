@@ -16,13 +16,14 @@ import (
 var topicPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,249}$`)
 
 type MySQL struct {
-	Host         string
-	Port         int
-	Database     string
-	User         string
-	Password     string
-	MaxOpenConns int
-	MaxIdleConns int
+	Host              string
+	Port              int
+	Database          string
+	User              string
+	Password          string
+	MaxOpenConns      int
+	MaxIdleConns      int
+	InterpolateParams bool
 }
 
 type Redis struct {
@@ -168,6 +169,12 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		if err != nil {
 			return Config{}, err
 		}
+	}
+	if value, ok := lookup("GO_MYSQL_INTERPOLATE_PARAMS"); ok {
+		if value != "true" && value != "false" {
+			return Config{}, fmt.Errorf("GO_MYSQL_INTERPOLATE_PARAMS must be true or false")
+		}
+		cfg.MySQL.InterpolateParams = value == "true"
 	}
 	// Redis authentication may be disabled on the isolated local instance.
 	cfg.Redis.Password, _ = lookup("REDIS_PASSWORD")

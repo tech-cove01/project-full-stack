@@ -33,6 +33,7 @@ func MySQLDSN(cfg config.Config) string {
 	dsn.User, dsn.Passwd, dsn.DBName = cfg.MySQL.User, cfg.MySQL.Password, cfg.MySQL.Database
 	dsn.Net, dsn.Addr = "tcp", net.JoinHostPort(cfg.MySQL.Host, strconv.Itoa(cfg.MySQL.Port))
 	dsn.ParseTime, dsn.Loc = true, cfg.Location
+	dsn.InterpolateParams = cfg.MySQL.InterpolateParams
 	dsn.Timeout, dsn.ReadTimeout, dsn.WriteTimeout = cfg.StartupTimeout, cfg.StartupTimeout, cfg.StartupTimeout
 	dsn.Params = map[string]string{"charset": "utf8mb4", "time_zone": "'+08:00'"}
 	return dsn.FormatDSN()

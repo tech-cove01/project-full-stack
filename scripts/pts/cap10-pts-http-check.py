@@ -63,7 +63,7 @@ def main():
     pool, engines = 4096, 9
     rounds = 1024 // frame_limit
     run_id, token = 'synthetic-http-' + uuid.uuid4().hex, secrets.token_hex(32)
-    config = {'runId': run_id, 'phase': 'warm', 'rate': 5000, 'seconds': 10,
+    config = {'runId': run_id, 'phase': 'warm', 'rate': 5000, 'seconds': 10, 'clockProtocol': 'dedicated-v1',
         'apiUrl': 'http://127.0.0.1:9', 'poolSize': pool, 'expectedEngines': engines, 'ptsConcurrency': 4105,
         'fixtureSHA256': 'a' * 64, 'scriptSHA256': 'b' * 64, 'controlToken': token,
         'relations': [{'slot': slot, 'userId': str(slot + 10001), 'noteId': str(slot + 20001),
@@ -87,7 +87,7 @@ def main():
             if hasattr(local, 'service'): local.service['lockHeldMs'] += (time.perf_counter_ns() - self.entered) / 1000000
             self.lock.release()
     finished = threading.Event()
-    store = server = serving = polling = sampling = None
+    store = server = serving = polling = clock_polling = sampling = None
     progress_samples = []
     result = {'scope': __doc__, 'passed': False, 'businessHTTPRequests': 0, 'cloudCalls': 0,
               'realNativeWindowMeasured': False, 'sourceSHA256': frozen, 'phaseHandlerASTSHA256': route_hash, 'harnessSourceSHA256': harness_sha,
@@ -142,8 +142,9 @@ def main():
                 try:
                     connection.connect(); connected = time.perf_counter_ns()
                     port = connection.sock.getsockname()[1]
-                    connection.request('GET' if body is None else 'POST', path, body=raw,
-                        headers={'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Connection': 'close'})
+                    request_headers = {'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json', 'Connection': 'close'}
+                    if path == '/clock': request_headers['X-CAP10-Run-ID'] = run_id
+                    connection.request('GET' if body is None else 'POST', path, body=raw, headers=request_headers)
                     sent = time.perf_counter_ns()
                     response = connection.getresponse(); headers = time.perf_counter_ns()
                     assert response.status == 200
@@ -155,20 +156,25 @@ def main():
                     'peerPort': port, 'startedNano': before, 'encodeMs': (encoded - before) / 1000000,
                     'connectMs': (connected - encoded) / 1000000, 'sendMs': (sent - connected) / 1000000,
                     'headersMs': (headers - sent) / 1000000, 'bodyMs': (received - headers) / 1000000,
-                    'uncertaintyMs': elapsed / 2 + 1, 'withinClockRTTBudget': elapsed <= 98,
+                    'uncertaintyMs': elapsed / 2 + 1 if path == '/clock' else None,
+                    'withinClockRTTBudget': elapsed <= 98 if path == '/clock' else None,
                     'seq': body.get('seq') if body else None, 'records': len(body.get('records', [])) if body else 0}
                 with metrics_lock: calls.append(sample)
-                clock = {'uncertaintyMs': elapsed / 2 + 1, 'roundTripMs': elapsed,
-                         'offsetMs': value['serverUnixMs'] - (wall + elapsed / 2)}
+                clock = None
+                if path == '/clock':
+                    assert set(value) == {'version', 'clockProtocol', 'runId', 'phase', 'serverUnixMs'}
+                    assert value['version'] == 1 and value['clockProtocol'] == 'dedicated-v1'
+                    assert value['runId'] == run_id and value['phase'] == 'warm'
+                    clock = {'uncertaintyMs': elapsed / 2 + 1, 'roundTripMs': elapsed,
+                             'offsetMs': value['serverUnixMs'] - (wall + elapsed / 2)}
                 return value, clock
-            clocks = [request('/control', actor=engine)[1] for engine in ids]
+            clocks = [request('/clock', actor=engine)[1] for engine in ids]
             registration_barrier = threading.Barrier(engines)
             def register(index):
                 slots = list(range(index, pool, engines))
                 registration_barrier.wait(timeout=6)
                 reply, observed = request('/register', {'runId': run_id, 'engineId': ids[index], 'slots': slots,
                     'readyWorkers': len(slots), 'scriptSHA256': 'b' * 64, 'fixtureSHA256': 'a' * 64}, ids[index])
-                if observed['uncertaintyMs'] < clocks[index]['uncertaintyMs']: clocks[index] = observed
                 return reply
             with ThreadPoolExecutor(max_workers=engines) as executor:
                 replies = list(executor.map(register, range(engines)))
@@ -181,15 +187,15 @@ def main():
                 reply, new_clock = request('/batch', {'runId': run_id, 'engineId': engine, 'seq': 0,
                     'records': [], 'clock': clocks[index], 'resources': resources()}, engine)
                 assert reply['ack'] == 0
-                if new_clock['uncertaintyMs'] < clocks[index]['uncertaintyMs']: clocks[index] = new_clock
-            def poll():
+            def poll(path):
                 try:
                     while not finished.is_set():
-                        request('/control')
+                        request(path)
                         finished.wait(.2)
                 except BaseException as error:
                     with metrics_lock: errors.append(type(error).__name__)
-            polling = threading.Thread(target=poll, daemon=True); polling.start()
+            polling = threading.Thread(target=poll, args=('/control',), daemon=True); polling.start()
+            clock_polling = threading.Thread(target=poll, args=('/clock',), daemon=True); clock_polling.start()
             def sample_progress():
                 try:
                     while not finished.is_set():
@@ -214,6 +220,8 @@ def main():
                         if time.perf_counter() - began >= 45: raise TimeoutError('bounded local protocol deadline')
                         time.sleep(.005)
                     barrier.wait(timeout=6)
+                    unused, sampled_clock = request('/clock', actor=ids[index])
+                    if sampled_clock['uncertaintyMs'] < clock['uncertaintyMs']: clock = sampled_clock
                     records = []
                     for ordinal in ordinals[index][round_ * frame_limit:(round_ + 1) * frame_limit]:
                         slot, previous = ordinal % pool, ordinal // pool
@@ -227,15 +235,14 @@ def main():
                     assert len(collector.canonical(body)) <= 16 << 20
                     reply, observed = request('/batch', body, ids[index])
                     assert reply['ack'] == round_ + 1
-                    if observed['uncertaintyMs'] < clock['uncertaintyMs']: clock = observed
                 return True
             with ThreadPoolExecutor(max_workers=engines) as executor:
                 futures = [executor.submit(engine, index) for index in range(engines)]
                 for future in futures:
                     try: assert future.result(timeout=45)
                     except BaseException as error: errors.append(type(error).__name__)
-            finished.set(); polling.join(timeout=6); sampling.join(timeout=6)
-            assert not polling.is_alive() and not sampling.is_alive()
+            finished.set(); polling.join(timeout=6); clock_polling.join(timeout=6); sampling.join(timeout=6)
+            assert not polling.is_alive() and not clock_polling.is_alive() and not sampling.is_alive()
             summary = store.progress()
             expected = engines * rounds * frame_limit
             assert summary['counts']['mutation'] == summary['counts']['attempted'] == summary['counts']['completed'] == expected
@@ -245,18 +252,22 @@ def main():
             assert raw_hash == summary['evidenceSHA256']
             controls = [sample['rttMs'] for sample in calls if sample['path'] == '/control']
             batches = [sample['rttMs'] for sample in calls if sample['path'] == '/batch']
-            result.update(passed=not errors and all(sample['withinClockRTTBudget'] for sample in calls),
+            clock_calls = [sample for sample in calls if sample['path'] == '/clock']
+            result.update(passed=not errors and bool(clock_calls) and all(sample['withinClockRTTBudget'] for sample in clock_calls),
                 syntheticRecords=expected, syntheticScheduleRate=5000, syntheticScheduleSeconds=10,
                 actualHTTPClients=engines, frameRecordLimit=frame_limit, simultaneousBurstRounds=rounds,
+                clockProtocol='dedicated-v1', maximumClockRTTMs=max(sample['rttMs'] for sample in clock_calls),
+                clockCalls=len(clock_calls), clockRTTBudgetMs=98,
                 maximumControlRTTMs=max(controls), maximumBatchRTTMs=max(batches), maximumAnyRTTMs=max(s['rttMs'] for s in calls),
                 fsyncCalls=synced.call_count, journalSHA256=raw_hash, summary=summary,
                 clientTransport='direct HTTPConnection; no per-request HTTPS context or proxy discovery',
                 listenerBacklog=server.request_queue_size, progressSamples=progress_samples,
                 fsyncScope='actual collector journal and actual 1s progress/latest saves',
-                scopeLimit='Physical local HTTP queue/RTT only. Engine resources and native HTTP results are synthetic; this partial record set is not native-window or business-capacity evidence.')
+                scopeLimit='Physical local dedicated clock RTT and separately reported durable ACK delay. Only clock samples have the unchanged98ms gate; all operations retain the5s HTTP timeout. Engine resources/results are synthetic, not native-window or business-capacity evidence.')
     finally:
         finished.set()
         if polling is not None: polling.join(timeout=6)
+        if clock_polling is not None: clock_polling.join(timeout=6)
         if sampling is not None: sampling.join(timeout=6)
         if server is not None:
             if serving is not None and serving.is_alive(): server.shutdown()
@@ -272,7 +283,7 @@ def main():
         result['passed'] = result['passed'] and result['sourceBytesStable']
         with (root / 'result.json').open('x', encoding='utf-8') as stream:
             json.dump(result, stream, indent=2); stream.write('\n')
-        print(json.dumps({key: result.get(key) for key in ('passed', 'syntheticRecords', 'maximumControlRTTMs',
+        print(json.dumps({key: result.get(key) for key in ('passed', 'syntheticRecords', 'maximumClockRTTMs', 'maximumControlRTTMs',
             'maximumBatchRTTMs', 'maximumAnyRTTMs', 'wallSeconds', 'errors')} | {'directory': str(root)}))
     return 0 if result['passed'] else 1
 

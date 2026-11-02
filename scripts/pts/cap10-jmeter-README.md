@@ -58,6 +58,11 @@ P95/P99 are recomputed over all raw HTTP/mutation samples by the root collector.
 Linux RSS comes from `/proc/self/status`, not JVM heap. The Windows finite
 wiring helper reads the real JVM working set through an owned PID lookup.
 Unsupported/missing resources remain null and cannot pass the collector.
+The current managed PTS engine RSS cap is 6 GiB per remote engine; real RSS and
+the two-engine aggregate remain recorded. The ECS collector plus Node helper
+retain a separate combined 2 GiB cap. The first live warm attempt stopped under
+the original 2 GiB remote cap before any business request; that failure remains
+retained. This authorized generator-environment adaptation is not API optimization.
 `monotonicNs` resources are measured relative to this engine's initialization;
 their deltas remain actual monotonic elapsed time. Native cloud verification of
 the PTS runtime and its effective processor visibility is still required.

@@ -108,6 +108,8 @@ API客户端读取标准环境变量`ALIBABA_CLOUD_ACCESS_KEY_ID`、`ALIBABA_CLO
 
 **施压JVM与独立主机RSS。** Apache JMeter官方启动脚本默认堆为`-Xms1g -Xmx1g`，但这不能证明PTS实际采用同一参数。PTS环境管理公开的是JAR和JMeter `.properties`，当前未从官方页面证实可修改SaaS JVM启动堆；不能把`Xmx`填成JMeter属性就声称已生效。本批PTS新环境已事前声明：每台远程引擎进程RSS分别小于2GiB，远端合计只展示；ECS本地Python collector和Node helper另合计小于2GiB。不得将两个独立远端主机相加后套用原同机k6预算，也不能把该环境适配称为代码优化收益。agent须核真实资源，不能把Xms已提交堆等同VmRSS；超出对应门槛或无法核实时先报告，不临时改限额或增加引擎。[本批资源声明](pts-preparation-plan.md)、[Apache启动脚本](https://raw.githubusercontent.com/apache/jmeter/rel/v5.6.3/bin/jmeter)、[PTS环境管理](https://help.aliyun.com/zh/pts/performance-test-pts-3-0/user-guide/jmeter-environment-management)
 
+**2026-11-02后续执行门槛：** 原2GiB门槛触发的首次预热零请求失败保留。依据实际独立托管引擎约3.1GB RSS及用户本批修复授权，后续每台远程PTS引擎改为严格小于6GiB；本地collector+Node合计仍小于2GiB，服务端配额和其它判据保持。仅展示真实RSS，不把JVM堆改成推测值，不将这次发压环境适配算业务代码优化，原名额不重置。
+
 **远程停止与完整数据。** PTS停止API只接受SceneId，不能原子地限定ReportId，因此同批SceneId不得由另一个人或定时任务启动。启动超时结果未知时工具不重发Start；未证实远端终态就不开始下一phase。PTS采样日志不是全样本JTL，报告API也不直接提供本批要求的P95；完整脱敏分批记录、真实native起止、资源与终态由私网collector保存，平台报告作为补充。[停止接口](https://help.aliyun.com/zh/pts/performance-test-pts-3-0/developer-reference/api-pts-2020-10-20-stoptestingjmeterscene)、[报告接口](https://help.aliyun.com/zh/pts/performance-test-pts-3-0/developer-reference/api-pts-2020-10-20-getjmeterreportdetails)
 
 agent将先核环境转移、干净构建、依赖健康、夹具、时基、网络、预算和完整采集，再按剩余名额执行；本地mock或有限接线通过不代表PTS云端容量通过。用户只需提供SSH/配置的私有路径与上述场景信息，不需要自行先跑一轮验证。

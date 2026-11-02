@@ -356,11 +356,15 @@ class Checks(unittest.TestCase):
     def test_remote_rss_limit_is_per_engine_not_two_host_aggregate(self):
         self.ready(); self.stamp = self.start
         for engine in (0, 1):
-            self.batch(engine, resources=self.resources(rssBytes=1200000000))
+            self.batch(engine, resources=self.resources(rssBytes=3400000000))
         summary = self.store.summary()
-        self.assertEqual(summary['remoteRSSBytes'], 2400000000)
+        self.assertEqual(summary['remoteRSSBytes'], 6800000000)
+        self.assertEqual(summary['remoteEngineRSSLimitBytes'], 6 << 30)
         self.assertFalse(summary['stop'])
         self.assertIn('each independently allocated remote engine', summary['resourcesScope'])
+        self.stamp += 5000
+        self.batch(0, resources=self.resources(rssBytes=module.RSS_LIMIT - 1))
+        self.assertFalse(self.store.control()['stop'])
         self.stamp += 5000
         self.batch(0, resources=self.resources(rssBytes=module.RSS_LIMIT))
         self.assertTrue(self.store.control()['stop'])

@@ -17,7 +17,7 @@ COUNT_KEYS = ('planned', 'attempted', 'completed', *KINDS)
 FACT_KEYS = ('wanted', 'observedLiked', 'previousVersion', 'observedVersion', 'observedNoteId')
 RECORD_KEYS = {'ordinal', 'slot', 'kind', 'startedUnixMs', 'elapsedMs', 'status', *FACT_KEYS}
 MAX_SAFE = 9007199254740991
-RSS_LIMIT = 2147483648
+RSS_LIMIT = 6 << 30
 
 
 def canonical(value):
@@ -427,6 +427,7 @@ class EngineStore:
                     'batchFatal': bool(self._collection_errors or any(raw[k] for k in ('noop', 'uncertain', 'rejected', 'invalid'))),
                     'childrenConverged': len(engines) == 2 and all(e['stoppedOffering'] for e in engines),
                     'violations': list(self._violations), 'collectionErrors': list(self._collection_errors),
-                    'resourcesScope': 'PTS environment: each independently allocated remote engine must stay below 2 GiB process RSS; the aggregate is displayed, not compared with a shared limit. Local Python collector plus Node classification retain their separate combined 2 GiB limit. This environment adaptation is not API optimization evidence.',
+                    'resourcesScope': 'PTS environment: each independently allocated remote engine must stay below 6 GiB process RSS; the aggregate is displayed, not compared with a shared limit. Local Python collector plus Node classification retain their separate combined 2 GiB limit. This environment adaptation is not API optimization evidence.',
+                    'remoteEngineRSSLimitBytes': RSS_LIMIT,
                     'remoteRSSBytes': sum(e['resources']['rssBytes'] for e in engines if e['resources'] is not None),
                     'evidenceSHA256': self._journal_hasher.hexdigest()}

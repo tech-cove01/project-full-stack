@@ -23,6 +23,7 @@ import psutil
 
 
 CAP10_PROJECT = 'project-full-stack-cap10'
+PTS_ENGINE_RSS_LIMIT = 6 << 30
 CAP10_LIMITS = {
     'mysql': (4_000_000_000, 2 << 30, '3306/tcp', '3481', '/var/lib/mysql'),
     'redis': (2_000_000_000, 512 << 20, '6379/tcp', '6581', '/data'),
@@ -371,10 +372,11 @@ def main():
                                 if type(rss) is not int or rss <= 0 or type(resources['logicalCPUs']) is not int or resources['logicalCPUs'] <= 0:
                                     raise ValueError('real PTS process RSS/CPU capacity missing')
                                 row['remoteGenerators'].append({'engineId': engine['engineId'], 'rss_bytes': rss,
+                                     'rss_limit_bytes': PTS_ENGINE_RSS_LIMIT,
                                     'source': 'JMeter MXBean/proc native resources via authenticated collector',
                                     'resources': resources})
-                                if rss >= 2147483648:
-                                    signal('one remote PTS engine RSS reached its declared 2 GiB cap')
+                                if rss >= PTS_ENGINE_RSS_LIMIT:
+                                    signal('one remote PTS engine RSS reached its declared 6 GiB cap')
                             if remote.get('stop'):
                                 signal('PTS collector locked a safety/evidence stop')
                     else:

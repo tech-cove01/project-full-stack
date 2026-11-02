@@ -16,6 +16,8 @@ RESOURCE = importlib.util.module_from_spec(resource_spec); resource_spec.loader.
 idle_spec = importlib.util.spec_from_file_location('cap10_runner_check_idle', REPO / 'scripts/cap10-idle-authorization-check.py')
 idle_checks = importlib.util.module_from_spec(idle_spec); idle_spec.loader.exec_module(idle_checks)
 IDLE = idle_checks.idle.IDLE
+observer_spec = importlib.util.spec_from_file_location('cap10_runner_check_observer', REPO / 'scripts/cap10-observer-contract.py')
+OBSERVER = importlib.util.module_from_spec(observer_spec); observer_spec.loader.exec_module(OBSERVER)
 source = ast.parse((REPO / 'scripts/cap10-run.py').read_text(encoding='utf-8'))
 names = {'classify', 'pre_stable_guard', 'container_snapshot', 'observer_terminal_outcome'}
 isolated = ast.Module(body=[node for node in source.body if isinstance(node, ast.FunctionDef) and node.name in names], type_ignores=[])
@@ -32,7 +34,7 @@ def check(condition, label):
 def authority_wiring(temporary, files):
     """Execute only the actual reservation/diagnostic AST with local doubles."""
     functions = {node.name: node for node in source.body if isinstance(node, ast.FunctionDef)}
-    scope = {'Path': Path, 'hashlib': hashlib, 'cohort': cohort, 'RESOURCE': RESOURCE, 'IDLE': IDLE}
+    scope = {'Path': Path, 'hashlib': hashlib, 'cohort': cohort, 'RESOURCE': RESOURCE, 'IDLE': IDLE, 'OBSERVER': OBSERVER}
     selected = ast.Module(body=[functions[name] for name in ('sha', 'cohort_dimensions', 'environment_identity', 'expected_diagnostics', 'pts_artifact_paths', 'reserve')], type_ignores=[])
     exec(compile(selected, 'cap10-run.py(actual reservation functions)', 'exec'), scope)
     body = functions['main'].body

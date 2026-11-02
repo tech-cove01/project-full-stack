@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 REPO = Path(__file__).resolve().parent.parent
@@ -132,6 +133,58 @@ class Checks(unittest.TestCase):
                 self.reserve(kind, rate)
         with self.assertRaises(ValueError):
             self.reserve('diagnostic', 50, prediction=None)
+
+    def test_old_reservation_records_canonical_legacy_observer_without_relabelling(self):
+        reservation = self.reserve('diagnostic', 50)
+        self.assertEqual(reservation['observerPolicy'], grade.OBSERVER.environment_policy({}))
+        self.assertEqual(reservation['observerSamplingLimits'], grade.OBSERVER.sampling_limits())
+
+    def test_actual_authority_reservation_binds_explicit_vector_identity(self):
+        policy = grade.OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': 'like-vector-v1'})
+        metadata = {'observerPolicy': policy, 'observerSamplingLimits': grade.OBSERVER.sampling_limits()}
+        with patch.object(grade, 'execution_context', return_value={'active': copy.deepcopy(metadata)}), \
+             patch.object(grade, 'authority_reservation', return_value={'tag': 'S20'}) as authority:
+            result = self.reserve('search', 5000, api=metadata, observer_policy=policy)
+        self.assertEqual(result, {'tag': 'S20', **metadata})
+        authority.assert_called_once()
+
+    def test_actual_reservation_rejects_mixed_or_unbound_vector_before_authority(self):
+        policy = grade.OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': 'like-vector-v1'})
+        metadata = {'observerPolicy': policy, 'observerSamplingLimits': grade.OBSERVER.sampling_limits()}
+        cases = [(metadata, {}, policy), ({}, metadata, policy),
+                 (metadata, metadata, None),
+                 (metadata, {**metadata, 'observerSamplingLimits': {**grade.OBSERVER.sampling_limits(), 'loadBudgetMs': 4000.0}}, policy)]
+        for api, active, selected in cases:
+            with self.subTest(api=api, active=active, selected=selected), \
+                 patch.object(grade, 'execution_context', return_value={'active': active}), \
+                 patch.object(grade, 'authority_reservation') as authority:
+                with self.assertRaises(ValueError):
+                    self.reserve('search', 5000, api=api, observer_policy=selected)
+                authority.assert_not_called()
+        with patch.object(grade, 'execution_context', return_value=None), self.assertRaises(ValueError):
+            self.reserve('search', 5000, api=metadata, observer_policy=policy)
+
+    def test_actual_vector_formal_requires_the_same_explicit_policy_and_limits_in_freeze(self):
+        policy = grade.OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': 'like-vector-v1'})
+        metadata = {'observerPolicy': policy, 'observerSamplingLimits': grade.OBSERVER.sampling_limits()}
+        with patch.object(grade, 'execution_context', return_value={'active': metadata}), \
+             patch.object(grade, 'authority_reservation', return_value={'tag': 'H2'}) as authority:
+            for freeze in ({}, {'observerPolicy': policy},
+                           {**metadata, 'observerPolicy': grade.OBSERVER.environment_policy({})}):
+                with self.subTest(freeze=freeze), self.assertRaises(ValueError):
+                    self.reserve('formal', 5000, api=metadata, observer_policy=policy, freeze=freeze)
+            authority.assert_not_called()
+            self.assertEqual(self.reserve('formal', 5000, api=metadata, observer_policy=policy, freeze=metadata)['tag'], 'H2')
+
+    def test_new_legacy_metadata_requires_integer_limits_but_old_ready_stays_legacy(self):
+        legacy = grade.OBSERVER.environment_policy({})
+        self.assertEqual(grade.observer_identity(legacy, {'ready': True})['observerPolicy'], legacy)
+        for metadata in ({'observerPolicy': legacy}, {'observerPolicy': None},
+                         {'observerPolicy': legacy, 'observerSamplingLimits': {**grade.OBSERVER.sampling_limits(), 'cadenceSeconds': 5.0}}):
+            with self.subTest(metadata=metadata), self.assertRaises(ValueError):
+                grade.observer_identity(legacy, metadata)
+        vector = grade.OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': 'like-vector-v1'})
+        with self.assertRaises(ValueError): grade.observer_identity(vector, {'ready': True})
 
     def test_passing_windows_expand_fourfold_not_one_small_step(self):
         self.add('S1', 50)

@@ -23,6 +23,9 @@ _resource_spec.loader.exec_module(RESOURCE)
 _idle_spec = importlib.util.spec_from_file_location('cap10_grade_idle', Path(__file__).with_name('cap10-idle-contract.py'))
 IDLE = importlib.util.module_from_spec(_idle_spec)
 _idle_spec.loader.exec_module(IDLE)
+_observer_spec = importlib.util.spec_from_file_location('cap10_grade_observer', Path(__file__).with_name('cap10-observer-contract.py'))
+OBSERVER = importlib.util.module_from_spec(_observer_spec)
+_observer_spec.loader.exec_module(OBSERVER)
 
 def require(condition, message):
     if not condition:
@@ -33,6 +36,22 @@ def read(path):
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def observer_identity(expected, api, active=None, freeze=None):
+    """Bind constant method/budgets; old absent fields mean legacy only."""
+    require(type(api) is dict, 'observer metadata object required')
+    selected = OBSERVER.metadata_policy({'observerPolicy': expected}, expected)
+    for metadata in (api, active, freeze):
+        if metadata is None:
+            continue
+        OBSERVER.metadata_policy(metadata, selected, allow_missing_legacy=True)
+        if ('observerPolicy' in metadata or 'observerSamplingLimits' in metadata
+                or selected['mode'] == OBSERVER.LIKE_VECTOR):
+            limits = metadata.get('observerSamplingLimits')
+            require(type(limits) is dict and all(type(value) is int for value in limits.values())
+                    and limits == OBSERVER.sampling_limits(), 'observer sampling limits differ from the fixed contract')
+    return {'observerPolicy': selected, 'observerSamplingLimits': OBSERVER.sampling_limits()}
 
 def environment_identity(record, root, *, require_sha=True):
     """Resolve this record's immutable environment, never a current alias."""
@@ -1044,7 +1063,7 @@ def search_state(root, source_sha):
         result['lowerEvidence'] = best[0]['tag']
     return result
 
-def check_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze=None, prediction=None, current_tools=None, observer_hash=None, preflight_reference=None):
+def check_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze=None, prediction=None, current_tools=None, observer_hash=None, preflight_reference=None, observer_policy=None):
     root, fixture = Path(root).resolve(), Path(fixture).resolve()
     require(root in (ROOT, ROOT / 'linux') and fixture.is_file() and fixture.is_relative_to(root), 'fixed CAP10 public paths required')
     require(kind in KINDS and type(rate) is int and 1 <= rate <= 5000, 'invalid CAP10 purpose/rate')
@@ -1069,8 +1088,14 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     require(ability.get('rate') == rate and ability.get('sufficient') is True and type(ability.get('maxVUs')) is int and ability['maxVUs'] == pool and type(ability.get('exclusiveRelationships')) is int and ability['exclusiveRelationships'] == pool and ability.get('classificationIncluded') is True and ability.get('evidence'), 'declared generator ability evidence required for every window')
     require(type(ability.get('estimatedInFlight')) in (int, float) and math.isfinite(ability['estimatedInFlight']) and 0 <= ability['estimatedInFlight'] <= pool, 'estimated in-flight work exceeds exclusive VU pool')
     context = execution_context(root)
+    selected_policy = OBSERVER.environment_policy({}) if observer_policy is None else observer_policy
+    observer_binding = observer_identity(selected_policy, api_metadata, context['active'] if context else None,
+                                         freeze if kind == 'formal' else None)
+    require(context is not None or selected_policy['mode'] == OBSERVER.FULL_HISTORY,
+            'vector mode requires the explicit per-window audit authority')
     if context:
-        return authority_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze, current_tools, observer_hash, context)
+        return {**authority_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze, current_tools, observer_hash, context),
+                **observer_binding}
     records = history(root)
     optimization = claim_optimization(root, records)
     expected_diagnostics = kind == 'diagnostic' or kind == 'comparison' and not optimization
@@ -1156,7 +1181,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
                 require(not any(c['rate'] == rate and c['tag'] in bound['boundaryTags'] for c in shorts), 'do not replay an already measured search rate')
     require(not (root / ('slot-' + tag + '.json')).exists() and not (root / (tag + '-command.json')).exists(), 'existing/orphan reservation is not reusable')
     return {'tag': tag, 'poolSize': pool, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'), 'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds,
-            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'toolRepairTransitionSHA256': repair['sha256'] if repair else None, 'claimOptimizationSHA256': optimization['sha256'] if optimization else None, 'delayedRecoverySHA256': delayed['sha256'] if delayed else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
+            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'toolRepairTransitionSHA256': repair['sha256'] if repair else None, 'claimOptimizationSHA256': optimization['sha256'] if optimization else None, 'delayedRecoverySHA256': delayed['sha256'] if delayed else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False, **observer_binding}
 
 def _grade_tail15(rows, ended, vector, finished):
     start = ended - dt.timedelta(seconds=15)

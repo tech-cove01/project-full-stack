@@ -27,6 +27,7 @@ owned = module('cap10_owned_run', 'cap10-env.py')
 cohort = module('cap10_cohort_run', 'cap10-cohort.py')
 RESOURCE = module('cap10_resource_run', 'cap10-resource-contract.py')
 IDLE = module('cap10_idle_run', 'cap10-idle-contract.py')
+OBSERVER = module('cap10_observer_run', 'cap10-observer-contract.py')
 ROOT = owned.ROOT
 BATCH_ROOT = owned.BATCH_ROOT
 KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
@@ -159,7 +160,7 @@ def reserve(args, api, value):
     reservation = grade.check_reservation(ROOT, args.kind, args.rate, args.seconds, api,
         value['CAP_LIKE_FIXTURE'], owned.read(args.preflight), owned.read(args.ability),
         freeze=freeze, prediction=prediction, current_tools=tools, observer_hash=observer_hash,
-        preflight_reference=preflight_reference)
+        preflight_reference=preflight_reference, observer_policy=OBSERVER.environment_policy(value))
     assert reservation.get('poolSize', cohort.DEFAULT_POOL_SIZE) == pool, 'reservation differs from its bound fixture pool'
     tag = reservation['tag']
     command = {'task': 'CAP-10', 'at': owned.now(), 'chain': 'like', 'kind': args.kind, 'tag': tag,
@@ -177,6 +178,7 @@ def reserve(args, api, value):
                'preflightPath': preflight_reference['path'], 'preflightSHA256': preflight_reference['sha256'], 'abilitySHA256': sha(args.ability),
                'predictionSHA256': sha(args.prediction) if args.prediction else None,
                'setupNormalization': {'existing': pool, 'active': 0, 'allWindows': True},
+               'observerPolicy': OBSERVER.environment_policy(value), 'observerSamplingLimits': OBSERVER.sampling_limits(),
                'failedStartsConsumeSlot': True}
     command['loadBackend'] = value.get('CAP10_LOAD_BACKEND', 'k6')
     for key in ('executionAuthoritySHA256', 'executionAuthorityGeneration', 'deploymentId',
@@ -456,6 +458,8 @@ def main():
         while not (downstream / 'ready.json').exists() and observer.poll() is None and time.monotonic() < deadline:
             time.sleep(.1)
         assert (downstream / 'ready.json').exists() and owned.read(downstream / 'ready.json')['ready']
+        observer_ready = owned.read(downstream / 'ready.json')
+        grade.observer_identity(command['observerPolicy'], observer_ready)
         native = {**value, 'CAP_STOP_FILE': str(control / 'stop.json'), 'CAP_API_PID': str(api['pid']), 'CAP10_DOWNSTREAM_EVIDENCE': str(downstream), 'CAP10_FORMAL': '1' if args.kind == 'formal' else '0'}
         if pts:
             native['CAP10_PYTHON_BIN'] = sys.executable

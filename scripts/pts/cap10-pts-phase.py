@@ -66,6 +66,15 @@ def normalized(summary, seconds):
         raise ValueError('integer complete JMeter counts required')
     if counts['attempted'] != counts['completed'] or summary['unknown'] != counts['uncertain']:
         raise ValueError('JMeter terminal accounting differs')
+    launch_plan = {}
+    if 'launchGuardMs' in summary or 'plannedTotal' in summary:
+        rate, guard, planned = summary.get('rate'), summary.get('launchGuardMs'), summary.get('plannedTotal')
+        if (type(rate) is not int or not 1 <= rate <= 5000 or type(guard) is not int
+                or guard != (0 if seconds == 10 else 100) or type(planned) is not int
+                or planned != rate * (seconds * 1000 - guard) // 1000 or counts['planned'] != planned):
+            raise ValueError('JMeter guarded launch plan differs from the complete native window')
+        launch_plan = {'launchGuardMs': guard, 'plannedTotal': planned,
+                       'targetRate': rate, 'plannedOfferedRatio': planned / (rate * seconds)}
     start, end = summary['startUnixMs'], summary['endUnixMs']
     if type(start) is not int or end != start + seconds * 1000:
         raise ValueError('JMeter native window differs')
@@ -89,12 +98,12 @@ def normalized(summary, seconds):
     metrics['cap_native_scenario_start_unix_ms'] = {'min': start, 'max': start}
     metrics['cap_native_scenario_duration_ms'] = {'min': seconds * 1000, 'max': seconds * 1000}
     return {'sourceEngine': 'JMeter 5.6.3 on Alibaba PTS', 'source': 'complete authenticated collector records; not sampled PTS logs or k6 output',
-            'quantileMethod': summary.get('quantileMethod'), 'metrics': metrics,
+            'quantileMethod': summary.get('quantileMethod'), 'metrics': metrics, 'launchPlan': launch_plan,
             'nativeScenario': {'startedAt': start, 'scheduledEndedAt': end, 'durationMs': seconds * 1000,
                 'complete': not summary.get('stop'), 'startMetric': {'min': start, 'max': start},
                 'generatorTimingValid': summary['generatorTimingViolations'] == 0,
                 'durationMetric': {'min': seconds * 1000, 'max': seconds * 1000},
-                'scope': 'All 512 registered slots, common ECS-clock offer window, full JMeter terminal records; platform report time is separate.'}}
+                'scope': 'All 512 registered slots, complete ECS-clock offer window, full JMeter terminal records; guarded launches do not shorten the QPS denominator. Platform report time is separate.'}}
 
 
 def handler_type(store, token, lock):
@@ -166,6 +175,25 @@ def scene_admission_path(root, reservation):
             and isinstance(authority_hash, str) and len(authority_hash) == 64
             and authority.is_file() and not authority.is_symlink()
             and hashlib.sha256(authority.read_bytes()).hexdigest() == authority_hash):
+        active_hash = reservation.get('reservationCheck', {}).get('activeApplicationSHA256')
+        if active_hash is not None:
+            if not isinstance(active_hash, str) or not re.fullmatch('[a-f0-9]{64}', active_hash):
+                raise ValueError('exact reserved application snapshot required')
+            snapshot = root / 'active-applications' / (active_hash + '.json')
+            if (snapshot.is_symlink() or not snapshot.is_file()
+                    or hashlib.sha256(snapshot.read_bytes()).hexdigest() != active_hash):
+                raise ValueError('reserved application snapshot bytes differ')
+            active = read(snapshot)
+            relative = active.get('ptsAdmissionPath')
+            if not isinstance(relative, str):
+                raise ValueError('reserved scene admission path required')
+            admission = root / relative
+            expected_hash = reservation.get('ptsAdmissionSHA256')
+            if (not admission.resolve().is_relative_to(root.resolve()) or admission.is_symlink()
+                    or not admission.is_file() or active.get('ptsAdmissionSHA256') != expected_hash
+                    or hashlib.sha256(admission.read_bytes()).hexdigest() != expected_hash):
+                raise ValueError('reserved scene admission bytes differ')
+            return admission
         return root / 'pts-scene-admission-repair1.json'
     transition = root / 'tool-repair-transition.json'
     repair_hash = reservation.get('reservationCheck', {}).get('toolRepairTransitionSHA256')
@@ -260,7 +288,9 @@ def run(args):
         response = client.start(cfg['sceneId'], runtime / ('pts-' + run_config['runId'] + '-start.private.json'),
             should_stop=lambda: stop_requested.is_set() or Path(os.environ['CAP_STOP_FILE']).exists() or store.control()['stop'])
         report_id = response['reportId']; terminal['reportId'] = report_id
-        deadline = started + seconds + 150
+        # Includes the 300s engine readiness barrier and bounded platform
+        # startup/clock negotiation. Native offer duration remains unchanged.
+        deadline = started + seconds + 390
         while time.monotonic() < deadline:
             with lock:
                 store.tick()

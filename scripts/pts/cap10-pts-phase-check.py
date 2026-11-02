@@ -42,6 +42,44 @@ def full_summary():
 
 
 class EnvelopeChecks(unittest.TestCase):
+    def test_guarded_plan_keeps_full_native_window_and_actual_counts(self):
+        summary = full_summary()
+        summary.update(rate=800, launchGuardMs=100, plannedTotal=47920)
+        for key in ('planned', 'attempted', 'completed', 'mutation'):
+            summary['counts'][key] = 47920
+        value = phase.normalized(summary, 60)
+        self.assertEqual(value['metrics']['cap_like_mutation']['count'], 47920)
+        self.assertEqual(value['nativeScenario']['durationMs'], 60000)
+        self.assertEqual(value['nativeScenario']['scheduledEndedAt'], summary['startUnixMs'] + 60000)
+        self.assertAlmostEqual(value['launchPlan']['plannedOfferedRatio'], 47920 / 48000)
+        for changes in ({'launchGuardMs': 101}, {'plannedTotal': 48000}, {'rate': True}):
+            with self.assertRaises(ValueError):
+                phase.normalized({**summary, **changes}, 60)
+        bad = copy.deepcopy(summary); bad['counts']['planned'] = 48000
+        with self.assertRaises(ValueError): phase.normalized(bad, 60)
+        bad = {**summary, 'endUnixMs': summary['endUnixMs'] - 100}
+        with self.assertRaises(ValueError): phase.normalized(bad, 60)
+
+    def test_application_snapshot_binds_the_original_admission_path(self):
+        with tempfile.TemporaryDirectory(prefix='.qa-cap10-active-admission-', dir=REPO.parent) as folder:
+            root = Path(folder) / 'linux'; root.mkdir()
+            authority = root.parent / 'execution-authority-20261102.json'; authority.write_bytes(b'{"generation":1}')
+            authority_hash = hashlib.sha256(authority.read_bytes()).hexdigest()
+            admission = root / 'pts-scene-admission-repair2.json'; admission.write_bytes(b'{"passed":true}')
+            admission_hash = hashlib.sha256(admission.read_bytes()).hexdigest()
+            active = {'ptsAdmissionPath': admission.name, 'ptsAdmissionSHA256': admission_hash}
+            raw = json.dumps(active).encode(); active_hash = hashlib.sha256(raw).hexdigest()
+            snapshots = root / 'active-applications'; snapshots.mkdir()
+            snapshot = snapshots / (active_hash + '.json'); snapshot.write_bytes(raw)
+            reservation = {'tag': 'H2', 'ptsAdmissionSHA256': admission_hash,
+                'reservationCheck': {'executionAuthoritySHA256': authority_hash, 'activeApplicationSHA256': active_hash}}
+            self.assertEqual(phase.scene_admission_path(root, reservation), admission)
+            admission.write_bytes(b'{"passed":false}')
+            with self.assertRaises(ValueError): phase.scene_admission_path(root, reservation)
+            admission.write_bytes(b'{"passed":true}')
+            snapshot.write_bytes(raw + b' ')
+            with self.assertRaises(ValueError): phase.scene_admission_path(root, reservation)
+
     def test_execution_authority_selects_existing_repair_for_positive_future_tags_only(self):
         with tempfile.TemporaryDirectory(prefix='.qa-cap10-authority-', dir=REPO.parent) as folder:
             batch = Path(folder); root = batch / 'linux'; root.mkdir()

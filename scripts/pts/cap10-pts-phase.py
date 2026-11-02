@@ -145,6 +145,15 @@ def handler_type(store, token, lock):
     return Handler
 
 
+def poll_termination(client, scene_id, report_id, stop_sent):
+    """A pending read must not consume the one safe scene-level Stop."""
+    if not stop_sent:
+        acknowledgement = client.stop(scene_id, report_id)
+        stop_sent = any(acknowledgement.get(key) is True
+                        for key in ('requested', 'terminalVerified', 'alreadyTerminal'))
+    return stop_sent, client.terminal_evidence(scene_id, report_id)
+
+
 def run(args):
     if sys.platform != 'linux' or os.environ.get('CAP10_PLATFORM') != 'linux' or os.environ.get('CAP10_LOAD_BACKEND') != 'pts':
         raise ValueError('explicit native Linux PTS execution required')
@@ -231,11 +240,8 @@ def run(args):
                     store.fail('owned_supervisor_stop')
                 summary = store.summary()
             save(args.evidence / 'latest.json', {'at': dt.datetime.now(dt.timezone.utc).isoformat(), 'summary': summary}, replace=True)
-            if (summary.get('stop') or summary.get('complete')) and not stop_sent:
-                client.stop(cfg['sceneId'], report_id)
-                stop_sent = True
-            if stop_sent:
-                report = client.terminal_evidence(cfg['sceneId'], report_id)
+            if summary.get('stop') or summary.get('complete'):
+                stop_sent, report = poll_termination(client, cfg['sceneId'], report_id, stop_sent)
                 if report.get('terminal') is True and summary.get('childrenConverged') is True:
                     terminal['remoteConverged'] = True
                     break
@@ -256,8 +262,9 @@ def run(args):
         terminal['failed'] = type(error).__name__
         if report_id is not None and not stop_sent:
             try:
-                client.stop(cfg['sceneId'], report_id)
-                stop_sent = True
+                acknowledgement = client.stop(cfg['sceneId'], report_id)
+                stop_sent = any(acknowledgement.get(key) is True
+                                for key in ('requested', 'terminalVerified', 'alreadyTerminal'))
             except Exception:
                 terminal['stopUnconfirmed'] = True
         return 1

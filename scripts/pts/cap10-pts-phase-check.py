@@ -11,6 +11,7 @@ import unittest
 import urllib.error
 import urllib.request
 import uuid
+from unittest.mock import Mock
 
 HERE = Path(__file__).resolve().parent
 REPO = HERE.parents[1]
@@ -38,6 +39,43 @@ def full_summary():
 
 
 class EnvelopeChecks(unittest.TestCase):
+    def test_pending_stop_keeps_polling_and_can_stop_after_identity_returns(self):
+        client = SimpleNamespace(stop=Mock(side_effect=[
+            {'requested': False, 'terminationPending': True, 'terminalVerified': False},
+            {'requested': True, 'terminalVerified': False}]),
+            terminal_evidence=Mock(side_effect=[{'terminal': False}, {'terminal': False}, {'terminal': True}]))
+        sent, evidence = phase.poll_termination(client, 'scene', 'report', False)
+        self.assertFalse(sent); self.assertFalse(evidence['terminal'])
+        sent, evidence = phase.poll_termination(client, 'scene', 'report', sent)
+        self.assertTrue(sent); self.assertFalse(evidence['terminal'])
+        sent, evidence = phase.poll_termination(client, 'scene', 'report', sent)
+        self.assertTrue(sent); self.assertTrue(evidence['terminal'])
+        self.assertEqual(client.stop.call_count, 2)
+        self.assertEqual(client.terminal_evidence.call_count, 3)
+        client.stop.assert_called_with('scene', 'report')
+
+    def test_report_pending_without_current_identity_never_claims_stop(self):
+        client = SimpleNamespace(stop=Mock(return_value={
+            'requested': False, 'terminationPending': True, 'terminalVerified': False}),
+            terminal_evidence=Mock(return_value={'terminal': False}))
+        sent = False
+        for _ in range(3):
+            sent, evidence = phase.poll_termination(client, 'scene', 'report', sent)
+            self.assertFalse(sent); self.assertFalse(evidence['terminal'])
+        self.assertEqual(client.stop.call_count, 3)
+        self.assertEqual(client.terminal_evidence.call_count, 3)
+
+    def test_real_terminal_ack_stops_retries_but_still_polls_end_evidence(self):
+        for acknowledgement in ({'alreadyTerminal': True}, {'terminalVerified': True}):
+            with self.subTest(acknowledgement=acknowledgement):
+                client = SimpleNamespace(stop=Mock(return_value=acknowledgement),
+                    terminal_evidence=Mock(return_value={'terminal': True}))
+                sent, evidence = phase.poll_termination(client, 'scene', 'report', False)
+                self.assertTrue(sent); self.assertTrue(evidence['terminal'])
+                phase.poll_termination(client, 'scene', 'report', sent)
+                self.assertEqual(client.stop.call_count, 1)
+                self.assertEqual(client.terminal_evidence.call_count, 2)
+
     def test_full_jmeter_envelope_has_explicit_provenance(self):
         value = phase.normalized(full_summary(), 60)
         self.assertIn('JMeter', value['sourceEngine'])

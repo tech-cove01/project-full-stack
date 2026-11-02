@@ -44,6 +44,9 @@ import (
 )
 
 func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision string) error {
+	if len(cfg.Kafka.Brokers) > 0 && (cfg.CommunityRelayBatch < 1 || cfg.CommunityRelayBatch > communityrelay.MaxBatchSize) {
+		return errors.New("community relay batch configuration is invalid")
+	}
 	startupCtx, cancel := context.WithTimeout(ctx, cfg.StartupTimeout)
 	resources, err := database.Open(startupCtx, cfg)
 	cancel()
@@ -135,10 +138,23 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	if len(cfg.Kafka.Brokers) > 0 {
 		// The community relay only runs when a broker is configured; local
 		// development stays a two-container environment.
-		relay := communityrelay.NewWorker(resources.ORM, cfg.Kafka.Brokers, cfg.Kafka.Topic)
-		defer func() { _ = relay.Close() }()
-		for range cfg.CommunityRelayWorkers {
-			workers = append(workers, relay.Runner())
+		if cfg.CommunityRelayBatch == 1 {
+			// The default retains the original single-event/shared-owner policy.
+			relay := communityrelay.NewWorker(resources.ORM, cfg.Kafka.Brokers, cfg.Kafka.Topic)
+			defer func() { _ = relay.Close() }()
+			for range cfg.CommunityRelayWorkers {
+				workers = append(workers, relay.Runner())
+			}
+		} else {
+			for range cfg.CommunityRelayWorkers {
+				workers = append(workers, communityBatchRelayLane(logger, func(workerCtx context.Context) (func(), error) {
+					runner, err := communityrelay.NewBatchRunner(workerCtx, resources.ORM, cfg.Kafka.Brokers, cfg.Kafka.Topic, cfg.CommunityRelayBatch)
+					if err != nil {
+						return nil, err
+					}
+					return runner.Run, nil
+				}))
+			}
 		}
 		projection := communityprojection.NewRuntime(communityprojection.New(resources.ORM))
 		for _, name := range []string{communityprojection.Follow, communityprojection.Feed} {
@@ -183,6 +199,21 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 	background := startBackground(ctx, owned, workers...)
 	logger.Info("Go API ready", "service", "project-full-stack-go", "runtime", "go", "version", revision, "address", listener.Addr().String(), "order_stream_workers", cfg.OrderStreamWorkers)
 	return serve(ctx, server, listener, background, cfg.ShutdownTimeout, logger)
+}
+
+// Construct each opt-in lane with the actual startBackground worker context.
+// Run owns its synchronous publisher drain; returning releases that lane's join.
+func communityBatchRelayLane(logger *slog.Logger, create func(context.Context) (func(), error)) func(context.Context) {
+	return func(workerCtx context.Context) {
+		run, err := create(workerCtx)
+		if err != nil || run == nil {
+			// Constructor errors may include configuration. Emit no credentials or
+			// payload fragments, but never silently run an API without its relay.
+			logger.Error("community batch relay configuration is invalid")
+			return
+		}
+		run()
+	}
 }
 
 type applicationResources struct {

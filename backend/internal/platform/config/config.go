@@ -57,6 +57,7 @@ type Config struct {
 	OrderPayTimeout              time.Duration
 	OrderStreamWorkers           int
 	CommunityRelayWorkers        int
+	CommunityRelayBatch          int
 	CommunityConsumerCommitBatch int
 }
 
@@ -71,6 +72,7 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 		OrderPayTimeout:              15 * time.Minute,
 		OrderStreamWorkers:           1,
 		CommunityRelayWorkers:        1,
+		CommunityRelayBatch:          1,
 		CommunityConsumerCommitBatch: 1,
 	}
 	var err error
@@ -206,6 +208,12 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	if value, ok := lookup("GO_COMMUNITY_RELAY_WORKERS"); ok {
 		cfg.CommunityRelayWorkers, err = parseInt("GO_COMMUNITY_RELAY_WORKERS", value, 1, 8)
+		if err != nil {
+			return Config{}, err
+		}
+	}
+	if value, ok := lookup("GO_COMMUNITY_RELAY_BATCH"); ok {
+		cfg.CommunityRelayBatch, err = parseInt("GO_COMMUNITY_RELAY_BATCH", value, 1, 64)
 		if err != nil {
 			return Config{}, err
 		}

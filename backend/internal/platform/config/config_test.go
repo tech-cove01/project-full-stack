@@ -94,6 +94,9 @@ func TestExplicitDependenciesAndSafeDefaults(t *testing.T) {
 	if cfg.CommunityRelayWorkers != 1 {
 		t.Fatal("community relay must remain serial by default")
 	}
+	if cfg.CommunityRelayBatch != 1 {
+		t.Fatal("community relay must retain the original single-event transport by default")
+	}
 	if cfg.CommunityConsumerCommitBatch != 1 {
 		t.Fatal("community offset commits must remain per-message by default")
 	}
@@ -194,6 +197,24 @@ func TestCommunityRelayWorkerCountIsBounded(t *testing.T) {
 		values["GO_COMMUNITY_RELAY_WORKERS"] = value
 		if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "GO_COMMUNITY_RELAY_WORKERS") || strings.Contains(err.Error(), "private-value") {
 			t.Fatal("invalid relay count must fail without exposing its value")
+		}
+	}
+}
+
+func TestCommunityRelayBatchIsBounded(t *testing.T) {
+	for _, value := range []string{"1", "2", "32", "64"} {
+		values := validEnvironment()
+		values["GO_COMMUNITY_RELAY_BATCH"] = value
+		cfg, err := fromMap(values)
+		if err != nil || strconv.Itoa(cfg.CommunityRelayBatch) != value {
+			t.Fatal("explicit bounded relay batch was not applied")
+		}
+	}
+	for _, value := range []string{"", "0", "-1", "65", "1.5", " 32 ", "private-value"} {
+		values := validEnvironment()
+		values["GO_COMMUNITY_RELAY_BATCH"] = value
+		if _, err := fromMap(values); err == nil || !strings.Contains(err.Error(), "GO_COMMUNITY_RELAY_BATCH") || strings.Contains(err.Error(), "private-value") {
+			t.Fatal("invalid relay batch must fail without exposing its value")
 		}
 	}
 }

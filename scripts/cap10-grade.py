@@ -5,6 +5,7 @@ before any warm/native start; failures and abandoned reservations are retained.
 """
 import datetime as dt
 import hashlib
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -13,6 +14,9 @@ import re
 REPO = Path(__file__).resolve().parent.parent
 ROOT = REPO / 'docs/evidence/2026-11-01-cap10'
 KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
+_cohort_spec = importlib.util.spec_from_file_location('cap10_grade_cohort', Path(__file__).with_name('cap10-cohort.py'))
+cohort = importlib.util.module_from_spec(_cohort_spec)
+_cohort_spec.loader.exec_module(cohort)
 
 def require(condition, message):
     if not condition:
@@ -23,6 +27,18 @@ def read(path):
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+def legacy_command_pool(root, command, manifest=None, *, repair_sha=None):
+    """Closed S1/S4/S5/S7 proofs retain their own original 512-slot fixture."""
+    if manifest is None:
+        require(re.fullmatch(r'[a-f0-9]{64}', repair_sha or ''), 'explicit original fixture proof chain required')
+        repair = _authority_ref(root, {'path': 'tool-repair-transition.json', 'sha256': repair_sha})
+        reference = repair.get('artifacts', {}).get('fixtureManifest', {})
+        require(reference.get('sha256') == command.get('fixtureSHA256'), 'original command fixture differs from retained repair reference')
+        manifest = _authority_ref(root, reference)
+    require(cohort.command_pool_size(command, manifest) == cohort.DEFAULT_POOL_SIZE,
+            'closed historical proof belongs to its original 512-slot cohort')
+    return cohort.DEFAULT_POOL_SIZE
 
 def instant(value):
     result = dt.datetime.fromisoformat(value.replace('Z', '+00:00'))
@@ -211,6 +227,7 @@ def pre_load_recovery(root, records):
     actual_owners = {(p.get('pid'), p.get('created')) for p in owners}
     require(owners and expected_owners and expected_owners <= actual_owners and all(type(p.get('pid')) is int and p['pid'] > 0 and type(p.get('created')) in (int, float) and p.get('alive') is False and p.get('identityChecked') is True for p in owners) and all(exited.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive')), 'all original local load owners must be proved gone')
     manifest, inspection = artifact('fixtureManifest'), artifact('fixtureInspection')
+    legacy_command_pool(root, command, manifest)
     require(proof['artifacts']['fixtureManifest']['sha256'] == command['fixtureSHA256'] and inspection.get('valid') is True and inspection.get('errors') == [], 'authoritative unchanged fixture inspection required')
     distribution, facts = inspection.get('distribution', {}), inspection.get('facts', {})
     require(distribution.get('configuredRelationships') == 512 and distribution.get('existing') == 512 and distribution.get('active') == 0 and distribution.get('inactive') == 512 and distribution.get('missing') == 0 and distribution.get('versionHistogram') == {'0': 512} and facts.get('transitions') == facts.get('eventCount') == 0 and facts.get('events') == [], 'all 512 original relationships must remain version-zero without LIKE outbox')
@@ -240,6 +257,7 @@ def claim_optimization(root, records):
         require(not relative.is_absolute() and '..' not in relative.parts and candidate.is_file() and not candidate.is_symlink() and candidate.resolve() == candidate and candidate.is_relative_to(root) and ref.get('sha256') == sha(candidate), 'optimization artifact bytes or path differ: ' + name)
         return read(candidate)
     command, previous, result = artifact('command'), artifact('stage'), artifact('result')
+    legacy_command_pool(root, command, repair_sha=value['toolRepairTransitionSHA256'])
     require(value['artifacts']['command']['path'] == 'S5-command.json' and value['artifacts']['stage']['path'] == 'S5-stage.json' and value['artifacts']['result']['path'] == 'S5-load/result.json' and command == records[4] and previous == stage(root, command) and previous.get('outcome') == 'performance_limited' and previous.get('passed') is False and previous.get('recoveryVerified') is False and command['kind'] == 'search' and command['rate'] == 800 and command['seconds'] == 60 and instant(previous['finishedAt']) <= registered, 'S5 failed recovery and effective performance baseline must remain unchanged')
     metrics = result.get('result', {})
     require(result.get('nativeScenario', {}).get('complete') is True and result.get('meetsAPIBudget') is True and result.get('finalFactsValid') is True and result.get('phaseAccountingValid') is True and metrics.get('mutationCounterMatchesDB') is True and metrics.get('attempted') == metrics.get('completed') == metrics.get('mutation') == 48000 and all(type(metrics.get(key)) is int and metrics[key] == 0 for key in ('noop', 'rejected', 'contentErrors', 'dropped', 'unknown', 'classificationUnknown', 'effectUnknown')), 'S5 must be a complete correctly measured 48000-mutation baseline')
@@ -284,6 +302,7 @@ def delayed_recovery(root, records, optimization):
         require(not relative.is_absolute() and '..' not in relative.parts and candidate.is_file() and not candidate.is_symlink() and candidate.resolve() == candidate and candidate.is_relative_to(root) and ref.get('sha256') == sha(candidate), 'delayed recovery artifact bytes or path differ: ' + name)
         return read(candidate)
     command, previous, result = artifact('command'), artifact('stage'), artifact('result')
+    legacy_command_pool(root, command, repair_sha=optimization['toolRepairTransitionSHA256'])
     require(value['artifacts']['command']['path'] == 'S7-command.json' and value['artifacts']['stage']['path'] == 'S7-stage.json' and value['artifacts']['result']['path'] == 'S7-load/result.json' and command == records[6] and previous == stage(root, command) and previous.get('outcome') == 'performance_limited' and previous.get('passed') is False and previous.get('recoveryVerified') is False and previous.get('batchFatal') is False and previous.get('childrenConverged') is True and previous.get('boundaryEligible') is True and command['kind'] == 'search' and command['seconds'] == 60 and instant(previous['finishedAt']) <= registered, 'original S7 failed recovery and genuine upper-bound evidence must remain')
     metrics = result.get('result', {})
     require(result.get('nativeScenario', {}).get('complete') is True and result.get('finalFactsValid') is True and result.get('phaseAccountingValid') is True and result.get('fixtureManifestSHA256') == final['fixtureSHA256'] and metrics.get('mutationCounterMatchesDB') is True and type(metrics.get('attempted')) is int and metrics['attempted'] > 0 and metrics['attempted'] == metrics.get('completed') == metrics.get('mutation') and metrics.get('actualOfferedRatio', 0) >= .99 and all(type(metrics.get(key)) is int and metrics[key] == 0 for key in ('noop', 'rejected', 'contentErrors', 'dropped', 'unknown', 'classificationUnknown', 'effectUnknown', 'httpErrors', 'systemErrors')), 'only complete error-free S7 performance overload may await later drain')
@@ -364,6 +383,7 @@ def tool_repair_transition(root, records):
     expected = {(p['pid'], p['created']) for p in previous.get('knownOwnedProcesses', [])}
     require(owners and expected and expected <= {(p.get('pid'), p.get('created')) for p in owners} and all(p.get('alive') is False and p.get('identityChecked') is True for p in owners) and all(exited.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive')), 'all original S4 local load owners must be proved gone')
     manifest, reconciliation = artifact('fixtureManifest'), artifact('reconciliation')
+    legacy_command_pool(root, command, manifest)
     require(value['artifacts']['fixtureManifest']['sha256'] == value['fixtureSHA256'] and reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and type(reconciliation.get('startedAt')) in (int, float) and reconciliation['startedAt'] / 1000 >= terminal_observed.timestamp() + 10 and reconciliation.get('finishedAt', 0) >= reconciliation['startedAt'], 'S4 requires complete reconciliation after ten seconds of terminal settle')
     facts, derived = reconciliation.get('facts', {}), reconciliation.get('derived', {})
     pairs = set(zip(manifest.get('multiNoteIds', []), manifest.get('userIds', [])))
@@ -394,6 +414,63 @@ def _authority_ref(root, reference):
     relative = Path(reference['path']); path = Path(root) / relative
     require(not relative.is_absolute() and '..' not in relative.parts and path.is_file() and not path.is_symlink() and path.resolve() == path and path.is_relative_to(root) and reference.get('sha256') == sha(path), 'bound artifact path or bytes differ')
     return read(path)
+
+
+def active_dimensions(context):
+    active = context['active']
+    return cohort.dimensions(active, {'poolSize': active.get('poolSize', cohort.DEFAULT_POOL_SIZE)})
+
+
+def admitted_cohort_dimensions(active, manifest, packet, admission):
+    """Explicit new artifacts bind their own dimensions and both helper sources."""
+    dimensions = cohort.dimensions(active, manifest)
+    packet_manifest = packet.get('manifest', {})
+    explicit = (dimensions != {'poolSize': 512, 'expectedEngines': 2, 'ptsConcurrency': 513}
+                or any(name in active['scriptHashes'] for name in ('cap10-cohort.py', 'load/cap10-cohort-contract.mjs'))
+                or any('poolSize' in value or 'cohortSourceSHA256' in value
+                       for value in (active, manifest, packet, packet_manifest, admission)))
+    if not explicit:
+        return dimensions
+    for value in (active, packet_manifest, admission):
+        require(all(key in value for key in ('poolSize', 'expectedEngines', 'ptsConcurrency'))
+                and cohort.dimensions(value, manifest) == dimensions,
+                'explicit packet/admission/active cohort dimensions differ from their bound fixture')
+    require(type(packet_manifest.get('normalThreads')) is int and packet_manifest['normalThreads'] == dimensions['poolSize']
+            and type(admission.get('agentCount')) is int and admission['agentCount'] == dimensions['expectedEngines']
+            and type(admission.get('concurrency')) is int and admission['concurrency'] == dimensions['ptsConcurrency'],
+            'new cohort requires matching explicit PTS thread/engine admission dimensions')
+    expected = {name: active['scriptHashes'].get(name.removeprefix('scripts/'))
+                for name in ('scripts/cap10-cohort.py', 'scripts/load/cap10-cohort-contract.mjs')}
+    require(all(isinstance(digest, str) and re.fullmatch(r'[a-f0-9]{64}', digest) for digest in expected.values())
+            and packet.get('cohortSourceSHA256') == admission.get('cohortSourceSHA256') == expected
+            and packet_manifest.get('cohortSourceSHA256') == {'scripts/load/cap10-cohort-contract.mjs': expected['scripts/load/cap10-cohort-contract.mjs']},
+            'explicit cohort packet/admission helper freeze differs from the active tool identity')
+    return dimensions
+
+
+def original_application(root, command, context):
+    original_sha = command.get('reservationCheck', {}).get('activeApplicationSHA256')
+    require(re.fullmatch(r'[a-f0-9]{64}', original_sha or ''), 'original command application identity required')
+    current_sha = context.get('activeApplicationSHA256')
+    if current_sha is None:
+        current_path = Path(root) / 'active-application.json'
+        if current_path.is_file() and read(current_path) == context['active']:
+            current_sha = sha(current_path)
+    if original_sha == current_sha:
+        return context['active']
+    return _authority_ref(root, {'path': 'active-applications/' + original_sha + '.json', 'sha256': original_sha})
+
+
+def original_command_dimensions(root, command, application):
+    require(application.get('sourceSha') == command.get('apiSourceSha') and all(application.get(key) == command.get(key)
+            for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')),
+            'original command must retain the complete original application identity')
+    require(application.get('fixtureSHA256') == command.get('fixtureSHA256'), 'original application fixture differs from command')
+    manifest = _authority_ref(root, {'path': application['fixturePath'], 'sha256': command['fixtureSHA256']})
+    cohort.command_pool_size(command, manifest)
+    dimensions = cohort.dimensions(command, manifest)
+    require(dimensions == cohort.dimensions(application, manifest), 'original command/application dimensions differ')
+    return dimensions
 
 
 def execution_context(root):
@@ -432,21 +509,27 @@ def execution_context(root):
     deployment = active.get('deployment', {})
     require(all(type(deployment.get(key)) is int and deployment[key] > 0 for key in ('relayWorkers', 'gomaxprocs', 'mysqlMaxOpen')), 'effective worker and connection/CPU configuration must be declared')
     require(active.get('environmentSHA256') == sha(Path(root) / 'environment.json'), 'current environment metadata differs')
-    _authority_ref(root, {'path': active['fixturePath'], 'sha256': active['fixtureSHA256']})
+    manifest = _authority_ref(root, {'path': active['fixturePath'], 'sha256': active['fixtureSHA256']})
     packet = _authority_ref(root, {'path': active['ptsPacketPath'], 'sha256': active['ptsPacketSHA256']})
     admission = _authority_ref(root, {'path': active['ptsAdmissionPath'], 'sha256': active['ptsAdmissionSHA256']})
     require(admission.get('passed') is True and packet.get('sceneFilesMD5') == admission.get('sceneFilesMD5'), 'current PTS packet must retain its real scene admission')
+    dimensions = admitted_cohort_dimensions(active, manifest, packet, admission)
     ready = _authority_ref(root, active['readiness'])
     require(ready.get('ready') is True and ready.get('readyBody', {}).get('version') == 'capacity-' + active['sourceSha'], 'positive readiness must belong to the current source')
-    return {'authority': authority, 'authoritySHA256': digest, 'active': active, 'activeApplicationSHA256': sha(active_path)}
+    return {'authority': authority, 'authoritySHA256': digest, 'active': active, 'activeApplicationSHA256': sha(active_path), 'dimensions': dimensions}
 
 
 def _active_command(command, context):
     active, reservation = context['active'], command.get('reservationCheck', {})
+    try:
+        dimensions_match = cohort.dimensions(command, {'poolSize': cohort.command_pool_size(command)}) == active_dimensions(context)
+    except ValueError:
+        return False
     return (reservation.get('executionAuthoritySHA256') == context['authoritySHA256'] and
             reservation.get('executionAuthorityGeneration') == context['authority']['generation'] and
             reservation.get('deploymentId') == active['deploymentId'] and command.get('apiSourceSha') == active['sourceSha'] and
-            all(command.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')))
+            all(command.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and
+            dimensions_match)
 
 
 def zero_start_layout(root, command, previous):
@@ -604,7 +687,8 @@ def authority_warm_only(root, command, previous, terminal, context):
             and isinstance(report.get('startTimeRaw'), str) and isinstance(report.get('endTimeRaw'), str)
             and len(report['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(report['endTimeRaw']) >= dt.datetime.fromisoformat(report['startTimeRaw']), 'warm-only phase needs its real report EndTime')
     start_ref = report['originalStartAudit']; start = _authority_ref(root, start_ref)
-    scene = read(Path(root) / context['active']['ptsAdmissionPath']).get('sceneId')
+    original_active = original_application(root, command, context)
+    scene = _authority_ref(root, {'path': original_active['ptsAdmissionPath'], 'sha256': command['ptsAdmissionSHA256']}).get('sceneId')
     require(start_ref['path'] == layout['warmStartAuditPath'] and start.get('action') == 'StartTestingJMeterScene'
             and start.get('sceneId') == scene and start.get('httpStatus') == 200
             and start.get('sanitizedRawResponse', {}).get('Success') is True
@@ -623,7 +707,10 @@ def authority_warm_only(root, command, previous, terminal, context):
 def authority_warm_zero_native_cancel(root, command, previous, terminal, context, layout):
     """Cancellation before any collector registration is never an ended report."""
     root = Path(root); prefix = command['tag'] + '-load/warm-pts/'
-    scene = read(root / context['active']['ptsAdmissionPath']).get('sceneId')
+    original_active = original_application(root, command, context)
+    dimensions = original_command_dimensions(root, command, original_active)
+    pool = dimensions['poolSize']
+    scene = _authority_ref(root, {'path': original_active['ptsAdmissionPath'], 'sha256': command['ptsAdmissionSHA256']}).get('sceneId')
     start_ref = terminal['originalStartAudit']; start = _authority_ref(root, start_ref)
     report_id = terminal.get('cancelledReportId')
     require(isinstance(report_id, str) and report_id and start_ref['path'] == layout['warmStartAuditPath']
@@ -673,7 +760,7 @@ def authority_warm_zero_native_cancel(root, command, previous, terminal, context
             'any native register, batch, completion or additional journal record forbids zero-native cancellation')
     identity = journal[0].get('configuration', {})
     identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()).hexdigest()
-    packet = _authority_ref(root, {'path': context['active']['ptsPacketPath'], 'sha256': command['ptsPacketSHA256']})
+    packet = _authority_ref(root, {'path': original_active['ptsPacketPath'], 'sha256': command['ptsPacketSHA256']})
     sources = packet.get('sourceSHA256', {})
     require(packet.get('version') == 1 and set(sources) == {'cap10-pts-prepare.py', 'cap10-jmeter.mjs',
             'cap10-jmeter.groovy', 'cap10-pts-contract.groovy'}
@@ -687,7 +774,7 @@ def authority_warm_zero_native_cancel(root, command, previous, terminal, context
     require(summary_ref['path'] == prefix + 'latest.json' and journal[0].get('hash') == identity_hash == summary.get('hash')
             and all(summary.get(key) == value for key, value in identity.items())
             and identity.get('phase') == 'warm' and identity.get('rate') == command.get('warmRate')
-            and identity.get('seconds') == command.get('warmSeconds') and identity.get('expectedEngines') == 2
+            and identity.get('seconds') == command.get('warmSeconds') and identity.get('expectedEngines') == dimensions['expectedEngines']
             and identity.get('fixtureSHA256') == command.get('fixtureSHA256')
             and isinstance(identity.get('runId'), str) and identity['runId']
             and summary.get('startUnixMs') is None and summary.get('endUnixMs') is None
@@ -707,7 +794,7 @@ def authority_warm_zero_native_cancel(root, command, previous, terminal, context
             and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == []
             and instant(previous['finishedAt']).timestamp() * 1000 <= reconciliation.get('startedAt', 0)
             <= reconciliation.get('finishedAt', 0) <= observed.timestamp() * 1000
-            and len(before.get('facts', [])) == len(before.get('notes', [])) == 512
+            and len(before.get('facts', [])) == len(before.get('notes', [])) == pool
             and all(key in before and key in after and before[key] == after[key]
                     for key in ('facts', 'notes', 'events', 'transitions', 'eventCount')),
             'zero-native cancellation needs later complete reconciliation with no authoritative fixture fact or event change')
@@ -746,6 +833,8 @@ def formal_start_retirement(root, command, context):
     require(instant(old_stage['finishedAt']) <= recorded <= dt.datetime.now(dt.timezone.utc), 'formal-start proof chronology differs')
     old_sha = command['reservationCheck']['activeApplicationSHA256']
     old_active = _authority_ref(root, {'path': 'active-applications/' + old_sha + '.json', 'sha256': old_sha})
+    dimensions = original_command_dimensions(root, command, old_active)
+    pool = dimensions['poolSize']
     require(old_active.get('sourceSha') == command.get('apiSourceSha') and all(old_active.get(key) == command.get(key)
             for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')),
             'retired warm must retain its own original application and bundle')
@@ -783,6 +872,7 @@ def formal_start_retirement(root, command, context):
             and all(summary.get(key) == value for key, value in identity.items())
             and identity.get('phase') == 'warm' and identity.get('fixtureSHA256') == command['fixtureSHA256']
             and identity.get('rate') == command['warmRate'] and identity.get('seconds') == command['warmSeconds']
+            and identity.get('expectedEngines', cohort.DEFAULT_ENGINES) == dimensions['expectedEngines']
             and summary.get('startUnixMs') is None and summary.get('endUnixMs') is None
             and summary.get('stop') is True and summary.get('complete') is False
             and summary.get('evidenceSHA256') == journal_ref['sha256']
@@ -793,9 +883,9 @@ def formal_start_retirement(root, command, context):
     timeline = reconciliation.get('timeline', [])
     require(before_ref['path'] == tag + '-load/warm-before.json' and reconciliation.get('valid') is True
             and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == []
-            and len(before.get('facts', [])) == len(before.get('notes', [])) == 512
+            and len(before.get('facts', [])) == len(before.get('notes', [])) == pool
             and all(key in before and before[key] == facts.get(key) for key in ('facts', 'notes', 'events', 'transitions', 'eventCount'))
-            and derived.get('available') is True and derived.get('errors') == [] and len(derived.get('notes', [])) == 512
+            and derived.get('available') is True and derived.get('errors') == [] and len(derived.get('notes', [])) == pool
             and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == []
             and instant(old_stage['finishedAt']).timestamp() * 1000 <= reconciliation.get('startedAt', 0)
             <= reconciliation.get('finishedAt', 0) <= recorded.timestamp() * 1000,
@@ -805,6 +895,8 @@ def formal_start_retirement(root, command, context):
 
 def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ability, freeze, tools, observer_hash, context):
     active, records = context['active'], history(root)
+    dimensions = cohort.dimensions(active, read(fixture))
+    pool = dimensions['poolSize']
     require(api.get('sourceSha') == active['sourceSha'] and api.get('sha256') == active['binarySHA256'] and sha(fixture) == active['fixtureSHA256'] and tools == active['scriptHashes'] and observer_hash == active['observerBinarySHA256'], 'window must use the current exact active application and tools')
     expected_diagnostics = kind == 'diagnostic'
     require(api.get('likeDiagnosticsRequested') is expected_diagnostics and api.get('tailEnabledRequested') is False, 'comparison and capacity windows keep diagnostics disabled')
@@ -841,7 +933,7 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
     if require_reconciliation or admission.get('reconciliation'):
         reconciliation = _authority_ref(root, admission['reconciliation'])
         facts, derived, timeline = reconciliation.get('facts', {}), reconciliation.get('derived', {}), reconciliation.get('timeline', [])
-        require(reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and derived.get('available') is True and derived.get('errors') == [] and len(facts.get('facts', [])) == len(facts.get('notes', [])) == len(derived.get('notes', [])) == 512 and facts.get('transitions') == facts.get('eventCount') and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == [] and reconciliation.get('finishedAt', float('inf')) / 1000 <= admitted.timestamp(), 'fresh complete authoritative reconciliation required before continuing')
+        require(reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and derived.get('available') is True and derived.get('errors') == [] and len(facts.get('facts', [])) == len(facts.get('notes', [])) == len(derived.get('notes', [])) == pool and facts.get('transitions') == facts.get('eventCount') and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == [] and reconciliation.get('finishedAt', float('inf')) / 1000 <= admitted.timestamp(), 'fresh complete authoritative reconciliation required before continuing')
         if previous and old_stage.get('passed') is not True:
             require(reconciliation.get('startedAt', 0) / 1000 >= instant(old_stage['finishedAt']).timestamp(), 'failed window requires later reconciliation, without rewriting its old recovery result')
     formal_group, retired = [], {}
@@ -853,7 +945,7 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
                 item = formal_start_retirement(root, command, context)
                 retired[item['tag']] = item['proofSHA256']
         require(len(formal_group) < 2 and all(stage(root, c).get('passed') is True for c in formal_group), 'each exact freeze permits only two formal windows; its first failure ends that group')
-        require(isinstance(freeze, dict) and freeze.get('executionAuthoritySHA256') == context['authoritySHA256'] and freeze.get('activeApplicationSHA256') == context['activeApplicationSHA256'] and freeze.get('deploymentId') == active['deploymentId'] and freeze.get('rate') == rate and freeze.get('sourceSha') == active['sourceSha'] and all(freeze.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': 512, 'active': 0, 'relationships': 512}, 'formal requires one exact current-source CI/identity freeze')
+        require(isinstance(freeze, dict) and freeze.get('executionAuthoritySHA256') == context['authoritySHA256'] and freeze.get('activeApplicationSHA256') == context['activeApplicationSHA256'] and freeze.get('deploymentId') == active['deploymentId'] and freeze.get('rate') == rate and freeze.get('sourceSha') == active['sourceSha'] and all(freeze.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': pool, 'active': 0, 'relationships': pool} and cohort.fixture_pool_size(freeze) == pool, 'formal requires one exact current-source CI/identity freeze')
         candidates = [c for c in records if c['tag'] == freeze.get('candidateTag') and c['kind'] == 'candidate' and c['rate'] == rate and _active_command(c, context)]
         require(len(candidates) == 1 and stage(root, candidates[0]).get('passed') is True and stage(root, candidates[0]).get('candidateMarginPassed') is True and stage(root, candidates[0]).get('recoveryVerified') is True, 'formal requires its completed passing current-identity candidate')
         require(all(_active_command(c, context) and c.get('reservationCheck', {}).get('retiredFormalStarts', {}) == retired for c in formal_group), 'both current-group formals must retain the same application/freeze and unchanged startup proofs')
@@ -866,7 +958,7 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
               'continuationAuthorizationSHA256': sha(ROOT / 'continuation-authorization.json') if (ROOT / 'continuation-authorization.json').is_file() else None,
               'executionAuthorityGeneration': context['authority']['generation'],
               'originalMaximumSeconds': 10800, 'maximumSeconds': None, 'remainingSeconds': None, 'workflowLimitsWaived': True}
-    return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'),
+    return {'tag': tag, 'poolSize': pool, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'),
             'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds, 'shortMaximum': None, 'formalMaximum': None,
             'formalMaximumPerFreeze': 2, 'formalGroupSHA256': freeze_sha,
             'formalGroupSlotsUsedAfter': len(formal_group) + (kind == 'formal'), 'retiredFormalStarts': retired,
@@ -933,9 +1025,10 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     require(re.fullmatch(r'[a-f0-9]{40}', source or '') and api_metadata['expectedVersion'] == 'capacity-' + source, 'clean fixed source/version required')
     require(sha(api_metadata['exe']) == binary, 'application binary bytes differ')
     environment, fixture_hash = sha(root / 'environment.json'), sha(fixture)
+    pool = cohort.fixture_pool_size(read(fixture))
     require(preflight.get('passed') is True and preflight.get('environmentSHA256') == environment, 'one valid idle preflight is required before load')
-    require(ability.get('rate') == rate and ability.get('sufficient') is True and ability.get('maxVUs') == 512 and ability.get('exclusiveRelationships') == 512 and ability.get('classificationIncluded') is True and ability.get('evidence'), 'declared generator ability evidence required for every window')
-    require(type(ability.get('estimatedInFlight')) in (int, float) and 0 <= ability['estimatedInFlight'] <= 512, 'estimated in-flight work exceeds exclusive VU pool')
+    require(ability.get('rate') == rate and ability.get('sufficient') is True and type(ability.get('maxVUs')) is int and ability['maxVUs'] == pool and type(ability.get('exclusiveRelationships')) is int and ability['exclusiveRelationships'] == pool and ability.get('classificationIncluded') is True and ability.get('evidence'), 'declared generator ability evidence required for every window')
+    require(type(ability.get('estimatedInFlight')) in (int, float) and math.isfinite(ability['estimatedInFlight']) and 0 <= ability['estimatedInFlight'] <= pool, 'estimated in-flight work exceeds exclusive VU pool')
     context = execution_context(root)
     if context:
         return authority_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze, current_tools, observer_hash, context)
@@ -978,7 +1071,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
         require(len(formals) < 2 and shorts, 'formal budget exhausted or no short evidence')
         require(all(stage(root, c).get('passed') is True for c in formals), 'first formal failure ended this group')
         require(isinstance(freeze, dict) and freeze.get('rate') == rate and freeze.get('sourceSha') == source and freeze.get('binarySHA256') == binary and freeze.get('environmentSHA256') == environment and freeze.get('fixtureSHA256') == fixture_hash, 'same immutable formal freeze required')
-        require(freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': 512, 'active': 0, 'relationships': 512}, 'formal checks/CI/initial distribution contract missing')
+        require(freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': pool, 'active': 0, 'relationships': pool} and cohort.fixture_pool_size(freeze) == pool, 'formal checks/CI/initial distribution contract missing')
         require(isinstance(current_tools, dict) and current_tools and freeze.get('scriptHashes') == current_tools and freeze.get('observerBinarySHA256') == observer_hash, 'formal tool/observer bytes differ from freeze')
         candidates = [c for c in shorts if c['kind'] == 'candidate']
         require(len(candidates) == 1 and candidates[0]['rate'] == rate and stage(root, candidates[0]).get('candidateMarginPassed') is True and stage(root, candidates[0]).get('passed') is True, 'one passing candidate with 160/400 margins is required')
@@ -1021,7 +1114,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
                 require(len(shorts) < 7 and not bound['searchFinished'] and rate == bound['nextRate'], 'next search rate/remaining slot differs from declared algorithm')
                 require(not any(c['rate'] == rate and c['tag'] in bound['boundaryTags'] for c in shorts), 'do not replay an already measured search rate')
     require(not (root / ('slot-' + tag + '.json')).exists() and not (root / (tag + '-command.json')).exists(), 'existing/orphan reservation is not reusable')
-    return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'), 'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds,
+    return {'tag': tag, 'poolSize': pool, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'), 'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds,
             'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'toolRepairTransitionSHA256': repair['sha256'] if repair else None, 'claimOptimizationSHA256': optimization['sha256'] if optimization else None, 'delayedRecoverySHA256': delayed['sha256'] if delayed else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
 
 def _grade_tail15(rows, ended, vector, finished):

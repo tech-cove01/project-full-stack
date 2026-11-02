@@ -2,12 +2,15 @@
 import ast
 import datetime as dt
 import hashlib
+import importlib.util
 import json
 from pathlib import Path
 from types import SimpleNamespace
 import uuid
 
 REPO = Path(__file__).resolve().parent.parent
+cohort_spec = importlib.util.spec_from_file_location('cap10_runner_check_cohort', REPO / 'scripts/cap10-cohort.py')
+cohort = importlib.util.module_from_spec(cohort_spec); cohort_spec.loader.exec_module(cohort)
 source = ast.parse((REPO / 'scripts/cap10-run.py').read_text(encoding='utf-8'))
 names = {'classify', 'pre_stable_guard', 'container_snapshot', 'observer_terminal_outcome'}
 isolated = ast.Module(body=[node for node in source.body if isinstance(node, ast.FunctionDef) and node.name in names], type_ignores=[])
@@ -24,8 +27,8 @@ def check(condition, label):
 def authority_wiring(temporary, files):
     """Execute only the actual reservation/diagnostic AST with local doubles."""
     functions = {node.name: node for node in source.body if isinstance(node, ast.FunctionDef)}
-    scope = {'Path': Path, 'hashlib': hashlib}
-    selected = ast.Module(body=[functions[name] for name in ('sha', 'expected_diagnostics', 'reserve')], type_ignores=[])
+    scope = {'Path': Path, 'hashlib': hashlib, 'cohort': cohort}
+    selected = ast.Module(body=[functions[name] for name in ('sha', 'cohort_dimensions', 'expected_diagnostics', 'pts_artifact_paths', 'reserve')], type_ignores=[])
     exec(compile(selected, 'cap10-run.py(actual reservation functions)', 'exec'), scope)
     body = functions['main'].body
     first = next(i for i, node in enumerate(body) if isinstance(node, ast.Assign)
@@ -102,6 +105,58 @@ def authority_wiring(temporary, files):
         reservation.pop(key)
     legacy = scope['reserve'](args, api, {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json')})
     check(not any(key in legacy for key in keys), 'legacy reservation gains no invented authority fields')
+    check(legacy['poolSize'] == legacy['preVUs'] == legacy['maxVUs'] == legacy['setupNormalization']['existing'] == 512,
+          'implicit legacy fixture retains 512 command and normalization slots')
+
+    def put(name, value):
+        path = temporary / name
+        if path not in files:
+            files.append(path)
+        path.write_text(json.dumps(value), encoding='utf-8')
+        return path
+    source_hashes = {'synthetic-source': 'a' * 64}
+    packet_path = put('pts-packet.json', {})
+    config_path = put('pts-config.json', {})
+    admission_path = put('pts-scene-admission.json', {})
+    grade = SimpleNamespace(execution_context=lambda _: None, history=lambda _: [],
+                            check_reservation=lambda *a, **kw: reservation)
+    preparation = SimpleNamespace(source_hashes=lambda: source_hashes)
+    scope['module'] = lambda name, filename: grade if filename == 'cap10-grade.py' else preparation
+    pts_value = {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json'), 'CAP10_LOAD_BACKEND': 'pts',
+                 'CAP10_PTS_CONFIG': str(config_path)}
+    for pool, engines in ((512, 2), (4096, 9), (17, 3)):
+        fixture = {'poolSize': pool, 'users': pool, 'multiNotes': pool, 'multiRelations': pool}
+        put('fixture.json', fixture)
+        configuration = {'poolSize': pool, 'expectedEngines': engines, 'ptsConcurrency': cohort.pts_concurrency(pool, engines),
+                         'sceneId': 'never-started', 'sceneFiles': {'synthetic-plan': 'unused'}}
+        put(config_path.name, configuration)
+        put(admission_path.name, {'passed': True, 'sceneId': configuration['sceneId'],
+                                 'sceneFilesMD5': configuration['sceneFiles'], 'sourceSHA256': source_hashes,
+                                 'configurationReference': str(config_path)})
+        reservation = {'tag': 'S10', 'poolSize': pool}
+        saved.clear()
+        current = scope['reserve'](args, api, pts_value)
+        check(current['poolSize'] == current['preVUs'] == current['maxVUs'] == current['setupNormalization']['existing'] == pool
+              and current['expectedEngines'] == engines and current['ptsConcurrency'] == cohort.pts_concurrency(pool, engines),
+              'actual PTS reservation retains independent ' + str(pool) + '/' + str(engines) + ' cohort dimensions')
+        check(saved['slot-S10.json'] == saved['S10-command.json'] == current,
+              str(pool) + '-slot command and reservation have identical immutable cohort fields')
+    for label, fixture, configuration, reserved_pool in (
+        ('new config with implicit old fixture', {}, {'poolSize': 4096, 'expectedEngines': 9}, 4096),
+        ('old config with new fixture', {'poolSize': 4096}, {'expectedEngines': 2}, 4096),
+        ('wrong PTS concurrency', {'poolSize': 4096}, {'poolSize': 4096, 'expectedEngines': 9, 'ptsConcurrency': 4104}, 4096),
+        ('wrong verified reservation pool', {'poolSize': 4096}, {'poolSize': 4096, 'expectedEngines': 9}, 512),
+    ):
+        configuration = {'sceneId': 'never-started', 'sceneFiles': {'synthetic-plan': 'unused'}, **configuration}
+        put('fixture.json', fixture); put(config_path.name, configuration)
+        reservation = {'tag': 'S10', 'poolSize': reserved_pool}; saved.clear()
+        try:
+            scope['reserve'](args, api, pts_value)
+        except (AssertionError, ValueError):
+            rejected = True
+        else:
+            rejected = False
+        check(rejected and not saved, label + ' fails before either reservation artifact is written')
 
 
 def main():

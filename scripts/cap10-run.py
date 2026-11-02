@@ -24,12 +24,14 @@ def module(name, filename):
 
 
 owned = module('cap10_owned_run', 'cap10-env.py')
+cohort = module('cap10_cohort_run', 'cap10-cohort.py')
 ROOT = owned.ROOT
 BATCH_ROOT = owned.BATCH_ROOT
 KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
 TOOL_NAMES = ('cap10-run.py', 'cap10-grade.py', 'cap10-env.py', 'cap10-stage.py', 'cap10-resources.py',
               'load/cap10-native-window.mjs', 'cap10-like.mjs', 'load/cap10-like.js',
-              'load/cap10-like-contract.mjs', 'load/cap10-db-observe.mjs', 'cap10-downstream.go')
+              'load/cap10-like-contract.mjs', 'load/cap10-db-observe.mjs', 'cap10-downstream.go',
+              'cap10-cohort.py', 'load/cap10-cohort-contract.mjs')
 PTS_TOOLS = ('pts/cap10-pts-phase.py', 'pts/cap10-pts-api.py', 'pts/cap10-pts-collector.py',
              'pts/cap10-jmeter.groovy', 'pts/cap10-pts-contract.groovy', 'pts/cap10-jmeter.mjs', 'pts/cap10-jmeter.jmx',
              'pts/cap10-pts-prepare.py')
@@ -37,6 +39,12 @@ PTS_TOOLS = ('pts/cap10-pts-phase.py', 'pts/cap10-pts-api.py', 'pts/cap10-pts-co
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def cohort_dimensions(value, manifest):
+    configuration = (owned.read(value['CAP10_PTS_CONFIG']) if value.get('CAP10_LOAD_BACKEND') == 'pts'
+                     else {'poolSize': cohort.fixture_pool_size(manifest)})
+    return cohort.dimensions(configuration, manifest)
 
 
 def expected_diagnostics(kind, tag, claim_optimization_sha=None):
@@ -96,6 +104,9 @@ def pts_artifact_paths(value, context, repaired):
 
 def reserve(args, api, value):
     grade = module('cap10_reservation_grade', 'cap10-grade.py')
+    manifest = owned.read(value['CAP_LIKE_FIXTURE'])
+    dimensions = cohort_dimensions(value, manifest)
+    pool = dimensions['poolSize']
     for path in (args.preflight, args.ability, args.prediction):
         if path is not None:
             assert path.resolve().is_relative_to(ROOT) and path.is_file()
@@ -130,10 +141,11 @@ def reserve(args, api, value):
     reservation = grade.check_reservation(ROOT, args.kind, args.rate, args.seconds, api,
         value['CAP_LIKE_FIXTURE'], owned.read(args.preflight), owned.read(args.ability),
         freeze=freeze, prediction=prediction, current_tools=tools, observer_hash=observer_hash)
+    assert reservation.get('poolSize', cohort.DEFAULT_POOL_SIZE) == pool, 'reservation differs from its bound fixture pool'
     tag = reservation['tag']
     command = {'task': 'CAP-10', 'at': owned.now(), 'chain': 'like', 'kind': args.kind, 'tag': tag,
                'mode': 'multi', 'rate': args.rate, 'seconds': args.seconds,
-               'warmSeconds': 10, 'warmRate': min(25, args.rate), 'preVUs': 512, 'maxVUs': 512,
+               'warmSeconds': 10, 'warmRate': min(25, args.rate), 'poolSize': pool, 'preVUs': pool, 'maxVUs': pool,
                'apiSourceSha': api['sourceSha'], 'apiPid': api['pid'], 'binarySHA256': api['sha256'],
                'likeDiagnosticsEnabled': api['likeDiagnosticsRequested'], 'feedTailEnabled': api['tailEnabledRequested'],
                'executionPlatform': api['executionPlatform'], 'transitionSHA256': api.get('transitionSHA256'),
@@ -144,7 +156,7 @@ def reserve(args, api, value):
                'freezeSHA256': sha(freeze_path) if freeze else None,
                'preflightSHA256': sha(args.preflight), 'abilitySHA256': sha(args.ability),
                'predictionSHA256': sha(args.prediction) if args.prediction else None,
-               'setupNormalization': {'existing': 512, 'active': 0, 'allWindows': True},
+               'setupNormalization': {'existing': pool, 'active': 0, 'allWindows': True},
                'failedStartsConsumeSlot': True}
     command['loadBackend'] = value.get('CAP10_LOAD_BACKEND', 'k6')
     for key in ('executionAuthoritySHA256', 'executionAuthorityGeneration', 'deploymentId',
@@ -152,6 +164,8 @@ def reserve(args, api, value):
         if key in reservation:
             command[key] = reservation[key]
     if command['loadBackend'] == 'pts':
+        command['expectedEngines'] = dimensions['expectedEngines']
+        command['ptsConcurrency'] = dimensions['ptsConcurrency']
         command['ptsPacketSHA256'] = pts_identity['ptsPacketSHA256']
         command['ptsAdmissionSHA256'] = pts_identity['ptsAdmissionSHA256']
         command['ptsPacketPath'] = packet_path.relative_to(ROOT).as_posix()

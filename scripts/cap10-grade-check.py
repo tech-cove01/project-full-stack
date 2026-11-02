@@ -84,6 +84,7 @@ class Checks(unittest.TestCase):
 
     def reserve(self, kind, rate, source=None, freeze=None, execution_root=None, **overrides):
         execution_root = execution_root or self.root
+        fixture_name = overrides.pop('fixture_name', 'fixture.json')
         source = source or self.source
         api = {
             'sourceSha': source, 'sha256': self.identity['binarySHA256'], 'exe': str(self.binary),
@@ -103,7 +104,7 @@ class Checks(unittest.TestCase):
             target.update(overrides.pop(name, {}))
         options.update(overrides)
         return grade.check_reservation(execution_root, kind, rate, 180 if kind == 'formal' else 60,
-                                       api, execution_root / 'fixture.json', preflight, ability, **options)
+                                       api, execution_root / fixture_name, preflight, ability, **options)
 
     def bounds(self, source=None):
         return grade.search_state(self.root, source or self.source)
@@ -1015,6 +1016,7 @@ class Checks(unittest.TestCase):
 
     def authority_admission(self, directory, tag):
         context = grade.execution_context(directory); previous = grade.history(directory)[-1]
+        pool = context['dimensions']['poolSize']
         old_stage = grade.stage(directory, previous)
         terminal = {'tag': previous['tag'], 'reports': [{'phase': phase, 'reportId': previous['tag'] + '-' + phase,
             'ended': True, 'startTimeRaw': '2026-11-02 00:00:00', 'endTimeRaw': '2026-11-02 00:01:00'} for phase in ('warm', 'stable')],
@@ -1024,8 +1026,8 @@ class Checks(unittest.TestCase):
         finished = max(self.now + dt.timedelta(seconds=20), grade.instant(old_stage['finishedAt']) + dt.timedelta(milliseconds=2))
         reconciliation = {'valid': True, 'factsValid': True, 'downstreamConverged': True, 'errors': [],
             'startedAt': int((finished - dt.timedelta(milliseconds=1)).timestamp() * 1000), 'finishedAt': int(finished.timestamp() * 1000),
-            'facts': {'facts': [{}] * 512, 'notes': [{}] * 512, 'transitions': 0, 'eventCount': 0},
-            'derived': {'available': True, 'errors': [], 'notes': [{}] * 512},
+            'facts': {'facts': [{}] * pool, 'notes': [{}] * pool, 'transitions': 0, 'eventCount': 0},
+            'derived': {'available': True, 'errors': [], 'notes': [{}] * pool},
             'timeline': [{'pending': 0, 'parked': 0, 'receiptErrors': []}]}
         reconcile_path = self.put('linux/reconcile-before-' + tag + '.json', reconciliation)
         return self.put('linux/admission-' + tag + '.json', {'version': 1, 'batch': 'CAP-10', 'tag': tag,
@@ -1042,8 +1044,158 @@ class Checks(unittest.TestCase):
         command.update({key: active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes',
                        'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')}, reservationCheck=reservation,
                        at=command_at.isoformat())
+        command.update({key: active[key] for key in ('poolSize', 'expectedEngines', 'ptsConcurrency') if key in active})
         self.put('linux/' + tag + '-command.json', command)
         return command
+
+    def large_active(self, directory, active):
+        active = copy.deepcopy(active)
+        pool, engines = 4096, 9
+        dimensions = {'poolSize': pool, 'expectedEngines': engines, 'ptsConcurrency': 4105}
+        helpers = {'scripts/cap10-cohort.py': '1' * 64, 'scripts/load/cap10-cohort-contract.mjs': '2' * 64}
+        active['scriptHashes'].update({key.removeprefix('scripts/'): value for key, value in helpers.items()})
+        self.tools = active['scriptHashes'].copy()
+        fixture = self.put('linux/fixture-large.json', {'poolSize': pool, 'users': pool, 'multiNotes': pool, 'multiRelations': pool})
+        packet = self.put('linux/packet-large.json', {'sceneFilesMD5': {'plan': 'large-frozen'}, 'cohortSourceSHA256': helpers,
+            'manifest': {**dimensions, 'normalThreads': pool,
+                         'cohortSourceSHA256': {'scripts/load/cap10-cohort-contract.mjs': helpers['scripts/load/cap10-cohort-contract.mjs']}}})
+        admission = self.put('linux/admission-large.json', {'passed': True, 'sceneFilesMD5': {'plan': 'large-frozen'},
+            'sceneId': 'LARGE-SCENE', 'agentCount': engines, 'concurrency': 4105,
+            **dimensions, 'cohortSourceSHA256': helpers})
+        active.update(poolSize=pool, expectedEngines=engines, ptsConcurrency=4105, deploymentId='new-explicit-cohort',
+            fixturePath=fixture.name, fixtureSHA256=grade.sha(fixture), ptsPacketPath=packet.name,
+            ptsPacketSHA256=grade.sha(packet), ptsAdmissionPath=admission.name, ptsAdmissionSHA256=grade.sha(admission))
+        self.put('linux/active-application.json', active)
+        return active
+
+    def test_explicit_packet_and_admission_reject_tampered_dimensions_or_helper_freeze(self):
+        directory, _, active = self.authority_fixture()
+        active = self.large_active(directory, active)
+        packet_path, admission_path = directory / active['ptsPacketPath'], directory / active['ptsAdmissionPath']
+        packet_bytes, admission_bytes = packet_path.read_bytes(), admission_path.read_bytes()
+        for artifact, field, wrong in (
+            ('manifest', 'poolSize', 512), ('manifest', 'expectedEngines', 2), ('manifest', 'ptsConcurrency', 513),
+            ('manifest', 'cohortSourceSHA256', {'scripts/load/cap10-cohort-contract.mjs': '3' * 64}),
+            ('packet', 'cohortSourceSHA256', {'scripts/cap10-cohort.py': '3' * 64, 'scripts/load/cap10-cohort-contract.mjs': '2' * 64}),
+            ('admission', 'poolSize', 512), ('admission', 'expectedEngines', 2), ('admission', 'ptsConcurrency', 513),
+            ('admission', 'cohortSourceSHA256', None),
+        ):
+            with self.subTest(artifact=artifact, field=field):
+                packet, admission = json.loads(packet_bytes), json.loads(admission_bytes)
+                target = packet['manifest'] if artifact == 'manifest' else packet if artifact == 'packet' else admission
+                target[field] = wrong
+                packet_path.write_text(json.dumps(packet), encoding='utf-8')
+                admission_path.write_text(json.dumps(admission), encoding='utf-8')
+                self.put('linux/active-application.json', {**active, 'ptsPacketSHA256': grade.sha(packet_path),
+                                                          'ptsAdmissionSHA256': grade.sha(admission_path)})
+                with self.assertRaises(ValueError): grade.execution_context(directory)
+        packet_path.write_bytes(packet_bytes); admission_path.write_bytes(admission_bytes)
+        bad = copy.deepcopy(active); bad['scriptHashes']['cap10-cohort.py'] = '3' * 64
+        self.put('linux/active-application.json', bad)
+        with self.assertRaises(ValueError): grade.execution_context(directory)
+
+    def test_closed_history_reads_original_manifest_reference_without_root_fixture(self):
+        # Match the real archive layout: the command has a hash, the retained
+        # tool-repair proof supplies like-fixture/fixture.json, and no root alias.
+        directory = self.root / 'linux'; directory.mkdir()
+        manifest = self.put('linux/like-fixture/fixture.json', {'users': 512, 'multiNotes': 512, 'multiRelations': 512})
+        command = {'tag': 'S5', 'fixtureSHA256': grade.sha(manifest)}
+        repair = self.put('linux/tool-repair-transition.json', {'artifacts': {'fixtureManifest':
+            {'path': 'like-fixture/fixture.json', 'sha256': grade.sha(manifest)}}})
+        self.assertFalse((directory / 'fixture.json').exists())
+        self.assertEqual(grade.legacy_command_pool(directory, command, repair_sha=grade.sha(repair)), 512)
+        for edits in ({'fixtureSHA256': 'f' * 64}, {'poolSize': 4096}):
+            with self.subTest(edits=edits), self.assertRaises(ValueError):
+                grade.legacy_command_pool(directory, {**command, **edits}, repair_sha=grade.sha(repair))
+        with self.assertRaises(ValueError): grade.legacy_command_pool(directory, command)
+        with self.assertRaises(ValueError): grade.legacy_command_pool(directory, command, repair_sha='f' * 64)
+
+    def test_explicit_large_cohort_reservation_rejects_old_ability_and_incomplete_current_reconciliation(self):
+        directory, api, active = self.authority_fixture()
+        active = self.large_active(directory, active)
+        self.authority_admission(directory, 'S7')
+        ability = {'maxVUs': 4096, 'exclusiveRelationships': 4096}
+        result = self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api,
+                              fixture_name='fixture-large.json', ability=ability)
+        self.assertEqual(result['poolSize'], 4096)
+        for change in ({'maxVUs': 512}, {'exclusiveRelationships': 512}, {'estimatedInFlight': 4097},
+                       {'estimatedInFlight': True}, {'estimatedInFlight': float('nan')}, {'estimatedInFlight': float('inf')}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api,
+                             fixture_name='fixture-large.json', ability={**ability, **change})
+        admission = grade.read(directory / 'admission-S7.json')
+        path = directory / admission['reconciliation']['path']; reconciliation = grade.read(path)
+        reconciliation['facts']['facts'].pop()
+        path.write_text(json.dumps(reconciliation), encoding='utf-8')
+        admission['reconciliation']['sha256'] = grade.sha(path); self.put('linux/admission-S7.json', admission)
+        with self.assertRaises(ValueError):
+            self.reserve('comparison', 800, source=self.other, execution_root=directory, api=api,
+                         fixture_name='fixture-large.json', ability=ability)
+
+    def test_new_context_requires_explicit_fixture_and_scene_dimensions(self):
+        directory, _, active = self.authority_fixture()
+        active = self.large_active(directory, active)
+        for field, wrong in (('poolSize', 512), ('expectedEngines', 2), ('ptsConcurrency', 4104)):
+            with self.subTest(field=field), self.assertRaises(ValueError):
+                self.put('linux/active-application.json', {**active, field: wrong})
+                grade.execution_context(directory)
+        self.put('linux/active-application.json', active)
+        admission = grade.read(directory / active['ptsAdmissionPath']); admission['agentCount'] = 2
+        path = self.put('linux/' + active['ptsAdmissionPath'], admission)
+        self.put('linux/active-application.json', {**active, 'ptsAdmissionSHA256': grade.sha(path)})
+        with self.assertRaises(ValueError): grade.execution_context(directory)
+
+    def test_large_formal_freeze_retains_its_own_candidate_and_pool(self):
+        directory, api, active = self.authority_fixture()
+        active = self.large_active(directory, active)
+        self.authority_admission(directory, 'S7')
+        options = {'source': self.other, 'execution_root': directory, 'api': api,
+                   'fixture_name': 'fixture-large.json', 'ability': {'maxVUs': 4096, 'exclusiveRelationships': 4096}}
+        reserved = self.reserve('candidate', 800, **options)
+        self.authority_add(directory, 'S7', 'candidate', 800, reserved, active)
+        context = grade.execution_context(directory)
+        freeze = {**active, 'rate': 800, 'candidateTag': 'S7', 'sourceCIPassed': True, 'relatedChecksPassed': True,
+            'initialDistributionContract': {'existing': 4096, 'active': 0, 'relationships': 4096},
+            'executionAuthoritySHA256': context['authoritySHA256'], 'activeApplicationSHA256': context['activeApplicationSHA256']}
+        self.put('freeze-like.json', freeze); self.put('linux/freeze-like.json', freeze)
+        self.authority_admission(directory, 'H1')
+        self.assertEqual(self.reserve('formal', 800, freeze=freeze, **options)['poolSize'], 4096)
+        for change in ({'poolSize': 512}, {'initialDistributionContract': {'existing': 512, 'active': 0, 'relationships': 512}}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                self.reserve('formal', 800, freeze={**freeze, **change}, **options)
+        command = grade.read(directory / 'S7-command.json'); command['poolSize'] = 512
+        self.assertFalse(grade._active_command(command, context))
+
+    def test_old_formal_retirement_keeps_original_512_fixture_under_large_successor(self):
+        directory, _, active, command, proof = self.formal_start_recovery_fixture()
+        original_paths = [directory / name for name in ('H1-command.json', 'H1-stage.json', 'fixture.json', proof['nativeJournal']['path'])]
+        originals = {path: path.read_bytes() for path in original_paths}
+        self.large_active(directory, active)
+        context = grade.execution_context(directory)
+        proof['successorActiveApplicationSHA256'] = context['activeApplicationSHA256']
+        self.put('linux/formal-start-recovery-H1.json', proof)
+        self.assertEqual(grade.formal_start_retirement(directory, command, context)['tag'], 'H1')
+        self.assertTrue(all(path.read_bytes() == raw for path, raw in originals.items()))
+        before_path = directory / proof['beforeWarm']['path']; before = grade.read(before_path)
+        reconciliation_path = directory / proof['reconciliation']['path']; reconciliation = grade.read(reconciliation_path)
+        before['facts'] = [{}] * 4096; before['notes'] = [{}] * 4096
+        reconciliation['facts'] = before; reconciliation['derived']['notes'] = [{}] * 4096
+        before_path.write_text(json.dumps(before), encoding='utf-8')
+        reconciliation_path.write_text(json.dumps(reconciliation), encoding='utf-8')
+        proof['beforeWarm']['sha256'] = grade.sha(before_path); proof['reconciliation']['sha256'] = grade.sha(reconciliation_path)
+        self.put('linux/formal-start-recovery-H1.json', proof)
+        with self.assertRaises(ValueError): grade.formal_start_retirement(directory, command, context)
+
+    def test_original_command_cannot_borrow_successor_pool_or_engine_count(self):
+        directory, _, active, command, _ = self.formal_start_recovery_fixture()
+        old_sha = command['reservationCheck']['activeApplicationSHA256']
+        original = grade.read(directory / ('active-applications/' + old_sha + '.json'))
+        self.large_active(directory, active)
+        self.assertEqual(grade.original_command_dimensions(directory, command, original),
+                         {'poolSize': 512, 'expectedEngines': 2, 'ptsConcurrency': 513})
+        for change in ({'poolSize': 4096}, {'expectedEngines': 9}, {'ptsConcurrency': 4105}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                grade.original_command_dimensions(directory, {**command, **change}, original)
 
     def test_authority_preserves_failures_and_uses_worker8_comparison_without_old_caps(self):
         directory, api, active = self.authority_fixture()
@@ -1342,7 +1494,12 @@ class Checks(unittest.TestCase):
                        ptsPacketSHA256=grade.sha(packet_path),
                        scriptHashes={**command['scriptHashes'], **{'pts/' + name: digest for name, digest in sources.items()}})
         active['ptsPacketSHA256'] = grade.sha(packet_path)
+        active['scriptHashes'] = command['scriptHashes'].copy()
+        self.tools = active['scriptHashes'].copy()
         self.put('linux/active-application.json', active)
+        # Fixture construction finishes before reserving this synthetic command:
+        # retain the final packet/tool application identity, not the earlier stub.
+        command['reservationCheck']['activeApplicationSHA256'] = grade.sha(directory / 'active-application.json')
         command_path = self.put('linux/S7-command.json', command)
         ref = lambda p: {'path': p.relative_to(directory).as_posix(), 'sha256': grade.sha(p)}
         at = grade.instant(previous['finishedAt'])

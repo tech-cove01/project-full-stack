@@ -20,17 +20,56 @@ import subprocess
 import sys
 
 REPO = Path(__file__).resolve().parents[2]
+_cohort_spec = importlib.util.spec_from_file_location('cap10_pts_prepare_cohort', REPO / 'scripts/cap10-cohort.py')
+cohort = importlib.util.module_from_spec(_cohort_spec); _cohort_spec.loader.exec_module(cohort)
 UPLOAD_FILES = ('cap10-jmeter.jmx', 'slots.csv', 'cap10-pts-private.json')
 PACKET_FILES = (*UPLOAD_FILES, 'cap10-jmeter-manifest.json')
 NODE_PROGRAM = """import {bundle} from './scripts/pts/cap10-jmeter.mjs';
 let input=''; for await (const chunk of process.stdin) input+=chunk;
-const v=JSON.parse(input); const m=await bundle(v.directory,{collectorUrl:v.collectorUrl,controlToken:v.controlToken});
+const v=JSON.parse(input); const m=await bundle(v.directory,{collectorUrl:v.collectorUrl,controlToken:v.controlToken,poolSize:v.poolSize,expectedEngines:v.expectedEngines});
 process.stdout.write(JSON.stringify(m));"""
 
 
 def source_hashes():
     return {name: hashlib.sha256((REPO / 'scripts/pts' / name).read_bytes()).hexdigest()
             for name in ('cap10-pts-prepare.py', 'cap10-jmeter.mjs', 'cap10-jmeter.groovy', 'cap10-pts-contract.groovy')}
+
+
+def cohort_source_hashes():
+    return {name: hashlib.sha256((REPO / name).read_bytes()).hexdigest()
+            for name in ('scripts/cap10-cohort.py', 'scripts/load/cap10-cohort-contract.mjs')}
+
+
+def manifest_dimensions(manifest, require_frozen=False):
+    if not isinstance(manifest, dict):
+        raise ValueError('JMeter manifest object required')
+    pool = cohort.pool_size(manifest.get('poolSize', cohort.DEFAULT_POOL_SIZE))
+    dims = cohort.dimensions({'poolSize': pool, 'expectedEngines': manifest.get('expectedEngines', 2),
+                              'ptsConcurrency': manifest.get('ptsConcurrency')}, {'poolSize': pool})
+    if ('poolSize' not in manifest and dims != {'poolSize': 512, 'expectedEngines': 2, 'ptsConcurrency': 513}):
+        raise ValueError('missing pool fields only identify the historical 512/2 profile')
+    if (manifest.get('standardJMeter') != '5.6.3' or type(manifest.get('normalThreads')) is not int
+            or manifest['normalThreads'] != pool or type(manifest.get('teardownThreads')) is not int
+            or manifest['teardownThreads'] != 1 or manifest.get('csvSplitRequired') is not True):
+        raise ValueError('generated JMeter cohort contract differs')
+    declared = manifest.get('cohortSourceSHA256')
+    expected = {'scripts/load/cap10-cohort-contract.mjs': cohort_source_hashes()['scripts/load/cap10-cohort-contract.mjs']}
+    if declared is None:
+        if require_frozen or dims != {'poolSize': 512, 'expectedEngines': 2, 'ptsConcurrency': 513}:
+            raise ValueError('legacy cohort lacks a current frozen helper source')
+    elif declared != expected:
+        raise ValueError('generated cohort helper source differs')
+    return dims
+
+
+def bound_cohort(packet_record, config):
+    dims = manifest_dimensions(packet_record['manifest'], require_frozen=True)
+    if cohort.dimensions(config, {'poolSize': dims['poolSize']}) != dims:
+        raise ValueError('private configuration differs from packet cohort')
+    expected = cohort_source_hashes()
+    if packet_record.get('cohortSourceSHA256') != expected or config.get('cohortSourceSHA256') != expected:
+        raise ValueError('packet and private cohort source freeze differ')
+    return dims
 
 
 def private_ip(value):
@@ -40,12 +79,12 @@ def private_ip(value):
     return str(address)
 
 
-def run_bundle(directory, collector_url, token, runner=subprocess.run):
+def run_bundle(directory, collector_url, token, runner=subprocess.run, *, pool_size=512, expected_engines=2):
     # Fixed script/arguments: credential values are never command-line arguments.
     argv = ['node', '--input-type=module', '-e', NODE_PROGRAM]
     safe_env = {k: v for k, v in os.environ.items() if k.upper() in ('PATH', 'SYSTEMROOT', 'TEMP', 'TMP', 'TMPDIR')}
     result = runner(argv, input=json.dumps({'directory': str(directory), 'collectorUrl': collector_url,
-                    'controlToken': token}), cwd=REPO, env=safe_env, capture_output=True,
+                    'controlToken': token, 'poolSize': pool_size, 'expectedEngines': expected_engines}), cwd=REPO, env=safe_env, capture_output=True,
                     text=True, encoding='utf-8', timeout=30)
     if result.returncode != 0:
         raise ValueError('local packet generator failed; output suppressed')
@@ -64,7 +103,8 @@ def validate_owned(owned, environment):
     return value, runtime
 
 
-def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn-shanghai', bundle_runner=run_bundle):
+def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn-shanghai', bundle_runner=run_bundle, *, pool_size=512, expected_engines=2):
+    requested = cohort.dimensions({'poolSize': pool_size, 'expectedEngines': expected_engines}, {'poolSize': pool_size})
     value, runtime = validate_owned(owned, environment)
     if region != 'cn-shanghai':
         raise ValueError('this frozen ECS/PTS packet uses Shanghai')
@@ -85,11 +125,11 @@ def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn
         'privateInputPath': str(directory / 'cap10-pts-private.json'),
         'files': [str(directory / name) for name in PACKET_FILES], 'registeredBeforeSecretWrite': True})
     collector_url, api_url = 'http://' + host + ':8481', 'http://' + host + ':8281'
-    before_sources = source_hashes()
-    manifest = bundle_runner(directory, collector_url, token)
-    if source_hashes() != before_sources:
+    before_sources, before_cohort = source_hashes(), cohort_source_hashes()
+    manifest = bundle_runner(directory, collector_url, token, pool_size=pool_size, expected_engines=expected_engines)
+    if source_hashes() != before_sources or cohort_source_hashes() != before_cohort:
         raise ValueError('packet sources changed during generation')
-    if manifest.get('standardJMeter') != '5.6.3' or manifest.get('normalThreads') != 512 or manifest.get('ptsConcurrency') != 513 or manifest.get('teardownThreads') != 1 or manifest.get('csvSplitRequired') is not True:
+    if manifest_dimensions(manifest, require_frozen=True) != requested:
         raise ValueError('generated JMeter contract differs')
     if not re.fullmatch(r'[a-f0-9]{64}', manifest.get('scriptSHA256', '')) or not all((directory / name).is_file() for name in PACKET_FILES):
         raise ValueError('complete upload packet required')
@@ -101,14 +141,15 @@ def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn
         raise ValueError('generated private collector binding differs')
     md5s = {name: hashlib.md5((directory / name).read_bytes(), usedforsecurity=False).hexdigest() for name in UPLOAD_FILES}
     cfg = {'sceneId': 'UNBOUND', 'regionId': region, 'collectorUrl': collector_url, 'apiUrl': api_url,
-           'controlToken': token, 'expectedEngines': 2, 'scriptSHA256': manifest['scriptSHA256'], 'sceneFiles': md5s}
+           'controlToken': token, **requested, 'cohortSourceSHA256': before_cohort,
+           'scriptSHA256': manifest['scriptSHA256'], 'sceneFiles': md5s}
     if credential_path is not None:
         cfg['credentialsFile'] = str(credential_path)
     config_path = owned.private_write(runtime, 'env-pts-control-' + nonce + '.private.json', cfg)
     updated = {**value, 'CAP10_LOAD_BACKEND': 'pts', 'CAP10_PTS_CONFIG': str(config_path),
                'CAP10_PYTHON_BIN': sys.executable, 'API_ADDR': '0.0.0.0:8281'}
     next_env = owned.private_write(runtime, 'env-pts-' + nonce + '.private.json', updated)
-    public = {'version': 1, 'manifest': manifest, 'sourceSHA256': before_sources,
+    public = {'version': 1, 'manifest': manifest, 'sourceSHA256': before_sources, 'cohortSourceSHA256': before_cohort,
         'privatePaths': {'packetDirectory': str(directory), 'cleanupRegistration': str(registration),
                          'configuration': str(config_path), 'environment': str(next_env)}, 'sceneFilesMD5': md5s}
     if token in json.dumps(public):
@@ -128,6 +169,9 @@ def bind(owned, environment, scene_id):
         raise ValueError('owned packet configuration required')
     cfg = owned.read(old_path)
     packet_record = owned.read(owned.ROOT / 'pts-packet.json')
+    bound_cohort(packet_record, cfg)
+    if packet_record['sourceSHA256'] != source_hashes():
+        raise ValueError('packet sources differ before binding')
     if old_path != Path(packet_record['privatePaths']['configuration']).resolve():
         raise ValueError('binding requires the original registered packet config')
     upload = Path(packet_record['privatePaths']['packetDirectory']).resolve()
@@ -142,7 +186,7 @@ def bind(owned, environment, scene_id):
     nonce = secrets.token_hex(6)
     config_path = owned.private_write(runtime, 'env-pts-control-' + nonce + '.private.json', {**cfg, 'sceneId': scene_id})
     next_env = owned.private_write(runtime, 'env-pts-bound-' + nonce + '.private.json', {**value, 'CAP10_PTS_CONFIG': str(config_path)})
-    public = {'version': 1, 'sceneId': scene_id, 'sourceSHA256': source_hashes(),
+    public = {'version': 1, 'sceneId': scene_id, 'sourceSHA256': source_hashes(), 'cohortSourceSHA256': cohort_source_hashes(),
         'packetManifestSHA256': hashlib.sha256((owned.ROOT / 'pts-packet.json').read_bytes()).hexdigest(),
         'privatePaths': {'configuration': str(config_path), 'environment': str(next_env)},
         'sceneFilesMD5': cfg['sceneFiles'], 'cloudCalled': False, 'sceneCreatedByThisTool': False}
@@ -235,7 +279,7 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
         'readRAMActionVerified': None, 'startStopPermissionsVerified': False, 'startStopCalled': False}
     try:
         value, runtime = validate_owned(owned, environment)
-        before = source_hashes()
+        before, before_cohort = source_hashes(), cohort_source_hashes()
         cfg_path = Path(value['CAP10_PTS_CONFIG'])
         if (value.get('CAP10_LOAD_BACKEND') != 'pts' or cfg_path.is_symlink() or cfg_path.resolve() != cfg_path
                 or cfg_path.parent != runtime or not re.fullmatch(r'env-pts-control-[a-f0-9]{12}\.private\.json', cfg_path.name)
@@ -244,11 +288,14 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
         if not any(owned.read(path).get('path') == str(cfg_path) for path in runtime.glob('owned-env-*.json')):
             raise ValueError('private configuration lacks owned-env registration')
         cfg = owned.read(cfg_path)
-        if (cfg.get('regionId') != 'cn-shanghai' or cfg.get('expectedEngines') != 2
+        if (cfg.get('regionId') != 'cn-shanghai'
                 or not re.fullmatch(r'[a-f0-9]{64}', cfg.get('controlToken', ''))):
-            raise ValueError('fixed Shanghai two-engine private configuration required')
+            raise ValueError('fixed Shanghai private configuration required')
         packet_record = owned.read(owned.ROOT / 'pts-packet.json')
         binding = owned.read(owned.ROOT / 'pts-scene-binding.json')
+        dims = bound_cohort(packet_record, cfg)
+        if binding.get('cohortSourceSHA256') != before_cohort:
+            raise ValueError('binding cohort helper sources differ')
         scene_id = cfg['sceneId']
         if (not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', scene_id) or scene_id == 'UNBOUND'
                 or binding['sceneId'] != scene_id or Path(binding['privatePaths']['configuration']) != cfg_path
@@ -282,12 +329,12 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
         if (scene.get('SceneId') != scene_id or len(scene.get('FileList', [])) != 3
                 or {item['FileName']: item['Md5'].lower() for item in scene['FileList']} != md5s
                 or any(type(scene.get(key)) is not int or scene[key] != expected for key, expected in
-                    (('Duration', 600), ('Concurrency', 513), ('AgentCount', 2)))):
+                    (('Duration', 600), ('Concurrency', dims['ptsConcurrency']), ('AgentCount', dims['expectedEngines'])))):
             raise ValueError('cloud scene files or lifecycle/engine settings differ')
-        if source_hashes() != before:
+        if source_hashes() != before or cohort_source_hashes() != before_cohort:
             raise ValueError('packet sources changed during scene admission')
-        result.update(passed=True, sceneId=scene_id, sceneFilesMD5=md5s, sourceSHA256=before,
-            scriptSHA256=manifest['scriptSHA256'], duration=600, concurrency=513, agentCount=2,
+        result.update(passed=True, sceneId=scene_id, sceneFilesMD5=md5s, sourceSHA256=before, cohortSourceSHA256=before_cohort, **dims,
+            scriptSHA256=manifest['scriptSHA256'], duration=600, concurrency=dims['ptsConcurrency'], agentCount=dims['expectedEngines'],
             configurationReference=str(cfg_path), scope='Only GetOpenJMeterScene read permission verified; no Start/Stop permission or cloud workload verified.')
         return result
     except BaseException as error:
@@ -303,6 +350,7 @@ def main():
     first = actions.add_parser('packet'); first.add_argument('--environment', required=True)
     first.add_argument('--ecs-private-ip', required=True); first.add_argument('--credentials-file')
     first.add_argument('--region', default='cn-shanghai')
+    first.add_argument('--pool-size', type=int, default=512); first.add_argument('--expected-engines', type=int, default=2)
     second = actions.add_parser('bind'); second.add_argument('--environment', required=True); second.add_argument('--scene-id', required=True)
     third = actions.add_parser('cleanup-packet'); third.add_argument('--environment', required=True)
     fourth = actions.add_parser('verify-scene'); fourth.add_argument('--environment', required=True); fourth.add_argument('--allow-live', action='store_true')
@@ -312,7 +360,8 @@ def main():
     spec = importlib.util.spec_from_file_location('cap10_pts_prepare_owned', REPO / 'scripts/cap10-env.py')
     owned = importlib.util.module_from_spec(spec); spec.loader.exec_module(owned)
     if args.action == 'packet':
-        result = packet(owned, args.environment, args.ecs_private_ip, args.credentials_file, args.region)
+        result = packet(owned, args.environment, args.ecs_private_ip, args.credentials_file, args.region,
+                        pool_size=args.pool_size, expected_engines=args.expected_engines)
     elif args.action == 'bind':
         result = bind(owned, args.environment, args.scene_id)
     elif args.action == 'cleanup-packet':

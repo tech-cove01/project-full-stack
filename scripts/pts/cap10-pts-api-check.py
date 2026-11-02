@@ -98,6 +98,146 @@ def main():
         root = Path(folder).resolve()
         assert root.parent == workspace and root.name.startswith('.qa-cap10-pts-offline-')
         # Only this newly created temporary directory is removed by the context.
+        def scene_client(scene, label, include_scene=True):
+            def transport(path, headers, timeout):
+                assert headers['x-acs-action'] == 'GetOpenJMeterScene'
+                assert parse_qs(urlsplit(path).query)['SceneId'] == [SCENE]
+                body = {'Success': True, 'RequestId': 'scene-shape-check'}
+                if include_scene:
+                    body['Scene'] = scene
+                return 200, json.dumps(body).encode()
+            return api.Client('cn-shanghai', root / label, AUTH,
+                transport=transport, scene_id=SCENE)
+
+        omitted = scene_client({'Duration': 600, 'Concurrency': 513, 'AgentCount': 2}, 'scene-omitted')
+        audited = []; original_audit = omitted._audit
+        def capture_scene_audit(action, data):
+            audited.append(data['sanitizedRawResponse'])
+            original_audit(action, data)
+        with patch.object(omitted, '_audit', side_effect=capture_scene_audit):
+            normalized = omitted.scene(SCENE)
+        check(normalized['Scene']['SceneId'] == SCENE and
+            normalized['Scene']['Duration'] == 600 and
+            normalized['sceneIdentitySource'] == 'signed-request-SceneId',
+            'omitted SceneId uses bound signed request with explicit provenance')
+        check(normalized is not audited[0] and normalized['Scene'] is not audited[0]['Scene'] and
+            'SceneId' not in audited[0]['Scene'] and 'sceneIdentitySource' not in audited[0],
+            'scene normalization copies response and Scene without mutating audited data')
+        raw_audit = json.loads(next((root / 'scene-omitted').glob('*.json')).read_text(encoding='utf-8'))
+        check('SceneId' not in raw_audit['sanitizedRawResponse']['Scene'],
+            'stored sanitized raw response preserves provider omission')
+        check(scene_client({'SceneId': SCENE, 'Duration': 600}, 'scene-explicit').scene(SCENE)['Scene']['SceneId'] == SCENE,
+            'matching explicit SceneId remains accepted')
+        for index, value in enumerate(('FOREIGN_SCENE', '', None, 123)):
+            candidate = scene_client({'SceneId': value, 'Duration': 600}, 'scene-mismatch-' + str(index))
+            expect_error(lambda: candidate.scene(SCENE), 'scene_identity_differs')
+        for index, value in enumerate(({}, [], None, 'not-a-scene', 123, False)):
+            candidate = scene_client(value, 'scene-invalid-' + str(index))
+            expect_error(lambda: candidate.scene(SCENE), 'scene_response_invalid')
+        expect_error(lambda: scene_client(None, 'scene-missing', include_scene=False).scene(SCENE), 'scene_response_invalid')
+
+        def running_client(data, label, include_running=True, request_id='running-shape-check', http_status=200):
+            def transport(path, headers, timeout):
+                assert headers['x-acs-action'] == 'GetJMeterSceneRunningData'
+                assert parse_qs(urlsplit(path).query)['SceneId'] == [SCENE]
+                body = {'Success': True, 'RequestId': request_id}
+                if include_running:
+                    body['RunningData'] = data
+                return http_status, json.dumps(body).encode()
+            return api.Client('cn-shanghai', root / label, AUTH,
+                transport=transport, scene_id=SCENE)
+
+        running_data = {'ReportId': REPORT, 'Status': 'RUNNING', 'HasReport': False, 'AgentCount': 2}
+        omitted_running = running_client(running_data, 'running-omitted')
+        normalized_running = omitted_running.running(SCENE)
+        check(normalized_running['sceneId'] == SCENE and normalized_running['reportId'] == REPORT and
+            normalized_running['status'] == 'RUNNING' and normalized_running['hasReport'] is False and
+            normalized_running['sceneIdentitySource'] == 'signed-request-SceneId',
+            'running omission uses bound signed request without changing status or report fields')
+        raw_running = json.loads(next((root / 'running-omitted').glob('*.json')).read_text(encoding='utf-8'))
+        check('SceneId' not in raw_running['sanitizedRawResponse']['RunningData'] and 'SceneId' not in running_data,
+            'running raw audit preserves omitted SceneId')
+        explicit_running = running_client({**running_data, 'SceneId': SCENE}, 'running-explicit').running(SCENE)
+        check(explicit_running['sceneId'] == SCENE and explicit_running['sceneIdentitySource'] == 'provider-response-SceneId',
+            'matching explicit running SceneId retains provider provenance')
+        for index, value in enumerate(('FOREIGN_SCENE', '', None, 123)):
+            candidate = running_client({**running_data, 'SceneId': value}, 'running-mismatch-' + str(index))
+            expect_error(lambda: candidate.running(SCENE), 'scene_identity_differs')
+        for index, value in enumerate(({}, [], None, 'not-running-data', 123, False)):
+            candidate = running_client(value, 'running-invalid-' + str(index))
+            expect_error(lambda: candidate.running(SCENE), 'running_response_invalid')
+        missing_running = running_client(None, 'running-missing', include_running=False)
+        missing_error = expect_error(lambda: missing_running.running(SCENE), 'no_running_data')
+        check(not missing_error.unknown, 'exact successful empty running response is a known local no-data condition')
+        missing_audit = json.loads(next((root / 'running-missing').glob('*.json')).read_text(encoding='utf-8'))
+        check(set(missing_audit['sanitizedRawResponse']) == {'RequestId', 'Success'} and
+            missing_audit['sanitizedRawResponse']['Success'] is True,
+            'successful empty running audit remains original without invented RunningData or provider error')
+        for index, (status, request_id) in enumerate(((202, 'request'), (204, 'request'),
+                (200, ''), (200, ' '), (200, None), (200, 123))):
+            candidate = running_client(None, 'running-empty-boundary-' + str(index),
+                include_running=False, request_id=request_id, http_status=status)
+            expect_error(lambda: candidate.running(SCENE), 'running_response_invalid')
+        for status in (202, 204):
+            def empty_body_transport(path, headers, timeout):
+                return status, b''
+            candidate = api.Client('cn-shanghai', root / ('running-empty-body-' + str(status)), AUTH,
+                transport=empty_body_transport, scene_id=SCENE)
+            expect_error(lambda: candidate.running(SCENE), 'invalid_provider_json')
+
+        fresh = Fake()
+        def fresh_transport(path, headers, timeout):
+            if headers['x-acs-action'] == 'GetJMeterSceneRunningData':
+                fresh.calls.append((headers['x-acs-action'], parse_qs(urlsplit(path).query)))
+                return 200, json.dumps({'Success': True, 'RequestId': 'fresh-scene'}).encode()
+            return fresh(path, headers, timeout)
+        fresh_client = api.Client('cn-shanghai', root / 'fresh-scene', AUTH,
+            transport=fresh_transport, scene_id=SCENE)
+        check(fresh_client._idle(SCENE) is None and
+            [action for action, _ in fresh.calls] == ['GetOpenJMeterScene', 'GetJMeterSceneRunningData'],
+            'fresh scene idle accepts exact no-data only after successful scene read and makes no writes')
+        expect_error(lambda: fresh_client.terminal_evidence(SCENE, REPORT), 'no_running_data')
+        check(not fresh_client.reports, 'no running data never binds or proves a terminal report')
+
+        def extra_running_transport(path, headers, timeout):
+            return 200, json.dumps({'Success': True, 'RequestId': 'extra-data', 'Status': 'RUNNING'}).encode()
+        extra_running = api.Client('cn-shanghai', root / 'extra-running-field', AUTH,
+            transport=extra_running_transport, scene_id=SCENE)
+        expect_error(lambda: extra_running.running(SCENE), 'running_response_invalid')
+        def provider_no_data_error(path, headers, timeout):
+            if headers['x-acs-action'] == 'GetJMeterSceneRunningData':
+                return 400, json.dumps({'Success': False, 'Code': 'no_running_data'}).encode()
+            return fresh(path, headers, timeout)
+        error_client = api.Client('cn-shanghai', root / 'provider-no-data-error', AUTH,
+            transport=provider_no_data_error, scene_id=SCENE)
+        expect_error(lambda: error_client._idle(SCENE), 'no_running_data')
+
+        def report_client(overview, label):
+            def transport(path, headers, timeout):
+                assert headers['x-acs-action'] == 'GetJMeterReportDetails'
+                assert parse_qs(urlsplit(path).query)['ReportId'] == [REPORT]
+                return 200, json.dumps({'Success': True, 'RequestId': 'report-shape-check',
+                    'ReportOverView': overview}).encode()
+            client = api.Client('cn-shanghai', root / label, AUTH, transport=transport, scene_id=SCENE)
+            client.reports.add(REPORT)
+            return client
+        overview = {'StartTime': '2026-11-01 12:00:00', 'EndTime': '2026-11-01 12:01:00', 'AgentCount': 2}
+        missing_report = report_client(overview, 'report-omitted')
+        expect_error(lambda: missing_report.report('UNBOUND_REPORT'), 'report_not_bound_to_this_client')
+        normalized_report = missing_report.report(REPORT)
+        check(normalized_report['reportId'] == REPORT and normalized_report['ended'] is True and
+            normalized_report['reportIdentitySource'] == 'signed-request-ReportId',
+            'omitted report ID uses acknowledged signed request without changing EndTime judgement')
+        report_audit = json.loads(next((root / 'report-omitted').glob('*.json')).read_text(encoding='utf-8'))
+        check('ReportId' not in report_audit['sanitizedRawResponse']['ReportOverView'] and 'ReportId' not in overview,
+            'report raw audit preserves provider ID omission')
+        for index, value in enumerate(('FOREIGN_REPORT', '', None)):
+            candidate = report_client({**overview, 'ReportId': value}, 'report-mismatch-' + str(index))
+            expect_error(lambda: candidate.report(REPORT), 'report_identity_differs')
+        for index, value in enumerate(({}, None, [], 'not-an-overview')):
+            candidate = report_client(value, 'report-invalid-' + str(index))
+            expect_error(lambda: candidate.report(REPORT), 'report_response_invalid')
+
         fake = Fake(); journal = root / 'S1-warm.private.json'; fake.start_journal = journal
         client = api.Client('cn-hangzhou', root / 'audit', AUTH, transport=fake, scene_id=SCENE, exclusive_scene=True)
         expect_error(lambda: client.running('FOREIGN'), 'scene_identity_differs')

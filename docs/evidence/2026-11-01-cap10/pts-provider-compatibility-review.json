@@ -1,0 +1,37 @@
+{
+  "date": "2026-11-02",
+  "scope": "PTS control API response compatibility before any CAP-10 pressure reservation; not a Go performance optimization",
+  "author": "/root/resume_metric_check",
+  "independentReviewers": ["/root", "/root/like_design_tradeoffs"],
+  "reviewPassed": true,
+  "apiSHA256": "03d8e9296139a117afe8c27e5608f3cbf607cd9246ea897fb1f6878a4ef5a52d",
+  "checkSHA256": "901ea39b100d7fd4c1f98e2e97b969c79e284ebf32e59500bc1af013a13b07bf",
+  "pureValidation": {
+    "command": "python -B scripts/pts/cap10-pts-api-check.py",
+    "reportedBy": "author agent on Windows",
+    "checks": 88,
+    "failed": 0,
+    "cloudCalls": 0,
+    "loadWindows": 0
+  },
+  "observedProviderShapes": [
+    "Successful GetOpenJMeterScene returns a nonempty Scene without echoed SceneId",
+    "Fresh never-started GetJMeterSceneRunningData returns HTTP200 and exactly RequestId plus Success:true, without RunningData"
+  ],
+  "safety": [
+    "Omitted echoed IDs use only the bound signed request identity, with provenance; explicit conflicting IDs remain rejected",
+    "No-running-data classification requires HTTP200, exact response keys, nonempty string RequestId, Success true and a local origin marker",
+    "Provider error codes cannot impersonate the local no-running-data marker",
+    "Raw sanitized audits retain the original omitted fields",
+    "Actual RunningData.ReportId, report binding, EndTime checks and platform/engine terminal requirements remain unchanged",
+    "Missing running data is never terminal proof for a started task"
+  ],
+  "liveReadOnlyAdmissionPassed": true,
+  "liveFreshSceneIdleReadPassed": true,
+  "initialFailedAdmissionPreserved": "linux/pts-scene-admission-attempt1-failed.json",
+  "liveControlReadinessEvidence": "linux/pts-final-readiness.json",
+  "goApplicationSourceSHA": "0602ac08a0b458851b2cc6a8b595bbafb443bdaa",
+  "goApplicationChanged": false,
+  "uploadPacketChanged": false,
+  "pressureSlotsUsedAtReview": {"short": 0, "formal": 0}
+}

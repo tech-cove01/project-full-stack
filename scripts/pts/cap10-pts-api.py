@@ -201,6 +201,7 @@ class Client:
         if self.audit_dir:
             self.audit_dir.mkdir(parents=True, exist_ok=True)
         self.stops = {}; self.reports = set()
+        self._last_success_http_status = None
 
     def _audit(self, action, data):
         if self.audit_dir:
@@ -209,6 +210,7 @@ class Client:
                 json.dump(clean(data, self.auth), stream, ensure_ascii=False, indent=2)
 
     def _call(self, action, params):
+        self._last_success_http_status = None
         if action not in READ_ACTIONS | WRITE_ACTIONS:
             raise Error('action_not_allowed')
         if self.transport is https_transport and not self.allow_cloud:
@@ -231,6 +233,7 @@ class Client:
                 if not isinstance(data, dict) or not 200 <= status < 300 or data.get('Success') is not True:
                     code = data.get('Code', 'provider_error') if isinstance(data, dict) else 'provider_error'
                     raise Error(clean(code, self.auth), unknown=status >= 500 or status == 429)
+                self._last_success_http_status = status
                 return data
             except (OSError, http.client.HTTPException) as error:
                 self._audit(action, {'action': action, 'attempt': attempt + 1, 'requestStartedAt': start,
@@ -252,17 +255,34 @@ class Client:
     def scene(self, scene_id):
         self._scene(scene_id)
         response = self._call('GetOpenJMeterScene', {'SceneId': scene_id})
-        if response.get('Scene', {}).get('SceneId') != scene_id:
+        scene = response.get('Scene')
+        if not isinstance(scene, dict) or not scene:
+            raise Error('scene_response_invalid')
+        if 'SceneId' not in scene:
+            # Some successful provider responses omit this field. The signed
+            # request remains bound to this scene; preserve the audited response.
+            return {**response, 'Scene': {**scene, 'SceneId': scene_id},
+                    'sceneIdentitySource': 'signed-request-SceneId'}
+        if scene['SceneId'] != scene_id:
             raise Error('scene_identity_differs')
         return response
 
     def running(self, scene_id):
         self._scene(scene_id)
         response = self._call('GetJMeterSceneRunningData', {'SceneId': scene_id})
-        if response.get('RunningData', {}).get('SceneId') != scene_id:
+        if (set(response) == {'RequestId', 'Success'} and response['Success'] is True
+                and self._last_success_http_status == 200
+                and isinstance(response['RequestId'], str) and response['RequestId'].strip()):
+            error = Error('no_running_data', unknown=False)
+            error.successful_empty_running_response = True
+            raise error
+        data = response.get('RunningData')
+        if not isinstance(data, dict) or not data:
+            raise Error('running_response_invalid')
+        if 'SceneId' in data and data['SceneId'] != scene_id:
             raise Error('scene_identity_differs')
-        data = response['RunningData']
         return {'sceneId': scene_id, 'reportId': data.get('ReportId'), 'status': data.get('Status'),
+            'sceneIdentitySource': 'provider-response-SceneId' if 'SceneId' in data else 'signed-request-SceneId',
             'hasReport': data.get('HasReport'), 'hasError': data.get('HasError'),
             'startTimeTS': data.get('StartTimeTS'), 'startTimeIsPlanned': True,
             'agentCount': data.get('AgentCount'), 'holdFor': data.get('HoldFor'),
@@ -273,15 +293,18 @@ class Client:
         if report_id not in self.reports:
             raise Error('report_not_bound_to_this_client')
         response = self._call('GetJMeterReportDetails', {'ReportId': report_id})
-        if response.get('ReportOverView', {}).get('ReportId') != report_id:
+        overview = response.get('ReportOverView')
+        if not isinstance(overview, dict) or not overview:
+            raise Error('report_response_invalid')
+        if 'ReportId' in overview and overview['ReportId'] != report_id:
             raise Error('report_identity_differs')
-        overview = response['ReportOverView']
         start, end = overview.get('StartTime'), overview.get('EndTime')
         try:
             ended = isinstance(start, str) and isinstance(end, str) and len(start) >= 19 and len(end) >= 19 and dt.datetime.fromisoformat(end) >= dt.datetime.fromisoformat(start)
         except (ValueError, TypeError):
             ended = False
         return {'reportId': report_id, 'ended': ended, 'startTimeRaw': start, 'endTimeRaw': end,
+            'reportIdentitySource': 'provider-response-ReportId' if 'ReportId' in overview else 'signed-request-ReportId',
             'timeZoneVerified': False, 'nativeWindowVerified': False,
             'agentCount': overview.get('AgentCount'), 'vum': overview.get('Vum'),
             'requestId': response.get('RequestId')}
@@ -304,7 +327,8 @@ class Client:
         try:
             running = self.running(scene_id)
         except Error as error:
-            if error.code == 'ReportNotExist' and not error.unknown:
+            empty_success = error.code == 'no_running_data' and getattr(error, 'successful_empty_running_response', False)
+            if (error.code == 'ReportNotExist' or empty_success) and not error.unknown:
                 return
             raise
         report_id = identity(running.get('reportId'))

@@ -60,4 +60,62 @@ check('wrong explicit concurrency and out-of-pool or duplicate shards fail') {
     try { type.dimensions([poolSize:4096,expectedEngines:9,ptsConcurrency:513]); return false } catch (IllegalArgumentException expected) { }
     [[0,17],[1,1]].every { slots -> try { type.planned(slots,50,60,17); false } catch (IllegalArgumentException expected) { true } }
 }
+check('bounded telemetry prefixes preserve exact ordering without editing pending') {
+    def pending=(0..<1000).collect { [ordinal:it] }, snapshot=new ArrayList(pending), sizes=[], received=[]
+    int remaining=pending.size()
+    while (remaining>0) {
+        def frame=type.framePrefix(pending,remaining)
+        sizes.add(frame.size());received.addAll(frame)
+        pending.subList(0,frame.size()).clear();remaining-=frame.size()
+    }
+    sizes==[128,128,128,128,128,128,128,104] && received==snapshot && !pending
+}
+check('snapshot chunks retain later arrivals and empty resource heartbeats') {
+    def pending=(0..<300).toList(), frame=type.framePrefix(pending,300)
+    pending.addAll([300,301]);pending.subList(0,frame.size()).clear()
+    def next=type.framePrefix(pending,172)
+    pending.subList(0,next.size()).clear()
+    def tail=type.framePrefix(pending,44)
+    next==(128..<256).toList() && tail==(256..<300).toList() && pending[-2..-1]==[300,301] && type.framePrefix([],0)==[]
+}
+check('invalid snapshot bounds fail rather than deleting unacknowledged rows') {
+    [-1,3].every { remaining -> try { type.framePrefix([0,1],remaining); false } catch (IllegalArgumentException expected) { true } }
+}
+// Compile the actual flush method with only its protocol transport replaced.
+// This exercises queue/ACK ownership without starting JMeter, HTTP or services.
+String runtimeSource=new File('scripts/pts/cap10-jmeter.groovy').getText('UTF-8')
+String actualFlush=runtimeSource.substring(runtimeSource.indexOf('    void flush() {'),runtimeSource.indexOf('    void reportLoop() {'))
+def flushType=loader.parseClass('''class Cap10ActualFlushCheck {
+    Object io=new Object(), recordsLock=new Object()
+    List pending=[], requests=[]
+    Map config=[runId:'synthetic'], clock=[:]
+    String engineId='synthetic'
+    long seq=0
+    int failSeq=-1, wrongAck=-1
+    boolean laterArrival=false
+    Map resources() { [synthetic:true] }
+    Map request(String path,Map body) {
+        assert path=='/batch';requests.add(body)
+        if(laterArrival){pending.add([ordinal:600]);laterArrival=false}
+        if(body.seq==failSeq)throw new IllegalStateException('synthetic ACK unavailable')
+        [ack:body.seq==wrongAck ? 999 : body.seq]
+    }
+''' + actualFlush + '}')
+check('actual flush owns bounded snapshot and leaves concurrent arrivals for next cadence') {
+    def run=flushType.newInstance();run.pending=(0..<600).collect { [ordinal:it] };run.laterArrival=true;run.flush()
+    run.requests.collect { it.records.size() }==[128,128,128,128,88] && run.requests.collect { it.seq }==[0,1,2,3,4] &&
+        run.requests.collectMany { it.records }.collect { it.ordinal }==(0..<600).toList() && run.pending==[[ordinal:600]] && run.seq==5
+}
+check('actual flush retries identical frame and never deletes an unacknowledged prefix') {
+    def run=flushType.newInstance();run.pending=(0..<600).collect { [ordinal:it] };run.failSeq=1
+    try{run.flush();return false}catch(IllegalStateException expected){assert expected.message=='telemetry ACK unavailable'}
+    run.requests.collect { it.seq }==[0,1,1,1] && run.requests[1].is(run.requests[2]) && run.requests[2].is(run.requests[3]) &&
+        run.seq==1 && run.pending.collect { it.ordinal }==(128..<600).toList()
+}
+check('actual flush keeps resource heartbeat and refuses wrong ACK before removal') {
+    def empty=flushType.newInstance();empty.flush()
+    def bad=flushType.newInstance();bad.pending=[[ordinal:0]];bad.wrongAck=0
+    try{bad.flush();return false}catch(IllegalStateException expected){assert expected.message=='telemetry sequence ACK differs'}
+    empty.seq==1 && empty.requests.size()==1 && empty.requests[0].records==[] && bad.seq==0 && bad.pending==[[ordinal:0]]
+}
 println(groovy.json.JsonOutput.toJson([checks:checks,failed:0,servicesStarted:false,loadWindows:0]))

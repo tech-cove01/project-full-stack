@@ -3,6 +3,11 @@ import groovy.json.JsonSlurper
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    static final int MAX_FRAME_RECORDS = 128
+    static List framePrefix(List pending, int remaining) {
+        if (remaining < 0 || remaining > pending.size()) throw new IllegalArgumentException('invalid pending frame snapshot')
+        new ArrayList(pending.subList(0, Math.min(remaining, MAX_FRAME_RECORDS)))
+    }
     static int poolSize(Object value = 512) {
         if (!(value instanceof Integer || value instanceof Long || value instanceof BigInteger) || value < 1 || value > 4096) throw new IllegalArgumentException('bounded integer relationship pool size required')
         value.intValue()

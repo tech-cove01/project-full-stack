@@ -183,16 +183,24 @@ class Cap10PTSRun {
     }
     void flush() {
         synchronized (io) {
-            List<Map> batch
-            synchronized (recordsLock) { batch = new ArrayList<Map>(pending) }
-            Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
-            Map response = null
-            for (int retry=0; retry<3 && response == null; retry++) {
-                try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+            int remaining
+            synchronized (recordsLock) { remaining = pending.size() }
+            // Bound this flush to its original snapshot. Concurrent completions
+            // append behind it and are picked up by the next normal 5s flush.
+            boolean heartbeat = remaining == 0
+            while (heartbeat || remaining > 0) {
+                List<Map> batch
+                synchronized (recordsLock) { batch = Cap10PTSContract.framePrefix(pending,remaining) }
+                Map body = [runId:config.runId,engineId:engineId,seq:seq,records:batch,clock:clock,resources:resources()]
+                Map response = null
+                for (int retry=0; retry<3 && response == null; retry++) {
+                    try { response = request('/batch',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('telemetry ACK unavailable'); Thread.sleep(200) }
+                }
+                if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
+                synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
+                remaining -= batch.size(); heartbeat = false
+                seq++
             }
-            if (response.ack != seq) throw new IllegalStateException('telemetry sequence ACK differs')
-            synchronized (recordsLock) { pending.subList(0,batch.size()).clear() }
-            seq++
         }
     }
     void reportLoop() {

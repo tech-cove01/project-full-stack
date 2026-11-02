@@ -115,15 +115,29 @@ class Cap10PTSRun {
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
         if (ordinal >= (long)config.rate * config.seconds) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
-        while (!stop.get() && System.nanoTime() < deadline) LockSupport.parkNanos(Math.min(50000000L, deadline-System.nanoTime()))
+        long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
+        while (!stop.get() && System.nanoTime() < preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
         if (stop.get()) return null
         long now = System.nanoTime()
         if ((now-deadline)/1000000d > 50d) {
             record([ordinal:ordinal,slot:relation.slot,kind:'dropped',startedUnixMs:null,elapsedMs:null,status:null])
             stop.set(true); flush(); return null
         }
+        // Give JMeter its setup lead without claiming an HTTP attempt yet.
+        [ordinal:ordinal,slot:relation.slot,wanted:!relation.liked,previousVersion:relation.version]
+    }
+    void begin(Map offer) {
+        if (offer.containsKey('startedUnixMs')) throw new IllegalStateException('offer already handed to HTTP sampler')
+        long deadline = Cap10PTSContract.dueNano(startNano, offer.ordinal as long, config.rate as int)
+        long now = Cap10PTSContract.handoffNano(deadline)
+        double scheduled = config.startUnixMs.doubleValue() + offer.ordinal * 1000d / config.rate
+        // Retain the actual clock reading; wait out sub-microsecond rounding
+        // rather than clamping a timestamp forward to its planned deadline.
+        while (serverAt(now) < scheduled) now = Cap10PTSContract.handoffNano(now + 1000L)
+        // This already selected sampler may execute even if a stop arrived
+        // during setup, so do not return early and send it before its deadline.
         attempted.incrementAndGet(); inFlight.incrementAndGet()
-        [ordinal:ordinal,slot:relation.slot,startedUnixMs:serverAt(now),wanted:!relation.liked,previousVersion:relation.version]
+        offer.startedUnixMs = serverAt(System.nanoTime())
     }
     void terminal(Map relation, Map offer, def sample) {
         int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
@@ -223,7 +237,7 @@ try {
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its
         // native elapsed time remains independent of Groovy classification.
-        ((Map)vars.getObject('cap10.offer')).startedUnixMs = run.serverAt(System.nanoTime())
+        run.begin((Map)vars.getObject('cap10.offer'))
     } else if (Parameters == 'post') {
         run.terminal((Map)vars.getObject('cap10.relation'),(Map)vars.getObject('cap10.offer'),prev)
         vars.remove('cap10.token')

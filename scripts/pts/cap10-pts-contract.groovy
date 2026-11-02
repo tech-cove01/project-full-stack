@@ -31,6 +31,17 @@ class Cap10PTSContract {
         if (rate < 1 || rate > 5000 || ordinal < 0) throw new IllegalArgumentException('invalid rate/ordinal')
         startNano + Math.floorDiv(Math.multiplyExact(ordinal, 1000000000L), rate as long)
     }
+    static long preparationNano(long startNano, long ordinal, int rate) {
+        dueNano(startNano, ordinal, rate) - 100000000L
+    }
+    static long handoffNano(long deadline) {
+        long now = System.nanoTime()
+        while (now < deadline) {
+            java.util.concurrent.locks.LockSupport.parkNanos(Math.min(50000000L, deadline-now))
+            now = System.nanoTime()
+        }
+        now
+    }
     static long planned(Collection<Integer> slots, int rate, int seconds) {
         long total = (long)rate * seconds
         slots.sum(0L) { int slot -> slot >= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long

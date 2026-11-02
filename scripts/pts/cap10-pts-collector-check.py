@@ -457,6 +457,84 @@ class Checks(unittest.TestCase):
         stats = module.quantiles([10, 110])
         self.assertEqual((stats['med'], stats['p(95)'], stats['p(99)']), (60, 105, 109))
 
+    def cohort(self, pool, engines):
+        self.store.close()
+        self.config.update(poolSize=pool, expectedEngines=engines,
+                           ptsConcurrency=module.cohort.pts_concurrency(pool, engines), phase='warm', seconds=10, rate=1000)
+        self.config['relations'] = [{'slot': i, 'userId': str(i + 1000), 'noteId': str(i + 2000),
+            'active': 0, 'version': 0, 'token': 'PRIVATE-SESSION-SENTINEL-' + str(i)} for i in range(pool)]
+        self.store = module.EngineStore(self.config, self.root / ('cohort-' + str(pool) + '.ndjson'), clock=lambda: self.stamp)
+        return [str(uuid.UUID(int=i + 1)) for i in range(engines)], [list(range(i, pool, engines)) for i in range(engines)]
+
+    def test_missing_pool_never_infers_a_large_fixture_and_legacy_identity_is_unchanged(self):
+        self.assertNotIn('poolSize', self.store.control())
+        self.assertNotIn('ptsConcurrency', self.store.control())
+        config = copy.deepcopy(self.config)
+        config['relations'] *= 8
+        with self.assertRaises(ValueError):
+            module.EngineStore(config, self.root / 'invalid-large.ndjson')
+        for changes in ({'poolSize': True}, {'poolSize': 4097}, {'poolSize': 17},
+                        {'poolSize': 512, 'expectedEngines': True}, {'ptsConcurrency': 514}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                module.EngineStore({**self.config, **changes}, self.root / 'invalid-dimensions.ndjson')
+
+    def test_nine_uneven_engines_need_all_4096_workers_before_barrier(self):
+        ids, shards = self.cohort(4096, 9)
+        self.assertEqual(sorted(map(len, shards)), [455] * 8 + [456])
+        for index, (engine, slots) in enumerate(zip(ids, shards)):
+            self.store.register({'runId': self.config['runId'], 'engineId': engine, 'slots': slots,
+                'readyWorkers': len(slots) - (index == 8), 'scriptSHA256': 'b' * 64, 'fixtureSHA256': 'a' * 64})
+        self.assertIsNone(self.store.control()['startUnixMs'])
+        last = self.store.register({'runId': self.config['runId'], 'engineId': ids[-1], 'slots': shards[-1],
+            'readyWorkers': len(shards[-1]), 'scriptSHA256': 'b' * 64, 'fixtureSHA256': 'a' * 64})
+        self.assertEqual(last['startUnixMs'], self.stamp + 10000)
+        self.assertEqual((last['poolSize'], last['expectedEngines'], last['ptsConcurrency']), (4096, 9, 4105))
+        self.assertEqual(len(self.store._owners), 4096)
+        self.assertEqual(sum(self.store._planned(slots) for slots in shards), 10000)
+        self.assertNotIn('PRIVATE-', (self.root / 'cohort-4096.ndjson').read_text())
+        self.start = last['startUnixMs']
+        self.stamp = self.start + 1000
+        wrong = self.record(512, slot=0)
+        with self.assertRaisesRegex(ValueError, 'ordinal ownership'):
+            self.store.batch({'runId': self.config['runId'], 'engineId': ids[0], 'seq': 0,
+                'records': [wrong], 'clock': self.clock(), 'resources': self.resources()})
+
+    def test_large_and_small_cohort_complete_exact_native_facts_and_quantiles(self):
+        for pool, engines in ((4096, 9), (17, 3)):
+            with self.subTest(pool=pool, engines=engines):
+                ids, shards = self.cohort(pool, engines)
+                for engine, slots in zip(ids, shards):
+                    self.store.register({'runId': self.config['runId'], 'engineId': engine, 'slots': slots,
+                        'readyWorkers': len(slots), 'scriptSHA256': 'b' * 64, 'fixtureSHA256': 'a' * 64})
+                self.start = self.store.control()['startUnixMs']
+                counts = [{'planned': self.store._planned(slots), 'attempted': 0, 'completed': 0,
+                    **{kind: 0 for kind in module.KINDS}} for slots in shards]
+                for seq, elapsed in enumerate((0, 5000, 10000)):
+                    self.stamp = self.start + elapsed
+                    records = [[] for _ in ids]
+                    for ordinal in range(max(0, elapsed - 5000), elapsed):
+                        slot, previous = ordinal % pool, ordinal // pool
+                        wanted = not bool(previous % 2)
+                        records[slot % engines].append({'ordinal': ordinal, 'slot': slot, 'kind': 'mutation',
+                            'startedUnixMs': self.start + ordinal, 'elapsedMs': 1, 'status': 200,
+                            'wanted': wanted, 'observedLiked': wanted, 'previousVersion': previous,
+                            'observedVersion': previous + 1, 'observedNoteId': str(slot + 2000)})
+                    for index, engine in enumerate(ids):
+                        self.store.batch({'runId': self.config['runId'], 'engineId': engine, 'seq': seq,
+                            'records': records[index], 'clock': self.clock(), 'resources': self.resources()})
+                        for key in ('attempted', 'completed', 'mutation'):
+                            counts[index][key] += len(records[index])
+                for engine, expected in zip(ids, counts):
+                    response = self.store.complete({'runId': self.config['runId'], 'engineId': engine,
+                        'lastSeq': 2, 'counts': expected, 'clock': self.clock(), 'stoppedOffering': True, 'inFlight': 0})
+                    self.assertTrue(response['complete'])
+                result = self.store.summary()
+                self.assertTrue(result['complete'] and result['collectionValid'] and result['childrenConverged'])
+                self.assertEqual((result['counts']['planned'], result['counts']['mutation'], result['unknown'], result['generatorTimingViolations']), (10000, 10000, 0, 0))
+                self.assertEqual((result['poolSize'], result['expectedEngines'], result['latencySampleCount']), (pool, engines, 10000))
+                self.assertEqual(result['allLatency']['p(99)'], 1)
+                self.assertEqual(result['endUnixMs'] - result['startUnixMs'], 10000)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)

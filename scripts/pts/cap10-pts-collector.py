@@ -2,6 +2,7 @@
 from collections import Counter
 import copy
 import hashlib
+import importlib.util
 import json
 import math
 import os
@@ -11,6 +12,9 @@ import time
 import uuid
 from urllib.parse import urlsplit
 
+_cohort_spec = importlib.util.spec_from_file_location('cap10_pts_collector_cohort', Path(__file__).resolve().parents[1] / 'cap10-cohort.py')
+cohort = importlib.util.module_from_spec(_cohort_spec)
+_cohort_spec.loader.exec_module(cohort)
 
 KINDS = ('mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')
 COUNT_KEYS = ('planned', 'attempted', 'completed', *KINDS)
@@ -65,24 +69,31 @@ class EngineStore:
             assert type(config.get(key)) is str and config[key], 'collector identity required'
         assert config['phase'] in ('warm', 'stable'), 'fixed collector phase required'
         assert integer(config.get('rate'), 1, 5000) and config.get('seconds') in ((10,) if config['phase'] == 'warm' else (60, 180)), 'fixed phase duration/rate required'
-        assert type(config['seconds']) is int and config.get('expectedEngines') == 2 and type(config['expectedEngines']) is int
+        assert type(config['seconds']) is int
         target = urlsplit(config.get('apiUrl', ''))
         assert target.scheme == 'http' and target.hostname and target.port and not target.username and not target.password and not target.query and not target.fragment and target.path in ('', '/'), 'fixed API target required'
         for key in ('fixtureSHA256', 'scriptSHA256'):
             assert type(config.get(key)) is str and len(config[key]) == 64 and all(c in '0123456789abcdef' for c in config[key]), 'evidence hash required'
         rows = config.get('relations')
-        assert isinstance(rows, list) and len(rows) == 512, '512 private relationships required'
+        assert isinstance(rows, list), 'private relationships required'
+        dimensions = cohort.dimensions(config, {'poolSize': config.get('poolSize', cohort.DEFAULT_POOL_SIZE), 'multiRelations': len(rows)})
+        self._pool_size, self._expected_engines = dimensions['poolSize'], dimensions['expectedEngines']
         self._relations = {}
         for row in rows:
-            assert isinstance(row, dict) and integer(row.get('slot'), 0, 511), 'private relationship slot invalid'
+            assert isinstance(row, dict) and integer(row.get('slot'), 0, self._pool_size - 1), 'private relationship slot invalid'
             assert row['slot'] not in self._relations, 'private relationship slots duplicated'
             assert all(type(row.get(key)) is str and row[key] for key in ('userId', 'noteId', 'token')), 'private relationship identity required'
             assert type(row.get('active')) is int and row['active'] in (0, 1) and integer(row.get('version')), 'private relationship fact invalid'
             self._relations[row['slot']] = copy.deepcopy(row)
-        assert len({(r['userId'], r['noteId']) for r in rows}) == 512, 'private relationships duplicated'
+        assert len({(r['userId'], r['noteId']) for r in rows}) == self._pool_size, 'private relationships duplicated'
         self._note_ids = {r['noteId'] for r in rows}
         self._planned_total = planned_total(config['rate'], config['seconds'])
-        self._identity = {key: config[key] for key in ('runId', 'phase', 'rate', 'seconds', 'apiUrl', 'fixtureSHA256', 'scriptSHA256', 'expectedEngines')}
+        self._identity = {key: config[key] for key in ('runId', 'phase', 'rate', 'seconds', 'apiUrl', 'fixtureSHA256', 'scriptSHA256')}
+        self._identity['expectedEngines'] = self._expected_engines
+        # Keep historical missing-field configuration identities unchanged.
+        # New explicit dimensions bind their pool and PTS concurrency as well.
+        if 'poolSize' in config or 'ptsConcurrency' in config or self._expected_engines != cohort.DEFAULT_ENGINES:
+            self._identity.update(dimensions)
         self._identity.update(version=1, jitterBudgetMs=50, clockUncertaintyMaxMs=50,
                               launchGuardMs=0 if config['phase'] == 'warm' else 100, plannedTotal=self._planned_total)
         self._identity_hash = digest(self._identity)
@@ -192,14 +203,14 @@ class EngineStore:
             self._require(set(payload) == {'runId', 'engineId', 'slots', 'readyWorkers', 'scriptSHA256', 'fixtureSHA256'}, 'collector registration fields differ')
             self._require(payload['scriptSHA256'] == self._config['scriptSHA256'] and payload['fixtureSHA256'] == self._config['fixtureSHA256'], 'collector fixture/script identity differs')
             slots = payload['slots']
-            self._require(isinstance(slots, list) and 0 < len(slots) <= 512 and all(integer(s, 0, 511) for s in slots) and len(set(slots)) == len(slots), 'collector slot assignment invalid')
+            self._require(isinstance(slots, list) and 0 < len(slots) <= self._pool_size and all(integer(s, 0, self._pool_size - 1) for s in slots) and len(set(slots)) == len(slots), 'collector slot assignment invalid')
             self._require(integer(payload['readyWorkers'], 0, len(slots)), 'collector worker barrier incomplete')
             slots = sorted(slots)
             if engine_id in self._engines:
                 self._require(self._engines[engine_id]['slots'] == slots, 'collector engine attempted to change slot ownership')
             else:
                 self._require(self._start is None and not self._stop, 'collector registration already frozen')
-                self._require(len(self._engines) < 2 and not any(slot in self._owners for slot in slots), 'collector slot ownership overlaps')
+                self._require(len(self._engines) < self._expected_engines and not any(slot in self._owners for slot in slots), 'collector slot ownership overlaps')
                 self._engines[engine_id] = {'slots': slots, 'lastSeenUnixMs': self._now(), 'batches': {}, 'complete': None,
                                            'readyWorkers': 0, 'resources': None, 'lastResourceUnixMs': None,
                                            'lastValidCPUUnixMs': None, 'clock': None, 'highCPUStreak': 0, 'cpuSamples': []}
@@ -209,7 +220,7 @@ class EngineStore:
                 self._append({'kind': 'ready', 'engineId': engine_id, 'readyWorkers': payload['readyWorkers']})
                 self._engines[engine_id]['readyWorkers'] = payload['readyWorkers']
             self._engines[engine_id]['lastSeenUnixMs'] = self._now()
-            if len(self._engines) == 2 and len(self._owners) == 512 and self._start is None and all(e['readyWorkers'] == len(e['slots']) for e in self._engines.values()):
+            if len(self._engines) == self._expected_engines and len(self._owners) == self._pool_size and self._start is None and all(e['readyWorkers'] == len(e['slots']) for e in self._engines.values()):
                 self._start = math.ceil(self._now()) + 10000
                 self._append({'kind': 'barrier', 'startUnixMs': self._start, 'endUnixMs': self._start + self._config['seconds'] * 1000})
             return {**self._control(), 'relations': [copy.deepcopy(self._relations[slot]) for slot in slots]}
@@ -252,8 +263,8 @@ class EngineStore:
                       {'ordinal', 'slot', 'kind', 'startedUnixMs', 'elapsedMs', 'status'} <= set(raw), 'collector native record fields invalid')
         record = copy.deepcopy(raw)
         ordinal, slot, kind = record['ordinal'], record['slot'], record['kind']
-        self._require(integer(ordinal, 0, self._planned_total - 1) and integer(slot, 0, 511) and
-                      ordinal % 512 == slot and self._owners.get(slot) == engine_id and kind in KINDS, 'collector native ordinal ownership invalid')
+        self._require(integer(ordinal, 0, self._planned_total - 1) and integer(slot, 0, self._pool_size - 1) and
+                      ordinal % self._pool_size == slot and self._owners.get(slot) == engine_id and kind in KINDS, 'collector native ordinal ownership invalid')
         self._require(ordinal not in self._records and ordinal > self._last_ordinal.get(slot, -1), 'collector native ordinal repeated or reordered')
         self._require(slot not in self._retired_slots, 'collector retired relationship used again')
         for key in ('wanted', 'observedLiked'):
@@ -351,7 +362,7 @@ class EngineStore:
 
     def _planned(self, slots):
         total = self._planned_total
-        return sum((total - 1 - slot) // 512 + 1 for slot in slots if slot < total)
+        return sum((total - 1 - slot) // self._pool_size + 1 for slot in slots if slot < total)
 
     def _raw_counts(self, engine_id=None):
         kinds = Counter(r[1] for r in self._records.values() if engine_id is None or self._owners[r[0]] == engine_id)
@@ -435,7 +446,7 @@ class EngineStore:
                         'cpuSamples': copy.deepcopy(engine['cpuSamples']), 'lastSeq': len(engine['batches']) - 1,
                         'counts': copy.deepcopy(engine['complete']['counts']) if engine['complete'] is not None else None}
                        for engine_id, engine in sorted(self._engines.items())]
-            complete = len(engines) == 2 and len(self._owners) == 512 and all(e['complete'] for e in engines)
+            complete = len(engines) == self._expected_engines and len(self._owners) == self._pool_size and all(e['complete'] for e in engines)
             collection_valid = complete and not self._collection_errors
             unknown_exact = collection_valid
             return {**self._control(), 'complete': complete, 'endUnixMs': self._start + self._config['seconds'] * 1000 if self._start is not None else None,
@@ -453,7 +464,7 @@ class EngineStore:
                     'generatorTimingViolationDetails': copy.deepcopy(self._generator_timing_details),
                     'generatorTimingViolationDetailsLimit': 64,
                     'generatorTimingRule': 'Every actual HTTP start must be within the native window and 0..50ms after its exact ordinal schedule; any violation invalidates the generator, never a service upper bound. All original terminal timestamps remain in the full journal; details here retain the first 64.',
-                    'childrenConverged': len(engines) == 2 and all(e['stoppedOffering'] for e in engines),
+                    'childrenConverged': len(engines) == self._expected_engines and all(e['stoppedOffering'] for e in engines),
                     'violations': list(self._violations), 'collectionErrors': list(self._collection_errors),
                     'resourcesScope': 'PTS environment: each independently allocated remote engine must stay below 6 GiB process RSS; the aggregate is displayed, not compared with a shared limit. Local Python collector plus Node classification retain their separate combined 2 GiB limit. This environment adaptation is not API optimization evidence.',
                     'remoteEngineRSSLimitBytes': RSS_LIMIT,

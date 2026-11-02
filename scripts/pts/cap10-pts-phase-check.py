@@ -28,6 +28,8 @@ def load(name):
 
 phase = load('cap10-pts-phase')
 collector = load('cap10-pts-collector')
+idle_fixture_spec = importlib.util.spec_from_file_location('cap10_phase_check_idle_fixture', REPO / 'scripts/cap10-idle-authorization-check.py')
+idle_fixtures = importlib.util.module_from_spec(idle_fixture_spec); idle_fixture_spec.loader.exec_module(idle_fixtures)
 
 
 def full_summary():
@@ -42,6 +44,43 @@ def full_summary():
 
 
 class EnvelopeChecks(unittest.TestCase):
+    def test_phase_uses_exact_reserved_idle_before_any_live_client(self):
+        with tempfile.TemporaryDirectory(prefix='.qa-cap10-phase-idle-', dir=REPO.parent) as folder:
+            root = Path(folder).resolve()
+            metadata = root / 'environment-012345abcdef.json'
+            metadata.write_text(json.dumps({'resourceProfile': 'mysql8-v1'}), encoding='utf-8')
+            identity = {'environmentPath': metadata.name, 'environmentSHA256': hashlib.sha256(metadata.read_bytes()).hexdigest(), 'resourceProfile': 'mysql8-v1'}
+            _, reference = idle_fixtures.versioned_preflight_fixture(root, identity)
+            reservation = {**identity, 'preflightPath': reference['path'], 'preflightSHA256': reference['sha256']}
+            configuration = {'CAP10_ENVIRONMENT_METADATA': str(metadata), 'CAP10_RESOURCE_PROFILE': 'mysql8-v1'}
+            self.assertEqual(phase.phase_preflight(reservation, configuration, root), reference)
+            for field, wrong in (('preflightPath', 'idle-result.json'), ('preflightSHA256', '0' * 64),
+                                 ('environmentSHA256', '0' * 64), ('resourceProfile', 'baseline')):
+                with self.subTest(field=field), self.assertRaises(ValueError):
+                    phase.phase_preflight({**reservation, field: wrong}, configuration, root)
+            with self.assertRaises(ValueError):
+                phase.phase_preflight({k: v for k, v in reservation.items() if k != 'preflightPath'}, configuration, root)
+            with self.assertRaises(ValueError):
+                phase.phase_preflight(reservation, {}, root)
+        source = ast.parse((HERE / 'cap10-pts-phase.py').read_text(encoding='utf-8'))
+        run = next(node for node in source.body if isinstance(node, ast.FunctionDef) and node.name == 'run')
+        calls = list(node for node in ast.walk(run) if isinstance(node, ast.Call))
+        guard = next(node for node in calls if isinstance(node.func, ast.Name) and node.func.id == 'phase_preflight')
+        live = next(node for node in calls if isinstance(node.func, ast.Attribute) and node.func.attr == 'Client')
+        reservation_read = next(node for node in ast.walk(run) if isinstance(node, ast.Assign)
+                                and any(isinstance(target, ast.Name) and target.id == 'reservation' for target in node.targets))
+        self.assertLess(reservation_read.lineno, guard.lineno)
+        self.assertLess(guard.lineno, live.lineno)
+
+    def test_legacy_phase_missing_idle_path_keeps_original_baseline(self):
+        with tempfile.TemporaryDirectory(prefix='.qa-cap10-phase-idle-', dir=REPO.parent) as folder:
+            root = Path(folder).resolve()
+            metadata = root / 'environment.json'; metadata.write_text('{}', encoding='utf-8')
+            environment_sha = hashlib.sha256(metadata.read_bytes()).hexdigest()
+            result = root / 'idle-result.json'; result.write_text(json.dumps({'passed': True, 'environmentSHA256': environment_sha}), encoding='utf-8')
+            reservation = {'environmentSHA256': environment_sha, 'preflightSHA256': hashlib.sha256(result.read_bytes()).hexdigest()}
+            self.assertEqual(phase.phase_preflight(reservation, {}, root)['path'], 'idle-result.json')
+
     def test_uncomputed_progress_cannot_become_final_percentiles(self):
         progress = full_summary()
         progress.update(allLatency=None, mutationLatency=None, latencyComplete=False, latencyStatisticsComputed=False)

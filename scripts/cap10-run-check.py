@@ -13,6 +13,9 @@ cohort_spec = importlib.util.spec_from_file_location('cap10_runner_check_cohort'
 cohort = importlib.util.module_from_spec(cohort_spec); cohort_spec.loader.exec_module(cohort)
 resource_spec = importlib.util.spec_from_file_location('cap10_runner_check_resource', REPO / 'scripts/cap10-resource-contract.py')
 RESOURCE = importlib.util.module_from_spec(resource_spec); resource_spec.loader.exec_module(RESOURCE)
+idle_spec = importlib.util.spec_from_file_location('cap10_runner_check_idle', REPO / 'scripts/cap10-idle-authorization-check.py')
+idle_checks = importlib.util.module_from_spec(idle_spec); idle_spec.loader.exec_module(idle_checks)
+IDLE = idle_checks.idle.IDLE
 source = ast.parse((REPO / 'scripts/cap10-run.py').read_text(encoding='utf-8'))
 names = {'classify', 'pre_stable_guard', 'container_snapshot', 'observer_terminal_outcome'}
 isolated = ast.Module(body=[node for node in source.body if isinstance(node, ast.FunctionDef) and node.name in names], type_ignores=[])
@@ -29,7 +32,7 @@ def check(condition, label):
 def authority_wiring(temporary, files):
     """Execute only the actual reservation/diagnostic AST with local doubles."""
     functions = {node.name: node for node in source.body if isinstance(node, ast.FunctionDef)}
-    scope = {'Path': Path, 'hashlib': hashlib, 'cohort': cohort, 'RESOURCE': RESOURCE}
+    scope = {'Path': Path, 'hashlib': hashlib, 'cohort': cohort, 'RESOURCE': RESOURCE, 'IDLE': IDLE}
     selected = ast.Module(body=[functions[name] for name in ('sha', 'cohort_dimensions', 'environment_identity', 'expected_diagnostics', 'pts_artifact_paths', 'reserve')], type_ignores=[])
     exec(compile(selected, 'cap10-run.py(actual reservation functions)', 'exec'), scope)
     body = functions['main'].body
@@ -82,7 +85,7 @@ def authority_wiring(temporary, files):
     else:
         rejected = False
     check(rejected, 'nonboolean authority trace expectation cannot be coerced')
-    for name in ('preflight.json', 'ability.json', 'fixture.json', 'environment.json', 'observer'):
+    for name in ('idle-result.json', 'ability.json', 'fixture.json', 'environment.json', 'observer'):
         path = temporary / name; path.write_text('{}'); files.append(path)
     saved = {}
     reservation = {'tag': 'S10', 'expectedDiagnostics': False,
@@ -97,10 +100,11 @@ def authority_wiring(temporary, files):
         return metadata, path, RESOURCE.bound_profile(value, metadata)
     owned.environment = environment
     scope.update(ROOT=temporary, REPO=temporary, TOOL_NAMES=(), PTS_TOOLS=(), owned=owned, module=lambda *_: grade)
-    args = SimpleNamespace(preflight=temporary / 'preflight.json', ability=temporary / 'ability.json', prediction=None,
+    args = SimpleNamespace(preflight=temporary / 'idle-result.json', ability=temporary / 'ability.json', prediction=None,
         observer=temporary / 'observer', kind='search', rate=800, seconds=60)
     api = {'sourceSha': 'f' * 40, 'pid': 100, 'sha256': '9' * 64,
         'likeDiagnosticsRequested': False, 'tailEnabledRequested': False, 'executionPlatform': 'linux'}
+    args.preflight.write_text(json.dumps({'passed': True, 'environmentSHA256': scope['sha'](temporary / 'environment.json')}))
     result = scope['reserve'](args, api, {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json')})
     keys = ('executionAuthoritySHA256', 'executionAuthorityGeneration', 'deploymentId',
             'activeApplicationSHA256', 'admissionSHA256')
@@ -170,9 +174,35 @@ def authority_wiring(temporary, files):
     new_value = {'CAP_LIKE_FIXTURE': str(temporary / 'fixture.json'),
                  'CAP10_ENVIRONMENT_METADATA': str(target), 'CAP10_RESOURCE_PROFILE': 'mysql8-v1'}
     new_api = {**api, 'environmentPath': target.name, 'environmentSHA256': scope['sha'](target), 'resourceProfile': 'mysql8-v1'}
+    _, preflight_reference = idle_checks.versioned_preflight_fixture(temporary, {key: new_api[key] for key in ('environmentPath', 'environmentSHA256', 'resourceProfile')})
+    args.preflight = temporary / preflight_reference['path']
+    files.extend([args.preflight.parent, *args.preflight.parent.iterdir()])
     current = scope['reserve'](args, new_api, new_value)
     check(current['environmentPath'] == target.name and current['environmentSHA256'] == scope['sha'](target)
           and current['resourceProfile'] == 'mysql8-v1', 'new reservation freezes its explicit environment filename, bytes and profile')
+    check(current['preflightPath'] == preflight_reference['path'] and current['preflightSHA256'] == preflight_reference['sha256'],
+          'actual reservation binds canonical new idle path and exact original bytes')
+    current_preflight = args.preflight
+    args.preflight = temporary / 'idle-result.json'; saved.clear()
+    try:
+        scope['reserve'](args, new_api, new_value)
+    except ValueError:
+        rejected = True
+    else:
+        rejected = False
+    check(rejected and not saved, 'new resource cannot reserve against the retained old idle path')
+    args.preflight = current_preflight
+    original_preflight = args.preflight.read_bytes()
+    incomplete = json.loads(original_preflight); incomplete['samples'].pop()
+    args.preflight.write_text(json.dumps(incomplete), encoding='utf-8'); saved.clear()
+    try:
+        scope['reserve'](args, new_api, new_value)
+    except ValueError:
+        rejected = True
+    else:
+        rejected = False
+    check(rejected and not saved, 'rehashed incomplete new idle cannot write either reservation artifact')
+    args.preflight.write_bytes(original_preflight)
     for label, cfg, identity in (
         ('old API cannot follow current metadata alias', new_value, api),
         ('API environment SHA mismatch', new_value, {**new_api, 'environmentSHA256': '0' * 64}),
@@ -318,9 +348,9 @@ def main():
         check(not scope['container_snapshot'](expected)['valid'], 'fast restart is detected even after container health recovers')
         authority_wiring(temporary, files)
     finally:
-        for path in files:
+        for path in sorted(files, key=lambda item: len(item.parts), reverse=True):
             if path.exists():
-                path.unlink()
+                path.unlink() if path.is_file() else path.rmdir()
         temporary.rmdir()
     print(json.dumps({'checks': checks, 'failed': 0, 'servicesStarted': False, 'loadRuns': 0}))
 

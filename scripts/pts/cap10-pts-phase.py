@@ -29,6 +29,17 @@ def module(name, path):
 
 
 cohort = module('cap10_phase_cohort', REPO / 'scripts/cap10-cohort.py')
+IDLE = module('cap10_phase_idle', REPO / 'scripts/cap10-idle-contract.py')
+
+
+def phase_preflight(reservation, configuration, root):
+    selected = IDLE.RESOURCE.metadata_path(configuration, root)
+    if IDLE.RESOURCE.application_metadata_path(reservation, root) != selected:
+        raise ValueError('phase resource environment differs from its original reservation')
+    profile = IDLE.RESOURCE.bound_profile(configuration, read(selected))
+    if IDLE.RESOURCE.profile_name(reservation.get('resourceProfile', 'baseline')) != profile:
+        raise ValueError('phase resource profile differs from its original reservation')
+    return IDLE.validate_preflight(reservation, root)
 
 
 def phase_cohort(configuration, source, manifest, reservation, admission):
@@ -260,8 +271,6 @@ def run(args):
     if not args.evidence.resolve().is_relative_to(expected_root):
         raise ValueError('same CAP10 Linux evidence root required')
     owned.transition()
-    if not owned.read(expected_root / 'idle-result.json')['passed']:
-        raise ValueError('cloud idle admission must pass before live PTS')
     phase = os.environ['CAP_LIKE_PHASE']; seconds = int(os.environ['CAP_LIKE_SECONDS'])
     rate = int(os.environ['CAP_LIKE_RATE'])
     if phase not in ('warm', 'stable') or seconds not in ((10,) if phase == 'warm' else (60, 180)) or not 1 <= rate <= 5000:
@@ -275,6 +284,7 @@ def run(args):
             or seconds != reservation['warmSeconds' if phase == 'warm' else 'seconds']
             or rate != reservation['warmRate' if phase == 'warm' else 'rate']):
         raise ValueError('phase must belong to its existing same-batch reservation')
+    phase_preflight(reservation, dict(os.environ), expected_root)
     admission_path = scene_admission_path(expected_root, reservation)
     admission = read(admission_path)
     if (hashlib.sha256(admission_path.read_bytes()).hexdigest() != reservation['ptsAdmissionSHA256']

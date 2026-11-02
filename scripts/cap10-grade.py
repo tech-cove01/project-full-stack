@@ -20,6 +20,9 @@ _cohort_spec.loader.exec_module(cohort)
 _resource_spec = importlib.util.spec_from_file_location('cap10_grade_resource', Path(__file__).with_name('cap10-resource-contract.py'))
 RESOURCE = importlib.util.module_from_spec(_resource_spec)
 _resource_spec.loader.exec_module(RESOURCE)
+_idle_spec = importlib.util.spec_from_file_location('cap10_grade_idle', Path(__file__).with_name('cap10-idle-contract.py'))
+IDLE = importlib.util.module_from_spec(_idle_spec)
+_idle_spec.loader.exec_module(IDLE)
 
 def require(condition, message):
     if not condition:
@@ -1041,7 +1044,7 @@ def search_state(root, source_sha):
         result['lowerEvidence'] = best[0]['tag']
     return result
 
-def check_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze=None, prediction=None, current_tools=None, observer_hash=None):
+def check_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze=None, prediction=None, current_tools=None, observer_hash=None, preflight_reference=None):
     root, fixture = Path(root).resolve(), Path(fixture).resolve()
     require(root in (ROOT, ROOT / 'linux') and fixture.is_file() and fixture.is_relative_to(root), 'fixed CAP10 public paths required')
     require(kind in KINDS and type(rate) is int and 1 <= rate <= 5000, 'invalid CAP10 purpose/rate')
@@ -1054,6 +1057,15 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     pool = cohort.fixture_pool_size(read(fixture))
     require(preflight.get('passed') is True and environment_identity(preflight, root) == (environment_path, environment, resource_profile),
             'one valid idle preflight bound to this exact environment is required before load')
+    require(preflight_reference is not None or environment_path == root / 'environment.json',
+            'versioned environment requires an explicit original idle preflight reference')
+    if preflight_reference is not None:
+        require(isinstance(preflight_reference, dict), 'explicit idle preflight reference required')
+        original = {**api_metadata, 'preflightPath': preflight_reference.get('path'),
+                    'preflightSHA256': preflight_reference.get('sha256'), 'environmentSHA256': environment}
+        require(IDLE.validate_preflight(original, root) == preflight_reference
+                and read(IDLE.preflight_path(original, root)) == preflight,
+                'provided idle preflight differs from its original reference')
     require(ability.get('rate') == rate and ability.get('sufficient') is True and type(ability.get('maxVUs')) is int and ability['maxVUs'] == pool and type(ability.get('exclusiveRelationships')) is int and ability['exclusiveRelationships'] == pool and ability.get('classificationIncluded') is True and ability.get('evidence'), 'declared generator ability evidence required for every window')
     require(type(ability.get('estimatedInFlight')) in (int, float) and math.isfinite(ability['estimatedInFlight']) and 0 <= ability['estimatedInFlight'] <= pool, 'estimated in-flight work exceeds exclusive VU pool')
     context = execution_context(root)

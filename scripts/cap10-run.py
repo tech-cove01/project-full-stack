@@ -26,13 +26,14 @@ def module(name, filename):
 owned = module('cap10_owned_run', 'cap10-env.py')
 cohort = module('cap10_cohort_run', 'cap10-cohort.py')
 RESOURCE = module('cap10_resource_run', 'cap10-resource-contract.py')
+IDLE = module('cap10_idle_run', 'cap10-idle-contract.py')
 ROOT = owned.ROOT
 BATCH_ROOT = owned.BATCH_ROOT
 KINDS = ('diagnostic', 'comparison', 'search', 'candidate', 'formal')
 TOOL_NAMES = ('cap10-run.py', 'cap10-grade.py', 'cap10-env.py', 'cap10-stage.py', 'cap10-resources.py',
               'load/cap10-native-window.mjs', 'cap10-like.mjs', 'load/cap10-like.js',
               'load/cap10-like-contract.mjs', 'load/cap10-db-observe.mjs', 'cap10-downstream.go',
-              'cap10-cohort.py', 'load/cap10-cohort-contract.mjs', 'cap10-resource-contract.py')
+              'cap10-cohort.py', 'load/cap10-cohort-contract.mjs', 'cap10-resource-contract.py', 'cap10-idle-contract.py')
 PTS_TOOLS = ('pts/cap10-pts-phase.py', 'pts/cap10-pts-api.py', 'pts/cap10-pts-collector.py',
              'pts/cap10-jmeter.groovy', 'pts/cap10-pts-contract.groovy', 'pts/cap10-jmeter.mjs', 'pts/cap10-jmeter.jmx',
              'pts/cap10-pts-prepare.py')
@@ -123,6 +124,10 @@ def reserve(args, api, value):
     for path in (args.preflight, args.ability, args.prediction):
         if path is not None:
             assert path.resolve().is_relative_to(ROOT) and path.is_file()
+    preflight_record = {'environmentPath': environment_path.name, 'environmentSHA256': sha(environment_path),
+                        'resourceProfile': resource_profile, 'preflightPath': args.preflight.resolve().relative_to(ROOT).as_posix(),
+                        'preflightSHA256': sha(args.preflight)}
+    preflight_reference = IDLE.validate_preflight(preflight_record, ROOT)
     prediction = owned.read(args.prediction) if args.prediction else None
     if value.get('CAP10_LOAD_BACKEND') == 'pts':
         repair_path = ROOT / 'tool-repair-transition.json'
@@ -153,7 +158,8 @@ def reserve(args, api, value):
     observer_hash = sha(args.observer)
     reservation = grade.check_reservation(ROOT, args.kind, args.rate, args.seconds, api,
         value['CAP_LIKE_FIXTURE'], owned.read(args.preflight), owned.read(args.ability),
-        freeze=freeze, prediction=prediction, current_tools=tools, observer_hash=observer_hash)
+        freeze=freeze, prediction=prediction, current_tools=tools, observer_hash=observer_hash,
+        preflight_reference=preflight_reference)
     assert reservation.get('poolSize', cohort.DEFAULT_POOL_SIZE) == pool, 'reservation differs from its bound fixture pool'
     tag = reservation['tag']
     command = {'task': 'CAP-10', 'at': owned.now(), 'chain': 'like', 'kind': args.kind, 'tag': tag,
@@ -168,7 +174,7 @@ def reserve(args, api, value):
                'scriptHashes': tools,
                'observerBinarySHA256': observer_hash, 'reservationCheck': reservation,
                'freezeSHA256': sha(freeze_path) if freeze else None,
-               'preflightSHA256': sha(args.preflight), 'abilitySHA256': sha(args.ability),
+               'preflightPath': preflight_reference['path'], 'preflightSHA256': preflight_reference['sha256'], 'abilitySHA256': sha(args.ability),
                'predictionSHA256': sha(args.prediction) if args.prediction else None,
                'setupNormalization': {'existing': pool, 'active': 0, 'allWindows': True},
                'failedStartsConsumeSlot': True}

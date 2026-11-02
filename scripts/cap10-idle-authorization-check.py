@@ -1,8 +1,10 @@
 """Pure local checks of separately authorized CAP10 idle retries."""
 import datetime as dt
+from contextlib import redirect_stdout
 import hashlib
 import importlib.util
 import json
+import io
 from pathlib import Path
 import tempfile
 from types import SimpleNamespace
@@ -18,6 +20,91 @@ TRANSITION = 'a' * 64
 
 def write(path, value):
     path.write_text(json.dumps(value), encoding='utf-8')
+
+
+def versioned_preflight_fixture(root, identity):
+    """Only complete synthetic files for pure consumer checks; no observation."""
+    directory = idle.IDLE.idle_directory(root / identity['environmentPath'], root, identity['resourceProfile'])
+    directory.mkdir(exist_ok=True)
+    reservation = {**identity, 'idleSchemaVersion': 1, 'idleDirectory': directory.name,
+                   'attempt': 1, 'seconds': 60, 'intervalSeconds': 5}
+    reservation_path = directory / 'idle-reservation.json'; write(reservation_path, reservation)
+    result = {**reservation, 'passed': True, 'noWorkloadStarted': True, 'errors': [],
+              'cadenceValid': True, 'uptimeValid': True, 'downstreamIdleAndComplete': True,
+              'threeConsecutiveBusy': False, 'observerExit': 0, 'hostCPUMedian': 20,
+              'hostMemoryMaxPercent': 60, 'downstreamSamples': 12, 'powerEvents': {'valid': True},
+              'samples': [{'elapsedSeconds': i * 5, 'cpuIntervalValid': i > 0, 'cpuIntervalSeconds': 5} for i in range(13)],
+              'clockIntervals': [{'valid': True} for _ in range(12)],
+              'reservationPath': reservation_path.relative_to(root).as_posix(),
+              'reservationSHA256': hashlib.sha256(reservation_path.read_bytes()).hexdigest()}
+    result_path = directory / 'idle-result.json'; write(result_path, result)
+    reference = {**identity, 'preflightPath': result_path.relative_to(root).as_posix(),
+                 'preflightSHA256': hashlib.sha256(result_path.read_bytes()).hexdigest()}
+    return result, idle.IDLE.validate_preflight(reference, root)
+
+
+def early_setup_failure_checks(base):
+    """Drive actual main through three faults before its observer can start."""
+    checked = 0
+    original_mkdir = Path.mkdir
+    for fault in ('reservation', 'container', 'control', 'identity_changed'):
+        root = base / ('main-fault-' + fault); root.mkdir()
+        runtime = root / 'private'; runtime.mkdir()
+        metadata_path = root / 'environment-012345abcdef.json'
+        limits = idle.RESOURCE.container_limits('mysql8-v1')
+        containers = {service: {'id': format(index + 1, '064x'), 'cpuNano': cpu, 'memoryBytes': memory,
+                                'volumes': [{'name': 'synthetic-' + service}]} for index, (service, (cpu, memory)) in enumerate(limits.items())}
+        metadata = {'resourceProfile': 'mysql8-v1', 'containers': containers}; write(metadata_path, metadata)
+        original_idle = root / 'idle-result.json'; write(original_idle, {'passed': False, 'retained': True})
+        original_slot = root / 'slot-S19.json'; write(original_slot, {'environmentSHA256': 'a' * 64})
+        originals = {path: path.read_bytes() for path in (original_idle, original_slot)}
+        configuration = {'CAP_SOURCE_SHA': 'a' * 40, 'CAP_READ_EXPECTED_REVISION': 'capacity-' + 'a' * 40,
+                         'CAP_LIKE_FIXTURE': str(root / 'unused-fixture.json')}
+        api_metadata = {'environmentPath': metadata_path.name, 'environmentSHA256': hashlib.sha256(metadata_path.read_bytes()).hexdigest(),
+                        'resourceProfile': 'mysql8-v1', 'privateEnvironmentFile': str(root / 'unused-private.json'),
+                        'sourceSha': configuration['CAP_SOURCE_SHA'], 'expectedVersion': configuration['CAP_READ_EXPECTED_REVISION']}
+        api_path = root / 'api.json'; write(api_path, api_metadata)
+        def save(path, value):
+            if fault == 'reservation' and path.name == 'idle-reservation.json':
+                raise OSError('synthetic reservation failure')
+            with path.open('x', encoding='utf-8') as stream:
+                json.dump(value, stream)
+        def container(service, cid, running, **kwargs):
+            if fault == 'container':
+                raise ValueError('synthetic container verification failure')
+            return containers[service]
+        def mkdir(path, *args, **kwargs):
+            if fault in ('control', 'identity_changed') and path.name == 'idle-control':
+                if fault == 'identity_changed':
+                    lock = runtime / 'cap10-active.private.json'
+                    changed = json.loads(lock.read_bytes()); changed['created'] += 1
+                    write(lock, changed)
+                raise OSError('synthetic control directory failure')
+            return original_mkdir(path, *args, **kwargs)
+        owned = SimpleNamespace(ROOT=root, PLATFORM='linux', FLAGS=0, settings=lambda p: (configuration, runtime),
+            read=lambda p: json.loads(Path(p).read_bytes()), environment=lambda value: (metadata, metadata_path, 'mysql8-v1'),
+            api_identity=lambda *a, **kw: SimpleNamespace(pid=12345), transition=lambda: TRANSITION,
+            now=lambda: '2026-11-02T17:50:00Z', save=save, container=container)
+        with patch.object(idle, 'module', side_effect=lambda name, filename: owned if filename == 'cap10-env.py' else SimpleNamespace()), \
+                patch('sys.argv', ['cap10-idle.py', '--environment', str(root / 'unused-private.json'), '--api-metadata', str(api_path),
+                                   '--observer', str(root / 'never-started-observer')]), \
+                patch.object(Path, 'mkdir', mkdir), patch.object(idle.subprocess, 'Popen') as popen, redirect_stdout(io.StringIO()):
+            try:
+                idle.main()
+            except SystemExit as error:
+                assert error.code == 1
+            else:
+                raise AssertionError('early setup failure must return failure')
+            popen.assert_not_called()
+        evidence = root / 'idle-012345abcdef'
+        result = owned.read(evidence / 'idle-result.json')
+        assert result['passed'] is False and result['samples'] == [] and result['noWorkloadStarted'] is True and result['errors']
+        assert evidence.is_dir()
+        assert (runtime / 'cap10-active.private.json').exists() is (fault == 'identity_changed')
+        assert not (evidence / 'idle-observer.txt').exists()
+        assert all(path.read_bytes() == raw for path, raw in originals.items())
+        checked += 1
+    return checked
 
 
 def main():
@@ -82,6 +169,54 @@ def main():
                 checks += 1
             else:
                 raise AssertionError('missing resource profile must not validate an eight-CPU cgroup as baseline')
+
+        namespace_root = base / 'versioned'; namespace_root.mkdir()
+        private_runtime = base / 'private-runtime'; private_runtime.mkdir()
+        metadata_path = namespace_root / target.name; write(metadata_path, {'resourceProfile': 'mysql8-v1'})
+        old_slot = namespace_root / 'slot-S19.json'; write(old_slot, {'environmentSHA256': 'a' * 64})
+        old_idle = namespace_root / 'idle-result.json'; write(old_idle, {'passed': False})
+        retained = {path: path.read_bytes() for path in (old_slot, old_idle)}
+        def exclusive_save(path, value):
+            with path.open('x', encoding='utf-8') as stream:
+                json.dump(value, stream)
+        owner_tools = SimpleNamespace(read=lambda p: json.loads(p.read_bytes()), save=exclusive_save)
+        directory, owner = idle.claim_versioned_idle(namespace_root, private_runtime, metadata_path, 'mysql8-v1', owner_tools, (None,) * 3)
+        lock = private_runtime / 'cap10-active.private.json'
+        assert directory.name == 'idle-012345abcdef' and owner['pid'] > 0 and owner['created'] > 0
+        assert owner_tools.read(lock) == owner and all(path.read_bytes() == raw for path, raw in retained.items())
+        checks += 1
+        assert not idle.release_idle_owner(private_runtime, {**owner, 'created': owner['created'] + 1}, None, owner_tools) and lock.exists()
+        checks += 1
+        assert not idle.release_idle_owner(private_runtime, owner, SimpleNamespace(poll=lambda: None), owner_tools) and lock.exists()
+        checks += 1
+        assert idle.release_idle_owner(private_runtime, owner, SimpleNamespace(poll=lambda: 0), owner_tools) and not lock.exists()
+        checks += 1
+        for retries in ((None,) * 3, ('legacy-authorization', None, None)):
+            try:
+                idle.claim_versioned_idle(namespace_root, private_runtime, metadata_path, 'mysql8-v1', owner_tools, retries)
+            except AssertionError:
+                checks += 1
+            else:
+                raise AssertionError('claimed namespace or legacy retry cannot create another observation')
+        second_metadata = namespace_root / 'environment-abcdef012345.json'; write(second_metadata, {'resourceProfile': 'mysql8-v1'})
+        new_slot = namespace_root / 'slot-S20.json'; write(new_slot, {'environmentPath': second_metadata.name, 'resourceProfile': 'mysql8-v1'})
+        try:
+            idle.claim_versioned_idle(namespace_root, private_runtime, second_metadata, 'mysql8-v1', owner_tools, (None,) * 3)
+        except AssertionError:
+            checks += 1
+        else:
+            raise AssertionError('new environment cannot fill its idle after a reservation')
+        new_slot.unlink()
+        exclusive_save(lock, {'kind': 'another-owner'})
+        unknown_lock = lock.read_bytes()
+        try:
+            idle.claim_versioned_idle(namespace_root, private_runtime, second_metadata, 'mysql8-v1', owner_tools, (None,) * 3)
+        except FileExistsError:
+            assert lock.read_bytes() == unknown_lock
+            checks += 1
+        else:
+            raise AssertionError('idle must take a real exclusive owner file')
+        checks += early_setup_failure_checks(base)
 
         def case():
             nonlocal checks

@@ -5,6 +5,7 @@ import datetime as dt
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import statistics
@@ -25,6 +26,7 @@ def module(name, filename):
 
 
 RESOURCE = module('cap10_idle_resource_contract', 'cap10-resource-contract.py')
+IDLE = module('cap10_idle_contract', 'cap10-idle-contract.py')
 
 
 def environment_identity(value, api_metadata, api_values, owned, root):
@@ -50,6 +52,43 @@ def container_identities(containers, resource_profile):
         identities.append({'id': container['id'], 'service': service, 'resourceProfile': resource_profile,
                            'cpuNano': cpu, 'memoryBytes': memory})
     return identities
+
+
+def claim_versioned_idle(root, runtime, environment_path, resource_profile, owned, retry_arguments):
+    assert not any(retry_arguments), 'versioned idle is one observation; legacy retry records remain separate'
+    directory = IDLE.idle_directory(environment_path, root, resource_profile)
+    assert directory != root and not directory.exists(), 'versioned idle namespace is already consumed'
+    histories = (root, root.parent) if root.name == 'linux' else (root, root / 'linux')
+    for history_root in histories:
+        for path in (*history_root.glob('slot-[SH]*.json'), *history_root.glob('[SH]*-command.json')):
+            if not re.fullmatch(r'(?:slot-[SH][1-9][0-9]*|[SH][1-9][0-9]*-command)\.json', path.name):
+                continue
+            assert path.is_file() and not path.is_symlink() and path.resolve() == path, 'original slot history must remain ordinary files'
+            assert RESOURCE.application_metadata_path(owned.read(path), history_root) != environment_path, 'idle must precede every reservation for this environment'
+    lock = runtime / 'cap10-active.private.json'
+    owner = {'kind': 'idle', 'pid': os.getpid(), 'created': psutil.Process().create_time(),
+             'environmentPath': environment_path.name, 'environmentSHA256': hashlib.sha256(environment_path.read_bytes()).hexdigest(),
+             'resourceProfile': resource_profile}
+    owned.save(lock, owner)
+    try:
+        directory.mkdir()
+    except BaseException:
+        if lock.is_file() and not lock.is_symlink() and owned.read(lock) == owner:
+            lock.unlink()
+        raise
+    return directory, owner
+
+
+def release_idle_owner(runtime, owner, observer, owned):
+    if (owner is None or owner.get('pid') != os.getpid()
+            or owner.get('created') != psutil.Process().create_time()
+            or observer is not None and observer.poll() is None):
+        return False
+    lock = runtime / 'cap10-active.private.json'
+    if lock.is_file() and not lock.is_symlink() and owned.read(lock) == owner:
+        lock.unlink()
+        return True
+    return False
 
 
 def idle_attempt(root, authorization, transition_sha, additional_authorization=None,
@@ -232,33 +271,45 @@ def main():
     assert api_runtime == runtime and app_config(api_values) == app_config(value)
     assert value['CAP_SOURCE_SHA'] == api_metadata['sourceSha']
     assert value['CAP_READ_EXPECTED_REVISION'] == api_metadata['expectedVersion']
-    assert not list(root.glob('slot-*.json')), 'idle observation must precede S1'
-    boot_id = owned.clock_sample().get('bootId') if args.interruption_retry_authorization else None
-    attempt = idle_attempt(root, args.retry_authorization, owned.transition(), args.additional_retry_authorization,
-                           args.interruption_retry_authorization, boot_id)
-    reservation = root / 'idle-reservation.json'
-    owned.save(reservation, {'at': owned.now(), 'seconds': 60, 'intervalSeconds': 5,
-                            **attempt, 'failedAttemptConsumesOnlyIdleObservation': True,
-                            'environmentPath': environment_path.name, 'environmentSHA256': environment_sha, 'resourceProfile': resource_profile,
-                            'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition()})
-    owned_containers = environment_metadata['containers']
-    for service, container in owned_containers.items():
-        checked = owned.container(service, container['id'], True, resource_profile=resource_profile)
-        assert checked['volumes'] == container['volumes']
-    identities = container_identities(owned_containers, resource_profile)
-    control = root / 'idle-control'
-    control.mkdir()
+    evidence_root = IDLE.idle_directory(environment_path, root, resource_profile)
+    idle_owner = None
+    if evidence_root == root:
+        assert not list(root.glob('slot-*.json')), 'idle observation must precede S1'
+        boot_id = owned.clock_sample().get('bootId') if args.interruption_retry_authorization else None
+        attempt = idle_attempt(root, args.retry_authorization, owned.transition(), args.additional_retry_authorization,
+                               args.interruption_retry_authorization, boot_id)
+    else:
+        evidence_root, idle_owner = claim_versioned_idle(root, runtime, environment_path, resource_profile, owned,
+            (args.retry_authorization, args.additional_retry_authorization, args.interruption_retry_authorization))
+        attempt = {'attempt': 1, 'idleSchemaVersion': 1, 'idleDirectory': evidence_root.name}
+    reservation = evidence_root / 'idle-reservation.json'
+    control = evidence_root / 'idle-control'
     done = control / 'done.json'
-    downstream = root / 'idle-downstream'
-    result = {'at': owned.now(), 'passed': False, 'seconds': 60, 'samples': [], 'errors': [],
+    downstream = evidence_root / 'idle-downstream'
+    observer = None
+    result = {'passed': False, 'seconds': 60, 'samples': [], 'errors': [],
               **attempt,
               'noWorkloadStarted': True, 'apiPid': api.pid, 'sourceSha': api_metadata['sourceSha'],
-              'executionPlatform': owned.PLATFORM, 'transitionSHA256': owned.transition(),
-              'scriptSHA256': hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              'executionPlatform': owned.PLATFORM,
               'environmentPath': environment_path.name, 'environmentSHA256': environment_sha, 'resourceProfile': resource_profile}
-    observer = None
+    if idle_owner is not None:
+        result.update(intervalSeconds=5, reservationPath=reservation.relative_to(root).as_posix())
     try:
-        with (root / 'idle-observer.txt').open('xb') as output:
+        result.update(at=owned.now(), transitionSHA256=owned.transition(),
+                      scriptSHA256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest())
+        owned.save(reservation, {'at': result['at'], 'seconds': 60, 'intervalSeconds': 5,
+                                **attempt, 'failedAttemptConsumesOnlyIdleObservation': True,
+                                'environmentPath': environment_path.name, 'environmentSHA256': environment_sha, 'resourceProfile': resource_profile,
+                                'executionPlatform': owned.PLATFORM, 'transitionSHA256': result['transitionSHA256']})
+        if idle_owner is not None:
+            result['reservationSHA256'] = hashlib.sha256(reservation.read_bytes()).hexdigest()
+        owned_containers = environment_metadata['containers']
+        for service, container in owned_containers.items():
+            checked = owned.container(service, container['id'], True, resource_profile=resource_profile)
+            assert checked['volumes'] == container['volumes']
+        identities = container_identities(owned_containers, resource_profile)
+        control.mkdir()
+        with (evidence_root / 'idle-observer.txt').open('xb') as output:
             observer = subprocess.Popen([str(Path(args.observer).resolve()), '--environment', args.environment,
                 '--output', str(downstream), '--done-file', str(done),
                 '--like-fixture', value['CAP_LIKE_FIXTURE'], '--max-seconds', '150'],
@@ -311,7 +362,7 @@ def main():
                                         'uncertaintySeconds': (after - before) / 2})
                 row['observationElapsedMs'] = (time.monotonic() - tick) * 1000
                 result['samples'].append(row)
-                with (root / 'idle-samples.ndjson').open('a', encoding='utf-8', newline='\n') as samples:
+                with (evidence_root / 'idle-samples.ndjson').open('a', encoding='utf-8', newline='\n') as samples:
                     samples.write(json.dumps(row, ensure_ascii=False) + '\n')
             owned.save(done, {'at': owned.now(), 'reason': '60-second idle observation complete; no load'})
             result['observerExit'] = observer.wait(timeout=15)
@@ -357,16 +408,24 @@ def main():
     except Exception as error:
         result['errors'].append({'class': type(error).__name__, 'detailsSuppressed': True})
     finally:
-        if observer is not None and observer.poll() is None:
-            if not done.exists():
-                owned.save(done, {'at': owned.now(), 'reason': 'idle observation failed; no load'})
+        try:
+            if observer is not None and observer.poll() is None:
+                if not done.exists():
+                    owned.save(done, {'at': owned.now(), 'reason': 'idle observation failed; no load'})
+                try:
+                    observer.wait(timeout=15)
+                except subprocess.TimeoutExpired:
+                    observer.terminate()
+                    observer.wait(timeout=5)
+        except Exception as error:
+            result['passed'] = False
+            result['errors'].append({'class': type(error).__name__, 'detailsSuppressed': True})
+        finally:
             try:
-                observer.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                observer.terminate()
-                observer.wait(timeout=5)
-        result['finishedAt'] = owned.now()
-        owned.save(root / 'idle-result.json', result)
+                result['finishedAt'] = owned.now()
+                owned.save(evidence_root / 'idle-result.json', result)
+            finally:
+                release_idle_owner(runtime, idle_owner, observer, owned)
     print(json.dumps({'idlePassed': result['passed'], 'samples': len(result['samples']),
                       'hostMemoryMaxPercent': result.get('hostMemoryMaxPercent'),
                       'hostCPUMedian': result.get('hostCPUMedian'), 'errors': result['errors']}))

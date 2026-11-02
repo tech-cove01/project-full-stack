@@ -16,6 +16,8 @@ GRADE_PATH = Path(__file__).with_name('cap10-grade.py')
 spec = importlib.util.spec_from_file_location('cap10_policy_under_review', GRADE_PATH)
 grade = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(grade)
+idle_spec = importlib.util.spec_from_file_location('cap10_grade_check_idle_fixture', Path(__file__).with_name('cap10-idle-authorization-check.py'))
+idle_checks = importlib.util.module_from_spec(idle_spec); idle_spec.loader.exec_module(idle_checks)
 
 
 class Checks(unittest.TestCase):
@@ -103,6 +105,11 @@ class Checks(unittest.TestCase):
             target = {'api': api, 'preflight': preflight, 'ability': ability}[name]
             target.update(overrides.pop(name, {}))
         options.update(overrides)
+        if 'preflight_reference' not in options and preflight.get('idleSchemaVersion') == 1:
+            path = execution_root / preflight['idleDirectory'] / 'idle-result.json'
+            original = grade.read(path)
+            options['preflight_reference'] = {'path': path.relative_to(execution_root).as_posix(), 'sha256': grade.sha(path),
+                **{key: original[key] for key in ('environmentPath', 'environmentSHA256', 'resourceProfile')}}
         return grade.check_reservation(execution_root, kind, rate, 180 if kind == 'formal' else 60,
                                        api, execution_root / fixture_name, preflight, ability, **options)
 
@@ -1074,7 +1081,8 @@ class Checks(unittest.TestCase):
         identity = {'environmentPath': path.name, 'environmentSHA256': grade.sha(path), 'resourceProfile': 'mysql8-v1'}
         active.update(identity, deploymentId='mysql8-resource-deployment')
         self.put('linux/active-application.json', active)
-        return {**api, **identity}, active, {'passed': True, **identity}
+        preflight, _ = idle_checks.versioned_preflight_fixture(directory, identity)
+        return {**api, **identity}, active, preflight
 
     def test_environment_identity_never_follows_current_versioned_metadata_for_old_records(self):
         original = (self.root / 'environment.json').read_bytes()
@@ -1126,6 +1134,21 @@ class Checks(unittest.TestCase):
             self.put(name, metadata)
             with self.subTest(name=name, profile=profile), self.assertRaises(ValueError):
                 grade.environment_identity({'environmentPath': name, 'resourceProfile': profile}, self.root, require_sha=False)
+
+    def test_new_resource_requires_original_idle_reference_before_reservation(self):
+        directory, api, active = self.authority_fixture()
+        api, active, preflight = self.resource_active(directory, api, active)
+        self.authority_admission(directory, 'S7')
+        options = {'source': self.other, 'execution_root': directory, 'api': api, 'preflight': preflight}
+        with self.assertRaises(ValueError):
+            self.reserve('comparison', 800, preflight_reference=None, **options)
+        result_path = directory / preflight['idleDirectory'] / 'idle-result.json'
+        original = result_path.read_bytes()
+        result_path.write_text(json.dumps({**preflight, 'samples': preflight['samples'][:-1]}), encoding='utf-8')
+        with self.assertRaises(ValueError):
+            self.reserve('comparison', 800, **options)
+        result_path.write_bytes(original)
+        self.assertEqual(self.reserve('comparison', 800, **options)['tag'], 'S7')
 
     def test_resource_formal_candidate_and_freeze_cannot_mix_metadata_paths(self):
         directory, api, active = self.authority_fixture()

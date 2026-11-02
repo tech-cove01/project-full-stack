@@ -38,23 +38,24 @@ type Kafka struct {
 }
 
 type Config struct {
-	Environment           string
-	APIAddr               string
-	DiagnosticsAddr       string
-	FeedDiagnostics       bool
-	LikeDiagnostics       bool
-	MySQL                 MySQL
-	Redis                 Redis
-	Kafka                 Kafka
-	AI                    AI
-	Search                Search
-	Location              *time.Location
-	StartupTimeout        time.Duration
-	ProbeTimeout          time.Duration
-	ShutdownTimeout       time.Duration
-	OrderPayTimeout       time.Duration
-	OrderStreamWorkers    int
-	CommunityRelayWorkers int
+	Environment                  string
+	APIAddr                      string
+	DiagnosticsAddr              string
+	FeedDiagnostics              bool
+	LikeDiagnostics              bool
+	MySQL                        MySQL
+	Redis                        Redis
+	Kafka                        Kafka
+	AI                           AI
+	Search                       Search
+	Location                     *time.Location
+	StartupTimeout               time.Duration
+	ProbeTimeout                 time.Duration
+	ShutdownTimeout              time.Duration
+	OrderPayTimeout              time.Duration
+	OrderStreamWorkers           int
+	CommunityRelayWorkers        int
+	CommunityConsumerCommitBatch int
 }
 
 func Load() (Config, error) { return load(os.LookupEnv) }
@@ -63,10 +64,11 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	cfg := Config{
 		Environment: "development", APIAddr: "127.0.0.1:8082",
 		StartupTimeout: 8 * time.Second, ProbeTimeout: 2 * time.Second,
-		ShutdownTimeout:       10 * time.Second,
-		OrderPayTimeout:       15 * time.Minute,
-		OrderStreamWorkers:    1,
-		CommunityRelayWorkers: 1,
+		ShutdownTimeout:              10 * time.Second,
+		OrderPayTimeout:              15 * time.Minute,
+		OrderStreamWorkers:           1,
+		CommunityRelayWorkers:        1,
+		CommunityConsumerCommitBatch: 1,
 	}
 	var err error
 	cfg.Location, err = time.LoadLocation("Asia/Shanghai")
@@ -188,6 +190,12 @@ func load(lookup func(string) (string, bool)) (Config, error) {
 	}
 	if value, ok := lookup("GO_COMMUNITY_RELAY_WORKERS"); ok {
 		cfg.CommunityRelayWorkers, err = parseInt("GO_COMMUNITY_RELAY_WORKERS", value, 1, 8)
+		if err != nil {
+			return Config{}, err
+		}
+	}
+	if value, ok := lookup("GO_COMMUNITY_CONSUMER_COMMIT_BATCH"); ok {
+		cfg.CommunityConsumerCommitBatch, err = parseInt("GO_COMMUNITY_CONSUMER_COMMIT_BATCH", value, 1, 64)
 		if err != nil {
 			return Config{}, err
 		}

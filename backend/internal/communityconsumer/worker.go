@@ -32,6 +32,8 @@ type reader interface {
 	Close() error
 }
 
+var errCommitBatchBarrier = errors.New("single-message commit barrier")
+
 type Worker struct {
 	reader       reader
 	readerMu     sync.Mutex
@@ -42,14 +44,18 @@ type Worker struct {
 	// A consumer must not join its group before the topic has partitions. In
 	// kafka-go 0.4.47 an empty initial assignment can race its partition watcher
 	// and stay empty after automatic topic creation.
-	topicReady    func(context.Context) bool
-	closeMetadata func()
-	ready         bool
-	pending       *kafka.Message
-	attempts      int
-	durable       bool
-	closeOnce     sync.Once
-	closeError    error
+	topicReady          func(context.Context) bool
+	closeMetadata       func()
+	ready               bool
+	pending             *kafka.Message
+	attempts            int
+	durable             bool
+	parked              bool
+	commitBatchSize     int
+	commitFlushInterval time.Duration
+	commitPending       []kafka.Message
+	closeOnce           sync.Once
+	closeError          error
 
 	readTimeout, applyTimeout, commitTimeout, retryDelay time.Duration
 }
@@ -114,7 +120,18 @@ func newWorkerWithGroup(brokers []string, topic, projection, group string, proce
 func workerWithReader(source reader, projection string, processor Processor) *Worker {
 	return &Worker{reader: source, projection: projection, processor: processor,
 		readTimeout: time.Second, applyTimeout: 5 * time.Second,
-		commitTimeout: 5 * time.Second, retryDelay: 200 * time.Millisecond}
+		commitTimeout: 5 * time.Second, retryDelay: 200 * time.Millisecond,
+		commitBatchSize: 1, commitFlushInterval: 10 * time.Millisecond}
+}
+
+// SetCommitBatch is assembly-only, before Poll/Run. DB effects remain individual
+// durable transactions; only successful LIKE offsets share a synchronous ACK.
+func (worker *Worker) SetCommitBatch(size int) error {
+	if size < 1 || size > 64 {
+		return errors.New("community synchronous commit batch must be between 1 and 64")
+	}
+	worker.commitBatchSize = size
+	return nil
 }
 
 func (worker *Worker) Close() error {
@@ -160,11 +177,99 @@ func (worker *Worker) Run(ctx context.Context) {
 	}
 }
 
-// Poll makes one bounded attempt at the current message. Poll/Run have one
-// goroutine owner. A failed Apply, Park or Commit keeps the same message; no
-// later offset is fetched by this worker until it has durable proof AND a
-// successful synchronous commit. Kafka itself may prefetch without committing.
+// Poll has one goroutine owner. The default retains a single message until its
+// synchronous ACK. Opt-in batches fetch a successor only after each LIKE effect
+// is DB-durable, hold at most 64 offsets, and stop fetching while an ACK retries.
+// Invalid/non-LIKE messages and parking retain their single-message barrier.
 func (worker *Worker) Poll(ctx context.Context) (bool, error) {
+	if worker.commitBatchSize <= 1 {
+		return worker.pollOne(ctx, false, worker.readTimeout)
+	}
+	if err := ctx.Err(); err != nil {
+		return false, err
+	}
+	if worker.readerClosed() {
+		return false, io.EOF
+	}
+	if len(worker.commitPending) > 0 {
+		return worker.commitDurableBatch(ctx)
+	}
+	var flushAt time.Time
+	processedAny := false
+	for len(worker.commitPending) < worker.commitBatchSize {
+		fetchTimeout := worker.readTimeout
+		if !flushAt.IsZero() {
+			fetchTimeout = time.Until(flushAt)
+			if fetchTimeout <= 0 {
+				break
+			}
+		}
+		processed, err := worker.pollOne(ctx, true, fetchTimeout)
+		processedAny = processedAny || processed
+		if errors.Is(err, errCommitBatchBarrier) {
+			if len(worker.commitPending) > 0 {
+				if _, err := worker.commitDurableBatch(ctx); err != nil {
+					return true, err
+				}
+			}
+			return worker.pollOne(ctx, false, worker.readTimeout)
+		}
+		if err != nil {
+			if len(worker.commitPending) > 0 && ctx.Err() == nil {
+				if _, commitErr := worker.commitDurableBatch(ctx); commitErr != nil {
+					return true, commitErr
+				}
+			}
+			return processedAny, err
+		}
+		if !processed {
+			break
+		}
+		if flushAt.IsZero() {
+			flushAt = time.Now().Add(worker.commitFlushInterval)
+		}
+	}
+	if len(worker.commitPending) > 0 {
+		return worker.commitDurableBatch(ctx)
+	}
+	return processedAny, nil
+}
+
+func (worker *Worker) readerClosed() bool {
+	worker.readerMu.Lock()
+	defer worker.readerMu.Unlock()
+	return worker.closed
+}
+
+func (worker *Worker) commitDurableBatch(ctx context.Context) (bool, error) {
+	if err := ctx.Err(); err != nil {
+		return true, err
+	}
+	if worker.readerClosed() {
+		return true, io.EOF
+	}
+	commitCtx, cancel := context.WithTimeout(ctx, worker.commitTimeout)
+	err := worker.reader.CommitMessages(commitCtx, worker.commitPending...)
+	cancel()
+	if err != nil {
+		if ctx.Err() != nil {
+			return true, ctx.Err()
+		}
+		if worker.readerClosed() {
+			return true, io.EOF
+		}
+		return true, errors.New("community batch offset commit not confirmed")
+	}
+	worker.commitPending = nil
+	return true, nil
+}
+
+func batchableLike(message kafka.Message) bool {
+	event, err := communityprojection.Decode(message.Value)
+	return err == nil && event.EventType == "LIKE_CHANGED"
+}
+
+func (worker *Worker) pollOne(ctx context.Context, collect bool, fetchTimeout time.Duration) (bool, error) {
 	if err := ctx.Err(); err != nil {
 		return false, err
 	}
@@ -194,7 +299,7 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 		worker.ready = true
 	}
 	if worker.pending == nil {
-		readCtx, cancel := context.WithTimeout(ctx, worker.readTimeout)
+		readCtx, cancel := context.WithTimeout(ctx, fetchTimeout)
 		message, err := worker.reader.FetchMessage(readCtx)
 		cancel()
 		if err != nil {
@@ -210,6 +315,9 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 			return false, errors.New("community message fetch unavailable")
 		}
 		worker.pending = &message
+	}
+	if collect && !batchableLike(*worker.pending) {
+		return true, errCommitBatchBarrier
 	}
 	if !worker.durable {
 		if worker.attempts < 3 {
@@ -239,10 +347,19 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 				return true, errors.New("community message parking not durable")
 			}
 			worker.durable = true
+			worker.parked = true
 		}
 	}
 	if err := ctx.Err(); err != nil {
 		return true, err
+	}
+	if collect {
+		if worker.parked {
+			return true, errCommitBatchBarrier
+		}
+		worker.commitPending = append(worker.commitPending, *worker.pending)
+		worker.pending, worker.attempts, worker.durable, worker.parked = nil, 0, false, false
+		return true, nil
 	}
 	commitCtx, cancel := context.WithTimeout(ctx, worker.commitTimeout)
 	err := worker.reader.CommitMessages(commitCtx, *worker.pending)
@@ -253,7 +370,7 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 		}
 		return true, errors.New("community offset commit not confirmed")
 	}
-	worker.pending, worker.attempts, worker.durable = nil, 0, false
+	worker.pending, worker.attempts, worker.durable, worker.parked = nil, 0, false, false
 	return true, nil
 }
 

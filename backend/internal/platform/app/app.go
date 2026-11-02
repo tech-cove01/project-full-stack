@@ -143,6 +143,9 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		projection := communityprojection.NewRuntime(communityprojection.New(resources.ORM))
 		for _, name := range []string{communityprojection.Follow, communityprojection.Feed} {
 			consumer, err := communityconsumer.NewWorker(cfg.Kafka.Brokers, cfg.Kafka.Topic, name, projection)
+			if err == nil {
+				err = consumer.SetCommitBatch(cfg.CommunityConsumerCommitBatch)
+			}
 			if err != nil {
 				_ = listener.Close()
 				_ = owned.Close()
@@ -155,6 +158,9 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		}
 		if searchClient != nil {
 			consumer, err := communityconsumer.NewWorker(cfg.Kafka.Brokers, cfg.Kafka.Topic, notesearch.Projection, notesearch.NewSync(resources.ORM, searchClient))
+			if err == nil {
+				err = consumer.SetCommitBatch(cfg.CommunityConsumerCommitBatch)
+			}
 			if err != nil {
 				_ = listener.Close()
 				_ = owned.Close()

@@ -17,7 +17,12 @@ import (
 // not lose the existing single-event publishing capacity.
 const BatchPublishBytes = 256 << 10
 
-const batchWriterBytes = 1 << 20
+const (
+	batchWriterBytes = 1 << 20
+	// A lane has one synchronous call, so no later call can fill a partial
+	// partition batch while this one waits. Keep only a short SDK linger.
+	batchWriterLinger = time.Millisecond
+)
 
 var (
 	ErrInvalidPublisher = errors.New("invalid community batch publisher configuration")
@@ -56,7 +61,7 @@ func NewBatchPublisher(lifetime context.Context, brokers []string, topic string,
 			return &kafka.Writer{
 				Addr: kafka.TCP(addresses...), Topic: topic, Balancer: &kafka.Hash{},
 				RequiredAcks: kafka.RequireAll, Async: false, MaxAttempts: 1,
-				WriteTimeout: 5 * time.Second, BatchTimeout: 10 * time.Millisecond,
+				WriteTimeout: 5 * time.Second, BatchTimeout: batchWriterLinger,
 				BatchSize: batchSize, BatchBytes: batchWriterBytes,
 				AllowAutoTopicCreation: true,
 			}

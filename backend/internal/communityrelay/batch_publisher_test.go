@@ -179,8 +179,8 @@ func TestBatchPublisherPolicyAndDependencyFreePreflight(t *testing.T) {
 	publisher, history := newSDKPublisher(t, ctx, 32, transport)
 	policy := publisher.newWriter()
 	if policy.RequiredAcks != kafka.RequireAll || policy.Async || policy.MaxAttempts != 1 || policy.BatchSize != 32 ||
-		policy.BatchBytes != batchWriterBytes || policy.WriteTimeout != 5*time.Second || policy.BatchTimeout != 10*time.Millisecond || publisher.writeWait != 10*time.Second {
-		t.Fatal("opt-in transport policy relaxed durability, attempt or byte/time bounds")
+		policy.BatchBytes != batchWriterBytes || policy.WriteTimeout != 5*time.Second || policy.BatchTimeout != time.Millisecond || publisher.writeWait != 10*time.Second {
+		t.Fatal("opt-in transport policy changed durability, attempt, byte/write bounds or reviewed linger")
 	}
 	_ = policy.Close()
 	before := len(history.snapshot())

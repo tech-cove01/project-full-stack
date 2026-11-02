@@ -145,8 +145,84 @@ def effective_work_budget(root, api_metadata, now=None):
             'originalMaximumSeconds': 10800, 'passed': True, 'platform': 'linux',
             'usedBeforeSwitch': used, 'anchor': transition['recordedAt'], **continuation}
 
+def pre_load_recovery(root, records):
+    """One zero-PUT S1 startup failure can consume its slot without a boundary."""
+    path = Path(root) / 'pre-load-recovery.json'
+    if not path.exists():
+        require(not any(c.get('reservationCheck', {}).get('preLoadRecoverySHA256') for c in records), 'pre-load recovery authorization cannot be removed')
+        return None
+    require(root == ROOT / 'linux' and path.is_file() and not path.is_symlink(), 'fixed Linux pre-load recovery required')
+    auth, digest = read(path), sha(path)
+    require(isinstance(auth, dict) and type(auth.get('version')) is int and auth['version'] == 1 and auth.get('batch') == 'CAP-10' and auth.get('authorized') is True and auth.get('failedTag') == 'S1' and auth.get('nextDiagnosticTag') == 'S2', 'only the first zero-request startup may recover')
+    require(type(auth.get('remoteEngineRSSLimitBytes')) is int and auth['remoteEngineRSSLimitBytes'] == 6 * 1024 ** 3 and auth.get('toolRefreezeAuthorized') is True, 'explicit per-engine 6GiB environment and one tool refreeze required')
+    require(isinstance(auth.get('userAuthorizationReference'), str) and auth['userAuthorizationReference'].strip() and isinstance(auth.get('recordedAt'), str), 'explicit autonomous repair authorization required')
+    registered = instant(auth['recordedAt'])
+    require(registered <= dt.datetime.now(dt.timezone.utc), 'recovery authorization cannot be future-dated')
+    require(records and records[0]['tag'] == 'S1' and records[0]['kind'] == 'diagnostic' and records[0]['rate'] == 50 and records[0]['seconds'] == 60, 'original S1 reservation must be retained')
+    for command in records[1:]:
+        require(command.get('reservationCheck', {}).get('preLoadRecoverySHA256') == digest and instant(command['at']) >= registered, 'pre-load recovery must remain fixed before S2')
+    require(auth.get('proofPath') == 'pre-load-recovery-proof.json', 'fixed pre-load proof path required')
+    proof_path = Path(root) / auth['proofPath']
+    require(proof_path.is_file() and not proof_path.is_symlink() and auth.get('proofSHA256') == sha(proof_path), 'pre-load proof bytes differ')
+    proof = read(proof_path)
+    require(isinstance(proof, dict) and proof.get('version') == 1 and proof.get('batch') == 'CAP-10' and proof.get('failedTag') == 'S1' and isinstance(proof.get('artifacts'), dict), 'pre-load proof identity invalid')
+    def artifact(name, ndjson=False):
+        reference = proof['artifacts'].get(name, {})
+        require(isinstance(reference, dict) and isinstance(reference.get('path'), str), 'pre-load artifact reference missing: ' + name)
+        relative = Path(reference['path'])
+        candidate = Path(root) / relative
+        require(not relative.is_absolute() and '..' not in relative.parts and candidate.is_file() and not candidate.is_symlink() and candidate.resolve() == candidate and candidate.is_relative_to(root), 'pre-load artifact must stay in executor root: ' + name)
+        require(reference.get('sha256') == sha(candidate), 'pre-load artifact bytes differ: ' + name)
+        return [json.loads(line) for line in candidate.read_bytes().splitlines() if line.strip()] if ndjson else read(candidate)
+    command, previous = artifact('command'), artifact('stage')
+    require(proof['artifacts']['command']['path'] == 'S1-command.json' and proof['artifacts']['stage']['path'] == 'S1-stage.json' and command == records[0] and previous == stage(root, command) and previous.get('passed') is False, 'original failed S1 artifacts cannot be replaced or relabeled')
+    require(instant(previous['finishedAt']) <= registered and command.get('loadBackend') == 'pts', 'recovery must follow the original PTS startup failure')
+    collector, journal = artifact('collectorTerminal'), artifact('collectorRecords', True)
+    zeros = ('attempted', 'completed', 'mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')
+    zero_counts = lambda counts: isinstance(counts, dict) and all(type(counts.get(key)) is int and counts[key] == 0 for key in zeros)
+    require(collector.get('phase') == 'warm' and collector.get('rate') == 25 and collector.get('seconds') == 10 and collector.get('expectedEngines') == 2 and collector.get('fixtureSHA256') == command['fixtureSHA256'] and collector.get('stop') is True and collector.get('childrenConverged') is True and collector.get('latencySampleCount') == 0 and zero_counts(collector.get('counts')), 'any HTTP outcome forbids startup recovery')
+    require(collector.get('evidenceSHA256') == proof['artifacts']['collectorRecords']['sha256'], 'collector must bind the complete retained journal')
+    configurations = [row.get('configuration', {}) for row in journal if row.get('kind') == 'configuration']
+    require(len(configurations) == 1 and all(configurations[0].get(key) == collector.get(key) for key in ('runId', 'phase', 'rate', 'seconds', 'fixtureSHA256', 'expectedEngines')), 'retained collector run identity differs')
+    engines = collector.get('engines', [])
+    require(len(engines) == 2 and len({e.get('engineId') for e in engines}) == 2 and all(e.get('stoppedOffering') is True and zero_counts(e.get('counts')) for e in engines), 'both engines must attest zero requests and stopped offering')
+    completions = [row for row in journal if row.get('kind') == 'complete']
+    require(len(completions) == 2 and {row.get('engineId') for row in completions} == {e['engineId'] for e in engines} and all(row.get('accepted') is True and row.get('stoppedOffering') is True and type(row.get('inFlight')) is int and row['inFlight'] == 0 and zero_counts(row.get('counts')) and row.get('collectorRawCounts') == row['counts'] for row in completions), 'complete zero-request engine termination frames required')
+    require(not any(row.get('kind') == 'batch' and row.get('records') != [] for row in journal), 'any recorded native HTTP forbids startup recovery')
+    barriers = [row for row in journal if row.get('kind') == 'barrier']
+    stops = [row for row in journal if row.get('kind') == 'stop']
+    require(not barriers and collector.get('startUnixMs') is None or len(barriers) == 1 and stops
+            and type(barriers[0].get('startUnixMs')) in (int, float) and math.isfinite(barriers[0]['startUnixMs'])
+            and collector.get('startUnixMs') == barriers[0]['startUnixMs']
+            and type(stops[0].get('atUnixMs')) in (int, float) and math.isfinite(stops[0]['atUnixMs'])
+            and stops[0]['atUnixMs'] < barriers[0]['startUnixMs'], 'startup stop must strictly precede its only scheduled barrier')
+    stop, idle1, idle2 = artifact('stopAudit'), artifact('idleAudit1'), artifact('idleAudit2')
+    scene = stop.get('sceneId')
+    require(stop.get('action') == 'StopTestingJMeterScene' and stop.get('httpStatus') == 200 and isinstance(scene, str) and scene and stop.get('sanitizedRawResponse', {}).get('Success') is True, 'actual accepted scene stop evidence required')
+    admission_path = Path(root) / 'pts-scene-admission.json'
+    require(admission_path.is_file() and command.get('ptsAdmissionSHA256') == sha(admission_path) and read(admission_path).get('sceneId') == scene, 'stopped scene must match the original S1 admission')
+    for row in (idle1, idle2):
+        response = row.get('sanitizedRawResponse')
+        require(row.get('action') == 'GetJMeterSceneRunningData' and row.get('sceneId') == scene and row.get('httpStatus') == 200 and isinstance(response, dict) and set(response) == {'RequestId', 'Success'} and response['Success'] is True and isinstance(response['RequestId'], str) and response['RequestId'].strip(), 'only strict signed no-active replies can recover zero-PUT startup')
+    require(instant(stop['responseFinishedAt']) <= instant(idle1['requestStartedAt']) and instant(idle1['responseFinishedAt']) <= instant(idle2['requestStartedAt']) and (instant(idle2['requestStartedAt']) - instant(idle1['requestStartedAt'])).total_seconds() >= 2 and idle1['sanitizedRawResponse']['RequestId'] != idle2['sanitizedRawResponse']['RequestId'], 'two distinct no-active replies at least two seconds apart required')
+    exited = artifact('localExit')
+    owners = exited.get('owners', [])
+    expected_owners = {(p['pid'], p['created']) for p in previous.get('knownOwnedProcesses', [])}
+    actual_owners = {(p.get('pid'), p.get('created')) for p in owners}
+    require(owners and expected_owners and expected_owners <= actual_owners and all(type(p.get('pid')) is int and p['pid'] > 0 and type(p.get('created')) in (int, float) and p.get('alive') is False and p.get('identityChecked') is True for p in owners) and all(exited.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive')), 'all original local load owners must be proved gone')
+    manifest, inspection = artifact('fixtureManifest'), artifact('fixtureInspection')
+    require(proof['artifacts']['fixtureManifest']['sha256'] == command['fixtureSHA256'] and inspection.get('valid') is True and inspection.get('errors') == [], 'authoritative unchanged fixture inspection required')
+    distribution, facts = inspection.get('distribution', {}), inspection.get('facts', {})
+    require(distribution.get('configuredRelationships') == 512 and distribution.get('existing') == 512 and distribution.get('active') == 0 and distribution.get('inactive') == 512 and distribution.get('missing') == 0 and distribution.get('versionHistogram') == {'0': 512} and facts.get('transitions') == facts.get('eventCount') == 0 and facts.get('events') == [], 'all 512 original relationships must remain version-zero without LIKE outbox')
+    pairs = list(zip(manifest.get('multiNoteIds', []), manifest.get('userIds', [])))
+    rows, notes = facts.get('facts', []), facts.get('notes', [])
+    require(len(pairs) == len(set(pairs)) == len(rows) == 512 and {(r.get('noteId'), r.get('userId')) for r in rows} == set(pairs) and all(type(r.get('active')) is int and r['active'] == 0 and type(r.get('version')) is int and r['version'] == 0 for r in rows) and len(notes) == 512 and {n.get('noteId') for n in notes} == {p[0] for p in pairs} and all(n.get('liked') == n.get('activeRelations') == 0 for n in notes), 'SQL facts and note counters must cover the exact original pairs')
+    return {'sha256': digest, 'failedTag': 'S1', 'nextDiagnosticTag': 'S2'}
+
+
 def search_state(root, source_sha):
     records = history(root)
+    recovery = pre_load_recovery(root, records)
     boundary_records = records
     final_path = Path(root) / 'final-application.json'
     if final_path.is_file():
@@ -156,7 +232,7 @@ def search_state(root, source_sha):
             indexes = [index for index, command in enumerate(records) if command['tag'] == after]
             require(len(indexes) == 1, 'rollback boundary reset must name a retained reservation')
             boundary_records = records[indexes[0] + 1:]
-    relevant = [(c, stage(root, c)) for c in boundary_records if c['tag'].startswith('S') and c['kind'] != 'candidate' and c['apiSourceSha'] == source_sha]
+    relevant = [(c, stage(root, c)) for c in boundary_records if c['tag'].startswith('S') and c['kind'] != 'candidate' and c['apiSourceSha'] == source_sha and (not recovery or c['tag'] != recovery['failedTag'])]
     passes = [(c, s) for c, s in relevant if s.get('outcome') == 'pass']
     limited = [(c, s) for c, s in relevant if s.get('outcome') == 'performance_limited' and s.get('boundaryEligible') is True]
     best = max(passes, key=lambda pair: pair[0]['rate'], default=None)
@@ -200,9 +276,15 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     require(api_metadata.get('likeDiagnosticsRequested') is (kind in ('diagnostic', 'comparison')) and api_metadata.get('tailEnabledRequested') is False, 'Like/Feed observation switches differ from purpose')
     budget = effective_work_budget(root, api_metadata)
     records = history(root)
+    recovery = pre_load_recovery(root, records)
     shorts = [c for c in records if c['tag'].startswith('S')]; formals = [c for c in records if c['tag'].startswith('H')]
+    effective_shorts = [c for c in shorts if not recovery or c['tag'] != recovery['failedTag']]
+    if recovery and effective_shorts:
+        require(current_tools == effective_shorts[0].get('scriptHashes') and observer_hash == effective_shorts[0].get('observerBinarySHA256'), 'recovered tools and observer are frozen from S2 onward')
     require(sum(c['seconds'] for c in records) + seconds <= 840, '840s total main-load budget exhausted')
     for c in records:
+        if recovery and c['tag'] == recovery['failedTag']:
+            continue  # The immutable failed slot remains consumed, never passed.
         previous = stage(root, c)
         require(previous.get('childrenConverged') is True, 'prior owned children have not converged')
         require(previous.get('batchFatal') is not True, 'correctness/unknown/noop ended the batch')
@@ -226,19 +308,20 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     else:
         require(not formals and len(shorts) < 8, 'short-window budget closed')
         tag = 'S' + str(len(shorts) + 1)
-        if not shorts:
-            require(kind == 'diagnostic' and rate == 50, 'S1 must be 50/s diagnostic')
-            require(prediction and prediction.get('observedEvidence') and prediction.get('differentPredictions'), 'S1 requires evidence and differentiating predictions before start')
+        if not effective_shorts:
+            require(kind == 'diagnostic' and rate == 50, 'first effective window must be 50/s diagnostic')
+            require(not recovery or tag == 'S2' and source == shorts[0]['apiSourceSha'] and binary == shorts[0]['binarySHA256'], 'startup recovery must use the same application in S2')
+            require(prediction and prediction.get('observedEvidence') and prediction.get('differentPredictions'), 'diagnostic requires evidence and differentiating predictions before start')
         elif kind == 'comparison':
-            require(len(shorts) == 1 and shorts[0]['kind'] == 'diagnostic' and rate == 50 and shorts[0]['apiSourceSha'] != source and prediction and prediction.get('comparisonOf') == 'S1' and prediction.get('singleVariableEvidence'), 'only the immediate one-variable 50/s comparison is allowed')
+            require(len(effective_shorts) == 1 and effective_shorts[0]['kind'] == 'diagnostic' and rate == 50 and effective_shorts[0]['apiSourceSha'] != source and prediction and prediction.get('comparisonOf') == effective_shorts[0]['tag'] and prediction.get('singleVariableEvidence'), 'only the immediate one-variable 50/s comparison is allowed')
         else:
             require(kind in ('search', 'candidate'), 'no repeated diagnostic or second optimization comparison')
             final = read(root / 'final-application.json')
             require(final['sourceSha'] == source and final['binarySHA256'] == binary and final['environmentSHA256'] == environment and final['fixtureSHA256'] == fixture_hash, 'freeze final search application before continuing')
-            require(any(c['kind'] == 'comparison' for c in shorts) or shorts[0]['apiSourceSha'] == source, 'changed version requires immediate comparison')
-            comparisons = [c for c in shorts if c['kind'] == 'comparison']
-            require(source in {shorts[0]['apiSourceSha'], *[c['apiSourceSha'] for c in comparisons]}, 'one optimization only; final source must be original or compared source')
-            if comparisons and source == shorts[0]['apiSourceSha']:
+            require(any(c['kind'] == 'comparison' for c in effective_shorts) or effective_shorts[0]['apiSourceSha'] == source, 'changed version requires immediate comparison')
+            comparisons = [c for c in effective_shorts if c['kind'] == 'comparison']
+            require(source in {effective_shorts[0]['apiSourceSha'], *[c['apiSourceSha'] for c in comparisons]}, 'one optimization only; final source must be original or compared source')
+            if comparisons and source == effective_shorts[0]['apiSourceSha']:
                 require(final.get('boundaryEvidenceAfter') == comparisons[0]['tag'] and final.get('rollbackEvidence'), 'rollback must reset old boundaries with explicit evidence')
             bound = search_state(root, source)
             if kind == 'candidate':
@@ -248,7 +331,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
                 require(not any(c['rate'] == rate and c['tag'] in bound['boundaryTags'] for c in shorts), 'do not replay an already measured search rate')
     require(not (root / ('slot-' + tag + '.json')).exists() and not (root / (tag + '-command.json')).exists(), 'existing/orphan reservation is not reusable')
     return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'), 'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds,
-            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
+            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
 
 def _grade_tail15(rows, ended, vector, finished):
     start = ended - dt.timedelta(seconds=15)

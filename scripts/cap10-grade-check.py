@@ -525,6 +525,134 @@ class Checks(unittest.TestCase):
         with self.assertRaises(ValueError):
             grade.stage(directory, command)
 
+    def zero_startup(self):
+        directory, transition, api, anchor = self.linux_transition(used=7800)
+        manifest = {'multiNoteIds': [str(i + 1) for i in range(512)], 'userIds': [str(i + 1001) for i in range(512)]}
+        self.put('linux/fixture.json', manifest)
+        self.put('linux/final-application.json', {**self.identity,
+            'environmentSHA256': grade.sha(directory / 'environment.json'), 'fixtureSHA256': grade.sha(directory / 'fixture.json')})
+        self.put('linux/pts-scene-admission.json', {'sceneId': 'OWNED_SCENE'})
+        command = self.add('S1', 50, 'correctness_stop', execution_root=directory, batchFatal=True,
+            childrenConverged=False, recoveryVerified=False, finishedAt=(self.now - dt.timedelta(seconds=3)).isoformat(),
+            knownOwnedProcesses=[{'pid': 12345, 'created': 123.5}])
+        command.update(loadBackend='pts', ptsAdmissionSHA256=grade.sha(directory / 'pts-scene-admission.json'),
+            at=(self.now - dt.timedelta(seconds=20)).isoformat())
+        self.put('linux/S1-command.json', command)
+        counts = dict.fromkeys(('attempted', 'completed', 'mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped'), 0)
+        identity = {'runId': 'ZERO_WARM', 'phase': 'warm', 'rate': 25, 'seconds': 10,
+                    'fixtureSHA256': command['fixtureSHA256'], 'expectedEngines': 2}
+        completions = [{'kind': 'complete', 'engineId': engine, 'accepted': True, 'stoppedOffering': True,
+                        'inFlight': 0, 'counts': {**counts, 'planned': 125}, 'collectorRawCounts': {**counts, 'planned': 125}}
+                       for engine in ('engine-1', 'engine-2')]
+        journal = self.put('linux/recovery/records.ndjson', {})
+        journal.write_text(''.join(json.dumps(row) + '\n' for row in [{'kind': 'configuration', 'configuration': identity}, *completions]), encoding='utf-8')
+        collector = {**identity, 'startUnixMs': None, 'stop': True, 'childrenConverged': True,
+                     'latencySampleCount': 0, 'counts': {**counts, 'planned': 250},
+                     'evidenceSHA256': grade.sha(journal), 'unknown': None,
+                     'engines': [{'engineId': row['engineId'], 'stoppedOffering': True, 'counts': row['counts']} for row in completions]}
+        self.put('linux/recovery/collector-terminal.json', collector)
+        at = lambda seconds: (self.now - dt.timedelta(seconds=seconds)).isoformat()
+        self.put('linux/recovery/stop.json', {'action': 'StopTestingJMeterScene', 'httpStatus': 200,
+            'sceneId': 'OWNED_SCENE', 'responseFinishedAt': at(12), 'sanitizedRawResponse': {'Success': True, 'Code': ''}})
+        for name, start, finish in [('idle1', 11, 10), ('idle2', 8, 7)]:
+            self.put('linux/recovery/' + name + '.json', {'action': 'GetJMeterSceneRunningData', 'httpStatus': 200,
+                'sceneId': 'OWNED_SCENE', 'requestStartedAt': at(start), 'responseFinishedAt': at(finish),
+                'sanitizedRawResponse': {'RequestId': name, 'Success': True}})
+        self.put('linux/recovery/exit.json', {'owners': [{'pid': 12345, 'created': 123.5, 'alive': False, 'identityChecked': True}],
+            'observerAlive': False, 'controllerAlive': False, 'wrapperAlive': False})
+        self.put('linux/recovery/inspect.json', {'valid': True, 'errors': [],
+            'distribution': {'configuredRelationships': 512, 'existing': 512, 'active': 0, 'inactive': 512,
+                             'missing': 0, 'versionHistogram': {'0': 512}},
+            'facts': {'transitions': 0, 'eventCount': 0, 'events': [],
+                'facts': [{'noteId': note, 'userId': user, 'active': 0, 'version': 0} for note, user in zip(manifest['multiNoteIds'], manifest['userIds'])],
+                'notes': [{'noteId': note, 'liked': 0, 'activeRelations': 0} for note in manifest['multiNoteIds']]}})
+        names = {'command': 'S1-command.json', 'stage': 'S1-stage.json', 'collectorTerminal': 'recovery/collector-terminal.json',
+                 'collectorRecords': 'recovery/records.ndjson', 'stopAudit': 'recovery/stop.json',
+                 'idleAudit1': 'recovery/idle1.json', 'idleAudit2': 'recovery/idle2.json', 'localExit': 'recovery/exit.json',
+                 'fixtureManifest': 'fixture.json', 'fixtureInspection': 'recovery/inspect.json'}
+        proof = {'version': 1, 'batch': 'CAP-10', 'failedTag': 'S1',
+                 'artifacts': {key: {'path': value, 'sha256': grade.sha(directory / value)} for key, value in names.items()}}
+        self.put('linux/pre-load-recovery-proof.json', proof)
+        authorization = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'failedTag': 'S1', 'nextDiagnosticTag': 'S2',
+            'remoteEngineRSSLimitBytes': 6 * 1024 ** 3, 'toolRefreezeAuthorized': True,
+            'userAuthorizationReference': 'synthetic authorized autonomous zero-request repair', 'recordedAt': at(1),
+            'proofPath': 'pre-load-recovery-proof.json', 'proofSHA256': grade.sha(directory / 'pre-load-recovery-proof.json')}
+        self.put('linux/pre-load-recovery.json', authorization)
+        return directory, api, proof, authorization
+
+    def test_zero_request_startup_consumes_S1_then_allows_only_S2_diagnostic(self):
+        directory, api, proof, authorization = self.zero_startup()
+        original = (directory / 'S1-stage.json').read_bytes()
+        reservation = self.reserve('diagnostic', 50, execution_root=directory, api=api)
+        self.assertEqual((reservation['tag'], reservation['shortSlotsUsedAfter'], reservation['mainSecondsReservedAfter']), ('S2', 2, 120))
+        self.assertEqual(grade.search_state(directory, self.source)['boundaryTags'], [])
+        self.assertIsNone(grade.search_state(directory, self.source)['L'])
+        self.assertEqual((directory / 'S1-stage.json').read_bytes(), original)
+        for kind in ('search', 'candidate', 'comparison'):
+            with self.subTest(kind=kind), self.assertRaises(ValueError):
+                self.reserve(kind, 50, execution_root=directory, api=api)
+
+    def test_recovered_diagnostic_supports_immediate_single_comparison_and_search(self):
+        directory, api, proof, authorization = self.zero_startup()
+        reservation = self.reserve('diagnostic', 50, execution_root=directory, api=api)
+        command = self.add('S2', 50, kind='diagnostic', execution_root=directory)
+        command['reservationCheck'] = reservation
+        self.put('linux/S2-command.json', command)
+        self.assertEqual(grade.search_state(directory, self.source)['nextRate'], 200)
+        self.assertEqual(self.reserve('search', 200, execution_root=directory, api=api)['tag'], 'S3')
+        prediction = {'observedEvidence': ['actual S2 segments'], 'differentPredictions': ['SQL', 'cache'],
+                      'comparisonOf': 'S2', 'singleVariableEvidence': ['one application change']}
+        self.assertEqual(self.reserve('comparison', 50, source=self.other, execution_root=directory, api=api,
+                                     prediction=prediction)['tag'], 'S3')
+        with self.assertRaises(ValueError):
+            self.reserve('comparison', 50, source=self.other, execution_root=directory, api=api)
+        with self.assertRaises(ValueError):
+            self.reserve('search', 200, execution_root=directory, api=api, current_tools={'changed': 'f' * 64})
+        self.put('linux/pre-load-recovery.json', {**authorization, 'userAuthorizationReference': 'changed after S2'})
+        with self.assertRaises(ValueError):
+            grade.search_state(directory, self.source)
+
+    def test_zero_request_recovery_rejects_any_put_uncertainty_live_owner_or_short_idle(self):
+        directory, api, proof, authorization = self.zero_startup()
+        for name, mutate in [('collectorTerminal', lambda value: value['counts'].update(attempted=1)),
+                ('collectorTerminal', lambda value: value['counts'].update(uncertain=1)),
+                ('localExit', lambda value: value['owners'][0].update(alive=True)),
+                ('idleAudit2', lambda value: value.update(requestStartedAt=grade.read(directory / 'recovery/idle1.json')['requestStartedAt'])),
+                ('fixtureInspection', lambda value: value['facts']['facts'][0].update(active=1))]:
+            target = directory / proof['artifacts'][name]['path']
+            retained = target.read_bytes()
+            value = grade.read(target); mutate(value); target.write_text(json.dumps(value), encoding='utf-8')
+            proof['artifacts'][name]['sha256'] = grade.sha(target)
+            self.put('linux/pre-load-recovery-proof.json', proof)
+            self.put('linux/pre-load-recovery.json', {**authorization, 'proofSHA256': grade.sha(directory / 'pre-load-recovery-proof.json')})
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.reserve('diagnostic', 50, execution_root=directory, api=api)
+            target.write_bytes(retained)
+            proof['artifacts'][name]['sha256'] = grade.sha(target)
+
+    def test_zero_request_recovery_accepts_future_barrier_only_when_stop_precedes_it(self):
+        directory, api, proof, authorization = self.zero_startup()
+        journal = directory / proof['artifacts']['collectorRecords']['path']
+        rows = [json.loads(line) for line in journal.read_text(encoding='utf-8').splitlines()]
+        rows.insert(1, {'kind': 'barrier', 'startUnixMs': 10000, 'endUnixMs': 20000})
+        rows.insert(2, {'kind': 'stop', 'atUnixMs': 9000})
+        for stopped, accepted in ((9000, True), (10000, False), (10001, False)):
+            rows[2]['atUnixMs'] = stopped
+            journal.write_text(''.join(json.dumps(row) + '\n' for row in rows), encoding='utf-8')
+            proof['artifacts']['collectorRecords']['sha256'] = grade.sha(journal)
+            collector_path = directory / proof['artifacts']['collectorTerminal']['path']
+            collector = grade.read(collector_path)
+            collector.update(startUnixMs=10000, evidenceSHA256=grade.sha(journal))
+            collector_path.write_text(json.dumps(collector), encoding='utf-8')
+            proof['artifacts']['collectorTerminal']['sha256'] = grade.sha(collector_path)
+            self.put('linux/pre-load-recovery-proof.json', proof)
+            self.put('linux/pre-load-recovery.json', {**authorization, 'proofSHA256': grade.sha(directory / 'pre-load-recovery-proof.json')})
+            if accepted:
+                self.assertEqual(self.reserve('diagnostic', 50, execution_root=directory, api=api)['tag'], 'S2')
+            else:
+                with self.assertRaises(ValueError):
+                    self.reserve('diagnostic', 50, execution_root=directory, api=api)
+
     def pipeline(self, mutate=None, seconds=60, summary=None):
         base = dt.datetime(2026, 11, 1, tzinfo=dt.timezone.utc)
         at = lambda value: (base + dt.timedelta(seconds=value)).isoformat()

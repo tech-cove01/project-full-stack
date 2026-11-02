@@ -653,6 +653,132 @@ class Checks(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.reserve('diagnostic', 50, execution_root=directory, api=api)
 
+    def repaired_s4(self):
+        self.now -= dt.timedelta(seconds=100)
+        directory, api, proof, authorization = self.zero_startup()
+        self.put('linux/pts-packet.json', {'sceneFilesMD5': {'plan': 'old'}})
+        old = {'scriptHashes': self.tools.copy(), 'observerBinarySHA256': self.observer,
+               'ptsPacketSHA256': grade.sha(directory / 'pts-packet.json'),
+               'ptsAdmissionSHA256': grade.sha(directory / 'pts-scene-admission.json')}
+        for tag, kind, rate in [('S2', 'diagnostic', 50), ('S3', 'search', 200), ('S4', 'search', 800)]:
+            reservation = self.reserve(kind, rate, execution_root=directory, api=api)
+            terminal = {} if tag != 'S4' else {'batchFatal': True, 'childrenConverged': False, 'recoveryVerified': False,
+                'finishedAt': (self.now + dt.timedelta(seconds=5)).isoformat(), 'knownOwnedProcesses': [{'pid': 23456, 'created': 234.5}]}
+            command = self.add(tag, rate, 'measurement_invalid' if tag == 'S4' else 'pass', kind=kind, execution_root=directory, **terminal)
+            command.update(old, reservationCheck=reservation)
+            self.put('linux/' + tag + '-command.json', command)
+        s4 = grade.read(directory / 'S4-command.json')
+        self.put('linux/pts-packet-repair1.json', {'sceneFilesMD5': {'plan': 'new'}})
+        self.put('linux/pts-scene-admission-repair1.json', {'passed': True, 'agentCount': 2, 'concurrency': 513,
+            'duration': 600, 'sceneFilesMD5': {'plan': 'new'}})
+        new = {'scriptHashes': {'synthetic-tool.py': 'f' * 64}, 'observerBinarySHA256': self.observer,
+            'ptsPacketPath': 'pts-packet-repair1.json', 'ptsAdmissionPath': 'pts-scene-admission-repair1.json',
+            'ptsPacketSHA256': grade.sha(directory / 'pts-packet-repair1.json'),
+            'ptsAdmissionSHA256': grade.sha(directory / 'pts-scene-admission-repair1.json')}
+        journal = self.put('linux/tool-repair/records.ndjson', {'kind': 'batch', 'records': [{'partial': True}]})
+        self.put('linux/tool-repair/collector.json', {'phase': 'stable', 'runId': 'S4_MAIN',
+            'fixtureSHA256': s4['fixtureSHA256'], 'counts': {'attempted': 2048}, 'unknown': None,
+            'evidenceSHA256': grade.sha(journal)})
+        for phase in ('warm', 'stable'):
+            self.put('linux/tool-repair/' + phase + '-terminal.json', {'backend': 'pts', 'reportId': phase + '-report',
+                'runId': 'S4_MAIN' if phase == 'stable' else 'S4_WARM', 'originalTerminalAbsent': phase == 'stable',
+                'nativeEvidenceComplete': False})
+            self.put('linux/tool-repair/' + phase + '-report.json', {'reportId': phase + '-report', 'ended': True,
+                'startTimeRaw': '2026-11-02 00:00:00', 'endTimeRaw': '2026-11-02 00:01:00'})
+        self.put('linux/tool-repair/start-ack.json', {'action': 'StartTestingJMeterScene', 'httpStatus': 200,
+            'sceneId': 'OWNED_SCENE', 'sanitizedRawResponse': {'Success': True, 'ReportId': 'stable-report'}})
+        self.put('linux/tool-repair/exit.json', {'owners': [{'pid': 23456, 'created': 234.5, 'alive': False, 'identityChecked': True}],
+            'observerAlive': False, 'controllerAlive': False, 'wrapperAlive': False})
+        manifest = grade.read(directory / 'fixture.json')
+        pairs = list(zip(manifest['multiNoteIds'], manifest['userIds']))
+        total = len(pairs)
+        reconciliation = {'valid': True, 'factsValid': True, 'downstreamConverged': True, 'errors': [],
+            'startedAt': int((self.now + dt.timedelta(seconds=17)).timestamp() * 1000),
+            'finishedAt': int((self.now + dt.timedelta(seconds=18)).timestamp() * 1000),
+            'facts': {'transitions': total, 'eventCount': total,
+                'facts': [{'noteId': note, 'userId': user, 'active': 1, 'version': 1} for note, user in pairs],
+                'notes': [{'noteId': note, 'liked': 1, 'activeRelations': 1} for note, user in pairs],
+                'events': [{'noteId': note, 'userId': user, 'count': 1, 'distinctVersions': 1, 'minVersion': 1, 'maxVersion': 1, 'invalid': 0} for note, user in pairs],
+                'delivery': [{'status': 'DONE', 'count': total}], 'parked': [],
+                'receipts': [{'projection': group, 'state': 'IGNORED', 'count': total} for group in ('follow-v1', 'feed-v1', 'search-v1')]},
+            'derived': {'available': True, 'errors': [],
+                'notes': [{'noteId': note, 'members': [user], 'versions': {user: '1'}} for note, user in pairs]}}
+        self.put('linux/tool-repair/reconcile.json', reconciliation)
+        names = {'command': 'S4-command.json', 'stage': 'S4-stage.json', 'collectorTerminal': 'tool-repair/collector.json',
+            'collectorRecords': 'tool-repair/records.ndjson', 'warmTerminal': 'tool-repair/warm-terminal.json',
+            'stableTerminal': 'tool-repair/stable-terminal.json', 'stableStartAudit': 'tool-repair/start-ack.json',
+            'warmReport': 'tool-repair/warm-report.json', 'stableReport': 'tool-repair/stable-report.json',
+            'localExit': 'tool-repair/exit.json', 'fixtureManifest': 'fixture.json', 'reconciliation': 'tool-repair/reconcile.json'}
+        transition = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'afterTag': 'S4', 'nextTag': 'S5', 'firstRate': 800,
+            'settleSeconds': 10, 'terminalObservedAt': (self.now + dt.timedelta(seconds=6)).isoformat(),
+            'recordedAt': (self.now + dt.timedelta(seconds=19)).isoformat(),
+            'userAuthorizationReference': 'synthetic explicit same-session repair without extra windows',
+            'preLoadRecoverySHA256': grade.sha(directory / 'pre-load-recovery.json'),
+            'sourceSha': self.source, 'binarySHA256': s4['binarySHA256'],
+            'environmentSHA256': s4['environmentSHA256'], 'fixtureSHA256': s4['fixtureSHA256'],
+            'oldIdentity': old, 'newIdentity': new,
+            'artifacts': {key: {'path': value, 'sha256': grade.sha(directory / value)} for key, value in names.items()}}
+        self.put('linux/tool-repair-transition.json', transition)
+        return directory, api, transition
+
+    def test_S4_tool_repair_retains_unknown_and_only_restarts_S5_search(self):
+        directory, api, transition = self.repaired_s4()
+        original_stage = (directory / 'S4-stage.json').read_bytes()
+        bound = grade.search_state(directory, self.source)
+        self.assertEqual((bound['L'], bound['U'], bound['nextRate'], bound['boundaryTags']), (None, None, 800, []))
+        reservation = self.reserve('search', 800, execution_root=directory, api=api, current_tools=transition['newIdentity']['scriptHashes'])
+        self.assertEqual((reservation['tag'], reservation['mainSecondsReservedAfter']), ('S5', 300))
+        self.assertEqual((directory / 'S4-stage.json').read_bytes(), original_stage)
+        self.assertIsNone(grade.read(directory / 'tool-repair/collector.json')['unknown'])
+        for kind, rate in [('search', 50), ('diagnostic', 50), ('comparison', 50), ('candidate', 800)]:
+            with self.subTest(kind=kind), self.assertRaises(ValueError):
+                self.reserve(kind, rate, execution_root=directory, api=api, current_tools=transition['newIdentity']['scriptHashes'])
+
+    def test_repaired_tool_bounds_exclude_old_windows_and_freeze_new_identity(self):
+        directory, api, transition = self.repaired_s4()
+        new = transition['newIdentity']
+        reservation = self.reserve('search', 800, execution_root=directory, api=api, current_tools=new['scriptHashes'])
+        command = self.add('S5', 800, execution_root=directory)
+        command.update(new, reservationCheck=reservation, at=(self.now + dt.timedelta(seconds=20)).isoformat())
+        self.put('linux/S5-command.json', command)
+        bound = grade.search_state(directory, self.source)
+        self.assertEqual((bound['L'], bound['nextRate'], bound['boundaryTags']), (800, 3200, ['S5']))
+        self.assertEqual(self.reserve('search', 3200, execution_root=directory, api=api, current_tools=new['scriptHashes'])['tag'], 'S6')
+        with self.assertRaises(ValueError):
+            self.reserve('search', 3200, execution_root=directory, api=api)
+        self.put('linux/tool-repair-transition.json', {**transition, 'userAuthorizationReference': 'changed after S5'})
+        with self.assertRaises(ValueError):
+            grade.search_state(directory, self.source)
+
+    def test_tool_repair_rejects_unsettled_data_or_missing_real_EndTime(self):
+        directory, api, transition = self.repaired_s4()
+        for name, mutate in [('stableReport', lambda value: value.update(endTimeRaw='')),
+                ('stableStartAudit', lambda value: value['sanitizedRawResponse'].update(ReportId='FOREIGN')),
+                ('reconciliation', lambda value: value.update(startedAt=int(grade.instant(transition['terminalObservedAt']).timestamp() * 1000))),
+                ('reconciliation', lambda value: value['derived']['notes'][0].update(members=[]))]:
+            path = directory / transition['artifacts'][name]['path']
+            retained = path.read_bytes(); value = grade.read(path); mutate(value)
+            path.write_text(json.dumps(value), encoding='utf-8')
+            transition['artifacts'][name]['sha256'] = grade.sha(path)
+            self.put('linux/tool-repair-transition.json', transition)
+            with self.subTest(name=name), self.assertRaises(ValueError):
+                self.reserve('search', 800, execution_root=directory, api=api, current_tools=transition['newIdentity']['scriptHashes'])
+            path.write_bytes(retained); transition['artifacts'][name]['sha256'] = grade.sha(path)
+
+    def test_tool_repair_can_read_original_latest_only_when_collector_terminal_is_absent(self):
+        directory, api, transition = self.repaired_s4()
+        collector = grade.read(directory / transition['artifacts']['collectorTerminal']['path'])
+        collector['stop'] = True
+        latest = self.put('linux/S4-load/stable-pts/latest.json', {'at': self.now.isoformat(), 'summary': collector})
+        transition['artifacts']['collectorTerminal'] = {'path': 'S4-load/stable-pts/latest.json', 'sha256': grade.sha(latest)}
+        self.put('linux/tool-repair-transition.json', transition)
+        self.assertEqual(self.reserve('search', 800, execution_root=directory, api=api,
+                                     current_tools=transition['newIdentity']['scriptHashes'])['tag'], 'S5')
+        self.put('linux/S4-load/stable-pts/collector-terminal.json', collector)
+        with self.assertRaises(ValueError):
+            self.reserve('search', 800, execution_root=directory, api=api,
+                         current_tools=transition['newIdentity']['scriptHashes'])
+
     def pipeline(self, mutate=None, seconds=60, summary=None):
         base = dt.datetime(2026, 11, 1, tzinfo=dt.timezone.utc)
         at = lambda value: (base + dt.timedelta(seconds=value)).isoformat()

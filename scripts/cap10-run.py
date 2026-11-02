@@ -46,16 +46,22 @@ def reserve(args, api, value):
             assert path.resolve().is_relative_to(ROOT) and path.is_file()
     prediction = owned.read(args.prediction) if args.prediction else None
     if value.get('CAP10_LOAD_BACKEND') == 'pts':
-        admission = owned.read(ROOT / 'pts-scene-admission.json')
+        repair_path = ROOT / 'tool-repair-transition.json'
+        repaired = repair_path.exists()
+        packet_path = ROOT / ('pts-packet-repair1.json' if repaired else 'pts-packet.json')
+        admission_path = ROOT / ('pts-scene-admission-repair1.json' if repaired else 'pts-scene-admission.json')
+        admission = owned.read(admission_path)
         configuration = owned.read(value['CAP10_PTS_CONFIG'])
         preparation = module('cap10_pts_admission_contract', 'pts/cap10-pts-prepare.py')
         assert admission.get('passed') is True and admission['sceneId'] == configuration['sceneId']
         assert admission['sceneFilesMD5'] == configuration['sceneFiles']
         assert admission['sourceSHA256'] == preparation.source_hashes()
         assert admission['configurationReference'] == value['CAP10_PTS_CONFIG']
-        pts_identity = {'loadBackend': 'pts', 'ptsPacketSHA256': sha(ROOT / 'pts-packet.json'),
-                        'ptsAdmissionSHA256': sha(ROOT / 'pts-scene-admission.json')}
+        pts_identity = {'loadBackend': 'pts', 'ptsPacketSHA256': sha(packet_path),
+                        'ptsAdmissionSHA256': sha(admission_path)}
         for prior in grade.history(ROOT):
+            if repaired and prior['tag'] in ('S1', 'S2', 'S3', 'S4'):
+                continue  # The grade validates the retained old/new transition.
             assert all(prior.get(key) == digest for key, digest in pts_identity.items()), 'same PTS packet/admission must cover the entire batch'
     freeze_path = ROOT / 'freeze-like.json'
     freeze = owned.read(freeze_path) if args.kind == 'formal' else None
@@ -85,8 +91,8 @@ def reserve(args, api, value):
                'failedStartsConsumeSlot': True}
     command['loadBackend'] = value.get('CAP10_LOAD_BACKEND', 'k6')
     if command['loadBackend'] == 'pts':
-        command['ptsPacketSHA256'] = sha(ROOT / 'pts-packet.json')
-        command['ptsAdmissionSHA256'] = sha(ROOT / 'pts-scene-admission.json')
+        command['ptsPacketSHA256'] = pts_identity['ptsPacketSHA256']
+        command['ptsAdmissionSHA256'] = pts_identity['ptsAdmissionSHA256']
     owned.save(ROOT / ('slot-' + tag + '.json'), command)
     owned.save(ROOT / (tag + '-command.json'), command)
     return command

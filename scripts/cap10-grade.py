@@ -220,12 +220,96 @@ def pre_load_recovery(root, records):
     return {'sha256': digest, 'failedTag': 'S1', 'nextDiagnosticTag': 'S2'}
 
 
+def tool_repair_transition(root, records):
+    """Permit one S4 tool failure to consume its slot, retaining its unknowns."""
+    path = Path(root) / 'tool-repair-transition.json'
+    if not path.exists():
+        require(not any(c.get('reservationCheck', {}).get('toolRepairTransitionSHA256') for c in records), 'tool repair transition cannot be removed')
+        return None
+    require(root == ROOT / 'linux' and path.is_file() and not path.is_symlink(), 'fixed Linux tool repair transition required')
+    value, digest = read(path), sha(path)
+    require(isinstance(value, dict) and type(value.get('version')) is int and value['version'] == 1 and value.get('batch') == 'CAP-10' and value.get('authorized') is True and value.get('afterTag') == 'S4' and value.get('nextTag') == 'S5' and type(value.get('firstRate')) is int and value['firstRate'] == 800 and value.get('settleSeconds') == 10, 'only the fixed S4 to S5 tool repair is authorized')
+    require(isinstance(value.get('userAuthorizationReference'), str) and value['userAuthorizationReference'].strip() and isinstance(value.get('recordedAt'), str), 'explicit continuous repair authorization required')
+    registered = instant(value['recordedAt'])
+    require(registered <= dt.datetime.now(dt.timezone.utc) and len(records) >= 4 and [c['tag'] for c in records[:4]] == ['S1', 'S2', 'S3', 'S4'], 'repair must follow all four retained short reservations')
+    recovery = pre_load_recovery(root, records)
+    require(recovery and value.get('preLoadRecoverySHA256') == recovery['sha256'], 'original S1 exception chain must remain intact')
+    require(isinstance(value.get('artifacts'), dict), 'tool repair artifact references required')
+    def artifact(name, ndjson=False):
+        ref = value['artifacts'].get(name, {})
+        require(isinstance(ref, dict) and isinstance(ref.get('path'), str), 'tool repair artifact missing: ' + name)
+        relative = Path(ref['path']); candidate = Path(root) / relative
+        require(not relative.is_absolute() and '..' not in relative.parts and candidate.is_file() and not candidate.is_symlink() and candidate.resolve() == candidate and candidate.is_relative_to(root) and ref.get('sha256') == sha(candidate), 'tool repair artifact bytes or path differ: ' + name)
+        return [json.loads(line) for line in candidate.read_bytes().splitlines() if line.strip()] if ndjson else read(candidate)
+    command, previous = artifact('command'), artifact('stage')
+    require(value['artifacts']['command']['path'] == 'S4-command.json' and value['artifacts']['stage']['path'] == 'S4-stage.json' and command == records[3] and previous == stage(root, command) and previous.get('passed') is False and command['kind'] == 'search' and command['rate'] == 800 and command['seconds'] == 60 and instant(previous['finishedAt']) <= registered, 'original failed S4 must be retained without relabeling')
+    for key, actual in (('sourceSha', command['apiSourceSha']), ('binarySHA256', command['binarySHA256']), ('environmentSHA256', command['environmentSHA256']), ('fixtureSHA256', command['fixtureSHA256'])):
+        require(value.get(key) == actual, 'repair cannot change application, environment or fixture: ' + key)
+    old, new = value.get('oldIdentity'), value.get('newIdentity')
+    require(isinstance(old, dict) and isinstance(new, dict) and isinstance(new.get('scriptHashes'), dict) and new['scriptHashes'] and re.fullmatch(r'[a-f0-9]{64}', new.get('observerBinarySHA256', '')), 'old and new tool identities required')
+    for key in ('scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256'):
+        require(old.get(key) == command.get(key), 'old S4 tool identity cannot be overwritten: ' + key)
+    for key, filename in (('ptsPacketSHA256', 'pts-packet.json'), ('ptsAdmissionSHA256', 'pts-scene-admission.json')):
+        require(old[key] == sha(Path(root) / filename), 'original PTS packet and admission must remain')
+    require(new.get('ptsPacketPath') == 'pts-packet-repair1.json' and new.get('ptsAdmissionPath') == 'pts-scene-admission-repair1.json', 'new PTS identities require distinct fixed paths')
+    for key, filename in (('ptsPacketSHA256', new['ptsPacketPath']), ('ptsAdmissionSHA256', new['ptsAdmissionPath'])):
+        require(new.get(key) == sha(Path(root) / filename), 'new PTS packet/admission bytes differ')
+    packet, admission = read(Path(root) / new['ptsPacketPath']), read(Path(root) / new['ptsAdmissionPath'])
+    require(admission.get('passed') is True and admission.get('agentCount') == 2 and admission.get('concurrency') == 513 and admission.get('duration') == 600 and packet.get('sceneFilesMD5') == admission.get('sceneFilesMD5'), 'new PTS packet must have matching read-only scene admission')
+    for c in records[4:]:
+        require(c.get('reservationCheck', {}).get('toolRepairTransitionSHA256') == digest and instant(c['at']) >= registered and c.get('apiSourceSha') == value['sourceSha'] and c.get('binarySHA256') == value['binarySHA256'] and all(c.get(key) == new[key] for key in ('scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')), 'S5 onward must use the one fixed repaired tool identity')
+    collector = artifact('collectorTerminal'); artifact('collectorRecords', True)
+    if value['artifacts']['collectorTerminal']['path'] == 'S4-load/stable-pts/latest.json':
+        original = Path(root) / 'S4-load/stable-pts/collector-terminal.json'
+        require(not original.exists() and not original.is_symlink() and isinstance(collector.get('summary'), dict) and collector['summary'].get('stop') is True, 'only the retained stopped S4 latest snapshot may replace a missing collector terminal')
+        collector = collector['summary']
+    require(collector.get('phase') == 'stable' and collector.get('fixtureSHA256') == value['fixtureSHA256'] and type(collector.get('counts', {}).get('attempted')) is int and collector['counts']['attempted'] > 0 and collector.get('evidenceSHA256') == value['artifacts']['collectorRecords']['sha256'], 'retain the actual nonzero S4 client evidence and its unknowns')
+    terminal_observed = instant(value['terminalObservedAt'])
+    for phase in ('warm', 'stable'):
+        terminal, report = artifact(phase + 'Terminal'), artifact(phase + 'Report')
+        require(terminal.get('backend') == 'pts' and isinstance(terminal.get('reportId'), str) and terminal['reportId'] and report.get('reportId') == terminal['reportId'] and report.get('ended') is True and isinstance(report.get('startTimeRaw'), str) and isinstance(report.get('endTimeRaw'), str) and len(report['endTimeRaw']) >= 19 and dt.datetime.fromisoformat(report['endTimeRaw']) >= dt.datetime.fromisoformat(report['startTimeRaw']), 'every S4 phase with PUTs requires its real report EndTime')
+        if phase == 'stable':
+            require(terminal.get('runId') == collector.get('runId'), 'S4 stable collector and PTS report identity differ')
+            acknowledgement = artifact('stableStartAudit')
+            require(acknowledgement.get('action') == 'StartTestingJMeterScene' and acknowledgement.get('httpStatus') == 200 and acknowledgement.get('sceneId') == read(Path(root) / 'pts-scene-admission.json').get('sceneId') and acknowledgement.get('sanitizedRawResponse', {}).get('Success') is True and acknowledgement['sanitizedRawResponse'].get('ReportId') == terminal['reportId'], 'S4 stable report must bind its original accepted Start acknowledgement')
+            if not (Path(root) / 'S4-load/stable-pts/terminal.json').exists():
+                require(terminal.get('originalTerminalAbsent') is True and terminal.get('nativeEvidenceComplete') is False and value['artifacts']['stableTerminal']['path'] != 'S4-load/stable-pts/terminal.json', 'external S4 terminal verification cannot recreate a missing original')
+    exited = artifact('localExit'); owners = exited.get('owners', [])
+    expected = {(p['pid'], p['created']) for p in previous.get('knownOwnedProcesses', [])}
+    require(owners and expected and expected <= {(p.get('pid'), p.get('created')) for p in owners} and all(p.get('alive') is False and p.get('identityChecked') is True for p in owners) and all(exited.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive')), 'all original S4 local load owners must be proved gone')
+    manifest, reconciliation = artifact('fixtureManifest'), artifact('reconciliation')
+    require(value['artifacts']['fixtureManifest']['sha256'] == value['fixtureSHA256'] and reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and type(reconciliation.get('startedAt')) in (int, float) and reconciliation['startedAt'] / 1000 >= terminal_observed.timestamp() + 10 and reconciliation.get('finishedAt', 0) >= reconciliation['startedAt'], 'S4 requires complete reconciliation after ten seconds of terminal settle')
+    facts, derived = reconciliation.get('facts', {}), reconciliation.get('derived', {})
+    pairs = set(zip(manifest.get('multiNoteIds', []), manifest.get('userIds', [])))
+    rows, notes, events = facts.get('facts', []), facts.get('notes', []), facts.get('events', [])
+    require(len(pairs) == len(rows) == len(notes) == 512 and {(r.get('noteId'), r.get('userId')) for r in rows} == pairs and {n.get('noteId') for n in notes} == {p[0] for p in pairs}, 'reconciliation must cover the original 512 exact relationships')
+    by_pair = {(e.get('noteId'), e.get('userId')): e for e in events}
+    require(len(by_pair) == len(events) and set(by_pair) <= pairs, 'reconciliation LIKE events must belong to exact pairs')
+    for row in rows:
+        version = row.get('version'); event = by_pair.get((row['noteId'], row['userId']))
+        require(type(version) is int and version >= 0 and row.get('active') == version % 2 and (version == 0 and event is None or version > 0 and event and event.get('count') == event.get('distinctVersions') == event.get('maxVersion') == version and event.get('minVersion') == 1 and event.get('invalid') == 0), 'S4 relation version and unique LIKE outbox facts must reconcile')
+    active = {r['noteId']: r['active'] for r in rows}
+    total = sum(r['version'] for r in rows)
+    require(facts.get('transitions') == facts.get('eventCount') == total and all(n.get('liked') == n.get('activeRelations') == active[n['noteId']] for n in notes) and sum(e.get('count', 0) for e in events) == total, 'S4 public counts, versions and events must agree')
+    require(derived.get('available') is True and derived.get('errors') == [] and len(derived.get('notes', [])) == 512, 'full Redis projection reconciliation required')
+    redis_by_note = {n.get('noteId'): n for n in derived['notes']}
+    require(set(redis_by_note) == set(active), 'Redis projection must cover exact notes')
+    for row in rows:
+        projection = redis_by_note[row['noteId']]; versions = projection.get('versions', {})
+        require(isinstance(versions, dict) and set(projection.get('members', [])) == ({row['userId']} if row['active'] else set()) and (versions.get(row['userId']) == str(row['version']) if row['version'] else row['userId'] not in versions) and set(versions) <= {row['userId'], '__complete', '__count'}, 'Redis member/version projection must match authoritative facts')
+    require(sum(d.get('count', 0) for d in facts.get('delivery', []) if d.get('status') == 'DONE') == total and not any(d.get('status') != 'DONE' and d.get('count', 0) for d in facts.get('delivery', [])) and not any(p.get('state') == 'PARKED' and p.get('count', 0) for p in facts.get('parked', [])), 'Outbox and parked failures must fully drain')
+    receipts = facts.get('receipts', [])
+    require(all(sum(r.get('count', 0) for r in receipts if r.get('projection') == group and r.get('state') == 'IGNORED') == total and not any(r.get('projection') == group and r.get('state') == 'APPLIED' and r.get('count', 0) for r in receipts) for group in ('follow-v1', 'feed-v1', 'search-v1')), 'all three independent LIKE receipt groups must reconcile')
+    return {**value, 'sha256': digest}
+
+
 def search_state(root, source_sha):
     records = history(root)
     recovery = pre_load_recovery(root, records)
-    boundary_records = records
+    repair = tool_repair_transition(root, records)
+    boundary_records = records[4:] if repair else records
     final_path = Path(root) / 'final-application.json'
-    if final_path.is_file():
+    if final_path.is_file() and not repair:
         final = read(final_path)
         after = final.get('boundaryEvidenceAfter') if final.get('sourceSha') == source_sha else None
         if after:
@@ -243,7 +327,7 @@ def search_state(root, source_sha):
               'boundaryTags': [c['tag'] for c, _ in relevant]}
     used = sum(c['tag'].startswith('S') for c in records)
     if not relevant:
-        result['nextRate'] = 50
+        result['nextRate'] = repair['firstRate'] if repair else 50
     elif lower is None:
         current = relevant[-1][0]['rate']
         if current == 1 or used >= 7:
@@ -277,13 +361,17 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     budget = effective_work_budget(root, api_metadata)
     records = history(root)
     recovery = pre_load_recovery(root, records)
+    repair = tool_repair_transition(root, records)
     shorts = [c for c in records if c['tag'].startswith('S')]; formals = [c for c in records if c['tag'].startswith('H')]
-    effective_shorts = [c for c in shorts if not recovery or c['tag'] != recovery['failedTag']]
-    if recovery and effective_shorts:
+    effective_shorts = [c for c in shorts if (not recovery or c['tag'] != recovery['failedTag']) and (not repair or int(c['tag'][1:]) >= 5)]
+    if repair:
+        new = repair['newIdentity']
+        require(kind not in ('diagnostic', 'comparison') and source == repair['sourceSha'] and binary == repair['binarySHA256'] and environment == repair['environmentSHA256'] and fixture_hash == repair['fixtureSHA256'] and current_tools == new['scriptHashes'] and observer_hash == new['observerBinarySHA256'], 'tool repair cannot change business code or its fixed new tools')
+    elif recovery and effective_shorts:
         require(current_tools == effective_shorts[0].get('scriptHashes') and observer_hash == effective_shorts[0].get('observerBinarySHA256'), 'recovered tools and observer are frozen from S2 onward')
     require(sum(c['seconds'] for c in records) + seconds <= 840, '840s total main-load budget exhausted')
     for c in records:
-        if recovery and c['tag'] == recovery['failedTag']:
+        if recovery and c['tag'] == recovery['failedTag'] or repair and c['tag'] == 'S4':
             continue  # The immutable failed slot remains consumed, never passed.
         previous = stage(root, c)
         require(previous.get('childrenConverged') is True, 'prior owned children have not converged')
@@ -292,6 +380,8 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
         require(previous.get('recoveryVerified') is True, 'previous window did not recover within its 60s budget')
     require(not any(c['kind'] == 'candidate' for c in shorts) or kind == 'formal', 'one candidate only; no later search or replacement')
     if kind == 'formal':
+        if repair:
+            require(freeze and freeze.get('toolRepairTransitionSHA256') == repair['sha256'], 'formal freeze must bind the one tool repair transition')
         require(len(formals) < 2 and shorts, 'formal budget exhausted or no short evidence')
         require(all(stage(root, c).get('passed') is True for c in formals), 'first formal failure ended this group')
         require(isinstance(freeze, dict) and freeze.get('rate') == rate and freeze.get('sourceSha') == source and freeze.get('binarySHA256') == binary and freeze.get('environmentSHA256') == environment and freeze.get('fixtureSHA256') == fixture_hash, 'same immutable formal freeze required')
@@ -309,9 +399,12 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
         require(not formals and len(shorts) < 8, 'short-window budget closed')
         tag = 'S' + str(len(shorts) + 1)
         if not effective_shorts:
-            require(kind == 'diagnostic' and rate == 50, 'first effective window must be 50/s diagnostic')
-            require(not recovery or tag == 'S2' and source == shorts[0]['apiSourceSha'] and binary == shorts[0]['binarySHA256'], 'startup recovery must use the same application in S2')
-            require(prediction and prediction.get('observedEvidence') and prediction.get('differentPredictions'), 'diagnostic requires evidence and differentiating predictions before start')
+            if repair:
+                require(kind == 'search' and tag == 'S5' and rate == 800, 'repaired tool starts one independent S5 800/s search')
+            else:
+                require(kind == 'diagnostic' and rate == 50, 'first effective window must be 50/s diagnostic')
+                require(not recovery or tag == 'S2' and source == shorts[0]['apiSourceSha'] and binary == shorts[0]['binarySHA256'], 'startup recovery must use the same application in S2')
+                require(prediction and prediction.get('observedEvidence') and prediction.get('differentPredictions'), 'diagnostic requires evidence and differentiating predictions before start')
         elif kind == 'comparison':
             require(len(effective_shorts) == 1 and effective_shorts[0]['kind'] == 'diagnostic' and rate == 50 and effective_shorts[0]['apiSourceSha'] != source and prediction and prediction.get('comparisonOf') == effective_shorts[0]['tag'] and prediction.get('singleVariableEvidence'), 'only the immediate one-variable 50/s comparison is allowed')
         else:
@@ -331,7 +424,7 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
                 require(not any(c['rate'] == rate and c['tag'] in bound['boundaryTags'] for c in shorts), 'do not replay an already measured search rate')
     require(not (root / ('slot-' + tag + '.json')).exists() and not (root / (tag + '-command.json')).exists(), 'existing/orphan reservation is not reusable')
     return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'), 'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds,
-            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
+            'shortMaximum': 8, 'formalMaximum': 2, 'mainSecondsMaximum': 840, 'S8ReservedForCandidate': True, 'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'effectiveWorkBudget': budget, 'preLoadRecoverySHA256': recovery['sha256'] if recovery else None, 'toolRepairTransitionSHA256': repair['sha256'] if repair else None, 'failedStartsConsumeSlot': True, 'writesPerformed': False}
 
 def _grade_tail15(rows, ended, vector, finished):
     start = ended - dt.timedelta(seconds=15)

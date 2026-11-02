@@ -25,6 +25,7 @@
 | OBS-V1 | 纯版本记账，延后提交、完整pending刷新、身份/hash、receipt/DONE不可逆、caps、epoch及双gate；生产Decode产生独立golden | `374ccbc`，普通16顶层/18子例、race/vet、Linux单文件构建、独审通过；未接运行路径 |
 | OBS-V2 | 有界同RR SQL适配，索引计划、真实延后事务/别名/取消及失败不推进 | 待实现/验证 |
 | AUDIT-V1a | 固定模式与完整审计预算，默认兼容，非法值拒绝 | `f65d62b`，Node39与runner71检查、独审通过 |
+| OBS-POLICY / OBS-LAUNCH | Python共用固定合同；启动元数据与实际进程环境绑定mode/预算，历史缺字段仅旧模式兼容 | 纯合同`3f3b601`已交；启动绑定10项检查及独审通过，不代表SQL/main或窗口接线完成 |
 | AUDIT-V1b | 实际完整SQL计划与正确性，包括未知projection；真实原/新同条件对照 | 待验证；不得用receipt单查询冒充完整审计 |
 | OBS-WIRE | 模式/预算绑定命令、active/freeze及报告，逐窗基线/终审引用，监督关闭 | 待实现；正式两轮不因逐窗proof变化而换freeze |
 

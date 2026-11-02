@@ -28,6 +28,9 @@ _cohort_spec.loader.exec_module(COHORT)
 _resource_spec = importlib.util.spec_from_file_location('cap10_environment_resources', REPO / 'scripts/cap10-resource-contract.py')
 RESOURCE = importlib.util.module_from_spec(_resource_spec)
 _resource_spec.loader.exec_module(RESOURCE)
+_observer_spec = importlib.util.spec_from_file_location('cap10_environment_observer', REPO / 'scripts/cap10-observer-contract.py')
+OBSERVER = importlib.util.module_from_spec(_observer_spec)
+_observer_spec.loader.exec_module(OBSERVER)
 BATCH_ROOT = REPO / 'docs/evidence/2026-11-01-cap10'
 PLATFORM = 'windows' if os.name == 'nt' else 'linux'
 assert os.name == 'nt' or sys.platform == 'linux', 'CAP10 supports Windows and the single Linux transition only'
@@ -307,10 +310,18 @@ def api_identity(metadata, health=False):
     private, _ = settings(metadata['privateEnvironmentFile'])
     assert private['CAP_SOURCE_SHA'] == metadata['sourceSha']
     assert private['CAP_READ_EXPECTED_REVISION'] == metadata['expectedVersion']
+    observer_policy = OBSERVER.environment_policy(private)
+    OBSERVER.metadata_policy(metadata, observer_policy, allow_missing_legacy=True)
+    if 'observerPolicy' in metadata or 'observerSamplingLimits' in metadata or observer_policy['mode'] == OBSERVER.LIKE_VECTOR:
+        limits = metadata.get('observerSamplingLimits')
+        assert (type(limits) is dict and all(type(value) is int for value in limits.values())
+                and limits == OBSERVER.sampling_limits()), 'API observer sampling limits differ'
     process = psutil.Process(metadata['pid'])
     assert abs(process.create_time() * 1000 - metadata['creationUnixMs']) <= 2
     assert Path(process.exe()).resolve() == Path(metadata['exe']).resolve()
     assert hashlib.sha256(Path(process.exe()).read_bytes()).hexdigest() == metadata['sha256']
+    if 'observerPolicy' in metadata:
+        assert OBSERVER.environment_policy(process.environ()) == observer_policy, 'actual API observer policy differs'
     if health:
         body = get_json('http://127.0.0.1:8281/health/ready')
         # The old app readiness covers SQL/Redis only. Kafka/ES are checked independently.
@@ -451,7 +462,9 @@ def start_api(args):
     binary = Path(args.binary).resolve()
     info = run(['go', 'version', '-m', str(binary)]).stdout
     assert 'vcs.revision=' + args.source_sha in info and 'vcs.modified=false' in info
+    observer_policy = OBSERVER.environment_policy(value)
     current = {**value, 'CAP_SOURCE_SHA': args.source_sha, 'CAP_READ_EXPECTED_REVISION': 'capacity-' + args.source_sha,
+               'CAP10_OBSERVER_MODE': observer_policy['mode'],
                'GO_FEED_DIAGNOSTICS': 'true' if args.tail else 'false',
                'GO_LIKE_DIAGNOSTICS': 'true' if args.like_diagnostics else 'false'}
     private = private_write(runtime, 'env-' + args.label + '.private.json', current)
@@ -467,7 +480,8 @@ def start_api(args):
                 'environmentPath': environment_path.name, 'resourceProfile': resource_profile,
                 'environmentSHA256': hashlib.sha256(environment_path.read_bytes()).hexdigest(),
                 'privateEnvironmentFile': str(private), 'tailEnabledRequested': args.tail,
-                'likeDiagnosticsRequested': args.like_diagnostics}
+                'likeDiagnosticsRequested': args.like_diagnostics,
+                'observerPolicy': observer_policy, 'observerSamplingLimits': OBSERVER.sampling_limits()}
     save(ROOT / ('api-' + args.label + '.json'), metadata)
     (ROOT / ('api-' + args.label + '-build.txt')).write_text(info, encoding='utf-8')
     ready = False

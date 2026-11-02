@@ -48,8 +48,11 @@ func TestIntegrationClaimDoesNotLockLiveLeaseWhileSelectingDueTail(t *testing.T)
 		t.Skip("isolated dependencies required")
 	}
 	cfg, err := config.Load()
-	if err != nil || !strings.HasPrefix(cfg.MySQL.Database, "cap10_relay_it_") {
-		t.Fatal("registered independent integration database is required")
+	if err != nil {
+		t.Fatal("invalid integration configuration")
+	}
+	if !strings.HasPrefix(cfg.MySQL.Database, "cap10_relay_it_") {
+		t.Skip("registered independent CAP10 integration database is required for the global claim lock fixture")
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()

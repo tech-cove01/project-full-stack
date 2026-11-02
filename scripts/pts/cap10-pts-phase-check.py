@@ -42,6 +42,65 @@ def full_summary():
 
 
 class EnvelopeChecks(unittest.TestCase):
+    def phase_fixture(self, count=4096, engines=9):
+        dimensions = {'poolSize': count, 'expectedEngines': engines,
+                      'ptsConcurrency': phase.cohort.pts_concurrency(count, engines)}
+        hashes = {name: hashlib.sha256((REPO / name).read_bytes()).hexdigest()
+                  for name in ('scripts/cap10-cohort.py', 'scripts/load/cap10-cohort-contract.mjs')}
+        manifest = {'poolSize': count, 'fixture': 'synthetic-cohort',
+                    'users': count, 'multiNotes': count, 'multiRelations': count,
+                    'userIds': [str(i + 1) for i in range(count)],
+                    'multiNoteIds': [str(i + 10001) for i in range(count)]}
+        source = {'poolSize': count, 'fixture': manifest['fixture'], 'multiNoteIds': manifest['multiNoteIds'],
+                  'users': [{'userId': user, 'token': 'synthetic-only'} for user in manifest['userIds']],
+                  'initial': [{'userId': user, 'noteId': manifest['multiNoteIds'][i], 'active': 0, 'version': 0}
+                              for i, user in enumerate(manifest['userIds'])]}
+        return ({**dimensions, 'cohortSourceSHA256': hashes}, source, manifest,
+                dict(dimensions), {**dimensions, 'cohortSourceSHA256': hashes})
+
+    def test_phase_binds_all_4096_hydrated_identities_and_nine_engines(self):
+        values = self.phase_fixture()
+        self.assertEqual(phase.phase_cohort(*values), {'poolSize': 4096, 'expectedEngines': 9, 'ptsConcurrency': 4105})
+        legacy = self.phase_fixture(512, 2)
+        for value in legacy:
+            value.pop('poolSize', None)
+        self.assertEqual(phase.phase_cohort(*legacy)['poolSize'], 512)
+
+    def test_phase_cannot_relabel_legacy_source_command_or_admission(self):
+        for index in (1, 3, 4):
+            values = self.phase_fixture()
+            values[index].pop('poolSize')
+            with self.subTest(index=index), self.assertRaises(ValueError):
+                phase.phase_cohort(*values)
+        for index in (0, 3, 4):
+            values = self.phase_fixture()
+            values[index]['expectedEngines'] = 2
+            with self.subTest(index=index), self.assertRaises(ValueError):
+                phase.phase_cohort(*values)
+
+    def test_phase_rejects_stale_helpers_and_reordered_facts_before_start(self):
+        for index in (0, 4):
+            values = self.phase_fixture()
+            values[index]['cohortSourceSHA256'] = {}
+            with self.subTest(index=index), self.assertRaises(ValueError):
+                phase.phase_cohort(*values)
+        values = self.phase_fixture()
+        values[1]['initial'][-1]['noteId'] = values[2]['multiNoteIds'][0]
+        with self.assertRaises(ValueError):
+            phase.phase_cohort(*values)
+        values = self.phase_fixture()
+        values[1]['users'][-1]['active'] = 1
+        with self.assertRaises(ValueError):
+            phase.phase_cohort(*values)
+
+    def test_large_normalized_window_keeps_full_duration_and_dimensions(self):
+        summary = full_summary()
+        summary.update(poolSize=4096, expectedEngines=9, ptsConcurrency=4105)
+        value = phase.normalized(summary, 60)
+        self.assertEqual((value['poolSize'], value['expectedEngines'], value['ptsConcurrency']), (4096, 9, 4105))
+        self.assertEqual(value['nativeScenario']['durationMs'], 60000)
+        self.assertEqual(value['metrics']['cap_like_mutation']['count'], 60)
+
     def test_guarded_plan_keeps_full_native_window_and_actual_counts(self):
         summary = full_summary()
         summary.update(rate=800, launchGuardMs=100, plannedTotal=47920)

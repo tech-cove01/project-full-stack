@@ -28,6 +28,36 @@ def module(name, path):
     return value
 
 
+cohort = module('cap10_phase_cohort', REPO / 'scripts/cap10-cohort.py')
+
+
+def phase_cohort(configuration, source, manifest, reservation, admission):
+    """Bind current hydration and cloud admission to their own original pool."""
+    dimensions = cohort.dimensions(configuration, manifest)
+    count = dimensions['poolSize']
+    for value in (source, reservation, admission):
+        if cohort.command_pool_size(value, manifest) != count:
+            raise ValueError('phase pool differs from its original fixture')
+    for value in (reservation, admission):
+        if cohort.dimensions(value, manifest) != dimensions:
+            raise ValueError('phase engine dimensions differ from admission or reservation')
+    expected = {name: hashlib.sha256((REPO / name).read_bytes()).hexdigest()
+                for name in ('scripts/cap10-cohort.py', 'scripts/load/cap10-cohort-contract.mjs')}
+    if any(value.get('cohortSourceSHA256') != expected for value in (configuration, admission)):
+        raise ValueError('phase cohort helper sources are not frozen by admission')
+    if (source.get('fixture') != manifest.get('fixture') or source.get('multiNoteIds') != manifest.get('multiNoteIds')
+            or not isinstance(source.get('users'), list) or len(source['users']) != count
+            or any(not isinstance(user, dict) or set(user) != {'userId', 'token'} for user in source['users'])
+            or not isinstance(source.get('initial'), list) or len(source['initial']) != count
+            or [user.get('userId') for user in source['users']] != manifest.get('userIds')):
+        raise ValueError('hydrated exclusive identities differ from their bound fixture')
+    for index, fact in enumerate(source['initial']):
+        if (not isinstance(fact, dict) or fact.get('userId') != manifest['userIds'][index]
+                or fact.get('noteId') != manifest['multiNoteIds'][index]):
+            raise ValueError('hydrated fact order differs from the exclusive fixture')
+    return dimensions
+
+
 def read(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'))
 
@@ -60,6 +90,7 @@ def normalized(summary, seconds):
     """Compatibility envelope, explicitly sourced from complete JMeter records."""
     if summary.get('complete') is not True or summary.get('collectionValid') is not True or summary.get('unknownIsExact') is not True:
         raise ValueError('incomplete JMeter evidence cannot become a native summary')
+    dimensions = cohort.dimensions(summary, {'poolSize': summary.get('poolSize', 512)})
     counts = summary['counts']
     required = ('planned', 'attempted', 'completed', 'mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')
     if not all(type(counts.get(key)) is int and counts[key] >= 0 for key in required):
@@ -97,13 +128,13 @@ def normalized(summary, seconds):
             raise ValueError('full-record percentiles unavailable')
     metrics['cap_native_scenario_start_unix_ms'] = {'min': start, 'max': start}
     metrics['cap_native_scenario_duration_ms'] = {'min': seconds * 1000, 'max': seconds * 1000}
-    return {'sourceEngine': 'JMeter 5.6.3 on Alibaba PTS', 'source': 'complete authenticated collector records; not sampled PTS logs or k6 output',
+    return {**dimensions, 'sourceEngine': 'JMeter 5.6.3 on Alibaba PTS', 'source': 'complete authenticated collector records; not sampled PTS logs or k6 output',
             'quantileMethod': summary.get('quantileMethod'), 'metrics': metrics, 'launchPlan': launch_plan,
             'nativeScenario': {'startedAt': start, 'scheduledEndedAt': end, 'durationMs': seconds * 1000,
                 'complete': not summary.get('stop'), 'startMetric': {'min': start, 'max': start},
                 'generatorTimingValid': summary['generatorTimingViolations'] == 0,
                 'durationMetric': {'min': seconds * 1000, 'max': seconds * 1000},
-                'scope': 'All 512 registered slots, complete ECS-clock offer window, full JMeter terminal records; guarded launches do not shorten the QPS denominator. Platform report time is separate.'}}
+                'scope': 'All fixture-bound registered slots, complete ECS-clock offer window, full JMeter terminal records; guarded launches do not shorten the QPS denominator. Platform report time is separate.'}}
 
 
 def handler_type(store, token, lock):
@@ -220,8 +251,8 @@ def run(args):
         raise ValueError('registered 0600 private PTS configuration required')
     cfg, source = read(cfg_path), read(args.input)
     host = private_url(cfg['collectorUrl'], 8481)
-    if private_url(cfg['apiUrl'], 8281) != host or len(cfg['controlToken']) < 64 or cfg['expectedEngines'] != 2:
-        raise ValueError('one fixed ECS and two PTS engines required')
+    if private_url(cfg['apiUrl'], 8281) != host or len(cfg['controlToken']) < 64:
+        raise ValueError('one fixed ECS with packet-bound PTS engines required')
     if args.evidence.resolve().parent != Path(os.environ['CAP_LIKE_EVIDENCE']).resolve():
         raise ValueError('fixed per-phase evidence directory required')
     args.evidence.mkdir()
@@ -245,8 +276,9 @@ def run(args):
             or rate != reservation['warmRate' if phase == 'warm' else 'rate']):
         raise ValueError('phase must belong to its existing same-batch reservation')
     admission_path = scene_admission_path(expected_root, reservation)
+    admission = read(admission_path)
     if (hashlib.sha256(admission_path.read_bytes()).hexdigest() != reservation['ptsAdmissionSHA256']
-            or read(admission_path).get('passed') is not True):
+            or admission.get('passed') is not True):
         raise ValueError('reserved PTS scene admission differs')
     import psutil
     owner = read(runtime / 'cap10-active.private.json')
@@ -254,11 +286,14 @@ def run(args):
     if (owner['tag'] != tag or parent.create_time() != owner['created']
             or parent.pid not in {p.pid for p in psutil.Process().parents()}):
         raise ValueError('PTS phase is not descended from the exact active reservation owner')
-    if len(source['users']) != 512 or len(source['initial']) != 512:
-        raise ValueError('512 hydrated exclusive facts required')
-    relations = [{**source['initial'][slot], **user, 'slot': slot} for slot, user in enumerate(source['users'])]
-    run_config = {**cfg, 'runId': secrets.token_hex(16), 'phase': phase, 'rate': rate, 'seconds': seconds,
-        'fixtureSHA256': hashlib.sha256(Path(os.environ['CAP_LIKE_FIXTURE']).read_bytes()).hexdigest(),
+    fixture_bytes = Path(os.environ['CAP_LIKE_FIXTURE']).read_bytes()
+    if hashlib.sha256(fixture_bytes).hexdigest() != reservation['fixtureSHA256']:
+        raise ValueError('phase fixture bytes differ from reservation')
+    dimensions = phase_cohort(cfg, source, json.loads(fixture_bytes), reservation, admission)
+    relations = [{**source['initial'][slot], 'userId': user['userId'], 'token': user['token'], 'slot': slot}
+                 for slot, user in enumerate(source['users'])]
+    run_config = {**cfg, **dimensions, 'runId': secrets.token_hex(16), 'phase': phase, 'rate': rate, 'seconds': seconds,
+        'fixtureSHA256': hashlib.sha256(fixture_bytes).hexdigest(),
         'relations': relations, 'apiUrl': cfg['apiUrl']}
     collector = module('cap10_pts_collector', Path(__file__).with_name('cap10-pts-collector.py'))
     api = module('cap10_pts_api', Path(__file__).with_name('cap10-pts-api.py'))
@@ -283,7 +318,7 @@ def run(args):
         if actual_files != cfg['sceneFiles']:
             raise ValueError('uploaded PTS scene artifact bytes differ from frozen packet')
         if any(type(scene.get(key)) is not int or scene[key] != expected for key, expected in
-               (('Duration', 600), ('Concurrency', 513), ('AgentCount', 2))):
+               (('Duration', 600), ('Concurrency', dimensions['ptsConcurrency']), ('AgentCount', dimensions['expectedEngines']))):
             raise ValueError('fixed PTS lifecycle/concurrency configuration differs')
         response = client.start(cfg['sceneId'], runtime / ('pts-' + run_config['runId'] + '-start.private.json'),
             should_stop=lambda: stop_requested.is_set() or Path(os.environ['CAP_STOP_FILE']).exists() or store.control()['stop'])

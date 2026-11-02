@@ -92,7 +92,9 @@ class Cap10PTSRun {
         Map c = request('/control')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate < 1 || c.rate > 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
-            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
+            c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
+            c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
         if (config != null && [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
@@ -113,7 +115,7 @@ class Cap10PTSRun {
         while (startNano == Long.MIN_VALUE && !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
-        if (ordinal >= (long)config.rate * config.seconds) return null
+        if (ordinal >= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
         while (!stop.get() && System.nanoTime() < preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
@@ -190,7 +192,7 @@ class Cap10PTSRun {
     void reportLoop() {
         try {
             long nextReport = 0L
-            long setupDeadline = System.nanoTime() + 90000000000L
+            long setupDeadline = System.nanoTime() + 300000000000L
             while (done.size() < slots.size() || (!stop.get() && startNano != Long.MIN_VALUE && System.nanoTime() < startNano + config.seconds*1000000000L)) {
                 if (startNano == Long.MIN_VALUE && System.nanoTime() >= setupDeadline) stop.set(true)
                 if (stop.get() && inFlight.get() == 0 && done.size() >= bound.size()) break

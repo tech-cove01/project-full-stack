@@ -77,7 +77,7 @@ class Checks(unittest.TestCase):
         return self.store.batch(payload)
 
     def declared(self, engine=0, **changes):
-        planned = sum(1 for i in range(self.config['rate'] * self.config['seconds']) if engine * 256 <= i % 512 < (engine + 1) * 256)
+        planned = sum(1 for i in range(module.planned_total(self.config['rate'], self.config['seconds'])) if engine * 256 <= i % 512 < (engine + 1) * 256)
         return {'planned': planned, 'attempted': 0, 'completed': 0, 'mutation': 0, 'noop': 0,
                 'uncertain': 0, 'rejected': 0, 'invalid': 0, 'dropped': 0, **changes}
 
@@ -95,7 +95,7 @@ class Checks(unittest.TestCase):
             self.store = module.EngineStore(self.config, self.root / 'journal-180.ndjson', clock=lambda: self.stamp)
         self.ready()
         declared = [self.declared(0), self.declared(1)]
-        pending = [self.record(i) for i in range(self.config['rate'] * seconds)]
+        pending = [self.record(i) for i in range(module.planned_total(self.config['rate'], seconds))]
         if mutate:
             for row in pending:
                 mutate(row)
@@ -161,10 +161,11 @@ class Checks(unittest.TestCase):
         summary = self.store.summary()
         self.assertTrue(summary['complete'] and summary['collectionValid'])
         self.assertEqual(summary['endUnixMs'] - summary['startUnixMs'], 60000)
-        self.assertEqual((summary['counts']['planned'], summary['counts']['mutation'], summary['notOffered']), (3000, 3000, 0))
+        self.assertEqual((summary['counts']['planned'], summary['counts']['mutation'], summary['notOffered']), (2995, 2995, 0))
+        self.assertEqual((summary['launchGuardMs'], summary['plannedTotal']), (100, 2995))
         self.assertEqual((summary['unknown'], summary['unknownIsExact']), (0, True))
         self.assertEqual(summary['allLatency']['max'], 250)
-        self.assertEqual(summary['latencySampleCount'], 3000)
+        self.assertEqual(summary['latencySampleCount'], 2995)
         self.assertEqual(summary['evidenceSHA256'], hashlib.sha256((self.root / 'journal.ndjson').read_bytes()).hexdigest())
 
     def test_180_window_has_same_fixed_nominal_boundary(self):
@@ -173,8 +174,40 @@ class Checks(unittest.TestCase):
             self.complete(engine, declared[engine])
         summary = self.store.summary()
         self.assertTrue(summary['complete'])
-        self.assertEqual(summary['counts']['mutation'], 9000)
+        self.assertEqual(summary['counts']['mutation'], 8995)
         self.assertEqual(summary['endUnixMs'] - summary['startUnixMs'], 180000)
+
+    def test_guard_plan_rounding_shards_and_unchanged_warm(self):
+        for rate in (1, 50, 800, 5000):
+            for seconds in (10, 60, 180):
+                expected = rate * (seconds * 1000 - (0 if seconds == 10 else 100)) // 1000
+                self.assertEqual(module.planned_total(rate, seconds), expected)
+        self.assertEqual((module.planned_total(800, 60), module.planned_total(800, 180)), (47920, 143920))
+        self.assertGreaterEqual(module.planned_total(800, 180) / (800 * 180), .99)
+        self.assertEqual(self.store._planned(range(0, 512, 2)) + self.store._planned(range(1, 512, 2)), 2995)
+        self.store.close(); self.config.update(phase='warm', rate=25, seconds=10)
+        self.store = module.EngineStore(self.config, self.root / 'warm-journal.ndjson', clock=lambda: self.stamp)
+        self.assertEqual((self.store.summary()['launchGuardMs'], self.store.summary()['counts']['planned']), (0, 250))
+
+    def test_guard_ordinals_cannot_be_reported_as_native_requests_or_drops(self):
+        self.ready(); self.stamp = self.start + 60000
+        # The old final five ordinals are no longer offered. Neither a response
+        # nor invented dropped records can fill this intentional guard interval.
+        for kind in ('mutation', 'dropped'):
+            self.stamp += 1
+            row = self.record(2995, kind=kind)
+            if kind == 'dropped':
+                row = {key: row[key] for key in ('ordinal', 'slot', 'kind')}
+                row.update(startedUnixMs=None, elapsedMs=None, status=None)
+            with self.assertRaisesRegex(ValueError, 'ordinal ownership'):
+                self.batch(1, records=[row])
+        self.assertEqual(self.store.summary()['counts']['attempted'], 0)
+
+    def test_old_unguarded_declared_count_still_rejects_complete(self):
+        declared = self.full_window()
+        declared[1]['planned'] += 5
+        self.assertFalse(self.complete(1, declared[1])['complete'])
+        self.assertFalse(self.store.summary()['collectionValid'])
 
     def test_ack_retry_is_idempotent_and_different_content_stops(self):
         self.ready(); self.stamp = self.start + 1000
@@ -264,16 +297,16 @@ class Checks(unittest.TestCase):
             self.assertTrue(self.complete(engine, declared[engine])['complete'])
         summary = self.store.summary()
         self.assertTrue(summary['complete'] and summary['collectionValid'])
-        self.assertEqual((summary['counts']['mutation'], summary['latencySampleCount']), (3000, 3000))
+        self.assertEqual((summary['counts']['mutation'], summary['latencySampleCount']), (2995, 2995))
         self.assertEqual((summary['unknown'], summary['unknownIsExact']), (0, True))
-        self.assertEqual(summary['generatorTimingViolations'], 3000)
+        self.assertEqual(summary['generatorTimingViolations'], 2995)
         self.assertEqual(len(summary['generatorTimingViolationDetails']), 64)
         self.assertTrue(all(row['dispatchOffsetMs'] == 51 for row in summary['generatorTimingViolationDetails']))
         self.assertFalse(summary['generatorTimingValid'] or summary['batchFatal'] or summary['stop'])
         frames = [json.loads(line) for line in (self.root / 'journal.ndjson').read_text().splitlines()]
         native = [row for frame in frames if frame['kind'] == 'batch' for row in frame['records']]
-        self.assertEqual(len(native), 3000)
-        self.assertGreaterEqual(native[-1]['startedUnixMs'], self.start + 60000)
+        self.assertEqual(len(native), 2995)
+        self.assertLess(native[-1]['startedUnixMs'], self.start + 60000)
 
     def test_bad_fact_after_timing_violation_remains_fatal_and_rolls_back_new_counters(self):
         self.ready(); self.stamp = self.start + 1000
@@ -300,7 +333,7 @@ class Checks(unittest.TestCase):
         summary = self.store.summary()
         self.assertFalse(summary['complete'] or summary['collectionValid'] or summary['unknownIsExact'])
         self.assertIsNone(summary['unknown'])
-        self.assertEqual(summary['notOffered'], 3000)
+        self.assertEqual(summary['notOffered'], 2995)
         self.assertEqual(summary['counts']['dropped'], 0)
         self.assertTrue(summary['childrenConverged'] and summary['batchFatal'])
 
@@ -321,7 +354,7 @@ class Checks(unittest.TestCase):
 
     def test_uncertain_response_remains_unknown_and_in_all_http_quantile(self):
         def alter(row):
-            if row['ordinal'] == 2999:
+            if row['ordinal'] == 2994:
                 row.update(kind='uncertain', status=0, elapsedMs=500)
         declared = self.full_window(mutate=alter)
         for engine in (0, 1):

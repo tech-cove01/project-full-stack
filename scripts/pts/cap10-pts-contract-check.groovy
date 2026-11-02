@@ -14,8 +14,15 @@ check('bad count invalid') { [-1,.5,'1'].every { type.classify(200,body(true,1,i
 check('transport effect uncertain') { [0,500,503].every { type.classify(it,'','101',[liked:false,version:0],true).kind == 'uncertain' } }
 check('rejection separate') { type.classify(403,'','101',[liked:false,version:0],true).kind == 'rejected' }
 check('malformed body invalid') { type.classify(200,'not json','101',[liked:false,version:0],true).kind == 'invalid' }
-check('512 slots partition complete fixed schedule') { [1,50,5000].every { rate -> [60,180].every { seconds -> type.planned((0..<512).toList(),rate,seconds) == (long)rate*seconds } } }
-check('arbitrary disjoint engine shards preserve exact nominal plans') { [1,50,5000].every { rate -> type.planned((0..<512).findAll { it%2==0 },rate,180) + type.planned((0..<512).findAll { it%2==1 },rate,180) == (long)rate*180 } }
+check('512 slots partition guarded exact integer schedule') { [1,50,800,5000].every { rate -> [10,60,180].every { seconds -> type.planned((0..<512).toList(),rate,seconds) == Math.floorDiv(rate*(seconds*1000L-(seconds==10 ? 0L : 100L)),1000L) } } }
+check('arbitrary disjoint engine shards preserve exact guarded plans') { [1,50,800,5000].every { rate -> type.planned((0..<512).findAll { it%2==0 },rate,180) + type.planned((0..<512).findAll { it%2==1 },rate,180) == type.plannedTotal(rate,180) } }
+check('warm remains unchanged and stable reports actual guarded totals') { type.plannedTotal(25,10)==250 && type.plannedTotal(800,60)==47920 && type.plannedTotal(800,180)==143920 && type.launchGuardMs(10)==0 && type.launchGuardMs(180)==100 }
+check('last guarded due precedes 100ms launch guard and next ordinal is unplanned') {
+    [1,50,800,5000].every { rate -> [60,180].every { seconds ->
+        long total=type.plannedTotal(rate,seconds), end=seconds*1000000000L
+        type.dueNano(0L,total-1,rate)<end-100000000L && total==Math.floorDiv(rate*(seconds*1000L-100L),1000L)
+    } }
+}
 check('ordinal independent of completed request duration') { type.ordinal(7,2) == 1031 && type.dueNano(1000L,1031L,50) == 20620001000L }
 check('prepare lead leaves exact offer deadline unchanged') {
     [50,200,800,3200,5000].every { rate ->

@@ -36,6 +36,11 @@ def number(value, minimum=0):
     return type(value) in (int, float) and math.isfinite(value) and value >= minimum
 
 
+def planned_total(rate, seconds):
+    assert integer(rate, 1, 5000) and type(seconds) is int and seconds in (10, 60, 180), 'fixed native plan required'
+    return rate * (seconds * 1000 - (0 if seconds == 10 else 100)) // 1000
+
+
 def quantiles(values):
     """Exact sorted R7 quantiles of the full unaggregated HTTP elapsed samples."""
     if not values:
@@ -76,8 +81,10 @@ class EngineStore:
             self._relations[row['slot']] = copy.deepcopy(row)
         assert len({(r['userId'], r['noteId']) for r in rows}) == 512, 'private relationships duplicated'
         self._note_ids = {r['noteId'] for r in rows}
+        self._planned_total = planned_total(config['rate'], config['seconds'])
         self._identity = {key: config[key] for key in ('runId', 'phase', 'rate', 'seconds', 'apiUrl', 'fixtureSHA256', 'scriptSHA256', 'expectedEngines')}
-        self._identity.update(version=1, jitterBudgetMs=50, clockUncertaintyMaxMs=50)
+        self._identity.update(version=1, jitterBudgetMs=50, clockUncertaintyMaxMs=50,
+                              launchGuardMs=0 if config['phase'] == 'warm' else 100, plannedTotal=self._planned_total)
         self._identity_hash = digest(self._identity)
         self._engines = {}
         self._owners = {}
@@ -245,7 +252,7 @@ class EngineStore:
                       {'ordinal', 'slot', 'kind', 'startedUnixMs', 'elapsedMs', 'status'} <= set(raw), 'collector native record fields invalid')
         record = copy.deepcopy(raw)
         ordinal, slot, kind = record['ordinal'], record['slot'], record['kind']
-        self._require(integer(ordinal, 0, self._config['rate'] * self._config['seconds'] - 1) and integer(slot, 0, 511) and
+        self._require(integer(ordinal, 0, self._planned_total - 1) and integer(slot, 0, 511) and
                       ordinal % 512 == slot and self._owners.get(slot) == engine_id and kind in KINDS, 'collector native ordinal ownership invalid')
         self._require(ordinal not in self._records and ordinal > self._last_ordinal.get(slot, -1), 'collector native ordinal repeated or reordered')
         self._require(slot not in self._retired_slots, 'collector retired relationship used again')
@@ -343,13 +350,13 @@ class EngineStore:
             return {**self._control(), 'ack': payload['seq'], 'seq': payload['seq'], 'duplicate': False}
 
     def _planned(self, slots):
-        total = self._config['rate'] * self._config['seconds']
+        total = self._planned_total
         return sum((total - 1 - slot) // 512 + 1 for slot in slots if slot < total)
 
     def _raw_counts(self, engine_id=None):
         kinds = Counter(r[1] for r in self._records.values() if engine_id is None or self._owners[r[0]] == engine_id)
         attempted = sum(kinds.values()) - kinds['dropped']
-        return {'planned': self._config['rate'] * self._config['seconds'] if engine_id is None else self._planned(self._engines[engine_id]['slots']),
+        return {'planned': self._planned_total if engine_id is None else self._planned(self._engines[engine_id]['slots']),
                 'attempted': attempted, 'completed': attempted, **{key: kinds[key] for key in KINDS}}
 
     def _statistics(self):

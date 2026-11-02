@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">eee2859f78847137e7b5a24d10e6dd69ea3cc3ce5c285b60f188c1261bea5754</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/><ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="512 fixed exclusive relationships" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">512</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></ThreadGroup><hashTree><CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Exclusive slot, once per outer iteration" enabled="true"><stringProp name="filename">slots.csv</stringProp><stringProp name="fileEncoding">UTF-8</stringProp><stringProp name="variableNames"></stringProp><stringProp name="delimiter">,</stringProp><boolProp name="quotedData">false</boolProp><boolProp name="recycle">false</boolProp><boolProp name="stopThread">true</boolProp><stringProp name="shareMode">shareMode.all</stringProp><boolProp name="ignoreFirstLine">false</boolProp></CSVDataSet><hashTree/><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 bind" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">bind</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">9756b540ee8d549bd9b12d060ab32b3564ebe18b529cc80f2d65ae900b82f6ca</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/><ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="512 fixed exclusive relationships" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">512</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></ThreadGroup><hashTree><CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Exclusive slot, once per outer iteration" enabled="true"><stringProp name="filename">slots.csv</stringProp><stringProp name="fileEncoding">UTF-8</stringProp><stringProp name="variableNames"></stringProp><stringProp name="delimiter">,</stringProp><boolProp name="quotedData">false</boolProp><boolProp name="recycle">false</boolProp><boolProp name="stopThread">true</boolProp><stringProp name="shareMode">shareMode.all</stringProp><boolProp name="ignoreFirstLine">false</boolProp></CSVDataSet><hashTree/><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 bind" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">bind</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
 
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
@@ -42,8 +42,16 @@ class Cap10PTSContract {
         }
         now
     }
+    static int launchGuardMs(int seconds) {
+        if (!(seconds in [10,60,180])) throw new IllegalArgumentException('invalid native duration')
+        seconds == 10 ? 0 : 100
+    }
+    static long plannedTotal(int rate, int seconds) {
+        if (rate &lt; 1 || rate &gt; 5000) throw new IllegalArgumentException('invalid rate')
+        Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
+    }
     static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
-        long total = (long)rate * seconds
+        long total = plannedTotal(rate, seconds)
         slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
     }
 }
@@ -142,7 +150,9 @@ class Cap10PTSRun {
         Map c = request('/control')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
-            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
+            c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
+            c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
         if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
@@ -163,7 +173,7 @@ class Cap10PTSRun {
         while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
-        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        if (ordinal &gt;= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
         while (!stop.get() &amp;&amp; System.nanoTime() &lt; preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
@@ -240,7 +250,7 @@ class Cap10PTSRun {
     void reportLoop() {
         try {
             long nextReport = 0L
-            long setupDeadline = System.nanoTime() + 90000000000L
+            long setupDeadline = System.nanoTime() + 300000000000L
             while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
                 if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
                 if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
@@ -355,8 +365,16 @@ class Cap10PTSContract {
         }
         now
     }
+    static int launchGuardMs(int seconds) {
+        if (!(seconds in [10,60,180])) throw new IllegalArgumentException('invalid native duration')
+        seconds == 10 ? 0 : 100
+    }
+    static long plannedTotal(int rate, int seconds) {
+        if (rate &lt; 1 || rate &gt; 5000) throw new IllegalArgumentException('invalid rate')
+        Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
+    }
     static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
-        long total = (long)rate * seconds
+        long total = plannedTotal(rate, seconds)
         slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
     }
 }
@@ -455,7 +473,9 @@ class Cap10PTSRun {
         Map c = request('/control')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
-            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
+            c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
+            c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
         if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
@@ -476,7 +496,7 @@ class Cap10PTSRun {
         while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
-        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        if (ordinal &gt;= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
         while (!stop.get() &amp;&amp; System.nanoTime() &lt; preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
@@ -553,7 +573,7 @@ class Cap10PTSRun {
     void reportLoop() {
         try {
             long nextReport = 0L
-            long setupDeadline = System.nanoTime() + 90000000000L
+            long setupDeadline = System.nanoTime() + 300000000000L
             while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
                 if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
                 if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
@@ -668,8 +688,16 @@ class Cap10PTSContract {
         }
         now
     }
+    static int launchGuardMs(int seconds) {
+        if (!(seconds in [10,60,180])) throw new IllegalArgumentException('invalid native duration')
+        seconds == 10 ? 0 : 100
+    }
+    static long plannedTotal(int rate, int seconds) {
+        if (rate &lt; 1 || rate &gt; 5000) throw new IllegalArgumentException('invalid rate')
+        Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
+    }
     static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
-        long total = (long)rate * seconds
+        long total = plannedTotal(rate, seconds)
         slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
     }
 }
@@ -768,7 +796,9 @@ class Cap10PTSRun {
         Map c = request('/control')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
-            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
+            c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
+            c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
         if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
@@ -789,7 +819,7 @@ class Cap10PTSRun {
         while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
-        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        if (ordinal &gt;= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
         while (!stop.get() &amp;&amp; System.nanoTime() &lt; preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
@@ -866,7 +896,7 @@ class Cap10PTSRun {
     void reportLoop() {
         try {
             long nextReport = 0L
-            long setupDeadline = System.nanoTime() + 90000000000L
+            long setupDeadline = System.nanoTime() + 300000000000L
             while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
                 if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
                 if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
@@ -981,8 +1011,16 @@ class Cap10PTSContract {
         }
         now
     }
+    static int launchGuardMs(int seconds) {
+        if (!(seconds in [10,60,180])) throw new IllegalArgumentException('invalid native duration')
+        seconds == 10 ? 0 : 100
+    }
+    static long plannedTotal(int rate, int seconds) {
+        if (rate &lt; 1 || rate &gt; 5000) throw new IllegalArgumentException('invalid rate')
+        Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
+    }
     static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
-        long total = (long)rate * seconds
+        long total = plannedTotal(rate, seconds)
         slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
     }
 }
@@ -1081,7 +1119,9 @@ class Cap10PTSRun {
         Map c = request('/control')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
-            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
+            c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
+            c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
         if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
@@ -1102,7 +1142,7 @@ class Cap10PTSRun {
         while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
-        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        if (ordinal &gt;= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
         while (!stop.get() &amp;&amp; System.nanoTime() &lt; preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
@@ -1179,7 +1219,7 @@ class Cap10PTSRun {
     void reportLoop() {
         try {
             long nextReport = 0L
-            long setupDeadline = System.nanoTime() + 90000000000L
+            long setupDeadline = System.nanoTime() + 300000000000L
             while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
                 if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
                 if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
@@ -1294,8 +1334,16 @@ class Cap10PTSContract {
         }
         now
     }
+    static int launchGuardMs(int seconds) {
+        if (!(seconds in [10,60,180])) throw new IllegalArgumentException('invalid native duration')
+        seconds == 10 ? 0 : 100
+    }
+    static long plannedTotal(int rate, int seconds) {
+        if (rate &lt; 1 || rate &gt; 5000) throw new IllegalArgumentException('invalid rate')
+        Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
+    }
     static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
-        long total = (long)rate * seconds
+        long total = plannedTotal(rate, seconds)
         slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
     }
 }
@@ -1394,7 +1442,9 @@ class Cap10PTSRun {
         Map c = request('/control')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
-            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
+            c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
+            c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
         if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
@@ -1415,7 +1465,7 @@ class Cap10PTSRun {
         while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
-        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        if (ordinal &gt;= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
         while (!stop.get() &amp;&amp; System.nanoTime() &lt; preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
@@ -1492,7 +1542,7 @@ class Cap10PTSRun {
     void reportLoop() {
         try {
             long nextReport = 0L
-            long setupDeadline = System.nanoTime() + 90000000000L
+            long setupDeadline = System.nanoTime() + 300000000000L
             while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
                 if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
                 if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break
@@ -1607,8 +1657,16 @@ class Cap10PTSContract {
         }
         now
     }
+    static int launchGuardMs(int seconds) {
+        if (!(seconds in [10,60,180])) throw new IllegalArgumentException('invalid native duration')
+        seconds == 10 ? 0 : 100
+    }
+    static long plannedTotal(int rate, int seconds) {
+        if (rate &lt; 1 || rate &gt; 5000) throw new IllegalArgumentException('invalid rate')
+        Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
+    }
     static long planned(Collection&lt;Integer&gt; slots, int rate, int seconds) {
-        long total = (long)rate * seconds
+        long total = plannedTotal(rate, seconds)
         slots.sum(0L) { int slot -&gt; slot &gt;= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
     }
 }
@@ -1707,7 +1765,9 @@ class Cap10PTSRun {
         Map c = request('/control')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate &lt; 1 || c.rate &gt; 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
-            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/)) throw new IllegalStateException('collector phase contract differs')
+            c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
+            c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
+            c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
         if (config != null &amp;&amp; [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
@@ -1728,7 +1788,7 @@ class Cap10PTSRun {
         while (startNano == Long.MIN_VALUE &amp;&amp; !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
-        if (ordinal &gt;= (long)config.rate * config.seconds) return null
+        if (ordinal &gt;= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
         while (!stop.get() &amp;&amp; System.nanoTime() &lt; preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
@@ -1805,7 +1865,7 @@ class Cap10PTSRun {
     void reportLoop() {
         try {
             long nextReport = 0L
-            long setupDeadline = System.nanoTime() + 90000000000L
+            long setupDeadline = System.nanoTime() + 300000000000L
             while (done.size() &lt; slots.size() || (!stop.get() &amp;&amp; startNano != Long.MIN_VALUE &amp;&amp; System.nanoTime() &lt; startNano + config.seconds*1000000000L)) {
                 if (startNano == Long.MIN_VALUE &amp;&amp; System.nanoTime() &gt;= setupDeadline) stop.set(true)
                 if (stop.get() &amp;&amp; inFlight.get() == 0 &amp;&amp; done.size() &gt;= bound.size()) break

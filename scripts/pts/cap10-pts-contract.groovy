@@ -42,8 +42,16 @@ class Cap10PTSContract {
         }
         now
     }
+    static int launchGuardMs(int seconds) {
+        if (!(seconds in [10,60,180])) throw new IllegalArgumentException('invalid native duration')
+        seconds == 10 ? 0 : 100
+    }
+    static long plannedTotal(int rate, int seconds) {
+        if (rate < 1 || rate > 5000) throw new IllegalArgumentException('invalid rate')
+        Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
+    }
     static long planned(Collection<Integer> slots, int rate, int seconds) {
-        long total = (long)rate * seconds
+        long total = plannedTotal(rate, seconds)
         slots.sum(0L) { int slot -> slot >= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
     }
 }

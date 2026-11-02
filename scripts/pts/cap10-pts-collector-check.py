@@ -489,6 +489,39 @@ class Checks(unittest.TestCase):
         self.assertEqual(self.store.progress()['counts']['mutation'], 1)
         self.assertEqual(self.store._raw_counts(ENGINE_IDS[0])['mutation'], 1)
 
+    def test_progress_keeps_latest_invalid_and_previous_valid_cpu_without_history_copy(self):
+        self.ready(); self.stamp = self.start + 1000
+        self.batch()
+        self.stamp += 1000; self.batch()
+        valid = copy.deepcopy(self.store._engines[ENGINE_IDS[0]]['cpuSamples'][-1])
+        self.assertTrue(valid['intervalValid'])
+        for unused in range(50):
+            self.stamp += 10; self.batch()
+        before = self.store.summary()
+        engine = before['engines'][0]
+        self.assertTrue(engine['cpuSamplesComplete'])
+        self.assertEqual(len(engine['cpuSamples']), 52)
+        live = self.store.progress()['engines'][0]
+        self.assertIs(live['cpuSamplesComplete'], False)
+        self.assertEqual(live['cpuSamples'], [valid, engine['cpuSamples'][-1]])
+        self.assertFalse(live['cpuSamples'][-1]['intervalValid'])
+        self.assertEqual(live['resources'], engine['resources'])
+        self.assertEqual(live['lastResourceUnixMs'], engine['lastResourceUnixMs'])
+        self.assertEqual(live['lastValidCPUUnixMs'], engine['lastValidCPUUnixMs'])
+        live['cpuSamples'][0]['raw']['rssBytes'] = 1
+        live['cpuSamples'][-1]['raw']['monotonicNs'] = 0
+        self.assertEqual(self.store.summary(), before)
+
+    def test_progress_does_not_invent_valid_cpu_intervals(self):
+        self.ready(); self.stamp = self.start + 1000
+        self.batch()
+        self.stamp += 10; self.batch()
+        live = self.store.progress()['engines'][0]
+        self.assertEqual(len(live['cpuSamples']), 1)
+        self.assertFalse(live['cpuSamples'][0]['intervalValid'])
+        self.assertIsNone(live['lastValidCPUUnixMs'])
+        self.assertEqual(len(self.store.summary()['engines'][0]['cpuSamples']), 2)
+
     def test_unsynced_frame_cannot_update_progress_counters(self):
         self.ready(); self.stamp = self.start + 1000
         with patch.object(module.os, 'fsync', side_effect=OSError('synthetic sync failure')):

@@ -217,7 +217,8 @@ class EngineStore:
                 self._require(len(self._engines) < self._expected_engines and not any(slot in self._owners for slot in slots), 'collector slot ownership overlaps')
                 self._engines[engine_id] = {'slots': slots, 'lastSeenUnixMs': self._now(), 'batches': {}, 'complete': None,
                                            'readyWorkers': 0, 'resources': None, 'lastResourceUnixMs': None,
-                                           'lastValidCPUUnixMs': None, 'clock': None, 'highCPUStreak': 0, 'cpuSamples': []}
+                                           'lastValidCPUUnixMs': None, 'clock': None, 'highCPUStreak': 0,
+                                           'cpuSamples': [], 'lastValidCPUSample': None}
                 self._engine_kind_counts[engine_id] = Counter()
                 self._owners.update({slot: engine_id for slot in slots})
                 self._append({'kind': 'register', 'engineId': engine_id, 'slots': slots, 'readyWorkers': 0})
@@ -260,6 +261,8 @@ class EngineStore:
                 self._stop_for('collector engine CPU safety limit')
         engine['resources'] = copy.deepcopy(resources)
         engine['cpuSamples'].append(sample)
+        if sample['intervalValid']:
+            engine['lastValidCPUSample'] = sample
         if resources['rssBytes'] >= RSS_LIMIT:
             self._stop_for('collector engine RSS safety limit')
 
@@ -455,6 +458,16 @@ class EngineStore:
         """Exact durable counters/resources only; no live percentile calculation."""
         return self.summary(include_latency=False)
 
+    @staticmethod
+    def _cpu_samples(engine, include_history):
+        samples = engine['cpuSamples']
+        if include_history or not samples:
+            return copy.deepcopy(samples)
+        # Live resource checks require the latest reading plus evidence that a
+        # real CPU interval exists. Full history remains in the final summary.
+        latest, valid = samples[-1], engine['lastValidCPUSample']
+        return copy.deepcopy([valid, latest] if valid is not None and valid is not latest else [latest])
+
     def summary(self, *, include_latency=True):
         with self._lock:
             self.tick()
@@ -468,7 +481,8 @@ class EngineStore:
                         'stoppedOffering': engine['complete'] is not None and engine['complete']['stoppedOffering'],
                         'resources': copy.deepcopy(engine['resources']), 'clock': copy.deepcopy(engine['clock']),
                         'lastResourceUnixMs': engine['lastResourceUnixMs'], 'lastValidCPUUnixMs': engine['lastValidCPUUnixMs'],
-                        'cpuSamples': copy.deepcopy(engine['cpuSamples']), 'lastSeq': len(engine['batches']) - 1,
+                        'cpuSamples': self._cpu_samples(engine, include_latency), 'cpuSamplesComplete': include_latency,
+                        'lastSeq': len(engine['batches']) - 1,
                         'counts': copy.deepcopy(engine['complete']['counts']) if engine['complete'] is not None else None}
                        for engine_id, engine in sorted(self._engines.items())]
             complete = len(engines) == self._expected_engines and len(self._owners) == self._pool_size and all(e['complete'] for e in engines)

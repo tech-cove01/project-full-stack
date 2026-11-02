@@ -230,8 +230,11 @@ class Client:
                     'attempt': attempt + 1, 'requestStartedAt': start, 'responseFinishedAt': utc(),
                     'elapsedSeconds': time.monotonic() - began, 'httpStatus': status,
                     'sanitizedRawResponse': data, 'rawResponseIsSanitized': True})
-                if not isinstance(data, dict) or not 200 <= status < 300 or data.get('Success') is not True:
+                if (not isinstance(data, dict) or not 200 <= status < 300
+                        or data.get('Success') is not True or data.get('Code', '') != ''):
                     code = data.get('Code', 'provider_error') if isinstance(data, dict) else 'provider_error'
+                    if not isinstance(code, str) or not code:
+                        code = 'provider_error'
                     raise Error(clean(code, self.auth), unknown=status >= 500 or status == 429)
                 self._last_success_http_status = status
                 return data
@@ -293,6 +296,14 @@ class Client:
         if report_id not in self.reports:
             raise Error('report_not_bound_to_this_client')
         response = self._call('GetJMeterReportDetails', {'ReportId': report_id})
+        if (set(response) == {'RequestId', 'SamplerMetricsList', 'Success'}
+                and self._last_success_http_status == 200 and response['SamplerMetricsList'] == []
+                and isinstance(response['RequestId'], str) and response['RequestId'].strip()):
+            # An acknowledged report with no sampler data may not have an
+            # overview yet. Missing overview is pending, never an EndTime.
+            return {'reportId': report_id, 'ended': False, 'reportAvailable': False,
+                    'reportIdentitySource': 'signed-request-ReportId',
+                    'nativeWindowVerified': False, 'requestId': response['RequestId']}
         overview = response.get('ReportOverView')
         if not isinstance(overview, dict) or not overview:
             raise Error('report_response_invalid')
@@ -303,14 +314,30 @@ class Client:
             ended = isinstance(start, str) and isinstance(end, str) and len(start) >= 19 and len(end) >= 19 and dt.datetime.fromisoformat(end) >= dt.datetime.fromisoformat(start)
         except (ValueError, TypeError):
             ended = False
-        return {'reportId': report_id, 'ended': ended, 'startTimeRaw': start, 'endTimeRaw': end,
+        return {'reportId': report_id, 'ended': ended, 'reportAvailable': True,
+            'startTimeRaw': start, 'endTimeRaw': end,
             'reportIdentitySource': 'provider-response-ReportId' if 'ReportId' in overview else 'signed-request-ReportId',
             'timeZoneVerified': False, 'nativeWindowVerified': False,
             'agentCount': overview.get('AgentCount'), 'vum': overview.get('Vum'),
             'requestId': response.get('RequestId')}
 
     def terminal_evidence(self, scene_id, report_id):
-        running = self.running(scene_id)
+        try:
+            running = self.running(scene_id)
+        except Error as error:
+            if (error.code != 'no_running_data' or error.unknown
+                    or not getattr(error, 'successful_empty_running_response', False)
+                    or report_id not in self.reports):
+                raise
+            # Only an already acknowledged/bound report may be queried when
+            # the current-scene API has ceased exposing RunningData. The
+            # signed report request must still yield a real valid EndTime.
+            report = self.report(report_id)
+            return {'terminal': report['ended'], 'reportId': report_id,
+                'runningDataAvailable': False, 'reportAvailable': report['reportAvailable'],
+                'reportedEndTimeRaw': report.get('endTimeRaw'), 'endTimeZoneVerified': False,
+                'nativeWindowVerified': False,
+                'basis': 'acknowledged bound report EndTime; current running data unavailable'}
         if running.get('reportId') != report_id:
             raise Error('current_report_identity_differs')
         # The official Status schema has no complete enum. Do not guess one.
@@ -396,7 +423,19 @@ class Client:
             raise Error('stop_requires_exclusive_acknowledged_report')
         if expectedReportId in self.stops:
             raise Error('stop_already_attempted_read_reconcile_instead')
-        current = self.running(scene_id)
+        try:
+            current = self.running(scene_id)
+        except Error as error:
+            if (error.code != 'no_running_data' or error.unknown
+                    or not getattr(error, 'successful_empty_running_response', False)):
+                raise
+            evidence = self.terminal_evidence(scene_id, expectedReportId)
+            # No current report identity means no scene-level Stop is safe.
+            # Keep polling this acknowledged report; only its real EndTime can
+            # close the phase, and an empty report never does so.
+            return {'requested': False, 'alreadyTerminal': evidence['terminal'],
+                'terminationPending': not evidence['terminal'], 'reportId': expectedReportId,
+                'terminalVerified': evidence['terminal']}
         if current.get('reportId') != expectedReportId:
             raise Error('refuse_to_stop_another_report')
         if self.terminal_evidence(scene_id, expectedReportId)['terminal']:

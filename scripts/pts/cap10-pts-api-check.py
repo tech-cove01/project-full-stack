@@ -97,6 +97,33 @@ def main():
     with tempfile.TemporaryDirectory(prefix='.qa-cap10-pts-offline-', dir=workspace) as folder:
         root = Path(folder).resolve()
         assert root.parent == workspace and root.name.startswith('.qa-cap10-pts-offline-')
+        # Actual PTS Stop acknowledgement includes an empty Code. It remains a
+        # success acknowledgement only, never evidence of remote termination.
+        stop_response = {'Message': 'stop accepted', 'RequestId': 'stop-response', 'Code': '', 'Success': True}
+        def response_client(label, body, status=200):
+            return api.Client('cn-shanghai', root / label, AUTH,
+                transport=lambda *_: (status, json.dumps(body).encode()),
+                scene_id=SCENE, exclusive_scene=True)
+        accepted = response_client('stop-empty-code', stop_response)
+        result = accepted._call('StopTestingJMeterScene', {'SceneId': SCENE})
+        check(result == stop_response and accepted._last_success_http_status == 200,
+            'HTTP200 Success true and empty Code is a stop acknowledgement')
+        raw_stop = json.loads(next((root / 'stop-empty-code').glob('*.json')).read_text())
+        check(raw_stop['sanitizedRawResponse']['Code'] == '' and
+            raw_stop['sanitizedRawResponse']['Success'] is True,
+            'raw audit preserves empty Code success fields')
+        for index, code in enumerate(('PermissionDenied', 'ReportNotExist', 'InternalError')):
+            conflicting = response_client('stop-conflicting-code-' + str(index), {**stop_response, 'Code': code})
+            expect_error(lambda: conflicting._call('StopTestingJMeterScene', {'SceneId': SCENE}), code)
+            check(conflicting._last_success_http_status is None,
+                'conflicting provider error Code cannot leave successful HTTP marker')
+        for index, body in enumerate(({**stop_response, 'Success': False},
+                                      {**stop_response, 'Code': None},
+                                      {**stop_response, 'Code': 0})):
+            rejected = response_client('stop-invalid-code-' + str(index), body)
+            expect_error(lambda: rejected._call('StopTestingJMeterScene', {'SceneId': SCENE}), 'provider_error')
+        rejected = response_client('stop-http-error-empty-code', stop_response, 403)
+        expect_error(lambda: rejected._call('StopTestingJMeterScene', {'SceneId': SCENE}), 'provider_error')
         # Only this newly created temporary directory is removed by the context.
         def scene_client(scene, label, include_scene=True):
             def transport(path, headers, timeout):
@@ -237,6 +264,66 @@ def main():
         for index, value in enumerate(({}, None, [], 'not-an-overview')):
             candidate = report_client(value, 'report-invalid-' + str(index))
             expect_error(lambda: candidate.report(REPORT), 'report_response_invalid')
+
+        def no_running_report_client(label, report_body, report_status=200):
+            calls = []
+            def transport(path, headers, timeout):
+                action = headers['x-acs-action']; calls.append(action)
+                if action == 'GetJMeterSceneRunningData':
+                    return 200, json.dumps({'RequestId': 'no-running', 'Success': True}).encode()
+                assert action == 'GetJMeterReportDetails'
+                assert parse_qs(urlsplit(path).query)['ReportId'] == [REPORT]
+                return report_status, json.dumps(report_body).encode()
+            client = api.Client('cn-shanghai', root / label, AUTH, transport=transport, scene_id=SCENE)
+            client.reports.add(REPORT)
+            return client, calls
+        pending_body = {'RequestId': 'pending-overview', 'SamplerMetricsList': [], 'Success': True}
+        pending, calls = no_running_report_client('report-pending', pending_body)
+        evidence = pending.terminal_evidence(SCENE, REPORT)
+        check(evidence['terminal'] is False and evidence['runningDataAvailable'] is False
+            and evidence['reportAvailable'] is False and evidence['reportedEndTimeRaw'] is None,
+            'empty current state and empty acknowledged report remain pending without invented EndTime')
+        check(calls == ['GetJMeterSceneRunningData', 'GetJMeterReportDetails'],
+            'pending terminal poll still queries exact already-bound report')
+        pending_audit = next(json.loads(p.read_text()) for p in (root / 'report-pending').glob('*.json')
+            if json.loads(p.read_text())['action'] == 'GetJMeterReportDetails')
+        check(pending_audit['sanitizedRawResponse'] == pending_body,
+            'pending report raw response stays byte-field faithful without synthesized overview')
+        expect_error(lambda: pending.report('UNBOUND_REPORT'), 'report_not_bound_to_this_client')
+        completed, _ = no_running_report_client('report-ended-without-running',
+            {'RequestId': 'report-ended', 'Success': True, 'ReportOverView': overview})
+        evidence = completed.terminal_evidence(SCENE, REPORT)
+        check(evidence['terminal'] is True and evidence['reportAvailable'] is True
+            and evidence['reportedEndTimeRaw'] == overview['EndTime'] and not evidence['nativeWindowVerified'],
+            'acknowledged signed report actual EndTime can prove remote terminal after current data disappears')
+        pending.exclusive = True
+        stop_pending = pending.stop(SCENE, REPORT)
+        check(stop_pending['requested'] is False and stop_pending['terminationPending'] is True
+            and stop_pending['terminalVerified'] is False and not pending.stops
+            and 'StopTestingJMeterScene' not in calls,
+            'missing current identity cannot send scene Stop or claim terminal; acknowledged report stays poll-only')
+        completed.exclusive = True
+        stopped_complete = completed.stop(SCENE, REPORT)
+        check(stopped_complete['requested'] is False and stopped_complete['alreadyTerminal'] is True
+            and stopped_complete['terminalVerified'] is True,
+            'completed acknowledged report needs no scene-level Stop when current data disappeared')
+        unfinished, _ = no_running_report_client('report-unfinished-without-running',
+            {'RequestId': 'report-unfinished', 'Success': True,
+             'ReportOverView': {**overview, 'EndTime': ''}})
+        check(unfinished.terminal_evidence(SCENE, REPORT)['terminal'] is False,
+            'overview without actual EndTime remains pending')
+        conflicting, _ = no_running_report_client('report-conflict-without-running',
+            {'RequestId': 'report-conflict', 'Success': True,
+             'ReportOverView': {**overview, 'ReportId': 'FOREIGN_REPORT'}})
+        expect_error(lambda: conflicting.terminal_evidence(SCENE, REPORT), 'report_identity_differs')
+        for index, body in enumerate(({**pending_body, 'SamplerMetricsList': ['sample']},
+                                      {**pending_body, 'RequestId': ''},
+                                      {**pending_body, 'ReportOverView': None},
+                                      {'RequestId': 'missing-metrics', 'Success': True})):
+            invalid, _ = no_running_report_client('report-invalid-pending-' + str(index), body)
+            expect_error(lambda: invalid.terminal_evidence(SCENE, REPORT), 'report_response_invalid')
+        wrong_status, _ = no_running_report_client('report-pending-http202', pending_body, 202)
+        expect_error(lambda: wrong_status.terminal_evidence(SCENE, REPORT), 'report_response_invalid')
 
         fake = Fake(); journal = root / 'S1-warm.private.json'; fake.start_journal = journal
         client = api.Client('cn-hangzhou', root / 'audit', AUTH, transport=fake, scene_id=SCENE, exclusive_scene=True)

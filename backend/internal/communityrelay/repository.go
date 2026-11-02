@@ -45,9 +45,9 @@ func (repository *Repository) Claim(ctx context.Context) (*Event, error) {
 	err := repository.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var rows []Event
 		if err := tx.Raw(`SELECT id,event_id,aggregate_type,aggregate_id,aggregate_version,
-			event_type,payload,attempts FROM tb_community_outbox
-			WHERE (delivery_status='PENDING' AND next_attempt_at<=NOW(3))
-			   OR (delivery_status='PROCESSING' AND lease_until<NOW(3))
+			event_type,payload,attempts FROM tb_community_outbox FORCE INDEX (idx_community_active_claim)
+			WHERE claim_active=1 AND ((delivery_status='PENDING' AND next_attempt_at<=NOW(3))
+			   OR (delivery_status='PROCESSING' AND lease_until<NOW(3)))
 			ORDER BY id LIMIT 1 FOR UPDATE SKIP LOCKED`).Scan(&rows).Error; err != nil {
 			return err
 		}

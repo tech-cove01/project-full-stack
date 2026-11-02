@@ -266,7 +266,12 @@ class EngineStore:
     def _record(self, raw, engine_id):
         self._require(isinstance(raw, dict) and not (set(raw) - RECORD_KEYS) and
                       {'ordinal', 'slot', 'kind', 'startedUnixMs', 'elapsedMs', 'status'} <= set(raw), 'collector native record fields invalid')
-        record = copy.deepcopy(raw)
+        self._require(all(type(value) in (str, int, float, bool, type(None)) for value in raw.values()),
+                      'collector native record must contain only JSON scalars')
+        # The accepted schema below permits only immutable JSON scalars. Own the
+        # mapping without recursively copying every scalar in every native row;
+        # nested/mutable values still fail before they can be journaled or ACKed.
+        record = dict(raw)
         ordinal, slot, kind = record['ordinal'], record['slot'], record['kind']
         self._require(integer(ordinal, 0, self._planned_total - 1) and integer(slot, 0, self._pool_size - 1) and
                       ordinal % self._pool_size == slot and self._owners.get(slot) == engine_id and kind in KINDS, 'collector native ordinal ownership invalid')

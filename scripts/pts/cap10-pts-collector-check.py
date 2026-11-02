@@ -511,6 +511,33 @@ class Checks(unittest.TestCase):
         self.assertEqual(result['allLatency']['max'], max(values))
         self.assertEqual(progress['counts'], result['counts'])
 
+    def test_acknowledged_scalar_records_do_not_alias_the_callers_mapping(self):
+        self.ready(); self.stamp = self.start + 1000
+        record = self.record()
+        self.batch(records=[record])
+        journal = (self.root / 'journal.ndjson').read_bytes()
+        record.update(kind='invalid', observedVersion=999, observedNoteId='FOREIGN', elapsedMs=999)
+        result = self.store.summary()
+        self.assertEqual((result['counts']['mutation'], result['allLatency']['max']), (1, 1))
+        self.assertEqual(self.store._facts[0], (True, 1))
+        self.assertEqual((self.root / 'journal.ndjson').read_bytes(), journal)
+        self.assertEqual(result['evidenceSHA256'], hashlib.sha256(journal).hexdigest())
+
+    def test_nested_record_values_are_rejected_without_committing_a_prefix(self):
+        for field in ('ordinal', 'slot', 'kind', 'startedUnixMs', 'wanted', 'observedLiked',
+                      'previousVersion', 'observedVersion', 'observedNoteId', 'elapsedMs', 'status'):
+            with self.subTest(field=field):
+                self.store.close()
+                self.store = module.EngineStore(self.config, self.root / ('nested-' + field + '.ndjson'), clock=lambda: self.stamp)
+                self.ready(); self.stamp = self.start + 1000
+                invalid = self.record(1)
+                invalid[field] = {'mutable': []}
+                with self.assertRaisesRegex(ValueError, 'JSON scalars'):
+                    self.batch(records=[self.record(), invalid])
+                self.assertEqual(self.store.progress()['counts']['attempted'], 0)
+                self.assertEqual(len(self.store._records), 0)
+                self.assertEqual(self.store._facts[0], (False, 0))
+
     def cohort(self, pool, engines):
         self.store.close()
         self.config.update(poolSize=pool, expectedEngines=engines,

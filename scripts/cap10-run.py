@@ -182,7 +182,7 @@ def reserve(args, api, value):
                'failedStartsConsumeSlot': True}
     command['loadBackend'] = value.get('CAP10_LOAD_BACKEND', 'k6')
     for key in ('executionAuthoritySHA256', 'executionAuthorityGeneration', 'deploymentId',
-                'activeApplicationSHA256', 'admissionSHA256'):
+                'activeApplicationSHA256', 'admissionSHA256', 'baselineAudit', 'baselineAuditEventCount'):
         if key in reservation:
             command[key] = reservation[key]
     if command['loadBackend'] == 'pts':
@@ -450,8 +450,10 @@ def main():
             assert ctypes.windll.kernel32.SetThreadExecutionState(0x80000001)
         owned.save(ROOT / (tag + '-capacity-before.json'), {'at': owned.now(), 'capacity': owned.get_json('http://127.0.0.1:8381/debug/capacity'), 'scope': 'parsed pre-warm snapshot'})
         log = (ROOT / (tag + '-observer.txt')).open('xb'); handles.append(log)
-        observer = subprocess.Popen([str(args.observer.resolve()), '--environment', str(args.environment.resolve()),
-            '--output', str(downstream), '--done-file', str(control / 'done.json'), '--max-seconds', stage_deadline],
+        observer_argv = [str(args.observer.resolve()), '--environment', str(args.environment.resolve()),
+            '--output', str(downstream), '--done-file', str(control / 'done.json'), '--max-seconds', stage_deadline]
+        observer_argv += grade.observer_arguments(ROOT, command)
+        observer = subprocess.Popen(observer_argv,
             cwd=REPO, env=owned.env(value), stdout=log, stderr=subprocess.STDOUT, creationflags=owned.FLAGS)
         process = psutil.Process(observer.pid); created = process.create_time(); process.cpu_percent(None); cpu_at = time.monotonic()
         state['observerPid'] = observer.pid; deadline = time.monotonic() + 90
@@ -459,7 +461,7 @@ def main():
             time.sleep(.1)
         assert (downstream / 'ready.json').exists() and owned.read(downstream / 'ready.json')['ready']
         observer_ready = owned.read(downstream / 'ready.json')
-        grade.observer_identity(command['observerPolicy'], observer_ready)
+        grade.observer_ready_identity(ROOT, command, observer_ready)
         native = {**value, 'CAP_STOP_FILE': str(control / 'stop.json'), 'CAP_API_PID': str(api['pid']), 'CAP10_DOWNSTREAM_EVIDENCE': str(downstream), 'CAP10_FORMAL': '1' if args.kind == 'formal' else '0'}
         if pts:
             native['CAP10_PYTHON_BIN'] = sys.executable
@@ -533,7 +535,7 @@ def main():
         state['apiPassed'] = report.get('meetsAPIBudget', report.get('meetsBudget')) is True
         state['factsConverged'] = report.get('finalReconcileValid') is True
         state['resourcesPassed'] = status.get('sampler_exit') == 0 and not status['errors'] and not status['stop_signal'] and not status['forced'] and status['resource_samples'] == status['complete_resource_samples'] and status['resource_samples'] > 0
-        state['pipeline'] = grade.pipeline_grade(downstream, report, args.seconds, 'like')
+        state['pipeline'] = grade.pipeline_grade(downstream, report, args.seconds, 'like', command)
         observed = owned.read(downstream / 'summary.json')
         state['collectionValid'] = observed.get('collectionValid') is True and observed.get('semanticViolationCount') == 0
         rows = [json.loads(line) for line in (control / 'resources.ndjson').read_text(encoding='utf-8-sig').splitlines() if line]

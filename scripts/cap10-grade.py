@@ -53,6 +53,133 @@ def observer_identity(expected, api, active=None, freeze=None):
                     and limits == OBSERVER.sampling_limits(), 'observer sampling limits differ from the fixed contract')
     return {'observerPolicy': selected, 'observerSamplingLimits': OBSERVER.sampling_limits()}
 
+
+VECTOR_LIMITS = {'maxNewEvents': 40000, 'maxPendingEvents': 40000,
+                 'maxTrackedLogicalBytes': 64 * 1024 * 1024, 'sourceChunkKeys': 256,
+                 'sourcePayloadBytes': 1024 * 1024, 'sourceResultValueBytes': 256 * 1024 * 1024}
+AUDIT_CONTRACT = {'contract': 'like-cohort-audit-v1',
+                  'sourceScope': 'selected-aggregate-id-with-blog-or-like-attribution',
+                  'hashContract': 'communityprojection.Decode/LIKE/canonical-ascii-v1'}
+
+
+def _audit_reference(root, reference):
+    require(type(reference) is dict and set(reference) == {'path', 'sha256'}, 'exact baseline audit reference required')
+    raw = reference['path']
+    require(type(raw) is str and len(raw) <= 1024 and
+            re.fullmatch(r'[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*', raw) and
+            all(part not in ('.', '..') for part in raw.split('/')) and
+            raw.split('/')[-1] == 'reconcile.json' and
+            type(reference['sha256']) is str and re.fullmatch(r'[a-f0-9]{64}', reference['sha256']),
+            'canonical native-root audit reference required')
+    return _authority_ref(root, reference)
+
+
+def _complete_vector_audit(proof, fixture_hash, pool):
+    """Check the bound Node audit contract; Go separately validates fresh SQL."""
+    require(type(proof) is dict and all(proof.get(key) is True for key in
+            ('valid', 'factsValid', 'downstreamConverged')) and proof.get('errors') == [],
+            'complete successful independent audit required')
+    require(all(type(proof.get(key)) is int for key in ('startedAt', 'finishedAt')) and
+            0 < proof['startedAt'] <= proof['finishedAt'] <= dt.datetime.now(dt.timezone.utc).timestamp() * 1000,
+            'full audit original timestamps invalid')
+    facts = proof['facts']
+    OBSERVER.metadata_policy(facts, OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': OBSERVER.LIKE_VECTOR}))
+    require(facts.get('auditContract') == AUDIT_CONTRACT and facts.get('fixtureManifestSHA256') == fixture_hash,
+            'full audit contract or original fixture bytes differ')
+    total = facts.get('eventCount')
+    require(type(total) is int and 0 <= total <= 9007199254740991 and type(facts.get('transitions')) is int and
+            facts['transitions'] == total, 'full audit source and fact totals differ')
+    rows, notes = facts['facts'], facts['notes']
+    pairs = {(row['noteId'], row['userId']) for row in rows}
+    require(len(rows) == len(pairs) == len(notes) == pool and
+            len({row['noteId'] for row in rows}) == pool and
+            {row['noteId'] for row in notes} == {pair[0] for pair in pairs} and
+            all(type(row['version']) is int and 0 <= row['version'] <= 2147483647 and
+                type(row['active']) is int and row['active'] == row['version'] % 2 for row in rows) and
+            sum(row['version'] for row in rows) == total, 'full audit relationship vector incomplete')
+    require(sum(row['count'] for row in facts['events']) == total and
+            all(type(row['invalid']) is int and row['invalid'] == 0 for row in facts['events']) and
+            sum(row['count'] for row in facts['delivery']) == total and
+            all(row['status'] == 'DONE' for row in facts['delivery']), 'full audit source or delivery not converged')
+    receipts = facts['receipts']
+    groups = {'follow-v1', 'feed-v1', 'search-v1'}
+    require(all(row['projection'] in groups and row['state'] == 'IGNORED' and
+                type(row['count']) is int and row['count'] > 0 and
+                all(type(row.get(key)) is int and row[key] == 0 for key in
+                    ('invalidHash', 'invalidProjection', 'invalidState')) for row in receipts) and
+            all(sum(row['count'] for row in receipts if row['projection'] == group) == total for group in groups),
+            'full audit receipt coverage, identity, state or hash invalid')
+    require(all(row['state'] == 'RESOLVED' for row in facts['parked']), 'full audit contains unresolved consumer failures')
+    derived = proof['derived']
+    require(derived.get('available') is True and derived.get('errors') == [] and
+            len(derived['notes']) == pool, 'full Redis audit incomplete')
+    require(type(facts.get('controlRows')) is dict, 'nullable full-audit controls required')
+    return facts
+
+
+def observer_baseline(root, reservation, fixture, policy):
+    if policy['mode'] == OBSERVER.FULL_HISTORY:
+        return {}
+    tag = reservation['tag']
+    admission = _authority_ref(root, {'path': 'admission-' + tag + '.json',
+                                      'sha256': reservation['admissionSHA256']})
+    reference = admission['reconciliation']
+    proof = _audit_reference(root, reference)
+    facts = _complete_vector_audit(proof, sha(fixture), reservation['poolSize'])
+    return {'baselineAudit': reference, 'baselineAuditEventCount': facts['eventCount']}
+
+
+def observer_ready_identity(root, command, ready):
+    observer_identity(command['observerPolicy'], ready)
+    if command['observerPolicy']['mode'] == OBSERVER.FULL_HISTORY:
+        return {}
+    proof = _audit_reference(root, command['baselineAudit'])
+    facts = _complete_vector_audit(proof, command['fixtureSHA256'], command['poolSize'])
+    require(ready.get('baselineAudit') == command['baselineAudit'] and
+            type(ready.get('baselineAuditEventCount')) is int and
+            ready['baselineAuditEventCount'] == command['baselineAuditEventCount'] == facts['eventCount'] and
+            ready.get('baselineCountSource') == 'bound-node-full-reconciliation',
+            'observer baseline must bind this window original full audit')
+    limits = ready.get('observerVectorLimits')
+    require(type(limits) is dict and all(type(value) is int for value in limits.values()) and limits == VECTOR_LIMITS,
+            'fixed observer vector limits differ')
+    for key in ('baselineVectorSHA256', 'baselineControlsSHA256'):
+        require(type(ready.get(key)) is str and re.fullmatch(r'[a-f0-9]{64}', ready[key]), 'observer baseline digest missing')
+    return {key: ready[key] for key in ('baselineAudit', 'baselineAuditEventCount', 'baselineCountSource',
+            'baselineVectorSHA256', 'baselineControlsSHA256', 'observerVectorLimits')}
+
+
+def observer_arguments(root, command):
+    if command['observerPolicy']['mode'] == OBSERVER.FULL_HISTORY:
+        return []
+    _audit_reference(root, command['baselineAudit'])
+    return ['--baseline-audit', str(Path(root) / command['baselineAudit']['path']),
+            '--baseline-audit-sha256', command['baselineAudit']['sha256']]
+
+
+def observer_final_audit(directory, report, command, summary, rows):
+    """Bind cumulative full audits to the per-stage delta, not recovery timing."""
+    root = directory.parent
+    ready = read(directory / 'ready.json')
+    identity = observer_ready_identity(root, command, ready)
+    require(observer_ready_identity(root, command, summary) == identity, 'terminal observer identity differs from ready')
+    OBSERVER.metadata_policy(report, command['observerPolicy'])
+    require(report.get('fixtureManifestSHA256') == command['fixtureSHA256'], 'load report fixture bytes differ')
+    baseline = _audit_reference(root, command['baselineAudit'])
+    final = read(root / (command['tag'] + '-load') / 'reconcile.json')
+    facts = _complete_vector_audit(final, command['fixtureSHA256'], command['poolSize'])
+    require(final['startedAt'] >= report['nativeScenario']['scheduledEndedAt'], 'final full audit predates native end')
+    require(facts['controlRows'] == baseline['facts']['controlRows'], 'projection or search controls changed during window')
+    require({(row['noteId'], row['userId']) for row in facts['facts']} ==
+            {(row['noteId'], row['userId']) for row in baseline['facts']['facts']}, 'final audit relationship set changed')
+    delta = rows[-1]['sql']['counts']['events']
+    require(type(delta) is int and delta >= 0 and
+            facts['eventCount'] == command['baselineAuditEventCount'] + delta,
+            'final full event count differs from baseline plus terminal vector delta')
+    return {'baselineAudit': command['baselineAudit'], 'baselineEventCount': command['baselineAuditEventCount'],
+            'finalEventCount': facts['eventCount'], 'terminalStageEvents': delta,
+            'finalAuditSHA256': sha(root / (command['tag'] + '-load') / 'reconcile.json')}
+
 def environment_identity(record, root, *, require_sha=True):
     """Resolve this record's immutable environment, never a current alias."""
     path = RESOURCE.application_metadata_path(record, root)
@@ -1094,8 +1221,8 @@ def check_reservation(root, kind, rate, seconds, api_metadata, fixture, prefligh
     require(context is not None or selected_policy['mode'] == OBSERVER.FULL_HISTORY,
             'vector mode requires the explicit per-window audit authority')
     if context:
-        return {**authority_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze, current_tools, observer_hash, context),
-                **observer_binding}
+        reservation = authority_reservation(root, kind, rate, seconds, api_metadata, fixture, preflight, ability, freeze, current_tools, observer_hash, context)
+        return {**reservation, **observer_binding, **observer_baseline(root, reservation, fixture, selected_policy)}
     records = history(root)
     optimization = claim_optimization(root, records)
     expected_diagnostics = kind == 'diagnostic' or kind == 'comparison' and not optimization
@@ -1210,7 +1337,7 @@ def _finished(row):
     return stamps[-1]
 
 
-def _pipeline_grade(directory, report, seconds, chain):
+def _pipeline_grade(directory, report, seconds, chain, observer_context=None):
     """Grade existing stage records only; missing evidence raises ValueError.
 
     An ordinary growth/recovery SLO miss returns passed=False. Feed has no LIKE
@@ -1233,6 +1360,13 @@ def _pipeline_grade(directory, report, seconds, chain):
     rows = [json.loads(line) for line in (directory / 'timeline.ndjson').read_text(encoding='utf-8-sig').splitlines() if line]
     require(summary.get('collectionValid') is True and summary.get('semanticViolationCount') == 0 and rows, 'incomplete downstream collection')
     require(all(not row['errors'] and not row.get('semanticViolations') and row.get('sql') and row.get('kafka') for row in rows), 'missing/invalid downstream sample')
+    selected = (observer_context or {}).get('observerPolicy', OBSERVER.environment_policy({}))
+    OBSERVER.metadata_policy(summary, selected, allow_missing_legacy=True)
+    full_audit = None
+    if selected['mode'] == OBSERVER.LIKE_VECTOR:
+        require(type(observer_context) is dict and directory.name == observer_context['tag'] + '-downstream',
+                'vector grade requires its original window command')
+        full_audit = observer_final_audit(directory, report, observer_context, summary, rows)
     starts = [instant(row['at']) for row in rows]
     require(starts == sorted(starts) and len(set(starts)) == len(starts), 'duplicate/nonmonotone sample timestamps')
     gaps = [(b - a).total_seconds() for a, b in zip(starts, starts[1:])]
@@ -1309,7 +1443,7 @@ def _pipeline_grade(directory, report, seconds, chain):
     if seconds == 60:
         tail15 = _grade_tail15(rows, ended, vector, _finished)
         passed = passed and tail15['passed']
-    return {'passed': passed, 'chain': chain, 'tail15': tail15, 'newEventsInConservativeSampledWindow': events,
+    return {'passed': passed, 'chain': chain, 'tail15': tail15, 'fullAuditBinding': full_audit, 'newEventsInConservativeSampledWindow': events,
             'maximumGrowthBudget': events * .01, 'growthByQueue': growth,
             'shortStageLast15SecondsQueueSlope': short_slopes,
             'windowStartTarget': window_start.isoformat(), 'firstBoundarySample': first['at'],
@@ -1324,8 +1458,8 @@ def _pipeline_grade(directory, report, seconds, chain):
             'samplingScope': '5s non-atomic observations with every start gap/boundary <=7.5s. Event denominator is fully inside the target window; boundary queue min/max is conservative. Recovery uses latest SQL/Kafka completion, not sample start or control done. Not instantaneous backlog proof.'}
 
 
-def pipeline_grade(directory, report, seconds, chain):
+def pipeline_grade(directory, report, seconds, chain, observer_context=None):
     try:
-        return _pipeline_grade(directory, report, seconds, chain)
+        return _pipeline_grade(directory, report, seconds, chain, observer_context)
     except (KeyError, TypeError, IndexError, OSError, json.JSONDecodeError) as error:
         raise ValueError('missing/malformed downstream evidence: ' + type(error).__name__) from None

@@ -143,10 +143,12 @@ class Checks(unittest.TestCase):
         policy = grade.OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': 'like-vector-v1'})
         metadata = {'observerPolicy': policy, 'observerSamplingLimits': grade.OBSERVER.sampling_limits()}
         with patch.object(grade, 'execution_context', return_value={'active': copy.deepcopy(metadata)}), \
-             patch.object(grade, 'authority_reservation', return_value={'tag': 'S20'}) as authority:
+             patch.object(grade, 'authority_reservation', return_value={'tag': 'S20'}) as authority, \
+             patch.object(grade, 'observer_baseline', return_value={'baselineAudit': {'path': 'original.json', 'sha256': 'a' * 64}}) as baseline:
             result = self.reserve('search', 5000, api=metadata, observer_policy=policy)
-        self.assertEqual(result, {'tag': 'S20', **metadata})
+        self.assertEqual(result, {'tag': 'S20', **metadata, 'baselineAudit': {'path': 'original.json', 'sha256': 'a' * 64}})
         authority.assert_called_once()
+        baseline.assert_called_once()
 
     def test_actual_reservation_rejects_mixed_or_unbound_vector_before_authority(self):
         policy = grade.OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': 'like-vector-v1'})
@@ -168,7 +170,8 @@ class Checks(unittest.TestCase):
         policy = grade.OBSERVER.environment_policy({'CAP10_OBSERVER_MODE': 'like-vector-v1'})
         metadata = {'observerPolicy': policy, 'observerSamplingLimits': grade.OBSERVER.sampling_limits()}
         with patch.object(grade, 'execution_context', return_value={'active': metadata}), \
-             patch.object(grade, 'authority_reservation', return_value={'tag': 'H2'}) as authority:
+             patch.object(grade, 'authority_reservation', return_value={'tag': 'H2'}) as authority, \
+             patch.object(grade, 'observer_baseline', return_value={}):
             for freeze in ({}, {'observerPolicy': policy},
                            {**metadata, 'observerPolicy': grade.OBSERVER.environment_policy({})}):
                 with self.subTest(freeze=freeze), self.assertRaises(ValueError):

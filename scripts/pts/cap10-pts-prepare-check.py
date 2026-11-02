@@ -247,7 +247,34 @@ def main():
                   and accepted['cohortSourceSHA256'] == generated['cohortSourceSHA256'] == binding['cohortSourceSHA256'], 'packet bind and mock admission preserve exact cohort freeze: ' + str(pool))
             result_path = owner.ROOT / 'pts-scene-admission.json'
             result_path.rename(owner.ROOT / 'admission-valid.json')
+            provider_baseline = len(provider_calls)
             if pool == 17:
+                namespace = 'profile-123456789abc'
+                artifacts = prepare.scene_artifact_paths(owner.ROOT, namespace)
+                protected = {path: path.read_bytes() for path in (owner.ROOT / 'pts-packet.json', owner.ROOT / 'pts-scene-binding.json', config_path)}
+                namespace_env = owner.private_write(run, 'env-namespace.private.json', {
+                    **owner.read(binding['privatePaths']['environment']), 'CAP10_PTS_PACKET_FILE': artifacts['packet'].name,
+                    'CAP10_PTS_ADMISSION_FILE': artifacts['admission'].name})
+                owner.save(artifacts['packet'], owner.read(owner.ROOT / 'pts-packet.json'))
+                owner.save(artifacts['binding'], {**binding,
+                    'privatePaths': {'configuration': str(config_path), 'environment': str(namespace_env)}})
+                accepted_namespace = prepare.verify_scene(owner, namespace_env, True, CohortClient, namespace=namespace)
+                check(accepted_namespace['passed'] and accepted_namespace['artifactNamespace'] == namespace
+                      and len(provider_calls) == 2 and not result_path.exists(), 'explicit profile admission writes only its new namespace')
+                check(all(path.read_bytes() == raw for path, raw in protected.items()), 'profile admission preserves original packet binding and private configuration bytes')
+                rejected(lambda: prepare.verify_scene(owner, namespace_env, True, CohortClient, namespace=namespace), 'profile admission cannot overwrite its own completed result')
+                artifacts['admission'].rename(owner.ROOT / 'admission-profile-valid.json')
+                rejected(lambda: prepare.verify_scene(owner, namespace_env, True, CohortClient), 'profile selectors cannot silently use default original paths')
+                check(len(provider_calls) == 2 and not owner.read(result_path)['cloudCalled'], 'namespace selector mismatch is rejected before provider')
+                result_path.rename(owner.ROOT / 'admission-profile-default-mismatch.json')
+                rejected(lambda: prepare.verify_scene(owner, binding['privatePaths']['environment'], True, CohortClient, namespace=namespace), 'new namespace requires both explicit registered selectors')
+                check(len(provider_calls) == 2 and not owner.read(artifacts['admission'])['cloudCalled'], 'missing namespace selectors cannot call provider')
+                artifacts['admission'].rename(owner.ROOT / 'admission-profile-missing-selectors.json')
+                for invalid in ('../outside', '/absolute', 'repair2', 'profile-ABCDEF123456', True):
+                    before_entries = set(owner.ROOT.iterdir())
+                    rejected(lambda: prepare.verify_scene(owner, namespace_env, True, CohortClient, namespace=invalid), 'invalid profile namespace rejected: ' + repr(invalid))
+                    check(set(owner.ROOT.iterdir()) == before_entries and len(provider_calls) == 2, 'invalid namespace writes no result and calls no provider')
+                provider_baseline = len(provider_calls)
                 packet_path = owner.ROOT / 'pts-packet.json'
                 packet_folder = Path(generated['privatePaths']['packetDirectory'])
                 jmx_path = packet_folder / 'cap10-jmeter.jmx'
@@ -276,7 +303,7 @@ def main():
                     resealed_binding['packetManifestSHA256'] = hashlib.sha256(packet_path.read_bytes()).hexdigest()
                     binding_path.write_text(json.dumps(resealed_binding), encoding='utf-8')
                     rejected(lambda: prepare.verify_scene(owner, binding['privatePaths']['environment'], True, CohortClient), 'resealed JMX clock variable rejected: ' + mutation)
-                    check(len(provider_calls) == 1 and not owner.read(result_path)['cloudCalled'], 'JMX clock mismatch makes no provider call: ' + mutation)
+                    check(len(provider_calls) == provider_baseline and not owner.read(result_path)['cloudCalled'], 'JMX clock mismatch makes no provider call: ' + mutation)
                     result_path.rename(owner.ROOT / ('admission-clock-jmx-' + mutation + '.json'))
                     for path, original in originals.items(): path.write_bytes(original)
             for artifact, path in (('packet', owner.ROOT / 'pts-packet.json'), ('config', config_path), ('binding', owner.ROOT / 'pts-scene-binding.json')):
@@ -287,7 +314,7 @@ def main():
                     else: damaged['clockProtocol'] = invalid
                     path.write_text(json.dumps(damaged), encoding='utf-8')
                     rejected(lambda: prepare.verify_scene(owner, binding['privatePaths']['environment'], True, CohortClient), 'clock binding mismatch rejected before provider: ' + artifact + '/' + mode + '/' + str(pool))
-                    check(len(provider_calls) == 1 and not owner.read(result_path)['cloudCalled'], 'protocol mismatch makes no provider call: ' + artifact + '/' + mode + '/' + str(pool))
+                    check(len(provider_calls) == provider_baseline and not owner.read(result_path)['cloudCalled'], 'protocol mismatch makes no provider call: ' + artifact + '/' + mode + '/' + str(pool))
                     result_path.rename(owner.ROOT / ('admission-clock-' + artifact + '-' + mode + '.json'))
                     path.write_bytes(original)
             record_path = owner.ROOT / 'pts-packet.json'
@@ -295,13 +322,13 @@ def main():
             damaged = owner.read(record_path); damaged.pop('cohortSourceSHA256')
             record_path.write_text(json.dumps(damaged), encoding='utf-8')
             rejected(lambda: prepare.verify_scene(owner, binding['privatePaths']['environment'], True, CohortClient), 'missing packet cohort source rejected before mock provider: ' + str(pool))
-            check(len(provider_calls) == 1 and not owner.read(result_path)['cloudCalled'], 'missing helper hash never reaches provider: ' + str(pool))
+            check(len(provider_calls) == provider_baseline and not owner.read(result_path)['cloudCalled'], 'missing helper hash never reaches provider: ' + str(pool))
             result_path.rename(owner.ROOT / 'admission-missing-helper.json')
             record_path.write_bytes(packet_bytes)
             config['poolSize'] = 512
             config_path.write_text(json.dumps(config), encoding='utf-8')
             rejected(lambda: prepare.verify_scene(owner, binding['privatePaths']['environment'], True, CohortClient), 'new cohort cannot adopt legacy private dimensions: ' + str(pool))
-            check(len(provider_calls) == 1, 'dimension mismatch rejected locally: ' + str(pool))
+            check(len(provider_calls) == provider_baseline, 'dimension mismatch rejected locally: ' + str(pool))
             prepare.cleanup_packet(owner, binding['privatePaths']['environment'])
         for pool, engines in ((0, 2), (4097, 9), (4096, True), (17, 18)):
             rejected(lambda: prepare.packet(None, None, '10.8.0.10', pool_size=pool, expected_engines=engines), 'invalid cohort rejected before environment access')

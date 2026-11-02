@@ -308,17 +308,35 @@ def cleanup_packet(owned, environment):
     return result
 
 
-def verify_scene(owned, environment, allow_live=False, client_factory=None):
+def scene_artifact_paths(root, namespace=None):
+    if namespace is not None and (type(namespace) is not str or not re.fullmatch(r'profile-[a-f0-9]{12}', namespace)):
+        raise ValueError('explicit bounded profile namespace required')
+    suffix = '' if namespace is None else '-' + namespace
+    root = Path(root)
+    return {'packet': root / ('pts-packet' + suffix + '.json'),
+            'binding': root / ('pts-scene-binding' + suffix + '.json'),
+            'admission': root / ('pts-scene-admission' + suffix + '.json'),
+            'api': root / ('pts-scene-admission' + suffix + '-api')}
+
+
+def verify_scene(owned, environment, allow_live=False, client_factory=None, *, namespace=None):
     """Explicit read-only admission; never call Start, Stop, running or _idle."""
     if allow_live is not True:
         raise ValueError('verify-scene requires explicit --allow-live')
-    output = owned.ROOT / 'pts-scene-admission.json'
+    artifacts = scene_artifact_paths(owned.ROOT, namespace)
+    output = artifacts['admission']
     if output.exists():
         raise ValueError('preserve prior scene admission evidence')
     result = {'version': 1, 'passed': False, 'cloudCalled': False,
         'readRAMActionVerified': None, 'startStopPermissionsVerified': False, 'startStopCalled': False}
+    if namespace is not None:
+        result['artifactNamespace'] = namespace
     try:
         value, runtime = validate_owned(owned, environment)
+        if (value.get('CAP10_PTS_PACKET_FILE', artifacts['packet'].name) != artifacts['packet'].name
+                or value.get('CAP10_PTS_ADMISSION_FILE', artifacts['admission'].name) != artifacts['admission'].name
+                or namespace is not None and any(key not in value for key in ('CAP10_PTS_PACKET_FILE', 'CAP10_PTS_ADMISSION_FILE'))):
+            raise ValueError('scene namespace differs from registered environment selectors')
         before, before_cohort = source_hashes(), cohort_source_hashes()
         cfg_path = Path(value['CAP10_PTS_CONFIG'])
         if (value.get('CAP10_LOAD_BACKEND') != 'pts' or cfg_path.is_symlink() or cfg_path.resolve() != cfg_path
@@ -331,15 +349,15 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
         if (cfg.get('regionId') != 'cn-shanghai'
                 or not re.fullmatch(r'[a-f0-9]{64}', cfg.get('controlToken', ''))):
             raise ValueError('fixed Shanghai private configuration required')
-        packet_record = owned.read(owned.ROOT / 'pts-packet.json')
-        binding = owned.read(owned.ROOT / 'pts-scene-binding.json')
+        packet_record = owned.read(artifacts['packet'])
+        binding = owned.read(artifacts['binding'])
         dims = bound_cohort(packet_record, cfg)
         if binding.get('cohortSourceSHA256') != before_cohort or clock_protocol(binding) != clock_protocol(cfg):
             raise ValueError('binding cohort helper sources or clock protocol differ')
         scene_id = cfg['sceneId']
         if (not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', scene_id) or scene_id == 'UNBOUND'
                 or binding['sceneId'] != scene_id or Path(binding['privatePaths']['configuration']) != cfg_path
-                or binding['packetManifestSHA256'] != hashlib.sha256((owned.ROOT / 'pts-packet.json').read_bytes()).hexdigest()
+                or binding['packetManifestSHA256'] != hashlib.sha256(artifacts['packet'].read_bytes()).hexdigest()
                 or packet_record['sourceSHA256'] != before or binding['sourceSHA256'] != before):
             raise ValueError('bound scene or frozen packet sources differ')
         upload = Path(packet_record['privatePaths']['packetDirectory'])
@@ -362,7 +380,7 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
             spec = importlib.util.spec_from_file_location('cap10_pts_admission_api', Path(__file__).with_name('cap10-pts-api.py'))
             api = importlib.util.module_from_spec(spec); spec.loader.exec_module(api)
             client_factory = api.Client
-        client = client_factory(cfg['regionId'], owned.ROOT / 'pts-scene-admission-api',
+        client = client_factory(cfg['regionId'], artifacts['api'],
             credential_file=cfg.get('credentialsFile'), allow_live=True, scene_id=scene_id)
         result['cloudCalled'] = True
         scene = client.scene(scene_id)['Scene']  # Exactly GetOpenJMeterScene.
@@ -396,6 +414,7 @@ def main():
     second = actions.add_parser('bind'); second.add_argument('--environment', required=True); second.add_argument('--scene-id', required=True)
     third = actions.add_parser('cleanup-packet'); third.add_argument('--environment', required=True)
     fourth = actions.add_parser('verify-scene'); fourth.add_argument('--environment', required=True); fourth.add_argument('--allow-live', action='store_true')
+    fourth.add_argument('--namespace')
     args = parser.parse_args()
     if sys.platform != 'linux' or Path.cwd().resolve() != REPO:
         raise ValueError('actual packet/bind/cleanup CLI requires native Linux repository cwd')
@@ -409,7 +428,7 @@ def main():
     elif args.action == 'cleanup-packet':
         result = cleanup_packet(owned, args.environment)
     else:
-        result = verify_scene(owned, args.environment, args.allow_live)
+        result = verify_scene(owned, args.environment, args.allow_live, namespace=args.namespace)
     print(json.dumps(result, ensure_ascii=False))
 
 

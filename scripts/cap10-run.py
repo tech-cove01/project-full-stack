@@ -392,7 +392,7 @@ def main():
             '--output', str(downstream), '--done-file', str(control / 'done.json'), '--max-seconds', stage_deadline],
             cwd=REPO, env=owned.env(value), stdout=log, stderr=subprocess.STDOUT, creationflags=owned.FLAGS)
         process = psutil.Process(observer.pid); created = process.create_time(); process.cpu_percent(None); cpu_at = time.monotonic()
-        state['observerPid'] = observer.pid; deadline = time.monotonic() + 30
+        state['observerPid'] = observer.pid; deadline = time.monotonic() + 90
         while not (downstream / 'ready.json').exists() and observer.poll() is None and time.monotonic() < deadline:
             time.sleep(.1)
         assert (downstream / 'ready.json').exists() and owned.read(downstream / 'ready.json')['ready']

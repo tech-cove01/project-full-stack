@@ -1,0 +1,7 @@
+# 发压前全历史核验与负载采样预算分离
+
+S11在wrapper启动前因观察器基线超时退出，真实PUT为0，原measurement_invalid保留。唯一一次有界只读RR诊断显示259640条历史LIKE均DONE、三组收据均IGNORED、无缺失/停车；count加三次主键JOIN实耗5339ms，超过原SQL与Kafka共用4秒预算。查询使用outbox主键range和receipt主键eq_ref；MySQL buffer pool为128MiB，未调整缓存、配额或删除历史。
+
+修复只分离发压前全历史读取：独立单连接ReadTimeout15秒、每次总预算30秒、总准入75秒，runner等待ready最多90秒。正式采样仍使用原单连接ReadTimeout3秒、SQL+Kafka共用4秒、5秒周期和7.5秒最大间隔，业务SLO、60秒恢复与旧失败不变。
+
+Linux构建、vet及非作者审查通过。真实无PUT的readiness→done验证通过：全历史5387ms、259640事件、正常退出0；本次是只读工具验证，不是容量窗口或新吞吐成绩。新observer SHA256为`813aa529648aa69e339e51b85ac1f9814791cd123edb9f1d0fe0d7b97bc1fa18`。

@@ -252,9 +252,13 @@ func baseline(view *sqlView, k *kafkaView) bool {
 }
 
 func observe(db *sql.DB, client *kafka.Client, topic string, watermark int64, notes []string, start, deadline time.Time) sample {
+	return observeWithBudget(db, client, topic, watermark, notes, start, deadline, 4*time.Second)
+}
+
+func observeWithBudget(db *sql.DB, client *kafka.Client, topic string, watermark int64, notes []string, start, deadline time.Time, budget time.Duration) sample {
 	started := time.Now()
 	s := sample{At: started.UTC(), ElapsedSeconds: time.Since(start).Seconds(), Errors: []string{}, Violations: []string{}}
-	limit := started.Add(4 * time.Second)
+	limit := started.Add(budget)
 	if deadline.Before(limit) {
 		limit = deadline
 	}
@@ -417,6 +421,17 @@ func mainRun() error {
 	defer db.Close()
 	db.SetMaxOpenConns(1)
 	db.SetMaxIdleConns(1)
+	// Historical admission reads all retained events and receipts once, before
+	// any load starts. It must not inherit the bounded in-load sampling budget.
+	initialConfig := *config
+	initialConfig.ReadTimeout = 15 * time.Second
+	initialDB, err := sql.Open("mysql", initialConfig.FormatDSN())
+	if err != nil {
+		return errors.New("initial observer connection setup failed")
+	}
+	defer initialDB.Close()
+	initialDB.SetMaxOpenConns(1)
+	initialDB.SetMaxIdleConns(1)
 	transport := &kafka.Transport{DialTimeout: 2 * time.Second, IdleTimeout: time.Second, MetadataTTL: time.Second}
 	defer transport.CloseIdleConnections()
 	client := &kafka.Client{Addr: kafka.TCP("127.0.0.1:9401"), Timeout: 3 * time.Second, Transport: transport}
@@ -425,12 +440,12 @@ func mainRun() error {
 	var initial sample
 	ready := false
 	startupAttempts := []sample{}
-	preflightDeadline := start.Add(15 * time.Second)
+	preflightDeadline := start.Add(75 * time.Second)
 	if deadline.Before(preflightDeadline) {
 		preflightDeadline = deadline
 	}
 	for {
-		initial = observe(db, client, "community.events", 0, notes, start, preflightDeadline)
+		initial = observeWithBudget(initialDB, client, "community.events", 0, notes, start, preflightDeadline, 30*time.Second)
 		startupAttempts = append(startupAttempts, initial)
 		ready = len(initial.Errors) == 0 && baseline(initial.SQL, initial.Kafka)
 		if ready || time.Now().Add(5*time.Second).After(preflightDeadline) {
@@ -438,7 +453,8 @@ func mainRun() error {
 		}
 		time.Sleep(5 * time.Second)
 	}
-	if err = save(filepath.Join(out, "ready.json"), map[string]any{"at": time.Now().UTC(), "ready": ready, "baseline": initial, "startupAttempts": startupAttempts, "observerPid": os.Getpid(), "fixedProject": "project-full-stack-cap10", "noteCount": len(notes), "fixtureSHA256": fileSHA(fixture), "scope": "bounded pre-load readiness attempts retained; initial cumulative LIKE baseline requires no pre-existing pending/receipt/park/lag before load"}); err != nil {
+	_ = initialDB.Close()
+	if err = save(filepath.Join(out, "ready.json"), map[string]any{"at": time.Now().UTC(), "ready": ready, "baseline": initial, "startupAttempts": startupAttempts, "observerPid": os.Getpid(), "fixedProject": "project-full-stack-cap10", "noteCount": len(notes), "fixtureSHA256": fileSHA(fixture), "initialBudgetSeconds": 30, "initialReadTimeoutSeconds": 15, "loadBudgetSeconds": 4, "loadReadTimeoutSeconds": 3, "scope": "bounded pre-load full-history readiness; initial cumulative LIKE baseline requires no pre-existing pending/receipt/park/lag before load. In-load observation cadence and budgets are unchanged"}); err != nil {
 		return errors.New("ready evidence write failed")
 	}
 	if !ready {

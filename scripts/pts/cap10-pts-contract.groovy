@@ -3,6 +3,26 @@ import groovy.json.JsonSlurper
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    static int poolSize(Object value = 512) {
+        if (!(value instanceof Integer || value instanceof Long || value instanceof BigInteger) || value < 1 || value > 4096) throw new IllegalArgumentException('bounded integer relationship pool size required')
+        value.intValue()
+    }
+    static int engineCount(Object value = 2, int pool = 512) {
+        poolSize(pool)
+        if (!(value instanceof Integer || value instanceof Long || value instanceof BigInteger) || value < 1 || value > Math.min(16, pool)) throw new IllegalArgumentException('bounded integer engine count required')
+        value.intValue()
+    }
+    static int ptsConcurrency(int pool = 512, int engines = 2) {
+        poolSize(pool); engineCount(engines, pool)
+        pool == 512 && engines == 2 ? 513 : pool + engines
+    }
+    static Map dimensions(Map config) {
+        int pool = poolSize(config.containsKey('poolSize') ? config.poolSize : 512)
+        int engines = engineCount(config.containsKey('expectedEngines') ? config.expectedEngines : 2, pool)
+        int concurrency = ptsConcurrency(pool, engines)
+        if (config.containsKey('ptsConcurrency') && (!(config.ptsConcurrency instanceof Integer || config.ptsConcurrency instanceof Long || config.ptsConcurrency instanceof BigInteger) || config.ptsConcurrency != concurrency)) throw new IllegalArgumentException('PTS concurrency differs from cohort dimensions')
+        [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
+    }
     static boolean integer(Object n) {
         n instanceof Number && !(n instanceof Float) && !(n instanceof Double) &&
             new BigDecimal(n.toString()).stripTrailingZeros().scale() <= 0 && n >= 0 && n <= MAX_SAFE
@@ -23,9 +43,10 @@ class Cap10PTSContract {
         if (data.version == previous.version) return observed + [kind:'noop']
         observed + [kind:'invalid']
     }
-    static long ordinal(int slot, long iteration) {
-        if (slot < 0 || slot >= 512 || iteration < 0) throw new IllegalArgumentException('invalid slot/iteration')
-        Math.addExact(slot as long, Math.multiplyExact(512L, iteration))
+    static long ordinal(int slot, long iteration, int pool = 512) {
+        poolSize(pool)
+        if (slot < 0 || slot >= pool || iteration < 0) throw new IllegalArgumentException('invalid slot/iteration')
+        Math.addExact(slot as long, Math.multiplyExact(pool as long, iteration))
     }
     static long dueNano(long startNano, long ordinal, int rate) {
         if (rate < 1 || rate > 5000 || ordinal < 0) throw new IllegalArgumentException('invalid rate/ordinal')
@@ -50,8 +71,10 @@ class Cap10PTSContract {
         if (rate < 1 || rate > 5000) throw new IllegalArgumentException('invalid rate')
         Math.floorDiv(Math.multiplyExact(rate as long, seconds * 1000L - launchGuardMs(seconds)), 1000L)
     }
-    static long planned(Collection<Integer> slots, int rate, int seconds) {
+    static long planned(Collection<Integer> slots, int rate, int seconds, int pool = 512) {
+        poolSize(pool)
+        if (slots.toSet().size() != slots.size() || slots.any { !(it instanceof Integer) || it < 0 || it >= pool }) throw new IllegalArgumentException('invalid exclusive slot shard')
         long total = plannedTotal(rate, seconds)
-        slots.sum(0L) { int slot -> slot >= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, 512L) } as long
+        slots.sum(0L) { int slot -> slot >= total ? 0L : 1L + Math.floorDiv(total - 1L - slot, pool as long) } as long
     }
 }

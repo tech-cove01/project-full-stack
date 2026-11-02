@@ -11,6 +11,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash
+    final int declaredPoolSize, declaredEngines
     final List<Integer> slots
     final Map<Integer,Map> relations = new ConcurrentHashMap<Integer,Map>()
     final Set<Integer> bound = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>())
@@ -27,8 +28,10 @@ class Cap10PTSRun {
     long seq = 0
     Thread reporter
 
-    Cap10PTSRun(String hash) {
+    Cap10PTSRun(String hash, int pool = 512, int engines = 2) {
         scriptHash = hash
+        declaredPoolSize = Cap10PTSContract.poolSize(pool)
+        declaredEngines = Cap10PTSContract.engineCount(engines, pool)
         def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
         def secret
         try { secret = new JsonSlurper().parse(file, 'UTF-8') } catch (Exception ignored) { throw new IllegalStateException('private collector configuration invalid') }
@@ -39,8 +42,8 @@ class Cap10PTSRun {
         collectorUrl = secret.collectorUrl.toString().replaceAll('/+$',''); controlToken = secret.controlToken
         def lines = FileServer.getFileServer().getResolvedFile('slots.csv').readLines('UTF-8').findAll { it.trim() }
         if (lines && lines[0].trim() == 'slot') lines = lines.drop(1)
-        slots = lines.collect { if (!(it.trim() ==~ /\d{1,3}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
-        if (!slots || slots.size() > 512 || slots.toSet().size() != slots.size() || slots.any { it < 0 || it >= 512 }) throw new IllegalStateException('invalid exclusive slot shard')
+        slots = lines.collect { if (!(it.trim() ==~ /\d{1,4}/)) throw new IllegalStateException('invalid slot CSV'); it.trim().toInteger() }
+        if (!slots || slots.size() > declaredPoolSize || slots.toSet().size() != slots.size() || slots.any { it < 0 || it >= declaredPoolSize }) throw new IllegalStateException('invalid exclusive slot shard')
         for (int attempt=0; attempt<3; attempt++) {
             try { control(); break }
             catch (IllegalStateException failure) {
@@ -90,12 +93,15 @@ class Cap10PTSRun {
     double serverAt(long nano) { anchorServerMs + (nano-anchorNano)/1000000d }
     void control() {
         Map c = request('/control')
+        Map dimensions = Cap10PTSContract.dimensions(c)
+        if (dimensions.poolSize != declaredPoolSize || dimensions.expectedEngines != declaredEngines) throw new IllegalStateException('JMeter and collector cohort differ')
+        c = c + dimensions
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate < 1 || c.rate > 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
             c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
             c.launchGuardMs != Cap10PTSContract.launchGuardMs(c.seconds as int) ||
             c.plannedTotal != Cap10PTSContract.plannedTotal(c.rate as int,c.seconds as int)) throw new IllegalStateException('collector phase contract differs')
-        if (config != null && [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256]) throw new IllegalStateException('phase binding changed')
+        if (config != null && [c.runId,c.phase,c.rate,c.seconds,c.fixtureSHA256,c.poolSize,c.expectedEngines,c.ptsConcurrency] != [config.runId,config.phase,config.rate,config.seconds,config.fixtureSHA256,config.poolSize,config.expectedEngines,config.ptsConcurrency]) throw new IllegalStateException('phase binding changed')
         def api = new URI(c.apiUrl.toString())
         if (api.scheme != 'http' || api.userInfo || api.fragment || api.query || !(api.path in ['', '/']) ||
             !(api.host ==~ /(?:127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+|172\.(?:1[6-9]|2\d|3[01])\.\d+\.\d+)/)) throw new IllegalStateException('private API endpoint invalid')
@@ -114,7 +120,7 @@ class Cap10PTSRun {
     Map gate(Map relation, long iteration) {
         while (startNano == Long.MIN_VALUE && !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
-        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration)
+        long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration, declaredPoolSize)
         if (ordinal >= Cap10PTSContract.plannedTotal(config.rate as int,config.seconds as int)) return null
         long deadline = Cap10PTSContract.dueNano(startNano, ordinal, config.rate as int)
         long preparation = Cap10PTSContract.preparationNano(startNano, ordinal, config.rate as int)
@@ -203,7 +209,7 @@ class Cap10PTSRun {
                 Thread.sleep(200L)
             }
             flush()
-            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int),attempted:attempted.get(),completed:completed.get()]
+            Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int,declaredPoolSize),attempted:attempted.get(),completed:completed.get()]
             counts.each { key,value -> totals[key]=value.get() }
             Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
             terminalAck = response.accepted == true
@@ -220,7 +226,7 @@ try {
         if (props.get('cap10.pts.initFailure') == true) throw new IllegalStateException('previous sanitized setup failure')
         run = (Cap10PTSRun)props.get('cap10.pts.instance')
         if (run == null) {
-            try { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256')); props.put('cap10.pts.instance',run) }
+            try { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256'), (vars.get('cap10.poolSize') ?: '512').toInteger(), (vars.get('cap10.expectedEngines') ?: '2').toInteger()); props.put('cap10.pts.instance',run) }
             catch (Exception ignored) { props.put('cap10.pts.initFailure',true); throw new IllegalStateException('sanitized initial setup failure') }
         }
     }

@@ -4,11 +4,15 @@ import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { resolve, dirname, join, basename } from 'node:path'
 import { createHash } from 'node:crypto'
 import { fileURLToPath } from 'node:url'
+import { poolSize as checkedPoolSize, engineCount, ptsConcurrency } from '../load/cap10-cohort-contract.mjs'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const xml = text => String(text).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 const sha = bytes => createHash('sha256').update(bytes).digest('hex')
-export async function bundle(directory, { collectorUrl, controlToken } = {}) {
+export async function bundle(directory, { collectorUrl, controlToken, poolSize = 512, expectedEngines = 2 } = {}) {
+  checkedPoolSize(poolSize); engineCount(expectedEngines, poolSize)
+  const concurrency = ptsConcurrency(poolSize, expectedEngines)
+  const cohortSourceSHA256 = { 'scripts/load/cap10-cohort-contract.mjs': sha(await readFile(join(here, '../load/cap10-cohort-contract.mjs'))) }
   const contract = await readFile(join(here, 'cap10-pts-contract.groovy'), 'utf8')
   const runtime = await readFile(join(here, 'cap10-jmeter.groovy'), 'utf8')
   const script = contract + '\n' + runtime, scriptSHA256 = sha(script)
@@ -23,14 +27,16 @@ export async function bundle(directory, { collectorUrl, controlToken } = {}) {
   const loop = `<WhileController guiclass="WhileControllerGui" testclass="WhileController" testname="Fixed relation, absolute ordinal deadlines" enabled="true"><stringProp name="WhileController.condition">\${cap10.continue}</stringProp></WhileController><hashTree>${jsr('gate')}<hashTree/><IfController guiclass="IfControllerPanel" testclass="IfController" testname="Only a scheduled offer" enabled="true"><stringProp name="IfController.condition">\${cap10.doWrite}</stringProp><boolProp name="IfController.evaluateAll">false</boolProp><boolProp name="IfController.useExpression">true</boolProp></IfController><hashTree>${http}</hashTree></hashTree>`
   const sampledHTTP = http.replace('</HTTPSamplerProxy><hashTree>', () => '</HTTPSamplerProxy><hashTree>' + jsr('pre', 'pre') + '<hashTree/>')
   const normal = csv + jsr('bind') + '<hashTree/>' + loop.replace(http, () => sampledHTTP) + jsr('done') + '<hashTree/>'
-  const plan = `<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">${scriptSHA256}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/>${thread('ThreadGroup','512 fixed exclusive relationships',512,normal)}${thread('PostThreadGroup','Terminal durable ACK',1,jsr('finish')+'<hashTree/>')}</hashTree></hashTree></jmeterTestPlan>\n`
+  const identity = Object.entries({ 'cap10.scriptSHA256': scriptSHA256, 'cap10.poolSize': poolSize, 'cap10.expectedEngines': expectedEngines })
+    .map(([name, value]) => `<elementProp name="${name}" elementType="Argument"><stringProp name="Argument.name">${name}</stringProp><stringProp name="Argument.value">${value}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>`).join('')
+  const plan = `<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments">${identity}</collectionProp></Arguments><hashTree/>${thread('ThreadGroup',poolSize+' fixed exclusive relationships',poolSize,normal)}${thread('PostThreadGroup','Terminal durable ACK',1,jsr('finish')+'<hashTree/>')}</hashTree></hashTree></jmeterTestPlan>\n`
   // User-defined variables, unlike JMeter properties, are transported by PTS.
   const finalPlan = plan
   directory = resolve(directory)
   await mkdir(directory, { recursive: false, mode: 0o700 })
   const jmx = join(directory, 'cap10-jmeter.jmx'), slots = join(directory, 'slots.csv')
   await writeFile(jmx, finalPlan, { flag: 'wx' })
-  await writeFile(slots, 'slot\n' + Array.from({ length: 512 }, (_, n) => n).join('\n') + '\n', { flag: 'wx' })
+  await writeFile(slots, 'slot\n' + Array.from({ length: poolSize }, (_, n) => n).join('\n') + '\n', { flag: 'wx' })
   if (collectorUrl !== undefined || controlToken !== undefined) {
     const uri = new URL(collectorUrl)
     assert.equal(uri.protocol, 'http:'); assert.ok(!uri.username && !uri.password && !uri.search && !uri.hash)
@@ -39,13 +45,20 @@ export async function bundle(directory, { collectorUrl, controlToken } = {}) {
     await writeFile(join(directory, 'cap10-pts-private.json'), JSON.stringify({ collectorUrl, controlToken }) + '\n', { mode: 0o600, flag: 'wx' })
   }
   const manifest = { generator: 'pts-jmeter', version: 1, scriptSHA256, jmxSHA256: sha(finalPlan), slotsSHA256: sha(await readFile(slots)),
-    normalThreads: 512, setupThreads: 0, teardownThreads: 1, ptsConcurrency: 513, csvSplitRequired: true,
+    poolSize, expectedEngines, normalThreads: poolSize, setupThreads: 0, teardownThreads: 1, ptsConcurrency: concurrency, csvSplitRequired: true,
+    cohortSourceSHA256,
     standardJMeter: '5.6.3', plugins: [], artifacts: ['cap10-jmeter.jmx','slots.csv','cap10-pts-private.json'],
     privacy: 'private config has only collector control credential; slots.csv contains no user/note/token. Do not publish raw PTS sampled logs without redaction.' }
   await writeFile(join(directory, 'cap10-jmeter-manifest.json'), JSON.stringify(manifest, null, 2) + '\n', { flag: 'wx' })
   return manifest
 }
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
-  assert.equal(process.argv[2], 'bundle'); assert.equal(process.argv.length, 4, 'use bundle <new-directory>; private config is created by the root controller')
-  console.log(JSON.stringify(await bundle(process.argv[3])))
+  assert.equal(process.argv[2], 'bundle'); assert.ok([4, 8].includes(process.argv.length), 'use bundle <new-directory> [--pool-size N --expected-engines E]; private config is created by the root controller')
+  const options = {}
+  if (process.argv.length === 8) {
+    assert.equal(process.argv[4], '--pool-size'); assert.equal(process.argv[6], '--expected-engines')
+    assert.match(process.argv[5], /^[1-9]\d*$/); assert.match(process.argv[7], /^[1-9]\d*$/)
+    options.poolSize = Number(process.argv[5]); options.expectedEngines = Number(process.argv[7])
+  }
+  console.log(JSON.stringify(await bundle(process.argv[3], options)))
 }

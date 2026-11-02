@@ -44,4 +44,20 @@ check('actual JMeter runtime with separate handoff compiles without starting it'
     loader.loadClass('Cap10PTSRun').getMethod('begin', Map) != null
 }
 check('safe integers remain strict') { !type.integer(true) && !type.integer(.5) && !type.integer('1') && !type.integer(9007199254740992G) }
+check('legacy omitted dimensions remain 512/2/513') { type.dimensions([:]) == [poolSize:512,expectedEngines:2,ptsConcurrency:513] && type.ordinal(511,1)==1023 }
+check('explicit large and uneven dimensions are bounded') { type.dimensions([poolSize:4096,expectedEngines:9,ptsConcurrency:4105]) == [poolSize:4096,expectedEngines:9,ptsConcurrency:4105] && type.ptsConcurrency(17,3)==20 }
+check('four digit slots and pool stride preserve original ordinal ownership') { type.ordinal(4095,2,4096)==12287 && type.ordinal(16,3,17)==67 }
+check('nine disjoint uneven shards cover the complete 5k guarded plan') {
+    def shards=(0..<9).collect { engine -> (0..<4096).findAll { it%9==engine } }
+    shards.flatten().toSet().size()==4096 && shards.collect { type.planned(it,5000,180,4096) }.sum()==899500L && shards.every { it.size() in [455,456] }
+}
+check('three small shards preserve native schedule and guard') { (0..<3).collect { engine -> type.planned((0..<17).findAll { it%3==engine },50,60,17) }.sum()==2995L }
+check('cohort validation rejects wrong types and bounds') {
+    [0,4097,true,null,'4096',4096.0G].every { value -> try { type.poolSize(value); false } catch (IllegalArgumentException expected) { true } } &&
+    [0,17,true,null,2.0G].every { value -> try { type.engineCount(value,4096); false } catch (IllegalArgumentException expected) { true } }
+}
+check('wrong explicit concurrency and out-of-pool or duplicate shards fail') {
+    try { type.dimensions([poolSize:4096,expectedEngines:9,ptsConcurrency:513]); return false } catch (IllegalArgumentException expected) { }
+    [[0,17],[1,1]].every { slots -> try { type.planned(slots,50,60,17); false } catch (IllegalArgumentException expected) { true } }
+}
 println(groovy.json.JsonOutput.toJson([checks:checks,failed:0,servicesStarted:false,loadWindows:0]))

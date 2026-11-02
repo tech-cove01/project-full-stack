@@ -1,6 +1,7 @@
 """One owned CAP10 60-second idle observation. Never starts a workload."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+import datetime as dt
 import hashlib
 import importlib.util
 import json
@@ -22,12 +23,14 @@ def module(name, filename):
     return value
 
 
-def idle_attempt(root, authorization, transition_sha):
-    """Authorize only the retained zero-sample first failure's one retry."""
+def idle_attempt(root, authorization, transition_sha, additional_authorization=None):
+    """Authorize explicit retries of the retained zero-sample failures."""
     root = Path(root).resolve()
     archive = root / 'idle-attempt-1'
+    if (root / 'idle-reservation.json').exists():
+        raise ValueError('current idle reservation already consumed; preserve it')
     if authorization is None:
-        if archive.exists():
+        if archive.exists() or additional_authorization is not None:
             raise ValueError('archived idle failure requires explicit retry authorization')
         return {'attempt': 1}
     expected = root.parent / 'continuation-authorization.json'
@@ -66,8 +69,55 @@ def idle_attempt(root, authorization, transition_sha):
             or reservation.get('executionPlatform') != 'linux'
             or reservation.get('transitionSHA256') != transition_sha):
         raise ValueError('retained zero-sample first idle failure differs')
-    return {'attempt': 2, 'retryAuthorizationSHA256': hashlib.sha256(raw).hexdigest(),
+    base = {'attempt': 2, 'retryAuthorizationSHA256': hashlib.sha256(raw).hexdigest(),
             'failedIdleResultSHA256': failure_sha}
+    if additional_authorization is None:
+        if (root / 'idle-attempt-2').exists():
+            raise ValueError('archived second failure requires a new explicit authorization')
+        return base
+    path = Path(additional_authorization)
+    expected = root.parent / 'idle-retry-3-authorization.json'
+    if path.is_symlink() or path.resolve() != expected or not path.is_file():
+        raise ValueError('fixed additional idle authorization required')
+    extra_raw = path.read_bytes()
+    extra = json.loads(extra_raw)
+    if (not isinstance(extra, dict) or type(extra.get('version')) is not int or extra['version'] != 1
+            or extra.get('batch') != 'CAP-10' or extra.get('authorized') is not True
+            or type(extra.get('attempt')) is not int or extra['attempt'] != 3
+            or type(extra.get('maxAdditionalIdleRetries')) is not int or extra['maxAdditionalIdleRetries'] != 1
+            or not isinstance(extra.get('userAuthorizationReference'), str) or not extra['userAuthorizationReference'].strip()
+            or extra.get('continuationAuthorizationSHA256') != base['retryAuthorizationSHA256']
+            or extra.get('transitionSHA256') != transition_sha
+            or extra.get('failedIdleResultPath') != 'linux/idle-attempt-2/idle-result.json'
+            or not isinstance(extra.get('recordedAt'), str)):
+        raise ValueError('one explicit third-attempt authorization required')
+    registered = dt.datetime.fromisoformat(extra['recordedAt'].replace('Z', '+00:00'))
+    if registered.tzinfo is None or registered > dt.datetime.now(dt.timezone.utc):
+        raise ValueError('additional authorization registration timestamp invalid')
+    archive = root / 'idle-attempt-2'
+    failed_path, reservation_path = archive / 'idle-result.json', archive / 'idle-reservation.json'
+    for original in (failed_path, reservation_path):
+        if original.is_symlink() or original.resolve() != original or not original.is_file():
+            raise ValueError('original regular second idle artifacts required')
+    failed_raw = failed_path.read_bytes()
+    failure_sha = hashlib.sha256(failed_raw).hexdigest()
+    failed, reservation = json.loads(failed_raw), json.loads(reservation_path.read_bytes())
+    if (extra.get('failedIdleResultSHA256') != failure_sha
+            or not isinstance(failed, dict) or failed.get('passed') is not False or failed.get('samples') != []
+            or failed.get('noWorkloadStarted') is not True or failed.get('seconds') != 60
+            or type(failed.get('attempt')) is not int or failed['attempt'] != 2
+            or failed.get('executionPlatform') != 'linux' or failed.get('transitionSHA256') != transition_sha
+            or failed.get('retryAuthorizationSHA256') != base['retryAuthorizationSHA256']
+            or failed.get('failedIdleResultSHA256') != base['failedIdleResultSHA256']
+            or not isinstance(reservation, dict) or type(reservation.get('attempt')) is not int or reservation['attempt'] != 2
+            or reservation.get('seconds') != 60 or reservation.get('failedAttemptConsumesOnlyIdleObservation') is not True
+            or reservation.get('executionPlatform') != 'linux' or reservation.get('transitionSHA256') != transition_sha
+            or reservation.get('retryAuthorizationSHA256') != base['retryAuthorizationSHA256']
+            or reservation.get('failedIdleResultSHA256') != base['failedIdleResultSHA256']):
+        raise ValueError('retained zero-sample second idle failure differs')
+    return {'attempt': 3, 'retryAuthorizationSHA256': hashlib.sha256(extra_raw).hexdigest(),
+            'continuationAuthorizationSHA256': base['retryAuthorizationSHA256'],
+            'failedIdleResultSHA256': failure_sha, 'firstFailedIdleResultSHA256': base['failedIdleResultSHA256']}
 
 
 def main():
@@ -76,6 +126,7 @@ def main():
     parser.add_argument('--api-metadata', required=True)
     parser.add_argument('--observer', required=True)
     parser.add_argument('--retry-authorization')
+    parser.add_argument('--additional-retry-authorization')
     args = parser.parse_args()
     owned = module('cap10_idle_owned', 'cap10-env.py')
     resources = module('cap10_idle_resources', 'cap10-resources.py')
@@ -89,7 +140,7 @@ def main():
     assert value['CAP_SOURCE_SHA'] == api_metadata['sourceSha']
     assert value['CAP_READ_EXPECTED_REVISION'] == api_metadata['expectedVersion']
     assert not list(root.glob('slot-*.json')), 'idle observation must precede S1'
-    attempt = idle_attempt(root, args.retry_authorization, owned.transition())
+    attempt = idle_attempt(root, args.retry_authorization, owned.transition(), args.additional_retry_authorization)
     reservation = root / 'idle-reservation.json'
     owned.save(reservation, {'at': owned.now(), 'seconds': 60, 'intervalSeconds': 5,
                             **attempt, 'failedAttemptConsumesOnlyIdleObservation': True,

@@ -42,6 +42,14 @@ func NewWorker(db *gorm.DB, brokers []string, topic string) *Worker {
 
 func (worker *Worker) Close() error { return worker.writer.Close() }
 
+// Runner owns per-loop diagnostic state while sharing this owner's database
+// repository and concurrent-safe Kafka Writer. Only the owner closes the writer,
+// after the application has cancelled and joined every returned runner.
+func (worker *Worker) Runner() func(context.Context) {
+	runner := &Worker{repo: worker.repo, writer: worker.writer, topic: worker.topic}
+	return runner.Run
+}
+
 func (worker *Worker) Run(ctx context.Context) {
 	for ctx.Err() == nil {
 		processed, err := worker.Poll(ctx)
@@ -93,8 +101,9 @@ func (worker *Worker) Poll(ctx context.Context) (bool, error) {
 		return true, worker.repo.NeedsReview(ctx, *event, err)
 	}
 	message := kafka.Message{
-		// The aggregate id is the partition key, so events of one note or one
-		// relation keep their order.
+		// The aggregate id keeps a note/relation on one partition. Concurrent
+		// claims and retries may publish versions out of order; consumers must
+		// retain their existing version fences and idempotent receipts.
 		Key:   []byte(event.AggregateID),
 		Value: body,
 		Headers: []kafka.Header{

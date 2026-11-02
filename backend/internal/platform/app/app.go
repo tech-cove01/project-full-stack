@@ -137,7 +137,9 @@ func Run(ctx context.Context, cfg config.Config, logger *slog.Logger, revision s
 		// development stays a two-container environment.
 		relay := communityrelay.NewWorker(resources.ORM, cfg.Kafka.Brokers, cfg.Kafka.Topic)
 		defer func() { _ = relay.Close() }()
-		workers = append(workers, relay.Run)
+		for range cfg.CommunityRelayWorkers {
+			workers = append(workers, relay.Runner())
+		}
 		projection := communityprojection.NewRuntime(communityprojection.New(resources.ORM))
 		for _, name := range []string{communityprojection.Follow, communityprojection.Feed} {
 			consumer, err := communityconsumer.NewWorker(cfg.Kafka.Brokers, cfg.Kafka.Topic, name, projection)

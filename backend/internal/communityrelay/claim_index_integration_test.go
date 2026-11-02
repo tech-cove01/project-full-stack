@@ -2,7 +2,9 @@ package communityrelay
 
 import (
 	"context"
+	"fmt"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -127,5 +129,94 @@ func TestIntegrationActiveClaimPreservesEligibilityAndSkipLocked(t *testing.T) {
 	}
 	if event, err := repo.Claim(ctx); err != nil || event != nil {
 		t.Fatalf("future retry and unexpired lease must stay unavailable: event=%+v err=%v", event, err)
+	}
+}
+
+func TestIntegrationEightConcurrentClaimsDoNotRedeliver(t *testing.T) {
+	if os.Getenv("GO_INTEGRATION") != "1" {
+		t.Skip("isolated dependencies required")
+	}
+	cfg, err := config.Load()
+	if err != nil {
+		t.Fatal("invalid integration configuration")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+	r, err := database.Open(ctx, cfg)
+	if err != nil {
+		t.Fatal("isolated dependencies unavailable")
+	}
+	t.Cleanup(func() { _ = r.Close() })
+	var existing int64
+	if err = r.ORM.WithContext(ctx).Raw("SELECT COUNT(*) FROM tb_community_outbox").Scan(&existing).Error; err != nil || existing != 0 {
+		t.Fatal("concurrent claim test requires an empty isolated outbox; existing rows untouched")
+	}
+	prefix := "CLAIM-POOL:" + randomSuffix(t)
+	ids := make([]string, 64)
+	for i := range ids {
+		ids[i] = fmt.Sprintf("%s:%d", prefix, i)
+	}
+	t.Cleanup(func() {
+		cleanup, stop := context.WithTimeout(context.Background(), 5*time.Second)
+		defer stop()
+		if err := r.ORM.WithContext(cleanup).Exec("DELETE FROM tb_community_outbox WHERE event_id IN ?", ids).Error; err != nil {
+			t.Error("owned concurrent fixture cleanup failed")
+		}
+	})
+	for _, id := range ids {
+		if err = r.ORM.WithContext(ctx).Exec(`INSERT INTO tb_community_outbox
+			(event_id,aggregate_type,aggregate_id,aggregate_version,event_type,payload)
+			VALUES (?,'FOLLOW','42',1,'FOLLOW_CHANGED','{}')`, id).Error; err != nil {
+			t.Fatal("concurrent outbox fixture insert failed")
+		}
+	}
+	repo := NewRepository(r.ORM)
+	var workers sync.WaitGroup
+	var guard sync.Mutex
+	seen := make(map[uint64]bool)
+	failures := make(chan error, 8)
+	for range 8 {
+		workers.Add(1)
+		go func() {
+			defer workers.Done()
+			for {
+				event, err := repo.Claim(ctx)
+				if err != nil {
+					failures <- err
+					return
+				}
+				if event == nil {
+					return
+				}
+				guard.Lock()
+				duplicate := seen[event.ID]
+				seen[event.ID] = true
+				guard.Unlock()
+				if duplicate {
+					failures <- fmt.Errorf("concurrent claims duplicated one owned event")
+					return
+				}
+				if err := repo.Done(ctx, *event); err != nil {
+					failures <- err
+					return
+				}
+			}
+		}()
+	}
+	workers.Wait()
+	close(failures)
+	for err := range failures {
+		t.Error(err)
+	}
+	if len(seen) != len(ids) {
+		t.Fatalf("concurrent claims completed %d of %d owned events", len(seen), len(ids))
+	}
+	var summary struct{ Total, Attempts, Completed int64 }
+	if err = r.ORM.WithContext(ctx).Raw(`SELECT COUNT(*) AS total,SUM(attempts) AS attempts,
+		SUM(delivery_status='DONE') AS completed FROM tb_community_outbox WHERE event_id IN ?`, ids).Scan(&summary).Error; err != nil {
+		t.Fatal(err)
+	}
+	if summary.Total != 64 || summary.Attempts != 64 || summary.Completed != 64 {
+		t.Fatalf("eight claimers must complete every event exactly once: %+v", summary)
 	}
 }

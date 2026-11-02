@@ -1,10 +1,30 @@
 package communityrelay
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"testing"
+	"time"
 )
+
+func TestIndependentRunnersJoinAfterCancellationWithoutClosingSharedOwner(t *testing.T) {
+	owner := &Worker{}
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	done := make(chan struct{}, 8)
+	for range 8 {
+		run := owner.Runner()
+		go func() { run(ctx); done <- struct{}{} }()
+	}
+	for range 8 {
+		select {
+		case <-done:
+		case <-time.After(time.Second):
+			t.Fatal("cancelled relay runner failed to join")
+		}
+	}
+}
 
 func TestBackoffDoublesAndStopsAtTheCap(t *testing.T) {
 	for attempts, want := range map[int]int{

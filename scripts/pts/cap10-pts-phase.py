@@ -74,6 +74,7 @@ def normalized(summary, seconds):
         'cap_like_rejected': counts['rejected'], 'cap_like_content_errors': counts['invalid'],
         'cap_like_system_errors': summary.get('systemErrors'), 'cap_like_http_errors': summary.get('httpErrors'),
         'cap_like_recovery_reads': 0, 'cap_like_recovery_failed': 0,
+        'cap_like_generator_timing_violations': summary.get('generatorTimingViolations'),
         'cap_like_retired_relations': counts['uncertain'] + counts['invalid'] + counts['rejected'] + counts['noop'],
         'dropped_iterations': counts['dropped'], 'http_reqs{name:like-write}': counts['attempted']}
     if not all(type(value) is int and value >= 0 for value in mapping.values()):
@@ -90,6 +91,7 @@ def normalized(summary, seconds):
             'quantileMethod': summary.get('quantileMethod'), 'metrics': metrics,
             'nativeScenario': {'startedAt': start, 'scheduledEndedAt': end, 'durationMs': seconds * 1000,
                 'complete': not summary.get('stop'), 'startMetric': {'min': start, 'max': start},
+                'generatorTimingValid': summary['generatorTimingViolations'] == 0,
                 'durationMetric': {'min': seconds * 1000, 'max': seconds * 1000},
                 'scope': 'All 512 registered slots, common ECS-clock offer window, full JMeter terminal records; platform report time is separate.'}}
 
@@ -154,6 +156,23 @@ def poll_termination(client, scene_id, report_id, stop_sent):
     return stop_sent, client.terminal_evidence(scene_id, report_id)
 
 
+def scene_admission_path(root, reservation):
+    root = Path(root)
+    transition = root / 'tool-repair-transition.json'
+    repair_hash = reservation.get('reservationCheck', {}).get('toolRepairTransitionSHA256')
+    if (reservation.get('tag') in {'S5', 'S6', 'S7', 'S8', 'H1', 'H2'}
+            and isinstance(repair_hash, str) and len(repair_hash) == 64
+            and transition.is_file() and not transition.is_symlink()
+            and hashlib.sha256(transition.read_bytes()).hexdigest() == repair_hash):
+        return root / 'pts-scene-admission-repair1.json'
+    return root / 'pts-scene-admission.json'
+
+
+def phase_exit_code(summary):
+    return 0 if (summary.get('stop') is False and summary.get('generatorTimingValid') is True
+                 and summary.get('generatorTimingViolations') == 0) else 1
+
+
 def run(args):
     if sys.platform != 'linux' or os.environ.get('CAP10_PLATFORM') != 'linux' or os.environ.get('CAP10_LOAD_BACKEND') != 'pts':
         raise ValueError('explicit native Linux PTS execution required')
@@ -188,7 +207,7 @@ def run(args):
             or seconds != reservation['warmSeconds' if phase == 'warm' else 'seconds']
             or rate != reservation['warmRate' if phase == 'warm' else 'rate']):
         raise ValueError('phase must belong to its existing same-batch reservation')
-    admission_path = expected_root / 'pts-scene-admission.json'
+    admission_path = scene_admission_path(expected_root, reservation)
     if (hashlib.sha256(admission_path.read_bytes()).hexdigest() != reservation['ptsAdmissionSHA256']
             or read(admission_path).get('passed') is not True):
         raise ValueError('reserved PTS scene admission differs')
@@ -255,7 +274,7 @@ def run(args):
         if not terminal['nativeEvidenceComplete']:
             raise ValueError('full native JMeter evidence unavailable')
         save(args.summary, normalized(summary, seconds))
-        return 0 if not summary.get('stop') else 1
+        return phase_exit_code(summary)
     except (Exception, KeyboardInterrupt) as error:
         with lock:
             store.fail('phase_exception')

@@ -1,11 +1,13 @@
 """Actual phase envelope/auth checks; synthetic loopback collector only."""
 import ast
 import copy
+import hashlib
 from http.server import ThreadingHTTPServer
 import importlib.util
 import json
 from pathlib import Path
 import threading
+import tempfile
 from types import SimpleNamespace
 import unittest
 import urllib.error
@@ -31,6 +33,7 @@ collector = load('cap10-pts-collector')
 def full_summary():
     return {'complete': True, 'collectionValid': True, 'unknownIsExact': True, 'unknown': 0,
         'startUnixMs': 1800000000000, 'endUnixMs': 1800000060000, 'stop': False,
+        'generatorTimingViolations': 0, 'generatorTimingValid': True,
         'counts': {'planned': 60, 'attempted': 60, 'completed': 60, 'mutation': 60,
                    'noop': 0, 'uncertain': 0, 'rejected': 0, 'invalid': 0, 'dropped': 0},
         'systemErrors': 0, 'httpErrors': 0, 'quantileMethod': 'full raw R7',
@@ -39,6 +42,56 @@ def full_summary():
 
 
 class EnvelopeChecks(unittest.TestCase):
+    def test_complete_timing_invalid_warm_returns_failure_after_preserving_summary(self):
+        good = full_summary()
+        self.assertEqual(phase.phase_exit_code(good), 0)
+        bad = {**good, 'generatorTimingValid': False, 'generatorTimingViolations': 1}
+        native = phase.normalized(bad, 60)
+        self.assertTrue(native['nativeScenario']['complete'])
+        self.assertEqual(native['metrics']['cap_like_mutation']['count'], 60)
+        self.assertEqual(phase.phase_exit_code(bad), 1)
+        self.assertEqual(phase.phase_exit_code({**good, 'stop': True}), 1)
+        self.assertEqual(phase.phase_exit_code({**good, 'generatorTimingValid': None}), 1)
+        self.assertEqual(phase.phase_exit_code({**good, 'generatorTimingViolations': 1}), 1)
+
+    def test_repaired_admission_is_only_selected_by_exact_late_reservation_transition(self):
+        with tempfile.TemporaryDirectory(prefix='.qa-cap10-admission-', dir=REPO.parent) as folder:
+            root = Path(folder)
+            transition = root / 'tool-repair-transition.json'
+            transition.write_bytes(b'{"repair":1}\n')
+            digest = hashlib.sha256(transition.read_bytes()).hexdigest()
+            for tag in ('S5', 'S6', 'S7', 'S8', 'H1', 'H2'):
+                reservation = {'tag': tag, 'reservationCheck': {'toolRepairTransitionSHA256': digest}}
+                self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission-repair1.json')
+            for tag in ('S1', 'S2', 'S3', 'S4', 'S9', 'H3', None):
+                reservation = {'tag': tag, 'reservationCheck': {'toolRepairTransitionSHA256': digest}}
+                self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission.json')
+            for marker in (None, '', 'a' * 64, 123):
+                reservation = {'tag': 'S5', 'reservationCheck': {'toolRepairTransitionSHA256': marker}}
+                self.assertEqual(phase.scene_admission_path(root, reservation), root / 'pts-scene-admission.json')
+            self.assertEqual(phase.scene_admission_path(root, {'tag': 'S5'}), root / 'pts-scene-admission.json')
+            transition.write_bytes(b'{"repair":2}\n')
+            self.assertEqual(phase.scene_admission_path(root, {'tag': 'S5', 'reservationCheck': {
+                'toolRepairTransitionSHA256': digest}}), root / 'pts-scene-admission.json')
+            transition.unlink()
+            self.assertEqual(phase.scene_admission_path(root, {'tag': 'S5', 'reservationCheck': {
+                'toolRepairTransitionSHA256': digest}}), root / 'pts-scene-admission.json')
+
+    def test_generator_timing_violation_survives_full_accounting_without_faking_unknown(self):
+        summary = full_summary(); summary['generatorTimingViolations'] = 2
+        value = phase.normalized(summary, 60)
+        self.assertEqual(value['metrics']['cap_like_generator_timing_violations']['count'], 2)
+        self.assertFalse(value['nativeScenario']['generatorTimingValid'])
+        self.assertTrue(value['nativeScenario']['complete'])
+        self.assertEqual(value['metrics']['cap_like_mutation']['count'], 60)
+        self.assertEqual(value['metrics']['cap_like_effect_unknown']['count'], 0)
+
+    def test_generator_timing_count_cannot_be_absent_negative_or_noninteger(self):
+        for count in (None, -1, 1.5, True):
+            with self.subTest(count=count):
+                summary = full_summary(); summary['generatorTimingViolations'] = count
+                with self.assertRaises(ValueError): phase.normalized(summary, 60)
+
     def test_pending_stop_keeps_polling_and_can_stop_after_identity_returns(self):
         client = SimpleNamespace(stop=Mock(side_effect=[
             {'requested': False, 'terminationPending': True, 'terminalVerified': False},

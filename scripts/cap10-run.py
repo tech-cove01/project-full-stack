@@ -117,7 +117,8 @@ def classify(state, report, load, kind):
     complete = report.get('nativeScenario', {}).get('complete') is True
     measured = summaries_complete and all(state.get(k) is True for k in ('resourcesPassed', 'toolBytesStable', 'collectionValid', 'traceSwitchesValid', 'containersValid')) and state.get('powerEvidence', {}).get('valid') is True and state.get('failedStartOrException') is None
     result = report.get('result') or {}
-    generator = result.get('dropped', 0) > 0 or result.get('actualOfferedRatio', 0) < .99
+    generator = (result.get('dropped', 0) > 0 or result.get('actualOfferedRatio', 0) < .99
+                 or result.get('generatorTimingViolations', 0) > 0)
     state['recoveryVerified'] = state.get('pipeline', {}).get('recoverySecondsFromNativeEnd') is not None and state['pipeline']['recoverySecondsFromNativeEnd'] <= 60
     if fatal:
         outcome = 'correctness_stop'

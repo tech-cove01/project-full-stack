@@ -93,6 +93,8 @@ class EngineStore:
         self._reason = None
         self._violations = []
         self._collection_errors = []
+        self._generator_timing_violations = 0
+        self._generator_timing_details = []
         self._closed = False
         self._journal_hasher = hashlib.sha256()
         self._journal_path = Path(journalPath)
@@ -254,14 +256,22 @@ class EngineStore:
         self._require('observedNoteId' not in record or record['observedNoteId'] is None or (type(record['observedNoteId']) is str and
                       record['observedNoteId'] in self._note_ids), 'collector native note identity invalid')
         scheduled = self._start + ordinal * 1000 / self._config['rate']
+        timing_violation = None
         if kind == 'dropped':
             self._require(all(record[k] is None for k in ('startedUnixMs', 'elapsedMs', 'status')), 'collector dropped record contains HTTP sample')
             self._require(self._now() > scheduled + 50, 'collector dropped ordinal is not overdue')
         else:
             self._require(number(record['startedUnixMs'], 1) and number(record['elapsedMs']) and
                           (record['status'] is None or integer(record['status'], 0, 599)), 'collector native HTTP timing invalid')
-            self._require(self._start <= record['startedUnixMs'] < self._start + self._config['seconds'] * 1000 and
-                          0 <= record['startedUnixMs'] - scheduled <= 50, 'collector native request outside scheduled window')
+            in_window = self._start <= record['startedUnixMs'] < self._start + self._config['seconds'] * 1000
+            offset = record['startedUnixMs'] - scheduled
+            if not (in_window and 0 <= offset <= 50):
+                # Scheduling failure cannot erase an actual HTTP terminal or
+                # its facts. Keep the full journal and ACK stream; the final
+                # generator gate rejects the window using the same 50ms rule.
+                timing_violation = {'ordinal': ordinal, 'slot': slot,
+                    'startedUnixMs': record['startedUnixMs'], 'scheduledUnixMs': scheduled,
+                    'dispatchOffsetMs': offset, 'withinNativeWindow': in_window, 'jitterBudgetMs': 50}
             self._require(record['startedUnixMs'] >= self._last_http_end.get(slot, 0), 'collector relationship HTTP samples overlap')
             uncertainty = self._engines[engine_id]['clock']['uncertaintyMs']
             self._require(record['startedUnixMs'] + record['elapsedMs'] <= self._now() + uncertainty, 'collector HTTP terminal precedes its measured completion')
@@ -279,6 +289,10 @@ class EngineStore:
             self._stop_for('collector non-mutation native result')
             if kind != 'dropped':
                 self._retired_slots.add(slot)
+        if timing_violation is not None:
+            self._generator_timing_violations += 1
+            if len(self._generator_timing_details) < 64:
+                self._generator_timing_details.append(timing_violation)
         # Full native facts remain in the durable journal. Runtime aggregation
         # retains no repeated JSON dictionaries or business identifiers.
         self._records[ordinal] = (slot, kind, record['status'], record['elapsedMs'])
@@ -303,7 +317,8 @@ class EngineStore:
             self._require(engine['complete'] is None and payload['seq'] == len(engine['batches']), 'collector batch sequence is not continuous')
             self._require(self._start is not None or not payload['records'], 'collector native result precedes barrier')
             self._clock_resource(engine, payload['clock'], payload['resources'])
-            prior = (dict(self._facts), dict(self._last_ordinal), dict(self._last_http_end), set(self._retired_slots))
+            prior = (dict(self._facts), dict(self._last_ordinal), dict(self._last_http_end), set(self._retired_slots),
+                     self._generator_timing_violations, list(self._generator_timing_details))
             added_ordinals = []
             try:
                 records = []
@@ -315,7 +330,8 @@ class EngineStore:
                 self._append({'kind': 'batch', 'runId': payload['runId'], 'engineId': engine_id, 'seq': payload['seq'],
                               'frameSHA256': frame_hash, 'records': records, 'clock': payload['clock'], 'resources': payload['resources']})
             except ValueError:
-                self._facts, self._last_ordinal, self._last_http_end, self._retired_slots = prior
+                (self._facts, self._last_ordinal, self._last_http_end, self._retired_slots,
+                 self._generator_timing_violations, self._generator_timing_details) = prior
                 for ordinal in added_ordinals:
                     self._records.pop(ordinal, None)
                 raise
@@ -425,6 +441,11 @@ class EngineStore:
                     'effectUnknown': raw['uncertain'], 'classificationUnknown': 0 if unknown_exact else None,
                     'httpErrors': statistics['httpErrors'], 'systemErrors': statistics['systemErrors'],
                     'batchFatal': bool(self._collection_errors or any(raw[k] for k in ('noop', 'uncertain', 'rejected', 'invalid'))),
+                    'generatorTimingViolations': self._generator_timing_violations,
+                    'generatorTimingValid': self._generator_timing_violations == 0,
+                    'generatorTimingViolationDetails': copy.deepcopy(self._generator_timing_details),
+                    'generatorTimingViolationDetailsLimit': 64,
+                    'generatorTimingRule': 'Every actual HTTP start must be within the native window and 0..50ms after its exact ordinal schedule; any violation invalidates the generator, never a service upper bound. All original terminal timestamps remain in the full journal; details here retain the first 64.',
                     'childrenConverged': len(engines) == 2 and all(e['stoppedOffering'] for e in engines),
                     'violations': list(self._violations), 'collectionErrors': list(self._collection_errors),
                     'resourcesScope': 'PTS environment: each independently allocated remote engine must stay below 6 GiB process RSS; the aggregate is displayed, not compared with a shared limit. Local Python collector plus Node classification retain their separate combined 2 GiB limit. This environment adaptation is not API optimization evidence.',

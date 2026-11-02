@@ -236,11 +236,54 @@ class Checks(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.batch(records=[self.record(elapsedMs=200)])
 
-    def test_late_or_pre_window_http_not_relabelled_as_success(self):
+    def test_late_or_pre_window_http_keeps_complete_frame_and_fact_chain(self):
         self.ready(); self.stamp = self.start + 1000
-        for started in (self.start - 1, self.start + 51, self.start + 60000):
-            with self.subTest(started=started), self.assertRaises(ValueError):
-                self.batch(records=[self.record(startedUnixMs=started)])
+        rows = [self.record(0, startedUnixMs=self.start - 1),
+                self.record(1, startedUnixMs=self.start + 71)]
+        result = self.batch(records=rows)
+        self.assertEqual(result['ack'], 0)
+        self.assertFalse(result['stop'])
+        self.assertTrue(self.batch(records=rows, seq=0)['duplicate'])
+        summary = self.store.summary()
+        self.assertEqual(summary['counts']['mutation'], 2)
+        self.assertEqual(summary['generatorTimingViolations'], 2)
+        self.assertEqual([r['dispatchOffsetMs'] for r in summary['generatorTimingViolationDetails']], [-1, 51])
+        self.assertFalse(summary['generatorTimingValid'] or summary['batchFatal'])
+        self.assertEqual(summary['collectionErrors'], [])
+        self.stamp = self.start + 11000
+        self.batch(records=[self.record(512)])
+        self.assertEqual(self.store._facts[0], (False, 2))
+        frames = [json.loads(line) for line in (self.root / 'journal.ndjson').read_text().splitlines()]
+        native = [row for frame in frames if frame['kind'] == 'batch' for row in frame['records']]
+        self.assertEqual([row['ordinal'] for row in native], [0, 1, 512])
+        self.assertEqual(native[:2], rows)
+
+    def test_full_timing_invalid_window_retains_all_real_terminals_and_exact_unknown(self):
+        declared = self.full_window(mutate=lambda row: row.update(startedUnixMs=row['startedUnixMs'] + 51))
+        for engine in (0, 1):
+            self.assertTrue(self.complete(engine, declared[engine])['complete'])
+        summary = self.store.summary()
+        self.assertTrue(summary['complete'] and summary['collectionValid'])
+        self.assertEqual((summary['counts']['mutation'], summary['latencySampleCount']), (3000, 3000))
+        self.assertEqual((summary['unknown'], summary['unknownIsExact']), (0, True))
+        self.assertEqual(summary['generatorTimingViolations'], 3000)
+        self.assertEqual(len(summary['generatorTimingViolationDetails']), 64)
+        self.assertTrue(all(row['dispatchOffsetMs'] == 51 for row in summary['generatorTimingViolationDetails']))
+        self.assertFalse(summary['generatorTimingValid'] or summary['batchFatal'] or summary['stop'])
+        frames = [json.loads(line) for line in (self.root / 'journal.ndjson').read_text().splitlines()]
+        native = [row for frame in frames if frame['kind'] == 'batch' for row in frame['records']]
+        self.assertEqual(len(native), 3000)
+        self.assertGreaterEqual(native[-1]['startedUnixMs'], self.start + 60000)
+
+    def test_bad_fact_after_timing_violation_remains_fatal_and_rolls_back_new_counters(self):
+        self.ready(); self.stamp = self.start + 1000
+        with self.assertRaisesRegex(ValueError, 'mutation facts'):
+            self.batch(records=[self.record(0, startedUnixMs=self.start + 51),
+                                self.record(1, observedVersion=5)])
+        summary = self.store.summary()
+        self.assertTrue(summary['batchFatal'] and summary['stop'])
+        self.assertEqual((summary['counts']['mutation'], summary['generatorTimingViolations']), (0, 0))
+        self.assertEqual(self.store._facts[0], (False, 0))
 
     def test_future_drop_cannot_fill_unoffered_nominal_schedule(self):
         self.ready(); self.stamp = self.start

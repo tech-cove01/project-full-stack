@@ -34,9 +34,15 @@
 
 **后续离线进展：** `c084636`解码复用组件耗时约减50.5%、分配减半；`8d580b9`显式驱动参数插值使真实6条SQL的prepare/execute/close各6→0，值/回滚/回退及实际GORM点赞、提交后取消回归通过，默认仍关闭。两者没有新业务QPS收益。该精确`8d580b9`[四项CI通过](https://github.com/tech-cove01/project-full-stack/actions/runs/41505690255)，干净Linux API/observer产物已构建、未部署。`3a78b2c`+`e85385f`组合将严格时钟校准与durable ACK分开，原98/50门槛不变；新协议17/3 JMeter20合成PUT/三进程退出0，9路HTTP的138次clock最高33.7998ms通过。`7da6401`增加显式新准入文件组，保留原包/准入。所有旧工具FAIL继续留证；没有新PTS或正式成绩。
 
-**观察SQL仍需代码方案：** 本机1CPU/1GiB/128MiB夹具在20分钟构造上限留下精确1225500事件与三组各1225500收据；原S2/S3未执行。独立P1原/合并SQL的全史与90万后缀均超时，候选未采纳；P2独立1CPU/4GiB/2GiB缓存仍在原30秒全史预算超时，随后连接未及时退出，90万后缀按guard明确未发起。原件与SKIP不重判，本轮自有四CID现全停、5卷保留、原资源保护通过。继续评估基于固定配对事实版本的精确增量采样及独立完整审计路径，不能只放大缓存、重试原扫描或放宽窗口4秒总/3秒读预算。详情与全部原件SHA见[档案](docs/evidence/2026-11-01-cap10/offline-improvements.md)。
+**大历史扫描的失败原件：** 本机1CPU/1GiB/128MiB夹具在20分钟构造上限留下精确1225500事件与三组各1225500收据；原S2/S3未执行。独立P1原/合并SQL的全史与90万后缀均超时，候选未采纳；P2独立1CPU/4GiB/2GiB缓存仍在原30秒全史预算超时，随后连接未及时退出，90万后缀按guard明确未发起。原件与SKIP不重判，该轮自有四CID正常全停、5卷保留、原资源保护通过。继续评估基于固定配对事实版本的精确增量采样及独立完整审计路径，不能只放大缓存、重试原扫描或放宽窗口4秒总/3秒读预算。详情与全部原件SHA见[档案](docs/evidence/2026-11-01-cap10/offline-improvements.md)。
 
 **新小票状态：** `374ccbc`完成版本向量纯记账引擎、延后提交/失效/缺失/alias/边界等回归及race/vet/独审，未接SQL或main；[规格与分票](docs/evidence/2026-11-01-cap10/observer-vector-plan.md)保留逐窗完整审计。`f65d62b`将新模式完整snapshot审计固定为120秒、旧模式30秒，严格仅窗口外，不代表查询提速或审计通过。`22692d6`提供默认仅计划、显式native读基线/应用mysql8资源的脚本，46项离线检查及注册文件与现有消费者兼容验证通过；未调整云资源。制包与参数组装另各7项本地检查通过，均不生成真实准入或容量结论。远端同步结果单独核实，不因本地commit称已推送。
+
+**最新真实SQL回归：** P3原receipt与独立候选各30秒仍失败，两项只读CTE仅证明join/count/alias，不含完整hash或预算通过。OBS-V2首轮32768规范事件在4秒内只读29434条，逐行测试清理也触30秒；原FAIL保留，随后按oracle精确批清理闭合。`d6ac1e5`把观测查询改成256键驱动，同一配对/事件oracle、同一1CPU/4GiB/2GiB配置下，完整32768事件/98304收据读取1.349935秒、135查询、实际commit，6顶层真实回归通过；同CID未重启，重seed、缓存历史与新AUTO ID差异留证，不把超时未完成与完成耗时拼成倍率。`e50eac0`把同步发布分区等待10ms改为1ms，同程序有限SDK组件中位数约10.57→1.66ms，ACK/取消/关闭回归、独审及[精确CI](https://github.com/tech-cove01/project-full-stack/actions/runs/41523762678)通过；没有真实broker或新业务QPS收益。
+
+**业务批量认领已交：** `bd35e2b1b3b464d312790259b60fe6b458a4e645`保留原RC事务、byte前缀/停车截止及attempt fence，把32条lease更新从32次单表UPDATE合为1次multi UPDATE，混合停车为2次；真实prepare/execute/close从各33次降至2或3次，插值开启时双方均0，SELECT/COMMIT仍各1。10项真实功能、24个实际EXPLAIN及独立1顶层/8子例计数对照通过，首轮计数harness漏Com_update_multi的FAIL原样保留。935条有限测试事件已精确清理、原大历史不变、自有容器正常停；普通39项/vet与双审通过，无新业务QPS。详情见[小票](docs/evidence/2026-11-01-cap10/relay-claim-point-plan.md)，已随`44f05c0`正常推送至既有origin/main，原TLS失败与后续成功分别保留。
+
+**开机前仍未闭合：** Go增量main已实现并通过纯检查/独审，实际互通仍待验证；Python逐窗基线/终审绑定`44f05c0e7f9decde1a2e7b572d7b3bd7bdcd29f4`的9项真实文件、89策略/71runner检查及独审通过、已推送；Node完整审计需验证实际Decode hash、完整查询预算和跨语言非NULL控制行。当前全量snapshot在多个setup阶段重复执行，120秒单次审计与原60秒setup的组合也必须先实测收敛，不能带到付费环境才发现。云机保持停止，不将局部SQL/SDK收益当5000或正式容量通过。
 
 <details>
 <summary>此前执行过程与原计划快照（历史，以上述最新决定为准）</summary>

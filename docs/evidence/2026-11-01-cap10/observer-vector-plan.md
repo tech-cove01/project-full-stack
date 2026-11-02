@@ -1,6 +1,6 @@
 # CAP-10：事实版本增量观测与完整审计
 
-2026-11-03。任务状态见根[STATUS](../../../STATUS.md)，失败与收益见[改动档案](offline-improvements.md)。本票解决大历史数据让观测器反复扫描的问题，不改变点赞业务、持久化、ACK或容量判定。当前纯记账引擎已交，SQL和窗口接线未完成，不能据此恢复云机或宣布5000准备通过。
+2026-11-03。任务状态见根[STATUS](../../../STATUS.md)，失败与收益见[改动档案](offline-improvements.md)。本票解决大历史数据让观测器反复扫描的问题，不改变点赞业务、持久化、ACK或容量判定。纯记账引擎和有界SQL适配已交，窗口接线与独立完整审计仍在验证，不能据此恢复云机或宣布5000准备通过。
 
 ## 依据与边界
 
@@ -23,11 +23,12 @@
 | 小票 | 行为与直接验证 | 当前 |
 | --- | --- | --- |
 | OBS-V1 | 纯版本记账，延后提交、完整pending刷新、身份/hash、receipt/DONE不可逆、caps、epoch及双gate；生产Decode产生独立golden | `374ccbc`，普通16顶层/18子例、race/vet、Linux单文件构建、独审通过；未接运行路径 |
-| OBS-V2 | 有界同RR SQL适配，索引计划、真实延后事务/别名/取消及失败不推进 | 待实现/验证 |
+| OBS-V2 | 有界同RR SQL适配，索引计划、真实延后事务/别名/取消及失败不推进 | `d6ac1e5`，6顶层真实回归通过；32768事件完整读取1.349935秒/135查询，首轮4秒FAIL保留，未改原预算 |
 | AUDIT-V1a | 固定模式与完整审计预算，默认兼容，非法值拒绝 | `f65d62b`，Node39与runner71检查、独审通过 |
 | OBS-POLICY / OBS-LAUNCH | Python共用固定合同；启动元数据与实际进程环境绑定mode/预算，历史缺字段仅旧模式兼容 | 纯合同`3f3b601`已交；启动绑定10项检查及独审通过，不代表SQL/main或窗口接线完成 |
 | OBS-BIND | 预约、命令、API/active/formal freeze及ready须匹配同一固定方法/预算；vector不得借旧缺字段元数据 | 89项策略、71项runner检查及独审通过；旧observer在vector ready门前拒，仍未启用新SQL/main |
 | AUDIT-V1b | 实际完整SQL计划与正确性，包括未知projection；真实原/新同条件对照 | 待验证；不得用receipt单查询冒充完整审计 |
-| OBS-WIRE | 模式/预算绑定命令、active/freeze及报告，逐窗基线/终审引用，监督关闭 | 待实现；正式两轮不因逐窗proof变化而换freeze |
+| OBS-PY-AUDIT | 本窗原admission/reconcile SHA→CLI/ready/summary→最终完整审计E+delta绑定，保留原恢复门槛 | `44f05c0`，9项文件绑定/89策略/71runner检查及独审通过；[规格](observer-audit-binding-plan.md)，无native互通或容量声明 |
+| OBS-WIRE | 模式/预算绑定命令、active/freeze及报告，逐窗基线/终审引用，监督关闭 | Go main纯检查/独审通过；Python逐窗绑定已交；真实Node proof互通/非NULL控制行及完整审计预算未闭合，尚未启用云测；正式两轮不因逐窗proof变化而换freeze |
 
 基线和终审SHA、事实向量摘要是逐窗引用；mode、工具、固定预算属于整个freeze。工具SQL/query/事件/逻辑字节与真实进程资源分别报告，逻辑上限不是RSS。没有上述接线和真实验证时，不把纯引擎、交叉编译或本机SQLprobe记成PTS或业务容量通过。

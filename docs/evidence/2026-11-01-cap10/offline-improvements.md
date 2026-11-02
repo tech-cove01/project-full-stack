@@ -106,6 +106,26 @@ P2原全史SQL在30秒总预算下30000.871ms失败，MAX1.077ms、counts2925.27
 
 `22692d6`交资源应用脚本：默认仅静态计划，另显式native只读capture基线或应用同MySQL CID的mysql8-v1与4GiB Buffer Pool。运行前核原挂载/配额/身份/独占及余量，运行后必须取得新鲜实际resize完成、原持久化不变；保留失败中间状态，不自动回退重试。46项离线检查、实际export到原两个登记消费者兼容及独审通过。该脚本未在云端执行，资源调整不计入代码吞吐收益。
 
+### P3与OBS-V2首轮：尚未闭合的预算
+
+P3仍用本地独立1CPU/4GiB、Buffer Pool2GiB和原1225500事件历史。首次schema前置额外COUNT(DISTINCT projection)在5秒预算失败，实际5061.462ms；两EXPLAIN和主query均未发起，原件62件manifest=`315b52a875c25e5780ac7e0b6e9852800f4e386dc11314ea501007b48750975f`。随后去掉该前置全史扫描，两个实际EXPLAIN分别表明旧receipt先ALL扫描估4099431行再查Outbox唯一键，新候选从Outbox ALL估1208931行、实际projection去重、按receipt完整PRIMARY eq_ref；估计505个projection不是实际基数。
+
+旧receipt唯一一次计时30050.348ms超时，结果null，会话约1294.539ms的5次检查仍活动，后续候选/CTE均SKIP并正常停自有CID；102件manifest=`23428986eed9dee07bdfca9dcb0118b1baa9c7e1e7397f339c1f787625f0ee46`。单独候选接续重启后唯一一次计时30054.851ms也失败，随后真实等待1971.750ms、8次检查证实会话drain；canonical/alias两项只读CTE通过，包含未知projection和错误aggregate不隐藏、case/尾空格/lossy eventId别名不匹配，但不含hash或完整审计。98件manifest=`746af968ce46458229d41813e15ba9db5cc3277c0f2cc07d77fd0fe1badc7d33`。不重跑旧query，不拼缓存冷热不同的耗时倍率；三轮原件、旧417条seal及原资源保护通过，正常停全部自有CID后另交OBS-V2生命周期。
+
+OBS-V2首个真实矩阵使用独立IT空库、同一1CPU/4GiB/2GiB资源，5顶层正确性通过，覆盖延后提交低ID、真实RR、pending完整刷新、9个污染反例、3个事务/取消故障与真实索引计划。第6项用实际生产Decode产生的4096配对/32768事件、98304收据，seed5.616秒；原32分支query在4.000411秒deadline，读29434/32768、924查询、显式source prepare1，SQL未commit、引擎未推进。不能把部分读取说通过，prepare1也不是会话总Com_stmt_prepare。小/大实际source唯一键和三组完整PK计划通过，事实小规模ref、大4096行range；未查询原1225500历史，不声称任意事实表都O(pool)。
+
+该次测试逐行删除4096事实也触30秒清理预算，原失败、三份源v4与6份raw已保存，随后按原oracle4096精确配对批清理闭合，12张IT表及本次oracle为0，原1225500历史守恒。原raw manifest=`0b06c6b83def0c003a2a847d6d6ae1572bfc292a56fed232e958b265603557b0`，分析=`f7d5adca888358b51c0dd74319ff47d04ab26044b16430186365a49b20463972`。后续候选将重复整join的32分支改为256个键驱动一次source/receipt join，以减少SQL调用和规划开销；首轮当时只有预测；后续有限对照结果如下，不改判首轮FAIL。主窗4秒总/3秒读不放宽。
+
+完整审计还发现原Node只计收据数量，未校hash，且未知组未显式拒；新模式须补完整源/字节身份与实际Decode canonical hash校验，原legacy证据不改判。120秒是窗口外审计预算，不能把这些待交付能力说成已有完整审计或借预算提升包装SQL收益。
+
+### OBS-V2有限对照与同步发布等待
+
+`d6ac1e5`接续仅一次同oracle对照：同一独立MySQL CID、1CPU/4GiB/2GiB配置，4096配对/32768源事件/98304收据的生产Decode oracle SHA256=`098e9b0f89a2a4f6fc50ea436a622a3939d7ee2881469b4694d76cac1f488a22`。seed5.439秒，完整SQL读取1.349935秒、135查询、显式source prepare1，事务实际commit；6顶层真实回归全部通过。实际N256键materialized、source唯一键及三组完整PK eq_ref，N1源const。未放宽4秒总/3秒读。同CID未重启，重seed、缓存历史与新AUTO ID差异明确记录；旧超时未完成，不能计算完整耗时改善倍率，也不能外推API QPS。
+
+本次12张IT表/oracle/自有会话精确为0，原历史及配置不变，四个自有CID正常停止、5卷保留；原100容器/140卷/38网络及14个运行服务保护通过。6份raw manifest=`575bcbcd4009faf810fe0e34697a4b153840bc47707b4e47da15018c5ed13f5f`，对照分析=`475405ae97d00aa0fe64f6901c8d8c764747a96d3451976c3105bc927d0a11a6`，112份闭合manifest=`15af4e89643bbcc71ff06bb753d6f465159fcbbbb55204f61da9aa3e55e034cc`。首轮失败、清理失败及精确修复原件全部保留。
+
+`e50eac0`按[同步发布规格](relay-publisher-flush-plan.md)把opt-in批发布器的分区凑批等待10ms缩至1ms。8个独占同步Writer各自一次调用已包含完整有界批，原10ms无法等来同lane下一调用；RequireAll、同步ACK、超时、字节上限、关闭drain及默认旧路径保持。有限同程序实际SDK加内存协议transport（不连broker/业务/SQL），3组配对×每组12次已测调用，中位数的中位数10.5673→1.66095ms，每variant384条已测记录/24次Produce均核；不把组件时延换成业务吞吐。原始结果SHA256=`4015866aa6d8c7dd7a5b9e81d461a7557ae7239c688d4dff98aaf6998b384c74`。相关普通/race/vet、独审及[精确CI](https://github.com/tech-cove01/project-full-stack/actions/runs/41523762678)通过。更短等待在调度暂停时可能增加wire batch，不承诺每partition只发一次Produce。
+
 ### 离线Linux产物
 
 已从干净独立`8d580b9`工作树构建linux/amd64、CGO关闭的API与原observer，无依赖升级、无服务启动。API build info内嵌精确revision且`vcs.modified=false`；observer按单源文件构建不内嵌VCS，原源文件SHA与二进制SHA另绑，不能声称两者都带VCS。API SHA256=`75b36b22d795bc4cb88288698553b7e8d3cf92297aa18c84284852f141012ff2`，observer=`493ea8b8e35cd25ae90019730db94859da9b7d782b300ea34cc23564d3478e2f`，私有产物manifest=`d4b73b0ddd678206ed4e668460528136c585568879fddad11200c21dba48ce82`。仅离线构建，未部署或发压，云端原版本不变。

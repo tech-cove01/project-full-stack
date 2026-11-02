@@ -18,12 +18,15 @@ import secrets
 import stat
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 REPO = Path(__file__).resolve().parents[2]
 _cohort_spec = importlib.util.spec_from_file_location('cap10_pts_prepare_cohort', REPO / 'scripts/cap10-cohort.py')
 cohort = importlib.util.module_from_spec(_cohort_spec); _cohort_spec.loader.exec_module(cohort)
 UPLOAD_FILES = ('cap10-jmeter.jmx', 'slots.csv', 'cap10-pts-private.json')
 PACKET_FILES = (*UPLOAD_FILES, 'cap10-jmeter-manifest.json')
+LEGACY_CLOCK_PROTOCOL = 'embedded-v1'
+CURRENT_CLOCK_PROTOCOL = 'dedicated-v1'
 NODE_PROGRAM = """import {bundle} from './scripts/pts/cap10-jmeter.mjs';
 let input=''; for await (const chunk of process.stdin) input+=chunk;
 const v=JSON.parse(input); const m=await bundle(v.directory,{collectorUrl:v.collectorUrl,controlToken:v.controlToken,poolSize:v.poolSize,expectedEngines:v.expectedEngines});
@@ -40,9 +43,40 @@ def cohort_source_hashes():
             for name in ('scripts/cap10-cohort.py', 'scripts/load/cap10-cohort-contract.mjs')}
 
 
+def clock_protocol(value):
+    if not isinstance(value, dict):
+        raise ValueError('clock protocol object required')
+    protocol = value.get('clockProtocol', LEGACY_CLOCK_PROTOCOL)
+    if protocol not in (LEGACY_CLOCK_PROTOCOL, CURRENT_CLOCK_PROTOCOL):
+        raise ValueError('unsupported explicit clock protocol')
+    return protocol
+
+
+def validate_jmx_clock(raw, protocol):
+    try:
+        root = ET.fromstring(raw)
+    except ET.ParseError as error:
+        raise ValueError('valid generated JMeter XML required') from error
+    matches = []
+    for argument in root.iter('elementProp'):
+        names = argument.findall("stringProp[@name='Argument.name']")
+        if argument.get('name') == 'cap10.clockProtocol' or any(name.text == 'cap10.clockProtocol' for name in names):
+            values = argument.findall("stringProp[@name='Argument.value']")
+            if (argument.get('elementType') != 'Argument' or argument.get('name') != 'cap10.clockProtocol'
+                    or len(names) != 1 or names[0].text != 'cap10.clockProtocol'
+                    or len(values) != 1 or values[0].text != protocol):
+                raise ValueError('JMeter clock argument differs from packet protocol')
+            matches.append(argument)
+    if len(matches) != 1:
+        raise ValueError('one explicit JMeter clock argument required')
+
+
 def manifest_dimensions(manifest, require_frozen=False):
     if not isinstance(manifest, dict):
         raise ValueError('JMeter manifest object required')
+    protocol = clock_protocol(manifest)
+    if require_frozen and protocol != CURRENT_CLOCK_PROTOCOL:
+        raise ValueError('current packet requires the explicit dedicated clock protocol')
     pool = cohort.pool_size(manifest.get('poolSize', cohort.DEFAULT_POOL_SIZE))
     dims = cohort.dimensions({'poolSize': pool, 'expectedEngines': manifest.get('expectedEngines', 2),
                               'ptsConcurrency': manifest.get('ptsConcurrency')}, {'poolSize': pool})
@@ -64,6 +98,9 @@ def manifest_dimensions(manifest, require_frozen=False):
 
 def bound_cohort(packet_record, config):
     dims = manifest_dimensions(packet_record['manifest'], require_frozen=True)
+    protocol = clock_protocol(packet_record['manifest'])
+    if clock_protocol(packet_record) != protocol or clock_protocol(config) != protocol:
+        raise ValueError('packet and private clock protocols differ')
     if cohort.dimensions(config, {'poolSize': dims['poolSize']}) != dims:
         raise ValueError('private configuration differs from packet cohort')
     expected = cohort_source_hashes()
@@ -133,6 +170,7 @@ def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn
         raise ValueError('generated JMeter contract differs')
     if not re.fullmatch(r'[a-f0-9]{64}', manifest.get('scriptSHA256', '')) or not all((directory / name).is_file() for name in PACKET_FILES):
         raise ValueError('complete upload packet required')
+    validate_jmx_clock((directory / 'cap10-jmeter.jmx').read_bytes(), clock_protocol(manifest))
     if os.name != 'nt' and (directory.stat().st_mode & 0o077 or (directory / 'cap10-pts-private.json').stat().st_mode & 0o077):
         raise ValueError('packet/private file permission differs')
     # Check secret-file shape before returning paths, without publishing values.
@@ -141,7 +179,7 @@ def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn
         raise ValueError('generated private collector binding differs')
     md5s = {name: hashlib.md5((directory / name).read_bytes(), usedforsecurity=False).hexdigest() for name in UPLOAD_FILES}
     cfg = {'sceneId': 'UNBOUND', 'regionId': region, 'collectorUrl': collector_url, 'apiUrl': api_url,
-           'controlToken': token, **requested, 'cohortSourceSHA256': before_cohort,
+           'controlToken': token, **requested, 'clockProtocol': clock_protocol(manifest), 'cohortSourceSHA256': before_cohort,
            'scriptSHA256': manifest['scriptSHA256'], 'sceneFiles': md5s}
     if credential_path is not None:
         cfg['credentialsFile'] = str(credential_path)
@@ -149,7 +187,8 @@ def packet(owned, environment, ecs_private_ip, credentials_file=None, region='cn
     updated = {**value, 'CAP10_LOAD_BACKEND': 'pts', 'CAP10_PTS_CONFIG': str(config_path),
                'CAP10_PYTHON_BIN': sys.executable, 'API_ADDR': '0.0.0.0:8281'}
     next_env = owned.private_write(runtime, 'env-pts-' + nonce + '.private.json', updated)
-    public = {'version': 1, 'manifest': manifest, 'sourceSHA256': before_sources, 'cohortSourceSHA256': before_cohort,
+    public = {'version': 1, 'manifest': manifest, 'clockProtocol': clock_protocol(manifest),
+        'sourceSHA256': before_sources, 'cohortSourceSHA256': before_cohort,
         'privatePaths': {'packetDirectory': str(directory), 'cleanupRegistration': str(registration),
                          'configuration': str(config_path), 'environment': str(next_env)}, 'sceneFilesMD5': md5s}
     if token in json.dumps(public):
@@ -186,7 +225,8 @@ def bind(owned, environment, scene_id):
     nonce = secrets.token_hex(6)
     config_path = owned.private_write(runtime, 'env-pts-control-' + nonce + '.private.json', {**cfg, 'sceneId': scene_id})
     next_env = owned.private_write(runtime, 'env-pts-bound-' + nonce + '.private.json', {**value, 'CAP10_PTS_CONFIG': str(config_path)})
-    public = {'version': 1, 'sceneId': scene_id, 'sourceSHA256': source_hashes(), 'cohortSourceSHA256': cohort_source_hashes(),
+    public = {'version': 1, 'sceneId': scene_id, 'clockProtocol': clock_protocol(cfg),
+        'sourceSHA256': source_hashes(), 'cohortSourceSHA256': cohort_source_hashes(),
         'packetManifestSHA256': hashlib.sha256((owned.ROOT / 'pts-packet.json').read_bytes()).hexdigest(),
         'privatePaths': {'configuration': str(config_path), 'environment': str(next_env)},
         'sceneFilesMD5': cfg['sceneFiles'], 'cloudCalled': False, 'sceneCreatedByThisTool': False}
@@ -294,8 +334,8 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
         packet_record = owned.read(owned.ROOT / 'pts-packet.json')
         binding = owned.read(owned.ROOT / 'pts-scene-binding.json')
         dims = bound_cohort(packet_record, cfg)
-        if binding.get('cohortSourceSHA256') != before_cohort:
-            raise ValueError('binding cohort helper sources differ')
+        if binding.get('cohortSourceSHA256') != before_cohort or clock_protocol(binding) != clock_protocol(cfg):
+            raise ValueError('binding cohort helper sources or clock protocol differ')
         scene_id = cfg['sceneId']
         if (not re.fullmatch(r'[A-Za-z0-9_-]{1,128}', scene_id) or scene_id == 'UNBOUND'
                 or binding['sceneId'] != scene_id or Path(binding['privatePaths']['configuration']) != cfg_path
@@ -308,6 +348,7 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
         if any((upload / name).is_symlink() or not (upload / name).is_file() for name in PACKET_FILES):
             raise ValueError('original regular packet files required')
         manifest = packet_record['manifest']
+        validate_jmx_clock((upload / 'cap10-jmeter.jmx').read_bytes(), clock_protocol(manifest))
         script = (REPO / 'scripts/pts/cap10-pts-contract.groovy').read_bytes() + b'\n' + (REPO / 'scripts/pts/cap10-jmeter.groovy').read_bytes()
         md5s = {name: hashlib.md5((upload / name).read_bytes(), usedforsecurity=False).hexdigest() for name in UPLOAD_FILES}
         if (owned.read(upload / 'cap10-jmeter-manifest.json') != manifest
@@ -334,6 +375,7 @@ def verify_scene(owned, environment, allow_live=False, client_factory=None):
         if source_hashes() != before or cohort_source_hashes() != before_cohort:
             raise ValueError('packet sources changed during scene admission')
         result.update(passed=True, sceneId=scene_id, sceneFilesMD5=md5s, sourceSHA256=before, cohortSourceSHA256=before_cohort, **dims,
+            clockProtocol=clock_protocol(manifest),
             scriptSHA256=manifest['scriptSHA256'], duration=600, concurrency=dims['ptsConcurrency'], agentCount=dims['expectedEngines'],
             configurationReference=str(cfg_path), scope='Only GetOpenJMeterScene read permission verified; no Start/Stop permission or cloud workload verified.')
         return result

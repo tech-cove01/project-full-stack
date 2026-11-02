@@ -8,6 +8,7 @@ import subprocess
 import tempfile
 from types import SimpleNamespace
 import uuid
+import xml.etree.ElementTree as ET
 from unittest.mock import patch
 
 SOURCE = Path(__file__).with_name('cap10-pts-prepare.py')
@@ -86,13 +87,22 @@ def main():
         check(public['manifest']['normalThreads'] == 512 and public['manifest']['ptsConcurrency'] == 513 and public['manifest']['csvSplitRequired'], 'generated standard JMX preserves 512 plus teardown and split CSV')
         check(set(public['sourceSHA256']) == {'cap10-pts-prepare.py', 'cap10-jmeter.mjs', 'cap10-jmeter.groovy', 'cap10-pts-contract.groovy'}
               and public['cohortSourceSHA256'] == cfg['cohortSourceSHA256'] == prepare.cohort_source_hashes(), 'original four source keys retained and separate cohort helpers frozen')
-        old_manifest = {key: value for key, value in public['manifest'].items() if key not in ('poolSize', 'expectedEngines', 'cohortSourceSHA256')}
+        check(public['clockProtocol'] == public['manifest']['clockProtocol'] == cfg['clockProtocol'] == 'dedicated-v1', 'new packet and private configuration explicitly bind dedicated clock protocol')
+        check(prepare.clock_protocol({}) == prepare.clock_protocol({'clockProtocol': 'embedded-v1'}) == 'embedded-v1', 'missing protocol retains embedded historical interpretation')
+        for invalid in (None, '', 'unknown', True, 1):
+            rejected(lambda: prepare.clock_protocol({'clockProtocol': invalid}), 'invalid explicit clock protocol rejected: ' + repr(invalid))
+        for invalid in (None, 'embedded-v1'):
+            rejected(lambda: prepare.manifest_dimensions({**public['manifest'], 'clockProtocol': invalid}, require_frozen=True), 'new frozen packet cannot downgrade clock protocol: ' + repr(invalid))
+        omitted_protocol = {key: value for key, value in public['manifest'].items() if key != 'clockProtocol'}
+        rejected(lambda: prepare.manifest_dimensions(omitted_protocol, require_frozen=True), 'new frozen packet cannot omit dedicated protocol')
+        old_manifest = {key: value for key, value in public['manifest'].items() if key not in ('poolSize', 'expectedEngines', 'cohortSourceSHA256', 'clockProtocol')}
         check(prepare.manifest_dimensions(old_manifest) == {'poolSize': 512, 'expectedEngines': 2, 'ptsConcurrency': 513}, 'old manifest omissions remain the legacy profile')
         rejected(lambda: prepare.manifest_dimensions(old_manifest, require_frozen=True), 'legacy helper omission cannot claim current frozen source admission')
         check(cfg['controlToken'] not in json.dumps(public) and 'PRIVATE-DB-SENTINEL' not in json.dumps(public), 'public packet metadata exports no control or database credentials')
         original_cfg = cfg_path.read_bytes(); original_env = Path(public['privatePaths']['environment']).read_bytes()
         bound = prepare.bind(owned, public['privatePaths']['environment'], 'CAP10_EXISTING_SCENE')
         bound_cfg = owned.read(bound['privatePaths']['configuration'])
+        check(bound['clockProtocol'] == bound_cfg['clockProtocol'] == 'dedicated-v1', 'binding preserves explicit protocol without deriving it from newest source')
         check(bound_cfg['sceneId'] == 'CAP10_EXISTING_SCENE' and bound_cfg['controlToken'] == cfg['controlToken'] and bound_cfg['sceneFiles'] == cfg['sceneFiles'], 'bind preserves token and exact frozen upload file hashes')
         check(cfg_path.read_bytes() == original_cfg and Path(public['privatePaths']['environment']).read_bytes() == original_env, 'bind creates new private files and preserves original bytes')
         check(not bound['cloudCalled'] and not bound['sceneCreatedByThisTool'] and cfg['controlToken'] not in json.dumps(bound), 'binding existing SceneId does not call cloud or disclose a secret')
@@ -110,6 +120,7 @@ def main():
         rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], client_factory=ReadOnlyClient), 'scene verification cannot call cloud without explicit allow-live')
         admission = prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient)
         check(admission['passed'] and calls == ['GetOpenJMeterScene'] and admission['readRAMActionVerified'] == 'pts:GetOpenJMeterScene' and not admission['startStopPermissionsVerified'] and not admission['startStopCalled'], 'scene admission verifies frozen files/settings using exactly one read and no Start/Stop')
+        check(admission['clockProtocol'] == 'dedicated-v1', 'successful scene admission carries the original packet clock protocol')
         check(cfg['controlToken'] not in json.dumps(admission) and 'PRIVATE-DB-SENTINEL' not in json.dumps(admission), 'public scene admission contains only allowed references/hashes')
         admission_path = owned.ROOT / 'pts-scene-admission.json'
         rejected(lambda: prepare.verify_scene(owned, bound['privatePaths']['environment'], True, ReadOnlyClient), 'prior scene admission is never overwritten')
@@ -236,6 +247,49 @@ def main():
                   and accepted['cohortSourceSHA256'] == generated['cohortSourceSHA256'] == binding['cohortSourceSHA256'], 'packet bind and mock admission preserve exact cohort freeze: ' + str(pool))
             result_path = owner.ROOT / 'pts-scene-admission.json'
             result_path.rename(owner.ROOT / 'admission-valid.json')
+            if pool == 17:
+                packet_path = owner.ROOT / 'pts-packet.json'
+                packet_folder = Path(generated['privatePaths']['packetDirectory'])
+                jmx_path = packet_folder / 'cap10-jmeter.jmx'
+                manifest_path = packet_folder / 'cap10-jmeter-manifest.json'
+                binding_path = owner.ROOT / 'pts-scene-binding.json'
+                originals = {path: path.read_bytes() for path in (packet_path, jmx_path, manifest_path, config_path, binding_path)}
+                for mutation in ('wrong', 'missing', 'duplicate'):
+                    tree = ET.fromstring(originals[jmx_path])
+                    argument = next(item for item in tree.iter('elementProp') if item.get('name') == 'cap10.clockProtocol')
+                    parent = next(item for item in tree.iter() if argument in list(item))
+                    if mutation == 'wrong': argument.find("stringProp[@name='Argument.value']").text = 'embedded-v1'
+                    elif mutation == 'missing': parent.remove(argument)
+                    else: parent.append(ET.fromstring(ET.tostring(argument)))
+                    raw = ET.tostring(tree, encoding='utf-8')
+                    jmx_path.write_bytes(raw)
+                    packet_record = owner.read(packet_path)
+                    packet_record['manifest']['jmxSHA256'] = hashlib.sha256(raw).hexdigest()
+                    packet_record['sceneFilesMD5']['cap10-jmeter.jmx'] = hashlib.md5(raw, usedforsecurity=False).hexdigest()
+                    manifest_path.write_text(json.dumps(packet_record['manifest']), encoding='utf-8')
+                    packet_path.write_text(json.dumps(packet_record), encoding='utf-8')
+                    resealed_config = owner.read(config_path)
+                    resealed_config['sceneFiles'] = packet_record['sceneFilesMD5']
+                    config_path.write_text(json.dumps(resealed_config), encoding='utf-8')
+                    resealed_binding = owner.read(binding_path)
+                    resealed_binding['sceneFilesMD5'] = packet_record['sceneFilesMD5']
+                    resealed_binding['packetManifestSHA256'] = hashlib.sha256(packet_path.read_bytes()).hexdigest()
+                    binding_path.write_text(json.dumps(resealed_binding), encoding='utf-8')
+                    rejected(lambda: prepare.verify_scene(owner, binding['privatePaths']['environment'], True, CohortClient), 'resealed JMX clock variable rejected: ' + mutation)
+                    check(len(provider_calls) == 1 and not owner.read(result_path)['cloudCalled'], 'JMX clock mismatch makes no provider call: ' + mutation)
+                    result_path.rename(owner.ROOT / ('admission-clock-jmx-' + mutation + '.json'))
+                    for path, original in originals.items(): path.write_bytes(original)
+            for artifact, path in (('packet', owner.ROOT / 'pts-packet.json'), ('config', config_path), ('binding', owner.ROOT / 'pts-scene-binding.json')):
+                original = path.read_bytes()
+                for mode, invalid in (('missing', None), ('legacy', 'embedded-v1'), ('null', None)):
+                    damaged = owner.read(path)
+                    if mode == 'missing': damaged.pop('clockProtocol')
+                    else: damaged['clockProtocol'] = invalid
+                    path.write_text(json.dumps(damaged), encoding='utf-8')
+                    rejected(lambda: prepare.verify_scene(owner, binding['privatePaths']['environment'], True, CohortClient), 'clock binding mismatch rejected before provider: ' + artifact + '/' + mode + '/' + str(pool))
+                    check(len(provider_calls) == 1 and not owner.read(result_path)['cloudCalled'], 'protocol mismatch makes no provider call: ' + artifact + '/' + mode + '/' + str(pool))
+                    result_path.rename(owner.ROOT / ('admission-clock-' + artifact + '-' + mode + '.json'))
+                    path.write_bytes(original)
             record_path = owner.ROOT / 'pts-packet.json'
             packet_bytes = record_path.read_bytes()
             damaged = owner.read(record_path); damaged.pop('cohortSourceSHA256')

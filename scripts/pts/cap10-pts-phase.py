@@ -148,6 +148,12 @@ def normalized(summary, seconds):
                 'scope': 'All fixture-bound registered slots, complete ECS-clock offer window, full JMeter terminal records; guarded launches do not shorten the QPS denominator. Platform report time is separate.'}}
 
 
+class CollectorHTTPServer(ThreadingHTTPServer):
+    # Nine engine connections plus control/progress must not overflow the
+    # stdlib backlog of five and incur SYN/accept delays before HTTP handling.
+    request_queue_size = 64
+
+
 def handler_type(store, token, lock):
     class Handler(BaseHTTPRequestHandler):
         protocol_version = 'HTTP/1.1'
@@ -311,7 +317,7 @@ def run(args):
                         allow_live=True, exclusive_scene=True, scene_id=cfg['sceneId'])
     store = collector.EngineStore(run_config, args.evidence / 'records.ndjson')
     lock = threading.RLock()
-    server = ThreadingHTTPServer((host, 8481), handler_type(store, cfg['controlToken'], lock))
+    server = CollectorHTTPServer((host, 8481), handler_type(store, cfg['controlToken'], lock))
     server.daemon_threads = True
     serving = threading.Thread(target=server.serve_forever, daemon=True)
     serving.start()

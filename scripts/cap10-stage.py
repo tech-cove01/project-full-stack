@@ -8,6 +8,7 @@ Read warmup uses a separate k6 process: sampling starts only at stable phase.
 import argparse
 import datetime as dt
 import hashlib
+import importlib.util
 import json
 import os
 from pathlib import Path
@@ -17,6 +18,11 @@ import sys
 import time
 
 import psutil
+
+
+_resource_spec = importlib.util.spec_from_file_location('cap10_stage_resources', Path(__file__).with_name('cap10-resource-contract.py'))
+RESOURCE = importlib.util.module_from_spec(_resource_spec)
+_resource_spec.loader.exec_module(RESOURCE)
 
 
 def now():
@@ -80,10 +86,12 @@ def main():
             parser.error('CAP10 requires explicit CAP_COHORT=cap10')
         ownership = Path(os.environ.get('CAP10_ENVIRONMENT_METADATA', '')).resolve()
         batch_root = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap10'
-        expected = batch_root / 'linux/environment.json' if sys.platform == 'linux' else batch_root / 'environment.json'
+        root = batch_root / 'linux' if sys.platform == 'linux' else batch_root
+        expected = RESOURCE.metadata_path(dict(os.environ), root)
         if ownership != expected or not ownership.is_file():
             parser.error('fixed CAP10 ownership metadata required')
         environment = json.loads(ownership.read_text(encoding='utf-8-sig'))
+        RESOURCE.bound_profile(dict(os.environ), environment)
         platform = 'linux' if sys.platform == 'linux' else 'windows'
         if os.environ.get('CAP10_PLATFORM', 'windows') != platform or environment.get('executionPlatform', 'windows') != platform:
             parser.error('CAP10 native platform/environment mismatch')

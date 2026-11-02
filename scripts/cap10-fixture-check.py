@@ -1,5 +1,6 @@
 """Actual owned fixture cleanup boundaries; synthetic files, no services or load."""
 import importlib.util
+import hashlib
 import json
 from pathlib import Path
 import tempfile
@@ -77,6 +78,28 @@ class Checks(unittest.TestCase):
             else:
                 with self.assertRaises(AssertionError):
                     ENV.credential_tokens(path, self.runtime)
+
+    def test_owned_environment_selects_versioned_metadata_without_changing_original(self):
+        original = ENV.ROOT / 'environment.json'
+        original.write_text('{}', encoding='utf-8')
+        versioned = ENV.ROOT / 'environment-012345abcdef.json'
+        versioned.write_text('{"resourceProfile":"mysql8-v1"}', encoding='utf-8')
+        config = {'CAP10_ENVIRONMENT_METADATA': str(versioned), 'CAP10_RESOURCE_PROFILE': 'mysql8-v1'}
+        metadata, path, profile = ENV.environment(config)
+        self.assertEqual((path, profile), (versioned, 'mysql8-v1'))
+        self.assertEqual(metadata['resourceProfile'], profile)
+        self.assertEqual(original.read_text(), '{}')
+        with self.assertRaises(ValueError):
+            ENV.environment({'CAP10_ENVIRONMENT_METADATA': str(versioned)})
+        api = {'environmentPath': versioned.name, 'resourceProfile': profile,
+               'environmentSHA256': hashlib.sha256(versioned.read_bytes()).hexdigest()}
+        self.assertEqual(ENV.api_environment(config, api)[1], versioned)
+        with self.assertRaises(AssertionError):
+            ENV.api_environment(config, {key: value for key, value in api.items() if key != 'environmentSHA256'})
+        versioned.write_text('{"resourceProfile":"mysql8-v1","changed":true}', encoding='utf-8')
+        with self.assertRaises(AssertionError):
+            ENV.api_environment(config, api)
+        self.assertEqual(ENV.api_environment({'CAP10_ENVIRONMENT_METADATA': str(original)}, {})[1], original)
 
 
 if __name__ == '__main__':

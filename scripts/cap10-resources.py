@@ -26,6 +26,9 @@ import psutil
 _cohort_spec = importlib.util.spec_from_file_location('cap10_resource_cohort', Path(__file__).with_name('cap10-cohort.py'))
 cohort = importlib.util.module_from_spec(_cohort_spec)
 _cohort_spec.loader.exec_module(cohort)
+_resource_spec = importlib.util.spec_from_file_location('cap10_sampler_resource_contract', Path(__file__).with_name('cap10-resource-contract.py'))
+RESOURCE = importlib.util.module_from_spec(_resource_spec)
+_resource_spec.loader.exec_module(RESOURCE)
 CAP10_PROJECT = 'project-full-stack-cap10'
 PTS_ENGINE_RSS_LIMIT = 6 << 30
 CAP10_LIMITS = {
@@ -66,9 +69,10 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-def cap10_container(expected, actual, service):
+def cap10_container(expected, actual, service, *, resource_profile=RESOURCE.BASELINE_PROFILE):
     """Validate selected inspect fields; never serialize a container environment."""
-    cpu, memory, port, host_port, destination = CAP10_LIMITS[service]
+    _, _, port, host_port, destination = CAP10_LIMITS[service]
+    cpu, memory = RESOURCE.container_limits(resource_profile)[service]
     if not re.fullmatch(r'[a-f0-9]{64}', expected.get('id', '')) or actual.get('id') != expected['id']:
         raise ValueError('CAP10 immutable container identity differs')
     labels = actual.get('labels', {})
@@ -104,7 +108,7 @@ def cap10_container(expected, actual, service):
     match = re.fullmatch(re.escape(CAP10_PROJECT) + r'-([a-f0-9]{12})-' + service, data_volume[0] or '')
     if not match:
         raise ValueError('CAP10 fresh volume namespace differs')
-    return {'service': service, 'id': expected['id'], 'cpuNano': cpu, 'memoryBytes': memory,
+    return {'service': service, 'id': expected['id'], 'cpuNano': cpu, 'memoryBytes': memory, 'resourceProfile': resource_profile,
             'volume': data_volume[0], 'destination': destination,
             'volumes': [{'name': name, 'destination': target} for name, target in volumes],
             'nonce': match.group(1), 'network': network}
@@ -199,7 +203,8 @@ def cpu_stat(identity):
     else:
         quota, period = map(int, lines.pop().split())
         usage_ns = None
-    if period <= 0 or quota * 1_000_000_000 != CAP10_LIMITS[identity['service']][0] * period:
+    cpu, _ = RESOURCE.container_limits(identity.get('resourceProfile', RESOURCE.BASELINE_PROFILE))[identity['service']]
+    if period <= 0 or quota * 1_000_000_000 != cpu * period:
         raise ValueError('actual CPU cgroup quota differs from declared container limit')
     raw = {}
     for line in lines:
@@ -246,10 +251,12 @@ def main():
         if args.project != CAP10_PROJECT or args.load_script != 'cap10-like.js' or args.diagnostics != 'http://127.0.0.1:8381/debug/capacity':
             parser.error('fixed CAP10 project/script/diagnostics required')
         batch_root = Path(__file__).resolve().parent.parent / 'docs/evidence/2026-11-01-cap10'
-        expected_path = batch_root / 'linux/environment.json' if sys.platform == 'linux' else batch_root / 'environment.json'
+        root = batch_root / 'linux' if sys.platform == 'linux' else batch_root
+        expected_path = RESOURCE.metadata_path(dict(os.environ), root)
         if args.ownership is None or args.ownership.resolve() != expected_path or not expected_path.is_file():
             parser.error('fixed CAP10 public ownership manifest required')
         ownership = json.loads(expected_path.read_text(encoding='utf-8-sig'))
+        resource_profile = RESOURCE.bound_profile(dict(os.environ), ownership)
         platform = 'linux' if sys.platform == 'linux' else 'windows'
         if os.environ.get('CAP10_PLATFORM', 'windows') != platform or ownership.get('executionPlatform', 'windows') != platform:
             parser.error('CAP10 native platform/environment mismatch')
@@ -282,7 +289,7 @@ def main():
             services = [service for service, value in ownership['containers'].items() if value['id'] == name]
             if len(services) != 1:
                 parser.error('CAP10 manifest container identity duplicated')
-            identities.append(cap10_container(ownership['containers'][services[0]], actual, services[0]))
+            identities.append(cap10_container(ownership['containers'][services[0]], actual, services[0], resource_profile=resource_profile))
             container_ids.append(name)
             continue
         result = subprocess.run(['docker', 'inspect', '--format', '{{json .Config.Labels}}', name], capture_output=True, text=True, timeout=15, check=True)

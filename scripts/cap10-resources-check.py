@@ -57,7 +57,7 @@ class Checks(unittest.TestCase):
         rows = resources.pts_engine_resources(original, 101000)
         self.assertEqual(rows[-1]['rss_bytes'], rows[-1]['rss_limit_bytes'])
 
-    def sample(self, pairs, quota='400000 100000', version=2):
+    def sample(self, pairs, quota='400000 100000', version=2, profile=None):
         paths = ['/sys/fs/cgroup/cpu.stat', '/sys/fs/cgroup/cpu.max']
         suffix = quota + '\n'
         if version == 1:
@@ -68,10 +68,40 @@ class Checks(unittest.TestCase):
         text = ''.join(key + ' ' + value + '\n' for key, value in pairs) + suffix
         with patch.dict(resources.CPU_LAYOUTS, {CID: layout}, clear=True), \
                 patch.object(resources.subprocess, 'run', return_value=SimpleNamespace(stdout=text)) as run:
-            result = resources.cpu_stat({'id': CID, 'service': 'mysql'})
+            identity = {'id': CID, 'service': 'mysql'}
+            if profile is not None:
+                identity['resourceProfile'] = profile
+            result = resources.cpu_stat(identity)
             run.assert_called_once_with(['docker', 'exec', CID, 'cat', *paths],
                 capture_output=True, text=True, timeout=4, check=True)
         return result
+
+    def test_explicit_target_cpu_quota_does_not_redefine_baseline(self):
+        result = self.sample(BASE, quota='800000 100000', profile='mysql8-v1')
+        self.assertEqual(result['quotaUsec'], 800000)
+        with self.assertRaises(ValueError):
+            self.sample(BASE, quota='800000 100000')
+        with self.assertRaises(ValueError):
+            self.sample(BASE, profile='mysql8-v1')
+
+    def test_container_caps_require_same_explicit_profile_and_original_identity(self):
+        volume = resources.CAP10_PROJECT + '-012345abcdef-mysql'
+        network = resources.CAP10_PROJECT + '_default'
+        expected = {'id': CID, 'cpuNano': 8_000_000_000, 'memoryBytes': 8 << 30,
+                    'volumes': [{'name': volume, 'destination': '/var/lib/mysql'}]}
+        actual = {**expected, 'running': True, 'labels': {'com.docker.compose.project': resources.CAP10_PROJECT,
+                    'com.docker.compose.service': 'mysql'},
+                  'ports': {'3306/tcp': [{'HostIp': '127.0.0.1', 'HostPort': '3481'}]},
+                  'networkMode': network, 'networks': {network: {}},
+                  'mounts': [{'Type': 'volume', 'Name': volume, 'Destination': '/var/lib/mysql'}]}
+        result = resources.cap10_container(expected, actual, 'mysql', resource_profile='mysql8-v1')
+        self.assertEqual(result['resourceProfile'], 'mysql8-v1')
+        self.assertEqual(result['id'], CID)
+        with self.assertRaises(ValueError):
+            resources.cap10_container(expected, actual, 'mysql')
+        changed = copy.deepcopy(actual); changed['id'] = 'b' * 64
+        with self.assertRaises(ValueError):
+            resources.cap10_container(expected, changed, 'mysql', resource_profile='mysql8-v1')
 
     def test_original_v2_fields_and_quota_remain_exact(self):
         result = self.sample(BASE)

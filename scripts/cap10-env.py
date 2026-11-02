@@ -25,6 +25,9 @@ REPO = Path(__file__).resolve().parent.parent
 _cohort_spec = importlib.util.spec_from_file_location('cap10_cohort_environment', REPO / 'scripts/cap10-cohort.py')
 COHORT = importlib.util.module_from_spec(_cohort_spec)
 _cohort_spec.loader.exec_module(COHORT)
+_resource_spec = importlib.util.spec_from_file_location('cap10_environment_resources', REPO / 'scripts/cap10-resource-contract.py')
+RESOURCE = importlib.util.module_from_spec(_resource_spec)
+_resource_spec.loader.exec_module(RESOURCE)
 BATCH_ROOT = REPO / 'docs/evidence/2026-11-01-cap10'
 PLATFORM = 'windows' if os.name == 'nt' else 'linux'
 assert os.name == 'nt' or sys.platform == 'linux', 'CAP10 supports Windows and the single Linux transition only'
@@ -226,14 +229,33 @@ def settings(path):
     assert value['MYSQL_PORT'] == '3481' and value['REDIS_PORT'] == '6581'
     assert value['API_BASE'] == 'http://127.0.0.1:8281'
     assert value['KAFKA_BROKERS'] == '127.0.0.1:9401' and value['ES_URL'] == 'http://127.0.0.1:9281'
-    assert value['CAP10_ENVIRONMENT_METADATA'] == str(ROOT / 'environment.json')
+    RESOURCE.metadata_path(value, ROOT)
+    RESOURCE.profile_name(value.get('CAP10_RESOURCE_PROFILE', RESOURCE.BASELINE_PROFILE))
     assert value.get('CAP10_PLATFORM', 'windows') == PLATFORM
     if PLATFORM == 'linux':
         assert value['CAP10_TRANSITION_SHA256'] == transition()
     return value, runtime
 
 
-def container(service, cid=None, running=None):
+def environment(value):
+    path = RESOURCE.metadata_path(value, ROOT)
+    metadata = read(path)
+    return metadata, path, RESOURCE.bound_profile(value, metadata)
+
+
+def api_environment(value, metadata):
+    public, path, profile = environment(value)
+    assert metadata.get('environmentPath', 'environment.json') == path.name
+    assert metadata.get('resourceProfile', RESOURCE.BASELINE_PROFILE) == profile
+    digest = metadata.get('environmentSHA256')
+    if digest is None:
+        assert 'environmentSHA256' not in metadata and path.name == 'environment.json' and profile == RESOURCE.BASELINE_PROFILE
+    else:
+        assert digest == hashlib.sha256(path.read_bytes()).hexdigest(), 'API environment metadata changed after startup'
+    return public, path, profile
+
+
+def container(service, cid=None, running=None, *, resource_profile=RESOURCE.BASELINE_PROFILE):
     assert service in PORTS
     if cid:
         assert re.fullmatch(r'[a-f0-9]{64}', cid)
@@ -247,7 +269,7 @@ def container(service, cid=None, running=None):
     port, target = PORTS[service]
     assert any(x['HostIp'] == '127.0.0.1' and x['HostPort'] == str(port)
                for x in raw['HostConfig']['PortBindings'][target])
-    assert (raw['HostConfig']['NanoCpus'], raw['HostConfig']['Memory']) == LIMITS[service]
+    assert (raw['HostConfig']['NanoCpus'], raw['HostConfig']['Memory']) == RESOURCE.container_limits(resource_profile)[service]
     volumes = sorted(({'name': item['Name'], 'destination': item['Destination']}
                       for item in raw['Mounts'] if item['Type'] == 'volume'), key=lambda item: item['destination'])
     primary = [item for item in volumes if item['destination'] == MOUNTS[service]]
@@ -422,9 +444,10 @@ def start_api(args):
     value, runtime = settings(args.environment)
     assert not any(port_open(p) for p in (8281, 8381))
     assert re.fullmatch(r'[a-f0-9]{40}', args.source_sha) and re.fullmatch(r'[a-z0-9-]{1,30}', args.label)
-    owned = read(ROOT / 'environment.json')['containers']
+    environment_metadata, environment_path, resource_profile = environment(value)
+    owned = environment_metadata['containers']
     for name in PORTS:
-        container(name, owned[name]['id'], True)
+        container(name, owned[name]['id'], True, resource_profile=resource_profile)
     binary = Path(args.binary).resolve()
     info = run(['go', 'version', '-m', str(binary)]).stdout
     assert 'vcs.revision=' + args.source_sha in info and 'vcs.modified=false' in info
@@ -441,6 +464,8 @@ def start_api(args):
                 'creationUnixMs': process.create_time() * 1000, 'createdAtUtc': dt.datetime.fromtimestamp(process.create_time(), dt.timezone.utc).isoformat(),
                 'sourceSha': args.source_sha, 'expectedVersion': current['CAP_READ_EXPECTED_REVISION'],
                 'sha256': hashlib.sha256(binary.read_bytes()).hexdigest(), 'label': args.label,
+                'environmentPath': environment_path.name, 'resourceProfile': resource_profile,
+                'environmentSHA256': hashlib.sha256(environment_path.read_bytes()).hexdigest(),
                 'privateEnvironmentFile': str(private), 'tailEnabledRequested': args.tail,
                 'likeDiagnosticsRequested': args.like_diagnostics}
     save(ROOT / ('api-' + args.label + '.json'), metadata)
@@ -549,9 +574,10 @@ def finish(args):
     metadata = read(metadata_path)
     assert not (runtime / 'cap10-active.private.json').exists(), 'resolve owned stage before cleanup'
     api_identity(metadata, health=True)
-    owned = read(ROOT / 'environment.json')['containers']
+    environment_metadata, environment_path, resource_profile = api_environment(value, metadata)
+    owned = environment_metadata['containers']
     for name in PORTS:
-        container(name, owned[name]['id'], True)
+        container(name, owned[name]['id'], True, resource_profile=resource_profile)
     phase_records = list(ROOT.glob('*-load/warm-process.json')) + list(ROOT.glob('*-load/stable-process.json'))
     for path in phase_records:
         detail = read(path)
@@ -619,11 +645,11 @@ def finish(args):
         assert not any(port_open(p) for p in (8281, 8381))
         checkpoint('owned_api_stopped')
         for name in PORTS:
-            container(name, owned[name]['id'], True)
+            container(name, owned[name]['id'], True, resource_profile=resource_profile)
         run(['docker', 'stop', '--time', '60', *[owned[name]['id'] for name in PORTS]])
         record['containers'] = {}
         for name in PORTS:
-            stopped = container(name, owned[name]['id'], False)
+            stopped = container(name, owned[name]['id'], False, resource_profile=resource_profile)
             # These Java images retain SIGTERM (128 + 15) after docker stop.
             # Other services must still exit zero; never accept OOM or SIGKILL.
             accepted_exit_codes = (0, 143) if name in ('kafka', 'elasticsearch') else (0,)

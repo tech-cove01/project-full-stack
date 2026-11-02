@@ -1484,6 +1484,107 @@ class Checks(unittest.TestCase):
         with self.assertRaises((ValueError, KeyError)):
             self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)
 
+    def formal_start_recovery_fixture(self):
+        directory, api, active, command, previous, terminal = self.authority_warm_fixture()
+        sources = {name: 'c' * 64 for name in ('cap10-pts-prepare.py', 'cap10-jmeter.mjs', 'cap10-jmeter.groovy', 'cap10-pts-contract.groovy')}
+        tools = {**active['scriptHashes'], **{'pts/' + key: value for key, value in sources.items()}}
+        packet = {'version': 1, 'sceneFilesMD5': {'plan': 'frozen'}, 'sourceSHA256': sources, 'manifest': {'scriptSHA256': 'b' * 64}}
+        self.put('linux/packet.json', packet)
+        active.update(scriptHashes=tools, ptsPacketSHA256=grade.sha(directory / 'packet.json'))
+        self.put('linux/active-application.json', active)
+        old_sha = grade.sha(directory / 'active-application.json')
+        self.put('linux/active-applications/' + old_sha + '.json', active)
+        admission = grade.read(directory / 'admission-S7.json'); admission.update(tag='H1', activeApplicationSHA256=old_sha)
+        admission_path = self.put('linux/admission-H1.json', admission)
+        (directory / 'S7-load').rename(directory / 'H1-load')
+        (directory / 'S7-command.json').unlink(); (directory / 'S7-stage.json').unlink()
+        command.update(tag='H1', kind='formal', warmRate=25, warmSeconds=10, freezeSHA256='a' * 64,
+                       scriptHashes=tools, ptsPacketSHA256=active['ptsPacketSHA256'])
+        command['reservationCheck'].update(tag='H1', activeApplicationSHA256=old_sha, admissionSHA256=grade.sha(admission_path))
+        command_path = self.put('linux/H1-command.json', command)
+        previous.update(tag='H1'); stage_path = self.put('linux/H1-stage.json', previous)
+        ref = lambda path: {'path': path.relative_to(directory).as_posix(), 'sha256': grade.sha(path)}
+        terminal.update(tag='H1', originalCommand=ref(command_path), originalStage=ref(stage_path),
+            originalResult=ref(directory / 'H1-load/result.json'), warmProcess=ref(directory / 'H1-load/warm-process.json'),
+            noStablePaths=grade.warm_only_layout(directory, command, previous))
+        terminal['reports'][0]['originalStartAudit'] = ref(directory / 'H1-load/warm-pts/api/one-StartTestingJMeterScene.json')
+        terminal_path = self.put('linux/formal-warm-terminal.json', terminal)
+        reconciliation = grade.read(directory / 'reconcile-before-S8.json'); reconciliation['facts']['events'] = []
+        reconcile_path = self.put('linux/formal-warm-reconcile.json', reconciliation)
+        before_path = self.put('linux/H1-load/warm-before.json', reconciliation['facts'])
+        identity = {'phase': 'warm', 'rate': 25, 'seconds': 10, 'fixtureSHA256': command['fixtureSHA256'], 'scriptSHA256': 'b' * 64}
+        identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode()).hexdigest()
+        zero = {key: 0 for key in ('attempted', 'completed', 'mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')}
+        rows = [{'kind': 'configuration', 'configuration': identity, 'hash': identity_hash},
+                {'kind': 'register', 'engineId': 'one'}, {'kind': 'register', 'engineId': 'two'},
+                {'kind': 'ready'}, {'kind': 'batch', 'records': []}, {'kind': 'complete', 'counts': zero}, {'kind': 'stop'}]
+        journal = directory / 'H1-load/warm-pts/records.ndjson'
+        journal.write_text(''.join(json.dumps(row) + '\n' for row in rows), encoding='utf-8')
+        summary = {**identity, 'hash': identity_hash, 'startUnixMs': None, 'endUnixMs': None,
+                   'stop': True, 'complete': False, 'counts': {'planned': 250, **zero}, 'evidenceSHA256': grade.sha(journal)}
+        summary_path = self.put('linux/H1-load/warm-pts/latest.json', {'summary': summary})
+        active.update(deploymentId='repair2-deployment', ptsPacketPath='packet2.json', ptsAdmissionPath='admission2.json',
+                      scriptHashes={**tools, 'cap10-grade.py': 'f' * 64})
+        self.put('linux/packet2.json', {**packet, 'repair': 2})
+        self.put('linux/admission2.json', {'passed': True, 'sceneFilesMD5': {'plan': 'frozen'}, 'sceneId': 'SCENE'})
+        active.update(ptsPacketSHA256=grade.sha(directory / 'packet2.json'), ptsAdmissionSHA256=grade.sha(directory / 'admission2.json'))
+        self.put('linux/active-application.json', active)
+        context = grade.execution_context(directory)
+        proof = {'version': 1, 'batch': 'CAP-10', 'authorized': True, 'tag': 'H1',
+            'userAuthorizationReference': 'synthetic explicit continue after zero-native warm failure',
+            'recordedAt': (dt.datetime.now(dt.timezone.utc) - dt.timedelta(seconds=1)).isoformat(),
+            'successorActiveApplicationSHA256': context['activeApplicationSHA256'], 'terminal': ref(terminal_path),
+            'reconciliation': ref(reconcile_path), 'nativeJournal': ref(journal), 'nativeSummary': ref(summary_path), 'beforeWarm': ref(before_path)}
+        self.put('linux/formal-start-recovery-H1.json', proof)
+        return directory, api, active, command, proof
+
+    def test_formal_groups_retain_zero_native_H1_then_allow_only_H2_H3_same_new_freeze(self):
+        directory, api, active, old, proof = self.formal_start_recovery_fixture()
+        original = (directory / 'H1-stage.json').read_bytes()
+        context = grade.execution_context(directory)
+        self.assertEqual(grade.formal_start_retirement(directory, old, context)['tag'], 'H1')
+        admission_path = self.authority_admission(directory, 'S7')
+        admission = grade.read(admission_path); admission['termination'] = proof['terminal']
+        self.put('linux/admission-S7.json', admission)
+        first = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api, current_tools=active['scriptHashes'])
+        self.authority_add(directory, 'S7', 'candidate', 800, first, active)
+        context = grade.execution_context(directory)
+        freeze = {**active, 'rate': 800, 'candidateTag': 'S7', 'sourceCIPassed': True, 'relatedChecksPassed': True,
+            'initialDistributionContract': {'existing': 512, 'active': 0, 'relationships': 512},
+            'executionAuthoritySHA256': context['authoritySHA256'], 'activeApplicationSHA256': context['activeApplicationSHA256']}
+        self.put('freeze-like.json', freeze); self.put('linux/freeze-like.json', freeze)
+        for tag in ('H2', 'H3'):
+            self.authority_admission(directory, tag)
+            reserved = self.reserve('formal', 800, source=self.other, freeze=freeze, execution_root=directory, api=api, current_tools=active['scriptHashes'])
+            self.assertEqual(reserved['tag'], tag)
+            command = self.authority_add(directory, tag, 'formal', 800, reserved, active)
+            command['freezeSHA256'] = grade.sha(directory / 'freeze-like.json'); self.put('linux/' + tag + '-command.json', command)
+        self.authority_admission(directory, 'H4')
+        with self.assertRaises(ValueError):
+            self.reserve('formal', 800, source=self.other, freeze=freeze, execution_root=directory, api=api, current_tools=active['scriptHashes'])
+        self.assertEqual((directory / 'H1-stage.json').read_bytes(), original)
+
+    def test_formal_start_retirement_rejects_stable_native_HTTP_or_changed_facts(self):
+        directory, api, active, old, proof = self.formal_start_recovery_fixture()
+        context = grade.execution_context(directory)
+        path = self.put('linux/H1-load/stable-process.json', {})
+        with self.assertRaises(ValueError): grade.formal_start_retirement(directory, old, context)
+        path.unlink()
+        for key, mutate in (('nativeSummary', lambda value: value['summary'].update(startUnixMs=1)),
+                            ('nativeSummary', lambda value: value['summary']['counts'].update(attempted=1)),
+                            ('reconciliation', lambda value: value['facts'].update(eventCount=1))):
+            path = directory / proof[key]['path']; original = path.read_bytes()
+            value = json.loads(original); mutate(value); path.write_text(json.dumps(value), encoding='utf-8')
+            bad = {**proof, key: {**proof[key], 'sha256': grade.sha(path)}}; self.put('linux/formal-start-recovery-H1.json', bad)
+            with self.assertRaises(ValueError): grade.formal_start_retirement(directory, old, context)
+            path.write_bytes(original)
+        self.put('linux/formal-start-recovery-H1.json', proof)
+        journal = directory / proof['nativeJournal']['path']; original = journal.read_bytes()
+        journal.write_bytes(original + b'{"kind":"barrier"}\n')
+        bad = {**proof, 'nativeJournal': {**proof['nativeJournal'], 'sha256': grade.sha(journal)}}
+        self.put('linux/formal-start-recovery-H1.json', bad)
+        with self.assertRaises(ValueError): grade.formal_start_retirement(directory, old, context)
+
     def test_authority_formal_still_requires_exact_candidate_and_stops_after_first_failure(self):
         directory, api, active = self.authority_fixture()
         reservation = self.reserve('candidate', 800, source=self.other, execution_root=directory, api=api)

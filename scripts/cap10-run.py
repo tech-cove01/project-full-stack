@@ -73,6 +73,27 @@ def observer_terminal_outcome(exit_code, summary, done):
     return 'recovery_limited'
 
 
+def pts_artifact_paths(value, context, repaired):
+    """Explicit replacement files must belong to the exact current deployment."""
+    selected = []
+    for variable, field, default in (
+        ('CAP10_PTS_PACKET_FILE', 'ptsPacketPath', 'pts-packet-repair1.json' if repaired else 'pts-packet.json'),
+        ('CAP10_PTS_ADMISSION_FILE', 'ptsAdmissionPath', 'pts-scene-admission-repair1.json' if repaired else 'pts-scene-admission.json')):
+        explicit = value.get(variable)
+        raw = Path(explicit) if explicit else Path(default)
+        assert '..' not in raw.parts
+        path = raw if raw.is_absolute() else ROOT / raw
+        assert path.is_file() and not path.is_symlink() and path.resolve() == path and path.is_relative_to(ROOT)
+        if explicit:
+            assert context is not None, 'replacement PTS artifacts require the current application authority'
+        if context is not None:
+            active = context['active']
+            digest_key = 'ptsPacketSHA256' if field == 'ptsPacketPath' else 'ptsAdmissionSHA256'
+            assert path.relative_to(ROOT).as_posix() == active[field] and sha(path) == active[digest_key]
+        selected.append(path)
+    return tuple(selected)
+
+
 def reserve(args, api, value):
     grade = module('cap10_reservation_grade', 'cap10-grade.py')
     for path in (args.preflight, args.ability, args.prediction):
@@ -82,8 +103,8 @@ def reserve(args, api, value):
     if value.get('CAP10_LOAD_BACKEND') == 'pts':
         repair_path = ROOT / 'tool-repair-transition.json'
         repaired = repair_path.exists()
-        packet_path = ROOT / ('pts-packet-repair1.json' if repaired else 'pts-packet.json')
-        admission_path = ROOT / ('pts-scene-admission-repair1.json' if repaired else 'pts-scene-admission.json')
+        context = grade.execution_context(ROOT)
+        packet_path, admission_path = pts_artifact_paths(value, context, repaired)
         admission = owned.read(admission_path)
         configuration = owned.read(value['CAP10_PTS_CONFIG'])
         preparation = module('cap10_pts_admission_contract', 'pts/cap10-pts-prepare.py')
@@ -94,9 +115,11 @@ def reserve(args, api, value):
         pts_identity = {'loadBackend': 'pts', 'ptsPacketSHA256': sha(packet_path),
                         'ptsAdmissionSHA256': sha(admission_path)}
         for prior in grade.history(ROOT):
+            if context and prior.get('reservationCheck', {}).get('activeApplicationSHA256') != context['activeApplicationSHA256']:
+                continue  # Earlier deployments retain their own immutable bundle.
             if repaired and prior['tag'] in ('S1', 'S2', 'S3', 'S4'):
                 continue  # The grade validates the retained old/new transition.
-            assert all(prior.get(key) == digest for key, digest in pts_identity.items()), 'same PTS packet/admission must cover the entire batch'
+            assert all(prior.get(key) == digest for key, digest in pts_identity.items()), 'same active deployment requires one PTS packet/admission'
     freeze_path = ROOT / 'freeze-like.json'
     freeze = owned.read(freeze_path) if args.kind == 'formal' else None
     if freeze is not None and value.get('CAP10_LOAD_BACKEND') == 'pts':
@@ -131,6 +154,8 @@ def reserve(args, api, value):
     if command['loadBackend'] == 'pts':
         command['ptsPacketSHA256'] = pts_identity['ptsPacketSHA256']
         command['ptsAdmissionSHA256'] = pts_identity['ptsAdmissionSHA256']
+        command['ptsPacketPath'] = packet_path.relative_to(ROOT).as_posix()
+        command['ptsAdmissionPath'] = admission_path.relative_to(ROOT).as_posix()
     owned.save(ROOT / ('slot-' + tag + '.json'), command)
     owned.save(ROOT / (tag + '-command.json'), command)
     return command
@@ -353,7 +378,7 @@ def main():
     grade = module('cap10_native_downstream_grade', 'cap10-grade.py')
     value, runtime = owned.settings(args.environment)
     pts = value.get('CAP10_LOAD_BACKEND') == 'pts'
-    stage_deadline = '600' if pts else '360'
+    stage_deadline = '1200' if pts else '360'
     api = owned.read(args.api_metadata); owned.api_identity(api, health=True)
     assert value['CAP_SOURCE_SHA'] == api['sourceSha']
     assert api['tailEnabledRequested'] is False

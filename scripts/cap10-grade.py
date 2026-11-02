@@ -415,6 +415,13 @@ def execution_context(root):
     for relative in ('environment-transition.json', 'continuation-authorization.json', 'idle-retry-3-authorization.json', 'idle-retry-4-authorization.json', 'linux/pre-load-recovery.json', 'linux/pre-load-recovery-proof.json', 'linux/tool-repair-transition.json', 'linux/S5-optimization-proof.json'):
         original = ROOT / relative
         require(not original.exists() or retained.get(relative) == sha(original), 'existing recovery and optimization proofs must remain retained')
+    original_repair = Path(root) / 'tool-repair-transition.json'
+    if original_repair.is_file():
+        repaired = read(original_repair)
+        for identity, names in ((repaired['oldIdentity'], ('pts-packet.json', 'pts-scene-admission.json')),
+                                (repaired['newIdentity'], ('pts-packet-repair1.json', 'pts-scene-admission-repair1.json'))):
+            for key, filename in zip(('ptsPacketSHA256', 'ptsAdmissionSHA256'), names):
+                _authority_ref(root, {'path': filename, 'sha256': identity[key]})
     for command in records[len(tags):]:
         reservation = command.get('reservationCheck', {})
         require(reservation.get('executionAuthoritySHA256') == digest and reservation.get('executionAuthorityGeneration') == authority['generation'] and instant(command['at']) >= registered, 'new reservations must bind the fixed execution authority')
@@ -578,7 +585,7 @@ def authority_warm_only(root, command, previous, terminal, context):
         require(key not in ('originalCommand', 'originalStage') or value == (command if key == 'originalCommand' else previous), 'warm-only original bytes differ')
     process = _authority_ref(root, terminal['warmProcess'])
     require(terminal['warmProcess']['path'] == command['tag'] + '-load/warm-process.json', 'warm process must be its original marker')
-    if missing:
+    if missing or any(owner.get('pid') == process['controller_pid'] for owner in previous.get('knownOwnedProcesses', [])):
         # Node records its spawn wall clock in the marker. Only the registered
         # psutil birth time identifies this exact controller process.
         registered = [owner for owner in previous['knownOwnedProcesses'] if owner.get('pid') == process['controller_pid']]
@@ -725,6 +732,77 @@ def authority_search_state(root, context):
             'boundaryTags': [c['tag'] for c, s in relevant if s.get('outcome') == 'pass' and s.get('passed') is True or s.get('outcome') == 'performance_limited' and s.get('boundaryEligible') is True]}
 
 
+def formal_start_retirement(root, command, context):
+    """Retire only a failed warm that never reached any native/stable offer."""
+    root = Path(root); tag = command['tag']; old_stage = stage(root, command)
+    path = root / ('formal-start-recovery-' + tag + '.json'); proof = read(path)
+    require(command.get('kind') == 'formal' and tag.startswith('H') and old_stage.get('passed') is False
+            and proof.get('version') == 1 and proof.get('batch') == 'CAP-10' and proof.get('authorized') is True
+            and proof.get('tag') == tag and isinstance(proof.get('userAuthorizationReference'), str) and proof['userAuthorizationReference'].strip()
+            and proof.get('successorActiveApplicationSHA256') == context['activeApplicationSHA256']
+            and proof['successorActiveApplicationSHA256'] != command.get('reservationCheck', {}).get('activeApplicationSHA256'),
+            'only an explicitly proved zero-native warm failure may precede a different formal freeze')
+    recorded = instant(proof['recordedAt'])
+    require(instant(old_stage['finishedAt']) <= recorded <= dt.datetime.now(dt.timezone.utc), 'formal-start proof chronology differs')
+    old_sha = command['reservationCheck']['activeApplicationSHA256']
+    old_active = _authority_ref(root, {'path': 'active-applications/' + old_sha + '.json', 'sha256': old_sha})
+    require(old_active.get('sourceSha') == command.get('apiSourceSha') and all(old_active.get(key) == command.get(key)
+            for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')),
+            'retired warm must retain its own original application and bundle')
+    terminal = _authority_ref(root, proof['terminal']); owners = terminal.get('owners', [])
+    expected = {(item['pid'], item['created']) for item in old_stage.get('knownOwnedProcesses', [])}
+    require(terminal.get('tag') == tag and terminal.get('terminationKind') == 'warm_only'
+            and all(terminal.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive'))
+            and expected and expected <= {(item.get('pid'), item.get('created')) for item in owners}
+            and all(item.get('alive') is False and item.get('identityChecked') is True for item in owners), 'retired warm requires every exact original owner stopped')
+    authority_warm_only(root, command, old_stage, terminal, {**context, 'active': old_active})
+    prefix = tag + '-load/warm-pts/'
+    journal_ref = proof['nativeJournal']; journal_path = root / journal_ref['path']
+    require(journal_ref['path'] == prefix + 'records.ndjson' and journal_path.is_file() and not journal_path.is_symlink()
+            and journal_path.resolve() == journal_path and journal_ref.get('sha256') == sha(journal_path), 'retired warm must retain its original full journal')
+    journal = [json.loads(line) for line in journal_path.read_bytes().splitlines()]
+    allowed = {'configuration', 'register', 'ready', 'batch', 'complete', 'stop'}
+    require(journal and journal[0].get('kind') == 'configuration'
+            and sum(row.get('kind') == 'configuration' for row in journal) == 1
+            and all(row.get('kind') in allowed for row in journal)
+            and all(row.get('records') == [] for row in journal if row.get('kind') == 'batch'),
+            'any barrier, native HTTP or unknown journal frame forbids retiring a formal start')
+    zero = ('attempted', 'completed', 'mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')
+    require(all(all(type(row.get('counts', {}).get(key)) is int and row['counts'][key] == 0 for key in zero)
+                for row in journal if row.get('kind') == 'complete'), 'retired warm completion must prove zero offers')
+    identity = journal[0]['configuration']
+    identity_hash = hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False).encode()).hexdigest()
+    packet = _authority_ref(root, {'path': old_active['ptsPacketPath'], 'sha256': command['ptsPacketSHA256']})
+    sources = packet.get('sourceSHA256', {})
+    require(set(sources) == {'cap10-pts-prepare.py', 'cap10-jmeter.mjs', 'cap10-jmeter.groovy', 'cap10-pts-contract.groovy'}
+            and all(digest == command['scriptHashes'].get('pts/' + name) for name, digest in sources.items())
+            and packet.get('manifest', {}).get('scriptSHA256') == identity.get('scriptSHA256'), 'retired warm bundle identity differs')
+    summary_ref = proof['nativeSummary']; data = _authority_ref(root, summary_ref); summary = data.get('summary', data)
+    require(summary_ref['path'] in (prefix + 'latest.json', prefix + 'collector-terminal.json')
+            and journal[0].get('hash') == identity_hash == summary.get('hash')
+            and all(summary.get(key) == value for key, value in identity.items())
+            and identity.get('phase') == 'warm' and identity.get('fixtureSHA256') == command['fixtureSHA256']
+            and identity.get('rate') == command['warmRate'] and identity.get('seconds') == command['warmSeconds']
+            and summary.get('startUnixMs') is None and summary.get('endUnixMs') is None
+            and summary.get('stop') is True and summary.get('complete') is False
+            and summary.get('evidenceSHA256') == journal_ref['sha256']
+            and all(type(summary.get('counts', {}).get(key)) is int and summary['counts'][key] == 0 for key in zero),
+            'retired warm summary must prove no native start or request, never a passed native window')
+    before_ref = proof['beforeWarm']; before = _authority_ref(root, before_ref)
+    reconciliation = _authority_ref(root, proof['reconciliation']); facts = reconciliation.get('facts', {}); derived = reconciliation.get('derived', {})
+    timeline = reconciliation.get('timeline', [])
+    require(before_ref['path'] == tag + '-load/warm-before.json' and reconciliation.get('valid') is True
+            and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == []
+            and len(before.get('facts', [])) == len(before.get('notes', [])) == 512
+            and all(key in before and before[key] == facts.get(key) for key in ('facts', 'notes', 'events', 'transitions', 'eventCount'))
+            and derived.get('available') is True and derived.get('errors') == [] and len(derived.get('notes', [])) == 512
+            and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == []
+            and instant(old_stage['finishedAt']).timestamp() * 1000 <= reconciliation.get('startedAt', 0)
+            <= reconciliation.get('finishedAt', 0) <= recorded.timestamp() * 1000,
+            'retired formal warm requires full fresh reconciliation with unchanged authoritative facts and events')
+    return {'tag': tag, 'proofSHA256': sha(path), 'originalFreezeSHA256': command.get('freezeSHA256')}
+
+
 def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ability, freeze, tools, observer_hash, context):
     active, records = context['active'], history(root)
     require(api.get('sourceSha') == active['sourceSha'] and api.get('sha256') == active['binarySHA256'] and sha(fixture) == active['fixtureSHA256'] and tools == active['scriptHashes'] and observer_hash == active['observerBinarySHA256'], 'window must use the current exact active application and tools')
@@ -766,12 +844,19 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
         require(reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and derived.get('available') is True and derived.get('errors') == [] and len(facts.get('facts', [])) == len(facts.get('notes', [])) == len(derived.get('notes', [])) == 512 and facts.get('transitions') == facts.get('eventCount') and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == [] and reconciliation.get('finishedAt', float('inf')) / 1000 <= admitted.timestamp(), 'fresh complete authoritative reconciliation required before continuing')
         if previous and old_stage.get('passed') is not True:
             require(reconciliation.get('startedAt', 0) / 1000 >= instant(old_stage['finishedAt']).timestamp(), 'failed window requires later reconciliation, without rewriting its old recovery result')
+    formal_group, retired = [], {}
+    freeze_sha = sha(Path(root) / 'freeze-like.json') if kind == 'formal' else None
     if kind == 'formal':
-        require(len(formals) < 2 and all(stage(root, c).get('passed') is True for c in formals), 'only the original two-formal group is supported; first formal failure ends it')
+        formal_group = [c for c in formals if c.get('freezeSHA256') == freeze_sha]
+        for command in formals:
+            if command not in formal_group:
+                item = formal_start_retirement(root, command, context)
+                retired[item['tag']] = item['proofSHA256']
+        require(len(formal_group) < 2 and all(stage(root, c).get('passed') is True for c in formal_group), 'each exact freeze permits only two formal windows; its first failure ends that group')
         require(isinstance(freeze, dict) and freeze.get('executionAuthoritySHA256') == context['authoritySHA256'] and freeze.get('activeApplicationSHA256') == context['activeApplicationSHA256'] and freeze.get('deploymentId') == active['deploymentId'] and freeze.get('rate') == rate and freeze.get('sourceSha') == active['sourceSha'] and all(freeze.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': 512, 'active': 0, 'relationships': 512}, 'formal requires one exact current-source CI/identity freeze')
         candidates = [c for c in records if c['tag'] == freeze.get('candidateTag') and c['kind'] == 'candidate' and c['rate'] == rate and _active_command(c, context)]
         require(len(candidates) == 1 and stage(root, candidates[0]).get('passed') is True and stage(root, candidates[0]).get('candidateMarginPassed') is True and stage(root, candidates[0]).get('recoveryVerified') is True, 'formal requires its completed passing current-identity candidate')
-        require(all(_active_command(c, context) and c.get('freezeSHA256') == sha(Path(root) / 'freeze-like.json') for c in formals), 'both formals must retain the same application and freeze')
+        require(all(_active_command(c, context) and c.get('reservationCheck', {}).get('retiredFormalStarts', {}) == retired for c in formal_group), 'both current-group formals must retain the same application/freeze and unchanged startup proofs')
     transition = read(ROOT / 'environment-transition.json'); anchor = instant(transition['recordedAt']); now = dt.datetime.now(dt.timezone.utc)
     intervals = [(s['loadWaitStartedAt'], s['loadWaitFinishedAt']) for c in records for s in [stage(root, c)] if s.get('loadWaitStartedAt') and s.get('loadWaitFinishedAt')]
     deducted = merged_wait_seconds(intervals, anchor, now); used = transition['effectiveWorkSecondsUsedBeforeSwitch']
@@ -782,7 +867,9 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
               'executionAuthorityGeneration': context['authority']['generation'],
               'originalMaximumSeconds': 10800, 'maximumSeconds': None, 'remainingSeconds': None, 'workflowLimitsWaived': True}
     return {'tag': tag, 'shortSlotsUsedAfter': len(shorts) + (kind != 'formal'), 'formalSlotsUsedAfter': len(formals) + (kind == 'formal'),
-            'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds, 'shortMaximum': None, 'formalMaximum': 2,
+            'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds, 'shortMaximum': None, 'formalMaximum': None,
+            'formalMaximumPerFreeze': 2, 'formalGroupSHA256': freeze_sha,
+            'formalGroupSlotsUsedAfter': len(formal_group) + (kind == 'formal'), 'retiredFormalStarts': retired,
             'mainSecondsMaximum': None, 'S8ReservedForCandidate': False, 'effectiveWorkBudget': budget,
             'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'executionAuthoritySHA256': context['authoritySHA256'],
             'executionAuthorityGeneration': context['authority']['generation'], 'deploymentId': active['deploymentId'],

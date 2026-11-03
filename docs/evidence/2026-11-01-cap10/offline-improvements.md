@@ -132,6 +132,24 @@ OBS-V2首个真实矩阵使用独立IT空库、同一1CPU/4GiB/2GiB资源，5顶
 
 该精确`8d580b9`的[四项远端CI](https://github.com/tech-cove01/project-full-stack/actions/runs/41505690255)均成功；实际CI响应另行保存SHA256=`a4fd18363775775cb840da88267ff19f6caa1dacf00a25b08bbd5e9ca125573a`。不回写构建时尚未取得CI的manifest。此处observer是原扫描版，后续新观测工具必须另取干净源码构建、重新绑定，不能把这个二进制当like-vector-v1。
 
+### 批量认领、完整审计与跨语言接线收口
+
+`bd35e2b1b3b464d312790259b60fe6b458a4e645`保留原RC/byte前缀/停车截止与attempt fence，以按主键驱动的有界点更新合并lease写入。真实32条正常认领从32次UPDATE降为1次multi UPDATE，混合停车2次；prepare/execute/close从各33次降为2或3，显式插值时双方均0，SELECT/COMMIT仍各1。10项真实功能、24个实际EXPLAIN、独立1顶层/8子例协议计数通过；首轮harness漏计Com_update_multi的FAIL保留。935条有限事件精确清理，原历史/配置不变、自有服务正常停；不是吞吐成绩。闭合224件manifest=`a11690003d63fbd5a2935512e5acce7c0fc1153d60f0a9f4a43971e3c88ca370`。
+
+`15f8eb558498455b033e193182e4394cec75f591`交[严格完整审计](full-audit-plan.md)。实际生产Decode的32项可存储身份/hash、12项收据反例、5源/4组聚合及3计划通过；1055分组FAIL与JSON字段顺序解析FAIL均保留，后者只解析原raw。唯一1225500源/三组收据完整RR查询106077.0271ms、Exit0/无timeout/完整COMMIT，符合单次120秒；该历史造数共3676500个hash不匹配且缺笔记/事实，业务对账失败、无Redis或新QPS。104件闭合manifest=`9701a337c197217d7a6050e395d5d0596a9465fcb5d34348abeb1d1d4475f90d`。后续累计200万以上历史仍有预算风险，不能按8CPU外推SQL8倍。
+
+`743686f`的实际N2互通：原Node提取snapshot/factErrors/derived/reconcile，真实MySQL/Redis生产Mark Lua得到E2完整基线；原Go源fresh RR factory接受NULL/非NULL控制行和present v0，受控改变事实后拒绝旧基线并恢复。两源/六收据/两事实与笔记、三控制值、四初始不存在的Redis键精确恢复，自有服务正常停。151件manifest=`823b862408ec94fc84aeb25359b61abac5900cadc21fb3a6ac81d2fdbc869ea5`。未运行Node/observer main、Kafka、API或PTS，不冒称整段阶段验证。
+
+`5c6c8e5`仅在完整SQL/Kafka样本Accept成功后发布同RR事实/控制摘要，未增加SQL；7项新顶层/11子例、总36顶层/89子例race/vet/Linux及独审通过。`e53534f33b368bb26e246ae0f0cc5ac2e48395fe`交[阶段去重](phase-audit-plan.md)：原基线/新鲜轻读/单条接受样本绑定，原生恢复后最多一次完整终审；不以反复全史扫描拖入setup60，不改原时间或正确性标准。10新阶段/10审计/39原Node、9文件绑定/71runner检查通过。首版k6时间入口、PID登记及纳秒截断发现已修复留档；原39VM上下文漏自由变量的FAIL保留后仅补上下文，未改原断言。旧“legacy SQL字面SHA”提取标签不准亦单独更正，完整legacy SQL实际SHA=`c8d0ff84604c7523fcaee21e1cd55440d1d82ad57f8731db46d35302aa7329cb`，新旧全文相同；不改旧原件。
+
+### Done候选暂缓与最终候选产物
+
+Done点更新候选完成24个实际计划、7顶层/37子例、638条有限事件及28个旧/新组件观察。较大批次减少SQL，但部分小批次变慢；每case仅一次观察，不给统计倍率或稳定阈值。用户明确暂不实施分档，公共六文件草稿已逐字归档、原生产文件精确恢复HEAD，未采纳到API。草稿patch SHA=`807ee059ca1c6f4f8fc7126499eac944c6c5f01efc36f5f858727f340843e882`，151件真实闭合manifest=`258358edf5c20674252600197f89b05a4d11b83193bc87a9c0ad4415bbe626ac`；不抹去研究，也不当已交付收益。
+
+新的可用Linux API来自干净15f8eb5，实际ELF完整40位capacity版本已核，SHA=`f29fe6a9c76d54a5ddd1cbd8b3ae143c53a4d348176b1a98bd7b7291949b4499`，manifest=`342d410777cdf4fa5b9b7d28299a5e618259fa968438de59ab2ca17bcf9178e2`；首次短7位版本产物已拒绝存档，不能混用。新observer来自干净5c6c8e5，SHA=`3fc4631973775a68878e4e00af8de5a3f5d7a6ef5e222319a53b4b1642591b28`，单文件无内嵌VCS，绑定原Go源SHA=`1e79e3d4d6d54bdde4d77e0005568e295f825f1c8b7cf6f5df31c1f8eac407f9`及相同go.mod/sum。observer manifest=`3dbba23de51cc524f36ad98f9dc7f46a55ed797bb11f31b03d7f68a38df2db15`捕获时CI仍pending，随后完成证明另存=`eb0262ee7363ad1093b675e05bf91235a611a7996428b30177068fd70934c7f8`，不改旧pending。
+
+API15f与observer5c6各自[精确API CI](https://github.com/tech-cove01/project-full-stack/actions/runs/41576389620)、[精确observer CI](https://github.com/tech-cove01/project-full-stack/actions/runs/41577337428)四项成功。两份产物只读校验、未部署；工具HEAD/脚本、API源码和observer源分别绑定。私有配置、夹具/包准备、参数组装、执行与双夹具清理已有直接离线检查，真实资源/进程/空载/9引擎/逐窗准入仍待同一ECS恢复后执行。接续步骤与开机前风险见[清单](offline-resume-checklist.md)，不自动新增功能或负载批次。
+
 ## 原件存档
 
 闭合S1–S19、失败H1及repair2静态材料共2202件、147402850原始字节；14.6MB私有归档已下载并逐成员核验，SHA256：`4a6ebbb7d37cd15884bd3124b1759288f067189647f867edd264a1cf54a6c4fa`。不公开凭据、云账号标识、网络地址或真实私有输入。

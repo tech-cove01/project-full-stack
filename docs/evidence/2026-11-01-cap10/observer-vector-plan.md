@@ -1,6 +1,6 @@
 # CAP-10：事实版本增量观测与完整审计
 
-2026-11-03。任务状态见根[STATUS](../../../STATUS.md)，失败与收益见[改动档案](offline-improvements.md)。本票解决大历史数据让观测器反复扫描的问题，不改变点赞业务、持久化、ACK或容量判定。纯记账引擎和有界SQL适配已交，窗口接线与独立完整审计仍在验证，不能据此恢复云机或宣布5000准备通过。
+2026-11-03。任务状态见根[STATUS](../../../STATUS.md)，失败与收益见[改动档案](offline-improvements.md)。本票解决大历史数据让观测器反复扫描的问题，不改变点赞业务、持久化、ACK或容量判定。纯记账、有界SQL、逐窗绑定、严格完整审计和阶段去重已交，真实N2互通与组件验证通过；完整云端阶段和容量尚未验证，按[接续清单](offline-resume-checklist.md)执行，不自动恢复实例。
 
 ## 依据与边界
 
@@ -29,7 +29,8 @@
 | OBS-BIND | 预约、命令、API/active/formal freeze及ready须匹配同一固定方法/预算；vector不得借旧缺字段元数据 | 89项策略、71项runner检查及独审通过；旧observer在vector ready门前拒，仍未启用新SQL/main |
 | AUDIT-V1b | 实际完整SQL与严格源/hash/未知projection校验 | 实际32/12/4组与3计划通过，完整1225500源审计106.077秒<120；造数hash无效且缺事实，非业务对账通过；[小票](full-audit-plan.md)，旧FAIL保留 |
 | OBS-PY-AUDIT | 本窗原admission/reconcile SHA→CLI/ready/summary→最终完整审计E+delta绑定，保留原恢复门槛 | `44f05c0`，9项文件绑定/89策略/71runner检查及独审通过；[规格](observer-audit-binding-plan.md)，无native互通或容量声明 |
-| OBS-SAMPLE-DIGEST | 同RR精确事实/控制摘要仅在整个样本Accept成功后发布，供阶段轻读绑定 | 7新顶层/11子例、含原检查的36顶层/89子例race/vet/Linux构建及三方独审通过，零新SQL；[小票](observer-sample-digest-plan.md)，Node阶段去重仍待接线 |
+| OBS-SAMPLE-DIGEST | 同RR精确事实/控制摘要仅在整个样本Accept成功后发布，供阶段轻读绑定 | `5c6c8e5`，7新顶层/11子例、含原检查的36顶层/89子例race/vet/Linux构建及三方独审、精确CI通过，零新SQL；[小票](observer-sample-digest-plan.md) |
+| PHASE-AUDIT-DEDUP | 原逐窗完整基线+中间轻量事实/控制+同一接受样本绑定，原生恢复后最多一次完整终审 | `e53534f`，10阶段/10完整审计/39原Node、9文件绑定/71runner检查及独审通过；[小票](phase-audit-plan.md)，完整真实阶段仍待云准入 |
 | OBS-WIRE | Go显式模式、逐窗原审计/事实/控制fresh RR绑定，完整SQL/Kafka样本成功才推进，监督关闭 | Go29顶层/78子例纯检查、race/vet/Linux构建及独审通过；真实N2 SQL/Redis→Go factory互通通过，NULL/非NULL控制行、present v0及stale拒绝后精确恢复；尚未运行真实observer main或PTS |
 
 基线和终审SHA、事实向量摘要是逐窗引用；mode、工具、固定预算属于整个freeze。工具SQL/query/事件/逻辑字节与真实进程资源分别报告，逻辑上限不是RSS。没有上述接线和真实验证时，不把纯引擎、交叉编译或本机SQLprobe记成PTS或业务容量通过。
@@ -40,4 +41,4 @@
 
 真实本机独立IT使用N2/E2：一个inactive v2配对有两条生产Decode规范源与三组各两条准确收据，另一配对明确present v0；实际Node提取原snapshot/factErrors/derived/reconcile函数并读真实Redis生产Mark Lua结果，完整对账valid/factsValid/converged、errors均通过。Go精确原源读取该原件，fresh RR factory接受，受控改变v0事实后拒绝旧基线，再精确恢复。NULL与非NULL DATETIME(3)控制值按六位小数互通，未改数据库时区或持久化。
 
-该用例没有调用固定端口的Node main、Go observer main、Kafka、API或PTS；不能把局部真实工厂互通称为完整容量接线已通过。两条源、六条收据、笔记/事实、三个原控制值及四个最初不存在的Redis键均已精确清理/恢复，自有MySQL/Redis正常停止、卷与其它服务保留。accepted-sample摘要已交，去掉阶段重复扫描仍是后续必要收尾，不因本票通过跳过。
+该用例没有调用固定端口的Node main、Go observer main、Kafka、API或PTS；不能把局部真实工厂互通称为完整容量接线已通过。两条源、六条收据、笔记/事实、三个原控制值及四个最初不存在的Redis键均已精确清理/恢复，自有MySQL/Redis正常停止、卷与其它服务保留。accepted-sample摘要与阶段扫描去重已另票交付，原4/3/5秒和setup/恢复60秒保持；不因组件通过跳过真实云准入。

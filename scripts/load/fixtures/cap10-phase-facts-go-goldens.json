@@ -1,0 +1,215 @@
+{
+  "acceptedSampleProduced": false,
+  "capacityProof": false,
+  "cases": [
+    {
+      "controlCanonicalJSON": [
+        "{\"Projection\":\"follow-v1\",\"RebuiltAt\":{\"String\":\"\",\"Valid\":false}}",
+        "{\"Projection\":\"feed-v1\",\"RebuiltAt\":{\"String\":\"2026-11-03 12:30:01.123456\",\"Valid\":true}}",
+        "{\"Name\":\"search-v1\",\"IndexAlias\":\"notes\",\"ActiveGeneration\":\"notes-current\",\"RebuiltAt\":{\"String\":\"2026-11-03 12:30:02.000000\",\"Valid\":true}}"
+      ],
+      "controlInnerSHA256": [
+        "9940a92c848e128ed5092c407130aea0944a1442425848e6e94819cf7443ef8e",
+        "1584d1a2bbc4b499452e74280fe59c147c07983552411e921a85ad7c75a7a7d2",
+        "469363a22e5e0db63c27da1cee1a76b349fa218787b108a0d946537f77578da8"
+      ],
+      "controlRows": {
+        "projections": [
+          {
+            "projection": "follow-v1",
+            "rebuiltAt": null
+          },
+          {
+            "projection": "feed-v1",
+            "rebuiltAt": "2026-11-03 12:30:01.123456"
+          }
+        ],
+        "search": {
+          "name": "search-v1",
+          "indexAlias": "notes",
+          "activeGeneration": "notes-current",
+          "rebuiltAt": "2026-11-03 12:30:02.000000"
+        }
+      },
+      "controlsCanonicalJSON": "[\"9940a92c848e128ed5092c407130aea0944a1442425848e6e94819cf7443ef8e\",\"1584d1a2bbc4b499452e74280fe59c147c07983552411e921a85ad7c75a7a7d2\",\"469363a22e5e0db63c27da1cee1a76b349fa218787b108a0d946537f77578da8\"]",
+      "controlsSHA256": "3fc537e3bd53c443fade83dcb43da20ec92606c02e3687c20b9eb635dfd9b812",
+      "factCanonicalJSON": "[{\"noteId\":\"101\",\"userId\":\"1\",\"present\":true,\"version\":2,\"active\":0},{\"noteId\":\"102\",\"userId\":\"2\",\"present\":true,\"version\":0,\"active\":0}]",
+      "factVectorSHA256": "a2771e7accea38676cae9c590242b7303e4276bcaa1b75830883e103f8c3e219",
+      "facts": [
+        {
+          "noteId": "101",
+          "userId": "1",
+          "present": true,
+          "version": 2,
+          "active": 0
+        },
+        {
+          "noteId": "102",
+          "userId": "2",
+          "present": true,
+          "version": 0,
+          "active": 0
+        }
+      ],
+      "name": "original-independent-node-input"
+    },
+    {
+      "controlCanonicalJSON": [
+        "{\"Projection\":\"follow-v1\",\"RebuiltAt\":{\"String\":\"\",\"Valid\":false}}",
+        "{\"Projection\":\"feed-v1\",\"RebuiltAt\":{\"String\":\"2026-11-03 12:30:01.123456\",\"Valid\":true}}",
+        "{\"Name\":\"search-v1\",\"IndexAlias\":\"notes\",\"ActiveGeneration\":\"notes-current\",\"RebuiltAt\":{\"String\":\"2026-11-03 12:30:02.000000\",\"Valid\":true}}"
+      ],
+      "controlInnerSHA256": [
+        "9940a92c848e128ed5092c407130aea0944a1442425848e6e94819cf7443ef8e",
+        "1584d1a2bbc4b499452e74280fe59c147c07983552411e921a85ad7c75a7a7d2",
+        "469363a22e5e0db63c27da1cee1a76b349fa218787b108a0d946537f77578da8"
+      ],
+      "controlRows": {
+        "projections": [
+          {
+            "projection": "follow-v1",
+            "rebuiltAt": null
+          },
+          {
+            "projection": "feed-v1",
+            "rebuiltAt": "2026-11-03 12:30:01.123456"
+          }
+        ],
+        "search": {
+          "name": "search-v1",
+          "indexAlias": "notes",
+          "activeGeneration": "notes-current",
+          "rebuiltAt": "2026-11-03 12:30:02.000000"
+        }
+      },
+      "controlsCanonicalJSON": "[\"9940a92c848e128ed5092c407130aea0944a1442425848e6e94819cf7443ef8e\",\"1584d1a2bbc4b499452e74280fe59c147c07983552411e921a85ad7c75a7a7d2\",\"469363a22e5e0db63c27da1cee1a76b349fa218787b108a0d946537f77578da8\"]",
+      "controlsSHA256": "3fc537e3bd53c443fade83dcb43da20ec92606c02e3687c20b9eb635dfd9b812",
+      "factCanonicalJSON": "[{\"noteId\":\"101\",\"userId\":\"1\",\"present\":true,\"version\":0,\"active\":0},{\"noteId\":\"102\",\"userId\":\"2\",\"present\":true,\"version\":2,\"active\":0}]",
+      "factVectorSHA256": "af3ee623ac1bbd7192269a33bba78eccc83975e180fff1153d943945f2617e77",
+      "facts": [
+        {
+          "noteId": "101",
+          "userId": "1",
+          "present": true,
+          "version": 0,
+          "active": 0
+        },
+        {
+          "noteId": "102",
+          "userId": "2",
+          "present": true,
+          "version": 2,
+          "active": 0
+        }
+      ],
+      "name": "same-totals-swapped-pairs"
+    },
+    {
+      "controlCanonicalJSON": [
+        "{\"Projection\":\"follow-v1\",\"RebuiltAt\":{\"String\":\"2026-11-03 12:30:01.123000\",\"Valid\":true}}",
+        "{\"Projection\":\"feed-v1\",\"RebuiltAt\":{\"String\":\"\",\"Valid\":false}}",
+        "{\"Name\":\"search-v1\",\"IndexAlias\":\"\\u003c\\u003e\\u0026\\\"\\\\中文\\u2028\\u2029\",\"ActiveGeneration\":\"\",\"RebuiltAt\":{\"String\":\"\",\"Valid\":false}}"
+      ],
+      "controlInnerSHA256": [
+        "ec4db70135eb1bfee68893efcfb390b9e42b70cf23da15ca25b3d7148130b05e",
+        "0945c114a4a4a7b94e291c8f5309a408b9960ee5d28cc941db34bd2773178ce1",
+        "cde731716703d7363df7e7fce88b14de2d03c5998f9ab31705d4c5076c2c3deb"
+      ],
+      "controlRows": {
+        "projections": [
+          {
+            "projection": "feed-v1",
+            "rebuiltAt": null
+          },
+          {
+            "projection": "follow-v1",
+            "rebuiltAt": "2026-11-03 12:30:01.123000"
+          }
+        ],
+        "search": {
+          "name": "search-v1",
+          "indexAlias": "\u003c\u003e\u0026\"\\中文\u2028\u2029",
+          "activeGeneration": "",
+          "rebuiltAt": null
+        }
+      },
+      "controlsCanonicalJSON": "[\"ec4db70135eb1bfee68893efcfb390b9e42b70cf23da15ca25b3d7148130b05e\",\"0945c114a4a4a7b94e291c8f5309a408b9960ee5d28cc941db34bd2773178ce1\",\"cde731716703d7363df7e7fce88b14de2d03c5998f9ab31705d4c5076c2c3deb\"]",
+      "controlsSHA256": "a6668bf6102ecf939dd461d692da084f19b5eff85200433b6677cde1ab006851",
+      "factCanonicalJSON": "[{\"noteId\":\"18446744073709551615\",\"userId\":\"1\",\"present\":true,\"version\":2147483647,\"active\":1},{\"noteId\":\"102\",\"userId\":\"18446744073709551614\",\"present\":true,\"version\":0,\"active\":0}]",
+      "factVectorSHA256": "938bfd109b2b57b8ff6d3354954c3a330c90a529b8538a29c9dc187dc8782d0b",
+      "facts": [
+        {
+          "noteId": "18446744073709551615",
+          "userId": "1",
+          "present": true,
+          "version": 2147483647,
+          "active": 1
+        },
+        {
+          "noteId": "102",
+          "userId": "18446744073709551614",
+          "present": true,
+          "version": 0,
+          "active": 0
+        }
+      ],
+      "name": "escaping-unicode-empty-generation-max-version"
+    },
+    {
+      "controlCanonicalJSON": [
+        "{\"Projection\":\"follow-v1\",\"RebuiltAt\":{\"String\":\"\",\"Valid\":false}}",
+        "{\"Projection\":\"feed-v1\",\"RebuiltAt\":{\"String\":\"\",\"Valid\":false}}",
+        "{\"Name\":\"search-v1\",\"IndexAlias\":\"\",\"ActiveGeneration\":\"\",\"RebuiltAt\":{\"String\":\"\",\"Valid\":false}}"
+      ],
+      "controlInnerSHA256": [
+        "9940a92c848e128ed5092c407130aea0944a1442425848e6e94819cf7443ef8e",
+        "0945c114a4a4a7b94e291c8f5309a408b9960ee5d28cc941db34bd2773178ce1",
+        "5b5ae2e1dd1ad92fb11343a1e16318f3cdafd09534175d9fc10c37a9f58e48db"
+      ],
+      "controlRows": {
+        "projections": [
+          {
+            "projection": "follow-v1",
+            "rebuiltAt": null
+          },
+          {
+            "projection": "feed-v1",
+            "rebuiltAt": null
+          }
+        ],
+        "search": {
+          "name": "search-v1",
+          "indexAlias": "",
+          "activeGeneration": "",
+          "rebuiltAt": null
+        }
+      },
+      "controlsCanonicalJSON": "[\"9940a92c848e128ed5092c407130aea0944a1442425848e6e94819cf7443ef8e\",\"0945c114a4a4a7b94e291c8f5309a408b9960ee5d28cc941db34bd2773178ce1\",\"5b5ae2e1dd1ad92fb11343a1e16318f3cdafd09534175d9fc10c37a9f58e48db\"]",
+      "controlsSHA256": "fe26f944bd3f64542ac0a47c6387346ed56bc59a7b7bb16a34133ef4d6621745",
+      "factCanonicalJSON": "[{\"noteId\":\"101\",\"userId\":\"1\",\"present\":true,\"version\":0,\"active\":0},{\"noteId\":\"102\",\"userId\":\"2\",\"present\":true,\"version\":0,\"active\":0}]",
+      "factVectorSHA256": "c1515c1edb19d4dafbc238ab75a06896079c539691c3f013a7df50923b4246fa",
+      "facts": [
+        {
+          "noteId": "101",
+          "userId": "1",
+          "present": true,
+          "version": 0,
+          "active": 0
+        },
+        {
+          "noteId": "102",
+          "userId": "2",
+          "present": true,
+          "version": 0,
+          "active": 0
+        }
+      ],
+      "name": "explicit-zero-all-null-empty-alias-generation"
+    }
+  ],
+  "contract": "like-vector-digest-v1",
+  "producer": "unmodified-Go-wire-v3-pure-functions",
+  "sourceSHA256": "df0ba14b1596bb526d84dab730d25ed8862e85572e0a208d9221ffbd4af5b6b1",
+  "sqlExecuted": false,
+  "synthetic": true
+}

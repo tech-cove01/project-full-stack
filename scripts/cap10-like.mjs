@@ -13,10 +13,13 @@ import { collectDatabase } from './load/cap10-db-observe.mjs'
 import { poolSize, fixturePoolSize } from './load/cap10-cohort-contract.mjs'
 import { observerPolicy } from './load/cap10-observer-policy.mjs'
 import { auditSQL, auditContractMatches, auditErrors, baselineAuditReference, baselineAuditCount } from './load/cap10-full-audit.mjs'
+import { PHASE_FACTS, phaseSQL, phaseErrors, makePhaseFacts, vectorIdentity, controlsIdentity, acceptedSample, recoveryEvidence } from './load/cap10-phase-facts.mjs'
 
 const owned = { project: 'project-full-stack-cap10', mysql: '3481', redis: '6581', api: 'http://127.0.0.1:8281', database: 'project_full_stack_go' }
 const action = process.argv[2]
 const observationPolicy = observerPolicy(process.env)
+const vectorMode = observationPolicy.mode === 'like-vector-v1'
+let windowBaseline = null
 assert.ok(['prepare', 'probe', 'run', 'inspect', 'reconcile', 'finish'].includes(action), 'use prepare/probe/run/inspect/reconcile/finish')
 assert.equal(process.env.CAP_COHORT, 'cap10')
 for (const key of ['MYSQL_USER', 'MYSQL_PASSWORD', 'CAP_SOURCE_SHA', 'CAP_READ_EXPECTED_REVISION']) assert.ok(process.env[key], `explicit ${key} required`)
@@ -258,6 +261,7 @@ SELECT JSON_OBJECT('_kind','parked','projection',projection,'state',state,'count
 }
 
 function factErrors(manifest, mode, state) {
+  if (vectorMode && state.captureKind === PHASE_FACTS) return phaseErrors(manifest, state, fixtureManifestHashes.get(manifest), windowBaseline.proof.facts.controlRows)
   const errors = [], users = new Set(manifest.userIds), notes = new Set(modeNotes(manifest, mode))
   if (observationPolicy.mode === 'like-vector-v1') errors.push(...auditErrors(manifest, state, fixtureManifestHashes.get(manifest)))
   const actual = new Map(state.facts.map(r => [r.noteId + ':' + r.userId, r]))
@@ -348,6 +352,75 @@ async function reconcile(manifest, mode, waitSeconds) {
     limitations: 'Final convergence is not steady-state proof; the common stage observer must separately record last-minute backlog/lag and the 60s recovery deadline.' }
 }
 
+async function boundWindowBaseline(manifest) {
+  const downstream = evidence(process.env.CAP10_DOWNSTREAM_EVIDENCE)
+  const ready = JSON.parse(await readFile(join(downstream, 'ready.json'), 'utf8'))
+  assert.equal(ready.ready, true)
+  assert.deepEqual(ready.observerPolicy, observationPolicy)
+  assert.deepEqual(ready.observerSamplingLimits, { loadBudgetMs: 4000, readTimeoutMs: 3000, cadenceSeconds: 5, nativeRecoverySeconds: 60 })
+  const ref = baselineAuditReference(ready), path = evidence(join(evidenceRoot, ref.path)), detail = await lstat(path)
+  assert.ok(detail.isFile() && !detail.isSymbolicLink() && detail.size <= 8 * 1024 * 1024)
+  assert.equal(await realpath(path), path)
+  const bytes = await readFile(path), proof = JSON.parse(bytes)
+  const events = baselineAuditCount(ready, proof, hash(bytes), manifest, fixtureManifestHashes.get(manifest))
+  assert.equal(vectorIdentity(manifest, proof.facts.facts).sha256, ready.baselineVectorSHA256)
+  assert.equal(controlsIdentity(proof.facts.controlRows).sha256, ready.baselineControlsSHA256)
+  return { ref, events, proof, ready, downstream }
+}
+
+async function phaseCapture(manifest, mode, label, timeoutMs = 30000) {
+  if (!vectorMode) return snapshot(manifest, mode, label)
+  assert.ok(windowBaseline, 'the original complete per-window baseline must be bound first')
+  const startedAt = Date.now(), raw = rows(await sql(phaseSQL(manifest), true, timeoutMs))
+  return makePhaseFacts(manifest, raw, { label, startedAt, endedAt: Date.now(), fixtureSHA: fixtureManifestHashes.get(manifest), expectedControls: windowBaseline.proof.facts.controlRows })
+}
+
+async function vectorWarmBefore(manifest, mode, dir) {
+  windowBaseline = await boundWindowBaseline(manifest)
+  const guard = await phaseCapture(manifest, mode, 'before-warm-facts')
+  assert.equal(guard.factVectorSHA256, windowBaseline.ready.baselineVectorSHA256)
+  assert.equal(guard.controlsSHA256, windowBaseline.ready.baselineControlsSHA256)
+  assert.deepEqual(guard.notes, windowBaseline.proof.facts.notes)
+  const path = join(dir, 'before-warm-facts.json'); await save(path, guard)
+  return { ...structuredClone(windowBaseline.proof.facts),
+    captureKind: 'bound-complete-baseline-with-fresh-fact-guard', baselineAudit: windowBaseline.ref,
+    baselineAuditEventCount: windowBaseline.events, freshGuard: { path: path.slice(evidenceRoot.length + 1).split(sep).join('/'), sha256: hash(await readFile(path)),
+      startedAt: guard.startedAt, endedAt: guard.endedAt, factVectorSHA256: guard.factVectorSHA256, controlsSHA256: guard.controlsSHA256 },
+    scope: 'Original complete audit fields/timestamps retained; only the attached fact/note/control guard is fresh. No new source-history scan was performed.' }
+}
+
+async function phaseSetupReconcile(manifest, mode, capture, committedAt, deadline) {
+  let accepted = null
+  while (Date.now() <= deadline) {
+    accepted = acceptedSample(await readFile(join(windowBaseline.downstream, 'timeline.ndjson')), capture,
+      { baselineEvents: windowBaseline.events, notBeforeMs: committedAt })
+    if (accepted) break
+    await pause(100)
+  }
+  assert.ok(accepted && Date.now() <= deadline, 'setup requires one exact accepted fact/control vector plus fully clean downstream within60s')
+  const projection = await derived(manifest, mode, capture), errors = factErrors(manifest, mode, capture).concat(projection.errors)
+  return { captureKind: PHASE_FACTS, fullAuditPerformed: false, valid: errors.length === 0, factsValid: errors.length === 0,
+    downstreamConverged: true, errors, facts: capture, derived: projection, acceptedSample: accepted,
+    baselineAudit: windowBaseline.ref, baselineAuditEventCount: windowBaseline.events,
+    scope: 'Fresh phase facts plus a complete accepted incremental sample and actual Redis derived read; this is not a complete history audit.' }
+}
+
+async function waitObserverRecovery(nativeEndMs) {
+  const path = join(windowBaseline.downstream, 'summary.json'), deadline = Date.now() + 65000
+  while (Date.now() <= deadline) {
+    try {
+      const bytes = await readFile(path), summary = JSON.parse(bytes), timeline = await readFile(join(windowBaseline.downstream, 'timeline.ndjson'))
+      const value = recoveryEvidence(summary, timeline, nativeEndMs, windowBaseline.ref, windowBaseline.events)
+      return { ...value, summarySHA256: hash(bytes), observerCompletionWaitLimitMs: 65000,
+        observerCompletionWaitScope: 'Bounded wait for existing post-controller collection to close; native recovery remains exactly60s.' }
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error
+    }
+    await pause(100)
+  }
+  throw new Error('original observer terminal collection unavailable; a later full audit cannot substitute for recovery evidence')
+}
+
 async function stopPresent() {
   if (!process.env.CAP_STOP_FILE) return false
   try { await readFile(process.env.CAP_STOP_FILE); return true } catch (error) { if (error.code !== 'ENOENT') throw error; return false }
@@ -356,7 +429,7 @@ async function stopPresent() {
 async function normalizeInitialState(manifest, mode, dir) {
   const count = fixturePoolSize(manifest)
   const startedAt = Date.now(), deadline = startedAt + 60000
-  const before = await snapshot(manifest, mode, 'before-setup')
+  const before = await phaseCapture(manifest, mode, 'before-setup', Math.max(1, Math.min(30000, deadline - Date.now())))
   assert.deepEqual(factErrors(manifest, mode, before), [], 'setup starts only from valid facts')
   assert.equal(initialDistribution(manifest, before).existing, count, 'setup requires every manifest-bound exclusive pair')
   const ids = manifest.multiNoteIds.map(id => `'${id}'`).join(',')
@@ -371,13 +444,13 @@ UPDATE tb_blog b SET liked=(SELECT COUNT(*) FROM tb_blog_like l WHERE l.blog_id=
 COMMIT;`, false, Math.max(1, deadline - Date.now())))
   const committedAt = Date.now()
   await save(join(dir, 'setup-transaction.json'), { startedAt, committedAt, records: raw, countedAsHTTPMutation: false })
-  const after = await snapshot(manifest, mode, 'after-setup-commit')
+  const after = await phaseCapture(manifest, mode, 'after-setup-commit', Math.max(1, Math.min(30000, deadline - Date.now())))
   const expected = before.facts.filter(row => row.active === 1).length
   assert.equal(raw.filter(row => row._kind === 'locked-note').length, count)
   assert.equal(raw.filter(row => row._kind === 'locked-pair').length, count)
   assert.deepEqual(factErrors(manifest, mode, after), [], 'setup facts/events invalid')
   assert.equal(after.transitions - before.transitions, expected)
-  assert.equal(after.eventCount - before.eventCount, expected)
+  if (!vectorMode) assert.equal(after.eventCount - before.eventCount, expected)
   const luaSourcePath = 'backend/internal/communitycache/bitmap.go'
   const source = await readFile(luaSourcePath, 'utf8')
   const lua = /var applyLike = redis.NewScript\(`([\s\S]*?)`\)/.exec(source)?.[1]
@@ -388,7 +461,8 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
   await redisCommands(calls)
   // Same fixed local TTL as the application; no Feed/read workload is run here.
   await pause(2100)
-  const audit = await reconcile(manifest, mode, Math.max(0, Math.floor((deadline - Date.now()) / 1000)))
+  const audit = vectorMode ? await phaseSetupReconcile(manifest, mode, after, committedAt, deadline)
+    : await reconcile(manifest, mode, Math.max(0, Math.floor((deadline - Date.now()) / 1000)))
   await save(join(dir, 'setup-reconcile.json'), audit)
   assert.ok(audit.valid, 'setup derived facts or receipts did not converge')
   const distribution = initialDistribution(manifest, audit.facts)
@@ -405,9 +479,9 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
     const bytes = await readFile(path)
     baselineEvents = baselineAuditCount(ready, JSON.parse(bytes), hash(bytes), manifest, fixtureManifestHashes.get(manifest))
   } else baselineEvents = ready.baseline.sql.counts.events
-  const expectedStageEvents = audit.facts.eventCount - baselineEvents
-  let clean = null
-  while (Date.now() <= deadline) {
+  const expectedStageEvents = (vectorMode ? audit.facts.transitions : audit.facts.eventCount) - baselineEvents
+  let clean = vectorMode ? { at: audit.acceptedSample.at } : null
+  while (!clean && Date.now() <= deadline) {
     const lines = (await readFile(join(downstream, 'timeline.ndjson'), 'utf8')).trim().split(/\r?\n/)
     let last; try { last = JSON.parse(lines.at(-1)) } catch { await pause(100); continue }
     if (last.sql && last.kafka && !last.errors.length && !last.semanticViolations?.length &&
@@ -420,7 +494,9 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
   assert.ok(clean && Date.now() <= deadline, 'setup did not return to the predefined full-chain baseline within 60s')
   const result = { startedAt, committedAt, completedAt: Date.now(), setupBudgetMs: 60000,
     generatedFactTransitions: expected, generatedEvents: expected, countedAsHTTPMutation: false,
-    beforeTransitions: before.transitions, beforeEvents: before.eventCount, afterTransitions: after.transitions, afterEvents: after.eventCount,
+    beforeTransitions: before.transitions, afterTransitions: after.transitions,
+    ...(!vectorMode ? { beforeEvents: before.eventCount, afterEvents: after.eventCount } : { fullAuditPerformed: false, acceptedSample: audit.acceptedSample,
+      observedStageEventCount: expectedStageEvents, observedStageEventCountSource: 'complete accepted Go vector sample; not a new history scan' }),
     ...(baselineAudit ? { baselineAudit, baselineAuditEventCount: baselineEvents, baselineCountSource: ready.baselineCountSource } : {}),
     beforeDistribution: initialDistribution(manifest, before), afterDistribution: distribution,
     markLuaSourcePath: luaSourcePath, markLuaSHA256: hash(lua), sourceFileSHA256: hash(source),
@@ -545,7 +621,16 @@ if (action === 'prepare') {
       report.phaseProcesses = 'warm and stable use separate Alibaba PTS ReportIds with the packet-bound managed engines and fresh authoritative RR hydration'
       report.generatorResourceScope = 'ECS Python collector plus Node helper <2GiB; each remote JMeter engine separately <6GiB, matching the collector safety limit. Same PTS topology is required for every comparison.'
     }
-    let warmBefore = null
+    let warmBefore = null, finalFullAuditAttempted = false, stableControllerStarted = false
+    async function finalFullAudit(reason, nativeEndMs = null) {
+      assert.equal(finalFullAuditAttempted, false, 'one final full-audit attempt only')
+      finalFullAuditAttempted = true
+      await save(join(dir, 'final-full-audit-attempt.json'), { reason, attemptedAt: Date.now(), baselineAudit: windowBaseline?.ref, noAutomaticRetry: true })
+      const end = nativeEndMs ?? report.nativeScenario?.scheduledEndedAt
+      if (stableControllerStarted && report.nativeScenario?.complete === true && Number.isFinite(end) && end > 0) report.nativeRecoveryEvidence = await waitObserverRecovery(end)
+      else report.nativeRecoveryEvidence = { nativeRecoveryVerified: false, summaryPassed: false, scope: 'No registered complete stable native window; no recovery claim or wait for a done signal that requires helper exit.' }
+      return reconcile(manifest, mode, 0)
+    }
     async function runPhase(phase, duration, state) {
       assert.equal(await stopPresent(), false, 'resource stop blocks next native phase')
       const map = new Map(state.facts.map(r => [r.noteId + ':' + r.userId, r]))
@@ -568,7 +653,10 @@ if (action === 'prepare') {
           const detail = json(pts ? { phase, backend: 'pts', helper_pid: process.pid, controller_pid: pid,
             controller_started_unix_ms: Date.now(), remoteEvidence: join(dir, phase + '-pts') }
             : { phase, helper_pid: process.pid, k6_pid: pid, k6_started_unix_ms: Date.now() })
-          return Promise.all([save(join(dir, phase + '-process.json'), JSON.parse(detail)), writeFile(join(dir, 'process.json'), detail)])
+          return Promise.all([save(join(dir, phase + '-process.json'), JSON.parse(detail)), writeFile(join(dir, 'process.json'), detail)]).then(result => {
+            if (vectorMode && phase === 'stable' && Number.isSafeInteger(pid) && pid > 0) stableControllerStarted = true
+            return result
+          })
         } })
       } finally {
         try { await unlink(path) } catch (error) { if (error.code !== 'ENOENT') throw error }
@@ -578,17 +666,21 @@ if (action === 'prepare') {
     }
     try {
       report.scriptSHA256 = Object.fromEntries(await Promise.all(['scripts/cap10-like.mjs', 'scripts/load/cap10-like.js', 'scripts/load/cap10-like-contract.mjs', 'scripts/load/cap10-native-window.mjs', 'scripts/load/cap10-db-observe.mjs', 'scripts/load/cap10-cohort-contract.mjs'].map(async p => [p, hash(await readFile(p))])))
-      warmBefore = await snapshot(manifest, mode, 'before-warm'); await save(join(dir, 'warm-before.json'), warmBefore)
+      warmBefore = vectorMode ? await vectorWarmBefore(manifest, mode, dir) : await snapshot(manifest, mode, 'before-warm'); await save(join(dir, 'warm-before.json'), warmBefore)
       report.initialDistributions.beforeWarm = initialDistribution(manifest, warmBefore)
       assert.deepEqual(factErrors(manifest, mode, warmBefore), [], 'starting facts invalid')
       if (process.env.CAP10_FORMAL === '1') assert.equal(report.initialDistributions.beforeWarm.existing, count, 'formal requires all manifest-bound relationships before warm')
       const warm = await runPhase('warm', warmSeconds, warmBefore); report.warmExit = warm.code; report.warmExternalStop = warm.externalStop
       assert.equal(warm.code, 0, 'warm failed; stable phase not started'); assert.equal(warm.externalStop, null)
       report.setup = await normalizeInitialState(manifest, mode, dir)
-      const before = await snapshot(manifest, mode, 'before-stable'); await save(join(dir, 'before.json'), before)
+      const before = await phaseCapture(manifest, mode, 'before-stable'); await save(join(dir, 'before.json'), before)
       report.initialDistributions.beforeStable = initialDistribution(manifest, before)
       assert.equal(report.initialDistributions.beforeStable.existing, count); assert.equal(report.initialDistributions.beforeStable.active, 0)
       assert.deepEqual(factErrors(manifest, mode, before), [], 'warm facts invalid')
+      if (vectorMode) {
+        const accepted = acceptedSample(await readFile(join(windowBaseline.downstream, 'timeline.ndjson')), before, { baselineEvents: windowBaseline.events, notBeforeMs: report.setup.committedAt })
+        assert.ok(accepted, 'stable hydration must match an accepted setup vector'); report.beforeStableAcceptedSample = accepted
+      }
       await save(join(dir, 'stable-db-before.json'), await collectDatabase(statement => sql(statement, true)))
       await save(join(dir, 'stable-capacity-before.json'), await capacitySnapshot())
       report.stableStartedAt = Date.now(); const stable = await runPhase('stable', seconds, before)
@@ -597,18 +689,29 @@ if (action === 'prepare') {
       report.stableCommandElapsedMs = report.stableEndedAt - report.stableStartedAt
       await save(join(dir, 'stable-capacity-after.json'), await capacitySnapshot())
       await save(join(dir, 'stable-db-after.json'), await collectDatabase(statement => sql(statement, true)))
-      const after = await snapshot(manifest, mode, 'after-stable'); await save(join(dir, 'after.json'), after)
+      let vectorNative = null, earlyUnknown = null, vectorScenario = null
+      if (vectorMode) {
+        vectorNative = JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8'))
+        vectorScenario = process.env.CAP10_LOAD_BACKEND === 'pts' ? vectorNative.nativeScenario : nativeScenarioWindow({ metric: vectorNative.metrics?.cap_native_scenario_start_unix_ms,
+          durationMetric: vectorNative.metrics?.cap_native_scenario_duration_ms, seconds, wrapperStartedAt: report.stableWrapperStartedAt, wrapperEndedAt: report.stableWrapperEndedAt,
+          exit: stable.code, externalStop: stable.externalStop, metrics: vectorNative.metrics })
+        report.nativeScenario = vectorScenario
+        const count = name => { const value = vectorNative.metrics?.[name]?.count; assert.ok(Number.isSafeInteger(value) && value >= 0); return value }
+        earlyUnknown = unknownBounds(count('cap_like_attempted'), count('cap_like_completed'), count('cap_like_effect_unknown'))
+        if (stable.code !== 0 || stable.externalStop || earlyUnknown.unknownUpperBound > 0) { report.ambiguousRequestSettleWaitMs = 5500; await pause(5500) }
+      }
+      const after = await phaseCapture(manifest, mode, 'after-stable'); await save(join(dir, 'after.json'), after)
       report.verifiedChangedParticipants = { stable: changedParticipants(before, after),
         warmSetupAndStable: { ...changedParticipants(warmBefore, after), includesSyntheticSetupTransitions: true } }
       // Windows can terminate k6 before it writes a summary. Preserve the real
       // business reconciliation independently; missing native metrics still fail.
-      if (stable.code !== 0 || stable.externalStop) { report.ambiguousRequestSettleWaitMs = 5500; await pause(5500) }
-      const final = await reconcile(manifest, mode, 60); await save(join(dir, 'reconcile.json'), final)
+      if (!vectorMode && (stable.code !== 0 || stable.externalStop)) { report.ambiguousRequestSettleWaitMs = 5500; await pause(5500) }
+      const final = vectorMode ? await finalFullAudit('after-native-recovery-evidence', vectorScenario?.scheduledEndedAt ?? null) : await reconcile(manifest, mode, 60); await save(join(dir, 'reconcile.json'), final)
       report.finalReconcileValid = final.valid
       report.finalFactsValid = final.factsValid; report.downstreamConverged = final.downstreamConverged
-      const native = JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8'))
+      const native = vectorMode ? vectorNative : JSON.parse(await readFile(join(dir, 'stable-summary.json'), 'utf8'))
       report.sourceEngine = native.sourceEngine || 'k6'
-      report.nativeScenario = process.env.CAP10_LOAD_BACKEND === 'pts' ? native.nativeScenario : nativeScenarioWindow({ metric: native.metrics?.cap_native_scenario_start_unix_ms,
+      report.nativeScenario = vectorMode ? vectorScenario : process.env.CAP10_LOAD_BACKEND === 'pts' ? native.nativeScenario : nativeScenarioWindow({ metric: native.metrics?.cap_native_scenario_start_unix_ms,
         durationMetric: native.metrics?.cap_native_scenario_duration_ms, seconds,
         wrapperStartedAt: report.stableWrapperStartedAt, wrapperEndedAt: report.stableWrapperEndedAt,
         exit: stable.code, externalStop: stable.externalStop, metrics: native.metrics })
@@ -619,10 +722,21 @@ if (action === 'prepare') {
       const allLatency = metric('cap_like_all_ms'), mutationLatency = native.metrics?.cap_like_mutation_ms || null
       for (const m of [allLatency, mutationLatency]) assert.ok(m && ['p(95)', 'p(99)', 'max'].every(k => Number.isFinite(m[k]) && m[k] >= 0), 'native latency missing')
       const { classificationUnknown, unknownLowerBound, unknownUpperBound, unknownIsExact, unknown } = unknownBounds(counts.attempted, counts.completed, counts.effectUnknown)
-      const dbMutations = after.transitions - before.transitions, eventsAdded = after.eventCount - before.eventCount
+      const dbMutations = after.transitions - before.transitions, eventsAdded = vectorMode ? final.facts.eventCount - (windowBaseline.events + report.beforeStableAcceptedSample.stageEvents) : after.eventCount - before.eventCount
+      if (vectorMode) {
+        const observed = JSON.parse((await readFile(join(windowBaseline.downstream, 'timeline.ndjson'), 'utf8')).trim().split(/\r?\n/).at(-1))
+        assert.equal(final.facts.eventCount, windowBaseline.events + observed.sql.counts.events, 'final independent source count differs from bound baseline plus terminal vector delta')
+        assert.equal(observed.sql.digestContract, 'like-vector-digest-v1')
+        assert.equal(observed.sql.factVectorSHA256, after.factVectorSHA256)
+        assert.equal(observed.sql.controlsSHA256, after.controlsSHA256)
+        assert.equal(vectorIdentity(manifest, final.facts.facts).sha256, after.factVectorSHA256)
+        assert.equal(controlsIdentity(final.facts.controlRows).sha256, after.controlsSHA256)
+        report.sourceCountProvenance = { baselineAudit: windowBaseline.ref, baselineEvents: windowBaseline.events, terminalStageEvents: observed.sql.counts.events, finalAuditedEvents: final.facts.eventCount, stableBeforeAcceptedSample: report.beforeStableAcceptedSample, intermediateSourceHistoryRead: false }
+      }
       const warmNative = JSON.parse(await readFile(join(dir, 'warm-summary.json'), 'utf8'))
       const warmMutations = warmNative.metrics?.cap_like_mutation?.count
       assert.ok(Number.isSafeInteger(warmMutations) && warmMutations >= 0, 'warm mutation count unavailable')
+      if (vectorMode) assert.equal(report.sourceCountProvenance.terminalStageEvents, warmMutations + report.setup.generatedFactTransitions + counts.mutation, 'warm/setup/stable deltas differ from terminal source evidence')
       report.phaseAccounting = { warmHTTPMutations: warmMutations, syntheticSetupTransitions: report.setup.generatedFactTransitions,
         stableKnownHTTPMutations: counts.mutation, stableDBTransitions: dbMutations,
         totalDBTransitions: after.transitions - warmBefore.transitions,
@@ -635,7 +749,7 @@ if (action === 'prepare') {
         classifiedIterationLatency: native.metrics?.cap_like_iteration_ms || null,
         dbMutations, eventsAdded, mutationCounterMatchesDB: dbMutations === counts.mutation && eventsAdded === counts.mutation,
         unknownScope: 'classificationUnknown and effectUnknown can overlap during abort sample loss. Distinct unknown is exact only when lower/upper coincide; otherwise unknown=null and bounds remain. Recovery never erases original uncertainty. Zero-unknown requires both counters zero.' }
-      if (unknownUpperBound > 0 && !report.ambiguousRequestSettleWaitMs) {
+      if (!vectorMode && unknownUpperBound > 0 && !report.ambiguousRequestSettleWaitMs) {
         report.ambiguousRequestSettleWaitMs = 5500; await pause(5500)
         const settled = await reconcile(manifest, mode, 60); await save(join(dir, 'uncertain-reconcile.json'), settled)
         report.finalReconcileValid = settled.valid
@@ -644,14 +758,15 @@ if (action === 'prepare') {
       report.meetsAPIBudget = report.nativeScenario.complete && stable.code === 0 && !stable.externalStop && counts.attempted > 0 && counts.attempted === counts.nativeWriteHTTP && counts.attempted === counts.completed && counts.attempted / (rate * seconds) >= .99 && counts.mutation / counts.attempted >= .99 && counts.noop === 0 && counts.rejected === 0 && classificationUnknown === 0 && counts.effectUnknown === 0 && counts.dropped === 0 && counts.contentErrors === 0 && counts.systemErrors / counts.attempted < .01 && counts.httpErrors / counts.attempted < .01 && allLatency['p(95)'] <= 200 && allLatency['p(99)'] <= 500 && mutationLatency['p(95)'] <= 200 && mutationLatency['p(99)'] <= 500 && report.result.mutationCounterMatchesDB
       report.meetsAPIBudget &&= counts.generatorTimingViolations === 0
       report.meetsBudget = report.meetsAPIBudget && report.finalReconcileValid
+      if (vectorMode) report.meetsBudget &&= report.nativeRecoveryEvidence?.nativeRecoveryVerified === true && report.nativeRecoveryEvidence.summaryPassed === true
       report.downstreamSteadyStateScope = 'final valid means convergence only; common stage lag/last-minute growth gate must additionally pass for a full-chain capacity claim'
     } catch (error) {
       report.failure = error.message; if (error.observerSQLFailure) report.observerSQLFailure = error.observerSQLFailure
       report.meetsBudget = false; report.meetsAPIBudget ??= false
-      if (!Object.hasOwn(report, 'finalReconcileValid')) {
+      if (!Object.hasOwn(report, 'finalReconcileValid') && (!vectorMode || !finalFullAuditAttempted)) {
         try {
           report.failedPhaseSettleWaitMs = 5500; await pause(5500)
-          const failed = await reconcile(manifest, mode, 60); await save(join(dir, 'failed-phase-reconcile.json'), failed)
+          const failed = vectorMode ? await finalFullAudit(stableControllerStarted ? 'failed-stable-once' : 'failed-before-stable-start-once') : await reconcile(manifest, mode, 60); await save(join(dir, 'failed-phase-reconcile.json'), failed)
           report.finalReconcileValid = failed.valid
           report.finalFactsValid = failed.factsValid; report.downstreamConverged = failed.downstreamConverged
         } catch { report.finalReconcileValid = false; report.failedPhaseReconcileUnavailable = true }

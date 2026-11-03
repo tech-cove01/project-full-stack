@@ -121,7 +121,7 @@ function controlDate(value) {
   const leap = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0)
   return day <= [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]
 }
-function controlRowsValid(value) {
+export function controlRowsValid(value) {
   if (!exactFields(value, ['projections', 'search']) || !Array.isArray(value.projections) || value.projections.length !== 2) return false
   const names = new Set()
   for (const row of value.projections) {

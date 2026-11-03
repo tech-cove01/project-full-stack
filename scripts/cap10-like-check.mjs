@@ -217,7 +217,7 @@ const derivedCode = helperSource.match(/^async function derived[\s\S]*?^}/m)[0]
 const seedManifest = { userIds: nativeFixture.users.map(x => x.userId), multiNoteIds: nativeFixture.multiNoteIds, relationshipSeed: { version: 0 } }
 function zeroState() { return { facts: nativeFixture.initial.map(x => ({ ...x })), notes: nativeFixture.multiNoteIds.map(noteId => ({ noteId, liked: 0, activeRelations: 0 })), events: [], transitions: 0, eventCount: 0 } }
 function projectionContext(replies) {
-  const context = { modeNotes: m => m.multiNoteIds, redisCommands: async () => replies, assert, observationPolicy: observerPolicy({}) }
+  const context = { vectorMode: false, modeNotes: m => m.multiNoteIds, redisCommands: async () => replies, assert, observationPolicy: observerPolicy({}) }
   vm.runInNewContext(factCode + '\n' + derivedCode + '\nglobalThis.factErrors = factErrors; globalThis.derived = derived', context)
   return context
 }

@@ -100,7 +100,7 @@ const helper = readFileSync('scripts/cap10-like.mjs', 'utf8')
 const facts = helper.match(/^function factErrors[\s\S]*?^}/m)[0]
 const reconcile = helper.match(/^async function reconcile[\s\S]*?^}/m)[0]
 function context(value, mode = 'like-vector-v1') {
-  const target = { observationPolicy: { mode }, auditErrors, modeNotes: m => m.multiNoteIds, fixtureManifestHashes: new WeakMap([[manifest, fixtureSHA]]),
+  const target = { vectorMode: mode === 'like-vector-v1', PHASE_FACTS: 'like-vector-phase-facts-v1', observationPolicy: { mode }, auditErrors, modeNotes: m => m.multiNoteIds, fixtureManifestHashes: new WeakMap([[manifest, fixtureSHA]]),
     snapshot: async () => structuredClone(value), pause: async () => {}, derived: async () => ({ errors: [] }) }
   vm.runInNewContext(facts + '\n' + reconcile + '\nglobalThis.factErrors = factErrors; globalThis.reconcile = reconcile', target)
   return target

@@ -74,19 +74,19 @@ type kafkaView struct {
 	Groups     []groupView `json:"groups"`
 }
 type sample struct {
-	At             time.Time  `json:"at"`
-	ElapsedSeconds float64    `json:"elapsedSeconds"`
-	DurationMS     float64    `json:"durationMs"`
-	SQL            *sqlView   `json:"sql"`
-	Kafka          *kafkaView `json:"kafka"`
-	Errors         []string   `json:"errors"`
-	Violations     []string   `json:"semanticViolations"`
+	At             time.Time           `json:"at"`
+	ElapsedSeconds float64             `json:"elapsedSeconds"`
+	DurationMS     float64             `json:"durationMs"`
+	SQL            *sqlView            `json:"sql"`
+	VectorSQL      *likeVectorSQLStats `json:"vectorSql,omitempty"`
+	Kafka          *kafkaView          `json:"kafka"`
+	Errors         []string            `json:"errors"`
+	Violations     []string            `json:"semanticViolations"`
 }
 
-// The like-vector-v1 accounting engine is deliberately not connected to main,
-// SQL or Kafka yet. A caller must supply a separately audited baseline and may
-// publish a proposal only after its read-only transaction and complete sample
-// succeeded. Legacy observation remains the default and only wired method.
+// Explicit like-vector-v1 uses a separately audited baseline and publishes only
+// after a committed RR read and a complete SQL/Kafka sample. Legacy full-history
+// observation remains the default when its mode is missing from the environment.
 const (
 	likeVectorMaxVersion = int64(1<<31 - 1) // The business version column is INT.
 	likeVectorMaxEvents  = int64(1 << 20)
@@ -521,7 +521,7 @@ func (engine *likeVectorEngine) Snapshot() likeVectorSnapshot {
 	return value
 }
 
-// OBS-V2 remains unwired. These bounds apply to one SQL observation, never to
+// These bounds apply to one SQL observation, never to
 // the separate full-audit budget or a business request/transaction.
 const (
 	likeVectorSQLChunk      = 256
@@ -582,7 +582,7 @@ func likeVectorControlsSQL(ctx context.Context, tx likeVectorSQLTx, stats *likeV
 	var controls likeVectorControls
 	stats.Phase = "controls"
 	stats.Queries++
-	rows, err := tx.QueryContext(ctx, `SELECT projection,rebuilt_at FROM tb_community_projection_control
+	rows, err := tx.QueryContext(ctx, `SELECT projection,DATE_FORMAT(rebuilt_at,'%Y-%m-%d %H:%i:%s.%f') FROM tb_community_projection_control
  WHERE projection IN ('follow-v1','feed-v1') ORDER BY projection`)
 	if err != nil {
 		return controls, err
@@ -631,7 +631,7 @@ func likeVectorControlsSQL(ctx context.Context, tx likeVectorSQLTx, stats *likeV
 	stats.Queries++
 	var name, alias, generation string
 	var rebuilt sql.NullString
-	if err = tx.QueryRowContext(ctx, `SELECT name,index_alias,active_generation,rebuilt_at
+	if err = tx.QueryRowContext(ctx, `SELECT name,index_alias,active_generation,DATE_FORMAT(rebuilt_at,'%Y-%m-%d %H:%i:%s.%f')
  FROM tb_note_search_control WHERE name='search-v1'`).Scan(&name, &alias, &generation, &rebuilt); err != nil {
 		return controls, err
 	}
@@ -928,6 +928,691 @@ func readLikeVectorSQLTx(ctx context.Context, tx likeVectorSQLTx, engine *likeVe
 	return &likeVectorSQLCandidate{engine: engine, proposal: proposal, sqlCommitted: true,
 		view: sqlView{StartedAt: stats.StartedAt, FinishedAt: time.Now().UTC(), AfterWatermark: after,
 			MaxOutboxID: maxID, Counts: view.Counts, Receipts: view.Receipts, Parked: parked}}, stats, nil
+}
+
+type observerPolicy struct {
+	Mode               string `json:"mode"`
+	FullAuditTimeoutMS int    `json:"fullAuditTimeoutMs"`
+	Scope              string `json:"scope"`
+}
+type observerSamplingLimits struct {
+	LoadBudgetMS          int `json:"loadBudgetMs"`
+	ReadTimeoutMS         int `json:"readTimeoutMs"`
+	CadenceSeconds        int `json:"cadenceSeconds"`
+	NativeRecoverySeconds int `json:"nativeRecoverySeconds"`
+}
+
+func observerMode(env map[string]string) (observerPolicy, error) {
+	mode, exists := env["CAP10_OBSERVER_MODE"]
+	if !exists {
+		mode = "full-history-v1"
+	}
+	budget := 30000
+	if mode == "like-vector-v1" {
+		budget = 120000
+	} else if mode != "full-history-v1" {
+		return observerPolicy{}, errors.New("unsupported observer mode")
+	}
+	return observerPolicy{mode, budget, "full-snapshot-audit-only"}, nil
+}
+func fixedObserverSampling() observerSamplingLimits { return observerSamplingLimits{4000, 3000, 5, 60} }
+
+type vectorAuditRef struct {
+	Path   string `json:"path"`
+	SHA256 string `json:"sha256"`
+}
+type vectorAuditFact struct {
+	NoteID  string `json:"noteId"`
+	UserID  string `json:"userId"`
+	Version *int64 `json:"version"`
+	Active  *int   `json:"active"`
+}
+type vectorAuditNote struct {
+	NoteID          string `json:"noteId"`
+	Liked           *int64 `json:"liked"`
+	ActiveRelations *int64 `json:"activeRelations"`
+}
+type vectorAuditEvent struct {
+	NoteID   string `json:"noteId"`
+	UserID   string `json:"userId"`
+	Count    *int64 `json:"count"`
+	Distinct *int64 `json:"distinctVersions"`
+	Min      *int64 `json:"minVersion"`
+	Max      *int64 `json:"maxVersion"`
+	Invalid  *int64 `json:"invalid"`
+}
+type vectorAuditDelivery struct {
+	Status string `json:"status"`
+	Count  *int64 `json:"count"`
+}
+type vectorAuditReceipt struct {
+	Projection        string `json:"projection"`
+	State             string `json:"state"`
+	Count             *int64 `json:"count"`
+	InvalidHash       *int64 `json:"invalidHash"`
+	InvalidProjection *int64 `json:"invalidProjection"`
+	InvalidState      *int64 `json:"invalidState"`
+}
+type vectorAuditPark struct {
+	Projection string `json:"projection"`
+	State      string `json:"state"`
+	Count      *int64 `json:"count"`
+}
+type vectorRawProjectionControl struct {
+	Projection string          `json:"projection"`
+	RebuiltAt  json.RawMessage `json:"rebuiltAt"`
+}
+type vectorRawSearchControl struct {
+	Name             string          `json:"name"`
+	IndexAlias       *string         `json:"indexAlias"`
+	ActiveGeneration *string         `json:"activeGeneration"`
+	RebuiltAt        json.RawMessage `json:"rebuiltAt"`
+}
+type vectorAuditControls struct {
+	Projections []vectorRawProjectionControl `json:"projections"`
+	Search      *vectorRawSearchControl      `json:"search"`
+}
+
+func vectorExactFields(raw json.RawMessage, names ...string) bool {
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(raw, &fields) != nil || len(fields) != len(names) {
+		return false
+	}
+	for _, name := range names {
+		if _, exists := fields[name]; !exists {
+			return false
+		}
+	}
+	return true
+}
+func (controls *vectorAuditControls) UnmarshalJSON(raw []byte) error {
+	if !vectorExactFields(raw, "projections", "search") {
+		return errVectorAudit
+	}
+	var fields map[string]json.RawMessage
+	if json.Unmarshal(raw, &fields) != nil {
+		return errVectorAudit
+	}
+	var rows []json.RawMessage
+	if json.Unmarshal(fields["projections"], &rows) != nil || len(rows) != 2 {
+		return errVectorAudit
+	}
+	for _, row := range rows {
+		if !vectorExactFields(row, "projection", "rebuiltAt") {
+			return errVectorAudit
+		}
+	}
+	if !vectorExactFields(fields["search"], "name", "indexAlias", "activeGeneration", "rebuiltAt") {
+		return errVectorAudit
+	}
+	type plainControls vectorAuditControls
+	var decoded plainControls
+	decoder := json.NewDecoder(bytes.NewReader(raw))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&decoded); err != nil {
+		return err
+	}
+	*controls = vectorAuditControls(decoded)
+	return nil
+}
+
+type vectorAuditSnapshot struct {
+	ObserverPolicy json.RawMessage       `json:"observerPolicy"`
+	AuditContract  json.RawMessage       `json:"auditContract"`
+	FixtureSHA     string                `json:"fixtureManifestSHA256"`
+	Facts          []vectorAuditFact     `json:"facts"`
+	Notes          []vectorAuditNote     `json:"notes"`
+	Events         []vectorAuditEvent    `json:"events"`
+	Delivery       []vectorAuditDelivery `json:"delivery"`
+	Receipts       []vectorAuditReceipt  `json:"receipts"`
+	Parked         []vectorAuditPark     `json:"parked"`
+	Transitions    *int64                `json:"transitions"`
+	EventCount     *int64                `json:"eventCount"`
+	ControlRows    *vectorAuditControls  `json:"controlRows"`
+	Watermark      *vectorAuditWatermark `json:"sourceWatermark"`
+}
+type vectorAuditWatermark struct {
+	MaxID          *string `json:"maxOutboxId"`
+	DiagnosticOnly bool    `json:"diagnosticOnly"`
+}
+
+func (watermark *vectorAuditWatermark) UnmarshalJSON(raw []byte) error {
+	if !vectorExactFields(raw, "maxOutboxId", "diagnosticOnly") {
+		return errVectorAudit
+	}
+	type plainWatermark vectorAuditWatermark
+	var decoded plainWatermark
+	if err := json.Unmarshal(raw, &decoded); err != nil {
+		return err
+	}
+	*watermark = vectorAuditWatermark(decoded)
+	return nil
+}
+
+type vectorAuditDocument struct {
+	Valid               bool                 `json:"valid"`
+	FactsValid          bool                 `json:"factsValid"`
+	DownstreamConverged bool                 `json:"downstreamConverged"`
+	Errors              []json.RawMessage    `json:"errors"`
+	StartedAt           *int64               `json:"startedAt"`
+	FinishedAt          *int64               `json:"finishedAt"`
+	Facts               *vectorAuditSnapshot `json:"facts"`
+	Derived             *struct {
+		Available bool              `json:"available"`
+		Errors    []json.RawMessage `json:"errors"`
+	} `json:"derived"`
+}
+type vectorBaseline struct {
+	Ref                    vectorAuditRef
+	Pairs                  []likeVectorPair
+	Facts                  []likeVectorFact
+	Controls               likeVectorControls
+	View                   sqlView
+	VectorSHA, ControlsSHA string
+}
+
+var errVectorAudit = errors.New("invalid complete vector baseline audit")
+
+func vectorJSONComplete(body []byte) error {
+	decoder := json.NewDecoder(bytes.NewReader(body))
+	decoder.UseNumber()
+	var walk func(int) error
+	walk = func(depth int) error {
+		if depth > 64 {
+			return errVectorAudit
+		}
+		token, err := decoder.Token()
+		if err != nil {
+			return err
+		}
+		delim, ok := token.(json.Delim)
+		if !ok {
+			return nil
+		}
+		switch delim {
+		case '{':
+			seen := map[string]bool{}
+			for decoder.More() {
+				token, err := decoder.Token()
+				name, ok := token.(string)
+				if err != nil || !ok || seen[name] {
+					return errVectorAudit
+				}
+				seen[name] = true
+				if err = walk(depth + 1); err != nil {
+					return err
+				}
+			}
+			token, err = decoder.Token()
+			if err != nil || token != json.Delim('}') {
+				return errVectorAudit
+			}
+		case '[':
+			for decoder.More() {
+				if err = walk(depth + 1); err != nil {
+					return err
+				}
+			}
+			token, err = decoder.Token()
+			if err != nil || token != json.Delim(']') {
+				return errVectorAudit
+			}
+		default:
+			return errVectorAudit
+		}
+		return nil
+	}
+	if err := walk(0); err != nil {
+		return err
+	}
+	if _, err := decoder.Token(); err != io.EOF {
+		return errVectorAudit
+	}
+	return nil
+}
+func vectorPolicyMatches(raw json.RawMessage, policy observerPolicy) bool {
+	var actual observerPolicy
+	return vectorExactFields(raw, "mode", "fullAuditTimeoutMs", "scope") && json.Unmarshal(raw, &actual) == nil && actual == policy
+}
+func vectorRawDate(raw json.RawMessage) (sql.NullString, error) {
+	if bytes.Equal(bytes.TrimSpace(raw), []byte("null")) {
+		return sql.NullString{}, nil
+	}
+	var value string
+	if len(raw) == 0 || json.Unmarshal(raw, &value) != nil {
+		return sql.NullString{}, errVectorAudit
+	}
+	parsed, err := time.Parse("2006-01-02 15:04:05.000000", value)
+	if err != nil || parsed.Format("2006-01-02 15:04:05.000000") != value {
+		return sql.NullString{}, errVectorAudit
+	}
+	return sql.NullString{String: value, Valid: true}, nil
+}
+func vectorControlHashes(raw *vectorAuditControls) (likeVectorControls, error) {
+	var result likeVectorControls
+	if raw == nil || len(raw.Projections) != 2 || raw.Search == nil {
+		return result, errVectorAudit
+	}
+	seen := map[string]bool{}
+	for _, row := range raw.Projections {
+		index := -1
+		if row.Projection == "follow-v1" {
+			index = 0
+		} else if row.Projection == "feed-v1" {
+			index = 1
+		}
+		if index < 0 || seen[row.Projection] {
+			return result, errVectorAudit
+		}
+		seen[row.Projection] = true
+		date, err := vectorRawDate(row.RebuiltAt)
+		if err != nil {
+			return result, err
+		}
+		body, _ := json.Marshal(struct {
+			Projection string
+			RebuiltAt  sql.NullString
+		}{row.Projection, date})
+		digest := sha256.Sum256(body)
+		result[index] = hex.EncodeToString(digest[:])
+	}
+	row := raw.Search
+	if row.Name != "search-v1" || row.IndexAlias == nil || row.ActiveGeneration == nil {
+		return result, errVectorAudit
+	}
+	date, err := vectorRawDate(row.RebuiltAt)
+	if err != nil {
+		return result, err
+	}
+	body, _ := json.Marshal(struct {
+		Name, IndexAlias, ActiveGeneration string
+		RebuiltAt                          sql.NullString
+	}{row.Name, *row.IndexAlias, *row.ActiveGeneration, date})
+	digest := sha256.Sum256(body)
+	result[2] = hex.EncodeToString(digest[:])
+	return result, nil
+}
+func vectorFixturePairs(body []byte) ([]likeVectorPair, error) {
+	notes, count, err := likeNotePool(body)
+	if err != nil {
+		return nil, err
+	}
+	var fixture struct {
+		Users []string `json:"userIds"`
+	}
+	if json.Unmarshal(body, &fixture) != nil || len(fixture.Users) != count {
+		return nil, errVectorAudit
+	}
+	pairs := make([]likeVectorPair, count)
+	for index, note := range notes {
+		pairs[index] = likeVectorPair{note, fixture.Users[index]}
+	}
+	seenNotes, seenUsers := map[string]bool{}, map[string]bool{}
+	for _, pair := range pairs {
+		if !likeVectorID(pair.NoteID) || !likeVectorID(pair.UserID) || seenNotes[pair.NoteID] || seenUsers[pair.UserID] {
+			return nil, errVectorAudit
+		}
+		seenNotes[pair.NoteID], seenUsers[pair.UserID] = true, true
+	}
+	return pairs, nil
+}
+func vectorRuntimeLimits() likeVectorLimits { return likeVectorLimits{40000, 40000, 64 << 20} }
+func vectorDigest(pairs []likeVectorPair, facts []likeVectorFact) (string, error) {
+	byNote := map[string]likeVectorFact{}
+	for _, fact := range facts {
+		byNote[fact.NoteID] = fact
+	}
+	type position struct {
+		NoteID  string `json:"noteId"`
+		UserID  string `json:"userId"`
+		Present bool   `json:"present"`
+		Version int64  `json:"version"`
+		Active  int    `json:"active"`
+	}
+	positions := make([]position, 0, len(pairs))
+	for _, pair := range pairs {
+		fact, exists := byNote[pair.NoteID]
+		if !exists || fact.UserID != pair.UserID {
+			return "", errVectorAudit
+		}
+		positions = append(positions, position{pair.NoteID, pair.UserID, true, fact.Version, fact.Active})
+	}
+	body, err := json.Marshal(positions)
+	if err != nil {
+		return "", err
+	}
+	digest := sha256.Sum256(body)
+	return hex.EncodeToString(digest[:]), nil
+}
+func validateVectorAudit(body, fixtureBytes []byte, ref vectorAuditRef, policy observerPolicy) (*vectorBaseline, error) {
+	if policy.Mode != "like-vector-v1" || vectorJSONComplete(body) != nil {
+		return nil, errVectorAudit
+	}
+	var proof vectorAuditDocument
+	if json.Unmarshal(body, &proof) != nil || !proof.Valid || !proof.FactsValid || !proof.DownstreamConverged || proof.Errors == nil || len(proof.Errors) != 0 || proof.StartedAt == nil || proof.FinishedAt == nil || *proof.StartedAt <= 0 || *proof.FinishedAt < *proof.StartedAt || proof.Facts == nil || proof.Derived == nil || !proof.Derived.Available || proof.Derived.Errors == nil || len(proof.Derived.Errors) != 0 {
+		return nil, errVectorAudit
+	}
+	snapshot := proof.Facts
+	fixtureHash := sha256.Sum256(fixtureBytes)
+	if snapshot.FixtureSHA != hex.EncodeToString(fixtureHash[:]) || !vectorPolicyMatches(snapshot.ObserverPolicy, policy) || snapshot.Transitions == nil || snapshot.EventCount == nil || *snapshot.EventCount < 0 || *snapshot.Transitions != *snapshot.EventCount || snapshot.Events == nil || snapshot.Delivery == nil || snapshot.Receipts == nil || snapshot.Parked == nil {
+		return nil, errVectorAudit
+	}
+	var contract map[string]string
+	if json.Unmarshal(snapshot.AuditContract, &contract) != nil || len(contract) != 3 || contract["contract"] != "like-cohort-audit-v1" || contract["sourceScope"] != "selected-aggregate-id-with-blog-or-like-attribution" || contract["hashContract"] != "communityprojection.Decode/LIKE/canonical-ascii-v1" {
+		return nil, errVectorAudit
+	}
+	pairs, err := vectorFixturePairs(fixtureBytes)
+	if err != nil || len(snapshot.Facts) != len(pairs) || len(snapshot.Notes) != len(pairs) {
+		return nil, errVectorAudit
+	}
+	baseline := &vectorBaseline{Ref: ref, Pairs: pairs}
+	expected := map[string]likeVectorPair{}
+	for _, pair := range pairs {
+		expected[pair.NoteID] = pair
+	}
+	facts := map[string]likeVectorFact{}
+	var transitions int64
+	for _, row := range snapshot.Facts {
+		pair, ok := expected[row.NoteID]
+		if !ok || row.UserID != pair.UserID || row.Version == nil || row.Active == nil || *row.Version < 0 || *row.Version > likeVectorMaxVersion || *row.Active != int(*row.Version%2) {
+			return nil, errVectorAudit
+		}
+		if _, seen := facts[row.NoteID]; seen {
+			return nil, errVectorAudit
+		}
+		fact := likeVectorFact{row.NoteID, row.UserID, *row.Version, *row.Active}
+		facts[row.NoteID] = fact
+		baseline.Facts = append(baseline.Facts, fact)
+		if *row.Version > likeVectorMaxInt64-transitions {
+			return nil, errVectorAudit
+		}
+		transitions += *row.Version
+	}
+	if transitions != *snapshot.EventCount {
+		return nil, errVectorAudit
+	}
+	seen := map[string]bool{}
+	for _, row := range snapshot.Notes {
+		fact, ok := facts[row.NoteID]
+		if !ok || seen[row.NoteID] || row.Liked == nil || row.ActiveRelations == nil || *row.Liked != int64(fact.Active) || *row.ActiveRelations != *row.Liked {
+			return nil, errVectorAudit
+		}
+		seen[row.NoteID] = true
+	}
+	seen = map[string]bool{}
+	var eventSum int64
+	for _, row := range snapshot.Events {
+		fact, ok := facts[row.NoteID]
+		if !ok || row.UserID != fact.UserID || seen[row.NoteID] || fact.Version == 0 || row.Count == nil || row.Distinct == nil || row.Min == nil || row.Max == nil || row.Invalid == nil || *row.Count != fact.Version || *row.Distinct != fact.Version || *row.Min != 1 || *row.Max != fact.Version || *row.Invalid != 0 {
+			return nil, errVectorAudit
+		}
+		seen[row.NoteID] = true
+		eventSum += *row.Count
+	}
+	for note, fact := range facts {
+		if fact.Version > 0 && !seen[note] {
+			return nil, errVectorAudit
+		}
+	}
+	if eventSum != transitions {
+		return nil, errVectorAudit
+	}
+	var delivered int64
+	if len(snapshot.Delivery) > 1 {
+		return nil, errVectorAudit
+	}
+	for _, row := range snapshot.Delivery {
+		if row.Status != "DONE" || row.Count == nil || *row.Count < 0 || *row.Count > likeVectorMaxInt64-delivered {
+			return nil, errVectorAudit
+		}
+		delivered += *row.Count
+	}
+	if delivered != transitions {
+		return nil, errVectorAudit
+	}
+	receipts := map[string]int64{}
+	for _, row := range snapshot.Receipts {
+		known := row.Projection == "follow-v1" || row.Projection == "feed-v1" || row.Projection == "search-v1"
+		if !known || row.State != "IGNORED" || row.Count == nil || row.InvalidHash == nil || row.InvalidProjection == nil || row.InvalidState == nil || *row.Count < 0 || *row.InvalidHash != 0 || *row.InvalidProjection != 0 || *row.InvalidState != 0 {
+			return nil, errVectorAudit
+		}
+		if _, seen := receipts[row.Projection]; seen {
+			return nil, errVectorAudit
+		}
+		receipts[row.Projection] = *row.Count
+	}
+	for _, group := range groups {
+		if receipts[group] != transitions {
+			return nil, errVectorAudit
+		}
+		baseline.View.Receipts = append(baseline.View.Receipts, receipt{Projection: group, Ignored: transitions})
+	}
+	for _, row := range snapshot.Parked {
+		if row.Count == nil || *row.Count < 0 || row.State != "RESOLVED" && row.State != "PARKED" || row.State == "PARKED" && *row.Count != 0 {
+			return nil, errVectorAudit
+		}
+	}
+	baseline.Controls, err = vectorControlHashes(snapshot.ControlRows)
+	if err != nil {
+		return nil, err
+	}
+	if snapshot.Watermark == nil || snapshot.Watermark.MaxID == nil || !snapshot.Watermark.DiagnosticOnly {
+		return nil, errVectorAudit
+	}
+	maxID, err := strconv.ParseInt(*snapshot.Watermark.MaxID, 10, 64)
+	if err != nil || maxID < 0 || transitions > 0 && maxID == 0 || strconv.FormatInt(maxID, 10) != *snapshot.Watermark.MaxID {
+		return nil, fmt.Errorf("%w: unsupported diagnostic watermark", errVectorAudit)
+	}
+	baseline.View.MaxOutboxID = maxID
+	baseline.View.Counts = counts{Events: transitions, Done: transitions}
+	baseline.VectorSHA, err = vectorDigest(pairs, baseline.Facts)
+	if err != nil {
+		return nil, err
+	}
+	controlBytes, _ := json.Marshal(baseline.Controls)
+	controlDigest := sha256.Sum256(controlBytes)
+	baseline.ControlsSHA = hex.EncodeToString(controlDigest[:])
+	return baseline, nil
+}
+func loadVectorAudit(path, expectedSHA, root string, fixtureBytes []byte, policy observerPolicy) (*vectorBaseline, error) {
+	if !regexp.MustCompile(`^[a-f0-9]{64}$`).MatchString(expectedSHA) || !filepath.IsAbs(path) || filepath.Clean(path) != path || filepath.Base(path) != "reconcile.json" || !beneath(path, root) {
+		return nil, errVectorAudit
+	}
+	info, err := os.Lstat(path)
+	if err != nil || !info.Mode().IsRegular() || info.Size() > 32<<20 {
+		return nil, errVectorAudit
+	}
+	real, err := filepath.EvalSymlinks(path)
+	realRoot, rootErr := filepath.EvalSymlinks(root)
+	relative, relErr := filepath.Rel(root, path)
+	if err != nil || rootErr != nil || relErr != nil || real != filepath.Join(realRoot, relative) {
+		return nil, errVectorAudit
+	}
+	body, err := os.ReadFile(path)
+	if err != nil || len(body) > 32<<20 {
+		return nil, errVectorAudit
+	}
+	digest := sha256.Sum256(body)
+	if hex.EncodeToString(digest[:]) != expectedSHA {
+		return nil, errVectorAudit
+	}
+	return validateVectorAudit(body, fixtureBytes, vectorAuditRef{filepath.ToSlash(relative), expectedSHA}, policy)
+}
+
+func createVectorEngine(ctx context.Context, db *sql.DB, audit *vectorBaseline) (*likeVectorEngine, error) {
+	if audit == nil || db == nil {
+		return nil, errVectorAudit
+	}
+	ctx, cancel := context.WithTimeout(ctx, 4*time.Second)
+	defer cancel()
+	tx, err := db.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelRepeatableRead, ReadOnly: true})
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+	stats := &likeVectorSQLStats{}
+	controls, err := likeVectorControlsSQL(ctx, tx, stats)
+	if err != nil {
+		return nil, err
+	}
+	if controls != audit.Controls {
+		return nil, fmt.Errorf("%w: maintenance_control_changed", errVectorAudit)
+	}
+	facts, err := likeVectorFactsSQL(ctx, tx, &likeVectorEngine{pairs: audit.Pairs}, stats)
+	if err != nil {
+		return nil, err
+	}
+	if len(facts) != len(audit.Pairs) {
+		return nil, fmt.Errorf("%w: baseline_fact_cardinality", errVectorAudit)
+	}
+	byNote := map[string]likeVectorFact{}
+	for _, fact := range facts {
+		if _, exists := byNote[fact.NoteID]; exists {
+			return nil, errVectorAudit
+		}
+		byNote[fact.NoteID] = fact
+	}
+	for _, expected := range audit.Facts {
+		if actual, exists := byNote[expected.NoteID]; !exists || actual != expected {
+			return nil, fmt.Errorf("%w: baseline_fact_changed", errVectorAudit)
+		}
+	}
+	if _, err = likeVectorSourceSchema(ctx, tx, stats); err != nil {
+		return nil, err
+	}
+	var maxID string
+	if err = tx.QueryRowContext(ctx, "SELECT CAST(COALESCE(MAX(id),0) AS CHAR) FROM tb_community_outbox").Scan(&maxID); err != nil {
+		return nil, err
+	}
+	if _, err = strconv.ParseInt(maxID, 10, 64); err != nil {
+		return nil, fmt.Errorf("%w: unsupported diagnostic watermark", errVectorAudit)
+	}
+	if err = ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err = tx.Commit(); err != nil {
+		return nil, err
+	}
+	if err = ctx.Err(); err != nil {
+		return nil, err
+	}
+	// A runtime engine exists only after the actual fresh RR read committed.
+	return newLikeVector(audit.Pairs, facts, controls, vectorRuntimeLimits())
+}
+
+func vectorKafkaComplete(view *kafkaView) bool {
+	if view == nil || len(view.Groups) != 3 {
+		return false
+	}
+	seen := map[string]bool{}
+	for _, group := range view.Groups {
+		known := false
+		for _, name := range groups {
+			if group.Group == "community."+name {
+				known = true
+			}
+		}
+		if !known || seen[group.Group] || !group.Initialized {
+			return false
+		}
+		seen[group.Group] = true
+	}
+	return true
+}
+
+func observeVectorWithKafka(db *sql.DB, engine *likeVectorEngine, watermark int64, start, deadline time.Time, kafkaRead func(context.Context) (*kafkaView, error)) sample {
+	started := time.Now()
+	s := sample{At: started.UTC(), ElapsedSeconds: time.Since(start).Seconds(), Errors: []string{}, Violations: []string{}}
+	limit := started.Add(4 * time.Second)
+	if deadline.Before(limit) {
+		limit = deadline
+	}
+	ctx, cancel := context.WithDeadline(context.Background(), limit)
+	defer cancel()
+	candidate, stats, err := readLikeVectorSQL(ctx, db, engine, watermark)
+	s.VectorSQL = stats
+	if err != nil {
+		s.Errors = append(s.Errors, "vector-sql-observation:"+fmt.Sprintf("%T", err))
+		if errors.Is(err, errLikeVectorInvariant) {
+			s.Violations = append(s.Violations, "LIKE vector invariant violated")
+		}
+	} else {
+		s.SQL = candidate.SQLView()
+	}
+	if kafkaRead == nil {
+		s.Errors = append(s.Errors, "kafka reader unavailable")
+	} else {
+		s.Kafka, err = kafkaRead(ctx)
+		if err != nil {
+			s.Errors = append(s.Errors, "kafka-observation:"+fmt.Sprintf("%T", err))
+		} else if s.Kafka == nil {
+			s.Errors = append(s.Errors, "kafka observation missing")
+		} else {
+			if !vectorKafkaComplete(s.Kafka) {
+				s.Errors = append(s.Errors, "kafka groups incomplete")
+			}
+		}
+	}
+	if ctx.Err() != nil {
+		s.Errors = append(s.Errors, "complete observation budget exceeded")
+	}
+	if candidate != nil {
+		if err = candidate.Accept(len(s.Errors) == 0 && len(s.Violations) == 0); err != nil && len(s.Errors) == 0 {
+			s.Errors = append(s.Errors, "vector publication rejected:"+fmt.Sprintf("%T", err))
+		}
+	}
+	s.DurationMS = float64(time.Since(started)) / float64(time.Millisecond)
+	return s
+}
+
+func vectorStartup(db *sql.DB, audit *vectorBaseline, start, deadline time.Time, kafkaRead func(context.Context) (*kafkaView, error)) (sample, *likeVectorEngine) {
+	started := time.Now()
+	limit := started.Add(4 * time.Second)
+	if deadline.Before(limit) {
+		limit = deadline
+	}
+	ctx, cancel := context.WithDeadline(context.Background(), limit)
+	defer cancel()
+	s := sample{At: started.UTC(), ElapsedSeconds: time.Since(start).Seconds(), Errors: []string{}, Violations: []string{}}
+	engine, err := createVectorEngine(ctx, db, audit)
+	if err != nil {
+		s.Errors = append(s.Errors, "vector-baseline:"+fmt.Sprintf("%T", err))
+	} else {
+		view := audit.View
+		view.StartedAt = started.UTC()
+		view.FinishedAt = time.Now().UTC()
+		view.Receipts = append([]receipt(nil), audit.View.Receipts...)
+		s.SQL = &view
+	}
+	if kafkaRead == nil {
+		s.Errors = append(s.Errors, "kafka reader unavailable")
+	} else {
+		s.Kafka, err = kafkaRead(ctx)
+		if err != nil {
+			s.Errors = append(s.Errors, "kafka-baseline:"+fmt.Sprintf("%T", err))
+		}
+	}
+	if ctx.Err() != nil {
+		s.Errors = append(s.Errors, "complete baseline readiness budget exceeded")
+	}
+	if !vectorKafkaComplete(s.Kafka) {
+		s.Errors = append(s.Errors, "complete Kafka readiness unavailable")
+	}
+	s.DurationMS = float64(time.Since(started)) / float64(time.Millisecond)
+	if len(s.Errors) > 0 || !baseline(s.SQL, s.Kafka) {
+		return s, nil
+	}
+	return s, engine
+}
+
+func addObserverMetadata(report map[string]any, policy observerPolicy, audit *vectorBaseline) {
+	report["observerPolicy"], report["observerSamplingLimits"] = policy, fixedObserverSampling()
+	if audit != nil {
+		report["baselineAudit"], report["baselineAuditEventCount"], report["baselineCountSource"] = audit.Ref, audit.View.Counts.Events, "bound-node-full-reconciliation"
+		report["baselineVectorSHA256"], report["baselineControlsSHA256"] = audit.VectorSHA, audit.ControlsSHA
+		limits := vectorRuntimeLimits()
+		report["observerVectorLimits"] = map[string]any{"maxNewEvents": limits.MaxNewEvents, "maxPendingEvents": limits.MaxPendingEvents, "maxTrackedLogicalBytes": limits.MaxTrackedBytes, "sourceChunkKeys": likeVectorSQLChunk, "sourcePayloadBytes": likeVectorPayloadBytes, "sourceResultValueBytes": likeVectorSQLValueBytes}
+	}
 }
 
 func read(path string, value any) error {
@@ -1255,6 +1940,8 @@ func mainRun() error {
 	output := flag.String("output", "", "new stage-downstream directory")
 	doneFile := flag.String("done-file", "", "owned control/done.json")
 	likeFixture := flag.String("like-fixture", "", "public like fixture; must match private env")
+	baselineAuditPath := flag.String("baseline-audit", "", "vector mode: original full reconcile.json")
+	baselineAuditSHA := flag.String("baseline-audit-sha256", "", "vector mode: original full reconcile SHA256")
 	maxSeconds := flag.Int("max-seconds", 360, "finite wall-time budget; explicitly selected PTS permits 1200 seconds")
 	flag.Parse()
 	wallLimit := 360
@@ -1287,6 +1974,13 @@ func mainRun() error {
 	env := map[string]string{}
 	if read(envPath, &env) != nil {
 		return errors.New("private environment unreadable")
+	}
+	policy, err := observerMode(env)
+	if err != nil {
+		return err
+	}
+	if policy.Mode == "full-history-v1" && (*baselineAuditPath != "" || *baselineAuditSHA != "") {
+		return errors.New("legacy mode rejects vector-only baseline references")
 	}
 	if env["CAP10_PLATFORM"] != executionPlatform {
 		return errors.New("native platform or evidence metadata differs")
@@ -1340,6 +2034,13 @@ func mainRun() error {
 	if err != nil {
 		return err
 	}
+	var audit *vectorBaseline
+	if policy.Mode == "like-vector-v1" {
+		audit, err = loadVectorAudit(*baselineAuditPath, *baselineAuditSHA, root, fixtureBytes, policy)
+		if err != nil {
+			return err
+		}
+	}
 	out, err := filepath.Abs(*output)
 	if err != nil || !beneath(out, root) {
 		return errors.New("new output outside fixed evidence root")
@@ -1387,6 +2088,7 @@ func mainRun() error {
 	start := time.Now()
 	deadline := start.Add(time.Duration(*maxSeconds) * time.Second)
 	var initial sample
+	var engine *likeVectorEngine
 	ready := false
 	startupAttempts := []sample{}
 	preflightDeadline := start.Add(75 * time.Second)
@@ -1394,7 +2096,11 @@ func mainRun() error {
 		preflightDeadline = deadline
 	}
 	for {
-		initial = observeWithBudget(initialDB, client, "community.events", 0, notes, start, preflightDeadline, 30*time.Second)
+		if audit == nil {
+			initial = observeWithBudget(initialDB, client, "community.events", 0, notes, start, preflightDeadline, 30*time.Second)
+		} else {
+			initial, engine = vectorStartup(db, audit, start, preflightDeadline, func(ctx context.Context) (*kafkaView, error) { return kafkaSnapshot(ctx, client, "community.events") })
+		}
 		startupAttempts = append(startupAttempts, initial)
 		ready = len(initial.Errors) == 0 && baseline(initial.SQL, initial.Kafka)
 		if ready || time.Now().Add(5*time.Second).After(preflightDeadline) {
@@ -1403,7 +2109,13 @@ func mainRun() error {
 		time.Sleep(5 * time.Second)
 	}
 	_ = initialDB.Close()
-	if err = save(filepath.Join(out, "ready.json"), map[string]any{"at": time.Now().UTC(), "ready": ready, "baseline": initial, "startupAttempts": startupAttempts, "observerPid": os.Getpid(), "fixedProject": "project-full-stack-cap10", "noteCount": len(notes), "poolSize": poolSize, "fixtureSHA256": hex.EncodeToString(fixtureDigest[:]), "initialBudgetSeconds": 30, "initialReadTimeoutSeconds": 15, "loadBudgetSeconds": 4, "loadReadTimeoutSeconds": 3, "scope": "bounded pre-load full-history readiness; initial cumulative LIKE baseline requires no pre-existing pending/receipt/park/lag before load. In-load observation cadence and budgets are unchanged"}); err != nil {
+	readyReport := map[string]any{"at": time.Now().UTC(), "ready": ready, "baseline": initial, "startupAttempts": startupAttempts, "observerPid": os.Getpid(), "fixedProject": "project-full-stack-cap10", "noteCount": len(notes), "poolSize": poolSize, "fixtureSHA256": hex.EncodeToString(fixtureDigest[:]), "initialBudgetSeconds": 30, "initialReadTimeoutSeconds": 15, "loadBudgetSeconds": 4, "loadReadTimeoutSeconds": 3, "scope": "bounded pre-load full-history readiness; initial cumulative LIKE baseline requires no pre-existing pending/receipt/park/lag before load. In-load observation cadence and budgets are unchanged"}
+	addObserverMetadata(readyReport, policy, audit)
+	if audit != nil {
+		readyReport["initialBudgetSeconds"], readyReport["initialReadTimeoutSeconds"] = 4, 3
+		readyReport["scope"] = "full cumulative baseline counters originate only from the bound Node full reconciliation; Go verifies the exact fresh RR fact/control vector and unchanged Kafka readiness, without rescanning source history"
+	}
+	if err = save(filepath.Join(out, "ready.json"), readyReport); err != nil {
 		return errors.New("ready evidence write failed")
 	}
 	if !ready {
@@ -1428,7 +2140,12 @@ func mainRun() error {
 			}
 			time.Sleep(delay)
 		}
-		s := observe(db, client, "community.events", watermark, notes, start, deadline)
+		var s sample
+		if audit == nil {
+			s = observe(db, client, "community.events", watermark, notes, start, deadline)
+		} else {
+			s = observeVectorWithKafka(db, engine, watermark, start, deadline, func(ctx context.Context) (*kafkaView, error) { return kafkaSnapshot(ctx, client, "community.events") })
+		}
 		samples++
 		if len(s.Errors) > 0 {
 			failures++
@@ -1471,7 +2188,12 @@ func mainRun() error {
 	if !complete && doneObserved.IsZero() {
 		_ = save(filepath.Join(filepath.Dir(done), "stop.json"), map[string]any{"at": time.Now().UTC(), "reason": "finite downstream observation window ended without owned control completion", "observerPid": os.Getpid()})
 	}
-	if err = save(filepath.Join(out, "summary.json"), map[string]any{"at": time.Now().UTC(), "valid": valid, "validScope": "complete stage collection, no semantic violations and post-control-done convergence only", "collectionValid": failures == 0, "semanticViolationCount": semanticFailures, "postControlDoneConverged": complete, "nativeRecoveryBudgetVerified": false, "fullChainStableBudgetVerified": false, "samples": samples, "failedSamples": failures, "maxSeconds": *maxSeconds, "startedAt": start.UTC(), "doneObservedAt": nullableTime(doneObserved), "recoveredAt": nullableTime(recovered), "recoveryFromObservedDoneMs": elapsedOrNil(doneObserved, recovered), "startOutboxWatermark": watermark, "baseline": initial, "allSamplesComplete": failures == 0, "scope": "stage samples read only id>startOutboxWatermark; cumulative cohort counts are the clean baseline plus stage counts. Kafka lag is whole topic, three independent groups, fetched sequentially. Final convergence is not steady-state proof. Grade the 60s native recovery budget from native stableEndedAt and timeline, not delayed helper/control completion."}); err != nil {
+	summaryReport := map[string]any{"at": time.Now().UTC(), "valid": valid, "validScope": "complete stage collection, no semantic violations and post-control-done convergence only", "collectionValid": failures == 0, "semanticViolationCount": semanticFailures, "postControlDoneConverged": complete, "nativeRecoveryBudgetVerified": false, "fullChainStableBudgetVerified": false, "samples": samples, "failedSamples": failures, "maxSeconds": *maxSeconds, "startedAt": start.UTC(), "doneObservedAt": nullableTime(doneObserved), "recoveredAt": nullableTime(recovered), "recoveryFromObservedDoneMs": elapsedOrNil(doneObserved, recovered), "startOutboxWatermark": watermark, "baseline": initial, "allSamplesComplete": failures == 0, "scope": "stage samples read only id>startOutboxWatermark; cumulative cohort counts are the clean baseline plus stage counts. Kafka lag is whole topic, three independent groups, fetched sequentially. Final convergence is not steady-state proof. Grade the 60s native recovery budget from native stableEndedAt and timeline, not delayed helper/control completion."}
+	addObserverMetadata(summaryReport, policy, audit)
+	if audit != nil {
+		summaryReport["scope"] = "stage samples discover exact fact-version deltas plus every unretired key; source watermark is diagnostic only. Baseline history counts come from the bound Node full audit; all stage SQL/Kafka samples must succeed before vector publication. Kafka lag and native recovery/convergence criteria are unchanged; final complete audit remains mandatory"
+	}
+	if err = save(filepath.Join(out, "summary.json"), summaryReport); err != nil {
 		return errors.New("summary write failed")
 	}
 	if !valid {

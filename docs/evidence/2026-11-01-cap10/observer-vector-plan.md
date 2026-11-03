@@ -29,6 +29,14 @@
 | OBS-BIND | 预约、命令、API/active/formal freeze及ready须匹配同一固定方法/预算；vector不得借旧缺字段元数据 | 89项策略、71项runner检查及独审通过；旧observer在vector ready门前拒，仍未启用新SQL/main |
 | AUDIT-V1b | 实际完整SQL与严格源/hash/未知projection校验 | 实际32/12/4组与3计划通过，完整1225500源审计106.077秒<120；造数hash无效且缺事实，非业务对账通过；[小票](full-audit-plan.md)，旧FAIL保留 |
 | OBS-PY-AUDIT | 本窗原admission/reconcile SHA→CLI/ready/summary→最终完整审计E+delta绑定，保留原恢复门槛 | `44f05c0`，9项文件绑定/89策略/71runner检查及独审通过；[规格](observer-audit-binding-plan.md)，无native互通或容量声明 |
-| OBS-WIRE | 模式/预算绑定命令、active/freeze及报告，逐窗基线/终审引用，监督关闭 | Go main纯检查/独审通过；Python逐窗绑定已交；真实Node proof互通/非NULL控制行及完整审计预算未闭合，尚未启用云测；正式两轮不因逐窗proof变化而换freeze |
+| OBS-WIRE | Go显式模式、逐窗原审计/事实/控制fresh RR绑定，完整SQL/Kafka样本成功才推进，监督关闭 | Go29顶层/78子例纯检查、race/vet/Linux构建及独审通过；真实N2 SQL/Redis→Go factory互通通过，NULL/非NULL控制行、present v0及stale拒绝后精确恢复；尚未运行真实observer main或PTS |
 
 基线和终审SHA、事实向量摘要是逐窗引用；mode、工具、固定预算属于整个freeze。工具SQL/query/事件/逻辑字节与真实进程资源分别报告，逻辑上限不是RSS。没有上述接线和真实验证时，不把纯引擎、交叉编译或本机SQLprobe记成PTS或业务容量通过。
+
+## OBS-WIRE真实互通范围
+
+新模式CLI必须带本窗原完整reconcile路径/SHA；先严格读原夹具/方法/控制/计数，再以同一实际提交的RR快照核事实与控制均未变化，历史E明确来自绑定的Node完整审计，timeline仅记录本窗delta。默认缺失模式保持旧方法；固定采样4秒总/3秒读/5秒节奏及native恢复60秒不变，单样本限额与逻辑字节/真实RSS分别报告。
+
+真实本机独立IT使用N2/E2：一个inactive v2配对有两条生产Decode规范源与三组各两条准确收据，另一配对明确present v0；实际Node提取原snapshot/factErrors/derived/reconcile函数并读真实Redis生产Mark Lua结果，完整对账valid/factsValid/converged、errors均通过。Go精确原源读取该原件，fresh RR factory接受，受控改变v0事实后拒绝旧基线，再精确恢复。NULL与非NULL DATETIME(3)控制值按六位小数互通，未改数据库时区或持久化。
+
+该用例没有调用固定端口的Node main、Go observer main、Kafka、API或PTS；不能把局部真实工厂互通称为完整容量接线已通过。两条源、六条收据、笔记/事实、三个原控制值及四个最初不存在的Redis键均已精确清理/恢复，自有MySQL/Redis正常停止、卷与其它服务保留。去掉阶段重复扫描及accepted-sample摘要仍是后续必要收尾，不因本票通过跳过。

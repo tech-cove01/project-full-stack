@@ -27,7 +27,7 @@
 | AUDIT-V1a | 固定模式与完整审计预算，默认兼容，非法值拒绝 | `f65d62b`，Node39与runner71检查、独审通过 |
 | OBS-POLICY / OBS-LAUNCH | Python共用固定合同；启动元数据与实际进程环境绑定mode/预算，历史缺字段仅旧模式兼容 | 纯合同`3f3b601`已交；启动绑定10项检查及独审通过，不代表SQL/main或窗口接线完成 |
 | OBS-BIND | 预约、命令、API/active/formal freeze及ready须匹配同一固定方法/预算；vector不得借旧缺字段元数据 | 89项策略、71项runner检查及独审通过；旧observer在vector ready门前拒，仍未启用新SQL/main |
-| AUDIT-V1b | 实际完整SQL计划与正确性，包括未知projection；真实原/新同条件对照 | 待验证；不得用receipt单查询冒充完整审计 |
+| AUDIT-V1b | 实际完整SQL与严格源/hash/未知projection校验 | 实际32/12/4组与3计划通过，完整1225500源审计106.077秒<120；造数hash无效且缺事实，非业务对账通过；[小票](full-audit-plan.md)，旧FAIL保留 |
 | OBS-PY-AUDIT | 本窗原admission/reconcile SHA→CLI/ready/summary→最终完整审计E+delta绑定，保留原恢复门槛 | `44f05c0`，9项文件绑定/89策略/71runner检查及独审通过；[规格](observer-audit-binding-plan.md)，无native互通或容量声明 |
 | OBS-WIRE | 模式/预算绑定命令、active/freeze及报告，逐窗基线/终审引用，监督关闭 | Go main纯检查/独审通过；Python逐窗绑定已交；真实Node proof互通/非NULL控制行及完整审计预算未闭合，尚未启用云测；正式两轮不因逐窗proof变化而换freeze |
 

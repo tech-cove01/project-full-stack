@@ -12,6 +12,7 @@ import { nativeScenarioWindow } from './load/cap10-native-window.mjs'
 import { collectDatabase } from './load/cap10-db-observe.mjs'
 import { poolSize, fixturePoolSize } from './load/cap10-cohort-contract.mjs'
 import { observerPolicy } from './load/cap10-observer-policy.mjs'
+import { auditSQL, auditContractMatches, auditErrors, baselineAuditReference, baselineAuditCount } from './load/cap10-full-audit.mjs'
 
 const owned = { project: 'project-full-stack-cap10', mysql: '3481', redis: '6581', api: 'http://127.0.0.1:8281', database: 'project_full_stack_go' }
 const action = process.argv[2]
@@ -186,6 +187,7 @@ async function guard() {
 }
 
 const fixturePath = process.env.CAP_LIKE_FIXTURE ? resolve(process.env.CAP_LIKE_FIXTURE) : null
+const fixtureManifestHashes = new WeakMap()
 async function loadFixture() {
   assert.ok(fixturePath, 'explicit CAP_LIKE_FIXTURE required')
   evidence(fixturePath)
@@ -211,7 +213,9 @@ async function loadFixture() {
     assert.equal(new Set(manifest.userIds).size, count); assert.equal(new Set(manifest.multiNoteIds).size, count)
     for (const id of [...manifest.userIds, ...manifest.multiNoteIds]) assert.match(id, /^[1-9]\d*$/)
   }
-  return { manifest, runtime, manifestSHA256: hash(bytes) }
+  const manifestSHA256 = hash(bytes)
+  fixtureManifestHashes.set(manifest, manifestSHA256)
+  return { manifest, runtime, manifestSHA256 }
 }
 const modeNotes = (manifest, mode) => { assert.equal(mode, 'multi'); return manifest.multiNoteIds }
 function rows(raw) { return raw ? raw.split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line)) : [] }
@@ -221,23 +225,41 @@ async function snapshot(manifest, mode, label) {
   const start = Date.now()
   // All fact, counter and outbox checks share one read-only RR snapshot. The
   // pre/post phase windows remain sequential, never a per-request commit clock.
-  const raw = rows(await sql(`SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY;
+  const legacyStatement = `SET TRANSACTION ISOLATION LEVEL REPEATABLE READ; START TRANSACTION WITH CONSISTENT SNAPSHOT, READ ONLY;
 SELECT JSON_OBJECT('_kind','fact','noteId',CAST(l.blog_id AS CHAR),'userId',CAST(l.user_id AS CHAR),'active',l.active,'version',l.version) FROM tb_blog_like l WHERE l.blog_id IN (${ids}) ORDER BY l.blog_id,l.user_id;
 SELECT JSON_OBJECT('_kind','note','noteId',CAST(b.id AS CHAR),'liked',b.liked,'activeRelations',(SELECT COUNT(*) FROM tb_blog_like l WHERE l.blog_id=b.id AND l.active=1)) FROM tb_blog b WHERE b.id IN (${ids}) ORDER BY b.id;
 SELECT JSON_OBJECT('_kind','event','noteId',g.note_id,'userId',g.user_id,'count',g.event_count,'distinctVersions',g.distinct_versions,'minVersion',g.min_version,'maxVersion',g.max_version,'invalid',g.invalid_count) FROM (SELECT o.aggregate_id AS note_id,JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')) AS user_id,COUNT(*) AS event_count,COUNT(DISTINCT o.aggregate_version) AS distinct_versions,MIN(o.aggregate_version) AS min_version,MAX(o.aggregate_version) AS max_version,SUM(COALESCE(BINARY o.aggregate_type<>BINARY 'BLOG' OR BINARY o.event_id<>BINARY CONCAT('LIKE:',o.aggregate_id,':',JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.userId')),':',o.aggregate_version) OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.blogId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.userId'))<>'STRING' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.version'))<>'INTEGER' OR JSON_TYPE(JSON_EXTRACT(o.payload,'$.liked'))<>'BOOLEAN' OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.blogId'))<>BINARY o.aggregate_id OR BINARY JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.version'))<>BINARY CAST(o.aggregate_version AS CHAR) OR JSON_UNQUOTE(JSON_EXTRACT(o.payload,'$.liked'))<>IF(MOD(o.aggregate_version,2)=1,'true','false'),1)) AS invalid_count FROM tb_community_outbox o WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id IN (${ids}) GROUP BY o.aggregate_id,user_id) g ORDER BY g.note_id,g.user_id;
 SELECT JSON_OBJECT('_kind','delivery','status',delivery_status,'count',COUNT(*)) FROM tb_community_outbox WHERE event_type='LIKE_CHANGED' AND aggregate_id IN (${ids}) GROUP BY delivery_status;
 SELECT JSON_OBJECT('_kind','receipt','projection',r.projection,'state',r.state,'count',COUNT(*)) FROM tb_community_projection_event r JOIN tb_community_outbox o ON o.event_id=r.event_id WHERE o.event_type='LIKE_CHANGED' AND o.aggregate_id IN (${ids}) GROUP BY r.projection,r.state;
-SELECT JSON_OBJECT('_kind','parked','projection',projection,'state',state,'count',COUNT(*)) FROM tb_community_consumer_failure GROUP BY projection,state; COMMIT;`, true, observationPolicy.fullAuditTimeoutMs))
+SELECT JSON_OBJECT('_kind','parked','projection',projection,'state',state,'count',COUNT(*)) FROM tb_community_consumer_failure GROUP BY projection,state; COMMIT;`
+  const fullAudit = observationPolicy.mode === 'like-vector-v1'
+  const raw = rows(await sql(fullAudit ? auditSQL(modeNotes(manifest, mode)) : legacyStatement, true, observationPolicy.fullAuditTimeoutMs))
   const take = kind => raw.filter(row => row._kind === kind).map(({ _kind, ...row }) => row)
-  assert.ok(raw.every(row => ['fact', 'note', 'event', 'delivery', 'receipt', 'parked'].includes(row._kind)))
+  assert.ok(raw.every(row => ['fact', 'note', 'event', 'delivery', 'receipt', 'parked', 'audit', 'control-projection', 'control-search', 'watermark'].includes(row._kind)))
   const facts = take('fact'), notes = take('note'), events = take('event'), delivery = take('delivery'), receipts = take('receipt'), parked = take('parked')
+  const audit = take('audit')
+  assert.ok(fullAudit ? audit.length === 1 && auditContractMatches(audit[0]) : audit.length === 0, 'full audit contract marker differs')
+  let auditMetadata = {}
+  if (fullAudit) {
+    const controls = take('control-projection'), search = take('control-search'), watermark = take('watermark')
+    assert.ok(controls.length === 2 && new Set(controls.map(row => row.projection)).size === 2
+      && controls.every(row => ['follow-v1', 'feed-v1'].includes(row.projection)) && search.length === 1 && watermark.length === 1,
+    'complete full-audit control and watermark rows required')
+    const fixtureManifestSHA256 = fixtureManifestHashes.get(manifest)
+    assert.match(fixtureManifestSHA256 || '', /^[a-f0-9]{64}$/, 'original fixture bytes must be bound before audit')
+    auditMetadata = { auditContract: audit[0], fixtureManifestSHA256,
+      controlRows: { projections: ['follow-v1', 'feed-v1'].map(name => controls.find(row => row.projection === name)), search: search[0] },
+      sourceWatermark: { ...watermark[0], diagnosticOnly: true } }
+  } else assert.equal(take('control-projection').length + take('control-search').length + take('watermark').length, 0)
   return { label, startedAt: start, endedAt: Date.now(), observerPolicy: observationPolicy, facts, notes, events, delivery, receipts, parked,
+    ...auditMetadata,
     transitions: facts.reduce((sum, row) => sum + row.version, 0), eventCount: events.reduce((sum, row) => sum + row.count, 0),
     scope: 'one read-only RR snapshot of the selected synthetic note pool; pre/post captures sequential; global consumer-failure rows include earlier stages in the owned DB' }
 }
 
 function factErrors(manifest, mode, state) {
   const errors = [], users = new Set(manifest.userIds), notes = new Set(modeNotes(manifest, mode))
+  if (observationPolicy.mode === 'like-vector-v1') errors.push(...auditErrors(manifest, state, fixtureManifestHashes.get(manifest)))
   const actual = new Map(state.facts.map(r => [r.noteId + ':' + r.userId, r]))
   const events = new Map(state.events.map(r => [r.noteId + ':' + r.userId, r]))
   for (const row of state.facts) {
@@ -374,7 +396,16 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
   assert.ok(process.env.CAP10_DOWNSTREAM_EVIDENCE, 'setup requires actual downstream baseline evidence')
   const downstream = evidence(process.env.CAP10_DOWNSTREAM_EVIDENCE)
   const ready = JSON.parse(await readFile(join(downstream, 'ready.json'), 'utf8'))
-  const expectedStageEvents = audit.facts.eventCount - ready.baseline.sql.counts.events
+  let baselineEvents, baselineAudit
+  if (observationPolicy.mode === 'like-vector-v1') {
+    baselineAudit = baselineAuditReference(ready)
+    const path = evidence(join(evidenceRoot, baselineAudit.path)), detail = await lstat(path)
+    assert.ok(detail.isFile() && !detail.isSymbolicLink() && detail.size <= 8 * 1024 * 1024, 'bounded original baseline audit required')
+    assert.equal(await realpath(path), path, 'baseline audit path alias rejected')
+    const bytes = await readFile(path)
+    baselineEvents = baselineAuditCount(ready, JSON.parse(bytes), hash(bytes), manifest, fixtureManifestHashes.get(manifest))
+  } else baselineEvents = ready.baseline.sql.counts.events
+  const expectedStageEvents = audit.facts.eventCount - baselineEvents
   let clean = null
   while (Date.now() <= deadline) {
     const lines = (await readFile(join(downstream, 'timeline.ndjson'), 'utf8')).trim().split(/\r?\n/)
@@ -390,6 +421,7 @@ COMMIT;`, false, Math.max(1, deadline - Date.now())))
   const result = { startedAt, committedAt, completedAt: Date.now(), setupBudgetMs: 60000,
     generatedFactTransitions: expected, generatedEvents: expected, countedAsHTTPMutation: false,
     beforeTransitions: before.transitions, beforeEvents: before.eventCount, afterTransitions: after.transitions, afterEvents: after.eventCount,
+    ...(baselineAudit ? { baselineAudit, baselineAuditEventCount: baselineEvents, baselineCountSource: ready.baselineCountSource } : {}),
     beforeDistribution: initialDistribution(manifest, before), afterDistribution: distribution,
     markLuaSourcePath: luaSourcePath, markLuaSHA256: hash(lua), sourceFileSHA256: hash(source),
     localTTLWaitMs: 2100, observerCleanSampleAt: clean.at,

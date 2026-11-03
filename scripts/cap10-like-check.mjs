@@ -7,6 +7,7 @@ import { stateFromBody, classifyWrite, pairForVU, unknownBounds } from './load/c
 import { nativeScenarioWindow } from './load/cap10-native-window.mjs'
 import { fixturePoolSize } from './load/cap10-cohort-contract.mjs'
 import { observerPolicy } from './load/cap10-observer-policy.mjs'
+import { AUDIT_CONTRACT, auditSQL, auditContractMatches } from './load/cap10-full-audit.mjs'
 
 let checks = 0
 async function check(name, fn) { await fn(); checks++; console.log('PASS ' + name) }
@@ -124,7 +125,7 @@ const auditCode = ['sql', 'snapshot'].map(name => helperSource.match(new RegExp(
 function auditContext(policy, reply = { code: 0, stdout: '', stderr: '', timedOut: false }) {
   const calls = []
   const context = { assert, observationPolicy: policy, sqlBin: 'synthetic-mysql', owned: { mysql: '3481', database: 'synthetic-owned' },
-    process: { env: { MYSQL_USER: 'synthetic-owner', MYSQL_PASSWORD: 'synthetic-only', CAP_READ_OBSERVER_USER: 'synthetic-reader', CAP_READ_OBSERVER_PASSWORD: 'synthetic-only' } },
+    process: { env: { MYSQL_USER: 'synthetic-owner', MYSQL_PASSWORD: 'synthetic-only', CAP_READ_OBSERVER_USER: 'synthetic-reader', CAP_READ_OBSERVER_PASSWORD: 'synthetic-only' } }, auditSQL, auditContractMatches, fixtureManifestHashes: { get: () => 'f'.repeat(64) },
     command: async (binary, argv, options) => { calls.push({ binary, argv, options }); return reply },
     modeNotes: manifest => manifest.multiNoteIds,
     rows: raw => raw ? raw.split(/\r?\n/).filter(Boolean).map(line => JSON.parse(line)) : [] }
@@ -135,7 +136,12 @@ await check('actual snapshot alone receives the selected full-audit timeout and 
   const records = [{ _kind: 'fact', noteId: '101', userId: '1', active: 0, version: 2 }, { _kind: 'event', count: 2 }]
   for (const mode of ['full-history-v1', 'like-vector-v1']) {
     const policy = observerPolicy({ CAP10_OBSERVER_MODE: mode })
-    const { context, calls } = auditContext(policy, { code: 0, stdout: records.map(row => JSON.stringify(row)).join('\n'), stderr: '', timedOut: false })
+    const payload = mode === 'like-vector-v1' ? [...records, { _kind: 'audit', ...AUDIT_CONTRACT },
+      { _kind: 'control-projection', projection: 'follow-v1', rebuiltAt: null },
+      { _kind: 'control-projection', projection: 'feed-v1', rebuiltAt: null },
+      { _kind: 'control-search', name: 'search-v1', indexAlias: '', activeGeneration: '', rebuiltAt: null },
+      { _kind: 'watermark', maxOutboxId: '2' }] : records
+    const { context, calls } = auditContext(policy, { code: 0, stdout: payload.map(row => JSON.stringify(row)).join('\n'), stderr: '', timedOut: false })
     await context.sql('SELECT 1')
     const state = await context.snapshot({ multiNoteIds: ['101'] }, 'multi', 'synthetic-audit')
     assert.equal(calls.length, 2)
@@ -146,6 +152,12 @@ await check('actual snapshot alone receives the selected full-audit timeout and 
     assert.match(calls[1].options.input, /COMMIT;$/)
     assert.deepEqual(state.observerPolicy, policy)
     assert.equal(state.transitions, 2); assert.equal(state.eventCount, 2)
+    if (mode === 'like-vector-v1') {
+      assert.equal(state.fixtureManifestSHA256, 'f'.repeat(64))
+      assert.equal(state.controlRows.projections[0].projection, 'follow-v1')
+      assert.equal(state.controlRows.search.rebuiltAt, null)
+      assert.equal(state.sourceWatermark.maxOutboxId, '2'); assert.equal(state.sourceWatermark.diagnosticOnly, true)
+    } else assert.equal(Object.hasOwn(state, 'controlRows'), false)
   }
 })
 await check('a timed-out complete audit rejects instead of fabricating empty facts or a passing report', async () => {
@@ -205,7 +217,7 @@ const derivedCode = helperSource.match(/^async function derived[\s\S]*?^}/m)[0]
 const seedManifest = { userIds: nativeFixture.users.map(x => x.userId), multiNoteIds: nativeFixture.multiNoteIds, relationshipSeed: { version: 0 } }
 function zeroState() { return { facts: nativeFixture.initial.map(x => ({ ...x })), notes: nativeFixture.multiNoteIds.map(noteId => ({ noteId, liked: 0, activeRelations: 0 })), events: [], transitions: 0, eventCount: 0 } }
 function projectionContext(replies) {
-  const context = { modeNotes: m => m.multiNoteIds, redisCommands: async () => replies, assert }
+  const context = { modeNotes: m => m.multiNoteIds, redisCommands: async () => replies, assert, observationPolicy: observerPolicy({}) }
   vm.runInNewContext(factCode + '\n' + derivedCode + '\nglobalThis.factErrors = factErrors; globalThis.derived = derived', context)
   return context
 }
@@ -247,7 +259,7 @@ function fixtureContext(manifest, action = 'inspect', runtimeCount = manifest.us
   const context = { assert, fixturePoolSize, fixturePath: '/public/fixture.json', evidence() {},
     readFile: async path => JSON.stringify(path === '/public/fixture.json' ? manifest : runtime),
     hash: () => 'fixture-byte-hash', owned: { project: 'owned-project', api: 'http://127.0.0.1:8281' },
-    executionPlatform: 'windows', process: { env: {} }, action, privateRoot: '/owned', join: posix.join, basename: posix.basename,
+    executionPlatform: 'windows', process: { env: {} }, action, privateRoot: '/owned', join: posix.join, basename: posix.basename, fixtureManifestHashes: new WeakMap(),
     under: (path, root) => path.startsWith(root + '/') }
   vm.runInNewContext(fixtureCode + '\n' + distributionCode + '\nglobalThis.loadFixture = loadFixture; globalThis.initialDistribution = initialDistribution', context)
   return context

@@ -42,7 +42,9 @@
 
 **业务批量认领已交：** `bd35e2b1b3b464d312790259b60fe6b458a4e645`保留原RC事务、byte前缀/停车截止及attempt fence，把32条lease更新从32次单表UPDATE合为1次multi UPDATE，混合停车为2次；真实prepare/execute/close从各33次降至2或3次，插值开启时双方均0，SELECT/COMMIT仍各1。10项真实功能、24个实际EXPLAIN及独立1顶层/8子例计数对照通过，首轮计数harness漏Com_update_multi的FAIL原样保留。935条有限测试事件已精确清理、原大历史不变、自有容器正常停；普通39项/vet与双审通过，无新业务QPS。详情见[小票](docs/evidence/2026-11-01-cap10/relay-claim-point-plan.md)，已随`44f05c0`正常推送至既有origin/main，原TLS失败与后续成功分别保留。
 
-**开机前仍未闭合：** Go增量main已实现并通过纯检查/独审，实际互通仍待验证；Python逐窗基线/终审绑定`44f05c0e7f9decde1a2e7b572d7b3bd7bdcd29f4`的9项真实文件、89策略/71runner检查及独审通过、已推送；Node完整审计需验证实际Decode hash、完整查询预算和跨语言非NULL控制行。当前全量snapshot在多个setup阶段重复执行，120秒单次审计与原60秒setup的组合也必须先实测收敛，不能带到付费环境才发现。云机保持停止，不将局部SQL/SDK收益当5000或正式容量通过。
+**完整审计真实验证已闭合：** 新模式已通过实际生产Decode的32项可存储身份/hash对照、12项收据反例、5源/4组聚合及3个真实EXPLAIN。原1055分组FAIL和随后解析器字段顺序FAIL均保留；源修复不禁用严格SQL模式，解析只对原raw离线修复，不重跑已过语义。唯一完整RR查询在本机1CPU/4GiB/Buffer Pool2GiB下耗时106077.0271ms，实际Exit0/无timeout/完整COMMIT，符合单次120秒预算；原历史造数三组共3676500条hash不匹配、笔记/事实缺失，业务对账不通过且未测Redis，不能称业务或新QPS通过。104件闭合manifest=`9701a337c197217d7a6050e395d5d0596a9465fcb5d34348abeb1d1d4475f90d`，自有容器正常停且原服务受保护。见[审计小票](docs/evidence/2026-11-01-cap10/full-audit-plan.md)。
+
+**开机前仍未闭合：** Go增量main已实现并通过纯检查/独审，实际非NULL控制行与Node/Redis互通待验证；Python逐窗基线/终审绑定`44f05c0e7f9decde1a2e7b572d7b3bd7bdcd29f4`的9项真实文件、89策略/71runner检查及独审通过、已推送。106秒已证明不能在setup60中反复全史扫描，接下来以同RR事实/计数轻读和已接受增量样本的精确向量摘要完成中间阶段，原生恢复后仅一次完整终审；该去重尚未实现。Done批完成点更新候选另做有限真实验证，未采纳到生产。云机保持停止，不将局部SQL/SDK收益当5000或正式容量通过。
 
 <details>
 <summary>此前执行过程与原计划快照（历史，以上述最新决定为准）</summary>

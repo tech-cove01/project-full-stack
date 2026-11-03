@@ -45,13 +45,16 @@ type receipt struct {
 	Ignored    int64  `json:"ignored"`
 }
 type sqlView struct {
-	StartedAt      time.Time `json:"startedAt"`
-	FinishedAt     time.Time `json:"finishedAt"`
-	AfterWatermark int64     `json:"afterWatermark"`
-	MaxOutboxID    int64     `json:"maxOutboxId"`
-	Counts         counts    `json:"counts"`
-	Receipts       []receipt `json:"receipts"`
-	Parked         int64     `json:"parked"`
+	StartedAt        time.Time `json:"startedAt"`
+	FinishedAt       time.Time `json:"finishedAt"`
+	AfterWatermark   int64     `json:"afterWatermark"`
+	MaxOutboxID      int64     `json:"maxOutboxId"`
+	Counts           counts    `json:"counts"`
+	Receipts         []receipt `json:"receipts"`
+	Parked           int64     `json:"parked"`
+	DigestContract   string    `json:"digestContract,omitempty"`
+	FactVectorSHA256 string    `json:"factVectorSHA256,omitempty"`
+	ControlsSHA256   string    `json:"controlsSHA256,omitempty"`
 }
 type partitionView struct {
 	Partition   int   `json:"partition"`
@@ -554,10 +557,11 @@ type likeVectorSQLTx interface {
 }
 
 type likeVectorSQLCandidate struct {
-	engine       *likeVectorEngine
-	proposal     *likeVectorProposal
-	view         sqlView
-	sqlCommitted bool
+	engine                           *likeVectorEngine
+	proposal                         *likeVectorProposal
+	view                             sqlView
+	sqlCommitted                     bool
+	factVectorSHA256, controlsSHA256 string
 }
 
 func (candidate *likeVectorSQLCandidate) SQLView() *sqlView {
@@ -912,6 +916,17 @@ func readLikeVectorSQLTx(ctx context.Context, tx likeVectorSQLTx, engine *likeVe
 	if err := tx.QueryRowContext(ctx, "SELECT COALESCE(MAX(id),0) FROM tb_community_outbox").Scan(&maxID); err != nil {
 		return nil, stats, err
 	}
+	// These identities describe the same validated RR rows as this proposal.
+	// They remain private until SQL commit and whole-sample Accept both succeed.
+	factSHA, err := vectorDigest(engine.pairs, facts)
+	if err != nil {
+		return nil, stats, err
+	}
+	controlBytes, err := json.Marshal(controls)
+	if err != nil {
+		return nil, stats, err
+	}
+	controlSHA := sha256.Sum256(controlBytes)
 	if err := ctx.Err(); err != nil {
 		return nil, stats, err
 	}
@@ -926,6 +941,7 @@ func readLikeVectorSQLTx(ctx context.Context, tx likeVectorSQLTx, engine *likeVe
 	stats.Phase = "complete"
 	view := proposal.View()
 	return &likeVectorSQLCandidate{engine: engine, proposal: proposal, sqlCommitted: true,
+		factVectorSHA256: factSHA, controlsSHA256: hex.EncodeToString(controlSHA[:]),
 		view: sqlView{StartedAt: stats.StartedAt, FinishedAt: time.Now().UTC(), AfterWatermark: after,
 			MaxOutboxID: maxID, Counts: view.Counts, Receipts: view.Receipts, Parked: parked}}, stats, nil
 }
@@ -1557,7 +1573,11 @@ func observeVectorWithKafka(db *sql.DB, engine *likeVectorEngine, watermark int6
 		s.Errors = append(s.Errors, "complete observation budget exceeded")
 	}
 	if candidate != nil {
-		if err = candidate.Accept(len(s.Errors) == 0 && len(s.Violations) == 0); err != nil && len(s.Errors) == 0 {
+		if err = candidate.Accept(len(s.Errors) == 0 && len(s.Violations) == 0); err == nil {
+			s.SQL.DigestContract = "like-vector-digest-v1"
+			s.SQL.FactVectorSHA256 = candidate.factVectorSHA256
+			s.SQL.ControlsSHA256 = candidate.controlsSHA256
+		} else if len(s.Errors) == 0 {
 			s.Errors = append(s.Errors, "vector publication rejected:"+fmt.Sprintf("%T", err))
 		}
 	}

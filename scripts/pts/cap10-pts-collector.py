@@ -20,8 +20,11 @@ KINDS = ('mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')
 COUNT_KEYS = ('planned', 'attempted', 'completed', *KINDS)
 FACT_KEYS = ('wanted', 'observedLiked', 'previousVersion', 'observedVersion', 'observedNoteId')
 RECORD_KEYS = {'ordinal', 'slot', 'kind', 'startedUnixMs', 'elapsedMs', 'status', *FACT_KEYS}
+PREHEAT_RECORD_KEYS = RECORD_KEYS | {'observedLikes'}
 MAX_SAFE = 9007199254740991
 RSS_LIMIT = 6 << 30
+PREHEAT_PROTOCOL = 'relation-noop-v1'
+PREHEAT_RATE = 500
 
 
 def canonical(value):
@@ -44,6 +47,13 @@ def clock_protocol(value):
     protocol = value.get('clockProtocol', 'embedded-v1')
     if type(protocol) is not str or protocol not in ('embedded-v1', 'dedicated-v1'):
         raise ValueError('collector clock protocol invalid')
+    return protocol
+
+
+def preheat_protocol(value):
+    protocol = value.get('preheatProtocol', 'none')
+    if type(protocol) is not str or protocol not in ('none', PREHEAT_PROTOCOL):
+        raise ValueError('collector preparation protocol invalid')
     return protocol
 
 
@@ -73,6 +83,7 @@ class EngineStore:
         self._config = copy.deepcopy(config)
         assert isinstance(config, dict), 'fixed collector configuration required'
         self._clock_protocol = clock_protocol(config)
+        self._preheat_protocol = preheat_protocol(config)
         for key in ('runId', 'phase', 'controlToken'):
             assert type(config.get(key)) is str and config[key], 'collector identity required'
         assert config['phase'] in ('warm', 'stable'), 'fixed collector phase required'
@@ -95,11 +106,17 @@ class EngineStore:
             self._relations[row['slot']] = copy.deepcopy(row)
         assert len({(r['userId'], r['noteId']) for r in rows}) == self._pool_size, 'private relationships duplicated'
         self._note_ids = {r['noteId'] for r in rows}
+        if self._preheat_protocol == PREHEAT_PROTOCOL:
+            assert len(self._note_ids) == self._pool_size, 'preparation requires one exclusively owned note per relation'
         self._planned_total = planned_total(config['rate'], config['seconds'])
         self._identity = {key: config[key] for key in ('runId', 'phase', 'rate', 'seconds', 'apiUrl', 'fixtureSHA256', 'scriptSHA256')}
         self._identity['expectedEngines'] = self._expected_engines
         if 'clockProtocol' in config:
             self._identity['clockProtocol'] = self._clock_protocol
+        if 'preheatProtocol' in config:
+            self._identity['preheatProtocol'] = self._preheat_protocol
+            if self._preheat_protocol == PREHEAT_PROTOCOL:
+                self._identity['preheatRate'] = PREHEAT_RATE
         # Keep historical missing-field configuration identities unchanged.
         # New explicit dimensions bind their pool and PTS concurrency as well.
         if 'poolSize' in config or 'ptsConcurrency' in config or self._expected_engines != cohort.DEFAULT_ENGINES:
@@ -127,6 +144,9 @@ class EngineStore:
         self._collection_errors = []
         self._generator_timing_violations = 0
         self._generator_timing_details = []
+        self._preheat_start = None
+        self._preheat_records = {}
+        self._preheat_counts = Counter()
         self._closed = False
         self._journal_hasher = hashlib.sha256()
         self._journal_path = Path(journalPath)
@@ -205,8 +225,11 @@ class EngineStore:
             self._require(False, 'collector frame encoding invalid')
 
     def _control(self):
-        return {**self._identity, 'serverUnixMs': self._now(), 'startUnixMs': self._start,
-                'stop': self._stop, 'stopReason': self._reason, 'hash': self._identity_hash}
+        result = {**self._identity, 'serverUnixMs': self._now(), 'startUnixMs': self._start,
+                  'stop': self._stop, 'stopReason': self._reason, 'hash': self._identity_hash}
+        if self._preheat_protocol == PREHEAT_PROTOCOL:
+            result['preheatStartUnixMs'] = self._preheat_start
+        return result
 
     def control(self):
         with self._lock:
@@ -235,6 +258,7 @@ class EngineStore:
                 self._require(self._start is None and not self._stop, 'collector registration already frozen')
                 self._require(len(self._engines) < self._expected_engines and not any(slot in self._owners for slot in slots), 'collector slot ownership overlaps')
                 self._engines[engine_id] = {'slots': slots, 'lastSeenUnixMs': self._now(), 'batches': {}, 'complete': None,
+                                           'preheatBatches': {}, 'preheatCounts': Counter(),
                                            'readyWorkers': 0, 'resources': None, 'lastResourceUnixMs': None,
                                            'lastValidCPUUnixMs': None, 'clock': None, 'highCPUStreak': 0,
                                            'cpuSamples': [], 'lastValidCPUSample': None}
@@ -245,10 +269,101 @@ class EngineStore:
                 self._append({'kind': 'ready', 'engineId': engine_id, 'readyWorkers': payload['readyWorkers']})
                 self._engines[engine_id]['readyWorkers'] = payload['readyWorkers']
             self._engines[engine_id]['lastSeenUnixMs'] = self._now()
-            if len(self._engines) == self._expected_engines and len(self._owners) == self._pool_size and self._start is None and all(e['readyWorkers'] == len(e['slots']) for e in self._engines.values()):
-                self._start = math.ceil(self._now()) + 10000
-                self._append({'kind': 'barrier', 'startUnixMs': self._start, 'endUnixMs': self._start + self._config['seconds'] * 1000})
+            self._advance_barrier()
             return {**self._control(), 'relations': [copy.deepcopy(self._relations[slot]) for slot in slots]}
+
+    def _advance_barrier(self):
+        if (self._stop or self._start is not None or len(self._engines) != self._expected_engines
+                or len(self._owners) != self._pool_size
+                or any(e['readyWorkers'] != len(e['slots']) for e in self._engines.values())):
+            return
+        if self._preheat_protocol == PREHEAT_PROTOCOL:
+            if self._preheat_start is None:
+                start = math.ceil(self._now()) + 10000
+                self._append({'kind': 'preheat-barrier', 'preheatProtocol': PREHEAT_PROTOCOL,
+                              'startUnixMs': start, 'rate': PREHEAT_RATE, 'planned': self._pool_size})
+                self._preheat_start = start
+            if len(self._preheat_records) != self._pool_size or self._preheat_counts['noop'] != self._pool_size:
+                return
+        start = math.ceil(self._now()) + 10000
+        self._append({'kind': 'barrier', 'startUnixMs': start, 'endUnixMs': start + self._config['seconds'] * 1000})
+        self._start = start
+
+    def _preheat_raw_counts(self, engine_id=None):
+        kinds = self._preheat_counts if engine_id is None else self._engines[engine_id]['preheatCounts']
+        count = sum(kinds.values())
+        return {'planned': self._pool_size if engine_id is None else len(self._engines[engine_id]['slots']),
+                'attempted': count, 'completed': count, **{key: kinds[key] for key in KINDS}}
+
+    def preheat(self, payload):
+        """Durable preparation terminals never enter native counters or percentiles."""
+        with self._lock:
+            self.tick()
+            self._require(self._preheat_protocol == PREHEAT_PROTOCOL, 'collector preparation not enabled')
+            engine_id = self._base(payload)
+            self._require(set(payload) == {'runId', 'engineId', 'seq', 'records', 'clock', 'resources'},
+                          'collector preparation fields differ')
+            self._require(engine_id in self._engines, 'collector preparation engine not registered')
+            engine = self._engines[engine_id]
+            self._require(integer(payload['seq']) and isinstance(payload['records'], list)
+                          and 1 <= len(payload['records']) <= 128, 'collector preparation sequence/size invalid')
+            frame_hash = self._frame_hash(payload)
+            if payload['seq'] in engine['preheatBatches']:
+                self._require(engine['preheatBatches'][payload['seq']] == frame_hash,
+                              'collector preparation duplicate sequence content differs')
+                return {**self._control(), 'ack': payload['seq'], 'duplicate': True}
+            self._require(self._preheat_start is not None and self._start is None and engine['complete'] is None
+                          and payload['seq'] == len(engine['preheatBatches']), 'collector preparation barrier/sequence invalid')
+            self._clock_resource(engine, payload['clock'], payload['resources'])
+            records, slots, invalid = [], set(), False
+            for raw in payload['records']:
+                self._require(isinstance(raw, dict) and set(raw) == PREHEAT_RECORD_KEYS
+                              and all(type(v) in (str, int, float, bool, type(None)) for v in raw.values()),
+                              'collector preparation terminal fields invalid')
+                record = dict(raw)
+                slot = record['slot']
+                self._require(integer(slot, 0, self._pool_size - 1) and integer(record['ordinal'])
+                              and record['ordinal'] == slot and self._owners.get(slot) == engine_id
+                              and slot not in slots and slot not in self._preheat_records,
+                              'collector preparation slot ownership/repetition invalid')
+                relation = self._relations[slot]
+                self._require(record['kind'] in KINDS and record['kind'] != 'dropped'
+                              and number(record['startedUnixMs'], self._preheat_start + slot * 1000 / PREHEAT_RATE)
+                              and number(record['elapsedMs'])
+                              and (record['status'] is None or integer(record['status'], 0, 599))
+                              and type(record['wanted']) is bool and record['wanted'] == bool(relation['active'])
+                              and integer(record['previousVersion']) and record['previousVersion'] == relation['version']
+                              and (record['observedLiked'] is None or type(record['observedLiked']) is bool)
+                              and (record['observedVersion'] is None or integer(record['observedVersion']))
+                              and (record['observedLikes'] is None or integer(record['observedLikes']))
+                              and (record['observedNoteId'] is None or type(record['observedNoteId']) is str),
+                              'collector preparation fact/timing types invalid')
+                self._require(record['startedUnixMs'] + record['elapsedMs'] <= self._now() + engine['clock']['uncertaintyMs'],
+                              'collector preparation terminal precedes measured completion')
+                valid = (record['kind'] == 'noop' and record['status'] == 200
+                         and record['observedLiked'] == bool(relation['active'])
+                         and record['observedVersion'] == relation['version']
+                         and record['observedLikes'] == relation['active']
+                         and record['observedNoteId'] == relation['noteId'])
+                invalid = invalid or not valid
+                records.append(record)
+                slots.add(slot)
+            self._append({'kind': 'preheat', 'runId': payload['runId'], 'engineId': engine_id,
+                          'seq': payload['seq'], 'frameSHA256': frame_hash, 'records': records,
+                          'clock': payload['clock'], 'resources': payload['resources']})
+            for record in records:
+                self._preheat_records[record['slot']] = record['kind']
+                self._preheat_counts[record['kind']] += 1
+                engine['preheatCounts'][record['kind']] += 1
+            engine['preheatBatches'][payload['seq']] = frame_hash
+            engine['lastSeenUnixMs'] = self._now()
+            engine['lastResourceUnixMs'] = engine['lastSeenUnixMs']
+            if engine['cpuSamples'][-1]['intervalValid']:
+                engine['lastValidCPUUnixMs'] = engine['lastSeenUnixMs']
+            if invalid:
+                self._stop_for('collector preparation terminal is not an unchanged noop', collection=True)
+            self._advance_barrier()
+            return {**self._control(), 'ack': payload['seq'], 'duplicate': False}
 
     def _clock_resource(self, engine, clock, resources=None):
         self._require(isinstance(clock, dict) and set(clock) == {'uncertaintyMs', 'offsetMs', 'roundTripMs'}, 'collector engine clock fields invalid')
@@ -425,7 +540,10 @@ class EngineStore:
         with self._lock:
             self.tick()
             engine_id = self._base(payload)
-            self._require(set(payload) == {'runId', 'engineId', 'lastSeq', 'counts', 'clock', 'stoppedOffering', 'inFlight'}, 'collector completion fields differ')
+            fields = {'runId', 'engineId', 'lastSeq', 'counts', 'clock', 'stoppedOffering', 'inFlight'}
+            if self._preheat_protocol == PREHEAT_PROTOCOL:
+                fields.add('preparationCounts')
+            self._require(set(payload) == fields, 'collector completion fields differ')
             self._require(engine_id in self._engines, 'collector engine not registered')
             engine = self._engines[engine_id]
             completion_hash = self._frame_hash(payload)
@@ -439,17 +557,28 @@ class EngineStore:
             raw = self._raw_counts(engine_id)
             stopped = payload['stoppedOffering'] is True and type(payload['inFlight']) is int and payload['inFlight'] == 0
             counters_match = counts == raw
+            preparation_complete = True
+            if self._preheat_protocol == PREHEAT_PROTOCOL:
+                preparation_counts = payload['preparationCounts']
+                self._require(isinstance(preparation_counts, dict) and set(preparation_counts) == set(COUNT_KEYS)
+                              and all(integer(v) for v in preparation_counts.values()), 'collector preparation completion counts invalid')
+                preparation_complete = (preparation_counts == self._preheat_raw_counts(engine_id)
+                                        and preparation_counts['noop'] == len(engine['slots'])
+                                        and preparation_counts['attempted'] == len(engine['slots'])
+                                        and len(self._preheat_records) == self._pool_size)
             coverage = sum(raw[k] for k in KINDS) == raw['planned']
             duration = self._start is not None and self._now() >= self._start + self._config['seconds'] * 1000
             resource_fresh = (engine['lastResourceUnixMs'] is not None and engine['lastValidCPUUnixMs'] is not None and
                               0 <= self._now() - engine['lastResourceUnixMs'] < 15000 and
                               0 <= self._now() - engine['lastValidCPUUnixMs'] < 15000)
-            valid = bool(stopped and counters_match and coverage and duration and resource_fresh)
+            valid = bool(stopped and counters_match and coverage and duration and resource_fresh and preparation_complete)
             self._append({'kind': 'complete', 'runId': payload['runId'], 'engineId': engine_id,
                           'completionSHA256': completion_hash, 'lastSeq': payload['lastSeq'], 'counts': counts,
                           'clock': payload['clock'], 'stoppedOffering': payload['stoppedOffering'], 'inFlight': payload['inFlight'],
                           'collectorRawCounts': raw, 'ordinalCoverageComplete': coverage, 'nativeDurationComplete': duration,
                           'resourceEvidenceFresh': resource_fresh,
+                          **({'preparationCounts': payload['preparationCounts'], 'preparationComplete': preparation_complete}
+                             if self._preheat_protocol == PREHEAT_PROTOCOL else {}),
                           'accepted': True, 'complete': valid})
             engine['complete'] = {'hash': completion_hash, 'valid': valid, 'counts': copy.deepcopy(counts),
                                   'stoppedOffering': stopped, 'counterMatches': counters_match, 'coverage': coverage, 'duration': duration}
@@ -505,9 +634,17 @@ class EngineStore:
                         'counts': copy.deepcopy(engine['complete']['counts']) if engine['complete'] is not None else None}
                        for engine_id, engine in sorted(self._engines.items())]
             complete = len(engines) == self._expected_engines and len(self._owners) == self._pool_size and all(e['complete'] for e in engines)
+            preparation = {}
+            if self._preheat_protocol == PREHEAT_PROTOCOL:
+                counts = self._preheat_raw_counts()
+                preparation = {'preparation': {'protocol': PREHEAT_PROTOCOL, 'rate': PREHEAT_RATE,
+                    'startUnixMs': self._preheat_start, 'counts': counts,
+                    'coverageComplete': len(self._preheat_records) == self._pool_size,
+                    'passed': self._start is not None and counts['noop'] == self._pool_size,
+                    'scope': 'One unchanged noop per exclusive relation through the same thread and HTTP sampler before native start; excluded from native offers, counts, latency and QPS. PTS lifecycle traffic/cost includes these requests.'}}
             collection_valid = complete and not self._collection_errors
             unknown_exact = collection_valid
-            return {**self._control(), 'complete': complete, 'endUnixMs': self._start + self._config['seconds'] * 1000 if self._start is not None else None,
+            return {**self._control(), **preparation, 'complete': complete, 'endUnixMs': self._start + self._config['seconds'] * 1000 if self._start is not None else None,
                     'counts': raw, 'notOffered': raw['planned'] - raw['attempted'] - raw['dropped'],
                     'allLatency': statistics['allLatency'], 'mutationLatency': statistics['mutationLatency'],
                     'quantileMethod': 'R7; full raw native HTTP elapsedMs, including failed HTTP terminals',

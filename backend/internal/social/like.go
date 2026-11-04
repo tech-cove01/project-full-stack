@@ -102,14 +102,16 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 		if result.RowsAffected != 1 {
 			return ErrUnsafe
 		}
-		delta := 1
+		var counter *gorm.DB
 		if wanted == 0 {
-			delta = -1
+			// liked is unsigned: protect its input before subtraction. An outer
+			// GREATEST cannot catch underflow from evaluating liked + (-1).
+			counter = tx.WithContext(ctx).Exec(`UPDATE tb_blog SET liked=GREATEST(liked,1)-1 WHERE id=?`, note)
+		} else {
+			counter = tx.WithContext(ctx).Exec(`UPDATE tb_blog SET liked=GREATEST(0,liked+?) WHERE id=?`, 1, note)
 		}
-		// GREATEST keeps the counter non-negative even if a projection later drifts.
-		if err := tx.WithContext(ctx).Exec(`UPDATE tb_blog SET liked=GREATEST(0,liked+?) WHERE id=?`,
-			delta, note).Error; err != nil {
-			return err
+		if counter.Error != nil {
+			return counter.Error
 		}
 		return enqueue(ctx, tx, likeEventID(note, user, version), "BLOG",
 			strconv.FormatUint(note, 10), version, "LIKE_CHANGED",

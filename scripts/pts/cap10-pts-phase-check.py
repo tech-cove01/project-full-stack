@@ -158,6 +158,48 @@ class EnvelopeChecks(unittest.TestCase):
         self.assertEqual(value['nativeScenario']['durationMs'], 60000)
         self.assertEqual(value['metrics']['cap_like_mutation']['count'], 60)
 
+    def test_preparation_counts_are_bound_but_excluded_from_native_metrics(self):
+        summary = full_summary()
+        summary.update(poolSize=17, expectedEngines=3, ptsConcurrency=20, preheatProtocol='relation-noop-v1')
+        summary['preparation'] = {'protocol': 'relation-noop-v1', 'rate': 500, 'passed': True,
+            'coverageComplete': True, 'counts': {'planned': 17, 'attempted': 17, 'completed': 17,
+                'noop': 17, 'mutation': 0, 'uncertain': 0, 'rejected': 0, 'invalid': 0, 'dropped': 0}}
+        result = phase.normalized(summary, 60)
+        self.assertEqual(result['preparation'], summary['preparation'])
+        self.assertEqual(result['metrics']['http_reqs{name:like-write}']['count'], 60)
+        self.assertEqual(result['metrics']['cap_like_noop']['count'], 0)
+        self.assertEqual(result['nativeScenario']['durationMs'], 60000)
+        for changes in ({'passed': False}, {'coverageComplete': False}, {'rate': 501},
+                        {'counts': {**summary['preparation']['counts'], 'noop': 16}},
+                        {'counts': {**summary['preparation']['counts'], 'uncertain': 1}}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                phase.normalized({**summary, 'preparation': {**summary['preparation'], **changes}}, 60)
+
+    def test_preparation_route_still_requires_bearer_and_strict_store_validation(self):
+        fake = Mock()
+        fake.preheat.return_value = {'ack': 0}
+        server = ThreadingHTTPServer(('127.0.0.1', 0), phase.handler_type(fake, 'synthetic-preheat-secret', threading.RLock()))
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=5)
+            connection.request('POST', '/preheat', '{}', {'Content-Type': 'application/json'})
+            response = connection.getresponse()
+            self.assertEqual(response.status, 403)
+            response.read()
+            fake.preheat.assert_not_called()
+            connection.close()
+            connection = http.client.HTTPConnection('127.0.0.1', server.server_port, timeout=5)
+            connection.request('POST', '/preheat', '{}', {'Authorization': 'Bearer synthetic-preheat-secret'})
+            response = connection.getresponse()
+            self.assertEqual(response.status, 200)
+            response.read()
+            fake.preheat.assert_called_once_with({})
+            connection.close()
+        finally:
+            server.shutdown()
+            server.server_close()
+
     def test_guarded_plan_keeps_full_native_window_and_actual_counts(self):
         summary = full_summary()
         summary.update(rate=800, launchGuardMs=100, plannedTotal=47920)

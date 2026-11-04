@@ -11,6 +11,7 @@ const xml = text => String(text).replaceAll('&', '&amp;').replaceAll('<', '&lt;'
 const sha = bytes => createHash('sha256').update(bytes).digest('hex')
 export async function bundle(directory, { collectorUrl, controlToken, poolSize = 512, expectedEngines = 2 } = {}) {
   const clockProtocol = 'dedicated-v1'
+  const preheatProtocol = 'relation-noop-v1'
   checkedPoolSize(poolSize); engineCount(expectedEngines, poolSize)
   const concurrency = ptsConcurrency(poolSize, expectedEngines)
   const cohortSourceSHA256 = { 'scripts/load/cap10-cohort-contract.mjs': sha(await readFile(join(here, '../load/cap10-cohort-contract.mjs'))) }
@@ -29,7 +30,7 @@ export async function bundle(directory, { collectorUrl, controlToken, poolSize =
   const sampledHTTP = http.replace('</HTTPSamplerProxy><hashTree>', () => '</HTTPSamplerProxy><hashTree>' + jsr('pre', 'pre') + '<hashTree/>')
   const normal = csv + jsr('bind') + '<hashTree/>' + loop.replace(http, () => sampledHTTP) + jsr('done') + '<hashTree/>'
   const identity = Object.entries({ 'cap10.scriptSHA256': scriptSHA256, 'cap10.poolSize': poolSize, 'cap10.expectedEngines': expectedEngines,
-    'cap10.clockProtocol': clockProtocol })
+    'cap10.clockProtocol': clockProtocol, 'cap10.preheatProtocol': preheatProtocol })
     .map(([name, value]) => `<elementProp name="${name}" elementType="Argument"><stringProp name="Argument.name">${name}</stringProp><stringProp name="Argument.value">${value}</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp>`).join('')
   const plan = `<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments">${identity}</collectionProp></Arguments><hashTree/>${thread('ThreadGroup',poolSize+' fixed exclusive relationships',poolSize,normal)}${thread('PostThreadGroup','Terminal durable ACK',1,jsr('finish')+'<hashTree/>')}</hashTree></hashTree></jmeterTestPlan>\n`
   // User-defined variables, unlike JMeter properties, are transported by PTS.
@@ -48,7 +49,9 @@ export async function bundle(directory, { collectorUrl, controlToken, poolSize =
   }
   const manifest = { generator: 'pts-jmeter', version: 1, scriptSHA256, jmxSHA256: sha(finalPlan), slotsSHA256: sha(await readFile(slots)),
     poolSize, expectedEngines, normalThreads: poolSize, setupThreads: 0, teardownThreads: 1, ptsConcurrency: concurrency, csvSplitRequired: true,
-    cohortSourceSHA256, clockProtocol,
+    cohortSourceSHA256, clockProtocol, preheatProtocol,
+    preparation: { protocol: preheatProtocol, requestsPerPhase: poolSize, offeredRate: 500,
+      scope: 'Same relation thread and HTTP sampler before native common start; separate durable noop terminals, excluded from native QPS/counts/latencies. PTS lifecycle includes preparation cost.' },
     standardJMeter: '5.6.3', plugins: [], artifacts: ['cap10-jmeter.jmx','slots.csv','cap10-pts-private.json'],
     privacy: 'private config has only collector control credential; slots.csv contains no user/note/token. Do not publish raw PTS sampled logs without redaction.' }
   await writeFile(join(directory, 'cap10-jmeter-manifest.json'), JSON.stringify(manifest, null, 2) + '\n', { flag: 'wx' })

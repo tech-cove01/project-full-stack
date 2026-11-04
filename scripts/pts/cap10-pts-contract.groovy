@@ -9,6 +9,19 @@ class Cap10PTSContract {
         if (!(value instanceof String) || !(value in ['embedded-v1','dedicated-v1'])) throw new IllegalArgumentException('invalid clock protocol')
         value
     }
+    static String preheatProtocol(Map config) {
+        def value = config.containsKey('preheatProtocol') ? config.preheatProtocol : 'none'
+        if (!(value instanceof String) || !(value in ['none','relation-noop-v1'])) throw new IllegalArgumentException('invalid preparation protocol')
+        value
+    }
+    static Map classifyPreheat(int status, String text, String noteId, Map previous) {
+        Map outcome = classify(status,text,noteId,previous,previous.liked as boolean)
+        def likes = null
+        try { def value = new JsonSlurper().parseText(text)?.data?.likes; if (integer(value)) likes = value.longValue() }
+        catch (Exception ignored) { }
+        if (outcome.kind == 'noop' && likes != (previous.liked ? 1L : 0L)) outcome.kind = 'invalid'
+        [observedLiked:null,observedVersion:null,observedNoteId:null] + outcome + [observedLikes:likes]
+    }
     static List framePrefix(List pending, int remaining) {
         if (remaining < 0 || remaining > pending.size()) throw new IllegalArgumentException('invalid pending frame snapshot')
         new ArrayList(pending.subList(0, Math.min(remaining, MAX_FRAME_RECORDS)))

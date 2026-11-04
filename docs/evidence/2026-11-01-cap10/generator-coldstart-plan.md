@@ -59,3 +59,32 @@ Finite local JMeter checks use synthetic HTTP only, not a capacity workload.
 Source review and finite checks establish the protocol and wiring, not that
 3000/s or any other capacity passes. The original latency, pipeline, resource,
 clock, complete-terminal and two-formal-window requirements still apply.
+
+## Offline delivery evidence (2026-11-04)
+
+G1 was committed as `a4ca69b896be0fae4ab9d279f1c3f838d0f5afb8` after
+12 focused protocol checks, the 47 existing collector checks, and two source
+reviews. The first focused run used an invalid synthetic resource clock above
+the existing safe-integer bound; the fixture was corrected, not the guard.
+
+G2 direct checks cover 40 phase/envelope/auth cases, 11 generated-artifact cases,
+38 existing Groovy contract cases and nine actual runtime/ACK method cases.
+The installed JDK 24 cannot compile this JMeter distribution's Groovy 3; the
+checks use the already installed Corretto 8 instead, without installing a JVM.
+
+One finite local run used 17 synthetic relationships over three real JMeter
+JVMs. It observed exactly 17 preparation noops and 20 native mutations through
+the one HTTP node, native latency sample count 20, native noop/timing counts
+zero, and all three processes exiting zero. A second finite run returned HTTP
+503 during preparation for five synthetic relationships over two JVMs: all
+five preparation effects remained uncertain, native attempts stayed zero and
+the native start was never assigned; both JVMs exited. These are wiring and
+failure-containment results, without a business database, cloud calls, capacity
+reservation or a business QPS result. Local keepalive resets at JVM exit remain
+in the tool output and do not replace the durable terminal records.
+
+Only the same JVM/thread/HTTP/JSON path is prepared by these noops. They do not
+exercise the backend mutation UPDATE/Outbox transaction and are not evidence
+that this write path is warm or that a target capacity will pass. Explicit
+packet/configuration/admission protocol binding must also pass before any
+future PTS Start; a runtime protocol mismatch alone is not a pre-Start check.

@@ -10,27 +10,32 @@ import org.apache.jmeter.services.FileServer
 class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
-    final String collectorUrl, controlToken, scriptHash, declaredClockProtocol
+    final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
     final int declaredPoolSize, declaredEngines
     final List<Integer> slots
     final Map<Integer,Map> relations = new ConcurrentHashMap<Integer,Map>()
     final Set<Integer> bound = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>())
     final Set<Integer> done = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>())
+    final Set<Integer> preheated = Collections.newSetFromMap(new ConcurrentHashMap<Integer,Boolean>())
     final AtomicBoolean stop = new AtomicBoolean(false)
     final AtomicLong attempted = new AtomicLong(), completed = new AtomicLong(), inFlight = new AtomicLong()
     final Map<String,AtomicLong> counts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
+    final AtomicLong preheatAttempted = new AtomicLong(), preheatCompleted = new AtomicLong()
+    final Map<String,AtomicLong> preheatCounts = ['mutation','noop','uncertain','rejected','invalid','dropped'].collectEntries { [(it):new AtomicLong()] }
     final List<Map> pending = []
+    final List<Map> preheatPending = []
     final Object io = new Object(), recordsLock = new Object()
     volatile Map config, clock
     volatile boolean anchorFrozen = false, terminalAck = false
-    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE
+    volatile long anchorNano, anchorServerMs, startNano = Long.MIN_VALUE, preheatNano = Long.MIN_VALUE
     volatile int readyReported = -1
-    long seq = 0
+    long seq = 0, preheatSeq = 0
     Thread reporter
 
-    Cap10PTSRun(String hash, int pool = 512, int engines = 2, String protocol = 'embedded-v1') {
+    Cap10PTSRun(String hash, int pool = 512, int engines = 2, String protocol = 'embedded-v1', String preparation = 'none') {
         scriptHash = hash
         declaredClockProtocol = Cap10PTSContract.clockProtocol([clockProtocol:protocol])
+        declaredPreheatProtocol = Cap10PTSContract.preheatProtocol([preheatProtocol:preparation])
         declaredPoolSize = Cap10PTSContract.poolSize(pool)
         declaredEngines = Cap10PTSContract.engineCount(engines, pool)
         def file = FileServer.getFileServer().getResolvedFile('cap10-pts-private.json')
@@ -113,6 +118,8 @@ class Cap10PTSRun {
         if (dimensions.poolSize != declaredPoolSize || dimensions.expectedEngines != declaredEngines) throw new IllegalStateException('JMeter and collector cohort differ')
         c = c + dimensions
         if (Cap10PTSContract.clockProtocol(c) != declaredClockProtocol) throw new IllegalStateException('collector clock protocol differs')
+        if (Cap10PTSContract.preheatProtocol(c) != declaredPreheatProtocol ||
+            (declaredPreheatProtocol != 'none' && c.preheatRate != 500)) throw new IllegalStateException('collector preparation protocol differs')
         if (c.version != 1 || !(c.runId instanceof String) || !(c.phase in ['warm','stable']) ||
             !(c.rate instanceof Integer) || c.rate < 1 || c.rate > 5000 || !(c.seconds in (c.phase == 'warm' ? [10] : [60,180])) ||
             c.jitterBudgetMs != 50 || c.clockUncertaintyMaxMs != 50 || c.scriptSHA256 != scriptHash || !(c.fixtureSHA256 ==~ /[a-f0-9]{64}/) ||
@@ -125,6 +132,10 @@ class Cap10PTSRun {
         if (config != null && c.apiUrl != config.apiUrl) throw new IllegalStateException('API endpoint changed')
         config = c
         if (declaredClockProtocol == 'dedicated-v1' && clock == null) request('/clock')
+        if (declaredPreheatProtocol != 'none' && c.preheatStartUnixMs != null && preheatNano == Long.MIN_VALUE) {
+            if (!(c.preheatStartUnixMs instanceof Number) || c.preheatStartUnixMs < serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('preparation start was not safely in the future')
+            preheatNano = anchorNano + ((c.preheatStartUnixMs.longValue()-anchorServerMs)*1000000L)
+        }
         if (c.startUnixMs != null && startNano == Long.MIN_VALUE) {
             if (!(c.startUnixMs instanceof Number) || c.startUnixMs < serverAt(System.nanoTime()) + 100d) throw new IllegalStateException('common start was not safely in the future')
             anchorFrozen = true
@@ -136,6 +147,14 @@ class Cap10PTSRun {
         relations[slot]
     }
     Map gate(Map relation, long iteration) {
+        if (declaredPreheatProtocol != 'none' && !preheated.contains(relation.slot as int)) {
+            while (preheatNano == Long.MIN_VALUE && !stop.get()) Thread.sleep(50)
+            if (stop.get()) return null
+            long preparation = Cap10PTSContract.preparationNano(preheatNano, relation.slot as long, 500)
+            while (!stop.get() && System.nanoTime() < preparation) LockSupport.parkNanos(Math.min(50000000L, preparation-System.nanoTime()))
+            if (stop.get()) return null
+            return [ordinal:relation.slot,slot:relation.slot,wanted:relation.liked,previousVersion:relation.version,preheat:true]
+        }
         while (startNano == Long.MIN_VALUE && !stop.get()) Thread.sleep(50)
         if (stop.get()) return null
         long ordinal = Cap10PTSContract.ordinal(relation.slot as int, iteration, declaredPoolSize)
@@ -154,29 +173,49 @@ class Cap10PTSRun {
     }
     void begin(Map offer) {
         if (offer.containsKey('startedUnixMs')) throw new IllegalStateException('offer already handed to HTTP sampler')
-        long deadline = Cap10PTSContract.dueNano(startNano, offer.ordinal as long, config.rate as int)
+        boolean preparation = offer.preheat == true
+        long epoch = preparation ? preheatNano : startNano
+        int rate = preparation ? 500 : config.rate as int
+        long deadline = Cap10PTSContract.dueNano(epoch, offer.ordinal as long, rate)
         long now = Cap10PTSContract.handoffNano(deadline)
-        double scheduled = config.startUnixMs.doubleValue() + offer.ordinal * 1000d / config.rate
+        double scheduled = (preparation ? config.preheatStartUnixMs : config.startUnixMs).doubleValue() + offer.ordinal * 1000d / rate
         // Retain the actual clock reading; wait out sub-microsecond rounding
         // rather than clamping a timestamp forward to its planned deadline.
         while (serverAt(now) < scheduled) now = Cap10PTSContract.handoffNano(now + 1000L)
         // This already selected sampler may execute even if a stop arrived
         // during setup, so do not return early and send it before its deadline.
-        attempted.incrementAndGet(); inFlight.incrementAndGet()
+        (preparation ? preheatAttempted : attempted).incrementAndGet(); inFlight.incrementAndGet()
         offer.startedUnixMs = serverAt(System.nanoTime())
     }
     void terminal(Map relation, Map offer, def sample) {
         int status = sample.responseCode ==~ /\d{3}/ ? sample.responseCode.toInteger() : 0
-        Map outcome = Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
-        Map event = offer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
-        completed.incrementAndGet(); inFlight.decrementAndGet()
-        if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
-        else stop.set(true)
-        record(event)
+        boolean preparation = offer.preheat == true
+        Map outcome = preparation ? Cap10PTSContract.classifyPreheat(status,sample.responseDataAsString,relation.noteId,relation) :
+            Cap10PTSContract.classify(status,sample.responseDataAsString,relation.noteId,relation,offer.wanted as boolean)
+        Map publicOffer = offer
+        if (preparation) { publicOffer = new LinkedHashMap(offer); publicOffer.remove('preheat') }
+        Map event = publicOffer + [kind:outcome.kind,elapsedMs:sample.time as double,status:status] + outcome
+        inFlight.decrementAndGet()
+        if (preparation) {
+            preheatCompleted.incrementAndGet(); preheatCounts[outcome.kind].incrementAndGet()
+            synchronized (recordsLock) {
+                if (preheatPending.size() >= declaredPoolSize) throw new IllegalStateException('bounded preparation buffer exhausted')
+                preheatPending.add(event)
+            }
+            if (outcome.kind == 'noop') {
+                if (!preheated.add(relation.slot as int)) throw new IllegalStateException('relationship prepared twice')
+            } else stop.set(true)
+        } else {
+            completed.incrementAndGet()
+            if (outcome.kind == 'mutation') { relation.liked = outcome.observedLiked; relation.version = outcome.observedVersion }
+            else stop.set(true)
+            record(event)
+        }
         // Remove credential-bearing sampler context before every listener/PTS log.
         sample.setRequestHeaders(''); sample.setResponseHeaders(''); sample.setSamplerData(''); sample.setResponseData(new byte[0]); sample.setResponseMessage('CAP10 ' + outcome.kind)
-        sample.setSuccessful(outcome.kind == 'mutation')
-        if (outcome.kind != 'mutation') flush()
+        sample.setSuccessful(outcome.kind == (preparation ? 'noop' : 'mutation'))
+        if (preparation && outcome.kind != 'noop') flushPreheat()
+        else if (!preparation && outcome.kind != 'mutation') flush()
     }
     void record(Map record) {
         counts[record.kind].incrementAndGet()
@@ -198,6 +237,24 @@ class Cap10PTSRun {
             } else { child.destroyForcibly() }
         }
         [cpuTimeNs:bean.processCpuTime,monotonicNs:System.nanoTime()-resourceOriginNano,rssBytes:rss,logicalCPUs:Runtime.runtime.availableProcessors()]
+    }
+    void flushPreheat() {
+        synchronized (io) {
+            int remaining
+            synchronized (recordsLock) { remaining = preheatPending.size() }
+            while (remaining > 0) {
+                List<Map> batch
+                synchronized (recordsLock) { batch = Cap10PTSContract.framePrefix(preheatPending,remaining) }
+                Map body = [runId:config.runId,engineId:engineId,seq:preheatSeq,records:batch,clock:clock,resources:resources()]
+                Map response = null
+                for (int retry=0; retry<3 && response == null; retry++) {
+                    try { response = request('/preheat',body) } catch (Exception ignored) { if (retry == 2) throw new IllegalStateException('preparation ACK unavailable'); Thread.sleep(200) }
+                }
+                if (response.ack != preheatSeq) throw new IllegalStateException('preparation sequence ACK differs')
+                synchronized (recordsLock) { preheatPending.subList(0,batch.size()).clear() }
+                remaining -= batch.size(); preheatSeq++
+            }
+        }
     }
     void flush() {
         synchronized (io) {
@@ -231,13 +288,21 @@ class Cap10PTSRun {
                 int ready = bound.size()
                 if (ready != readyReported) { request('/register',[runId:config.runId,engineId:engineId,slots:slots,readyWorkers:ready,scriptSHA256:scriptHash,fixtureSHA256:config.fixtureSHA256]); readyReported=ready }
                 control()
+                if (declaredPreheatProtocol != 'none') flushPreheat()
                 if (System.nanoTime() >= nextReport) { flush(); nextReport = System.nanoTime() + 5000000000L }
                 Thread.sleep(200L)
             }
+            if (declaredPreheatProtocol != 'none') flushPreheat()
             flush()
             Map totals = [planned:Cap10PTSContract.planned(slots,config.rate as int,config.seconds as int,declaredPoolSize),attempted:attempted.get(),completed:completed.get()]
             counts.each { key,value -> totals[key]=value.get() }
-            Map response = request('/complete',[runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()])
+            Map completion = [runId:config.runId,engineId:engineId,lastSeq:seq-1,counts:totals,clock:clock,stoppedOffering:true,inFlight:inFlight.get()]
+            if (declaredPreheatProtocol != 'none') {
+                Map prepared = [planned:slots.size(),attempted:preheatAttempted.get(),completed:preheatCompleted.get()]
+                preheatCounts.each { key,value -> prepared[key]=value.get() }
+                completion.preparationCounts = prepared
+            }
+            Map response = request('/complete',completion)
             terminalAck = response.accepted == true
         } catch (Exception ignored) { stop.set(true); System.err.println('CAP10 telemetry/measurement failure; no body or credentials retained') }
     }
@@ -252,7 +317,7 @@ try {
         if (props.get('cap10.pts.initFailure') == true) throw new IllegalStateException('previous sanitized setup failure')
         run = (Cap10PTSRun)props.get('cap10.pts.instance')
         if (run == null) {
-            try { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256'), (vars.get('cap10.poolSize') ?: '512').toInteger(), (vars.get('cap10.expectedEngines') ?: '2').toInteger(), vars.get('cap10.clockProtocol') == null ? 'embedded-v1' : vars.get('cap10.clockProtocol')); props.put('cap10.pts.instance',run) }
+            try { run = new Cap10PTSRun(vars.get('cap10.scriptSHA256'), (vars.get('cap10.poolSize') ?: '512').toInteger(), (vars.get('cap10.expectedEngines') ?: '2').toInteger(), vars.get('cap10.clockProtocol') == null ? 'embedded-v1' : vars.get('cap10.clockProtocol'), vars.get('cap10.preheatProtocol') == null ? 'none' : vars.get('cap10.preheatProtocol')); props.put('cap10.pts.instance',run) }
             catch (Exception ignored) { props.put('cap10.pts.initFailure',true); throw new IllegalStateException('sanitized initial setup failure') }
         }
     }
@@ -264,7 +329,8 @@ try {
         vars.put('cap10.doWrite',offer != null ? 'true' : 'false')
         if (offer == null) vars.put('cap10.continue','false')
         else {
-            vars.putObject('cap10.offer',offer); vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
+            vars.putObject('cap10.offer',offer)
+            if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
             def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }

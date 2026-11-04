@@ -110,6 +110,20 @@ def normalized(summary, seconds):
     """Compatibility envelope, explicitly sourced from complete JMeter records."""
     if summary.get('complete') is not True or summary.get('collectionValid') is not True or summary.get('unknownIsExact') is not True:
         raise ValueError('incomplete JMeter evidence cannot become a native summary')
+    preparation = {}
+    if summary.get('preheatProtocol', 'none') != 'none':
+        value = summary.get('preparation')
+        count = summary.get('poolSize')
+        if (summary.get('preheatProtocol') != 'relation-noop-v1' or type(count) is not int
+                or not isinstance(value, dict) or value.get('protocol') != 'relation-noop-v1'
+                or value.get('rate') != 500 or value.get('passed') is not True or value.get('coverageComplete') is not True
+                or not isinstance(value.get('counts'), dict)
+                or any(type(value['counts'].get(k)) is not int or value['counts'][k] != count
+                       for k in ('planned', 'attempted', 'completed', 'noop'))
+                or any(type(value['counts'].get(k)) is not int or value['counts'][k] != 0
+                       for k in ('mutation', 'uncertain', 'rejected', 'invalid', 'dropped'))):
+            raise ValueError('complete unchanged preparation required before native summary')
+        preparation = {'preparation': value, 'preheatProtocol': 'relation-noop-v1'}
     dimensions = cohort.dimensions(summary, {'poolSize': summary.get('poolSize', 512)})
     counts = summary['counts']
     required = ('planned', 'attempted', 'completed', 'mutation', 'noop', 'uncertain', 'rejected', 'invalid', 'dropped')
@@ -148,7 +162,7 @@ def normalized(summary, seconds):
             raise ValueError('full-record percentiles unavailable')
     metrics['cap_native_scenario_start_unix_ms'] = {'min': start, 'max': start}
     metrics['cap_native_scenario_duration_ms'] = {'min': seconds * 1000, 'max': seconds * 1000}
-    return {**dimensions, 'sourceEngine': 'JMeter 5.6.3 on Alibaba PTS', 'source': 'complete authenticated collector records; not sampled PTS logs or k6 output',
+    return {**dimensions, **preparation, 'sourceEngine': 'JMeter 5.6.3 on Alibaba PTS', 'source': 'complete authenticated collector records; not sampled PTS logs or k6 output',
             'quantileMethod': summary.get('quantileMethod'), 'metrics': metrics, 'launchPlan': launch_plan,
             'nativeScenario': {'startedAt': start, 'scheduledEndedAt': end, 'durationMs': seconds * 1000,
                 'complete': not summary.get('stop'), 'startMetric': {'min': start, 'max': start},
@@ -187,7 +201,7 @@ def handler_type(store, token, lock):
                 self.reply(200, value)
                 return
             try:
-                if self.path not in ('/control', '/register', '/batch', '/complete'):
+                if self.path not in ('/control', '/register', '/batch', '/preheat', '/complete'):
                     self.reply(404, {'error': 'unknown endpoint'})
                     return
                 if method == 'GET':
@@ -330,6 +344,7 @@ def run(args):
     relations = [{**source['initial'][slot], 'userId': user['userId'], 'token': user['token'], 'slot': slot}
                  for slot, user in enumerate(source['users'])]
     run_config = {**cfg, **dimensions, 'runId': secrets.token_hex(16), 'phase': phase, 'rate': rate, 'seconds': seconds,
+        'preheatProtocol': 'relation-noop-v1',
         'fixtureSHA256': hashlib.sha256(fixture_bytes).hexdigest(),
         'relations': relations, 'apiUrl': cfg['apiUrl']}
     collector = module('cap10_pts_collector', Path(__file__).with_name('cap10-pts-collector.py'))

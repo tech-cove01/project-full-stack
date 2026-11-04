@@ -25,7 +25,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--java', type=Path, required=True)
     parser.add_argument('--jmeter', type=Path, required=True)
-    parser.add_argument('--case', choices=('success','noop','uncertain'), default='success')
+    parser.add_argument('--case', choices=('success','noop','uncertain','preheat-uncertain','preheat-version'), default='success')
     parser.add_argument('--pool-size', type=int, default=512)
     parser.add_argument('--expected-engines', type=int, default=2)
     args = parser.parse_args()
@@ -39,6 +39,7 @@ def main():
     phase = module('cap10_jmeter_actual_http', REPO / 'scripts/pts/cap10-pts-phase.py')
     facts = {str(1001 + slot): [False, 0] for slot in range(pool)}
     observations = []
+    prepared_slots = set()
     class Stub(BaseHTTPRequestHandler):
         def log_message(self, *args):
             pass
@@ -48,12 +49,19 @@ def main():
             assert self.headers.get('authorization') == 'synthetic-rel-token-' + str(slot)
             wanted = json.loads(self.rfile.read(int(self.headers['Content-Length'])))['liked']
             prior = facts[note]
-            assert wanted is not prior[0]
-            if args.case != 'noop':
+            preparation = slot not in prepared_slots
+            if preparation:
+                assert wanted is prior[0]
+                prepared_slots.add(slot)
+            else:
+                assert wanted is not prior[0]
+            if not preparation and args.case != 'noop':
                 prior[0], prior[1] = wanted, prior[1] + 1
-            observations.append({'slot': slot, 'wanted': wanted, 'version': prior[1]})
-            raw = json.dumps({'success': True, 'data': {'noteId': note, 'liked': wanted, 'version': prior[1], 'likes': int(wanted)}}).encode()
-            self.send_response(503 if args.case == 'uncertain' else 200); self.send_header('Content-Length', str(len(raw))); self.end_headers(); self.wfile.write(raw)
+            observations.append({'slot': slot, 'wanted': wanted, 'version': prior[1], 'preparation': preparation})
+            version = prior[1] + (1 if preparation and args.case == 'preheat-version' else 0)
+            raw = json.dumps({'success': True, 'data': {'noteId': note, 'liked': wanted, 'version': version, 'likes': int(wanted)}}).encode()
+            failed = (preparation and args.case == 'preheat-uncertain') or (not preparation and args.case == 'uncertain')
+            self.send_response(503 if failed else 200); self.send_header('Content-Length', str(len(raw))); self.end_headers(); self.wfile.write(raw)
     api = ThreadingHTTPServer(('127.0.0.1', 0), Stub)
     threading.Thread(target=api.serve_forever, daemon=True).start()
     # Generate a public bundle and a private, loopback-only control input.
@@ -66,6 +74,7 @@ def main():
                   'token': 'synthetic-rel-token-'+str(slot)} for slot in range(pool)]
     store = store_module.EngineStore({'runId': 'finite-local-warm', 'phase': 'warm', 'rate': 2, 'seconds': 10,
         'controlToken': token, **dimensions, 'clockProtocol': manifest['clockProtocol'],
+        'preheatProtocol': manifest['preheatProtocol'],
         'fixtureSHA256': 'a'*64, 'scriptSHA256': manifest['scriptSHA256'],
         'apiUrl': 'http://127.0.0.1:'+str(api.server_port), 'relations': relations}, root / 'collector.ndjson')
     collector = phase.CollectorHTTPServer(('127.0.0.1', 0), phase.handler_type(store, token, threading.RLock()))
@@ -98,9 +107,24 @@ def main():
             store.fail('finite local wiring deadline')
             raise AssertionError('finite wiring did not finish')
         summary = store.summary()
-        expected = summary.get('complete') is True and len(observations)==20 if args.case == 'success' else summary.get('complete') is False and 1 <= len(observations) < 20 and summary['counts'][args.case] >= 1
+        preparation_puts = sum(row['preparation'] for row in observations)
+        native_puts = len(observations) - preparation_puts
+        if args.case == 'success':
+            expected = (summary.get('complete') is True and native_puts == 20 and preparation_puts == pool
+                        and summary['preparation']['passed'] is True
+                        and summary['counts']['mutation'] == 20 and summary['counts']['noop'] == 0
+                        and summary['latencySampleCount'] == 20)
+        elif args.case.startswith('preheat-'):
+            kind = 'uncertain' if args.case == 'preheat-uncertain' else 'invalid'
+            expected = (summary.get('complete') is False and summary['startUnixMs'] is None
+                        and native_puts == 0 and 1 <= preparation_puts <= pool
+                        and summary['preparation']['counts'][kind] >= 1 and summary['counts']['attempted'] == 0)
+        else:
+            expected = (summary.get('complete') is False and preparation_puts == pool
+                        and 1 <= native_puts < 20 and summary['counts'][args.case] >= 1)
         result = {'scope':'finite loopback synthetic HTTP; no business DB/cloud/capacity slots', 'case':args.case, 'exitCodes':[c.returncode for c in children],
-                  'stubPUTs':len(observations), 'collectorSummary':summary, 'manifest':manifest,
+                  'stubPUTs':len(observations), 'stubPreparationPUTs':preparation_puts,
+                  'stubNativePUTs':native_puts, 'collectorSummary':summary, 'manifest':manifest,
                   'actualJMeterProcesses':engines, 'normalWorkers':workers_per_engine * engines,
                   'exclusiveRelationships':pool, 'surplusEOFWorkers':workers_per_engine * engines - pool,
                   'teardownWorkers':engines, 'csvSplitSimulation':'disjoint slot modulo engine count; unequal shards retain EOF surplus workers',

@@ -8,7 +8,7 @@
 ## 当前路线
 
 - 用户已确定全面迁移 Go，后续不再新增 Java 功能。保留 Vue 3/TS、MySQL 8.4、Redis 7.4、SQL/Lua 和外部业务契约。
-- 先读 STATUS.md 和 docs/implementation-plan.md，再按 docs/agent-handoff.md 执行。STATUS.md 是唯一任务状态入口；docs/README.md 保留产品与历史交付详情。
+- 每次接续、切换 agent 或压缩上下文后，先读本文件、[协作与授权记录](docs/collaboration-agreements.md)、STATUS.md 和 docs/implementation-plan.md，再按 docs/agent-handoff.md 执行。先核对已获授权和最新用户指令，不重复索取已记录的信息或许可。STATUS.md 是唯一任务状态入口；docs/README.md 保留产品与历史交付详情。
 - Java 参考基线为 java-baseline-20261026，不等于全部验收通过。Go 实际完成前不得沿用 Java 测试/吞吐量作为 Go 成绩。
 - 订单保留 Redis Stream / 交易 outbox，社区独立 outbox → Kafka。不新增 PostgreSQL/RabbitMQ；2026-10-28用户确认补公开笔记ES全文搜索（GO-076），独立于正在实施的GO-072，不扩Canal/ELK/集群或压缩计数。
 - 临时 backend-go/ 完成等价验收后收敛至 backend/；不长期开发双后端，不同时消费同一 Stream/group/outbox。

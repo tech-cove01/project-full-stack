@@ -17,6 +17,14 @@ import { PHASE_FACTS, phaseSQL, phaseErrors, makePhaseFacts, vectorIdentity, con
 
 const owned = { project: 'project-full-stack-cap10', mysql: '3481', redis: '6581', api: 'http://127.0.0.1:8281', database: 'project_full_stack_go' }
 const action = process.argv[2]
+const finishedFixtureArgs = process.argv.slice(3)
+let finishedFixtureManifestSHA256
+if (finishedFixtureArgs.length) {
+  assert.equal(action, 'reconcile', 'finished fixture mode is available only for read-only reconcile')
+  assert.ok(finishedFixtureArgs.length === 2 && finishedFixtureArgs[0] === '--finished-fixture-sha256', 'use reconcile --finished-fixture-sha256 <original manifest SHA256>')
+  assert.match(finishedFixtureArgs[1], /^[a-f0-9]{64}$/, 'exact original finished fixture SHA256 required')
+  finishedFixtureManifestSHA256 = finishedFixtureArgs[1]
+}
 const observationPolicy = observerPolicy(process.env)
 const vectorMode = observationPolicy.mode === 'like-vector-v1'
 let windowBaseline = null
@@ -191,7 +199,7 @@ async function guard() {
 
 const fixturePath = process.env.CAP_LIKE_FIXTURE ? resolve(process.env.CAP_LIKE_FIXTURE) : null
 const fixtureManifestHashes = new WeakMap()
-async function loadFixture() {
+async function loadFixture({ finishedManifestSHA256 } = {}) {
   assert.ok(fixturePath, 'explicit CAP_LIKE_FIXTURE required')
   evidence(fixturePath)
   const bytes = await readFile(fixturePath), manifest = JSON.parse(bytes)
@@ -202,6 +210,42 @@ async function loadFixture() {
   assert.ok(manifest.status === 'READY' || (action === 'finish' && manifest.status === 'PREPARING'), 'new fixture must be ready')
   assert.match(manifest.sourceSha, /^[a-f0-9]{40}$/); assert.equal(manifest.expectedRevision, 'capacity-' + manifest.sourceSha)
   assert.ok(under(manifest.credentialFile, join(privateRoot, 'tmp')) && basename(manifest.credentialFile) === 'input.json', 'private fixture input must stay in owned runtime/tmp')
+  if (action !== 'finish') {
+    assert.equal(manifest.userIds.length, count); assert.equal(manifest.multiNoteIds.length, count)
+    assert.equal(new Set(manifest.userIds).size, count); assert.equal(new Set(manifest.multiNoteIds).size, count)
+    for (const id of [...manifest.userIds, ...manifest.multiNoteIds]) assert.match(id, /^[1-9]\d*$/)
+  }
+  const manifestSHA256 = hash(bytes)
+  if (finishedManifestSHA256 !== undefined) {
+    assert.equal(action, 'reconcile', 'closed identity cannot enter a write action')
+    assert.match(finishedManifestSHA256, /^[a-f0-9]{64}$/)
+    assert.equal(manifest.status, 'READY', 'partial fixture cannot use closed identity audit')
+    assert.equal(manifestSHA256, finishedManifestSHA256, 'finished fixture manifest bytes differ')
+    const originalStat = await lstat(fixturePath)
+    assert.ok(originalStat.isFile() && !originalStat.isSymbolicLink(), 'regular original finished manifest required')
+    const originalReal = await realpath(fixturePath), directoryReal = await realpath(dirname(fixturePath))
+    assert.equal(originalReal, join(directoryReal, basename(fixturePath)))
+    assert.ok(under(originalReal, await realpath(evidenceRoot)), 'finished fixture resolves outside owned evidence')
+    const finishPath = join(dirname(fixturePath), 'finish.json'), finishStat = await lstat(finishPath)
+    assert.ok(finishStat.isFile() && !finishStat.isSymbolicLink(), 'regular same-directory finish receipt required')
+    assert.equal(await realpath(finishPath), join(directoryReal, 'finish.json'))
+    const finishBytes = await readFile(finishPath), finish = JSON.parse(finishBytes)
+    assert.ok(finish && typeof finish === 'object' && !Array.isArray(finish), 'finish receipt object required')
+    assert.equal(finish.fixtureManifestSHA256, manifestSHA256, 'finish receipt belongs to another fixture')
+    assert.ok(Number.isSafeInteger(finish.loggedOut) && finish.loggedOut === count, 'finish receipt must cover the exact original pool')
+    assert.equal(finish.credentialFileRemoved, true); assert.equal(finish.sqlFixtureRetained, true)
+    try {
+      await lstat(manifest.credentialFile)
+      assert.fail('finished fixture credential path still exists')
+    } catch (error) { if (error.code !== 'ENOENT') throw error }
+    fixtureManifestHashes.set(manifest, manifestSHA256)
+    return { manifest, runtime: null, manifestSHA256, finishedFixtureAudit: {
+      contract: 'finished-fixture-read-only-v1', fixtureManifestSHA256: manifestSHA256,
+      finish: { path: relative(evidenceRoot, finishPath).split(sep).join('/'), sha256: hash(finishBytes) },
+      loggedOut: count, credentialFileAbsent: true, sqlFixtureRetained: true,
+      tokenAuthenticationAttempted: false, capacityEligible: false,
+      scope: 'Original manifest identities and finish receipt only; complete SQL/Redis reconciliation, no session restoration or current-cohort admission.' } }
+  }
   let runtime
   try { runtime = JSON.parse(await readFile(manifest.credentialFile, 'utf8')) }
   catch (error) {
@@ -211,12 +255,6 @@ async function loadFixture() {
   assert.equal(runtime.fixture, manifest.fixture)
   assert.ok(Array.isArray(runtime.users) && (runtime.users.length === count || (action === 'finish' && manifest.status === 'PREPARING' && runtime.users.length < count)))
   assert.deepEqual(runtime.users.map(u => u.userId), (manifest.userIds || []).slice(0, runtime.users.length))
-  if (action !== 'finish') {
-    assert.equal(manifest.userIds.length, count); assert.equal(manifest.multiNoteIds.length, count)
-    assert.equal(new Set(manifest.userIds).size, count); assert.equal(new Set(manifest.multiNoteIds).size, count)
-    for (const id of [...manifest.userIds, ...manifest.multiNoteIds]) assert.match(id, /^[1-9]\d*$/)
-  }
-  const manifestSHA256 = hash(bytes)
   fixtureManifestHashes.set(manifest, manifestSHA256)
   return { manifest, runtime, manifestSHA256 }
 }
@@ -553,7 +591,7 @@ if (action === 'prepare') {
     sqlFixtureRetained: true, apiSourceSha: process.env.CAP_SOURCE_SHA, fixtureSourceSha: manifest.sourceSha, fixtureManifestSHA256: manifestSHA256 })
   console.log(JSON.stringify({ finished: true, likersLoggedOut: loggedOut, credentialInputRemoved: true, sqlFixtureRetained: true }))
 } else {
-  const { manifest, runtime, manifestSHA256 } = await loadFixture()
+  const { manifest, runtime, manifestSHA256, finishedFixtureAudit } = await loadFixture({ finishedManifestSHA256: finishedFixtureManifestSHA256 })
   const count = fixturePoolSize(manifest)
   const mode = process.env.CAP_LIKE_MODE || 'multi'; assert.equal(mode, 'multi')
   assert.ok(process.env.CAP_LIKE_EVIDENCE, 'explicit new CAP_LIKE_EVIDENCE required')
@@ -571,7 +609,9 @@ if (action === 'prepare') {
     console.log(JSON.stringify({ valid: result.valid, distribution, errors, reservesCapacitySlot: false }))
     process.exitCode = result.valid ? 0 : 1
   } else if (action === 'reconcile') {
-    const result = await reconcile(manifest, mode, 60); await save(join(dir, 'reconcile.json'), result)
+    const result = await reconcile(manifest, mode, 60)
+    if (finishedFixtureAudit) result.finishedFixtureAudit = finishedFixtureAudit
+    await save(join(dir, 'reconcile.json'), result)
     console.log(JSON.stringify({ valid: result.valid, errors: result.errors })); process.exitCode = result.valid ? 0 : 1
   } else if (action === 'probe') {
     const user = runtime.users[0], noteId = modeNotes(manifest, mode)[0], records = []

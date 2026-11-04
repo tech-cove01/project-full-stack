@@ -2,13 +2,15 @@
 
 2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
-## 当前交接：S20–S22均受限，停止加窗并按失败保留模式收尾（2026-11-04）
+## 当前交接：稳定3000目标继续，服务已停，离线修复准备中（2026-11-04）
 
-用户已购买6万VUM、119.80元，沿同一1996/4/2000包与API15f/observer5c6执行了三个60秒候选。S20：179700成功mutation（2995/s）、P95/P99=268/358ms、timing134、full/tail增长超预算，恢复4.497616秒；S21：143760成功mutation（2396/s）、264/369ms、timing63、full/tail增长0/pipeline PASS，恢复5.005335秒、候选余量未过；S22：95840成功mutation（1597.333…/s）、116/205ms、timing26，延迟余量通过，但tail Outbox177>159.8、pipeline FAIL，恢复4.606288秒。三窗unknown/drop均0，资源/时基/采集/业务终审和退出核对通过；均generator_limited、boundaryEligible=false，无本轮有效稳定QPS，正式未跑。不在调度混杂下认定单一后端瓶颈，不称稳定1600/3000。现不再加窗或优化，按`preserved_failure`备份与精确清理，见[终态与费用票](evidence/2026-11-01-cap10/cost3000-continuation-plan.md)及根[STATUS](../STATUS.md)。
+用户最新明确要求取得可写简历的稳定3000，不能把三候选失败当作目标收尾；用户按节省停机建议报告“我关了，你改吧”。agent无法独立查ECS，当前停止全部SSH/云动作，只做离线准备。上一阶段同1996/4/2000、API15f/observer5c6完成三窗：S20为2995 mutation/s、268/358ms、timing134，增长超预算；S21为2396/s、264/369ms、timing63，下游增长0/pipeline PASS、余量未过；S22为1597.333…/s、116/205ms、timing26，余量通过但tail Outbox177>159.8/pipeline FAIL。三窗均unknown/drop0、变更全部成功、资源/时基/采集/业务终审及退出通过，仍均generator_limited、无有效稳定QPS，正式未跑。旧FAIL和历史提交保留，不改3000目标，见[修复票与接续规格](evidence/2026-11-01-cap10/cost3000-continuation-plan.md)及根[STATUS](../STATUS.md)。
 
 同CID/卷的mysql8-v1已实际应用8CPU/8GiB/4GiB缓存，原swap/持久化保持。空载基线与显式重试修复`669e36d`、`0ce8d1a`已推送并部署，API15f/observer5c6原产物不变。attempt2真实60秒/13样本PASS，CPU中位2.65%、内存最高10.4%，15份原件下载逐SHA核验；原0样本FAIL保留。该idle实际观察旧4096范围，仅按同资源metadata/SHA/profile显式复用，当前1996进程/夹具/包与逐窗vector基线另真验。
 
-原H1新退休proof仅换回原collector-terminal引用后经严格全验PASS，原H1 FAIL/unknown=null及30 raw不改。旧H1/512、未压4096、当前1996是三个独立清理范围，4096须在最终停API前单独正常logout并核自有会话0；512费用备选未创建云端夹具。S20/S21的138原件已下载逐SHA核验，归档SHA=`139938bb3d15b6b01384d82d849578f80bd2810afc10f3497195e721d2cf5bb3`；S22与最终收尾证据继续按实际完成记账。清理尚未宣称完成，用户密钥/卷/旧失败保留，不用余额新增压力或正式组。
+旧H1原FAIL/unknown=null/30raw保持，退休proof只修正原collector-terminal引用并严格验过。三cohort会话、5组上传、35登记环境已清理，API/四服务已停；随后同MySQL短启，精确清掉自有IT库/账号并再停、主库保留。本地有IT清理原回包；远端一份归属证据不足且接续仍需用的PTS凭据保留，用户本地原AK/key不碰。2736件全备份SHA=`bc2d33b36a14f1b15f0bae455c5fc5ff4eb8cbcd12259d66092d8ec293b3fb42`与23件inspect delta SHA=`b0240a79d50c1b983949f31cb39de3e5d750516790141831fa8725f5aa8dcb56`已本地核验；最终post-cleanup打包前AssertionError已本地定位为错误要求登记JSON数量0；公共清理本来保留登记索引、只删除其指向的env/上传目录。前序四CID stopped/noOOM、APIgone及8281/8481closed已通过，非业务/停服失败；无新归档/postdelta下载，不称最终备份完成。下次只核登记目标删除，不为此改公共源或重启。
+
+两票均处离线准备/交付核验阶段：`CAP-10-GEN-COLDSTART`将全部准备放在共同native Start设定前；Start冻结后不事后移动或截样本，原50ms规则和全部原始记录不变；`CAP-10-SQL-WAIT`按同周期池/锁/提交证据窄改后段等待，保持同步事务、fence、ACK与持久化。旧Done暂缓归档的历史保留；本轮已按新需求批准成熟N≥8点驱动、N1–7旧路径，当前实现验证中，尚待核验/独审，不宣称已部署。修复后绑定精确新源码/工具/产物与真实准入，目标仍为稳定3000及同条件两轮180秒，按完整时长实际成功数计分母；不把低档或配置数字写成目标通过。
 
 ### 11-03历史交接：目标接近5000，节省停机与离线优化
 

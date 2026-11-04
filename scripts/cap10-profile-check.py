@@ -280,6 +280,82 @@ class Checks(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 P.same_identity(original, {**original, key: value})
 
+    def test_same_identity_mount_order_preserves_raw_and_mysql_resource_contract(self):
+        before = copy.deepcopy(self.fixture.containers['mysql'])
+        after = copy.deepcopy(before)
+        after['mounts'].reverse()
+        original_before, original_after = copy.deepcopy(before), copy.deepcopy(after)
+        P.same_identity(before, after)
+        self.assertEqual(before, original_before)
+        self.assertEqual(after, original_after)
+        after.update(cpuNano=8_000_000_000, memoryBytes=8 * P.GIB,
+                     memorySwap=P.swap_target(before['memoryBytes'], before['memorySwap']))
+        P.same_identity(before, after, mysql_target=True)
+        with self.assertRaises(ValueError):
+            P.same_identity(before, after)
+
+    def test_same_identity_mount_fields_and_multiplicity_remain_exact(self):
+        before = self.fixture.containers['kafka']
+        changes = {'Type': 'bind', 'Name': 'other', 'Source': '/other', 'Destination': '/other',
+                   'Driver': 'other', 'Mode': 'ro', 'RW': False, 'Propagation': 'shared',
+                   'unknownField': 'new'}
+        cases = []
+        for key, value in changes.items():
+            changed = copy.deepcopy(before)
+            changed['mounts'][0][key] = value
+            cases.append((key, changed))
+        removed_field = copy.deepcopy(before)
+        del removed_field['mounts'][0]['RW']
+        cases.append(('removed-field', removed_field))
+        for name, mounts in (
+                ('removed-mount', before['mounts'][:-1]),
+                ('duplicate-added', before['mounts'] + [before['mounts'][0]]),
+                ('replaced-with-duplicate', [before['mounts'][0], before['mounts'][0], before['mounts'][2]])):
+            cases.append((name, {**before, 'mounts': copy.deepcopy(mounts)}))
+        for name, after in cases:
+            with self.subTest(change=name), self.assertRaises(ValueError):
+                P.same_identity(before, after)
+
+    def permute_kafka_mount_inspections(self, fake):
+        inspect, observed = fake.inspect, []
+        def reordered(cid):
+            value = inspect(cid)
+            if value['service'] == 'kafka':
+                mounts = value['mounts']
+                shift = len(observed) % len(mounts)
+                value['mounts'] = mounts[shift:] + mounts[:shift]
+                observed.append(copy.deepcopy(value['mounts']))
+            return value
+        fake.inspect = reordered
+        return observed
+
+    def test_capture_allows_mount_permutation_without_rewriting_raw_snapshot(self):
+        fake = Fake(self.fixture)
+        observed = self.permute_kafka_mount_inspections(fake)
+        output = self.fixture.root / 'baseline-abcdef012345.json'
+        original = self.fixture.baseline_path.read_bytes()
+        P.capture_baseline(self.fixture.private, output, self.fixture.root, fake)
+        self.assertGreaterEqual(len(observed), 2)
+        self.assertNotEqual(observed[0], observed[1])
+        self.assertEqual(P.read(output)['containers']['kafka']['mounts'], observed[0])
+        self.assertEqual(self.fixture.baseline_path.read_bytes(), original)
+        self.assertFalse(fake.updated or fake.resized)
+
+    def test_execute_allows_mount_permutation_and_retains_original_baseline(self):
+        self.fixture.plan()
+        original = self.fixture.baseline_path.read_bytes()
+        fake = Fake(self.fixture)
+        observed = self.permute_kafka_mount_inspections(fake)
+        result = self.execute(fake)
+        self.assertGreaterEqual(len(observed), 3)
+        self.assertNotEqual(observed[0], observed[1])
+        self.assertNotEqual(observed[1], observed[2])
+        self.assertTrue(fake.updated and fake.resized)
+        self.assertEqual(self.fixture.baseline_path.read_bytes(), original)
+        exported = P.read(self.fixture.root / result['environmentPath'])
+        proof = P.read(self.fixture.root / exported['resourceApplicationEvidencePath'])
+        self.assertEqual(proof['containersAfter']['kafka']['mounts'], observed[-1])
+
     def test_other_service_drift_after_update_retains_actual_partial_state(self):
         self.fixture.plan()
         fake = Fake(self.fixture)

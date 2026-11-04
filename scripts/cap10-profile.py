@@ -274,12 +274,19 @@ def verify_plan(plan_path, root):
 
 
 def same_identity(before, after, *, mysql_target=False):
-    expected = copy.deepcopy(before)
+    expected, actual = copy.deepcopy(before), copy.deepcopy(after)
+    # Docker may reorder Mounts between inspect calls. Compare every complete
+    # mount object without changing raw snapshots or discarding duplicates.
+    for item in (expected, actual):
+        require(type(item['mounts']) is list and all(type(mount) is dict for mount in item['mounts']),
+                'complete mount objects required')
+        item['mounts'] = sorted(item['mounts'], key=lambda mount: json.dumps(
+            mount, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False))
     if mysql_target:
         expected['cpuNano'] = 8_000_000_000
         expected['memoryBytes'] = 8 * GIB
         expected['memorySwap'] = swap_target(before['memoryBytes'], before['memorySwap'])
-    require(expected == after, 'complete service identity/policy changed beyond the plan')
+    require(expected == actual, 'complete service identity/policy changed beyond the plan')
 
 
 def validate_facts(facts, allowed_buffers):

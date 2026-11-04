@@ -170,6 +170,16 @@ S20/S21/S22均保留`generator_limited`：实际成功变更速率2995/2396/1597
 
 **不采纳1000µs，不继续扫描旋钮。** Commit平均反升、P95基本不变；完整调用尾部的单次差异受固定先后顺序、新ID和缓存影响，不作纯因果倍率，也不当60/180秒稳定QPS。两臂native借池等待均0，不能据此称云端共享池问题解决。server计数包络另为14.959444/14.596061秒，含seed/audit/cleanup，不冒充native区间；缺失COMMIT基线保留unknown。实际恢复delay0、IT12与自有会话归零、原历史守恒、MySQL正常停止及原资源保护通过。193件manifest SHA256=`4d1a43680b1b144e6fff90825154c52aeb48b022d714ef5d3b04a4cdffcf876f`，分析SHA256=`8039229f1211e2b0e8e5f696021c4d23ec6a3c4ccc183602fc15874f3296611a`。
 
+## 11-04：Like正确性修复与SQL往返精简
+
+`f32bc313ee13ff1ab01ca43fb1f3d3f9d4c6c057`单独修复无符号计数减法：外层`GREATEST(0,liked+(-1))`来不及阻止先发生的下溢，改为先保护输入再减1。两驱动真实公共服务回归验证零计数取消赞、版本/两事件与重复请求noop；70件manifest=`13b2f4518e5e3de57884423fcfd26f95072b8693b0035113917c2bcdaae676b6`。这是正确性修复，不是QPS收益。
+
+`c464c1fa4d153806fb44ac746312552655ebda63`将笔记PK+关系UK两次锁点读合并、同一笔记/关系/用户/旧版本的两个UPDATE合并。现有关系变更的业务SQL实际6→4：SELECT3→2、两单表UPDATE→一个multi UPDATE、INSERT仍1；BEGIN/COMMIT/隔离SET仍各1。保原同步提交、RC、版本fence、取消回滚、Outbox和提交后新鲜状态读取。真实两驱动2顶层/16子例覆盖并发与点锁、陈旧版本拒绝、取消回滚、提交后ACK错误及正溢出；详见[规格与实际结果](like-tx-rpc-plan.md)。
+
+首私有计数将raw prepare当客户端命令，7/6/6误差导致整矩阵FAIL；93件原件manifest=`96b8042bc911473140c44e873856d208a4c7aabc83f19fe46de429b9d1777f0c`保留。根据[MySQL8.4官方计数定义](https://dev.mysql.com/doc/refman/8.4/en/server-status-variables.html)，服务端reprepare也增加prepare。另一次只对精确遗留做事务清理、独立排空/空库核对，再跑8次私有调用：关闭插值原like raw7/reprepare1、派生客户端prepare6，新like/unlike各raw4/reprepare0；execute/close各6→4。开启插值双方均0，SQL级PREPARE/EXECUTE/DEALLOCATE全0。不是把第一件缺失字段补值或重判PASS；87件新manifest=`261fd16540f66382931fff12452de0c93a0db561a349181e8ef67ff0f3fc3d11`。
+
+这些是同一有限程序的语句/命令计数，不能当全部网络往返33%下降、延迟倍率或稳定3000；COMMIT成本仍在，云端效果待同条件实测。IT12/会话归零、原历史与配置守恒、正常停机及原资源/卷保护均闭合。最终源码已正常推送，干净Linux构建/精确CI见STATUS；尚未在云机部署。
+
 ## 原件存档
 
 闭合S1–S19、失败H1及repair2静态材料共2202件、147402850原始字节；14.6MB私有归档已下载并逐成员核验，SHA256：`4a6ebbb7d37cd15884bd3124b1759288f067189647f867edd264a1cf54a6c4fa`。不公开凭据、云账号标识、网络地址或真实私有输入。

@@ -3,6 +3,7 @@ import groovy.json.JsonSlurper
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    private static final BigInteger MAX_SAFE_BIG = BigInteger.valueOf(MAX_SAFE)
     static final int MAX_FRAME_RECORDS = 128
     static String clockProtocol(Map config) {
         def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
@@ -47,6 +48,14 @@ class Cap10PTSContract {
         [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
     }
     static boolean integer(Object n) {
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
+            long value = n.longValue()
+            return value >= 0L && value <= MAX_SAFE
+        }
+        if (n instanceof BigInteger && n.getClass() == BigInteger) {
+            return n.signum() >= 0 && n.compareTo(MAX_SAFE_BIG) <= 0
+        }
+        // Keep the original semantics for decimals and other Number classes.
         n instanceof Number && !(n instanceof Float) && !(n instanceof Double) &&
             new BigDecimal(n.toString()).stripTrailingZeros().scale() <= 0 && n >= 0 && n <= MAX_SAFE
     }
@@ -56,10 +65,12 @@ class Cap10PTSContract {
         def body = null
         try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
         def data = body instanceof Map && body.success == true && body.data instanceof Map ? body.data : null
+        def versionValue = data?.version
+        boolean versionIsInteger = integer(versionValue)
         def valid = data && data.noteId instanceof String && data.noteId == noteId && data.liked instanceof Boolean &&
-            integer(data.version) && integer(data.likes)
+            versionIsInteger && integer(data.likes)
         def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
-            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedVersion:versionIsInteger ? versionValue.longValue() : null,
             observedNoteId:data?.noteId instanceof String ? data.noteId : null]
         if (!valid || data.liked != wanted) return observed + [kind:'invalid']
         if (data.version == previous.version + 1 && wanted != previous.liked) return observed + [kind:'mutation']

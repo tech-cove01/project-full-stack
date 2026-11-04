@@ -1,8 +1,9 @@
-<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">7a350851174bd8e377a162889447f6b9a95ff4fb07644709552c3ba2f069195c</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.poolSize" elementType="Argument"><stringProp name="Argument.name">cap10.poolSize</stringProp><stringProp name="Argument.value">512</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.expectedEngines" elementType="Argument"><stringProp name="Argument.name">cap10.expectedEngines</stringProp><stringProp name="Argument.value">2</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.clockProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.clockProtocol</stringProp><stringProp name="Argument.value">dedicated-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.preheatProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.preheatProtocol</stringProp><stringProp name="Argument.value">relation-noop-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/><ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="512 fixed exclusive relationships" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">512</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></ThreadGroup><hashTree><CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Exclusive slot, once per outer iteration" enabled="true"><stringProp name="filename">slots.csv</stringProp><stringProp name="fileEncoding">UTF-8</stringProp><stringProp name="variableNames"></stringProp><stringProp name="delimiter">,</stringProp><boolProp name="quotedData">false</boolProp><boolProp name="recycle">false</boolProp><boolProp name="stopThread">true</boolProp><stringProp name="shareMode">shareMode.all</stringProp><boolProp name="ignoreFirstLine">false</boolProp></CSVDataSet><hashTree/><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 bind" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">bind</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">3f405245ca1f40e42f6c276df4a2e01f75d6b05e30188f988320d21ba822d388</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.poolSize" elementType="Argument"><stringProp name="Argument.name">cap10.poolSize</stringProp><stringProp name="Argument.value">512</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.expectedEngines" elementType="Argument"><stringProp name="Argument.name">cap10.expectedEngines</stringProp><stringProp name="Argument.value">2</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.clockProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.clockProtocol</stringProp><stringProp name="Argument.value">dedicated-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.preheatProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.preheatProtocol</stringProp><stringProp name="Argument.value">relation-noop-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/><ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="512 fixed exclusive relationships" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">512</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></ThreadGroup><hashTree><CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Exclusive slot, once per outer iteration" enabled="true"><stringProp name="filename">slots.csv</stringProp><stringProp name="fileEncoding">UTF-8</stringProp><stringProp name="variableNames"></stringProp><stringProp name="delimiter">,</stringProp><boolProp name="quotedData">false</boolProp><boolProp name="recycle">false</boolProp><boolProp name="stopThread">true</boolProp><stringProp name="shareMode">shareMode.all</stringProp><boolProp name="ignoreFirstLine">false</boolProp></CSVDataSet><hashTree/><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 bind" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">bind</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
 
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    private static final BigInteger MAX_SAFE_BIG = BigInteger.valueOf(MAX_SAFE)
     static final int MAX_FRAME_RECORDS = 128
     static String clockProtocol(Map config) {
         def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
@@ -47,6 +48,14 @@ class Cap10PTSContract {
         [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
     }
     static boolean integer(Object n) {
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
+            long value = n.longValue()
+            return value &gt;= 0L &amp;&amp; value &lt;= MAX_SAFE
+        }
+        if (n instanceof BigInteger &amp;&amp; n.getClass() == BigInteger) {
+            return n.signum() &gt;= 0 &amp;&amp; n.compareTo(MAX_SAFE_BIG) &lt;= 0
+        }
+        // Keep the original semantics for decimals and other Number classes.
         n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
             new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
     }
@@ -56,10 +65,12 @@ class Cap10PTSContract {
         def body = null
         try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
         def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def versionValue = data?.version
+        boolean versionIsInteger = integer(versionValue)
         def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
-            integer(data.version) &amp;&amp; integer(data.likes)
+            versionIsInteger &amp;&amp; integer(data.likes)
         def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
-            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedVersion:versionIsInteger ? versionValue.longValue() : null,
             observedNoteId:data?.noteId instanceof String ? data.noteId : null]
         if (!valid || data.liked != wanted) return observed + [kind:'invalid']
         if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
@@ -476,6 +487,7 @@ try {
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    private static final BigInteger MAX_SAFE_BIG = BigInteger.valueOf(MAX_SAFE)
     static final int MAX_FRAME_RECORDS = 128
     static String clockProtocol(Map config) {
         def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
@@ -520,6 +532,14 @@ class Cap10PTSContract {
         [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
     }
     static boolean integer(Object n) {
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
+            long value = n.longValue()
+            return value &gt;= 0L &amp;&amp; value &lt;= MAX_SAFE
+        }
+        if (n instanceof BigInteger &amp;&amp; n.getClass() == BigInteger) {
+            return n.signum() &gt;= 0 &amp;&amp; n.compareTo(MAX_SAFE_BIG) &lt;= 0
+        }
+        // Keep the original semantics for decimals and other Number classes.
         n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
             new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
     }
@@ -529,10 +549,12 @@ class Cap10PTSContract {
         def body = null
         try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
         def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def versionValue = data?.version
+        boolean versionIsInteger = integer(versionValue)
         def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
-            integer(data.version) &amp;&amp; integer(data.likes)
+            versionIsInteger &amp;&amp; integer(data.likes)
         def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
-            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedVersion:versionIsInteger ? versionValue.longValue() : null,
             observedNoteId:data?.noteId instanceof String ? data.noteId : null]
         if (!valid || data.liked != wanted) return observed + [kind:'invalid']
         if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
@@ -949,6 +971,7 @@ try {
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    private static final BigInteger MAX_SAFE_BIG = BigInteger.valueOf(MAX_SAFE)
     static final int MAX_FRAME_RECORDS = 128
     static String clockProtocol(Map config) {
         def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
@@ -993,6 +1016,14 @@ class Cap10PTSContract {
         [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
     }
     static boolean integer(Object n) {
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
+            long value = n.longValue()
+            return value &gt;= 0L &amp;&amp; value &lt;= MAX_SAFE
+        }
+        if (n instanceof BigInteger &amp;&amp; n.getClass() == BigInteger) {
+            return n.signum() &gt;= 0 &amp;&amp; n.compareTo(MAX_SAFE_BIG) &lt;= 0
+        }
+        // Keep the original semantics for decimals and other Number classes.
         n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
             new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
     }
@@ -1002,10 +1033,12 @@ class Cap10PTSContract {
         def body = null
         try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
         def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def versionValue = data?.version
+        boolean versionIsInteger = integer(versionValue)
         def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
-            integer(data.version) &amp;&amp; integer(data.likes)
+            versionIsInteger &amp;&amp; integer(data.likes)
         def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
-            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedVersion:versionIsInteger ? versionValue.longValue() : null,
             observedNoteId:data?.noteId instanceof String ? data.noteId : null]
         if (!valid || data.liked != wanted) return observed + [kind:'invalid']
         if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
@@ -1422,6 +1455,7 @@ try {
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    private static final BigInteger MAX_SAFE_BIG = BigInteger.valueOf(MAX_SAFE)
     static final int MAX_FRAME_RECORDS = 128
     static String clockProtocol(Map config) {
         def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
@@ -1466,6 +1500,14 @@ class Cap10PTSContract {
         [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
     }
     static boolean integer(Object n) {
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
+            long value = n.longValue()
+            return value &gt;= 0L &amp;&amp; value &lt;= MAX_SAFE
+        }
+        if (n instanceof BigInteger &amp;&amp; n.getClass() == BigInteger) {
+            return n.signum() &gt;= 0 &amp;&amp; n.compareTo(MAX_SAFE_BIG) &lt;= 0
+        }
+        // Keep the original semantics for decimals and other Number classes.
         n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
             new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
     }
@@ -1475,10 +1517,12 @@ class Cap10PTSContract {
         def body = null
         try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
         def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def versionValue = data?.version
+        boolean versionIsInteger = integer(versionValue)
         def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
-            integer(data.version) &amp;&amp; integer(data.likes)
+            versionIsInteger &amp;&amp; integer(data.likes)
         def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
-            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedVersion:versionIsInteger ? versionValue.longValue() : null,
             observedNoteId:data?.noteId instanceof String ? data.noteId : null]
         if (!valid || data.liked != wanted) return observed + [kind:'invalid']
         if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
@@ -1895,6 +1939,7 @@ try {
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    private static final BigInteger MAX_SAFE_BIG = BigInteger.valueOf(MAX_SAFE)
     static final int MAX_FRAME_RECORDS = 128
     static String clockProtocol(Map config) {
         def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
@@ -1939,6 +1984,14 @@ class Cap10PTSContract {
         [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
     }
     static boolean integer(Object n) {
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
+            long value = n.longValue()
+            return value &gt;= 0L &amp;&amp; value &lt;= MAX_SAFE
+        }
+        if (n instanceof BigInteger &amp;&amp; n.getClass() == BigInteger) {
+            return n.signum() &gt;= 0 &amp;&amp; n.compareTo(MAX_SAFE_BIG) &lt;= 0
+        }
+        // Keep the original semantics for decimals and other Number classes.
         n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
             new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
     }
@@ -1948,10 +2001,12 @@ class Cap10PTSContract {
         def body = null
         try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
         def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def versionValue = data?.version
+        boolean versionIsInteger = integer(versionValue)
         def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
-            integer(data.version) &amp;&amp; integer(data.likes)
+            versionIsInteger &amp;&amp; integer(data.likes)
         def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
-            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedVersion:versionIsInteger ? versionValue.longValue() : null,
             observedNoteId:data?.noteId instanceof String ? data.noteId : null]
         if (!valid || data.liked != wanted) return observed + [kind:'invalid']
         if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']
@@ -2368,6 +2423,7 @@ try {
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
     static final long MAX_SAFE = 9007199254740991L
+    private static final BigInteger MAX_SAFE_BIG = BigInteger.valueOf(MAX_SAFE)
     static final int MAX_FRAME_RECORDS = 128
     static String clockProtocol(Map config) {
         def value = config.containsKey('clockProtocol') ? config.clockProtocol : 'embedded-v1'
@@ -2412,6 +2468,14 @@ class Cap10PTSContract {
         [poolSize:pool, expectedEngines:engines, ptsConcurrency:concurrency]
     }
     static boolean integer(Object n) {
+        if (n instanceof Byte || n instanceof Short || n instanceof Integer || n instanceof Long) {
+            long value = n.longValue()
+            return value &gt;= 0L &amp;&amp; value &lt;= MAX_SAFE
+        }
+        if (n instanceof BigInteger &amp;&amp; n.getClass() == BigInteger) {
+            return n.signum() &gt;= 0 &amp;&amp; n.compareTo(MAX_SAFE_BIG) &lt;= 0
+        }
+        // Keep the original semantics for decimals and other Number classes.
         n instanceof Number &amp;&amp; !(n instanceof Float) &amp;&amp; !(n instanceof Double) &amp;&amp;
             new BigDecimal(n.toString()).stripTrailingZeros().scale() &lt;= 0 &amp;&amp; n &gt;= 0 &amp;&amp; n &lt;= MAX_SAFE
     }
@@ -2421,10 +2485,12 @@ class Cap10PTSContract {
         def body = null
         try { body = new JsonSlurper().parseText(text) } catch (Exception ignored) { return [kind:'invalid'] }
         def data = body instanceof Map &amp;&amp; body.success == true &amp;&amp; body.data instanceof Map ? body.data : null
+        def versionValue = data?.version
+        boolean versionIsInteger = integer(versionValue)
         def valid = data &amp;&amp; data.noteId instanceof String &amp;&amp; data.noteId == noteId &amp;&amp; data.liked instanceof Boolean &amp;&amp;
-            integer(data.version) &amp;&amp; integer(data.likes)
+            versionIsInteger &amp;&amp; integer(data.likes)
         def observed = [observedLiked:data?.liked instanceof Boolean ? data.liked : null,
-            observedVersion:integer(data?.version) ? data.version.longValue() : null,
+            observedVersion:versionIsInteger ? versionValue.longValue() : null,
             observedNoteId:data?.noteId instanceof String ? data.noteId : null]
         if (!valid || data.liked != wanted) return observed + [kind:'invalid']
         if (data.version == previous.version + 1 &amp;&amp; wanted != previous.liked) return observed + [kind:'mutation']

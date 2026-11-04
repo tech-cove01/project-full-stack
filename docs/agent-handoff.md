@@ -1,8 +1,8 @@
 # 给实现 agent 的 Go 迁移交接
 
-更新：2026-11-04。接续先读根AGENTS、[协作与授权记录](collaboration-agreements.md)、[当前STATUS](../STATUS.md)和[总方案](implementation-plan.md)。状态仅由根STATUS维护；本页保留执行顺序与交付规则，不另列一套历史状态表。
+更新：2026-11-05。接续先读根AGENTS、[协作与授权记录](collaboration-agreements.md)、[当前STATUS](../STATUS.md)和[总方案](implementation-plan.md)。状态仅由根STATUS维护；本页保留执行顺序与交付规则，不另列一套历史状态表。
 
-## 当前交接：S23/S24受限，consumer64候选运行中
+## 当前交接：S27在stable前失败，observer顺序待修
 
 用户要求取得可写简历的稳定至少3000成功变更/秒。R1—R4仓库整理已完成并同步远端，原ECS及四依赖已恢复健康，最终容量API、新1996夹具及PTS三文件已实际核对通过4引擎/2000VU。不扩业务，不将候选观察值或失败阶段收尾写成目标完成。以根STATUS最新段为准，不能再沿用旧“关机不连接”快照阻止已授权接续。
 
@@ -16,9 +16,19 @@ S24仅将pool64/64→128/128、consumer32保持，新进程及新13样本空载�
 
 pool128另用独立三源副本：authority两处报告路径加入原command标签避免重名，其余两源沿用原字节，原八源不动。控制台紧凑结果与原pretty文件SHA不同时，原driver已在写work/inputs前拒绝；后用实际文件SHA经原CLI接续，不覆盖失败或改driver。
 
-下一小票为[CAP10-CONSUMER64](../STATUS.md#配置试验与下一小票)：保持pool128，仅consumer提交批32→64；relay8×32、GOMAX8、源码/产物、原资源及双1保持。新API已实际启动、新13样本空载通过（CPU约2.4%、内存约14.5%），S25的authority已通过，候选运行中、尚无结果。原函数须显式传pool128/consumer64 policy，新deployment/进程身份不复用旧配置；原50ms、零unknown/drop、候选160/400ms、全下游与事实、native结束后60秒恢复等门槛全部通过，才同freeze两轮各180秒正式，正式200/500ms不变，第一轮失败不跑第二轮。空载和配置变化不提前证明收益。
+S25在pool128/consumer64下已中止，原`correctness_stop`、`batchFatal=true`及`childrenConverged=false`保持。已接受raw有22068次mutation、1次drop，非完整窗，不计算QPS/P95；一次实际成功HTTP耗时719ms，超过同relation约663ms周期，后一次来不及启动而drop。后续overlap拒帧及原unknown缺失保留，被拒batch未保存完整body，不能据此推断假overlap。
 
-S20—S22已知8704 VUM，加S23实际1122+2895=4017，累计12721；47279仅为未扣S24的计划余量，S24实际待提取，不能称当前余额。具体操作复用[接续清单](evidence/2026-11-01-cap10/offline-resume-checklist.md)及本机已审私有RUNBOOK，旧待办以根STATUS最新段覆盖；不将私有配置、Token或云资源ID复制进公开仓库。
+S25独立真实闭合已通过原1996关系完整reconcile、两个签名provider EndTime及全部旧PID不存在核验；备份原owner字节后唯一释放锁。闭合证明不改变原`childrenConverged=false`或成绩，不补造terminal。S26随后以同c464、pool128/consumer32、Like诊断开启配置完成3010×60秒诊断：180299次成功变更/完整60秒=3004.983333次/秒，P95/P99为216/333.02ms，drop/timing/unknown均0，但API及下游失败，仍为`performance_limited`。事实收敛、原`childrenConverged=true`、恢复6.038893秒及负载闭合已核实，诊断API也已正常停止。
+
+当前[redo2GiB试验](evidence/2026-11-01-cap10/offline-improvements.md#11-05同机redo容量试验收益待验证)的在线配置及验证约1.7秒完成：requested=effective=2147483648、status=OK，不重启、不persist，保双1/delay0/doublewrite、原4GiB buffer及8CPU/8GiB资源。原metadata与resize-before的UUID/版本仅用文件补证通过，不重跑SET或改原证明。新1996夹具/包及新namespace只读验证已通过，三个上传MD5与旧包相同，无需用户重新上传；最终诊断关闭、pool128/consumer32 API及新13样本空载通过。S27实际warm 250次成功变更后、stable启动前setup超时，原`correctness_stop`、`batchFatal=true`、`childrenConverged=true`保持；最终facts/derived/downstream对账通过，但没有stable主窗或其资源样本，不得写主窗QPS/P95，H2/H3未运行。
+
+已由原baseline事实文件只读证明：Node/ready按manifest顺序，Go live按内部NoteID词典序生成摘要；新ID跨十进制位数时发生顺序差异。初始版本全0、控制摘要相同、事实未变，两种排序的hash分别精确匹配原ready/live，导致setup原60秒始终无法匹配samevector。offline正在做最小observer顺序修复，业务API c464不改；先验证顺序合同、重绑实际observer/工具与当窗准入，不追认原S27失败或降低门槛。
+
+继续只用[既有接续顺序](../STATUS.md#配置试验与下一小票)和同1996关系/4引擎/2000VU维度；S26诊断开启、S27关闭且换新关系夹具，不能把跨窗差异写成纯redo或纯业务代码收益。新资源metadata另绑redo实际证明，原mysqlActual字段与4GiB证明链保留；每次MySQL重启后须实际复核运行时容量，不沿用此proof假设仍是2GiB。
+
+目标仍为稳定至少3000的两轮各180秒正式。诊断日志和空载不作容量成绩；后续容量配置必须完整候选通过，原50ms、零unknown/drop、候选160/400ms、全下游与事实、native结束后60秒恢复门槛保持，正式200/500ms不变，第一轮失败不跑第二轮。
+
+实际已核VUM为S20—S22的8704，加S23的4017、S24的3807、S25的2061及S26的3868，累计22457；37543仅为未扣S27的计划余量，不能称账户余额，S27实际warm费用待提取。已核原输出SHA的[S24/S26脱敏摘要](evidence/2026-11-01-cap10/cloud-like-S24-S26-summary.json)保持原字节及失败grade，S27另留原件，不混改旧摘要。具体操作复用[接续清单](evidence/2026-11-01-cap10/offline-resume-checklist.md)及本机已审私有RUNBOOK，旧待办以根STATUS最新段覆盖；不将私有配置、Token或云资源ID复制进公开仓库。
 
 旧H1/512、未压4096、前1996已正常logout并删除凭据，主库/卷保留；旧环境/上传的登记JSON保留作审计，核其绑定目标缺失，不要求登记数0。不能复活旧Token。原完整历史、旧指令与核验范围见[交接快照](../archive/docs/agent-handoff-history-20261104.md)、[状态快照](../archive/docs/status-history-20261104.md)和[功能交付快照](../archive/docs/go-delivery-history-20261104.md)，均非当前执行授权。
 

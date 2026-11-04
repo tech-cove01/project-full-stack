@@ -1,6 +1,6 @@
 # CAP-10 改动与收益档案
 
-更新：2026-11-04。唯一任务状态见根 [STATUS](../../../STATUS.md)。用户当前目标为可写简历的稳定3000成功QPS，原接近5000要求保留为较早历史；当前离线修复中，没有本批180秒正式成功组。以下把代码、部署资源和测量工具分开，不将目标或离线回归写成吞吐收益。
+更新：2026-11-05。唯一任务状态见根 [STATUS](../../../STATUS.md)。用户当前目标为可写简历的稳定3000成功QPS，原接近5000要求保留为较早历史；当前已恢复同机云测，没有本批180秒正式成功组。以下历史组件记录保留当时范围；代码、部署资源和测量工具分别归档，不将目标或离线回归写成吞吐收益。
 
 ## 已取得的证据
 
@@ -178,7 +178,23 @@ S20/S21/S22均保留`generator_limited`：实际成功变更速率2995/2396/1597
 
 首私有计数将raw prepare当客户端命令，7/6/6误差导致整矩阵FAIL；93件原件manifest=`96b8042bc911473140c44e873856d208a4c7aabc83f19fe46de429b9d1777f0c`保留。根据[MySQL8.4官方计数定义](https://dev.mysql.com/doc/refman/8.4/en/server-status-variables.html)，服务端reprepare也增加prepare。另一次只对精确遗留做事务清理、独立排空/空库核对，再跑8次私有调用：关闭插值原like raw7/reprepare1、派生客户端prepare6，新like/unlike各raw4/reprepare0；execute/close各6→4。开启插值双方均0，SQL级PREPARE/EXECUTE/DEALLOCATE全0。不是把第一件缺失字段补值或重判PASS；87件新manifest=`261fd16540f66382931fff12452de0c93a0db561a349181e8ef67ff0f3fc3d11`。
 
-这些是同一有限程序的语句/命令计数，不能当全部网络往返33%下降、延迟倍率或稳定3000；COMMIT成本仍在，云端效果待同条件实测。IT12/会话归零、原历史与配置守恒、正常停机及原资源/卷保护均闭合。最终源码已正常推送，干净Linux构建/精确CI见STATUS；尚未在云机部署。
+这些是同一有限程序的语句/命令计数，不能当全部网络往返33%下降、延迟倍率或稳定3000；COMMIT成本仍在。IT12/会话归零、原历史与配置守恒、正常停机及原资源/卷保护均闭合。该组件核验时尚未云部署；后续c464已用于S23/S24，仍未取得稳定容量，具体云测与配置身份以STATUS为准。
+
+## 11-05：同机redo容量试验（收益待验证）
+
+S26是Like诊断开启、pool128/consumer32的完整60秒诊断，180299次成功变更/60秒=3004.983333次/秒，原完整HTTP的P95/P99为216/333.02ms，drop/timing/unknown均0；API及下游失败、原结果`performance_limited`，事实收敛及负载闭合通过，恢复6.038893秒，不是正式容量组。已核输出SHA的[S24/S26脱敏原摘要](cloud-like-S24-S26-summary.json)保留各自身份与原grade。有限慢trace是32条环形缓冲的选择性观察，嵌套阶段不能相加；BEGIN包含取连接与往返，Commit包含客户端调用，不能由这些trace推断纯池等待、纯fsync或完整请求P95。S25中止、拒帧body缺失和独立闭合仍分别保留，不以S26诊断追认S25。
+
+调整前只读实际观察：`innodb_redo_log_capacity`与有效容量均为104857600字节（100MiB），resize状态OK，redo启用；MySQL为8CPU/8GiB、buffer 4GiB，`innodb_flush_log_at_trx_commit=1`、`sync_binlog=1`、`binlog_group_commit_sync_delay=0`、doublewrite和binlog启用，io_capacity 10000/max20000。根盘可用约80.7GB（十进制），执行时另核为新增容量预留空间后仍至少8GiB。MySQL文件计数是启动以来累计值，不冒充S26纯60秒差分。
+
+另有S26主窗内完整落入边界的33个1Hz内核磁盘差分区间：观察约在native开始27秒后启动，仅覆盖后33秒；IOPS平均6787.386、中位6791.876、最大7193.924，平均写入144.889MiB/s、await 3.377ms、util约80.48%、平均队列深度22.91。按[阿里云块存储性能公式](https://help.aliyun.com/zh/ecs/user-guide/block-storage-performance)，100GiB PL1标称IOPS为6800。这支持I/O压力线索，仍不能只凭1Hz设备完成计数断定云盘已被throttle，也不是完整60秒或纯MySQL I/O归因。
+
+本试验只在线执行一次`SET GLOBAL innodb_redo_log_capacity=2147483648`，同实例、原四容器/卷/网络/boot保持，无额外采购、不persist、不restart或删除日志。配置及验证执行约1.7秒，requested与effective均为2147483648、resize状态OK；该墙钟不是纯服务端resize耗时，也不要求physical size恰好等于目标。每个实际采样及before/request/verified独立保存，新metadata只追加redoActual及运行时标记，原mysqlActual严格字段与本boot 4GiB证明链不变。原metadata与resize-before的UUID/版本另作只读文件补证，不重跑SET或改写首次证明。新metadata SHA256=`17aa8fd5b10c55b81780dd26285349930b38c3319ab5a8e1bcc3dd762ed9bade`，verified SHA256=`1905bdc4bea402474218723e164ffcbd643559b335d9c5e99adf3d366a9c05c5`。
+
+待检验的是更大redo空间能否减轻检查点/刷新压力，进而改善同机链路；它没有减少每次成功写入的同步提交、Outbox或消费者确认要求，也不证明COMMIT瓶颈已经解决。双1、delay0、doublewrite、4GiB buffer、io_capacity与c464业务源码保持。S27同时回到诊断关闭的容量配置，并使用新1996关系夹具以限制选中关系的历史审计规模，旧数据不删除；因此跨S26/S27差异不能当成纯redo因果倍率，更不能混为SQL6→4的业务代码收益。
+
+新夹具/包、同三MD5及只读准入通过，最终诊断关闭、pool128/consumer32 API和新13样本空载通过。S27实际warm 250次成功变更后、stable启动前setup失败，原`correctness_stop`、`batchFatal=true`、`childrenConverged=true`保留；最终facts/derived/downstream对账通过不替代主窗，没有stable资源样本或主窗QPS/P95，**redo收益仍未验证**。
+
+本次失败已用原文件只读闭环为observer顺序错误：Node和ready按manifest顺序，Go live按内部NoteID词典序；新夹具ID跨十进制位数，两种顺序不同。相同初始全0版本事实的manifest顺序hash为`4ad9aadd79255d4e8e83cb464b53e96b3a48693b6548f01c8721cd14e6ff0944`，精确匹配ready；词典序hash为`63c1c21c85a8b6c38db9da769d2ed3cb09d2902799d0b6ba525cd72fe540e53a`，精确匹配live；控制摘要相同。未发新SQL或修改事实来制造匹配。原setup60秒无法取得samevector而失败，不据此判断redo性能；最小工具修复待交，业务API c464不变。原FAIL和S24/S26摘要字节保留，后续仍须完整候选及同freeze两轮180秒，运行时redo重启后必须重新实查。
 
 ## 原件存档
 

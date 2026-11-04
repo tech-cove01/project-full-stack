@@ -1,6 +1,6 @@
 # 工作流与任务状态
 
-更新：2026-11-04。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
+更新：2026-11-05。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
 
 ## 当前目标与操作状态
 
@@ -10,7 +10,13 @@
 
 **本次检查点：** 最终c464容量API、新1996关系夹具及`relation-noop-v1`新包已实际部署；PTS三文件核对通过，为4引擎/2000VU。S23、S24均以完整60秒分母观察到约3004.98次实际成功变更/秒，但均为`performance_limited`。S23的P95/P99为266/355ms；S24只将连接池64/64→128/128，P95/P99为198/320ms，API预算通过、候选160ms余量未过，全窗及末15秒下游仍失败。两窗timing/unknown/drop均0、事实终审通过，恢复分别为1.455063/4.183483秒。H2/H3未运行、新正式freeze未建立；这不是稳定3000成绩。
 
-下一单变量为保持pool128、consumer提交批32→64。该API已实际启动，新空载通过60秒/13样本，主机CPU约2.4%、内存约14.5%；S25的authority已通过，候选正在运行，尚未取得结果。空载通过不证明吞吐，后续仍须原完整候选及正式门槛。
+S25在pool128、consumer提交批64下已中止：原结果为`correctness_stop`、`batchFatal=true`、`childrenConverged=false`，保持原值。已接受raw中有22068次mutation及1次drop；这不是完整窗口，不计算QPS或P95。一次实际成功HTTP耗时719ms，超过同relation约663ms的调度周期，下一次来不及启动而drop；后续overlap拒帧及原unknown缺失保留。被拒batch未保存完整body，不能推断为“假overlap”。
+
+S25独立真实闭合已通过：原1996关系完整reconcile、两个签名provider EndTime及全部旧PID不存在均已核实，备份原owner字节后仅释放该锁。它不修复旧成绩、不将原`childrenConverged=false`改成true，也不新造terminal。后续S26以同c464、pool128、consumer32、Like诊断开启配置完成3010×60秒诊断：180299次成功变更/完整60秒=3004.983333次/秒，P95/P99为216/333.02ms，drop/timing/unknown均0；API及下游预算失败，原结果为`performance_limited`。事实收敛、原`childrenConverged=true`、恢复6.038893秒及负载闭合均已核实，不是正式容量成绩。
+
+当前已在同一MySQL实例在线将redo容量100MiB→2GiB，配置及验证执行约1.7秒，requested与effective均为2147483648、resize状态OK；没有重启、持久化配置或放宽双1。原诊断API已正常停止，UUID/版本文件只读补证通过，原resize证明不改写。新1996关系夹具及同维度新包已准备，三上传MD5与旧包相同且新namespace只读验证通过，无需用户重新上传。诊断关闭、pool128/consumer32最终API及新60秒/13样本空载通过（CPU中位约2.7%、内存最高约15.9%）。S27实际在warm 250次成功变更后、stable启动前失败：setup原60秒内未匹配同事实摘要，`correctness_stop`、`batchFatal=true`、`childrenConverged=true`；最终facts/derived/downstream对账通过，但没有stable主窗或其资源样本，不能报告主窗QPS/P95或redo收益，H2/H3未运行。
+
+根因已用原事实文件只读闭环为observer顺序错误：Node和ready摘要按manifest顺序，Go live摘要按内部NoteID词典序；新夹具ID跨十进制位数时，两种顺序不同。在初始版本全0、控制摘要一致且事实未变时，原manifest顺序hash精确匹配ready，词典序hash精确匹配live。原S27 FAIL不追认；最小observer顺序修复正在准备，业务API c464不变。
 
 两项准备失败原件保留：BOOT首FAIL的瞬时原因未精确取证，不补称确定原因；后续同boot、原CID/事实、账号认证与权限的只读复核及显式最终化通过，不重跑resize/CREATE。authority准备的H1/S22前后报告同名`FileExists`已精确定位；原H1退休证明经实际public grade通过，以同助手显式新attempt完成准备，不重复assembler/API/idle。八个助手源码字节未改，恢复通过不改写首FAIL。
 
@@ -45,23 +51,25 @@ S23全窗search lag为2027，超过预算1653；末15秒三组收据增长922/95
 
 S20/S23脱敏原摘要见[云测摘要](docs/evidence/2026-11-01-cap10/cloud-like-S20-S23-summary.json)，保留原grade、不重采样。S24的API预算虽过，候选余量与下游仍失败：全窗三组收据增长5476/4804/5722、Kafka lag为5317/4677/5499，均超各自预算1655.36；末15秒收据增长2952/2728/3240、Kafka lag为2372/2212/2596，均超各自预算301.38。S24详细公开报告后续与新窗口归档，不用观察到的延迟差异替代稳态结论或推算QPS倍率。
 
+S24/S26的[脱敏原摘要](docs/evidence/2026-11-01-cap10/cloud-like-S24-S26-summary.json)已从实际输出复制并核SHA一致，分别保留candidate/diagnostic身份、失败grade及provider VUM，不将诊断窗口改成正式成绩。
+
 后续仍配置3010，以完整60/180秒分母计算，计划发起180299/541499次，约3004.9833/3008.3278次/秒；最终只按真实成功变更计量、两正式取较低值。原能力公式需1890关系，1996关系/4引擎/2000VU可容纳该估算，不保证容量；原50ms、零unknown/drop、候选160/400ms余量、正式200/500ms及下游稳态/恢复门槛保持。
 
-已购60000 VUM，S20—S22六份provider报告合计8704，S23两份实际为1122+2895=4017，已知累计12721。相减47279只是**未扣S24**的计划余量；S24实际消耗待提取，不能称当前余额，账户余额和其它消费未独立查询。下一窗口前按真实报告重核预算，准备noop、屏障及平台生命周期消耗单列；不用全stage墙钟冒充账单。
+已购60000 VUM，实际已核S20—S22合计8704、S23为4017、S24为1046+2761=3807、S25为2061、S26为928+2940=3868，累计22457。相减37543只是**未扣S27**的计划余量，不能称账户余额，账户余额和其它消费未独立查询；S27实际warm费用待提取，中止窗口也不记为零成本。准备noop、屏障及平台生命周期消耗单列，不用全stage墙钟冒充账单。
 
 ## 配置试验与下一小票
 
 CAP10-POOL128已实际完成：仅连接池64/64→128/128，consumer32保持；新deployment/进程及新空载通过13样本、CPU约2.6%/内存约13.3%，随后S24结果如上。记录这次配置试验的实际观察，不能宣称它已取得稳定容量。
 
-CAP10-CONSUMER64规格：保持pool128，仅consumer提交批32→64，使用现有配置上限；c464源码及上述API/observer产物、GOMAX8、relay8×32、原资源与双1持久化保持，SQL/ACK正确性门槛不变。新deployment/进程及新空载已通过，S25候选运行中，尚无收益或容量结论。
+CAP10-CONSUMER64曾保持pool128，仅consumer提交批32→64，源码、GOMAX8、relay8×32、原资源与双1持久化不变。S25原中止与独立闭合分别保留，不能由局部成功计数得出收益或容量结论。
 
-验收：经原函数显式接线pool128/consumer64 policy并核实际进程配置，不复用前部署身份；配置3010×60秒候选，全部原时序、计数、延迟、下游、事实及native结束后60秒恢复门槛同时通过，才生成同freeze并执行两轮各180秒正式；第一正式失败不跑第二轮。保留新旧原件，若无收益或争用增大如实记录，不降目标或门槛。
+CAP10-REDO2G仅调整同机`innodb_redo_log_capacity`，保原4GiB buffer、8CPU/8GiB MySQL、io_capacity 10000/max20000、双1、delay0、doublewrite、源码c464、relay8×32及consumer32。配置已完成，但S27因工具错误未进入stable，收益仍未验证；S26诊断开启、S27关闭且换新夹具也不能拼成纯redo倍率。机制、实际配置与限制见[redo试验记录](docs/evidence/2026-11-01-cap10/offline-improvements.md#11-05同机redo容量试验收益待验证)。先修复observer顺序合同并重新绑定实际工具/observer产物与当窗准入，再按完整候选及同freeze两轮各180秒正式验证；所有原门槛不变，第一正式失败不跑第二轮。
 
 ## 下一步
 
 1. R1—R4已完成必要核对、独审及分票提交，均已正常同步远端main；原始文件和历史完整保留，不重写Git历史。
-2. S23/S24失败保留；不重跑已有有效证据的全套测试，不为文档或现有配置试验重新构建API。S24详细公开报告可后续归档，不阻塞本检查点。
-3. CAP10-CONSUMER64新API及新空载已通过，接续S25候选的计量与终审；原三文件/1996关系/4引擎/2000VU保持，先纳入S24真实报告重核费用。
+2. S23/S24失败、S25原中止及独立闭合、S26诊断受限与闭合、S27工具setup失败分别保留；不重判旧FAIL，不为工具修复重新构建未改的业务API。
+3. 最小修复observer的manifest顺序摘要并验证跨位数ID，再重新绑定observer/工具与准入。redo2GiB保留运行时实际证明，1996关系/4引擎/2000VU及门槛不变，按真实报告重核费用，不预写负载结果。
 4. 按原authority/runner进行3010候选，只有完整通过后才同freeze正式两轮180秒；保留首FAIL与全部原件，不改门槛。用户此前已授权原计划接续，不因工具本身只准备而额外索取相同许可。
 
 ## 权威入口

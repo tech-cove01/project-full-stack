@@ -1220,6 +1220,193 @@ def formal_start_retirement(root, command, context):
     return {'tag': tag, 'proofSHA256': sha(path), 'originalFreezeSHA256': command.get('freezeSHA256')}
 
 
+def _failed_formal_resource_change(root, old_active, context, proof):
+    """The sole supported successor changes Kafka's owned runtime memory."""
+    active = context['active']
+    old_path, old_sha, old_profile = environment_identity(old_active, root)
+    new_path, new_sha, new_profile = environment_identity(active, root)
+    require((old_profile, new_profile) == ('mysql8-v1', 'mysql8-kafka2-v1')
+            and old_active['deploymentId'] != active['deploymentId']
+            and old_active['sourceSha'] == active['sourceSha'] and old_active['binarySHA256'] == active['binarySHA256']
+            and old_active.get('deployment') == active.get('deployment')
+            and old_sha != new_sha and old_path != new_path
+            and proof.get('successorDeploymentId') == active['deploymentId']
+            and proof.get('successorEnvironment') == {'path': new_path.name, 'sha256': new_sha},
+            'failed formal successor requires the explicit new Kafka profile and deployment, without changing API code')
+    old, new = read(old_path), read(new_path)
+    actual = new.get('kafkaMemoryActual', {})
+    keys = {'containerId', 'memoryBytes', 'memorySwapBytes', 'bootIdentity', 'parentEnvironment',
+            'before', 'after', 'proof', 'swapPolicy', 'swapAllowanceBytes'}
+    parent = {'path': old_path.name, 'sha256': old_sha}; boot = old.get('bootIdentity', {}).get('bootID')
+    require(type(actual) is dict and set(actual) == keys and type(boot) is str and boot
+            and actual.get('parentEnvironment') == parent and actual.get('bootIdentity') == {'bootId': boot}
+            and actual.get('containerId') == old['containers']['kafka']['id']
+            and actual.get('memoryBytes') == 2 << 30 and actual.get('memorySwapBytes') == 3 << 30
+            and actual.get('swapPolicy') == 'preserve-extra-swap-bytes-v1' and actual.get('swapAllowanceBytes') == 1 << 30
+            and proof.get('resourceChangeProof') == actual['proof'], 'exact actual Kafka change proof required')
+    verified = _authority_ref(root, actual['proof'])
+    before, after = _authority_ref(root, actual['before']), _authority_ref(root, actual['after'])
+    require(all(verified.get(key) is True for key in ('complete', 'runtimeOnly', 'noRestart', 'noLoad'))
+            and verified.get('bootId') == boot and verified.get('bootIdentity') == actual['bootIdentity']
+            and verified.get('containerId') == actual['containerId']
+            and verified.get('parentEnvironment') == parent and verified.get('before') == actual['before']
+            and verified.get('after') == actual['after']
+            and verified.get('fromProfile') == old_profile and verified.get('toProfile') == new_profile
+            and verified.get('memoryBeforeBytes') == 1 << 30 and verified.get('memorySwapBeforeBytes') == 2 << 30
+            and all(verified.get(key) == actual[key] for key in ('memoryBytes', 'memorySwapBytes', 'swapPolicy', 'swapAllowanceBytes')),
+            'Kafka runtime verification does not bind the complete exact change')
+    require(all(before.get(key) == after.get(key) for key in
+                ('bootIdentity', 'parentEnvironment', 'processIdentity', 'volumes', 'network', 'mysqlRedo'))
+            and before.get('bootIdentity') == actual['bootIdentity'] and before.get('parentEnvironment') == parent
+            and all(key in before for key in ('processIdentity', 'volumes', 'network', 'mysqlFacts', 'mysqlRedo')),
+            'Kafka change cannot restart processes or change the other dependency facts')
+    fixed_mysql = ('serverUUID', 'version', 'flushAtCommit', 'syncBinlog', 'groupCommitDelay',
+                   'isolation', 'dedicatedServer', 'logBin', 'doublewrite', 'readOnly',
+                   'superReadOnly', 'sqlMode', 'instances', 'chunkBytes')
+    first_mysql, last_mysql = before['mysqlFacts'], after['mysqlFacts']
+    require(all(key in first_mysql and key in last_mysql and key in old['mysqlActual']
+                and type(first_mysql[key]) is type(last_mysql[key]) is type(old['mysqlActual'][key])
+                and first_mysql[key] == last_mysql[key] == old['mysqlActual'][key] for key in fixed_mysql)
+            and all(type(value.get('bufferBytes')) is int and value['bufferBytes'] == 4 << 30
+                    and all(type(value.get(key)) is int and value[key] == 0
+                            for key in ('resizeCode', 'otherSessions', 'activeTransactions'))
+                    and type(value.get('resizeText')) is str and type(value.get('uptime')) is int and value['uptime'] >= 0
+                    and type(value.get('resizeProgress')) is int and 0 <= value['resizeProgress'] <= 100
+                    for value in (first_mysql, last_mysql))
+            and first_mysql['resizeText'] == last_mysql['resizeText'] and last_mysql['uptime'] >= first_mysql['uptime'],
+            'Kafka transition must retain fixed MySQL facts while allowing monotonic uptime')
+    original = before.get('containers', {}); changed = after.get('containers', {})
+    require(set(original) == set(changed) == set(old['containers'])
+            and original['kafka'].get('id') == actual['containerId']
+            and original['kafka'].get('memoryBytes') == 1 << 30 and original['kafka'].get('memorySwap') == 2 << 30
+            and changed == {**original, 'kafka': {**original['kafka'], 'memoryBytes': 2 << 30, 'memorySwap': 3 << 30}},
+            'only Kafka memory and its fixed extra swap allowance may change')
+    for name, container in old['containers'].items():
+        require(all(original[name].get(key) == container.get(key) for key in
+                    ('id', 'cpuNano', 'memoryBytes', 'imageId', 'volumes', 'mounts', 'networks', 'ports') if key in container),
+                'actual Kafka parent differs from the old dependency identity')
+    expected_containers = {**old['containers'], 'kafka': {**old['containers']['kafka'], 'memoryBytes': 2 << 30}}
+    if 'memorySwap' in expected_containers['kafka']:
+        expected_containers['kafka']['memorySwap'] = 3 << 30
+    require(new.get('containers') == expected_containers
+            and {k: v for k, v in new.items() if k not in ('at', 'resourceProfile', 'containers', 'kafkaMemoryActual')}
+            == {k: v for k, v in old.items() if k not in ('at', 'resourceProfile', 'containers')},
+            'new metadata must preserve all original MySQL/redo and dependency fields')
+
+
+def failed_formal_group_supersession(root, freeze_sha, context, proof=None):
+    """Prove a failed native group closed; never return a retired or passed window."""
+    root = Path(root); active = context['active']; deployment = active.get('deploymentId', '')
+    require(type(freeze_sha) is str and re.fullmatch(r'[a-f0-9]{64}', freeze_sha)
+            and type(deployment) is str and re.fullmatch(r'[a-z0-9][a-z0-9-]{0,79}', deployment),
+            'original freeze and explicit successor deployment required')
+    path = root / 'formal-group-supersessions' / (freeze_sha + '-' + deployment + '.json')
+    from_file = proof is None
+    if from_file:
+        proof = _authority_ref(root, {'path': path.relative_to(root).as_posix(), 'sha256': sha(path)})
+    require(proof.get('version') == 1 and proof.get('batch') == 'CAP-10'
+            and proof.get('kind') == 'closed_failed_formal_group' and proof.get('authorized') is True
+            and type(proof.get('userAuthorizationReference')) is str and proof['userAuthorizationReference'].strip()
+            and proof.get('originalFreeze') == {'path': 'freeze-history/' + freeze_sha + '.json', 'sha256': freeze_sha},
+            'explicit failed-group closure and byte-identical original freeze archive required')
+    original_freeze = _authority_ref(root, proof['originalFreeze'])
+    records = [c for c in history(root) if c.get('kind') == 'formal' and c.get('freezeSHA256') == freeze_sha]
+    require(1 <= len(records) <= 2 and all(stage(root, c).get('passed') is True for c in records[:-1])
+            and stage(root, records[-1]).get('passed') is False
+            and [m.get('tag') for m in proof.get('members', [])] == [c['tag'] for c in records],
+            'the complete original group must end at its first failure, with at most two slots')
+    recorded = instant(proof['recordedAt'])
+    require(instant(stage(root, records[-1])['finishedAt']) <= recorded <= dt.datetime.now(dt.timezone.utc),
+            'failed-group closure cannot precede its failure or be future-dated')
+    original_active = original_application(root, records[-1], context)
+    require(original_freeze.get('activeApplicationSHA256') == records[-1]['reservationCheck']['activeApplicationSHA256']
+            and original_freeze.get('deploymentId') == original_active['deploymentId'], 'old freeze belongs to another application')
+    _failed_formal_resource_change(root, original_active, context, proof)
+    for command, member in zip(records, proof['members']):
+        tag = command['tag']; previous = stage(root, command)
+        require(command.get('seconds') == 180 and command.get('loadBackend') == 'pts'
+                and command.get('reservationCheck', {}).get('executionAuthoritySHA256') == context['authoritySHA256']
+                and command['reservationCheck'].get('executionAuthorityGeneration') == context['authority']['generation']
+                and command['reservationCheck'].get('activeApplicationSHA256') == original_freeze['activeApplicationSHA256']
+                and previous.get('childrenConverged') is True and previous.get('failedStartOrException') is None,
+                'original failed formal must retain its actual terminal and fixed execution authority')
+        for key, suffix in (('command', '-command.json'), ('stage', '-stage.json'), ('result', '-load/result.json')):
+            expected = {'path': tag + suffix, 'sha256': sha(root / (tag + suffix))}
+            require(member.get(key) == expected, 'failed group must retain its exact original ' + key)
+            _authority_ref(root, expected)
+        terminal = _authority_ref(root, member['terminal']); owners = terminal.get('owners', [])
+        expected_owners = {(p['pid'], p['created']) for p in previous.get('knownOwnedProcesses', [])}
+        require(expected_owners and len(expected_owners) == len(previous['knownOwnedProcesses'])
+                and all(type(pid) is int and pid > 0 and type(birth) in (int, float)
+                        and math.isfinite(birth) and birth > 0 for pid, birth in expected_owners)
+                and terminal.get('tag') == tag
+                and terminal.get('originalStageSHA256') == member['stage']['sha256']
+                and all(terminal.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive'))
+                and expected_owners == {(p.get('pid'), p.get('created')) for p in owners}
+                and len(owners) == len(expected_owners)
+                and all(p.get('alive') is False and p.get('identityChecked') is True for p in owners),
+                'every original exact owner must have exited before supersession')
+        app = original_application(root, command, context); dimensions = original_command_dimensions(root, command, app)
+        reports = terminal.get('reports', [])
+        require(len(reports) == 2 and {r.get('phase') for r in reports} == {'warm', 'stable'}
+                and len({r.get('reportId') for r in reports}) == 2
+                and set(member.get('reportAudits', {})) == set(member.get('processes', {})) == {'warm', 'stable'},
+                'both actually started PTS phases require separate original signed EndTime evidence')
+        scene = _authority_ref(root, {'path': app['ptsAdmissionPath'], 'sha256': command['ptsAdmissionSHA256']})['sceneId']
+        for report in reports:
+            phase = report['phase']; start_ref = report['originalStartAudit']; start = _authority_ref(root, start_ref)
+            audit = _authority_ref(root, member['reportAudits'][phase]); raw = audit.get('sanitizedRawResponse', {})
+            overview = raw.get('ReportOverView', {})
+            starts = list((root / (tag + '-load') / (phase + '-pts/api')).glob('*StartTestingJMeterScene.json'))
+            require(len(starts) == 1 and start_ref['path'] == starts[0].relative_to(root).as_posix()
+                    and start.get('action') == 'StartTestingJMeterScene' and start.get('httpStatus') == 200
+                    and start.get('sceneId') == scene and start.get('sanitizedRawResponse', {}).get('Success') is True
+                    and start['sanitizedRawResponse'].get('ReportId') == report.get('reportId')
+                    and report.get('ended') is True and type(report.get('reportId')) is str and report['reportId']
+                    and type(report.get('startTimeRaw')) is str and type(report.get('endTimeRaw')) is str
+                    and dt.datetime.fromisoformat(report['endTimeRaw']) >= dt.datetime.fromisoformat(report['startTimeRaw'])
+                    and audit.get('action') == 'GetJMeterReportDetails' and audit.get('httpStatus') == 200
+                    and audit.get('sceneId') == scene and audit.get('regionId') == start.get('regionId')
+                    and raw.get('Success') is True and type(raw.get('RequestId')) is str and raw['RequestId']
+                    and raw['RequestId'] == report.get('requestId') and overview.get('ReportId') == report['reportId']
+                    and overview.get('StartTime') == report['startTimeRaw'] and overview.get('EndTime') == report['endTimeRaw']
+                    and instant(start['responseFinishedAt']) <= instant(audit['requestStartedAt'])
+                    <= instant(audit['responseFinishedAt']) <= recorded,
+                    'failed formal needs its exact original Start and matching successful signed EndTime')
+            process_ref = member['processes'][phase]; process = _authority_ref(root, process_ref)
+            require(process_ref['path'] == tag + '-load/' + phase + '-process.json'
+                    and process.get('backend') == 'pts' and process.get('phase') == phase
+                    and sum(p['pid'] == process.get('controller_pid') for p in owners) == 1,
+                    'both original controller markers must match stopped registered owners')
+        journal_ref = member['nativeJournal']; journal_path = root / journal_ref['path']
+        require(journal_ref['path'] == tag + '-load/stable-pts/records.ndjson' and journal_path.is_file()
+                and not journal_path.is_symlink() and journal_path.resolve() == journal_path
+                and journal_ref.get('sha256') == sha(journal_path), 'original stable journal bytes required')
+        with journal_path.open('r', encoding='utf-8') as stream:
+            first = json.loads(next(stream)); offered = any(row.get('kind') == 'batch' and row.get('records')
+                for line in stream if line.strip() for row in [json.loads(line)])
+        identity = first.get('configuration', {})
+        require(first.get('kind') == 'configuration' and identity.get('phase') == 'stable'
+                and identity.get('fixtureSHA256') == command['fixtureSHA256']
+                and identity.get('rate') == command['rate'] and identity.get('seconds') == 180
+                and identity.get('expectedEngines', cohort.DEFAULT_ENGINES) == dimensions['expectedEngines'] and offered,
+                'native-failed supersession cannot relabel an unstarted or zero-offer formal')
+    final = records[-1]; app = original_application(root, final, context)
+    pool = original_command_dimensions(root, final, app)['poolSize']
+    audit = _audit_reference(root, proof['reconciliation']); facts = _complete_vector_audit(audit, final['fixtureSHA256'], pool)
+    fixture = _authority_ref(root, {'path': app['fixturePath'], 'sha256': final['fixtureSHA256']})
+    notes, users = fixture.get('multiNoteIds', []), fixture.get('userIds', [])
+    require(len(notes) == len(users) == len(set(notes)) == len(set(users)) == pool
+            and {(r['noteId'], r['userId']) for r in facts['facts']} == set(zip(notes, users))
+            and {r['noteId'] for r in audit['derived']['notes']} == set(notes)
+            and instant(stage(root, final)['finishedAt']).timestamp() * 1000 <= audit['startedAt']
+            <= audit['finishedAt'] <= recorded.timestamp() * 1000
+            and audit.get('timeline') and audit['timeline'][-1].get('pending') == audit['timeline'][-1].get('parked') == 0
+            and audit['timeline'][-1].get('receiptErrors') == [], 'later complete reconciliation of the exact original fixture required')
+    return {'kind': 'closed_failed_formal_group', 'tags': [c['tag'] for c in records],
+            'proofSHA256': sha(path) if from_file else None, 'originalFreezeSHA256': freeze_sha}
+
+
 def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ability, freeze, tools, observer_hash, context):
     active, records = context['active'], history(root)
     require(environment_identity(api, root, require_sha=False) == environment_identity(active, root),
@@ -1265,20 +1452,38 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
         require(reconciliation.get('valid') is True and reconciliation.get('factsValid') is True and reconciliation.get('downstreamConverged') is True and reconciliation.get('errors') == [] and derived.get('available') is True and derived.get('errors') == [] and len(facts.get('facts', [])) == len(facts.get('notes', [])) == len(derived.get('notes', [])) == pool and facts.get('transitions') == facts.get('eventCount') and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0 and timeline[-1].get('receiptErrors') == [] and reconciliation.get('finishedAt', float('inf')) / 1000 <= admitted.timestamp(), 'fresh complete authoritative reconciliation required before continuing')
         if previous and old_stage.get('passed') is not True:
             require(reconciliation.get('startedAt', 0) / 1000 >= instant(old_stage['finishedAt']).timestamp(), 'failed window requires later reconciliation, without rewriting its old recovery result')
-    formal_group, retired = [], {}
+    formal_group, retired, closed_groups = [], {}, {}
+    if (kind == 'candidate' and previous and previous.get('kind') == 'formal'
+            and old_stage.get('passed') is False and not _active_command(previous, context)
+            and (Path(root) / (previous['tag'] + '-load/stable-process.json')).is_file()):
+        item = failed_formal_group_supersession(root, previous['freezeSHA256'], context)
+        closed_groups[previous['freezeSHA256']] = item['proofSHA256']
     freeze_sha = sha(Path(root) / 'freeze-like.json') if kind == 'formal' else None
     if kind == 'formal':
         formal_group = [c for c in formals if c.get('freezeSHA256') == freeze_sha]
+        declared_closed = freeze.get('closedFailedFormalGroups', {}) if isinstance(freeze, dict) else {}
+        require(type(declared_closed) is dict, 'failed formal closure map must be explicit')
         for command in formals:
             if command not in formal_group:
-                item = formal_start_retirement(root, command, context)
-                retired[item['tag']] = item['proofSHA256']
+                old_freeze = command.get('freezeSHA256')
+                if old_freeze in declared_closed:
+                    if old_freeze not in closed_groups:
+                        item = failed_formal_group_supersession(root, old_freeze, context)
+                        closed_groups[old_freeze] = item['proofSHA256']
+                else:
+                    item = formal_start_retirement(root, command, context)
+                    retired[item['tag']] = item['proofSHA256']
+        require(declared_closed == closed_groups, 'new freeze cannot omit, add or replace a failed-group closure')
         require(len(formal_group) < 2 and all(stage(root, c).get('passed') is True for c in formal_group), 'each exact freeze permits only two formal windows; its first failure ends that group')
         require(isinstance(freeze, dict) and freeze.get('executionAuthoritySHA256') == context['authoritySHA256'] and freeze.get('activeApplicationSHA256') == context['activeApplicationSHA256'] and freeze.get('deploymentId') == active['deploymentId'] and freeze.get('rate') == rate and freeze.get('sourceSha') == active['sourceSha'] and all(freeze.get(key) == active[key] for key in ('binarySHA256', 'environmentSHA256', 'fixtureSHA256', 'scriptHashes', 'observerBinarySHA256', 'ptsPacketSHA256', 'ptsAdmissionSHA256')) and freeze.get('sourceCIPassed') is True and freeze.get('relatedChecksPassed') is True and freeze.get('initialDistributionContract') == {'existing': pool, 'active': 0, 'relationships': pool} and cohort.fixture_pool_size(freeze) == pool, 'formal requires one exact current-source CI/identity freeze')
         require(environment_identity(freeze, root) == environment_identity(active, root), 'formal freeze environment path or profile differs')
         candidates = [c for c in records if c['tag'] == freeze.get('candidateTag') and c['kind'] == 'candidate' and c['rate'] == rate and _active_command(c, context)]
         require(len(candidates) == 1 and stage(root, candidates[0]).get('passed') is True and stage(root, candidates[0]).get('candidateMarginPassed') is True and stage(root, candidates[0]).get('recoveryVerified') is True, 'formal requires its completed passing current-identity candidate')
+        require(candidates[0].get('reservationCheck', {}).get('closedFailedFormalGroups', {}) == closed_groups,
+                'new freeze must retain its passing candidate original failed-group closure map')
         require(all(_active_command(c, context) and c.get('reservationCheck', {}).get('retiredFormalStarts', {}) == retired for c in formal_group), 'both current-group formals must retain the same application/freeze and unchanged startup proofs')
+        require(all(c.get('reservationCheck', {}).get('closedFailedFormalGroups', {}) == closed_groups for c in formal_group),
+                'both current-group formals must retain exactly the same closed failed groups')
     transition = read(ROOT / 'environment-transition.json'); anchor = instant(transition['recordedAt']); now = dt.datetime.now(dt.timezone.utc)
     intervals = [(s['loadWaitStartedAt'], s['loadWaitFinishedAt']) for c in records for s in [stage(root, c)] if s.get('loadWaitStartedAt') and s.get('loadWaitFinishedAt')]
     deducted = merged_wait_seconds(intervals, anchor, now); used = transition['effectiveWorkSecondsUsedBeforeSwitch']
@@ -1292,6 +1497,7 @@ def authority_reservation(root, kind, rate, seconds, api, fixture, preflight, ab
             'mainSecondsReservedAfter': sum(c['seconds'] for c in records) + seconds, 'shortMaximum': None, 'formalMaximum': None,
             'formalMaximumPerFreeze': 2, 'formalGroupSHA256': freeze_sha,
             'formalGroupSlotsUsedAfter': len(formal_group) + (kind == 'formal'), 'retiredFormalStarts': retired,
+            'closedFailedFormalGroups': closed_groups,
             'mainSecondsMaximum': None, 'S8ReservedForCandidate': False, 'effectiveWorkBudget': budget,
             'elapsedConservativeSeconds': budget['effectiveSecondsUpperBound'], 'executionAuthoritySHA256': context['authoritySHA256'],
             'executionAuthorityGeneration': context['authority']['generation'], 'deploymentId': active['deploymentId'],

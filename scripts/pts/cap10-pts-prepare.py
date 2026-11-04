@@ -277,10 +277,12 @@ def bind(owned, environment, scene_id):
     return public
 
 
-def cleanup_packet(owned, environment):
+def cleanup_packet(owned, environment, cleanup_namespace=None):
     """Delete only registered packet files; private env/config cleanup is separate."""
     _, runtime = validate_owned(owned, environment)
-    plan_path, result_path = owned.ROOT / 'pts-packet-cleanup-plan.json', owned.ROOT / 'pts-packet-cleanup.json'
+    output_directory = (owned.ROOT if cleanup_namespace is None else
+                        owned.cleanup_directory(cleanup_namespace, Path(environment).resolve(), packet=True))
+    plan_path, result_path = output_directory / 'pts-packet-cleanup-plan.json', output_directory / 'pts-packet-cleanup.json'
     if plan_path.exists() or result_path.exists():
         raise ValueError('preserve prior packet cleanup evidence; no automatic repeat')
     registrations = sorted(runtime.glob('owned-pts-upload-*.json'))
@@ -458,6 +460,7 @@ def main():
     first.add_argument('--pool-size', type=int, default=512); first.add_argument('--expected-engines', type=int, default=2)
     second = actions.add_parser('bind'); second.add_argument('--environment', required=True); second.add_argument('--scene-id', required=True)
     third = actions.add_parser('cleanup-packet'); third.add_argument('--environment', required=True)
+    third.add_argument('--cleanup-namespace', help='new explicit 12hex output namespace; default preserves legacy paths')
     fourth = actions.add_parser('verify-scene'); fourth.add_argument('--environment', required=True); fourth.add_argument('--allow-live', action='store_true')
     fourth.add_argument('--namespace')
     args = parser.parse_args()
@@ -471,7 +474,7 @@ def main():
     elif args.action == 'bind':
         result = bind(owned, args.environment, args.scene_id)
     elif args.action == 'cleanup-packet':
-        result = cleanup_packet(owned, args.environment)
+        result = cleanup_packet(owned, args.environment, cleanup_namespace=args.cleanup_namespace)
     else:
         result = verify_scene(owned, args.environment, args.allow_live, namespace=args.namespace)
     print(json.dumps(result, ensure_ascii=False))

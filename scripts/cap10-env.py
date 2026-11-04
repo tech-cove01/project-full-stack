@@ -581,6 +581,38 @@ def phase_terminated(detail, load):
         return True
 
 
+def cleanup_directory(namespace, environment, *, packet=False):
+    """One explicit output namespace; only this finish's packet child may join."""
+    if namespace is None:
+        return ROOT
+    assert type(namespace) is str and re.fullmatch(r'[a-f0-9]{12}', namespace), 'exact cleanup namespace required'
+    directory = ROOT / ('cleanup-' + namespace)
+    assert ROOT.resolve() == ROOT and directory.resolve() == directory and not directory.is_symlink()
+    source = Path(environment)
+    assert source.resolve() == source and source.is_file() and not source.is_symlink()
+    source_sha = hashlib.sha256(source.read_bytes()).hexdigest()
+    owner_path = directory / 'owner.json'
+    if packet and directory.exists():
+        assert directory.is_dir() and owner_path.is_file() and not owner_path.is_symlink()
+        owner = read(owner_path)
+        assert set(owner) == {'kind', 'namespace', 'pid', 'created', 'environmentPath', 'environmentSHA256'}
+        assert owner['kind'] == 'cap10-env-finish' and owner['namespace'] == namespace
+        assert owner['environmentPath'] == str(source) and owner['environmentSHA256'] == source_sha
+        assert type(owner['pid']) is int and owner['pid'] in (os.getpid(), os.getppid())
+        assert type(owner['created']) in (int, float) and math.isfinite(owner['created']) and owner['created'] > 0
+        assert abs(psutil.Process(owner['pid']).create_time() - owner['created']) <= .002, 'cleanup owner birth differs'
+        return directory
+    directory.mkdir(mode=0o700)  # exclusive; never adopt an existing or failed namespace
+    owner = {'kind': 'cap10-pts-cleanup' if packet else 'cap10-env-finish', 'namespace': namespace,
+             'pid': os.getpid(), 'created': psutil.Process().create_time(),
+             'environmentPath': str(source), 'environmentSHA256': source_sha}
+    with owner_path.open('x', encoding='utf-8') as output:
+        json.dump(owner, output)
+        output.flush()
+        os.fsync(output.fileno())
+    return directory
+
+
 def finish(args):
     value, runtime = settings(args.environment)
     metadata_path = Path(args.api_metadata).resolve()
@@ -599,7 +631,9 @@ def finish(args):
         if pts:
             assert value.get('CAP10_LOAD_BACKEND') == 'pts'
         assert phase_terminated(detail, path.parent), 'owned workload controller or remote PTS termination unproved'
-    progress = ROOT / 'cleanup-progress.json'
+    cleanup_namespace = getattr(args, 'cleanup_namespace', None)
+    output_directory = cleanup_directory(cleanup_namespace, Path(args.environment).resolve())
+    progress = output_directory / 'cleanup-progress.json'
     assert not progress.exists(), 'preserve partial cleanup; choose explicit recovery'
     record = {'at': now(), 'complete': False, 'steps': [], 'exceptions': [], 'volumesRetained': True}
     def checkpoint(step):
@@ -641,8 +675,11 @@ def finish(args):
         record['removedInterruptedPrivatePhaseInputs'] = removed_phase_inputs
         checkpoint('registered_phase_private_inputs_removed')
         if value.get('CAP10_LOAD_BACKEND') == 'pts':
-            result = run([sys.executable, '-B', '-X', 'utf8', 'scripts/pts/cap10-pts-prepare.py',
-                          'cleanup-packet', '--environment', str(Path(args.environment).resolve())], timeout=30)
+            packet_argv = [sys.executable, '-B', '-X', 'utf8', 'scripts/pts/cap10-pts-prepare.py',
+                           'cleanup-packet', '--environment', str(Path(args.environment).resolve())]
+            if cleanup_namespace is not None:
+                packet_argv += ['--cleanup-namespace', cleanup_namespace]
+            result = run(packet_argv, timeout=30)
             record['ptsPacketCleanup'] = json.loads(result.stdout)
             checkpoint('registered_pts_upload_packet_removed')
         user = value['CAP_READ_OBSERVER_USER']
@@ -682,7 +719,7 @@ def finish(args):
         record['removedPrivateEnvironmentFiles'] = removed
         record['complete'] = True
         checkpoint('complete')
-        save(ROOT / 'cleanup.json', record)
+        save(output_directory / 'cleanup.json', record)
         print(json.dumps({'cleanupComplete': True, 'ownServicesStopped': True, 'volumesRetained': True}))
     except Exception as error:
         record['exceptions'].append({'at': now(), 'class': type(error).__name__, 'detailsSuppressed': True})
@@ -701,6 +738,7 @@ def main():
     p.add_argument('--like-diagnostics', action='store_true')
     p = sub.add_parser('stop-api'); p.add_argument('--api-metadata', required=True)
     p = sub.add_parser('finish'); p.add_argument('--environment', required=True); p.add_argument('--api-metadata', required=True)
+    p.add_argument('--cleanup-namespace', help='new explicit 12hex output namespace; default preserves legacy paths')
     args = parser.parse_args()
     {'prepare-deps': prepare, 'resume-preparation': resume_preparation,
      'start-api': start_api, 'stop-api': stop_api, 'finish': finish}[args.action](args)

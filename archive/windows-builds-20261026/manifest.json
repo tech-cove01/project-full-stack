@@ -1,0 +1,114 @@
+{
+  "schema": "windows-build-archive-v1",
+  "task": "R1",
+  "archivedAtUtc": "2026-11-04T12:51:30.5819445Z",
+  "sourceTreeCommit": "fc36fff77b6a45bd98cd41565f75935aebf51c3d",
+  "historicalRecordedHashes": "docs/reviews/2026-10-28/batch-3583818/source-manifest.json",
+  "fileCount": 14,
+  "totalBytes": 563155968,
+  "allBytesPreserved": true,
+  "currentBuildOutput": "backend/bin/api.exe",
+  "currentBuildConventionChanged": false,
+  "ignoredBinFilesMoved": false,
+  "gitHistoryRewritten": false,
+  "files": [
+    {
+      "originalPath": "backend/bin/api-final.exe",
+      "archivePath": "archive/windows-builds-20261026/api-final.exe",
+      "sha256": "fad073cf5dab12e104873712600862b58d3bd937b429cc02c70abd8484211523",
+      "bytes": 40069120,
+      "gitBlob": "f3e31d4cb625e15092eaf928715338810efbeabb"
+    },
+    {
+      "originalPath": "backend/bin/api-go010-final.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go010-final.exe",
+      "sha256": "cb2e9a7f74b5d1e551ef884b3577d964a29bfca15586b188888c46879586a244",
+      "bytes": 40133632,
+      "gitBlob": "43ac93bfa2cd194940201fb446437303400f3c80"
+    },
+    {
+      "originalPath": "backend/bin/api-go010.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go010.exe",
+      "sha256": "cb2e9a7f74b5d1e551ef884b3577d964a29bfca15586b188888c46879586a244",
+      "bytes": 40133632,
+      "gitBlob": "43ac93bfa2cd194940201fb446437303400f3c80"
+    },
+    {
+      "originalPath": "backend/bin/api-go011-final.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go011-final.exe",
+      "sha256": "d01f99b437dc193ee3eadd40303716bf7a8ecbb14fc2d32947ddbaeb98adca82",
+      "bytes": 40179200,
+      "gitBlob": "dc82e4a35e6ed3796173a141ae76301f44efe0b4"
+    },
+    {
+      "originalPath": "backend/bin/api-go011.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go011.exe",
+      "sha256": "d01f99b437dc193ee3eadd40303716bf7a8ecbb14fc2d32947ddbaeb98adca82",
+      "bytes": 40179200,
+      "gitBlob": "dc82e4a35e6ed3796173a141ae76301f44efe0b4"
+    },
+    {
+      "originalPath": "backend/bin/api-go020-final.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go020-final.exe",
+      "sha256": "3328a852e59ad8b0d637519e2fbd65d600fd7b56a1df30ba3aa122f845b1a8f6",
+      "bytes": 40190464,
+      "gitBlob": "92113617f41affb524a34f65e959805bbdb106c9"
+    },
+    {
+      "originalPath": "backend/bin/api-go020.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go020.exe",
+      "sha256": "1fb9111d2eb4ccbcef25e5428d3fe8c84e3e3a5fe48cbba76a2ccba66f1ad80d",
+      "bytes": 40190464,
+      "gitBlob": "07a57e62a43a82852b41b100138f3b6445df48c3"
+    },
+    {
+      "originalPath": "backend/bin/api-go021-final.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go021-final.exe",
+      "sha256": "5c56d3b1ab314d16cd0d563d52876f1e5dfb3af65ff065cc79e8cc70122e0c05",
+      "bytes": 40337920,
+      "gitBlob": "f690de3392f93b1048a842ce2a0579a87cc43df7"
+    },
+    {
+      "originalPath": "backend/bin/api-go021.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go021.exe",
+      "sha256": "e29a30e98e3ddf7852873614f295f5b546d161df765f2dd3ad55596b150bbb80",
+      "bytes": 40337920,
+      "gitBlob": "70dce49154239885537fa7a0024607763032c1af"
+    },
+    {
+      "originalPath": "backend/bin/api-go030.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go030.exe",
+      "sha256": "6fb4ff980adc3a6bcfcc818e15b521177d2f233e167da52d5b877d2a92d4b02f",
+      "bytes": 40457216,
+      "gitBlob": "7bf0d01627c3ee708cbb60577572fb40e39a6fe4"
+    },
+    {
+      "originalPath": "backend/bin/api-go031.exe",
+      "archivePath": "archive/windows-builds-20261026/api-go031.exe",
+      "sha256": "c4360633b75b12f0a9f26326c5085245b6e455dcbc34922d4e60f529b960b657",
+      "bytes": 40519680,
+      "gitBlob": "1708ea7031ded1b68dedea97ffa9f9efaa70a377"
+    },
+    {
+      "originalPath": "backend/bin/api-qa1.exe",
+      "archivePath": "archive/windows-builds-20261026/api-qa1.exe",
+      "sha256": "698a71e8fd3573844ca243dceb9a72182804b34bdde2e3f4578c1371fe640196",
+      "bytes": 40179200,
+      "gitBlob": "1b0d25711a2e38814c634d60b1f36098a2f0cf06"
+    },
+    {
+      "originalPath": "backend/bin/api-review-d27a8ea.exe",
+      "archivePath": "archive/windows-builds-20261026/api-review-d27a8ea.exe",
+      "sha256": "7191672ecdac354f8c67656176d5033b6fbd9d6de1978fe39f4a9446959be429",
+      "bytes": 40179200,
+      "gitBlob": "3a08edb533932be2ec1aac7b8f1306bca05ccfb8"
+    },
+    {
+      "originalPath": "backend/bin/api.exe",
+      "archivePath": "archive/windows-builds-20261026/api.exe",
+      "sha256": "fad073cf5dab12e104873712600862b58d3bd937b429cc02c70abd8484211523",
+      "bytes": 40069120,
+      "gitBlob": "f3e31d4cb625e15092eaf928715338810efbeabb"
+    }
+  ]
+}

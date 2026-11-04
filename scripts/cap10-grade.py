@@ -757,8 +757,162 @@ def authority_zero_start(root, command, previous, terminal, context):
     return True
 
 
+PRESTABLE_SETUP_FAILURE = 'setup requires one exact accepted fact/control vector plus fully clean downstream within60s'
+
+
+def prestable_setup_layout(root, command, previous):
+    """Only a completed candidate warm followed by this known setup failure."""
+    if not (re.fullmatch(r'S[1-9][0-9]*', command.get('tag', '')) and command.get('kind') == 'candidate'
+            and command.get('loadBackend') == 'pts' and previous.get('passed') is False
+            and previous.get('outcome') == 'correctness_stop' and previous.get('batchFatal') is True
+            and previous.get('childrenConverged') is True and previous.get('failedStartOrException') in (None, 'FileNotFoundError')
+            and type(previous.get('wrapperExit')) is int and previous['wrapperExit'] != 0
+            and type(previous.get('observerExit')) is int and previous['observerExit'] == 0):
+        return None
+    root = Path(root); load = root / (command['tag'] + '-load')
+    names = ('result.json', 'warm-process.json', 'process.json', 'setup-transaction.json',
+             'failed-phase-reconcile.json', 'final-full-audit-attempt.json', 'warm-summary.json', 'warm-pts/terminal.json')
+    if load.is_symlink() or any(not (load / name).is_file() or (load / name).is_symlink()
+                              or (load / name).resolve() != load / name for name in names):
+        return None
+    result, process, current, setup, audit, attempt, summary, terminal = [read(load / name) for name in names]
+    forbidden = ('setup', 'stableExit', 'stableStartedAt', 'stableEndedAt', 'stableWrapperStartedAt',
+                 'stableWrapperEndedAt', 'stableCommandElapsedMs', 'stableExternalStop', 'result')
+    if not (result.get('loadBackend') == 'pts' and type(result.get('warmExit')) is int and result['warmExit'] == 0
+            and result.get('warmExternalStop') is None and result.get('failure') == PRESTABLE_SETUP_FAILURE
+            and result.get('nativeScenario', {}).get('complete') is False
+            and all(result.get(key) is None for key in forbidden)
+            and all(result.get(key) is True for key in ('finalReconcileValid', 'finalFactsValid', 'downstreamConverged'))
+            and result.get('failedPhaseSettleWaitMs') == 5500
+            and current == process and process.get('phase') == 'warm' and process.get('backend') == 'pts'
+            and type(process.get('controller_pid')) is int and process['controller_pid'] > 0):
+        return None
+    absent = [load / name for name in ('stable-process.json', 'stable-pts', 'stable-summary.json', 'stable-console.txt',
+        'stable-private-input.json', 'stable-private-input-removed.json', 'stable-db-before.json', 'stable-db-after.json',
+        'stable-capacity-before.json', 'stable-capacity-after.json', 'before.json', 'after.json', 'setup-reconcile.json')]
+    if any(path.exists() or path.is_symlink() for path in absent) or any(path.name.startswith('stable') for path in load.rglob('*')):
+        return None
+    starts = list((load / 'warm-pts/api').glob('*StartTestingJMeterScene.json'))
+    if len(starts) != 1 or starts[0].is_symlink():
+        return None
+    if not (setup.get('countedAsHTTPMutation') is False and isinstance(setup.get('records'), list) and setup['records']
+            and all(type(setup.get(key)) is int and setup[key] > 0 for key in ('startedAt', 'committedAt'))
+            and setup['startedAt'] <= setup['committedAt']
+            and attempt.get('reason') == 'failed-before-stable-start-once' and attempt.get('noAutomaticRetry') is True
+            and type(attempt.get('attemptedAt')) is int and attempt['attemptedAt'] >= setup['startedAt'] + 60000
+            and attempt.get('baselineAudit') == command.get('baselineAudit', command.get('reservationCheck', {}).get('baselineAudit'))
+            and terminal.get('backend') == 'pts' and terminal.get('remoteConverged') is True
+            and terminal.get('nativeEvidenceComplete') is True and terminal.get('failed') is None
+            and summary.get('nativeScenario', {}).get('complete') is True
+            and all(audit.get(key) is True for key in ('valid', 'factsValid', 'downstreamConverged'))
+            and audit.get('errors') == [] and audit.get('derived', {}).get('available') is True
+            and audit['derived'].get('errors') == []
+            and all(type(audit.get(key)) is int for key in ('startedAt', 'finishedAt'))):
+        return None
+    try:
+        if not (instant(terminal['finishedAt']).timestamp() * 1000 <= setup['startedAt']
+                <= setup['committedAt'] <= attempt['attemptedAt'] <= audit['startedAt'] <= audit['finishedAt']
+                <= instant(result['finished']).timestamp() * 1000 <= instant(previous['finishedAt']).timestamp() * 1000):
+            return None
+    except (ValueError, KeyError, TypeError):
+        return None
+    extra = {}
+    if previous.get('failedStartOrException') == 'FileNotFoundError':
+        control = root / (command['tag'] + '-control'); status_path, done_path = control / 'exit-status.json', control / 'done.json'
+        resource_path = control / 'resources.ndjson'
+        if resource_path.exists() or resource_path.is_symlink() or any(not p.is_file() or p.is_symlink() or p.resolve() != p for p in (status_path, done_path)):
+            return None
+        status, done = read(status_path), read(done_path)
+        errors = ['no stable owned generator was observed; no resource sample',
+                  'resource evidence unavailable or malformed', 'no complete resource sample; no measurable capacity result']
+        environment_path, environment_sha, _ = environment_identity(command, root)
+        if not (status.get('cohort') == 'cap10' and status.get('mode') == 'like' and status.get('errors') == errors
+                and status.get('sampler_started') is False and type(status.get('resource_samples')) is int
+                and type(status.get('complete_resource_samples')) is int and status['resource_samples'] == status['complete_resource_samples'] == 0
+                and status.get('first_resource_sample_at') is None and status.get('last_resource_sample_at') is None
+                and status.get('api_pid') == command.get('apiPid') and status.get('ownership_metadata') == str(environment_path)
+                and status.get('ownership_metadata_sha256') == environment_sha and status.get('harness_exit') == previous['wrapperExit']
+                and status.get('stop_signal') is False and status.get('forced') is False and status.get('forced_owned_processes') == []
+                and done.get('source') == 'cap10-stage'):
+            return None
+        try:
+            if not (instant(result['finished']) <= instant(done['at']) <= instant(status['ended_at']) <= instant(previous['finishedAt'])):
+                return None
+        except (ValueError, KeyError, TypeError):
+            return None
+        extra = {'secondaryException': 'FileNotFoundError', 'missingResourcesPath': resource_path.relative_to(root).as_posix(),
+                 'controlExitStatus': {'path': status_path.relative_to(root).as_posix(), 'sha256': sha(status_path)},
+                 'controlDone': {'path': done_path.relative_to(root).as_posix(), 'sha256': sha(done_path)}}
+    bound = lambda name: {'path': (load / name).relative_to(root).as_posix(), 'sha256': sha(load / name)}
+    return {'kind': 'prestable_setup_failed', **extra, 'absentPaths': [p.relative_to(root).as_posix() for p in absent],
+            'warmStartAuditPath': starts[0].relative_to(root).as_posix(), 'setupTransaction': bound('setup-transaction.json'),
+            'finalFullAudit': bound('failed-phase-reconcile.json'), 'finalFullAuditAttempt': bound('final-full-audit-attempt.json'),
+            'warmSummary': bound('warm-summary.json'), 'warmTerminal': bound('warm-pts/terminal.json')}
+
+
+def authority_prestable_setup(root, command, previous, terminal, context, layout):
+    """Validate the extra originals; shared warm checks validate signed EndTime."""
+    expected = {(row['pid'], row['created']) for row in previous.get('knownOwnedProcesses', [])}
+    owners = terminal.get('owners', [])
+    require(expected and expected <= {(row.get('pid'), row.get('created')) for row in owners}
+            and all(row.get('alive') is False and row.get('identityChecked') is True for row in owners)
+            and all(terminal.get(key) is False for key in ('observerAlive', 'controllerAlive', 'wrapperAlive')),
+            'pre-stable closure requires every original exact owner stopped')
+    summary = _authority_ref(root, layout['warmSummary']); warm = _authority_ref(root, layout['warmTerminal'])
+    count = lambda name: summary.get('metrics', {}).get(name, {}).get('count')
+    offered = command.get('warmRate', 0) * command.get('warmSeconds', 0)
+    require(type(offered) is int and offered > 0 and all(type(count(name)) is int and count(name) == offered
+            for name in ('cap_like_attempted', 'cap_like_completed', 'cap_like_success', 'cap_like_mutation'))
+            and all(type(count(name)) is int and count(name) == 0 for name in ('cap_like_noop', 'cap_like_effect_unknown',
+                'cap_like_rejected', 'cap_like_content_errors', 'cap_like_system_errors', 'cap_like_http_errors',
+                'dropped_iterations', 'cap_like_generator_timing_violations'))
+            and warm.get('reportId') == terminal['reports'][0]['reportId'], 'complete successful original warm evidence required')
+    active = original_application(root, command, context)
+    dimensions = original_command_dimensions(root, command, active); pool = dimensions['poolSize']
+    fixture = _authority_ref(root, {'path': active['fixturePath'], 'sha256': command['fixtureSHA256']})
+    notes, users = fixture.get('multiNoteIds', []), fixture.get('userIds', [])
+    require(len(notes) == len(users) == pool and len(set(notes)) == len(set(users)) == pool
+            and all(type(value) is str and re.fullmatch(r'[1-9][0-9]*', value) for value in notes + users),
+            'pre-stable closure must retain the original exclusive fixture identities')
+    pairs = dict(zip(notes, users)); setup = _authority_ref(root, layout['setupTransaction'])
+    records = setup['records']; locked_notes = [r for r in records if r.get('_kind') == 'locked-note']
+    locked_pairs = [r for r in records if r.get('_kind') == 'locked-pair']
+    require(len(records) == 2 * pool and len(locked_notes) == len(locked_pairs) == pool
+            and {r.get('noteId') for r in locked_notes} == set(notes)
+            and {r.get('noteId') for r in locked_pairs} == set(notes)
+            and all(r.get('userId') == pairs[r['noteId']] and type(r.get('active')) is int and r['active'] in (0, 1)
+                    and type(r.get('version')) is int and r['version'] >= 0 for r in locked_pairs),
+            'original setup must contain the exact locked notes and pairs, not invented HTTP mutations')
+    baseline_ref = command.get('baselineAudit', command.get('reservationCheck', {}).get('baselineAudit'))
+    baseline = _authority_ref(root, baseline_ref); baseline_events = baseline.get('facts', {}).get('eventCount')
+    require(type(baseline_events) is int and baseline_events >= 0
+            and sum(r['version'] for r in locked_pairs) == baseline_events + offered,
+            'setup source versions must retain baseline plus actual warm mutations')
+    audit = _authority_ref(root, layout['finalFullAudit']); _authority_ref(root, layout['finalFullAuditAttempt'])
+    _complete_vector_audit(audit, command['fixtureSHA256'], pool)
+    signed = _authority_ref(root, terminal['warmReportAudit'])
+    require(signed.get('sanitizedRawResponse', {}).get('ReportOverView', {}).get('ReportId') == terminal['reports'][0]['reportId'],
+            'pre-stable closure requires the signed report identity explicitly present')
+    facts, derived, timeline = audit.get('facts', {}), audit.get('derived', {}), audit.get('timeline', [])
+    expected_versions = {r['noteId']: r['version'] + r['active'] for r in locked_pairs}
+    rows, counters = facts.get('facts', []), facts.get('notes', [])
+    require(facts.get('fixtureManifestSHA256') == command['fixtureSHA256'] and len(rows) == len(counters) == pool
+            and {r.get('noteId') for r in rows} == {r.get('noteId') for r in counters} == set(notes)
+            and all(r.get('userId') == pairs[r['noteId']] and type(r.get('active')) is int and r['active'] == 0
+                    and type(r.get('version')) is int and r['version'] == expected_versions[r['noteId']] for r in rows)
+            and all(r.get('liked') == r.get('activeRelations') == 0 for r in counters)
+            and facts.get('eventCount') == facts.get('transitions') == sum(expected_versions.values())
+            and len(derived.get('notes', [])) == pool and {r.get('noteId') for r in derived['notes']} == set(notes)
+            and timeline and timeline[-1].get('pending') == timeline[-1].get('parked') == 0
+            and timeline[-1].get('receiptErrors') == [], 'original final full audit must close the exact setup effects')
+    return True
+
+
 def warm_only_layout(root, command, previous):
     """A failed warm may have a real report while setup/stable never existed."""
+    prestable = prestable_setup_layout(root, command, previous)
+    if prestable is not None:
+        return prestable
     tag = command.get('tag', '')
     if not (re.fullmatch(r'[SH][1-9][0-9]*', tag) and command.get('loadBackend') == 'pts'
             and previous.get('passed') is False and type(previous.get('wrapperExit')) is int
@@ -872,6 +1026,8 @@ def authority_warm_only(root, command, previous, terminal, context):
             and isinstance(raw.get('RequestId'), str) and raw['RequestId'] and raw['RequestId'] == report.get('requestId')
             and overview.get('StartTime') == report['startTimeRaw'] and overview.get('EndTime') == report['endTimeRaw']
             and overview.get('ReportId', report['reportId']) == report['reportId'], 'warm-only EndTime needs the real signed report response')
+    if layout.get('kind') == 'prestable_setup_failed':
+        authority_prestable_setup(root, command, previous, terminal, context, layout)
     return True
 
 

@@ -1,0 +1,11 @@
+# CAP10-PRESTABLE-CLOSURE
+
+S27的warm实际成功，setup在原60秒内找不到同一事实/控制摘要，stable从未启动。旧入口只识别失败warm，因而会错误要求不存在的stable报告。
+
+本票只增加非正式candidate的精确原件闭合入口：固定setup错误、warmExit=0、完整warm native/terminal、原setup事务、原单次最终完整对账、全部stable路径不存在、全部原owner退出，以及唯一warm Start和显式同ReportId的签名实际EndTime。原stage的secondary FileNotFoundError只在原control证明未启动资源采样、两计数0、精确三条缺资源错误及resources.ndjson确实不存在时接受；其它exception仍拒绝。完整终审复用既有严格full-audit合同，不能用phase事实子集替代。未知失败、缺原件、任意stable证据及formal退休仍拒绝。
+
+复用旧单warm报告结构，layout显式标记`kind=prestable_setup_failed`。原私有producer无需改字节；它仍读取真实warm报告并调用公共验证。后续准入仍必须另做失败阶段结束后的新鲜完整对账。原S27 FAIL、unknown、资源缺失、阈值和两次正式上限不改，不补造stable报告或容量成绩。
+
+验证只用聚焦合成文件正反例，先保留旧入口失败，再验证新增入口及原failed-warm回归。无服务、SQL、PTS或新负载。
+
+实际验证：旧入口对该正例返回None，失败原件保留；新增8项focused通过，含公开下一预约校验、失败后必须有更晚的新鲜完整对账，以及重封SHA后的stable/未知失败、控制状态、原件缺失、setup身份、hash/收据与signed ReportId反例。首次新组的一处测试夹具重复初始化错误保留，只修夹具隔离。另对本地已下载S27五原件核对实际字段，并用既有完整审计helper验证真实final proof通过；该只读检查不冒充云端路径不存在、owner退出或签名EndTime验证。原私有3源与压力门槛均未改。

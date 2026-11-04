@@ -1,0 +1,13 @@
+# CAP10-GEN-ENDPOINT-CACHE
+
+H2的4条50ms调度违规早于Kafka内存保护停压；没有GC日志证明其根因。本票仅减少已知热路径中的重复分配，不承诺消除调度抖动或取得稳定3000。
+
+原Groovy gate每次offer重新构造URI、提取host/port并写入线程变量。API URL已经经过control的私网HTTP/无凭据/无query或fragment/根路径校验，后续control也禁止它发生变化。现在仅在首次有效control后保存同样的host/port字符串，每个关系线程bind时写一次。control原校验与变更拒绝逐字保留，gate不再解析URL。
+
+默认端口仍80，显式端口保持原值。不改token清理、HTTP节点、wanted/version、ordinal、原始elapsed、50ms、park/stop/handoff、持久ACK、帧或计数；不增加线程或引擎。API、业务事务和资源不变。JMX字节及工具身份会改变，后续必须按新原件重新绑定并上传，不沿用旧MD5或旧正式freeze。
+
+直接检查编译真实Groovy类，以合成private配置和替身collector边界执行实际构造/control/bind，随后执行实际JSR223 bind/gate语句检查两个独立线程变量、预热与native iteration语义。替身只返回固定原协议内容，无HTTP/云/业务依赖。正反例覆盖私网地址、默认/显式端口、同URL控制刷新与不同URL/非法URL拒绝；不通过伪造实际调度时间验证收益。原contract与bundle直接检查继续适用。
+
+本机6项实际构造/control/dispatcher检查、原38项Groovy合同检查及11项bundle检查通过，公共示例JMX由原builder重新生成，差异检查通过。边界替身无HTTP/云/业务请求；没有执行负载或新增引擎。首次使用JDK24时，现有Groovy3报不支持class版本68；改用本机已有Corretto8后检查代码通过，首次退出路径断言因Windows分隔符不同失败，只修检查器为精确canonical parent比较，原日志均保留。最终聚焦检查退出0。
+
+这些本机检查不是PTS引擎GC证据、50ms调度保证或云容量成绩。独立审查及提交待本票冻结后记录。

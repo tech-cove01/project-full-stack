@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">4e3cd990117b5af44ebb2222e5fa90f2981bc276c69073409fedd87c6db8b304</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.poolSize" elementType="Argument"><stringProp name="Argument.name">cap10.poolSize</stringProp><stringProp name="Argument.value">512</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.expectedEngines" elementType="Argument"><stringProp name="Argument.name">cap10.expectedEngines</stringProp><stringProp name="Argument.value">2</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.clockProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.clockProtocol</stringProp><stringProp name="Argument.value">dedicated-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.preheatProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.preheatProtocol</stringProp><stringProp name="Argument.value">relation-noop-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/><ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="512 fixed exclusive relationships" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">512</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></ThreadGroup><hashTree><CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Exclusive slot, once per outer iteration" enabled="true"><stringProp name="filename">slots.csv</stringProp><stringProp name="fileEncoding">UTF-8</stringProp><stringProp name="variableNames"></stringProp><stringProp name="delimiter">,</stringProp><boolProp name="quotedData">false</boolProp><boolProp name="recycle">false</boolProp><boolProp name="stopThread">true</boolProp><stringProp name="shareMode">shareMode.all</stringProp><boolProp name="ignoreFirstLine">false</boolProp></CSVDataSet><hashTree/><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 bind" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">bind</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
+<?xml version="1.0" encoding="UTF-8"?><jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3"><hashTree><TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="CAP10 authenticated mutations with owned PTS slots" enabled="true"><boolProp name="TestPlan.serialize_threadgroups">false</boolProp><boolProp name="TestPlan.tearDown_on_shutdown">true</boolProp><elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments"><collectionProp name="Arguments.arguments"/></elementProp></TestPlan><hashTree><Arguments guiclass="ArgumentsPanel" testclass="Arguments" testname="CAP10 script identity"><collectionProp name="Arguments.arguments"><elementProp name="cap10.scriptSHA256" elementType="Argument"><stringProp name="Argument.name">cap10.scriptSHA256</stringProp><stringProp name="Argument.value">7a350851174bd8e377a162889447f6b9a95ff4fb07644709552c3ba2f069195c</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.poolSize" elementType="Argument"><stringProp name="Argument.name">cap10.poolSize</stringProp><stringProp name="Argument.value">512</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.expectedEngines" elementType="Argument"><stringProp name="Argument.name">cap10.expectedEngines</stringProp><stringProp name="Argument.value">2</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.clockProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.clockProtocol</stringProp><stringProp name="Argument.value">dedicated-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp><elementProp name="cap10.preheatProtocol" elementType="Argument"><stringProp name="Argument.name">cap10.preheatProtocol</stringProp><stringProp name="Argument.value">relation-noop-v1</stringProp><stringProp name="Argument.metadata">=</stringProp></elementProp></collectionProp></Arguments><hashTree/><ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="512 fixed exclusive relationships" enabled="true"><stringProp name="ThreadGroup.on_sample_error">continue</stringProp><elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="one outer iteration"><boolProp name="LoopController.continue_forever">false</boolProp><stringProp name="LoopController.loops">1</stringProp></elementProp><stringProp name="ThreadGroup.num_threads">512</stringProp><stringProp name="ThreadGroup.ramp_time">0</stringProp><boolProp name="ThreadGroup.scheduler">false</boolProp></ThreadGroup><hashTree><CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="Exclusive slot, once per outer iteration" enabled="true"><stringProp name="filename">slots.csv</stringProp><stringProp name="fileEncoding">UTF-8</stringProp><stringProp name="variableNames"></stringProp><stringProp name="delimiter">,</stringProp><boolProp name="quotedData">false</boolProp><boolProp name="recycle">false</boolProp><boolProp name="stopThread">true</boolProp><stringProp name="shareMode">shareMode.all</stringProp><boolProp name="ignoreFirstLine">false</boolProp></CSVDataSet><hashTree/><JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="CAP10 bind" enabled="true"><stringProp name="scriptLanguage">groovy</stringProp><stringProp name="parameters">bind</stringProp><stringProp name="filename"></stringProp><stringProp name="cacheKey">true</stringProp><stringProp name="script">import groovy.json.JsonSlurper
 
 // Pure contract shared by the uploaded JSR223 script and offline checks.
 class Cap10PTSContract {
@@ -115,6 +115,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
+    final String apiHost, apiPort
     final int declaredPoolSize, declaredEngines
     final List&lt;Integer&gt; slots
     final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
@@ -160,6 +161,11 @@ class Cap10PTSRun {
                 if (failure.message != 'collector clock uncertainty invalid' || attempt == 2) throw failure
             }
         }
+        // control() validated this endpoint and rejects any later URL change.
+        // Keep its sampler strings for this run instead of parsing every offer.
+        URI endpoint = new URI(config.apiUrl.toString())
+        apiHost = endpoint.host
+        apiPort = (endpoint.port == -1 ? 80 : endpoint.port).toString()
         def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
         registered.relations.each { r -&gt;
             if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
@@ -427,6 +433,7 @@ try {
     }
     if (Parameters == 'bind') {
         vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+        vars.put('cap10.apiHost',run.apiHost); vars.put('cap10.apiPort',run.apiPort)
     } else if (Parameters == 'gate') {
         Map relation = (Map)vars.getObject('cap10.relation')
         Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
@@ -436,7 +443,6 @@ try {
             vars.putObject('cap10.offer',offer)
             if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
-            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its
@@ -582,6 +588,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
+    final String apiHost, apiPort
     final int declaredPoolSize, declaredEngines
     final List&lt;Integer&gt; slots
     final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
@@ -627,6 +634,11 @@ class Cap10PTSRun {
                 if (failure.message != 'collector clock uncertainty invalid' || attempt == 2) throw failure
             }
         }
+        // control() validated this endpoint and rejects any later URL change.
+        // Keep its sampler strings for this run instead of parsing every offer.
+        URI endpoint = new URI(config.apiUrl.toString())
+        apiHost = endpoint.host
+        apiPort = (endpoint.port == -1 ? 80 : endpoint.port).toString()
         def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
         registered.relations.each { r -&gt;
             if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
@@ -894,6 +906,7 @@ try {
     }
     if (Parameters == 'bind') {
         vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+        vars.put('cap10.apiHost',run.apiHost); vars.put('cap10.apiPort',run.apiPort)
     } else if (Parameters == 'gate') {
         Map relation = (Map)vars.getObject('cap10.relation')
         Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
@@ -903,7 +916,6 @@ try {
             vars.putObject('cap10.offer',offer)
             if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
-            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its
@@ -1049,6 +1061,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
+    final String apiHost, apiPort
     final int declaredPoolSize, declaredEngines
     final List&lt;Integer&gt; slots
     final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
@@ -1094,6 +1107,11 @@ class Cap10PTSRun {
                 if (failure.message != 'collector clock uncertainty invalid' || attempt == 2) throw failure
             }
         }
+        // control() validated this endpoint and rejects any later URL change.
+        // Keep its sampler strings for this run instead of parsing every offer.
+        URI endpoint = new URI(config.apiUrl.toString())
+        apiHost = endpoint.host
+        apiPort = (endpoint.port == -1 ? 80 : endpoint.port).toString()
         def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
         registered.relations.each { r -&gt;
             if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
@@ -1361,6 +1379,7 @@ try {
     }
     if (Parameters == 'bind') {
         vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+        vars.put('cap10.apiHost',run.apiHost); vars.put('cap10.apiPort',run.apiPort)
     } else if (Parameters == 'gate') {
         Map relation = (Map)vars.getObject('cap10.relation')
         Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
@@ -1370,7 +1389,6 @@ try {
             vars.putObject('cap10.offer',offer)
             if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
-            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its
@@ -1516,6 +1534,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
+    final String apiHost, apiPort
     final int declaredPoolSize, declaredEngines
     final List&lt;Integer&gt; slots
     final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
@@ -1561,6 +1580,11 @@ class Cap10PTSRun {
                 if (failure.message != 'collector clock uncertainty invalid' || attempt == 2) throw failure
             }
         }
+        // control() validated this endpoint and rejects any later URL change.
+        // Keep its sampler strings for this run instead of parsing every offer.
+        URI endpoint = new URI(config.apiUrl.toString())
+        apiHost = endpoint.host
+        apiPort = (endpoint.port == -1 ? 80 : endpoint.port).toString()
         def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
         registered.relations.each { r -&gt;
             if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
@@ -1828,6 +1852,7 @@ try {
     }
     if (Parameters == 'bind') {
         vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+        vars.put('cap10.apiHost',run.apiHost); vars.put('cap10.apiPort',run.apiPort)
     } else if (Parameters == 'gate') {
         Map relation = (Map)vars.getObject('cap10.relation')
         Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
@@ -1837,7 +1862,6 @@ try {
             vars.putObject('cap10.offer',offer)
             if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
-            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its
@@ -1983,6 +2007,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
+    final String apiHost, apiPort
     final int declaredPoolSize, declaredEngines
     final List&lt;Integer&gt; slots
     final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
@@ -2028,6 +2053,11 @@ class Cap10PTSRun {
                 if (failure.message != 'collector clock uncertainty invalid' || attempt == 2) throw failure
             }
         }
+        // control() validated this endpoint and rejects any later URL change.
+        // Keep its sampler strings for this run instead of parsing every offer.
+        URI endpoint = new URI(config.apiUrl.toString())
+        apiHost = endpoint.host
+        apiPort = (endpoint.port == -1 ? 80 : endpoint.port).toString()
         def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
         registered.relations.each { r -&gt;
             if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
@@ -2295,6 +2325,7 @@ try {
     }
     if (Parameters == 'bind') {
         vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+        vars.put('cap10.apiHost',run.apiHost); vars.put('cap10.apiPort',run.apiPort)
     } else if (Parameters == 'gate') {
         Map relation = (Map)vars.getObject('cap10.relation')
         Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
@@ -2304,7 +2335,6 @@ try {
             vars.putObject('cap10.offer',offer)
             if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
-            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its
@@ -2450,6 +2480,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
+    final String apiHost, apiPort
     final int declaredPoolSize, declaredEngines
     final List&lt;Integer&gt; slots
     final Map&lt;Integer,Map&gt; relations = new ConcurrentHashMap&lt;Integer,Map&gt;()
@@ -2495,6 +2526,11 @@ class Cap10PTSRun {
                 if (failure.message != 'collector clock uncertainty invalid' || attempt == 2) throw failure
             }
         }
+        // control() validated this endpoint and rejects any later URL change.
+        // Keep its sampler strings for this run instead of parsing every offer.
+        URI endpoint = new URI(config.apiUrl.toString())
+        apiHost = endpoint.host
+        apiPort = (endpoint.port == -1 ? 80 : endpoint.port).toString()
         def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
         registered.relations.each { r -&gt;
             if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
@@ -2762,6 +2798,7 @@ try {
     }
     if (Parameters == 'bind') {
         vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+        vars.put('cap10.apiHost',run.apiHost); vars.put('cap10.apiPort',run.apiPort)
     } else if (Parameters == 'gate') {
         Map relation = (Map)vars.getObject('cap10.relation')
         Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
@@ -2771,7 +2808,6 @@ try {
             vars.putObject('cap10.offer',offer)
             if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
-            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its

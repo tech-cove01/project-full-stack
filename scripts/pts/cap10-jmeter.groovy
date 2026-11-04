@@ -11,6 +11,7 @@ class Cap10PTSRun {
     final String engineId = UUID.randomUUID().toString()
     final long resourceOriginNano = System.nanoTime()
     final String collectorUrl, controlToken, scriptHash, declaredClockProtocol, declaredPreheatProtocol
+    final String apiHost, apiPort
     final int declaredPoolSize, declaredEngines
     final List<Integer> slots
     final Map<Integer,Map> relations = new ConcurrentHashMap<Integer,Map>()
@@ -56,6 +57,11 @@ class Cap10PTSRun {
                 if (failure.message != 'collector clock uncertainty invalid' || attempt == 2) throw failure
             }
         }
+        // control() validated this endpoint and rejects any later URL change.
+        // Keep its sampler strings for this run instead of parsing every offer.
+        URI endpoint = new URI(config.apiUrl.toString())
+        apiHost = endpoint.host
+        apiPort = (endpoint.port == -1 ? 80 : endpoint.port).toString()
         def registered = request('/register',[runId:config.runId, engineId:engineId, slots:slots, readyWorkers:0, scriptSHA256:scriptHash, fixtureSHA256:config.fixtureSHA256])
         registered.relations.each { r ->
             if (!(r.slot in slots) || relations.containsKey(r.slot as int) || !(r.userId ==~ /[1-9]\d*/) || !(r.noteId ==~ /[1-9]\d*/) || !(r.active in [0,1]) || !Cap10PTSContract.integer(r.version) || !(r.token instanceof String) || !r.token) throw new IllegalStateException('private relation shard invalid')
@@ -323,6 +329,7 @@ try {
     }
     if (Parameters == 'bind') {
         vars.putObject('cap10.relation',run.bind(vars.get('slot').toInteger())); vars.put('cap10.iteration','0'); vars.put('cap10.continue','true')
+        vars.put('cap10.apiHost',run.apiHost); vars.put('cap10.apiPort',run.apiPort)
     } else if (Parameters == 'gate') {
         Map relation = (Map)vars.getObject('cap10.relation')
         Map offer = run.gate(relation,vars.get('cap10.iteration').toLong())
@@ -332,7 +339,6 @@ try {
             vars.putObject('cap10.offer',offer)
             if (offer.preheat != true) vars.put('cap10.iteration',(vars.get('cap10.iteration').toLong()+1).toString())
             vars.put('cap10.noteId',relation.noteId); vars.put('cap10.token',relation.token); vars.put('cap10.wanted',offer.wanted.toString())
-            def uri = new URI(run.config.apiUrl.toString()); vars.put('cap10.apiHost',uri.host); vars.put('cap10.apiPort',(uri.port == -1 ? 80 : uri.port).toString())
         }
     } else if (Parameters == 'pre') {
         // Monotonic handoff immediately before the standard HTTP sampler. Its

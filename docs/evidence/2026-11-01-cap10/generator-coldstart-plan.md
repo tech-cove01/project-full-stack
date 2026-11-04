@@ -22,6 +22,12 @@ complete 60/180-second native window. It does not alter the backend.
   preprocessor/HTTP/postprocessor node; bind the generated packet and phase to
   that protocol, retain preparation evidence in the normalized result, and
   verify the wiring without business services or cloud execution.
+- **GEN-COLD-G3:** bind the explicit protocol along manifest, unique JMX
+  argument, private configuration, packet, scene binding and admission. Before
+  constructing the PTS client, the phase verifies its reservation's original
+  packet path/SHA and agreement with the configuration and admission. Old
+  missing fields retain the `none` interpretation; newly frozen packets require
+  `relation-noop-v1`.
 
 ## Cold and measured boundaries
 
@@ -88,3 +94,12 @@ exercise the backend mutation UPDATE/Outbox transaction and are not evidence
 that this write path is warm or that a target capacity will pass. Explicit
 packet/configuration/admission protocol binding must also pass before any
 future PTS Start; a runtime protocol mismatch alone is not a pre-Start check.
+
+G2 was committed independently as
+`c061153653f2f4295d76e1cb9ba6848b9896fcc9` after the above direct checks,
+both finite runs and two source reviews. G3 then passed 204 packet/binding/mock
+admission checks and 42 phase checks, including resealed JMX wrong/missing/
+duplicate arguments and packet/configuration/binding protocol drift that must
+make no provider call. This does not constitute live PTS admission: the private
+continuation producer, fresh packet, environment and frozen deployment still
+need their own explicit compatible preparation before the ECS is resumed.

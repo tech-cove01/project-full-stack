@@ -123,6 +123,45 @@ class EnvelopeChecks(unittest.TestCase):
         with self.assertRaises(ValueError):
             phase.phase_cohort(*values[:4], {key: value for key, value in values[4].items() if key != 'clockProtocol'})
 
+    def test_preparation_protocol_is_exactly_bound_to_original_packet_before_client(self):
+        with tempfile.TemporaryDirectory(prefix='.qa-cap10-phase-preheat-', dir=REPO.parent) as folder:
+            root = Path(folder).resolve()
+            packet_path = root / 'pts-packet-profile-123456789abc.json'
+            packet = {'preheatProtocol': 'relation-noop-v1', 'manifest': {'preheatProtocol': 'relation-noop-v1'}}
+            packet_path.write_text(json.dumps(packet), encoding='utf-8')
+            reservation = {'ptsPacketPath': packet_path.name,
+                           'ptsPacketSHA256': hashlib.sha256(packet_path.read_bytes()).hexdigest()}
+            cfg = {'preheatProtocol': 'relation-noop-v1'}
+            self.assertEqual(phase.phase_preheat_protocol(cfg, cfg, reservation, root), 'relation-noop-v1')
+            self.assertEqual(phase.phase_preheat_protocol({}, {}, {}, root), 'none')
+            for bad in (None, True, '', 'unknown', 'none'):
+                with self.subTest(protocol=bad), self.assertRaises(ValueError):
+                    phase.phase_preheat_protocol(cfg, {'preheatProtocol': bad}, reservation, root)
+            for changes in ({'ptsPacketPath': '../outside.json'}, {'ptsPacketSHA256': '0' * 64},
+                            {'ptsPacketPath': str(packet_path)}, {'ptsPacketPath': None}):
+                with self.subTest(changes=changes), self.assertRaises(ValueError):
+                    phase.phase_preheat_protocol(cfg, cfg, {**reservation, **changes}, root)
+            for changed in ({'manifest': {}}, {'preheatProtocol': 'none'}, {'manifest': {'preheatProtocol': None}}):
+                packet_path.write_text(json.dumps({**packet, **changed}), encoding='utf-8')
+                resealed = {**reservation, 'ptsPacketSHA256': hashlib.sha256(packet_path.read_bytes()).hexdigest()}
+                with self.subTest(packet=changed), self.assertRaises(ValueError):
+                    phase.phase_preheat_protocol(cfg, cfg, resealed, root)
+        source = ast.parse((HERE / 'cap10-pts-phase.py').read_text(encoding='utf-8'))
+        run = next(node for node in source.body if isinstance(node, ast.FunctionDef) and node.name == 'run')
+        calls = [node for node in ast.walk(run) if isinstance(node, ast.Call)]
+        guard = next(node for node in calls if isinstance(node.func, ast.Name) and node.func.id == 'phase_preheat_protocol')
+        live = next(node for node in calls if isinstance(node.func, ast.Attribute) and node.func.attr == 'Client')
+        self.assertLess(guard.lineno, live.lineno)
+
+    def test_phase_preserves_missing_none_and_rejects_mismatched_preparation_admission(self):
+        values = self.phase_fixture(17, 3)
+        self.assertEqual(phase.phase_cohort(*values)['poolSize'], 17)
+        values[0]['preheatProtocol'] = values[4]['preheatProtocol'] = 'relation-noop-v1'
+        self.assertEqual(phase.phase_cohort(*values)['poolSize'], 17)
+        for invalid in (None, 'none', True, 'unknown'):
+            with self.subTest(protocol=invalid), self.assertRaises(ValueError):
+                phase.phase_cohort(*values[:4], {**values[4], 'preheatProtocol': invalid})
+
     def test_phase_cannot_relabel_legacy_source_command_or_admission(self):
         for index in (1, 3, 4):
             values = self.phase_fixture()

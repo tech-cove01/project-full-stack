@@ -46,6 +46,8 @@ def phase_cohort(configuration, source, manifest, reservation, admission):
     """Bind current hydration and cloud admission to their own original pool."""
     if clock_protocol(configuration) != clock_protocol(admission):
         raise ValueError('phase clock protocol differs from admission')
+    if preheat_protocol(configuration) != preheat_protocol(admission):
+        raise ValueError('phase preparation protocol differs from admission')
     dimensions = cohort.dimensions(configuration, manifest)
     count = dimensions['poolSize']
     for value in (source, reservation, admission):
@@ -75,6 +77,40 @@ def clock_protocol(value):
     protocol = value.get('clockProtocol', 'embedded-v1')
     if type(protocol) is not str or protocol not in ('embedded-v1', 'dedicated-v1'):
         raise ValueError('phase clock protocol invalid')
+    return protocol
+
+
+def preheat_protocol(value):
+    if not isinstance(value, dict):
+        raise ValueError('phase preparation protocol object required')
+    protocol = value.get('preheatProtocol', 'none')
+    if type(protocol) is not str or protocol not in ('none', 'relation-noop-v1'):
+        raise ValueError('phase preparation protocol invalid')
+    return protocol
+
+
+def phase_preheat_protocol(configuration, admission, reservation, root):
+    """Validate the original SHA-bound packet before constructing a live client."""
+    protocol = preheat_protocol(configuration)
+    if preheat_protocol(admission) != protocol:
+        raise ValueError('phase preparation protocol differs from admission')
+    relative = reservation.get('ptsPacketPath')
+    if relative is None and protocol == 'none':
+        return protocol  # Historical reservations did not carry a packet path.
+    if type(relative) is not str or not relative or Path(relative).is_absolute():
+        raise ValueError('reserved preparation packet path required')
+    root = Path(root).resolve()
+    packet_path = root / relative
+    expected = reservation.get('ptsPacketSHA256')
+    if (type(expected) is not str or not re.fullmatch('[a-f0-9]{64}', expected)
+            or packet_path.is_symlink() or not packet_path.is_file()
+            or packet_path.resolve() != packet_path or not packet_path.is_relative_to(root)
+            or hashlib.sha256(packet_path.read_bytes()).hexdigest() != expected):
+        raise ValueError('reserved preparation packet bytes differ')
+    packet = read(packet_path)
+    if (not isinstance(packet, dict) or not isinstance(packet.get('manifest'), dict)
+            or preheat_protocol(packet) != protocol or preheat_protocol(packet['manifest']) != protocol):
+        raise ValueError('phase packet/configuration/admission preparation protocols differ')
     return protocol
 
 
@@ -331,6 +367,7 @@ def run(args):
     if (hashlib.sha256(admission_path.read_bytes()).hexdigest() != reservation['ptsAdmissionSHA256']
             or admission.get('passed') is not True):
         raise ValueError('reserved PTS scene admission differs')
+    preparation_protocol = phase_preheat_protocol(cfg, admission, reservation, expected_root)
     import psutil
     owner = read(runtime / 'cap10-active.private.json')
     parent = psutil.Process(owner['pid'])
@@ -344,7 +381,7 @@ def run(args):
     relations = [{**source['initial'][slot], 'userId': user['userId'], 'token': user['token'], 'slot': slot}
                  for slot, user in enumerate(source['users'])]
     run_config = {**cfg, **dimensions, 'runId': secrets.token_hex(16), 'phase': phase, 'rate': rate, 'seconds': seconds,
-        'preheatProtocol': 'relation-noop-v1',
+        'preheatProtocol': preparation_protocol,
         'fixtureSHA256': hashlib.sha256(fixture_bytes).hexdigest(),
         'relations': relations, 'apiUrl': cfg['apiUrl']}
     collector = module('cap10_pts_collector', Path(__file__).with_name('cap10-pts-collector.py'))

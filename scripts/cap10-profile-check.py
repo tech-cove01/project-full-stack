@@ -569,6 +569,63 @@ class Checks(unittest.TestCase):
                 mock.patch.object(P.psutil, 'Process', return_value=process), self.assertRaises(ValueError):
             adapter.guard_idle(self.fixture.root)
 
+    def test_null_api_stop_is_only_a_bound_result_not_absence_proof(self):
+        root = self.fixture.root
+        # Write the stop first so this also exercises that artifact before its
+        # companion's ordinary owner check in directory iteration order.
+        P.save(root / 'api-old-stop.json', {'at': P.now(), 'pid': 321, 'identityMatched': True,
+                                          'exitCode': None, 'goGracefulShutdownClaimed': False})
+        P.save(root / 'api-old.json', {'cohort': 'cap10', 'pid': 321, 'creationUnixMs': 1000})
+        connection = mock.MagicMock()
+        connection.__enter__.return_value.connect_ex.return_value = 1
+        with mock.patch.object(P.socket, 'socket', return_value=connection), \
+                mock.patch.object(P.psutil, 'Process', side_effect=P.psutil.NoSuchProcess(321)) as inspect:
+            P.Native().guard_idle(root)
+            inspect.assert_called_once_with(321)
+        process = mock.Mock()
+        process.create_time.return_value = 2
+        with mock.patch.object(P.socket, 'socket', return_value=connection), \
+                mock.patch.object(P.psutil, 'Process', return_value=process):
+            P.Native().guard_idle(root)  # A different birth is an unrelated reused PID.
+        process.create_time.return_value = 1
+        with mock.patch.object(P.socket, 'socket', return_value=connection), \
+                mock.patch.object(P.psutil, 'Process', return_value=process), self.assertRaises(ValueError):
+            P.Native().guard_idle(root)
+        self.assertFalse(process.terminate.called)
+
+    def test_null_api_stop_requires_exact_companion_identity(self):
+        root = self.fixture.root
+        stop = {'pid': 321, 'identityMatched': True, 'exitCode': None}
+        original = {'cohort': 'cap10', 'pid': 321, 'creationUnixMs': 1000}
+        connection = mock.MagicMock()
+        connection.__enter__.return_value.connect_ex.return_value = 1
+        cases = [None, {**original, 'cohort': 'other'}, {**original, 'pid': 322},
+                 {**original, 'pid': True}, {'cohort': 'cap10', 'pid': 321},
+                 *({**original, 'creationUnixMs': birth} for birth in (True, 0, -1, float('inf'), float('nan')))]
+        for number, companion in enumerate(cases):
+            with self.subTest(case=number):
+                path = root / ('api-null' + str(number))
+                P.save(path.with_name(path.name + '-stop.json'), stop)
+                if companion is not None:
+                    P.save(path.with_suffix('.json'), companion)
+                with mock.patch.object(P.socket, 'socket', return_value=connection), self.assertRaises(ValueError):
+                    P.Native().guard_idle(root)
+                path.with_name(path.name + '-stop.json').unlink()
+                if companion is not None:
+                    path.with_suffix('.json').unlink()
+
+    def test_integer_api_stop_result_compatibility_and_missing_exit_rejection(self):
+        path = self.fixture.root / 'api-old-stop.json'
+        connection = mock.MagicMock()
+        connection.__enter__.return_value.connect_ex.return_value = 1
+        P.save(path, {'pid': 321, 'identityMatched': True, 'exitCode': 0})
+        with mock.patch.object(P.socket, 'socket', return_value=connection), \
+                mock.patch.object(P.psutil, 'Process', side_effect=AssertionError('result is not an owner')):
+            P.Native().guard_idle(self.fixture.root)
+        P.save(path.with_name('api-missing-stop.json'), {'pid': 321, 'identityMatched': True})
+        with mock.patch.object(P.socket, 'socket', return_value=connection), self.assertRaises(ValueError):
+            P.Native().guard_idle(self.fixture.root)
+
     def test_real_cli_default_branch_never_constructs_native(self):
         output = self.fixture.root / 'cli-plan.json'
         arguments = ['cap10-profile.py', '--environment', str(self.fixture.private),

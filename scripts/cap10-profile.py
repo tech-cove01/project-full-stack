@@ -379,9 +379,24 @@ class Native:
             # metadata independently; an old stop result never proves it absent.
             if ('creationUnixMs' not in metadata and path.name.endswith('-stop.json')
                     and metadata.get('identityMatched') is True
-                    and type(metadata.get('pid')) is int and metadata['pid'] > 0
-                    and type(metadata.get('exitCode')) is int):
-                continue
+                    and type(metadata.get('pid')) is int and metadata['pid'] > 0):
+                if type(metadata.get('exitCode')) is int:
+                    continue
+                if 'exitCode' in metadata and metadata['exitCode'] is None:
+                    # psutil.wait() can return None for a non-child process.
+                    # This is only a bound result artifact: the companion's
+                    # actual PID/birth must still pass the process check below.
+                    companion = path.with_name(path.name.removesuffix('-stop.json') + '.json')
+                    require(companion.is_file() and not companion.is_symlink()
+                            and companion.resolve() == companion,
+                            'null API stop requires its original process metadata')
+                    original = read(companion)
+                    require(original.get('cohort') == 'cap10'
+                            and type(original.get('pid')) is int and original['pid'] == metadata['pid']
+                            and type(original.get('creationUnixMs')) in (int, float)
+                            and math.isfinite(original['creationUnixMs']) and original['creationUnixMs'] > 0,
+                            'null API stop differs from its original process identity')
+                    continue
             if ('pid' not in metadata and path.name.endswith('-health.json')
                     and type(metadata.get('ready')) is bool and 'readyBody' in metadata
                     and 'capacityBody' in metadata):

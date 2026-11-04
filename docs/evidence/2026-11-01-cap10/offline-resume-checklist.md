@@ -2,6 +2,10 @@
 
 2026-11-03。状态统一见[STATUS](../../../STATUS.md)。功能版已收尾；本阶段只测真实点赞写入，不补Feed、收藏或集群功能。用户确认同一ECS节省停机、保留原卷；当前没有自动连接、开机、资源应用、PTS预约或新压力。
 
+2026-11-04接续：用户已恢复同一ECS，原容器/卷核对与工具部署完成；最新指令为“先修吧，在发压前停一下”。完成资源预检兼容修复及必要验证后停住，等用户继续，不启动PTS调试、预热、短测/正式测量，也不预约slot。
+
+本次窄修复`CAP-10-PROFILE-STOPNULL`：原Linux停止结果可能记录`exitCode:null`。资源预检只在同label原API metadata与cohort/PID/有限正birth严格绑定时识别该结果，仍检查原API真实PID与创建时间；不能凭null或旧stop文件推断进程消失。未知结果、缺伴随记录和活owner继续阻断，旧整数退出结果规则保留。此修复不改变资源/压力预算或业务确认语义。
+
 ## 固定候选与已完成准备
 
 - API：干净提交`15f8eb558498455b033e193182e4394cec75f591`，ELF内实际版本为`capacity-15f8eb558498455b033e193182e4394cec75f591`，二进制SHA256=`f29fe6a9c76d54a5ddd1cbd8b3ae143c53a4d348176b1a98bd7b7291949b4499`。精确[四项CI通过](https://github.com/tech-cove01/project-full-stack/actions/runs/41576389620)。

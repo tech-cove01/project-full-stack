@@ -2,11 +2,17 @@
 
 2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
-## 当前交接：云端预检修复完成，停在发压前（2026-11-04）
+## 当前交接：S20已判generator_limited，S21准入完成待启动（2026-11-04启动前快照）
 
-用户已恢复同一ECS，随后明确“先修吧，在发压前停一下”。已按小问题提交推送并部署`4597d43`（原停止结果null严格绑定）和`a02abe1`（完整挂载对象仅忽略排列）；53项纯检查、独审及修复后的真实只读资源捕获通过，7份成功/失败/部署/差异原件下载逐SHA核验。四依赖健康，MySQL实际仍4CPU/2GiB/冷启动缓存128MiB，未应用新资源。API/diagnostics/collector关闭、active owner已释放，原20份S/H命令SHA不变，无新slot、PTS调试、预热或测量。当前ECS仍运行，未停机或释放；**等用户明确继续**，再按[接续清单](evidence/2026-11-01-cap10/offline-resume-checklist.md)进行资源、配置/夹具、上传与真实准入，不能直接发压。完整状态见根[STATUS](../STATUS.md)。
+用户已覆盖此前暂停，费用优先选择3000档，自行购买3万VUM×2，共6万VUM、119.80元。新1996/4/2000包、API15f最终注册ready及PTS三MD5/SplitCsv/2000/4真实准入PASS。S20候选3000/s×60秒完成179700次mutation，全部成功、179700/60=2995/s，unknown/drop=0、P95/P99=268/358ms；调度违规134次，下游full/tail增长超1%预算。资源/时基/采集/业务终审通过、恢复4.497616秒，但stage=generator_limited、batchFatal=false、boundaryEligible=false；不算稳定3000，也不能在调度混杂下认定单一后端瓶颈。S21的2400/s×60秒candidate新ability/admission与预算核对已完成，首次全包络估耗9151/60000 VUM；截至本启动前快照待Start，未有通过候选、正式两轮未跑，不改源码、PTS包或门槛。只收尾点赞，见[费用接续票](evidence/2026-11-01-cap10/cost3000-continuation-plan.md)和根[STATUS](../STATUS.md)。
+
+同CID/卷的mysql8-v1已实际应用8CPU/8GiB/4GiB缓存，原swap/持久化保持。空载基线与显式重试修复`669e36d`、`0ce8d1a`已推送并部署，API15f/observer5c6原产物不变。attempt2真实60秒/13样本PASS，CPU中位2.65%、内存最高10.4%，15份原件下载逐SHA核验；原0样本FAIL保留。该idle实际观察旧4096范围，仅按同资源metadata/SHA/profile显式复用，当前1996进程/夹具/包与逐窗vector基线另真验。
+
+原H1新退休proof曾误引latest日志SHA，现仅换回原collector-terminal引用并经公共严格全验PASS；原H1 FAIL/unknown=null及30份raw不改。收尾是旧H1/512、未压4096、当前1996三cohort，4096须在最终停API前单独正常logout并核自有会话0；512费用备选未创建云端夹具。S20原判保留，后续候选必须完整通过才准备同条件两轮180秒；所有旧失败、用量账与完整120秒审计预算保持。
 
 ### 11-03历史交接：目标接近5000，节省停机与离线优化
+
+以下为当时快照；其中停机、未部署、待恢复及4096/9/4105安排已由上方11-04实际状态覆盖，不能作为当前操作指令。
 
 先读根[STATUS当前状态](../STATUS.md)。本批尚未完成，不能把800短测或1000接口通过写成稳定5000。用户已明确目标为接近5000稳定成功QPS，选择保留同一ECS并节省停机、继续离线优化，并已确认“已节省停机，显示已停止”；不继续原800正式组，不新增PTS预约/云端配置试验/连接，不释放实例或卷、不自动启动。状态来自用户控制台确认，agent没有ECS查询/停机权限。
 

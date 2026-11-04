@@ -1,0 +1,80 @@
+{
+  "version": 1,
+  "task": "REPO-ARCHIVE-R2",
+  "sourceRevision": "fc36fff77b6a45bd98cd41565f75935aebf51c3d",
+  "pathGate": "same-repository-absolute-non-reparse",
+  "files": [
+    {
+      "oldPath": "scripts/cap06-env.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap06-env.py",
+      "bytes": 27132,
+      "sha256": "b4999a8fc3737569e7c93a86655ea8cfba030ca67955c10205058f1308377ebe"
+    },
+    {
+      "oldPath": "scripts/cap06-stage.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap06-stage.py",
+      "bytes": 8151,
+      "sha256": "9fcc46e4f346f3046ec82885f266faa74f2055c60d757626ac7351e72026f682"
+    },
+    {
+      "oldPath": "scripts/cap06-tail.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap06-tail.py",
+      "bytes": 14134,
+      "sha256": "585dcc333386e63fe053d944402e6349dd49b5af036543714a378658d66a25f8"
+    },
+    {
+      "oldPath": "scripts/cap07-audit.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap07-audit.py",
+      "bytes": 20149,
+      "sha256": "3ad9550f1ef3140e5ccde72d0487fb23a83a66ddef1a5f07f701c750c0dae393"
+    },
+    {
+      "oldPath": "scripts/cap07-env.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap07-env.py",
+      "bytes": 832,
+      "sha256": "442224233bf0ec49d9ed969e466196459ff8068f58555922d7bfdb2f20885182"
+    },
+    {
+      "oldPath": "scripts/cap07-stage.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap07-stage.py",
+      "bytes": 15507,
+      "sha256": "f3f91a271b488824b57dad6b5026e83776e6394cfa9e23c438acd3277bc3078f"
+    },
+    {
+      "oldPath": "scripts/cap08-audit.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap08-audit.py",
+      "bytes": 28734,
+      "sha256": "80e193a8e2fac2e351b88c0953a5244046eda6dc850f2f3722f33d2b9a8591a6"
+    },
+    {
+      "oldPath": "scripts/cap08-check.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap08-check.py",
+      "bytes": 20748,
+      "sha256": "854ab57ea09ebf9efad0f42a343a155d35c4bafb9026b49164aa2baac27d82c6"
+    },
+    {
+      "oldPath": "scripts/cap08-collector.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap08-collector.py",
+      "bytes": 21882,
+      "sha256": "aa1ec0b291b7f278e4db4399a05bcbaa79d4f1932c56afba160ce257b2a5de8c"
+    },
+    {
+      "oldPath": "scripts/cap08-env.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap08-env.py",
+      "bytes": 746,
+      "sha256": "fc172a832ba2a24a745146f3577672daf9073f6b10b646f96a1a261e095559e3"
+    },
+    {
+      "oldPath": "scripts/cap08-policy.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap08-policy.py",
+      "bytes": 14662,
+      "sha256": "33356e576b2aef4527da1030d2809c679b350a0aec3ac2f82c2e5b7509237a03"
+    },
+    {
+      "oldPath": "scripts/cap08-stage.py",
+      "newPath": "archive/capacity-tools-cap06-cap08/scripts/cap08-stage.py",
+      "bytes": 13263,
+      "sha256": "a7d5411acdd46a3edc337c78c06d91132c5cd8e35d375245b5d3ac6ba49f2dce"
+    }
+  ]
+}

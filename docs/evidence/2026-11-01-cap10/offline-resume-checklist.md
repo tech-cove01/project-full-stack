@@ -8,6 +8,8 @@
 
 独立小票`CAP-10-PROFILE-MOUNTORDER`：修复STOPNULL后真实只读捕获发现Kafka完整挂载列表仅次序变化而被整对象相等比较误拒，原FAIL与差异保留。仅在比较副本中排序完整挂载对象，原始顺序、所有字段和重复项原样保留；替换、增删、重复、权限或其他身份变化仍拒。完成直接回归、独审和真实只读捕获即停止，不继续资源应用或API/PTS启动；这不代表新资源、空载准入或容量通过。
 
+11-04实际停止点：两修复分别提交推送`4597d43`、`a02abe1`，后者已部署并通过真实只读捕获；53项纯检查与独审通过，7份云端原件下载逐SHA核验。实际MySQL仍4CPU/2GiB/128MiB冷启动缓存；未应用mysql8-v1。API/diagnostics/collector均未启动、owner已释放、原20份S/H命令SHA不变，无新slot或PTS运行。四依赖与ECS保持运行，未停机或释放。等用户明确继续后从步骤2的资源应用准备接续，不能直接跳到发压或借旧空载/准入。
+
 ## 固定候选与已完成准备
 
 - API：干净提交`15f8eb558498455b033e193182e4394cec75f591`，ELF内实际版本为`capacity-15f8eb558498455b033e193182e4394cec75f591`，二进制SHA256=`f29fe6a9c76d54a5ddd1cbd8b3ae143c53a4d348176b1a98bd7b7291949b4499`。精确[四项CI通过](https://github.com/tech-cove01/project-full-stack/actions/runs/41576389620)。

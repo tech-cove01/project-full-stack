@@ -1,6 +1,41 @@
 # 源码讲解路线
 
-依据功能冻结版本 `0f185a558acf70ffcf60d05882d66db5a6b946db` 整理。用于按业务约束解释实现和回答追问，不将仓库历史自动等同于个人职责。所有结论按 [STATUS](../STATUS.md) 的核验范围使用；页面操作参见 [录屏指南](demo-recording.md)。本文本轮仅做源码校对，没有重新运行服务、压测或真实模型。
+按业务源码 `c464c1fa4d153806fb44ac746312552655ebda63` 校准模块与调用入口。`0f185a558acf70ffcf60d05882d66db5a6b946db` 是较早讲解基线，历史报告仍按各自日期和版本引用。本文用于按业务约束解释实现和回答追问，个人职责按真实经历填写；核验范围见 [STATUS](../STATUS.md)，页面操作见 [录屏指南](demo-recording.md)。本次只更新读码导航，未运行服务、压测或模型。
+
+## 模块地图与第一条调用链
+
+`backend/internal/` 当前有26个一级目录，共用一个API和进程生命周期。先按职责选组，再沿具体请求读函数，避免从全部文件依次读起。
+
+| 分组 | 模块目录 | 主要入口与职责 |
+| --- | --- | --- |
+| 组装与基础设施（1） | [platform](../backend/internal/platform/) | `app.Run`组装服务与worker；config/database/httpapi管理配置、池和HTTP，diagnostics/taildiag提供受控观测 |
+| 身份、商铺与授权（3） | [auth](../backend/internal/auth/)、[shop](../backend/internal/shop/)、[merchant](../backend/internal/merchant/) | 当前身份、公开商铺查询、成员和逐门店scope；身份恢复不替代写事务内授权复核 |
+| 交易与恢复（10） | [activity](../backend/internal/activity/)、[activitypub](../backend/internal/activitypub/)、[order](../backend/internal/order/)、[orderadmission](../backend/internal/orderadmission/)、[orderstream](../backend/internal/orderstream/)、[ordertimeout](../backend/internal/ordertimeout/)、[outbox](../backend/internal/outbox/)、[ordercomp](../backend/internal/ordercomp/)、[orderreview](../backend/internal/orderreview/)、[merchantorder](../backend/internal/merchantorder/) | 活动发布、Redis准入、异步成单、订单状态、交易事件、补偿/review及商家核销退款 |
+| 社区与查询投影（8） | [note](../backend/internal/note/)、[social](../backend/internal/social/)、[communitycards](../backend/internal/communitycards/)、[communitycache](../backend/internal/communitycache/)、[communityrelay](../backend/internal/communityrelay/)、[communityconsumer](../backend/internal/communityconsumer/)、[communityprojection](../backend/internal/communityprojection/)、[notesearch](../backend/internal/notesearch/) | 笔记/关系事实、公共卡片与计数、Outbox投递、持久收据、SQL/ES查询投影 |
+| 业务AI（4） | [ai](../backend/internal/ai/)、[aichat](../backend/internal/aichat/)、[aiknowledge](../backend/internal/aiknowledge/)、[aitool](../backend/internal/aitool/) | Provider协议、会话与终态、知识索引/检索、当前身份下的只读业务工具 |
+
+用一次点赞说明同步与后台链路：
+
+1. [social/http.go](../backend/internal/social/http.go)的`PUT /notes/:id/like`校验登录身份和期望状态，调用[Service.SetLike](../backend/internal/social/like.go)。
+2. `SetLike`在同一RC事务中锁笔记与关系，更新事实/计数并写[enqueue](../backend/internal/social/follow.go)对应的社区Outbox；COMMIT后读取新鲜状态并完成有界缓存更新。请求成功不等于三组消费都已收敛。
+3. [app.Run](../backend/internal/platform/app/app.go)按配置选择默认单事件[Worker](../backend/internal/communityrelay/worker.go)或显式批次大于1的[BatchRunner](../backend/internal/communityrelay/batch_runner.go)。后者调用[ClaimBatchBounded](../backend/internal/communityrelay/bounded_batch_repository.go) / [DoneBatch](../backend/internal/communityrelay/batch_repository.go)，同步发布获ACK后才标DONE；[done_point.go](../backend/internal/communityrelay/done_point.go)为N≥8保留逐事件fence与新鲜租约时间检查，未知COMMIT不当已回滚。
+4. [communityconsumer](../backend/internal/communityconsumer/worker.go)按独立组消费；[LIKE收据微批](../backend/internal/communityconsumer/receipt_batch.go)仅合并可忽略LIKE的持久收据，DB提交后再同步确认offset。follow/feed走[communityprojection](../backend/internal/communityprojection/like_batch.go)，search走[notesearch](../backend/internal/notesearch/ignored_like_batch.go)，其它事件仍维护各自投影效果。
+
+## 前端 route → view → API
+
+路由统一在[router.ts](../frontend/src/router.ts)，普通请求统一在[api.ts](../frontend/src/api.ts)的`api`与`request`，DTO见[types.ts](../frontend/src/types.ts)，身份状态见[stores/auth.ts](../frontend/src/stores/auth.ts)。页面上的路由守卫只是交互入口，服务端继续复核身份与资源范围。
+
+| 路由 | View | 主要API与后端模块 |
+| --- | --- | --- |
+| `/login` | [LoginView](../frontend/src/views/LoginView.vue) | `sendCode/login/me/logout` → auth |
+| `/`、`/shops/:id` | [ExploreView](../frontend/src/views/ExploreView.vue)、[ShopView](../frontend/src/views/ShopView.vue) | `shops/shopTypes/shop/vouchers` → shop；`seckill` → order准入 |
+| `/orders`、`/orders/:id` | [MyOrdersView](../frontend/src/views/MyOrdersView.vue)、[OrderView](../frontend/src/views/OrderView.vue) | `myOrders/order/payOrder/cancelOrder` → order |
+| `/feed`、`/notes/new`、`/notes/:id` | [FeedView](../frontend/src/views/FeedView.vue)、[NoteView](../frontend/src/views/NoteView.vue) | `feed/createNote/note/setLike/noteLike/setFollow/relationship` → social/note |
+| `/notes/search` | [NoteSearchView](../frontend/src/views/NoteSearchView.vue) | `searchNotes` → notesearch |
+| `/merchant`、`/merchant/activities` | [MerchantView](../frontend/src/views/MerchantView.vue)、[MerchantActivitiesView](../frontend/src/views/MerchantActivitiesView.vue) | `workspace/activities/createActivity/retryActivity/offlineActivity` → merchant/activity |
+| `/merchant/orders` | [MerchantOrdersView](../frontend/src/views/MerchantOrdersView.vue) | `merchantOrders/redeem/refundOrder/audits` → merchantorder |
+| `/merchant/knowledge`、`/ai/knowledge/:id` | [MerchantKnowledgeView](../frontend/src/views/MerchantKnowledgeView.vue)、[PublicKnowledgeView](../frontend/src/views/PublicKnowledgeView.vue) | `merchantKnowledge/createKnowledge/publishKnowledge/publicKnowledge`等 → aiknowledge |
+| `/assistant` | [AssistantView](../frontend/src/views/AssistantView.vue) | 会话与能力调用`api`；消息SSE由本View直接`fetch`到`/ai/conversations/:id/messages` → aichat |
 
 ## 先用 90 秒讲清项目
 
@@ -51,6 +86,8 @@ MySQL 与 Redis 没有跨系统原子事务。DB commit 成功而 ACK 失败时�
 
 先看 [social.Service.Feed / feedPage](../backend/internal/social/feed.go)：按 `(create_time,id)` 游标翻页，批量装配门店和当前用户字段。`likedByMe` 按调用者单独查询，不能放入共享公共计数。再看 [readSnapshot](../backend/internal/social/projection.go)：投影完整性与查询依赖使用同一个 RR 只读快照，不完整或可选投影不可用时回退数据库，最终 SQL 仍校验当前公开状态与关注事实。
 
+完整Feed的公共正文路径看[communitycards](../backend/internal/communitycards/cards.go)及[storage.go](../backend/internal/communitycards/storage.go)：以笔记ID和发布版本缓存正文，L1/Redis缺失后批量回源，并用有界同批加载合并请求。页顺序、当前事实、个人状态和公共计数留在缓存外；共享加载由组件生命周期管理，关闭时先取消并等待，再释放数据库/Redis资源。下面的`communitycache`是独立计数组件，不应把它的函数级实验当完整Feed HTTP结果。
+
 [communitycache/counts.go](../backend/internal/communitycache/counts.go) 中有两条路径：
 
 - `Get`：L1 → Redis → MySQL，用自有 `inflight/flight` 合并同 key 加载。等待者可以用自己的 context 取消等待；真正执行加载的请求仍携带它的 context。这里没有调用 `x/sync/singleflight`。
@@ -69,8 +106,8 @@ MySQL 与 Redis 没有跨系统原子事务。DB commit 成功而 ACK 失败时�
 | 阅读顺序 | 入口与责任 |
 | --- | --- |
 | 事实与事件 | [note.Create](../backend/internal/note/note.go)、[SetLike](../backend/internal/social/like.go)、[SetFollow](../backend/internal/social/follow.go)：事实变化与 community outbox 同事务；期望状态重复 no-op 不涨版本、不多发事件 |
-| 投递 | [communityrelay.Claim](../backend/internal/communityrelay/repository.go) 和 [Worker.Poll](../backend/internal/communityrelay/worker.go)：租约认领，aggregate ID 为 key，Kafka 确认后标 DONE；不确定投递可能重试 |
-| 消费 | [communityconsumer.NewWorker / Poll](../backend/internal/communityconsumer/worker.go)：follow/feed/search 三个稳定独立组；Apply 最多三次后转 Park，效果或失败持久化后才同步提交位点，未确认时保留当前消息 |
+| 投递 | [单事件Worker](../backend/internal/communityrelay/worker.go)与显式启用的[BatchRunner](../backend/internal/communityrelay/batch_runner.go)：租约/字节前缀认领，aggregate ID为key，Kafka同步确认后才Done；批发布失败先真实Close/drain再继续，不确定投递可能重放 |
+| 消费 | [NewWorker / Poll](../backend/internal/communityconsumer/worker.go)维护follow/feed/search独立组；逐条效果或失败持久化后同步确认位点。显式微批只对严格校验的LIKE写IGNORED收据并合并位点确认，异常/其它事件退回原逐条屏障，未确认前保留原消息 |
 | SQL 投影 | [Repository.Apply](../backend/internal/communityprojection/repository.go)：收据和投影效果同事务，eventId/hash 防冲突，业务 version 防旧覆盖；无关已知事件也留 IGNORED 收据 |
 | 搜索投影 | [notesearch.Sync.Apply / Park / Replay](../backend/internal/notesearch/sync.go)：查当前公开事实，ES 按业务版本写入，SQL 保存状态/hash/收据，失败保存原消息及 topic/partition/offset 供精确重放 |
 | 查询与重建 | [Service.Search](../backend/internal/notesearch/service.go) 使用 PIT/search_after 取候选，再由 SQL 复核公开事实及版本；[Rebuild](../backend/internal/notesearch/rebuild.go) 离线创建新代次并切换 alias |

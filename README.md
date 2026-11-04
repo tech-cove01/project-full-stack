@@ -94,8 +94,11 @@ frontend/         Vue 用户端与商家工作台
 infra/mysql/      表结构、演示数据与版本迁移
 scripts/          启动辅助、业务验证与量化工具
 docs/             架构、运行说明与开发记录
+archive/          冻结参考源码、旧构建与历史文档
 compose.go.yaml   本地 MySQL / Redis 及可选 Kafka / ES
 ```
+
+阅读源码可从[后端模块导航](backend/README.md)与[前端页面导航](frontend/README.md)开始。
 
 ## 许可证
 

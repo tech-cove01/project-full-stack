@@ -24,6 +24,13 @@ type LikeState struct {
 	Likes   int64  `json:"likes"`
 }
 
+const lockedLikeFactsSQL = `SELECT STRAIGHT_JOIN b.id,b.user_id,b.status,
+	COALESCE(l.id,0) AS relation_id,COALESCE(l.active,0) AS relation_active,
+	COALESCE(l.version,0) AS relation_version
+	FROM tb_blog AS b FORCE INDEX(PRIMARY)
+	LEFT JOIN tb_blog_like AS l FORCE INDEX(uk_blog_like) ON l.blog_id=b.id AND l.user_id=?
+	WHERE b.id=? FOR UPDATE`
+
 // SetLike is an expected-state write. The note row is locked first, which
 // serializes the counter update with concurrent likes on the same note; repeating
 // the current state changes nothing and emits no event.
@@ -46,26 +53,24 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 	defer transactionSpan.End(true)
 	err = service.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		var blog struct {
-			ID     uint64
-			UserID uint64
-			Status string
+			ID              uint64
+			UserID          uint64
+			Status          string
+			RelationID      uint64
+			RelationActive  int
+			RelationVersion int
 		}
-		if err := tx.WithContext(ctx).Raw(`SELECT id,user_id,status FROM tb_blog
-			WHERE id=? FOR UPDATE`, note).Scan(&blog).Error; err != nil {
+		if err := tx.WithContext(ctx).Raw(lockedLikeFactsSQL, user, note).Scan(&blog).Error; err != nil {
 			return err
 		}
 		if blog.ID == 0 || blog.Status != "PUBLISHED" {
 			return ErrNoteNotFound
 		}
-		var existing struct {
+		existing := struct {
 			ID      uint64
 			Active  int
 			Version int
-		}
-		if err := tx.WithContext(ctx).Raw(`SELECT id,active,version FROM tb_blog_like
-			WHERE blog_id=? AND user_id=? FOR UPDATE`, note, user).Scan(&existing).Error; err != nil {
-			return err
-		}
+		}{blog.RelationID, blog.RelationActive, blog.RelationVersion}
 		wanted := 0
 		if liked {
 			wanted = 1
@@ -94,24 +99,24 @@ func (service *Service) SetLike(ctx context.Context, userID, noteID string, like
 			return nil
 		}
 		version := existing.Version + 1
-		result := tx.WithContext(ctx).Exec(`UPDATE tb_blog_like SET active=?,version=?
-			WHERE id=? AND version=?`, wanted, version, existing.ID, existing.Version)
+		counter := "GREATEST(0,b.liked+1)"
+		if wanted == 0 {
+			counter = "GREATEST(b.liked,1)-1"
+		}
+		// One unique tuple fences both changes. The assignments use only their
+		// own old columns and parameters, independent of multi-update ordering.
+		result := tx.WithContext(ctx).Exec(`UPDATE tb_blog AS b FORCE INDEX(PRIMARY)
+			STRAIGHT_JOIN tb_blog_like AS l FORCE INDEX(PRIMARY) ON l.blog_id=b.id
+			SET l.active=?,l.version=?,b.liked=`+counter+`
+			WHERE b.id=? AND l.id=? AND l.user_id=? AND l.version=?`,
+			wanted, version, note, existing.ID, user, existing.Version)
 		if result.Error != nil {
 			return result.Error
 		}
-		if result.RowsAffected != 1 {
+		// The relation must change. A clamped unlike can leave the already-zero
+		// counter unchanged, so the driver can report one or two changed rows.
+		if result.RowsAffected < 1 || result.RowsAffected > 2 {
 			return ErrUnsafe
-		}
-		var counter *gorm.DB
-		if wanted == 0 {
-			// liked is unsigned: protect its input before subtraction. An outer
-			// GREATEST cannot catch underflow from evaluating liked + (-1).
-			counter = tx.WithContext(ctx).Exec(`UPDATE tb_blog SET liked=GREATEST(liked,1)-1 WHERE id=?`, note)
-		} else {
-			counter = tx.WithContext(ctx).Exec(`UPDATE tb_blog SET liked=GREATEST(0,liked+?) WHERE id=?`, 1, note)
-		}
-		if counter.Error != nil {
-			return counter.Error
 		}
 		return enqueue(ctx, tx, likeEventID(note, user, version), "BLOG",
 			strconv.FormatUint(note, 10), version, "LIKE_CHANGED",

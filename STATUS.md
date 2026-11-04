@@ -16,7 +16,7 @@
 
 **CAP-10-IDLE-VECTOR-BASELINE / 代码自验与独审通过，真实空载待接续：** 新vector observer必须绑定完整审计，原idle启动器遗漏`--baseline-audit`及字节SHA，导致Go在采样前严格拒绝。已限定复用现有Node完整reconcile和原完整verdict、沿最终API PID/4096夹具产生真实审计原件，再传原path/SHA给Go；legacy路径不变。完整基线在观察器ready及60秒/13样本之前，不借轻量facts或伪造空基线，不改采样/完整审计/恢复门槛。6项直接检查（含13组反例）、原90项授权检查与独审通过；原0样本FAIL不改判，待严格重试接线闭合后才实际验证。
 
-**CAP-10-IDLE-RETRY / 待验证：** 原versioned idle仅接受首次且原FAIL不覆盖。仅为同环境、已终结0样本的已知observer启动失败增加显式attempt2，原结果/预约/log和实际退出closure按SHA绑定，兄弟目录独立产出；无隐式latest、无attempt3，不更换资源身份掩盖失败。新成功结果仍须完整60秒/13样本及原全部CPU/时钟/下游门槛，经公共合同验证；私有assembler使用显式preflight新副本，封存release与旧helper原件不改。
+**CAP-10-IDLE-RETRY / 代码自验与独审通过，真实验证待执行：** 原versioned idle仅接受首次且原FAIL不覆盖。已仅为同环境、已终结0样本的已知observer启动失败增加显式attempt2，原结果/预约/log和实际退出closure按SHA绑定，兄弟目录独立产出；无隐式latest、无attempt3，不更换资源身份掩盖失败。新成功结果仍须完整60秒/13样本及原全部CPU/时钟/下游门槛，经公共合同验证；私有assembler使用显式preflight新副本，封存release与旧helper原件不改。13项合同、5项producer、9项assembler直接检查及原90项授权检查通过，baseline6项同时通过，独审通过；首个测试错误类型定位保留并修正前置条件，均非新业务/容量结果。用户最新费用优先，可下调目标QPS；先验证空载，再确认现有1000VU额度下的配套方案，未购买资源包。
 
 **11-04此前接续与停止点（历史）：** 用户恢复同一ECS后，原16CPU/32GiB、原四CID/镜像/数据卷已核并恢复健康。已备份原12项云端工具修改和同字节014迁移，以实际旧Git提交为先决条件的小增量包部署原冻结源码/API/observer，未重建业务产物。用户随后明确“先修吧，在发压前停一下”；当时只修复并验证资源预检兼容问题，不启动PTS调试、预热、短测、正式测量或预约新slot，等待用户继续。该暂停现已由上方最新继续指令覆盖；下方11-03停机与历史窗口记录保留其当时范围。
 

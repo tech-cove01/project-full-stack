@@ -112,9 +112,34 @@ def container_identities(containers, resource_profile):
     return identities
 
 
-def claim_versioned_idle(root, runtime, environment_path, resource_profile, owned, retry_arguments):
-    assert not any(retry_arguments), 'versioned idle is one observation; legacy retry records remain separate'
+def retry_processes_absent(root, environment, attempt_fields):
+    """Recheck the exact old output selectors; a closure file is not a live check."""
+    previous = (root / attempt_fields['failedIdleResultPath']).parent
+    selectors = {'--output': str(previous / 'idle-downstream'),
+                 '--done-file': str(previous / 'idle-control/done.json')}
+    for process in psutil.process_iter():
+        if process.pid == os.getpid():
+            continue
+        try:
+            command = process.cmdline()
+        except psutil.NoSuchProcess:
+            continue
+        assert isinstance(command, list) and all(type(item) is str for item in command)
+        arguments = list(zip(command, command[1:]))
+        assert not any(selectors.get(flag) == path for flag, path in arguments if flag in selectors), 'original idle observer is still present'
+        launcher = any(Path(item).name == 'cap10-idle.py' for item in command)
+        assert not (launcher and ('--environment', str(environment)) in arguments), 'original idle launcher is still present'
+
+
+def claim_versioned_idle(root, runtime, environment_path, resource_profile, owned, retry_arguments, environment=None):
+    assert not any(retry_arguments[1:]), 'legacy additional/interruption retries do not apply to versioned idle'
     directory = IDLE.idle_directory(environment_path, root, resource_profile)
+    attempt_fields = None
+    if retry_arguments[0] is not None:
+        assert environment is not None, 'explicit original launch environment required for startup retry'
+        directory, attempt_fields = IDLE.validate_versioned_retry(root, environment_path, resource_profile,
+                                                                 Path(retry_arguments[0]))
+        retry_processes_absent(root, environment, attempt_fields)
     assert directory != root and not directory.exists(), 'versioned idle namespace is already consumed'
     histories = (root, root.parent) if root.name == 'linux' else (root, root / 'linux')
     for history_root in histories:
@@ -127,6 +152,8 @@ def claim_versioned_idle(root, runtime, environment_path, resource_profile, owne
     owner = {'kind': 'idle', 'pid': os.getpid(), 'created': psutil.Process().create_time(),
              'environmentPath': environment_path.name, 'environmentSHA256': hashlib.sha256(environment_path.read_bytes()).hexdigest(),
              'resourceProfile': resource_profile}
+    if attempt_fields is not None:
+        owner['attemptFields'] = attempt_fields
     owned.save(lock, owner)
     try:
         directory.mkdir()
@@ -338,8 +365,9 @@ def main():
                                args.interruption_retry_authorization, boot_id)
     else:
         evidence_root, idle_owner = claim_versioned_idle(root, runtime, environment_path, resource_profile, owned,
-            (args.retry_authorization, args.additional_retry_authorization, args.interruption_retry_authorization))
-        attempt = {'attempt': 1, 'idleSchemaVersion': 1, 'idleDirectory': evidence_root.name}
+            (args.retry_authorization, args.additional_retry_authorization, args.interruption_retry_authorization),
+            environment=args.environment)
+        attempt = idle_owner.get('attemptFields', {'attempt': 1, 'idleSchemaVersion': 1, 'idleDirectory': evidence_root.name})
     reservation = evidence_root / 'idle-reservation.json'
     control = evidence_root / 'idle-control'
     done = control / 'done.json'
@@ -374,6 +402,11 @@ def main():
         with (evidence_root / 'idle-observer.txt').open('xb') as output:
             observer = subprocess.Popen(idle_observer_command(args.observer, args.environment, value, evidence_root, root, baseline),
                 cwd=REPO, stdout=output, stderr=subprocess.STDOUT, creationflags=owned.FLAGS)
+            result['observerPid'] = observer.pid
+            try:
+                result['observerCreationUnixMs'] = psutil.Process(observer.pid).create_time() * 1000
+            except psutil.NoSuchProcess:
+                result['observerCreationUnixMs'] = None  # Already exited; never invent its birth time.
             for _ in range(80):
                 if (downstream / 'ready.json').exists() or observer.poll() is not None:
                     break

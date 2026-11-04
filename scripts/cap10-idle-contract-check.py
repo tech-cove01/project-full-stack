@@ -149,6 +149,90 @@ class Checks(unittest.TestCase):
         idle.validate_preflight(command, self.root)
         self.assertTrue(all(path.read_bytes() == raw for path, raw in before.items()))
 
+    def retry_fixture(self):
+        command, failed_path, complete = self.fixture()
+        directory = failed_path.parent
+        reservation_path = directory / 'idle-reservation.json'
+        reservation = json.loads(reservation_path.read_bytes())
+        reservation['failedAttemptConsumesOnlyIdleObservation'] = True
+        reservation_path.write_text(json.dumps(reservation), encoding='utf-8')
+        complete['reservationSHA256'] = self.sha(reservation_path)
+        failed = {**complete, 'passed': False, 'samples': [],
+                  'finishedAt': '2020-01-01T00:00:00Z', 'errors': [{'class': 'AssertionError'}]}
+        failed_path.write_text(json.dumps(failed), encoding='utf-8')
+        log = directory / 'idle-observer.txt'
+        log.write_text('cap10-downstream: invalid complete vector baseline audit\n', encoding='utf-8')
+        identity = {key: command[key] for key in ('environmentPath', 'environmentSHA256', 'resourceProfile')}
+        closure_path = self.put(directory.name + '-startup-closure.json', {
+            'version': 1, 'kind': 'versioned-idle-startup-closure', **identity,
+            'failedIdleResultSHA256': self.sha(failed_path), 'observedAt': '2020-01-01T00:00:01Z',
+            'idleOwnerReleased': True, 'observerAbsent': True, 'launcherExited': True, 'noWorkloadStarted': True})
+        ref = lambda path: {'path': path.relative_to(self.root).as_posix(), 'sha256': self.sha(path)}
+        auth_path = self.put(directory.name + '-retry-2-authorization.json', {
+            'version': 1, 'kind': 'versioned-idle-startup-retry', 'attempt': 2, **identity,
+            'recordedAt': '2020-01-01T00:00:02Z', 'userAuthorizationReference': 'synthetic existing authorization',
+            'failedIdleResult': ref(failed_path), 'failedIdleReservation': ref(directory / 'idle-reservation.json'),
+            'failedObserverLog': ref(log), 'closureProof': ref(closure_path)})
+        return command, failed_path, complete, auth_path
+
+    def test_explicit_second_observation_keeps_first_failure_and_full_admission(self):
+        command, failed_path, complete, auth_path = self.retry_fixture()
+        original = {path: path.read_bytes() for path in failed_path.parent.iterdir() if path.is_file()}
+        directory, fields = idle.validate_versioned_retry(self.root, self.root / command['environmentPath'], 'mysql8-v1', auth_path)
+        self.assertEqual(directory.name, 'idle-012345abcdef-attempt-2')
+        reservation = {**complete, **fields, 'failedAttemptConsumesOnlyIdleObservation': True}
+        reservation.pop('reservationPath'); reservation.pop('reservationSHA256')
+        reservation_path = self.put(directory.name + '/idle-reservation.json', reservation)
+        result = {**complete, **fields, 'reservationPath': directory.name + '/idle-reservation.json',
+                  'reservationSHA256': self.sha(reservation_path)}
+        path = self.put(directory.name + '/idle-result.json', result)
+        second = {**command, 'preflightPath': path.relative_to(self.root).as_posix(), 'preflightSHA256': self.sha(path)}
+        self.assertEqual(idle.validate_preflight(second, self.root)['path'], second['preflightPath'])
+        with self.assertRaises(ValueError):
+            idle.validate_preflight({**command, 'preflightSHA256': self.sha(failed_path)}, self.root)
+        for edit in (lambda v: v.update(attempt=3), lambda v: v.update(failedIdleResultSHA256='0' * 64),
+                     lambda v: v.update(retryAuthorizationSHA256='0' * 64), lambda v: v['samples'].pop(),
+                     lambda v: v.update(observerExit=1)):
+            self.reject_result(second, path, result, edit)
+        self.assertTrue(all(path.read_bytes() == raw for path, raw in original.items()))
+        for wrong in ('idle-012345abcdef-attempt-3/idle-result.json', 'idle-abcdef012345-attempt-2/idle-result.json'):
+            with self.assertRaises(ValueError):
+                idle.preflight_path({**second, 'preflightPath': wrong}, self.root)
+
+    def test_startup_retry_rejects_nonempty_samples_unknown_failure_and_unclosed_owner(self):
+        command, failed_path, _, auth_path = self.retry_fixture()
+        original = {path: path.read_bytes() for path in self.root.rglob('*') if path.is_file()}
+        edits = [lambda a: a.update(attempt=3), lambda a: a.update(environmentSHA256='0' * 64),
+                 lambda a: a['failedIdleResult'].update(sha256='0' * 64)]
+        for index, edit in enumerate(edits):
+            value = json.loads(original[auth_path]); edit(value); auth_path.write_text(json.dumps(value), encoding='utf-8')
+            with self.subTest(auth=index), self.assertRaises(ValueError):
+                idle.validate_versioned_retry(self.root, self.root / command['environmentPath'], 'mysql8-v1', auth_path)
+        for path, raw in original.items(): path.write_bytes(raw)
+        for kind in ('passed', 'samples', 'log', 'observerAbsent', 'idleOwnerReleased', 'launcherExited', 'future'):
+            for path, raw in original.items(): path.write_bytes(raw)
+            auth = json.loads(auth_path.read_bytes())
+            if kind in ('passed', 'samples'):
+                value = json.loads(failed_path.read_bytes()); value[kind] = True if kind == 'passed' else [{}]
+                failed_path.write_text(json.dumps(value), encoding='utf-8')
+                auth['failedIdleResult']['sha256'] = self.sha(failed_path)
+            elif kind == 'log':
+                log = failed_path.parent / 'idle-observer.txt'; log.write_text('unrelated startup failure', encoding='utf-8')
+                auth['failedObserverLog']['sha256'] = self.sha(log)
+            else:
+                closure_path = self.root / auth['closureProof']['path']; value = json.loads(closure_path.read_bytes())
+                if kind == 'future': value['observedAt'] = '2999-01-01T00:00:00Z'
+                else: value[kind] = False
+                closure_path.write_text(json.dumps(value), encoding='utf-8'); auth['closureProof']['sha256'] = self.sha(closure_path)
+            auth_path.write_text(json.dumps(auth), encoding='utf-8')
+            with self.subTest(kind=kind), self.assertRaises(ValueError):
+                idle.validate_versioned_retry(self.root, self.root / command['environmentPath'], 'mysql8-v1', auth_path)
+        for path, raw in original.items(): path.write_bytes(raw)
+        sample_path = self.put(failed_path.parent.name + '/idle-downstream/timeline.ndjson', {'unexpected': 'sample'})
+        with self.assertRaises(ValueError):
+            idle.validate_versioned_retry(self.root, self.root / command['environmentPath'], 'mysql8-v1', auth_path)
+        self.assertTrue(sample_path.exists())
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

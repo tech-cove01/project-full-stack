@@ -93,8 +93,20 @@ func TestObserverVersionedEnvironmentProfiles(t *testing.T) {
 	if profile, err := environmentResourceProfile(newEnv, root); err != nil || profile != "mysql8-v1" {
 		t.Fatalf("explicit profile failed: %s %v", profile, err)
 	}
+	kafkaTarget := filepath.Join(root, "environment-112345abcdef.json")
+	if err := os.WriteFile(kafkaTarget, []byte(`{"resourceProfile":"mysql8-kafka2-v1"}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	kafkaEnv := map[string]string{"CAP10_ENVIRONMENT_METADATA": kafkaTarget, "CAP10_RESOURCE_PROFILE": "mysql8-kafka2-v1"}
+	if profile, err := environmentResourceProfile(kafkaEnv, root); err != nil || profile != "mysql8-kafka2-v1" {
+		t.Fatalf("Kafka2 resource profile failed: %s %v", profile, err)
+	}
 	for _, value := range []map[string]string{
 		{"CAP10_ENVIRONMENT_METADATA": target},
+		{"CAP10_ENVIRONMENT_METADATA": kafkaTarget},
+		{"CAP10_ENVIRONMENT_METADATA": target, "CAP10_RESOURCE_PROFILE": "mysql8-kafka2-v1"},
+		{"CAP10_ENVIRONMENT_METADATA": kafkaTarget, "CAP10_RESOURCE_PROFILE": "mysql8-v1"},
+		{"CAP10_ENVIRONMENT_METADATA": kafkaTarget, "CAP10_RESOURCE_PROFILE": "mysql8-kafka4-v1"},
 		{"CAP10_ENVIRONMENT_METADATA": legacy, "CAP10_RESOURCE_PROFILE": "mysql8-v1"},
 		{"CAP10_ENVIRONMENT_METADATA": legacy, "CAP10_RESOURCE_PROFILE": ""},
 		{"CAP10_ENVIRONMENT_METADATA": filepath.Join(root, "foreign.json")},

@@ -1741,7 +1741,7 @@ func environmentResourceProfile(env map[string]string, root string) (string, err
 	if !present {
 		profile = "baseline"
 	}
-	if profile != "baseline" && profile != "mysql8-v1" {
+	if profile != "baseline" && profile != "mysql8-v1" && profile != "mysql8-kafka2-v1" {
 		return "", errors.New("unsupported environment resource profile")
 	}
 	var metadata map[string]json.RawMessage

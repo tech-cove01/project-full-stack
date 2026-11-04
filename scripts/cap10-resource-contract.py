@@ -5,21 +5,25 @@ import re
 
 BASELINE_PROFILE = 'baseline'
 TARGET_PROFILE = 'mysql8-v1'
+KAFKA2_PROFILE = 'mysql8-kafka2-v1'
 _BASELINE = {'mysql': (4_000_000_000, 2 << 30), 'redis': (2_000_000_000, 512 << 20),
              'kafka': (2_000_000_000, 1 << 30), 'elasticsearch': (2_000_000_000, 1 << 30)}
 _METADATA_NAME = re.compile(r'environment(?:-[a-f0-9]{12})?\.json')
 
 
 def profile_name(value=BASELINE_PROFILE):
-    if type(value) is not str or value not in (BASELINE_PROFILE, TARGET_PROFILE):
+    if type(value) is not str or value not in (BASELINE_PROFILE, TARGET_PROFILE, KAFKA2_PROFILE):
         raise ValueError('explicit supported CAP10 resource profile required')
     return value
 
 
 def container_limits(profile=BASELINE_PROFILE):
     limits = dict(_BASELINE)
-    if profile_name(profile) == TARGET_PROFILE:
+    profile = profile_name(profile)
+    if profile in (TARGET_PROFILE, KAFKA2_PROFILE):
         limits['mysql'] = (8_000_000_000, 8 << 30)
+    if profile == KAFKA2_PROFILE:
+        limits['kafka'] = (2_000_000_000, 2 << 30)
     return limits
 
 

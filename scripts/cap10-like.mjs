@@ -69,7 +69,7 @@ const metadataStat = await lstat(process.env.CAP10_ENVIRONMENT_METADATA)
 assert.ok(metadataStat.isFile() && !metadataStat.isSymbolicLink(), 'regular owned environment metadata required')
 assert.equal(await realpath(process.env.CAP10_ENVIRONMENT_METADATA), join(await realpath(evidenceRoot), basename(process.env.CAP10_ENVIRONMENT_METADATA)), 'environment metadata resolves outside its original namespace')
 const resourceProfile = process.env.CAP10_RESOURCE_PROFILE ?? 'baseline'
-assert.ok(['baseline', 'mysql8-v1'].includes(resourceProfile), 'explicit bounded resource profile required')
+assert.ok(['baseline', 'mysql8-v1', 'mysql8-kafka2-v1'].includes(resourceProfile), 'explicit bounded resource profile required')
 const resourceMetadata = JSON.parse(await readFile(process.env.CAP10_ENVIRONMENT_METADATA))
 assert.ok(resourceMetadata && typeof resourceMetadata === 'object' && !Array.isArray(resourceMetadata), 'environment metadata object required')
 assert.equal(Object.hasOwn(resourceMetadata, 'resourceProfile') ? resourceMetadata.resourceProfile : 'baseline', resourceProfile, 'private and public resource profiles differ')

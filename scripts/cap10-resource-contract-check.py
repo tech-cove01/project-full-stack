@@ -31,6 +31,24 @@ class Checks(unittest.TestCase):
         self.assertNotEqual(old, new)
         self.assertEqual(CONTRACT.metadata_path({}, ROOT), old)
 
+    def test_kafka2_profile_changes_only_fixed_kafka_memory(self):
+        original = CONTRACT.container_limits('mysql8-v1')
+        target = CONTRACT.container_limits('mysql8-kafka2-v1')
+        self.assertEqual(original['kafka'], (2_000_000_000, 1 << 30))
+        self.assertEqual(target['kafka'], (2_000_000_000, 2 << 30))
+        self.assertEqual({key: value for key, value in original.items() if key != 'kafka'},
+                         {key: value for key, value in target.items() if key != 'kafka'})
+        target['kafka'] = (0, 0)
+        self.assertEqual(CONTRACT.container_limits('mysql8-kafka2-v1')['kafka'], (2_000_000_000, 2 << 30))
+        self.assertEqual(CONTRACT.container_limits('mysql8-v1'), original)
+        self.assertEqual(CONTRACT.bound_profile({'CAP10_RESOURCE_PROFILE': 'mysql8-kafka2-v1'},
+                                              {'resourceProfile': 'mysql8-kafka2-v1'}), 'mysql8-kafka2-v1')
+        for config, metadata in (({'CAP10_RESOURCE_PROFILE': 'mysql8-kafka2-v1'}, {'resourceProfile': 'mysql8-v1'}),
+                                 ({'CAP10_RESOURCE_PROFILE': 'mysql8-v1'}, {'resourceProfile': 'mysql8-kafka2-v1'}),
+                                 ({'CAP10_RESOURCE_PROFILE': 'mysql8-kafka4-v1'}, {'resourceProfile': 'mysql8-kafka4-v1'})):
+            with self.assertRaises(ValueError):
+                CONTRACT.bound_profile(config, metadata)
+
     def test_paths_are_explicit_root_files_not_arbitrary_cleanup_expansion(self):
         for name in ('../environment.json', 'nested/environment.json', 'environment-other.json', 'input.json', '', None):
             with self.assertRaises(ValueError):

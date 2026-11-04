@@ -153,12 +153,13 @@ type likeVectorState struct {
 	trackedBytes  int64
 }
 type likeVectorEngine struct {
-	mu       sync.Mutex
-	pairs    []likeVectorPair
-	users    map[string]string
-	controls likeVectorControls
-	limits   likeVectorLimits
-	state    *likeVectorState
+	mu          sync.Mutex
+	pairs       []likeVectorPair
+	digestPairs []likeVectorPair // Independent original fixture order; pairs remains lexically sorted for traversal.
+	users       map[string]string
+	controls    likeVectorControls
+	limits      likeVectorLimits
+	state       *likeVectorState
 }
 type likeVectorReadSet struct {
 	owner     *likeVectorEngine
@@ -214,7 +215,7 @@ func newLikeVector(pairs []likeVectorPair, baseline []likeVectorFact, controls l
 		limits.MaxTrackedBytes < 1 || limits.MaxTrackedBytes > likeVectorMaxBytes {
 		return nil, errLikeVectorInput
 	}
-	engine := &likeVectorEngine{pairs: append([]likeVectorPair(nil), pairs...), users: make(map[string]string, len(pairs)), controls: controls, limits: limits}
+	engine := &likeVectorEngine{pairs: append([]likeVectorPair(nil), pairs...), digestPairs: append([]likeVectorPair(nil), pairs...), users: make(map[string]string, len(pairs)), controls: controls, limits: limits}
 	users := make(map[string]bool, len(pairs))
 	for _, pair := range engine.pairs {
 		if !likeVectorID(pair.NoteID) || !likeVectorID(pair.UserID) || engine.users[pair.NoteID] != "" || users[pair.UserID] {
@@ -918,7 +919,7 @@ func readLikeVectorSQLTx(ctx context.Context, tx likeVectorSQLTx, engine *likeVe
 	}
 	// These identities describe the same validated RR rows as this proposal.
 	// They remain private until SQL commit and whole-sample Accept both succeed.
-	factSHA, err := vectorDigest(engine.pairs, facts)
+	factSHA, err := vectorDigest(engine.digestPairs, facts)
 	if err != nil {
 		return nil, stats, err
 	}

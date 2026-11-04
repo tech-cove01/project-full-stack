@@ -164,8 +164,10 @@ func orderedBatch(events []Event) ([]Event, error) {
 	return ordered, nil
 }
 
-// DoneBatch applies the original Done fence in ascending ID order inside one
-// transaction. A lost lease returns ErrLeaseLost and aborts the whole batch;
+// DoneBatch uses the original Done transaction below eight events. Larger
+// batches lock exact primary keys, retain each original fence and check fresh
+// server time before their single commit. Physical lock order is not promised.
+// A lost lease returns ErrLeaseLost and aborts the whole batch;
 // callers may subsequently retry individual Done operations with the same fences.
 // A database/commit error is returned unchanged, without claiming that a server
 // commit could not have happened. Broker acknowledgement remains the caller's
@@ -174,6 +176,9 @@ func (repository *Repository) DoneBatch(ctx context.Context, events []Event) err
 	ordered, err := orderedBatch(events)
 	if err != nil {
 		return err
+	}
+	if len(ordered) >= donePointMinBatchSize {
+		return repository.donePointBatch(ctx, ordered)
 	}
 	return repository.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		owned := NewRepository(tx)

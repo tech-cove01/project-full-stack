@@ -172,16 +172,16 @@ func TestDoneBatchSortsACopyAndCommitsOnce(t *testing.T) {
 		events[i] = Event{ID: uint64(MaxBatchSize - i), Attempts: i%8 + 1}
 	}
 	before := append([]Event(nil), events...)
-	script := &batchScript{}
-	if err := scriptedBatchRepository(t, script).DoneBatch(context.Background(), events); err != nil {
+	state := &donePointScript{leases: donePointLeasesN(MaxBatchSize), affected: MaxBatchSize, guard: int64(1)}
+	if err := donePointRepository(t, state).DoneBatch(context.Background(), events); err != nil {
 		t.Fatal(err)
 	}
-	if !reflect.DeepEqual(events, before) || script.commits != 1 || script.rollbacks != 0 || len(script.execIDs) != MaxBatchSize {
+	if !reflect.DeepEqual(events, before) || state.base.commits != 1 || state.base.rollbacks != 0 || len(state.args[0]) != MaxBatchSize {
 		t.Fatal("successful done batch must commit once without reordering caller data")
 	}
-	for i, id := range script.execIDs {
-		if id != uint64(i+1) {
-			t.Fatal("completion locks must be taken in ascending ID order")
+	for i, id := range state.args[0] {
+		if id.Value != int64(i+1) {
+			t.Fatal("completion input must retain ascending ID order")
 		}
 	}
 }

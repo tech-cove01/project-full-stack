@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "windows": [
+    {
+      "tag": "S28",
+      "kind": "candidate",
+      "configuredRate": 3010,
+      "fullNominalSeconds": 60,
+      "sourceSha": "c464c1fa4d153806fb44ac746312552655ebda63",
+      "sourceCI": {
+        "sourceSha": "c464c1fa4d153806fb44ac746312552655ebda63",
+        "runId": 41828027736,
+        "status": "completed",
+        "conclusion": "success",
+        "successfulJobs": 4
+      },
+      "resourceProfile": "mysql8-v1",
+      "poolSize": 1996,
+      "expectedEngines": 4,
+      "ptsConcurrency": 2000,
+      "stagePassed": true,
+      "outcome": "pass",
+      "boundaryEligible": false,
+      "successfulMutationsPerFullNominalSecond": 3004.983333333333,
+      "nativeWindowComplete": true,
+      "nativeDurationMs": 60000,
+      "generatorTimingValid": true,
+      "quantileMethod": "R7; full raw native HTTP elapsedMs, including failed HTTP terminals",
+      "nativeLaunchPlan": {
+        "launchGuardMs": 100,
+        "plannedTotal": 180299,
+        "targetRate": 3010,
+        "plannedOfferedRatio": 0.9983333333333333
+      },
+      "allLatencyMs": {
+        "p95": 13,
+        "p99": 52
+      },
+      "mutationLatencyMs": {
+        "p95": 13,
+        "p99": 52
+      },
+      "quality": {
+        "attempted": 180299,
+        "completed": 180299,
+        "successful": 180299,
+        "mutation": 180299,
+        "noop": 0,
+        "rejected": 0,
+        "unknown": 0,
+        "effectUnknown": 0,
+        "classificationUnknown": 0,
+        "unknownIsExact": true,
+        "dropped": 0,
+        "generatorTimingViolations": 0,
+        "contentErrors": 0,
+        "httpErrors": 0,
+        "systemErrors": 0,
+        "actualOfferedRatio": 0.9983333333333333,
+        "mutationFraction": 1,
+        "mutationCounterMatchesDB": true
+      },
+      "apiBudgetPassed": true,
+      "candidateMarginPassed": true,
+      "finalFactsValid": true,
+      "finalReconcileValid": true,
+      "phaseAccountingValid": true,
+      "finalDownstreamConverged": true,
+      "pipelinePassed": true,
+      "pipelineObservationWindowSeconds": 60,
+      "pipelineWindowScope": "complete short gate",
+      "conservativeSampledEvents": 150496,
+      "growthBudget": 1504.96,
+      "growthByQueue": {
+        "outbox": 35,
+        "receipt-follow-v1": 55,
+        "receipt-feed-v1": 62,
+        "receipt-search-v1": 60,
+        "lag-community.follow-v1": 0,
+        "lag-community.feed-v1": 0,
+        "lag-community.search-v1": 0
+      },
+      "tail15": {
+        "passed": true,
+        "eventsConservative": 15051,
+        "growthBudget": 150.51,
+        "growthByQueue": {
+          "outbox": 0,
+          "receipt-follow-v1": 6,
+          "receipt-feed-v1": 13,
+          "receipt-search-v1": 11,
+          "lag-community.follow-v1": 0,
+          "lag-community.feed-v1": 0,
+          "lag-community.search-v1": 0
+        }
+      },
+      "pipelineSamplingScope": "5s non-atomic observations with every start gap/boundary <=7.5s. Event denominator is fully inside the target window; boundary queue min/max is conservative. Recovery uses latest SQL/Kafka completion, not sample start or control done. Not instantaneous backlog proof.",
+      "recoveryVerified": true,
+      "recoverySecondsFromNativeEnd": 4.732779,
+      "nativeRecoveryBudgetVerified": true,
+      "resourcesPassed": true,
+      "collectionValid": true,
+      "batchFatal": false,
+      "toolBytesStable": true,
+      "childrenConverged": true,
+      "preparation": {
+        "warm": {
+          "protocol": "relation-noop-v1",
+          "rate": 500,
+          "counts": {
+            "planned": 1996,
+            "attempted": 1996,
+            "completed": 1996,
+            "mutation": 0,
+            "noop": 1996,
+            "uncertain": 0,
+            "rejected": 0,
+            "invalid": 0,
+            "dropped": 0
+          },
+          "coverageComplete": true,
+          "passed": true
+        },
+        "stable": {
+          "protocol": "relation-noop-v1",
+          "rate": 500,
+          "counts": {
+            "planned": 1996,
+            "attempted": 1996,
+            "completed": 1996,
+            "mutation": 0,
+            "noop": 1996,
+            "uncertain": 0,
+            "rejected": 0,
+            "invalid": 0,
+            "dropped": 0
+          },
+          "coverageComplete": true,
+          "passed": true
+        }
+      },
+      "provider": {
+        "warm": {
+          "ended": true,
+          "vum": 1097,
+          "terminalRemoteConverged": true,
+          "nativeEvidenceComplete": true
+        },
+        "stable": {
+          "ended": true,
+          "vum": 2738,
+          "terminalRemoteConverged": true,
+          "nativeEvidenceComplete": true
+        },
+        "totalVum": 3835
+      },
+      "metricScope": "Original native summaries; no resampling, phase splicing or reinterpretation of existing grades."
+    }
+  ],
+  "twoPassedSameFreezeFormals": false,
+  "stableSuccessfulQPS": null,
+  "stable3000TargetProven": false,
+  "scope": "Candidate throughput and successful mutations alone are not a formal stable-capacity result. Different source/fixture/packet identities are separate observations, not a pure causal before/after multiplier."
+}

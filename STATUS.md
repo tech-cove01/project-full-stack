@@ -14,7 +14,7 @@
 
 **11-04最新继续指令：** 用户已明确“继续吧，按原计划推进压测，尽快测完收尾，需要我操作的时候告诉我”，覆盖下方此前的发压前暂停。原MySQL同CID/卷已真实完成8CPU/8GiB、Buffer Pool128MiB→4GiB且原swap/持久化保持；新15f API、4096关系READY和独立新PTS包已准备，最终API已启动。新空载在0样本时因观察器缺完整vector baseline参数提前退出，原FAIL与owner退出保留，尚无新slot/PTS Start。用户另反馈PTS最大VU仅1000；已核官方个人认证按量账号的并发上限1000，原4105VU/9引擎方案需额外能力。先修完剩余工具接线再告知最小可行费用方案，不让用户先买包等待；新文件已另复制到用户原本地目录，凭据不公开。本轮仍只做点赞，不追加业务/Feed/秒杀或新的性能专题，目标QPS与旧实测不改。
 
-**CAP-10-IDLE-VECTOR-BASELINE / 待验证：** 新vector observer必须绑定完整审计，原idle启动器遗漏`--baseline-audit`及字节SHA，导致Go在采样前严格拒绝。限定复用现有Node完整reconcile和原完整verdict、沿最终API PID/4096夹具产生真实审计原件，再传原path/SHA给Go；legacy路径不变。完整基线在观察器ready及60秒/13样本之前，不借轻量facts或伪造空基线，不改采样/完整审计/恢复门槛；直接回归、独审、小票提交后部署。
+**CAP-10-IDLE-VECTOR-BASELINE / 代码自验与独审通过，真实空载待接续：** 新vector observer必须绑定完整审计，原idle启动器遗漏`--baseline-audit`及字节SHA，导致Go在采样前严格拒绝。已限定复用现有Node完整reconcile和原完整verdict、沿最终API PID/4096夹具产生真实审计原件，再传原path/SHA给Go；legacy路径不变。完整基线在观察器ready及60秒/13样本之前，不借轻量facts或伪造空基线，不改采样/完整审计/恢复门槛。6项直接检查（含13组反例）、原90项授权检查与独审通过；原0样本FAIL不改判，待严格重试接线闭合后才实际验证。
 
 **CAP-10-IDLE-RETRY / 待验证：** 原versioned idle仅接受首次且原FAIL不覆盖。仅为同环境、已终结0样本的已知observer启动失败增加显式attempt2，原结果/预约/log和实际退出closure按SHA绑定，兄弟目录独立产出；无隐式latest、无attempt3，不更换资源身份掩盖失败。新成功结果仍须完整60秒/13样本及原全部CPU/时钟/下游门槛，经公共合同验证；私有assembler使用显式preflight新副本，封存release与旧helper原件不改。
 

@@ -27,6 +27,64 @@ def module(name, filename):
 
 RESOURCE = module('cap10_idle_resource_contract', 'cap10-resource-contract.py')
 IDLE = module('cap10_idle_contract', 'cap10-idle-contract.py')
+OBSERVER = module('cap10_idle_observer_contract', 'cap10-observer-contract.py')
+COHORT = module('cap10_idle_cohort_contract', 'cap10-cohort.py')
+
+
+def prepare_vector_baseline(value, api_metadata, evidence_root, root, owned):
+    """Run the existing complete read-only reconciliation before idle starts."""
+    policy = OBSERVER.environment_policy(value)
+    if policy['mode'] != OBSERVER.LIKE_VECTOR:
+        return None
+    fixture = Path(value['CAP_LIKE_FIXTURE'])
+    assert (fixture.is_absolute() and fixture.resolve() == fixture and fixture.is_file()
+            and not fixture.is_symlink() and fixture.is_relative_to(root))
+    fixture_bytes = fixture.read_bytes()
+    pool = COHORT.fixture_pool_size(json.loads(fixture_bytes))
+    directory = evidence_root / 'idle-baseline'
+    assert not directory.exists() and not directory.is_symlink()
+    environment = owned.env({**value, 'CAP_API_PID': str(api_metadata['pid']), 'CAP_LIKE_MODE': 'multi',
+                             'CAP_LIKE_FIXTURE': str(fixture), 'CAP_LIKE_EVIDENCE': str(directory)})
+    with (evidence_root / 'idle-baseline.stdout.txt').open('xb') as output, \
+            (evidence_root / 'idle-baseline.stderr.txt').open('xb') as error:
+        completed = subprocess.run(['node', 'scripts/cap10-like.mjs', 'reconcile'], cwd=REPO,
+                                   env=environment, stdout=output, stderr=error, timeout=180)
+    assert completed.returncode == 0, 'complete idle baseline reconciliation failed; raw output retained'
+    path = directory / 'reconcile.json'
+    assert (path.is_file() and not path.is_symlink() and path.resolve() == path
+            and path.is_relative_to(root) and path.stat().st_size <= 32 << 20)
+    raw = path.read_bytes()
+    audit = json.loads(raw)
+    facts, derived, timeline = audit.get('facts', {}), audit.get('derived', {}), audit.get('timeline', [])
+    # Same complete verdict as prepare_profile_authority.reconcile_checked;
+    # Go independently validates the original audit and a fresh RR snapshot.
+    assert (audit.get('valid') is True and audit.get('factsValid') is True
+            and audit.get('downstreamConverged') is True and audit.get('errors') == []
+            and derived.get('available') is True and derived.get('errors') == []
+            and len(facts.get('facts', [])) == len(facts.get('notes', [])) == len(derived.get('notes', [])) == pool
+            and type(facts.get('eventCount')) is int and facts['eventCount'] >= 0
+            and facts.get('transitions') == facts['eventCount'] and timeline
+            and timeline[-1].get('pending') == timeline[-1].get('parked') == 0
+            and timeline[-1].get('receiptErrors') == []
+            and facts.get('observerPolicy') == policy
+            and facts.get('fixtureManifestSHA256') == hashlib.sha256(fixture_bytes).hexdigest()), \
+        'complete scoped idle facts/derived/receipts reconciliation required'
+    assert fixture.read_bytes() == fixture_bytes, 'idle fixture changed during reconciliation'
+    return {'path': path.relative_to(root).as_posix(), 'sha256': hashlib.sha256(raw).hexdigest(),
+            'eventCount': facts['eventCount']}
+
+
+def idle_observer_command(observer, environment, value, evidence_root, root, baseline):
+    command = [str(Path(observer).resolve()), '--environment', environment,
+               '--output', str(evidence_root / 'idle-downstream'),
+               '--done-file', str(evidence_root / 'idle-control/done.json'),
+               '--like-fixture', value['CAP_LIKE_FIXTURE'], '--max-seconds', '150']
+    if OBSERVER.environment_policy(value)['mode'] == OBSERVER.LIKE_VECTOR:
+        assert baseline is not None, 'vector idle requires its original complete baseline'
+        command += ['--baseline-audit', str(root / baseline['path']), '--baseline-audit-sha256', baseline['sha256']]
+    else:
+        assert baseline is None
+    return command
 
 
 def environment_identity(value, api_metadata, api_values, owned, root):
@@ -308,11 +366,13 @@ def main():
             checked = owned.container(service, container['id'], True, resource_profile=resource_profile)
             assert checked['volumes'] == container['volumes']
         identities = container_identities(owned_containers, resource_profile)
+        baseline = prepare_vector_baseline(value, api_metadata, evidence_root, root, owned)
+        if baseline is not None:
+            result['baselineAudit'] = {key: baseline[key] for key in ('path', 'sha256')}
+            result['baselineAuditEventCount'] = baseline['eventCount']
         control.mkdir()
         with (evidence_root / 'idle-observer.txt').open('xb') as output:
-            observer = subprocess.Popen([str(Path(args.observer).resolve()), '--environment', args.environment,
-                '--output', str(downstream), '--done-file', str(done),
-                '--like-fixture', value['CAP_LIKE_FIXTURE'], '--max-seconds', '150'],
+            observer = subprocess.Popen(idle_observer_command(args.observer, args.environment, value, evidence_root, root, baseline),
                 cwd=REPO, stdout=output, stderr=subprocess.STDOUT, creationflags=owned.FLAGS)
             for _ in range(80):
                 if (downstream / 'ready.json').exists() or observer.poll() is not None:

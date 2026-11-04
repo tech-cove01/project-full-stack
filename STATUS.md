@@ -44,6 +44,8 @@
 
 **下一步与两张离线修复票：** 先定位generator开窗冷启动违例，再以既有同周期原件定位后段SQL等待；规格与验收见下表，离线准备与交付待核验，尚无已验证收益。保留三窗失败和历史提交，不放宽时基、50ms调度、计量、API/候选余量、下游或恢复标准。离线准备及独审完成后再通知用户恢复同一ECS，按精确新版本/新包与逐窗准入继续稳定3000候选、同freeze正式两轮180秒；当前不连云或发压，旧slot/预算/失败不重置。
 
+**关机后的实际交付进展：** 生成器三票`a4ca69b`/`c061153`/`09053eb`已分别实现、直接验证和双审提交：同线程/同HTTP节点的有界noop准备、独立持久计数、全slot准备成功后才设native Start，以及Start前包/配置/准入协议绑定。17关系/3个真实本机JMeter进程验证17次准备noop+20次native变更，预热503反例保持native=0；均为替身接线，不是业务或PTS容量。后台Done点驱动`aeb0c96`已通过relay race/vet及两个真实MySQL入口（2顶层/2子例），清理与原资源保护闭合；该精确源码全套普通Go测试/vet及干净Linux产物本机验证通过，远端CI尚待完成。历史已finish夹具只读审计`9bbe3b6`和清理输出隔离`cb783db`分别交付，不恢复旧Token、不覆盖旧回执。提交等待0/1000µs的4096次有限组件研究未显示明确Commit收益，决定不采纳，参数已恢复0，详见[收益档案](docs/evidence/2026-11-01-cap10/offline-improvements.md)。当前继续精简Like事务SQL并完成fresh boot/1996/4引擎私有接线；这些均不等于稳定3000通过。推送授权已固化于[协作记录](docs/collaboration-agreements.md)；远端同步暂遇[GitHub Git/Actions故障](https://www.githubstatus.com/incidents/smtdswd1h2w4)，未伪称已推送或CI通过。
+
 | 小票 | 已有线索与边界 | 必须交付的验收 |
 | --- | --- | --- |
 | CAP-10-GEN-COLDSTART（离线准备中） | 按原native journal定位开窗违例；所有准备在共同native Start设定前完成；Start一旦冻结，不事后移动或截样本，不放宽50ms | 原调度/完整60或180秒/R7与真实预热记账保持；对应离线接线和实际4引擎验证，不能以本地模拟当云通过 |

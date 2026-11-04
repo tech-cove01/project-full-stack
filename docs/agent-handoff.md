@@ -2,6 +2,8 @@
 
 2026-10-26 用户已明确：全面改用 Go，后续不再开发 Java。实现 agent 负责应用、迁移、脚本和自验；本聊天负责方案与独立核验。当前状态只在 [STATUS.md](../STATUS.md) 维护，[README.md](README.md)保留产品与交付详情，总路线在 [implementation-plan.md](implementation-plan.md) 维护。
 
+接续或上下文压缩后先读根 AGENTS.md、[长期协作与具体推送授权](collaboration-agreements.md)及 STATUS 当前段。2026-11-04 用户已明确授权正常同步代码/状态/性能环境说明至既有 GitHub 仓库 main，不为同目标重复询问；稳定3000目标未达成，不能因失败阶段清理改写成整个任务完成。最新离线提交、验证与外部CI状态以 STATUS“关机后的实际交付进展”为准，以下较早准备描述不能覆盖该段。
+
 ## 当前交接：稳定3000目标继续，服务已停，离线修复准备中（2026-11-04）
 
 用户最新明确要求取得可写简历的稳定3000，不能把三候选失败当作目标收尾；用户按节省停机建议报告“我关了，你改吧”。agent无法独立查ECS，当前停止全部SSH/云动作，只做离线准备。上一阶段同1996/4/2000、API15f/observer5c6完成三窗：S20为2995 mutation/s、268/358ms、timing134，增长超预算；S21为2396/s、264/369ms、timing63，下游增长0/pipeline PASS、余量未过；S22为1597.333…/s、116/205ms、timing26，余量通过但tail Outbox177>159.8/pipeline FAIL。三窗均unknown/drop0、变更全部成功、资源/时基/采集/业务终审及退出通过，仍均generator_limited、无有效稳定QPS，正式未跑。旧FAIL和历史提交保留，不改3000目标，见[修复票与接续规格](evidence/2026-11-01-cap10/cost3000-continuation-plan.md)及根[STATUS](../STATUS.md)。

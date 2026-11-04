@@ -1,6 +1,6 @@
 # CAP-10 改动与收益档案
 
-更新：2026-11-03。唯一任务状态见根 [STATUS](../../../STATUS.md)。用户目标为接近5000稳定成功QPS；当前转入离线优化，没有本批180秒正式成功组。以下把代码、部署资源和测量工具分开，不将目标或离线回归写成吞吐收益。
+更新：2026-11-04。唯一任务状态见根 [STATUS](../../../STATUS.md)。用户当前目标为可写简历的稳定3000成功QPS，原接近5000要求保留为较早历史；当前离线修复中，没有本批180秒正式成功组。以下把代码、部署资源和测量工具分开，不将目标或离线回归写成吞吐收益。
 
 ## 已取得的证据
 
@@ -149,6 +149,26 @@ Done点更新候选完成24个实际计划、7顶层/37子例、638条有限事�
 新的可用Linux API来自干净15f8eb5，实际ELF完整40位capacity版本已核，SHA=`f29fe6a9c76d54a5ddd1cbd8b3ae143c53a4d348176b1a98bd7b7291949b4499`，manifest=`342d410777cdf4fa5b9b7d28299a5e618259fa968438de59ab2ca17bcf9178e2`；首次短7位版本产物已拒绝存档，不能混用。新observer来自干净5c6c8e5，SHA=`3fc4631973775a68878e4e00af8de5a3f5d7a6ef5e222319a53b4b1642591b28`，单文件无内嵌VCS，绑定原Go源SHA=`1e79e3d4d6d54bdde4d77e0005568e295f825f1c8b7cf6f5df31c1f8eac407f9`及相同go.mod/sum。observer manifest=`3dbba23de51cc524f36ad98f9dc7f46a55ed797bb11f31b03d7f68a38df2db15`捕获时CI仍pending，随后完成证明另存=`eb0262ee7363ad1093b675e05bf91235a611a7996428b30177068fd70934c7f8`，不改旧pending。
 
 API15f与observer5c6各自[精确API CI](https://github.com/tech-cove01/project-full-stack/actions/runs/41576389620)、[精确observer CI](https://github.com/tech-cove01/project-full-stack/actions/runs/41577337428)四项成功。两份产物只读校验、未部署；工具HEAD/脚本、API源码和observer源分别绑定。私有配置、夹具/包准备、参数组装、执行与双夹具清理已有直接离线检查，真实资源/进程/空载/9引擎/逐窗准入仍待同一ECS恢复后执行。接续步骤与开机前风险见[清单](offline-resume-checklist.md)，不自动新增功能或负载批次。
+
+## 11-04：新三窗、必要修复与未采用的调优
+
+S20/S21/S22均保留`generator_limited`：实际成功变更速率2995/2396/1597.333每秒，P95/P99分别268/358、264/369、116/205ms，调度违规134/63/26；业务终审、unknown/drop0不抵消时序或积压失败。原帧复算证明三窗违规均在首轮关系线程的首秒，不能据此确诊JIT或否认后段HTTP长尾。
+
+- `a4ca69b`/`c061153`/`09053eb`修发生器的首次执行边界：同线程同HTTP节点先有限noop准备，独立记录全部准备原件/成本，全部持久确认后才冻结完整native Start。17关系/3 JVM和准备503故障的有限替身验证通过，不是云端容量提升。
+- `aeb0c96`采用已封存的Done点驱动路径：N1–7仍旧事务，N8–64从N次UPDATE改为两个SELECT加一次有成对fence的UPDATE，仍一次COMMIT；32条的事务内完成语句由32条变3条，BEGIN/COMMIT各一次另计；插值关闭时驱动prepare/execute/close往返还须分别计量。新真实MySQL2顶层/2子例通过，旧638事件/24实际计划仅引用，未重复执行。67件新封档manifest SHA256=`0d0c62879c855690f1ed40d011e835351e9e64c97d242327de5d9c444e1c5267`。不宣称本票单独足以稳定3000。
+
+另做一次`binlog_group_commit_sync_delay`的0→1000µs有限组件研究，保持双1持久化、提交顺序和原资源。官方说明此参数可能聚合同步，也可能增加延迟或争用，须实际验证，见[MySQL 8.4手册](https://dev.mysql.com/doc/refman/8.4/en/replication-options-binary-log.html#sysvar_binlog_group_commit_sync_delay)。
+
+本机1CPU/4GiB、2GiB缓存、SQL池64/64、插值true，同一exe两次fresh进程，每臂64个独占关系并发，每关系内串行切换32次，共4096次真实`social.SetLike`；未接Redis/HTTP/Kafka或后台共享池竞争。两臂正确性、逐版本Outbox、清理和参数还原均通过，结果如下：
+
+| 有限组件指标 | delay0 | delay1000µs |
+| --- | ---: | ---: |
+| 2048次完成时间 | 5.3550666秒 | 5.1451221秒 |
+| SetLike P95/P99 | 219.223730 / 279.227272ms | 211.812700 / 221.739520ms |
+| 实际Commit平均 | 60.606172ms | 62.315420ms |
+| 实际Commit P95/P99 | 102.634200 / 112.199696ms | 102.470500 / 110.590755ms |
+
+**不采纳1000µs，不继续扫描旋钮。** Commit平均反升、P95基本不变；完整调用尾部的单次差异受固定先后顺序、新ID和缓存影响，不作纯因果倍率，也不当60/180秒稳定QPS。两臂native借池等待均0，不能据此称云端共享池问题解决。server计数包络另为14.959444/14.596061秒，含seed/audit/cleanup，不冒充native区间；缺失COMMIT基线保留unknown。实际恢复delay0、IT12与自有会话归零、原历史守恒、MySQL正常停止及原资源保护通过。193件manifest SHA256=`4d1a43680b1b144e6fff90825154c52aeb48b022d714ef5d3b04a4cdffcf876f`，分析SHA256=`8039229f1211e2b0e8e5f696021c4d23ec6a3c4ccc183602fc15874f3296611a`。
 
 ## 原件存档
 

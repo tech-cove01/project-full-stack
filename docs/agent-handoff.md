@@ -2,13 +2,23 @@
 
 更新：2026-11-04。接续先读根AGENTS、[协作与授权记录](collaboration-agreements.md)、[当前STATUS](../STATUS.md)和[总方案](implementation-plan.md)。状态仅由根STATUS维护；本页保留执行顺序与交付规则，不另列一套历史状态表。
 
-## 当前交接：先整理，再继续稳定3000
+## 当前交接：S23/S24受限，consumer64候选运行中
 
-用户要求取得可写简历的稳定至少3000成功变更/秒。R1—R4仓库整理已完成并同步远端，用户已恢复原ECS并提供当前连接信息，已实际接通并恢复原四依赖健康；不扩业务，不将失败阶段清理写成目标完成。BOOT首FAIL保留，独立只读恢复最终化已通过，APP/bootstrap、新1996夹具和新三文件已实际生成；最终API重绑、上传核对及新空载待完成。以根STATUS最新段为准，不能再沿用旧“关机不连接”快照阻止已授权接续。
+用户要求取得可写简历的稳定至少3000成功变更/秒。R1—R4仓库整理已完成并同步远端，原ECS及四依赖已恢复健康，最终容量API、新1996夹具及PTS三文件已实际核对通过4引擎/2000VU。不扩业务，不将候选观察值或失败阶段收尾写成目标完成。以根STATUS最新段为准，不能再沿用旧“关机不连接”快照阻止已授权接续。
 
-当前业务源码c464c1fa4d153806fb44ac746312552655ebda63、正确容量API、observer和精确CI绑定见[STATUS](../STATUS.md#已交代码工具与最终产物)。旧计数矩阵FAIL与独立接续PASS分开，组件SQL6→4不代表容量；新代码已云端部署，尚未发压。八助手v2之外的实际操作以本次原件绑定；真实boot、清理回执SHA、当前4GiB缓存完成证明、新1996 Token和新包已取得，新idle仍须实际完成，均不能借旧记录替代。
+S23配置3010×60秒，180299次实际成功变更，完整分母为3004.983333次/秒；HTTP/DB计数一致，timing/unknown/drop均0，事实终审通过、恢复1.455063秒。P95/P99为266/355ms，`apiBudget=false`、`candidateMargin=false`，全窗与末15秒下游均失败，最终`performance_limited`。H2/H3未运行、新正式freeze未建立、负载owner已闭合；没有正式稳定3000成绩。全窗search lag为2027>1653，末15秒三组收据增长922/950/1237、Kafka lag为631/708/1042，均超各自预算301.56，不能用全成功覆盖这些失败。
 
-原三候选均失败，正式两轮未跑；下一候选建议配置3010但按完整窗口实际成功数计量，原时序、余量、下游和恢复标准保持。8704 VUM为六报告已知消耗，约51296只作计划，实际剩余开机后核。具体操作顺序只用[接续清单](evidence/2026-11-01-cap10/offline-resume-checklist.md)及本机已审私有RUNBOOK；不将私有配置、Token或云资源ID复制进公开仓库。
+S24仅将pool64/64→128/128、consumer32保持，新进程及新13样本空载通过（CPU约2.6%、内存约13.3%）。候选完整60秒实际约3004.98次成功变更/秒，P95/P99为198/320ms、API预算通过，但候选160ms余量未过，全窗及末15秒下游失败，仍为`performance_limited`；timing/unknown/drop均0、事实终审通过、恢复4.183483秒。全窗收据增长5476/4804/5722、Kafka lag5317/4677/5499均超预算1655.36；末15秒收据增长2952/2728/3240、Kafka lag2372/2212/2596均超预算301.38。未运行正式，也不能调用仅供完整候选PASS的freeze/formal脚本。
+
+当前业务源码c464c1fa4d153806fb44ac746312552655ebda63、容量API、observer和精确CI绑定见[STATUS](../STATUS.md#已交代码工具与最终产物)，S23/S24实际使用该组合。旧计数矩阵FAIL与独立接续PASS分开，组件SQL6→4不代表容量。原S20的268/358ms、timing134与新S23的266/355ms、timing0分别保留，[S20/S23脱敏原摘要](evidence/2026-11-01-cap10/cloud-like-S20-S23-summary.json)不重采样或改grade；源码/夹具/包/boot变化不能拼成纯业务优化倍率。S24详细公开报告后续归档。
+
+准备失败同样保留：BOOT首FAIL瞬时原因未精确取证，之后只读复核和显式最终化通过，不重复resize/CREATE；authority的H1/S22前后报告同名`FileExists`已定位，原H1退休证明经实际public grade通过，以同助手显式新attempt完成准备，不重复assembler/API/idle。八助手字节未变，不改写首FAIL或旧H1失败。
+
+pool128另用独立三源副本：authority两处报告路径加入原command标签避免重名，其余两源沿用原字节，原八源不动。控制台紧凑结果与原pretty文件SHA不同时，原driver已在写work/inputs前拒绝；后用实际文件SHA经原CLI接续，不覆盖失败或改driver。
+
+下一小票为[CAP10-CONSUMER64](../STATUS.md#配置试验与下一小票)：保持pool128，仅consumer提交批32→64；relay8×32、GOMAX8、源码/产物、原资源及双1保持。新API已实际启动、新13样本空载通过（CPU约2.4%、内存约14.5%），S25的authority已通过，候选运行中、尚无结果。原函数须显式传pool128/consumer64 policy，新deployment/进程身份不复用旧配置；原50ms、零unknown/drop、候选160/400ms、全下游与事实、native结束后60秒恢复等门槛全部通过，才同freeze两轮各180秒正式，正式200/500ms不变，第一轮失败不跑第二轮。空载和配置变化不提前证明收益。
+
+S20—S22已知8704 VUM，加S23实际1122+2895=4017，累计12721；47279仅为未扣S24的计划余量，S24实际待提取，不能称当前余额。具体操作复用[接续清单](evidence/2026-11-01-cap10/offline-resume-checklist.md)及本机已审私有RUNBOOK，旧待办以根STATUS最新段覆盖；不将私有配置、Token或云资源ID复制进公开仓库。
 
 旧H1/512、未压4096、前1996已正常logout并删除凭据，主库/卷保留；旧环境/上传的登记JSON保留作审计，核其绑定目标缺失，不要求登记数0。不能复活旧Token。原完整历史、旧指令与核验范围见[交接快照](../archive/docs/agent-handoff-history-20261104.md)、[状态快照](../archive/docs/status-history-20261104.md)和[功能交付快照](../archive/docs/go-delivery-history-20261104.md)，均非当前执行授权。
 

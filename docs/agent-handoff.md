@@ -4,13 +4,13 @@
 
 ## 当前交接：本批稳定3000与归档清理完成，用户确认原ECS已释放
 
-用户于2026-11-05确认原ECS已释放；按用户回报记录，未通过ECS API独立核验。当前正由用户逐步留存PTS正式H3/H4报告的官方PDF与页面截图；此操作不依赖原ECS，也不阻止实例释放。现场现已无法经原实例接入；未单独确认关联盘是否随之释放，不推断磁盘已删除或费用已清零。已有备份为选定证据增量，未做整机镜像或MySQL全库备份。
+用户于2026-11-05确认原ECS已释放；按用户回报记录，未通过ECS API独立核验。两份PTS官方PDF、四张PTS页面图和一张ECS规格图已本地集中备份并逐SHA核对；四张页面图仅显示时刻/时间轴、无具体日期，符合当前展示偏好，无需改图。此操作不依赖原ECS，也不阻止实例释放。现场现已无法经原实例接入；未单独确认关联盘是否随之释放，不推断磁盘已删除或费用已清零。已有备份为选定证据增量，未做整机镜像或MySQL全库备份。
 
 [脱敏收尾摘要](evidence/2026-11-01-cap10/cloud-like-closeout-summary.json) SHA=`fad3ccc22592845c2cad3a70f968a2d179041d7957fd9e0164283cec39a266ce`，只含SHA/计数/状态；用户确认与agent独立查询范围保持区分。
 
 本批S29候选及同新freeze的H3/H4两正式全部PASS，稳定成功状态变更吞吐取低为3008.3278次/秒；两正式各541499次/完整180秒，H3 P95/P99=62/102ms、恢复1.654332秒，H4为55/94ms、恢复1.875416秒。timing/unknown/drop等质量计数均0、unknown精确且DB计数一致，事实/派生、API、下游、资源和采集通过，childrenConverged=true。负载为1996独立关系的点赞与取消变更，warm及准备noop不计主窗。正式下游按原末60秒保守窗口，不把tail15=null写成额外末15秒已测。
 
-新freeze SHA=`b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1`，两轮保持同API/部署/资源/工具身份；S29完整60秒180299变更、P95/P99=36/72ms、恢复1.637856秒，候选不能顶替正式。见[正式报告](evidence/2026-11-01-cap10/cloud-like-final-report.md)和[脱敏原摘要](evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)，摘要SHA=`5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b`。单机16vCPU/32GiB，MySQL容器8CPU/8GiB、buffer4GiB/redo2GiB、Kafka2GiB；不写成最大容量或整机8核8G。 独立PTS四引擎通过阿里云上海VPC内网向该单台ECS发压，引擎不运行在被测ECS上；表内P95/P99仅指私网HTTP主窗，未包含公网用户链路。
+新freeze SHA=`b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1`，两轮保持同API/部署/资源/工具身份；S29完整60秒180299变更、P95/P99=36/72ms、恢复1.637856秒，候选不能顶替正式。见[正式报告](evidence/2026-11-01-cap10/cloud-like-final-report.md)和[脱敏原摘要](evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)，摘要SHA=`5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b`。单机16vCPU/32GiB，MySQL容器8CPU/8GiB、buffer4GiB/redo2GiB、Kafka2GiB；不写成最大容量或整机8核8G。 独立PTS四引擎通过阿里云上海VPC内网向该单台ECS发压，引擎不运行在被测ECS上；表内P95/P99仅指私网HTTP主窗，未包含公网用户链路。留存页面中的监控图属于PTS施压端集群CPU、内存和带宽监控，不代表被测ECS利用率。PTS全报告汇总均值与原生180秒主窗成绩分别保留，不用全报告均值替代主窗计数或R7分位数。
 
 本批不再新增票据、负载或云机请求。H4后fresh终审和实际success_close精确清理均已完成，cleanup SHA=`114eb9a12bc1b4ef5263818dc3e03aa26fc1698b559e867b0ed94aa933f7fa93`：当前1996会话注销后余0、credential已删除，63个环境登记及8个upload登记对应目标全部不存在、审计JSON索引保留。API/collector端口8281/8381/8481关闭，四原容器停止/无OOM，MySQL与Redis exit0、Kafka与ES exit143；释放前该次清理未删除主库、卷、网络及旧FAIL；用户原keys保留，未修改或删除。原API stop回执exitCode=null保留，不改为0；后验PID/端口与容器状态另有实际复核。
 

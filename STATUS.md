@@ -4,11 +4,11 @@
 
 ## 当前目标与操作状态
 
-用户要求的**稳定至少3000成功变更/秒已在本批固定配置下通过两轮正式验证，且本批归档与精确清理已完成**。本次为点赞与取消点赞的状态变更，1996组独立关系；不再新增票据、压力轮次或云机请求。用户于2026-11-05确认原ECS已释放；此状态据用户回报记录，未通过ECS API独立核验，root不再SSH。当前正由用户逐步留存PTS正式H3/H4报告的官方PDF与页面截图；该留存不依赖原ECS，也不是实例释放的前置条件。[脱敏收尾摘要](docs/evidence/2026-11-01-cap10/cloud-like-closeout-summary.json)仅记录SHA、计数与状态，SHA=`fad3ccc22592845c2cad3a70f968a2d179041d7957fd9e0164283cec39a266ce`。
+用户要求的**稳定至少3000成功变更/秒已在本批固定配置下通过两轮正式验证，且本批归档与精确清理已完成**。本次为点赞与取消点赞的状态变更，1996组独立关系；不再新增票据、压力轮次或云机请求。用户于2026-11-05确认原ECS已释放；此状态据用户回报记录，未通过ECS API独立核验，root不再SSH。两份PTS官方PDF、四张PTS页面图和一张ECS规格图已本地集中备份并逐SHA核对；四张页面图仅显示时刻/时间轴、无具体日期，符合当前展示偏好，无需改图。PTS材料留存不依赖原ECS，也不是实例释放的前置条件。[脱敏收尾摘要](docs/evidence/2026-11-01-cap10/cloud-like-closeout-summary.json)仅记录SHA、计数与状态，SHA=`fad3ccc22592845c2cad3a70f968a2d179041d7957fd9e0164283cec39a266ce`。
 
 **当前检查点：S29候选及同freeze的H3/H4正式两轮全部PASS，不再发压。** 两正式各541499次成功变更/完整180秒=3008.327778次/秒，稳定值取低为3008.3278；H3 P95/P99=62/102ms、恢复1.654332秒，H4为55/94ms、恢复1.875416秒。主窗timing/unknown/drop等错误计数均0，unknown精确、DB计数一致，API、完整事实/派生、下游、资源和采集通过、childrenConverged=true。正式下游按原末60秒保守窗口，tail15未单独输出；不将其写成额外末15秒通过。原S28只保候选身份、H2 FAIL及unknown=null均不改。
 
-新正式freeze SHA=`b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1`。S29完整60秒180299变更、P95/P99=36/72ms、恢复1.637856秒，另有末15秒下游通过；它不替代正式两轮。[正式报告](docs/evidence/2026-11-01-cap10/cloud-like-final-report.md)及[脱敏原摘要](docs/evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)已据原件生成，摘要SHA=`5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b`。本批资源为单机16vCPU/32GiB，MySQL容器8CPU/8GiB、buffer4GiB/redo2GiB，Kafka2GiB，profile为mysql8-kafka2-v1；不把容器配额当整机规格，也不宣称最大容量。 负载由阿里云上海VPC内网的独立PTS四引擎发向被测单台ECS，四引擎不在被测ECS上；P95/P99为该私网HTTP主窗统计，不包含公网用户链路。
+新正式freeze SHA=`b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1`。S29完整60秒180299变更、P95/P99=36/72ms、恢复1.637856秒，另有末15秒下游通过；它不替代正式两轮。[正式报告](docs/evidence/2026-11-01-cap10/cloud-like-final-report.md)及[脱敏原摘要](docs/evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)已据原件生成，摘要SHA=`5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b`。本批资源为单机16vCPU/32GiB，MySQL容器8CPU/8GiB、buffer4GiB/redo2GiB，Kafka2GiB，profile为mysql8-kafka2-v1；不把容器配额当整机规格，也不宣称最大容量。 负载由阿里云上海VPC内网的独立PTS四引擎发向被测单台ECS，四引擎不在被测ECS上；P95/P99为该私网HTTP主窗统计，不包含公网用户链路。留存页面中的监控图属于PTS施压端集群CPU、内存和带宽监控，不代表被测ECS利用率。PTS全报告汇总均值与原生180秒主窗成绩分别保留，不用全报告均值替代主窗计数或R7分位数。
 
 H4后当前1996关系完整只读终审通过后，已审清理器实际success_close完成：当前1996会话注销后余0、credential输入删除，63个owned-env登记和8个upload登记对应目标均不存在，审计登记JSON保留。API/collector的8281/8381/8481端口关闭，四原容器停止且无OOM；MySQL/Redis exitCode=0、Kafka/Elasticsearch为143。释放前该次清理未删除主库、卷、网络及旧FAIL；用户原keys保留，未修改或删除。cleanup原件SHA=`114eb9a12bc1b4ef5263818dc3e03aa26fc1698b559e867b0ed94aa933f7fa93`；仅当前API两份活日志按原prefix不变的append-only保存最终SHA，其余原E证据SHA不变。
 

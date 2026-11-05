@@ -4,13 +4,15 @@
 
 ## 当前目标与操作状态
 
-用户要求的**稳定至少3000成功变更/秒已在本批固定配置下通过两轮正式验证**。本次为点赞与取消点赞的状态变更，1996组独立关系；不再追加压测，转原件归档、精确清理与结果交付，清理完成状态仍须实际回执。
+用户要求的**稳定至少3000成功变更/秒已在本批固定配置下通过两轮正式验证，且本批归档与精确清理已完成**。本次为点赞与取消点赞的状态变更，1996组独立关系；不再新增票据、压力轮次或云机请求。用户已在控制台确认节省停机显示已停止；agent无ECS权限、未独立查询，root已停止SSH。[脱敏收尾摘要](docs/evidence/2026-11-01-cap10/cloud-like-closeout-summary.json)仅记录SHA、计数与状态，SHA=`fad3ccc22592845c2cad3a70f968a2d179041d7957fd9e0164283cec39a266ce`。
 
 **当前检查点：S29候选及同freeze的H3/H4正式两轮全部PASS，不再发压。** 两正式各541499次成功变更/完整180秒=3008.327778次/秒，稳定值取低为3008.3278；H3 P95/P99=62/102ms、恢复1.654332秒，H4为55/94ms、恢复1.875416秒。主窗timing/unknown/drop等错误计数均0，unknown精确、DB计数一致，API、完整事实/派生、下游、资源和采集通过、childrenConverged=true。正式下游按原末60秒保守窗口，tail15未单独输出；不将其写成额外末15秒通过。原S28只保候选身份、H2 FAIL及unknown=null均不改。
 
-新正式freeze SHA=`b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1`。S29完整60秒180299变更、P95/P99=36/72ms、恢复1.637856秒，另有末15秒下游通过；它不替代正式两轮。[正式报告](docs/evidence/2026-11-01-cap10/cloud-like-final-report.md)及[脱敏原摘要](docs/evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)已据原件生成，摘要SHA=`5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b`。本批资源为单机16vCPU/32GiB，MySQL容器8CPU/8GiB、buffer4GiB/redo2GiB，Kafka2GiB，profile为mysql8-kafka2-v1；不把容器配额当整机规格，也不宣称最大容量。
+新正式freeze SHA=`b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1`。S29完整60秒180299变更、P95/P99=36/72ms、恢复1.637856秒，另有末15秒下游通过；它不替代正式两轮。[正式报告](docs/evidence/2026-11-01-cap10/cloud-like-final-report.md)及[脱敏原摘要](docs/evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)已据原件生成，摘要SHA=`5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b`。本批资源为单机16vCPU/32GiB，MySQL容器8CPU/8GiB、buffer4GiB/redo2GiB，Kafka2GiB，profile为mysql8-kafka2-v1；不把容器配额当整机规格，也不宣称最大容量。 负载由阿里云上海VPC内网的独立PTS四引擎发向被测单台ECS，四引擎不在被测ECS上；P95/P99为该私网HTTP主窗统计，不包含公网用户链路。
 
-H4后当前1996关系新鲜完整只读终审已通过，reconcile SHA=`0d9da46732727abd2c33c45edc66f5810b5f00e893114bc9c32971215bdfcbb9`。原件归档、下载逐SHA核验与已审精确清理正在进行；尚不宣称备份完、服务已停或ECS已关。warm及每phase1996次准备noop均不计主窗QPS，旧CAP-09/容量FAIL、H1/H2失败及B1未知保留，不跨轮拼PASS。
+H4后当前1996关系完整只读终审通过后，已审清理器实际success_close完成：当前1996会话注销后余0、credential输入删除，63个owned-env登记和8个upload登记对应目标均不存在，审计登记JSON保留。API/collector的8281/8381/8481端口关闭，四原容器停止且无OOM；MySQL/Redis exitCode=0、Kafka/Elasticsearch为143。主库、卷、网络及旧FAIL保留，用户原keys保留，未修改或删除。cleanup原件SHA=`114eb9a12bc1b4ef5263818dc3e03aa26fc1698b559e867b0ed94aa933f7fa93`；仅当前API两份活日志按原prefix不变的append-only保存最终SHA，其余原E证据SHA不变。
+
+主395件增量包已下载并逐395个SHA核验通过，原文件总315397060字节，包SHA=`0b56c89dff5753ece53b407e19d5dbc176a3ef3ecfad667fa23522a53e96d9bc`、manifest SHA=`57dc4ae1633e10196f26b0bb62786487c86a9de863d035d1b30d6d01a385d5a1`；收尾22件小包亦已下载逐22个SHA通过，包SHA=`5d088ddad03fc8df1924f3ccaa07bf6a3f0bf29656dbb7fe86a4bece8cb7ed4c`、manifest SHA=`e476e06d8d8f66b52a16d3729f57916ebf2f387c290821af4dfa5f45a4b6ec3b`。它们依赖已核2736+1259+10份原件，是选定增量而非整机镜像；两正式共1082998条raw经独立流式重算通过。warm/preparation noop不计QPS，旧CAP-09/容量FAIL、H1/H2失败及B1未知均保持。
 
 新boot最初只读实测buffer128MiB、redo requested/effective100MiB；随后已用两个明确SET恢复4GiB buffer/2GiB redo并验证，双1、delay0、RR、doublewrite、原UUID/版本保持，Kafka2GiB/MemorySwap3GiB保留。新资源metadata SHA=`472fa2e997bbc7d72501b4ebb0e63ddc337ab222c32c2485509664fc233c4057`，本boot恢复proof SHA=`d67eb9b4c0c0ba00fab5d850a4aaffd248d520b5c1bd9fcffcde7a60fb7425b1`；旧资源证明不改写，不借旧idle。原observer只读账号鉴权通过，没有重复DDL/CREATE或重建。10件authority/slot补包已实际生成、下载并逐SHA校验：包SHA=`256f19862c3aeb018f74cc826d5050db1d9b0a709c435fe2ed3518ca97e8bd3c`，manifest SHA=`4fbfcadd3b2b184f7a0a6413d400c2395f160ba8c98b5f8e7aeea091e52626a2`；补包采集时旧组未用的H3文件不存在，该历史记录保留，新组H3/H4另有真实原件。
 
@@ -22,7 +24,7 @@ H4后当前1996关系新鲜完整只读终审已通过，reconcile SHA=`0d9da467
 
 凌晨停机回执SHA=`1eed7539a4a9ad329c137b4e6c7652bd7f5740535ef26a30ffbbf699e571062b`：当时API端口关闭，原四容器均已退出、无OOM；MySQL/Redis的exitCode=0，Kafka/Elasticsearch为143，保留原信号退出码，不写成全0。原CID/卷保留，未删除会话、夹具或数据卷。本地私有增量包69101423字节，SHA=`5623ed8cdeebf10712f8fc68e79fd36460ecf455ebb2159f2d28601dc55a818e`，manifest SHA=`8ad2d5fa8eec5f66a708362423d9b6060810f18255c3a06c71b4cfec6eccaf9b`；独审逐一核1259文件的bytes/SHA、成员集合及路径安全均通过（原manifest另占1成员）。这是选定增量，依赖原2736件基线备份，不是整机镜像；当时未执行的authority/slot小补包已在本次恢复后补齐，如上。私有归档不进入公开仓库。
 
-主库、卷及失败原件按既有范围保留；前次boot API H曾正常停止，本批正式使用新boot API及新空载证明。当前停服/清理结果仍待实际回执。上下文压缩或接续后先读AGENTS、[授权记录](docs/collaboration-agreements.md)、本页、[方案](docs/implementation-plan.md)及[交接](docs/agent-handoff.md)，以顶部不再加压、归档清理指令为准，不重复索取已有授权。
+主库、卷及失败原件按既有范围保留；前次boot API H曾正常停止，本批正式使用新boot API及新空载证明。本批停服与清理已有实际回执，用户控制台停机确认与agent独立查询范围如顶部。上下文压缩或接续后先读AGENTS、[授权记录](docs/collaboration-agreements.md)、本页、[方案](docs/implementation-plan.md)及[交接](docs/agent-handoff.md)，以顶部不再加压、归档清理指令为准，不重复索取已有授权。
 
 **前次boot负载检查点：** S28配置3010×60秒的完整候选已实际通过：180299次成功变更/完整60秒=3004.983333次/秒，P95/P99为13/52ms，timing/drop/unknown及HTTP错误均0；事实、全窗及末15秒下游、资源和采集均通过，恢复4.732779秒、`childrenConverged=true`。这是候选结果，尚非正式稳定容量。正式freeze已实际创建（SHA=`aac3026375430c276761bcee6b23bd24751f7195dbfa6a7fc1d22f4b4d712230`），H2按同freeze配置3010×180秒，但已实际中止失败，旧freeze下未启动H3补pair。最终c464 API、1996关系/4引擎/2000VU及原门槛保持，当时稳定3000两正式尚未证明；本批新组结果独立见顶部。
 
@@ -79,7 +81,7 @@ S20/S23脱敏原摘要见[云测摘要](docs/evidence/2026-11-01-cap10/cloud-lik
 
 S24/S26的[脱敏原摘要](docs/evidence/2026-11-01-cap10/cloud-like-S24-S26-summary.json)已从实际输出复制并核SHA一致，分别保留candidate/diagnostic身份、失败grade及provider VUM，不将诊断窗口改成正式成绩。
 
-后续仍配置3010，以完整60/180秒分母计算，计划发起180299/541499次，约3004.9833/3008.3278次/秒；最终只按真实成功变更计量、两正式取较低值。原能力公式需1890关系，1996关系/4引擎/2000VU可容纳该估算，不保证容量；原50ms、零unknown/drop、候选160/400ms余量、正式200/500ms及下游稳态/恢复门槛保持。
+本批配置3010，以完整60/180秒分母计算，原计划发起180299/541499次；本次实际成功计数吻合，分别为3004.9833/3008.3278次/秒，稳定值只取两正式较低值，不再发起后续负载。原能力公式需1890关系，1996关系/4引擎/2000VU可容纳该估算，不保证容量；原50ms、零unknown/drop、候选160/400ms余量、正式200/500ms及下游稳态/恢复门槛保持。
 
 已购60000 VUM。此前已核29295（含S27预热950及旧H2的2053），本批S29为1080+2623=3703、H3为1228+6571=7799、H4为927+6669=7596，共19098，累计48393。相减11607为**未独立查询账户的计划余量，非账户余额**；中止窗口不记为零成本。准备noop、warm、屏障及平台生命周期消耗单列，不按主窗时长猜账单；主机费用另计。
 
@@ -96,8 +98,8 @@ CAP10-REDO2G仅调整同机`innodb_redo_log_capacity`，保原4GiB buffer、8CPU
 1. R1—R4已完成必要核对、独审及分票提交，均已正常同步远端main；原始文件和历史完整保留，不重写Git历史。
 2. S23/S24失败、S25原中止及独立闭合、S26诊断受限与闭合、S27工具setup失败分别保留；不重判旧FAIL，不为工具修复重新构建未改的业务API。
 3. 本批S29与同freeze H3/H4已完整通过，不再发压；旧S28候选和H2正式FAIL、所有旧unknown及原件保持，不运行旧freeze补pair或新增轮次。
-4. H4后fresh current1996完整终审通过；按已审K2-only清理副本及原S25独立闭合证明生成精确计划，当前API/卷身份、无owner和原注册全集仍逐项复核。先完成必要私有原件下载/SHA核验，再注销当前会话、删除原登记输入和正常停服；主库/卷与旧FAIL不删除。
-5. 更新本次正式报告和既有求职材料时只用两正式较低值、两轮原P95/P99及明确资源/负载口径；清理、归档、停服和ECS状态仅据实际回执补记，不将目标通过等同于这些步骤已完成。
+4. H4后fresh终审、主395件及后补22件下载逐SHA核验、success_close精确清理和后验状态复核均已完成；主库/卷/网络及旧FAIL保留，登记索引不删。用户已确认节省停机显示停止，agent无权限未独立查询，不再SSH。
+5. 正式报告与原摘要已提交并正常推送`30073a1d26901924a5d2bf5af8e9ba532dd2fe2b`；本轮只补真实闭合及私网口径，不改摘要字节或旧结论。后续引用仅使用两正式较低值、两轮原P95/P99及明确资源/负载模型，不新增本批任务。
 6. 已审小提交继续按已有授权正常同步，保留原TLS失败，不重复询问已有推送许可；当前工具已同步`4ab583d`，原私有freeze producer保留，新副本只在新candidate完整PASS后按显式选项使用。
 
 ## 权威入口

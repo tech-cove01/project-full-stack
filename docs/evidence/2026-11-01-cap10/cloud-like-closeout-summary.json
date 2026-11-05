@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "recordedAt": "2026-11-05T04:58:35.448693+00:00",
+  "scope": "CAP-10 completed fixed-profile Like mutation batch; final cleanup and selected backup verification, not a whole-machine image.",
+  "loadComplete": true,
+  "additionalPressurePlanned": false,
+  "resultSummarySHA256": "5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b",
+  "freezeSHA256": "b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1",
+  "stableSuccessfulMutationsPerSecond": 3008.3277777777776,
+  "cleanup": {
+    "mode": "success_close",
+    "receiptSHA256": "114eb9a12bc1b4ef5263818dc3e03aa26fc1698b559e867b0ed94aa933f7fa93",
+    "verificationSHA256": "49a79a5c1e9946dce8de9427269738065e6f17beff96d9c855b9f2bb73c94b88",
+    "currentFixtureUsers": 1996,
+    "currentSessionsAfterLogout": 0,
+    "currentPrivateCredentialInputRemoved": true,
+    "registeredEnvironmentTargetsRemoved": 63,
+    "registeredUploadTargetsRemoved": 8,
+    "auditRegistrationIndexesRetained": true,
+    "originalUserKeysTouched": false,
+    "mainDatabaseAndSQLFixturesRetained": true,
+    "volumesAndNetworkRetained": true,
+    "apiAndCollectorPortsClosed": true,
+    "containers": {
+      "mysql": {
+        "running": false,
+        "exitCode": 0,
+        "oomKilled": false
+      },
+      "redis": {
+        "running": false,
+        "exitCode": 0,
+        "oomKilled": false
+      },
+      "kafka": {
+        "running": false,
+        "exitCode": 143,
+        "oomKilled": false
+      },
+      "elasticsearch": {
+        "running": false,
+        "exitCode": 143,
+        "oomKilled": false
+      }
+    },
+    "allOtherOriginalEvidenceSHA256Retained": true,
+    "apiLogsAppendOnlyAndFinalHashesArchived": true
+  },
+  "backups": [
+    {
+      "files": 2736,
+      "archiveSHA256": "bc2d33b36a14f1b15f0bae455c5fc5ff4eb8cbcd12259d66092d8ec293b3fb42",
+      "manifestSHA256": "5c61573f1fa5eb081926fb7615149e991176c13d4a07f0463d566a74964cf85e"
+    },
+    {
+      "files": 1259,
+      "archiveSHA256": "5623ed8cdeebf10712f8fc68e79fd36460ecf455ebb2159f2d28601dc55a818e",
+      "manifestSHA256": "8ad2d5fa8eec5f66a708362423d9b6060810f18255c3a06c71b4cfec6eccaf9b"
+    },
+    {
+      "files": 10,
+      "archiveSHA256": "256f19862c3aeb018f74cc826d5050db1d9b0a709c435fe2ed3518ca97e8bd3c",
+      "manifestSHA256": "4fbfcadd3b2b184f7a0a6413d400c2395f160ba8c98b5f8e7aeea091e52626a2"
+    },
+    {
+      "files": 395,
+      "archiveBytes": 32175279,
+      "selectedRawBytes": 315397060,
+      "archiveSHA256": "0b56c89dff5753ece53b407e19d5dbc176a3ef3ecfad667fa23522a53e96d9bc",
+      "manifestSHA256": "57dc4ae1633e10196f26b0bb62786487c86a9de863d035d1b30d6d01a385d5a1"
+    },
+    {
+      "files": 22,
+      "archiveBytes": 236787,
+      "archiveSHA256": "5d088ddad03fc8df1924f3ccaa07bf6a3f0bf29656dbb7fe86a4bece8cb7ed4c",
+      "manifestSHA256": "e476e06d8d8f66b52a16d3729f57916ebf2f387c290821af4dfa5f45a4b6ec3b"
+    }
+  ],
+  "currentBatchBackupsDownloadedAndEveryMemberVerified": true,
+  "privateArchivesPublished": false,
+  "ecs": {
+    "state": "stopped",
+    "mode": "saving-stop",
+    "evidence": "user confirmed ECS console after cleanup",
+    "independentlyQueriedByAgent": false
+  },
+  "capacityScope": "1996 independent existing user/note relations, alternate like/unlike; Shanghai VPC PTS 4 engines/2000 VU; two 180s formals. Legacy failures and B1 unknown retained."
+}

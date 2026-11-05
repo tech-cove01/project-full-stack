@@ -27,3 +27,15 @@ MySQL只逐项冻结原14个配置/身份字段及4GiB buffer、resize code/text
 新增聚焦合成检查覆盖真实native失败不能走零native退休、缺闭合原件拒绝、签名报告/owner/完整审计/资源链错误拒绝、新组两个未用标签及首FAIL终止、两次映射一致和累计预算不重置。仅本地纯检查；真实H2闭合原件、新资源变更、新candidate及新正式组均由实际执行另行提供，不用合成夹具冒充云端准入。
 
 本地直接验证：新增7项聚焦检查通过（最终2.193秒），原H1退休/同freeze两轮/首FAIL终止的3项选定回归通过（2.528秒），新私有producer的3项默认只读、显式开关与原字节保留检查通过（最终0.400秒）；AST检查通过。最初缺入口的RED保留，未重跑整套旧matrix。以上均为合成文件检查，不是实际H2闭合、新资源已准入或新正式成绩。
+
+## 原机新boot的严格接续
+
+运行时buffer与redo配置不能借用旧boot证明。新增显式`same-containers-new-boot-v1`桥：先逐SHA复核旧失败组及原Kafka资源变更，再独立绑定旧资源metadata、新boot健康服务恢复前后快照和恢复证明。原metadata与失败原件不改写；新metadata保留原`mysqlActual/redoActual/kafkaMemoryActual`历史段，以`bootRestoreActual`另绑当前boot的实际证据，不将旧idle或旧资源快照当作本次准入。
+
+纯接口`boot_restore_identity(root, metadata_reference)`只核此独立资源桥并返回原parent ref、当前boot及恢复完成时刻，不读取active/candidate。私有资源policy复用同一规则，再验证父环境原redo/Kafka证明；正式组入口另保留完整旧H→I验证和原失败组闭合，不能把该纯返回值当作预约或候选通过。
+
+跨boot保留原CID、镜像、完整挂载、卷、网络、配额、SQL UUID及14项固定事实。恢复前只接受已知空闲状态的128MiB或4GiB buffer、100MiB或2GiB redo；恢复后必须实际4GiB buffer、requested/effective均2GiB且状态OK。新boot内恢复前后PID、启动时刻和restartCount必须一致；与旧boot的PID不要求数值不同。新API、60秒/13样本idle及完整fresh audit仍独立执行；闭合原H2夹具的audit须开始于本boot恢复完成后，不能借旧boot对账。
+
+仅在比较副本上将完整mount字典按canonical JSON排序，保留重复项及全部字段，不修改raw。真实历史快照曾仅因MySQL mounts顺序不同而被原严格列表比较误拒；容器摘要的`volumes{name,destination}`也按实际完整mount的`Name/Destination`精确对应，不把两种schema直接比较。卷名、目标、完整挂载字段、重复项或网络漂移仍拒绝。
+
+本次聚焦检查扩为13项，并增加私有producer的新boot默认只读检查；另用已封存的原H→I五份资源原件离线验证该资源门及重封错误卷目标的拒绝。它只核历史资源原件，不代表真实新boot、完整失败组或新候选已准入。原同boot失败、原RED和检查准备失败记录保留；新producer副本继续原两阶段合同，无新candidate PASS前提循环。新candidate通过后才创建新freeze，所有原预算、未用标签、首FAIL终止及正式门槛保持。

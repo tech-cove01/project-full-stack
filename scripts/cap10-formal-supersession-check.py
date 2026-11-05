@@ -27,15 +27,20 @@ class Checks(unittest.TestCase):
         self.fixture = {'poolSize': 2, 'multiNoteIds': ['9', '10'], 'userIds': ['19', '20']}
         fixture = self.put('fixture.json', self.fixture)
         self.put('admission-old.json', {'sceneId': 'SYNTHETIC_SCENE'})
-        self.containers = {name: {'id': str(i) * 64, 'cpuNano': cpu, 'memoryBytes': memory,
+        self.containers = {name: {'id': str(i) * 64, 'name': name, 'project': 'synthetic', 'service': name,
+            'running': True, 'status': 'running', 'healthStatus': 'healthy', 'exitCode': 0, 'oomKilled': False,
+            'restartCount': 0, 'cpuNano': cpu, 'memoryBytes': memory,
             'memorySwap': 2 * memory, 'imageId': 'synthetic-' + name, 'volumes': ['preserved'],
-            'networks': {'owned': {}}, 'ports': {}, 'mounts': [], 'policy': {}}
+            'networks': {'owned': {}}, 'ports': {}, 'mounts': [
+                {'Type': 'volume', 'Name': name + '-data', 'Destination': '/data', 'RW': True},
+                {'Type': 'bind', 'Source': '/synthetic/config', 'Destination': '/config', 'RW': False}], 'policy': {}}
             for i, (name, (cpu, memory)) in enumerate(grade.RESOURCE.container_limits('mysql8-v1').items(), 1)}
         mysql = {'serverUUID': '11111111-1111-1111-1111-111111111111', 'version': '8.4.8', 'flushAtCommit': 1,
             'syncBinlog': 1, 'groupCommitDelay': 0, 'isolation': 'REPEATABLE-READ', 'dedicatedServer': 0,
             'logBin': 1, 'doublewrite': 'ON', 'readOnly': 0, 'superReadOnly': 0, 'sqlMode': 'STRICT_TRANS_TABLES',
             'instances': 1, 'chunkBytes': 134217728}
-        self.old_meta = {'at': self.t(1), 'resourceProfile': 'mysql8-v1', 'bootIdentity': {'bootID': 'synthetic-boot'},
+        self.old_meta = {'at': self.t(1), 'resourceProfile': 'mysql8-v1',
+            'bootIdentity': {'bootID': 'synthetic-boot', 'bootTimeUnix': self.clock.timestamp() - 1000},
             'containers': self.containers, 'mysqlActual': mysql, 'redoActual': {'retained': True}}
         old_env = self.put('environment-111111111111.json', self.old_meta)
         self.old_active = {'version': 1, 'batch': 'CAP-10', 'sourceSha': 'a' * 40, 'binarySHA256': 'b' * 64,
@@ -104,10 +109,13 @@ class Checks(unittest.TestCase):
             'timeline': [{'pending': 0, 'parked': 0, 'receiptErrors': []}]}
         self.put('closure/reconcile.json', self.audit)
         parent = self.ref(old_env); before = {'at': self.t(81), 'bootIdentity': {'bootId': 'synthetic-boot'},
-            'parentEnvironment': parent, 'containers': copy.deepcopy(self.containers), 'processIdentity': {'retained': True},
+            'parentEnvironment': parent, 'containers': copy.deepcopy(self.containers),
+            'processIdentity': {name: {'pid': 100 + i, 'startedAt': self.t(-10), 'created': self.t(-1000),
+                'restartCount': 0, 'oomKilled': False} for i, name in enumerate(self.containers)},
             'volumes': ['retained'], 'network': {'retained': True}, 'mysqlFacts': {**mysql, 'bufferBytes': 4 << 30,
                 'resizeCode': 0, 'resizeText': 'complete', 'resizeProgress': 100, 'uptime': 100,
-                'otherSessions': 0, 'activeTransactions': 0}, 'mysqlRedo': {'retained': True}}
+                'otherSessions': 0, 'activeTransactions': 0}, 'mysqlRedo': {'serverUUID': mysql['serverUUID'],
+                    'mysqlRedoCapacityBytes': 2 << 30, 'mysqlRedoEffectiveCapacityBytes': 2 << 30, 'mysqlRedoResizeStatus': 'OK'}}
         after = copy.deepcopy(before); after['at'] = self.t(82)
         after['mysqlFacts']['uptime'] = 101
         after['containers']['kafka'].update(memoryBytes=2 << 30, memorySwap=3 << 30)
@@ -312,6 +320,137 @@ class Checks(unittest.TestCase):
         command = grade.read(self.root / 'H3-command.json'); command['reservationCheck']['closedFailedFormalGroups'] = {}
         self.put('H3-command.json', command)
         with self.assertRaises(ValueError): self.reserve('formal', freeze)
+
+    def boot_restore(self):
+        parent_ref = self.ref(self.new_meta_path); parent = grade.read(self.new_meta_path)
+        before = copy.deepcopy(grade._authority_ref(self.root, parent['kafkaMemoryActual']['after']))
+        before.update(at=self.t(91), bootIdentity={'bootId': 'new-boot'}, parentEnvironment=parent_ref)
+        for row in before['processIdentity'].values(): row.update(pid=row['pid'] + 100, startedAt=self.t(90))
+        before['mysqlFacts'].update(bufferBytes=128 << 20, uptime=5, resizeText='not started', resizeProgress=0)
+        before['mysqlRedo'].update(mysqlRedoCapacityBytes=100 << 20, mysqlRedoEffectiveCapacityBytes=100 << 20)
+        after = copy.deepcopy(before); after['at'] = self.t(93)
+        after['mysqlFacts'].update(bufferBytes=4 << 30, uptime=7, resizeText='complete', resizeProgress=100)
+        after['mysqlRedo'].update(mysqlRedoCapacityBytes=2 << 30, mysqlRedoEffectiveCapacityBytes=2 << 30)
+        before_ref = self.ref(self.put('boot-restore/before.json', before))
+        after_ref = self.ref(self.put('boot-restore/actual-001.json', after))
+        verified = {'version': 1, 'batch': 'CAP-10', 'kind': 'same-containers-new-boot-v1', 'complete': True,
+            'noLoad': True, 'parentEnvironment': parent_ref, 'before': before_ref, 'after': after_ref,
+            'previousBootId': 'synthetic-boot', 'bootId': 'new-boot'}
+        proof_ref = self.ref(self.put('boot-restore/verified.json', verified))
+        metadata = copy.deepcopy(parent); metadata.update(at=self.t(94),
+            bootIdentity={'bootID': 'new-boot', 'bootTimeUnix': (self.clock + dt.timedelta(seconds=90)).timestamp()},
+            bootRestoreActual={'contract': 'same-containers-new-boot-v1', 'parentEnvironment': parent_ref,
+                'before': before_ref, 'after': after_ref, 'proof': proof_ref, 'bootIdentity': {'bootId': 'new-boot'}})
+        self.new_meta_path = self.put('environment-333333333333.json', metadata)
+        self.active.update(environmentPath=self.new_meta_path.name, environmentSHA256=grade.sha(self.new_meta_path),
+            deploymentId='new-boot-deployment')
+        self.put('active-application.json', self.active)
+        self.context['activeApplicationSHA256'] = grade.sha(self.root / 'active-application.json')
+        audit = {**self.audit, 'startedAt': self.ms(95), 'finishedAt': self.ms(98)}
+        self.proof.update(successorDeploymentId=self.active['deploymentId'], successorEnvironment=self.ref(self.new_meta_path),
+            reconciliation=self.ref(self.put('new-boot-audit/reconcile.json', audit)), recordedAt=self.t(99))
+        self.proof_path = self.put('formal-group-supersessions/' + self.old_freeze_sha + '-' + self.active['deploymentId'] + '.json', self.proof)
+        return metadata
+
+    def test_historical_resource_mount_order_is_not_a_resource_change(self):
+        metadata = grade.read(self.new_meta_path); actual = metadata['kafkaMemoryActual']
+        after = grade._authority_ref(self.root, actual['after'])
+        after['containers']['mysql']['mounts'].reverse()
+        actual['after'] = self.ref(self.put(actual['after']['path'], after))
+        verified = grade._authority_ref(self.root, actual['proof']); verified['after'] = actual['after']
+        actual['proof'] = self.ref(self.put(actual['proof']['path'], verified))
+        metadata['containers']['redis']['mounts'].reverse()
+        self.put(self.new_meta_path.name, metadata)
+        self.active['environmentSHA256'] = grade.sha(self.new_meta_path)
+        self.proof.update(successorEnvironment=self.ref(self.new_meta_path), resourceChangeProof=actual['proof'])
+        self.put(self.proof_path.relative_to(self.root).as_posix(), self.proof)
+        originals = {p: p.read_bytes() for p in self.root.rglob('*') if p.is_file()}
+        self.assertEqual(self.validate()['kind'], 'closed_failed_formal_group')
+        self.assertEqual(originals, {p: p.read_bytes() for p in self.root.rglob('*') if p.is_file()})
+
+    def reseal_boot(self, metadata):
+        bridge = metadata['bootRestoreActual']
+        bridge['before'] = self.ref(self.root / bridge['before']['path'])
+        bridge['after'] = self.ref(self.root / bridge['after']['path'])
+        verified = grade._authority_ref(self.root, bridge['proof']); verified.update(before=bridge['before'], after=bridge['after'])
+        bridge['proof'] = self.ref(self.put(bridge['proof']['path'], verified))
+        self.put(self.new_meta_path.name, metadata)
+        self.active['environmentSHA256'] = grade.sha(self.new_meta_path)
+        self.put('active-application.json', self.active)
+        self.context['activeApplicationSHA256'] = grade.sha(self.root / 'active-application.json')
+        self.proof['successorEnvironment'] = self.ref(self.new_meta_path)
+        self.put(self.proof_path.relative_to(self.root).as_posix(), self.proof)
+
+    def test_new_boot_reuses_old_resource_history_but_requires_current_restoration(self):
+        original_stage = (self.root / 'H2-stage.json').read_bytes()
+        metadata = self.boot_restore()
+        self.assertEqual(self.validate()['kind'], 'closed_failed_formal_group')
+        bridge = grade.boot_restore_identity(self.root, self.ref(self.new_meta_path))
+        self.assertEqual(bridge, {'parentEnvironment': metadata['bootRestoreActual']['parentEnvironment'],
+            'bootId': 'new-boot', 'restoredAtUnixMs': (self.clock + dt.timedelta(seconds=93)).timestamp() * 1000})
+        self.assertEqual(grade.read(self.root / metadata['bootRestoreActual']['parentEnvironment']['path'])['bootIdentity']['bootID'], 'synthetic-boot')
+        self.assertEqual((self.root / 'H2-stage.json').read_bytes(), original_stage)
+
+    def test_new_boot_rejects_old_audit_or_missing_explicit_bridge(self):
+        metadata = self.boot_restore()
+        original = copy.deepcopy(self.proof)
+        self.proof['reconciliation'] = self.ref(self.root / 'closure/reconcile.json')
+        self.put(self.proof_path.relative_to(self.root).as_posix(), self.proof)
+        with self.assertRaises(ValueError): self.validate()
+        self.proof = original; self.put(self.proof_path.relative_to(self.root).as_posix(), self.proof)
+        metadata.pop('bootRestoreActual'); self.put(self.new_meta_path.name, metadata)
+        self.active['environmentSHA256'] = grade.sha(self.new_meta_path)
+        self.proof['successorEnvironment'] = self.ref(self.new_meta_path)
+        self.put(self.proof_path.relative_to(self.root).as_posix(), self.proof)
+        with self.assertRaises(ValueError): self.validate()
+
+    def test_resealed_new_boot_wrong_volume_uuid_durability_targets_or_restart_rejected(self):
+        metadata = self.boot_restore()
+        originals = {p: p.read_bytes() for p in self.root.rglob('*') if p.is_file()}
+        original_proof = copy.deepcopy(self.proof); original_active = copy.deepcopy(self.active)
+        for case in ('volume', 'uuid', 'durability', 'buffer', 'redo', 'process'):
+            value = copy.deepcopy(metadata); after_path = self.root / value['bootRestoreActual']['after']['path']
+            after = grade.read(after_path)
+            if case == 'volume': after['volumes'] = ['wrong-volume']
+            elif case == 'uuid': after['mysqlFacts']['serverUUID'] = 'wrong-server'
+            elif case == 'durability': after['mysqlFacts']['syncBinlog'] = 0
+            elif case == 'buffer': after['mysqlFacts']['bufferBytes'] = 128 << 20
+            elif case == 'redo': after['mysqlRedo']['mysqlRedoEffectiveCapacityBytes'] = 100 << 20
+            else: after['processIdentity']['mysql']['pid'] += 1
+            self.put(after_path.relative_to(self.root).as_posix(), after); self.reseal_boot(value)
+            with self.subTest(case=case), self.assertRaises(ValueError): self.validate()
+            for path, raw in originals.items(): path.write_bytes(raw)
+            self.proof = copy.deepcopy(original_proof); self.active.clear(); self.active.update(copy.deepcopy(original_active))
+            self.context['activeApplicationSHA256'] = grade.sha(self.root / 'active-application.json')
+
+    def test_new_boot_candidate_and_formal_still_keep_old_slots_and_new_freeze(self):
+        self.boot_restore(); freeze = self.new_freeze(); self.admission('H3')
+        result = self.reserve('formal', freeze)
+        self.assertEqual((result['tag'], result['formalSlotsUsedAfter'], result['mainSecondsReservedAfter']), ('H3', 2, 420))
+        self.assertFalse(grade.stage(self.root, self.command)['passed'])
+
+    def test_new_boot_mount_permutation_preserves_raw_and_rejects_changed_field_or_duplicate(self):
+        metadata = self.boot_restore()
+        for phase in ('before', 'after'):
+            path = self.root / metadata['bootRestoreActual'][phase]['path']; value = grade.read(path)
+            for row in value['containers'].values(): row['mounts'].reverse()
+            self.put(path.relative_to(self.root).as_posix(), value)
+        for row in metadata['containers'].values(): row['mounts'].reverse()
+        self.reseal_boot(metadata)
+        originals = {p: p.read_bytes() for p in self.root.rglob('*') if p.is_file()}
+        self.assertEqual(self.validate()['kind'], 'closed_failed_formal_group')
+        self.assertEqual(originals, {p: p.read_bytes() for p in self.root.rglob('*') if p.is_file()})
+        original_proof = copy.deepcopy(self.proof); original_active = copy.deepcopy(self.active)
+        for case in ('field', 'duplicate'):
+            value = copy.deepcopy(metadata); path = self.root / value['bootRestoreActual']['after']['path']; after = grade.read(path)
+            mounts = after['containers']['kafka']['mounts']
+            if case == 'field': mounts[0]['RW'] = not mounts[0]['RW']
+            else: mounts.append(copy.deepcopy(mounts[0]))
+            self.put(path.relative_to(self.root).as_posix(), after); self.reseal_boot(value)
+            with self.subTest(case=case), self.assertRaises(ValueError): self.validate()
+            for p, raw in originals.items(): p.write_bytes(raw)
+            self.proof = copy.deepcopy(original_proof); self.active.clear(); self.active.update(copy.deepcopy(original_active))
+            self.context['activeApplicationSHA256'] = grade.sha(self.root / 'active-application.json')
 
 
 if __name__ == '__main__':

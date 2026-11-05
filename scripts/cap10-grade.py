@@ -1220,11 +1220,124 @@ def formal_start_retirement(root, command, context):
     return {'tag': tag, 'proofSHA256': sha(path), 'originalFreezeSHA256': command.get('freezeSHA256')}
 
 
+def _formal_container_identity_copy(containers):
+    """Compare full mount objects as a multiset; retain raw bytes and duplicates."""
+    require(type(containers) is dict, 'complete container map required')
+    result = json.loads(json.dumps(containers, ensure_ascii=False, allow_nan=False))
+    for row in result.values():
+        require(type(row) is dict, 'complete container object required')
+        if 'mounts' in row:
+            require(type(row['mounts']) is list and all(type(mount) is dict for mount in row['mounts']), 'complete mount objects required')
+            row['mounts'] = sorted(row['mounts'], key=lambda mount: json.dumps(
+                mount, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False))
+    return result
+
+
+def boot_restore_identity(root, metadata_reference):
+    """Validate only the SHA-bound same-container resource bridge, without active or candidate state."""
+    current = _authority_ref(root, metadata_reference)
+    current_path, _, profile = environment_identity({'environmentPath': metadata_reference['path'],
+        'environmentSHA256': metadata_reference['sha256'], 'resourceProfile': current.get('resourceProfile')}, root)
+    require(current_path.name == metadata_reference['path'] and profile == 'mysql8-kafka2-v1',
+            'current boot restoration metadata must be the exact root Kafka2 environment')
+    bridge = current.get('bootRestoreActual')
+    require(type(bridge) is dict and set(bridge) == {'contract', 'parentEnvironment', 'before', 'after', 'proof', 'bootIdentity'}
+            and bridge.get('contract') == 'same-containers-new-boot-v1', 'explicit new-boot restoration contract required')
+    parent_ref = bridge['parentEnvironment']; parent = _authority_ref(root, parent_ref)
+    require(Path(parent_ref['path']).name == parent_ref['path'] and 'bootRestoreActual' not in parent
+            and parent.get('resourceProfile') == current.get('resourceProfile') == 'mysql8-kafka2-v1',
+            'boot restoration must retain the original Kafka2 metadata, without a recursive bridge')
+    verified = _authority_ref(root, bridge['proof'])
+    before, after = _authority_ref(root, bridge['before']), _authority_ref(root, bridge['after'])
+    old_boot = parent.get('bootIdentity', {}).get('bootID'); identity = current.get('bootIdentity', {})
+    new_boot = identity.get('bootID')
+    require(type(new_boot) is str and new_boot and new_boot != old_boot
+            and set(identity) == {'bootID', 'bootTimeUnix'}
+            and type(identity['bootTimeUnix']) in (int, float) and math.isfinite(identity['bootTimeUnix'])
+            and identity['bootTimeUnix'] > parent['bootIdentity']['bootTimeUnix']
+            and bridge.get('bootIdentity') == {'bootId': new_boot}
+            and verified.get('version') == 1 and verified.get('batch') == 'CAP-10'
+            and verified.get('kind') == 'same-containers-new-boot-v1'
+            and verified.get('complete') is True and verified.get('noLoad') is True
+            and verified.get('previousBootId') == old_boot and verified.get('bootId') == new_boot
+            and verified.get('parentEnvironment') == parent_ref
+            and verified.get('before') == bridge['before'] and verified.get('after') == bridge['after'],
+            'new boot and its exact parent/before/after verification must be independently bound')
+    previous = _authority_ref(root, parent['kafkaMemoryActual']['after'])
+    require(all(snapshot.get('bootIdentity') == {'bootId': new_boot} and snapshot.get('parentEnvironment') == parent_ref
+                and _formal_container_identity_copy(snapshot.get('containers')) == _formal_container_identity_copy(previous['containers'])
+                and snapshot.get('volumes') == previous['volumes'] and snapshot.get('network') == previous['network']
+                for snapshot in (before, after))
+            and before.get('processIdentity') == after.get('processIdentity')
+            and set(after.get('processIdentity', {})) == set(previous['processIdentity'])
+            and all(type(row.get('pid')) is int and row['pid'] > 0 and type(row.get('startedAt')) is str and row['startedAt']
+                    and row.get('created') == previous['processIdentity'][name]['created'] and row.get('oomKilled') is False
+                    and instant(row['startedAt']).timestamp() >= identity['bootTimeUnix']
+                    and instant(row['created']) <= instant(row['startedAt'])
+                    for name, row in after['processIdentity'].items()),
+            'new boot must retain exact containers/images/quotas/mounts/network/volumes and stable restored processes')
+    fixed = ('serverUUID', 'version', 'flushAtCommit', 'syncBinlog', 'groupCommitDelay', 'isolation',
+             'dedicatedServer', 'logBin', 'doublewrite', 'readOnly', 'superReadOnly', 'sqlMode', 'instances', 'chunkBytes')
+    for snapshot in (before, after):
+        facts, redo = snapshot['mysqlFacts'], snapshot['mysqlRedo']
+        require(all(key in facts and key in parent['mysqlActual']
+                    and type(facts[key]) is type(parent['mysqlActual'][key]) and facts[key] == parent['mysqlActual'][key] for key in fixed)
+                and all(type(facts.get(key)) is int and facts[key] == 0 for key in ('resizeCode', 'otherSessions', 'activeTransactions'))
+                and type(facts.get('resizeProgress')) is int and 0 <= facts['resizeProgress'] <= 100
+                and type(facts.get('resizeText')) is str and type(facts.get('uptime')) is int and facts['uptime'] >= 0
+                and type(facts.get('bufferBytes')) is int and facts['bufferBytes'] in (128 << 20, 4 << 30)
+                and set(redo) == {'serverUUID', 'mysqlRedoCapacityBytes', 'mysqlRedoEffectiveCapacityBytes', 'mysqlRedoResizeStatus'}
+                and redo.get('serverUUID') == parent['mysqlActual']['serverUUID']
+                and type(redo.get('mysqlRedoCapacityBytes')) is int and redo['mysqlRedoCapacityBytes'] in (100 << 20, 2 << 30)
+                and redo.get('mysqlRedoEffectiveCapacityBytes') == redo['mysqlRedoCapacityBytes']
+                and redo.get('mysqlRedoResizeStatus') == 'OK', 'new boot must restore original SQL identity/durability from known idle runtime states')
+    require(after['mysqlFacts']['bufferBytes'] == 4 << 30 and after['mysqlRedo']['mysqlRedoCapacityBytes'] == 2 << 30
+            and after['mysqlFacts']['uptime'] >= before['mysqlFacts']['uptime']
+            and instant(previous['at']) < instant(before['at'])
+            and identity['bootTimeUnix'] <= instant(before['at']).timestamp() <= instant(after['at']).timestamp()
+            <= dt.datetime.now(dt.timezone.utc).timestamp(), 'actual current-boot 4GiB buffer and 2GiB redo restoration required')
+    mutable = {'running', 'status', 'healthStatus', 'exitCode', 'oomKilled', 'restartCount'}
+    current_containers = _formal_container_identity_copy(current['containers'])
+    parent_containers = _formal_container_identity_copy(parent['containers'])
+    require(set(current_containers) == set(parent_containers), 'new boot dependency set differs')
+    for name, row in current_containers.items():
+        original = parent_containers[name]; live = after['containers'][name]
+        require(set(row) == set(original) and {k: v for k, v in row.items() if k not in mutable}
+                == {k: v for k, v in original.items() if k not in mutable}
+                and row.get('running') is True and row.get('oomKilled') is False
+                and type(row.get('exitCode')) is int and row['exitCode'] == 0
+                and ('status' not in original or row.get('status') == 'running')
+                and type(row.get('restartCount')) is int and row['restartCount'] >= 0
+                and row['restartCount'] == after['processIdentity'][name]['restartCount']
+                and all(row.get(key) == live.get(key) for key in ('id', 'cpuNano', 'memoryBytes', 'memorySwap', 'imageId',
+                    'ports', 'name', 'project', 'service', 'running', 'healthStatus') if key in original),
+                'current metadata must describe the same healthy restored dependencies')
+    require({k: v for k, v in current.items() if k not in ('at', 'bootIdentity', 'containers', 'bootRestoreActual')}
+            == {k: v for k, v in parent.items() if k not in ('at', 'bootIdentity', 'containers')},
+            'new boot must preserve all historical metadata/proofs and bind its actual successor environment')
+    return {'parentEnvironment': parent_ref, 'bootId': new_boot, 'restoredAtUnixMs': instant(after['at']).timestamp() * 1000}
+
+
+def _failed_formal_boot_restore(root, old_active, context, proof, current_path, current):
+    """Retain H-to-I formal history, then validate its independent resource bridge."""
+    reference = {'path': current_path.name, 'sha256': sha(current_path)}
+    restored = boot_restore_identity(root, reference)
+    parent_ref = restored['parentEnvironment']
+    historical_active = {**context['active'], 'environmentPath': parent_ref['path'], 'environmentSHA256': parent_ref['sha256']}
+    _failed_formal_resource_change(root, old_active, {**context, 'active': historical_active},
+                                  {**proof, 'successorEnvironment': parent_ref})
+    require(proof.get('successorEnvironment') == reference, 'failed formal successor must bind the actual restored environment')
+    return restored['restoredAtUnixMs']
+
+
 def _failed_formal_resource_change(root, old_active, context, proof):
     """The sole supported successor changes Kafka's owned runtime memory."""
     active = context['active']
     old_path, old_sha, old_profile = environment_identity(old_active, root)
     new_path, new_sha, new_profile = environment_identity(active, root)
+    current = read(new_path)
+    if 'bootRestoreActual' in current:
+        return _failed_formal_boot_restore(root, old_active, context, proof, new_path, current)
     require((old_profile, new_profile) == ('mysql8-v1', 'mysql8-kafka2-v1')
             and old_active['deploymentId'] != active['deploymentId']
             and old_active['sourceSha'] == active['sourceSha'] and old_active['binarySHA256'] == active['binarySHA256']
@@ -1275,20 +1388,33 @@ def _failed_formal_resource_change(root, old_active, context, proof):
                     for value in (first_mysql, last_mysql))
             and first_mysql['resizeText'] == last_mysql['resizeText'] and last_mysql['uptime'] >= first_mysql['uptime'],
             'Kafka transition must retain fixed MySQL facts while allowing monotonic uptime')
-    original = before.get('containers', {}); changed = after.get('containers', {})
+    original = _formal_container_identity_copy(before.get('containers', {}))
+    changed = _formal_container_identity_copy(after.get('containers', {}))
+    old_containers = _formal_container_identity_copy(old['containers'])
     require(set(original) == set(changed) == set(old['containers'])
             and original['kafka'].get('id') == actual['containerId']
             and original['kafka'].get('memoryBytes') == 1 << 30 and original['kafka'].get('memorySwap') == 2 << 30
             and changed == {**original, 'kafka': {**original['kafka'], 'memoryBytes': 2 << 30, 'memorySwap': 3 << 30}},
             'only Kafka memory and its fixed extra swap allowance may change')
-    for name, container in old['containers'].items():
+    for name, container in old_containers.items():
         require(all(original[name].get(key) == container.get(key) for key in
-                    ('id', 'cpuNano', 'memoryBytes', 'imageId', 'volumes', 'mounts', 'networks', 'ports') if key in container),
+                    ('id', 'cpuNano', 'memoryBytes', 'memorySwap', 'imageId', 'mounts', 'networks', 'ports') if key in container),
                 'actual Kafka parent differs from the old dependency identity')
-    expected_containers = {**old['containers'], 'kafka': {**old['containers']['kafka'], 'memoryBytes': 2 << 30}}
+        if 'volumes' in container:
+            volumes = original[name].get('volumes')
+            if volumes is None:
+                volumes = [{'name': mount['Name'], 'destination': mount['Destination']}
+                           for mount in original[name]['mounts'] if mount.get('Type') == 'volume']
+            canonical = lambda rows: sorted(rows, key=lambda row: json.dumps(row, sort_keys=True, separators=(',', ':')))
+            require(canonical(volumes) == canonical(container['volumes']), 'actual parent volume names/destinations differ')
+        if 'networkId' in container:
+            require(container['networkId'] == before['network'].get('id')
+                    and container['networkId'] in original[name].get('networks', {}).values(),
+                    'actual parent network identity differs')
+    expected_containers = {**old_containers, 'kafka': {**old_containers['kafka'], 'memoryBytes': 2 << 30}}
     if 'memorySwap' in expected_containers['kafka']:
         expected_containers['kafka']['memorySwap'] = 3 << 30
-    require(new.get('containers') == expected_containers
+    require(_formal_container_identity_copy(new.get('containers')) == expected_containers
             and {k: v for k, v in new.items() if k not in ('at', 'resourceProfile', 'containers', 'kafkaMemoryActual')}
             == {k: v for k, v in old.items() if k not in ('at', 'resourceProfile', 'containers')},
             'new metadata must preserve all original MySQL/redo and dependency fields')
@@ -1321,7 +1447,7 @@ def failed_formal_group_supersession(root, freeze_sha, context, proof=None):
     original_active = original_application(root, records[-1], context)
     require(original_freeze.get('activeApplicationSHA256') == records[-1]['reservationCheck']['activeApplicationSHA256']
             and original_freeze.get('deploymentId') == original_active['deploymentId'], 'old freeze belongs to another application')
-    _failed_formal_resource_change(root, original_active, context, proof)
+    restored_at = _failed_formal_resource_change(root, original_active, context, proof)
     for command, member in zip(records, proof['members']):
         tag = command['tag']; previous = stage(root, command)
         require(command.get('seconds') == 180 and command.get('loadBackend') == 'pts'
@@ -1401,6 +1527,7 @@ def failed_formal_group_supersession(root, freeze_sha, context, proof=None):
             and {r['noteId'] for r in audit['derived']['notes']} == set(notes)
             and instant(stage(root, final)['finishedAt']).timestamp() * 1000 <= audit['startedAt']
             <= audit['finishedAt'] <= recorded.timestamp() * 1000
+            and (restored_at is None or audit['startedAt'] >= restored_at)
             and audit.get('timeline') and audit['timeline'][-1].get('pending') == audit['timeline'][-1].get('parked') == 0
             and audit['timeline'][-1].get('receiptErrors') == [], 'later complete reconciliation of the exact original fixture required')
     return {'kind': 'closed_failed_formal_group', 'tags': [c['tag'] for c in records],

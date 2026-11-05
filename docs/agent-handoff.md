@@ -2,7 +2,9 @@
 
 更新：2026-11-05。接续先读根AGENTS、[协作与授权记录](collaboration-agreements.md)、[当前STATUS](../STATUS.md)和[总方案](implementation-plan.md)。状态仅由根STATUS维护；本页保留执行顺序与交付规则，不另列一套历史状态表。
 
-## 当前交接：本批稳定3000与归档清理完成，用户确认已节省停机
+## 当前交接：本批稳定3000与归档清理完成，用户确认原ECS已释放
+
+用户于2026-11-05确认原ECS已释放；按用户回报记录，未通过ECS API独立核验。当前正由用户逐步留存PTS正式H3/H4报告的官方PDF与页面截图；此操作不依赖原ECS，也不阻止实例释放。现场现已无法经原实例接入；未单独确认关联盘是否随之释放，不推断磁盘已删除或费用已清零。已有备份为选定证据增量，未做整机镜像或MySQL全库备份。
 
 [脱敏收尾摘要](evidence/2026-11-01-cap10/cloud-like-closeout-summary.json) SHA=`fad3ccc22592845c2cad3a70f968a2d179041d7957fd9e0164283cec39a266ce`，只含SHA/计数/状态；用户确认与agent独立查询范围保持区分。
 
@@ -10,9 +12,9 @@
 
 新freeze SHA=`b9ad14447b94cc903b427f51b24e9db991cf046e8501d93545e267d35cfe70f1`，两轮保持同API/部署/资源/工具身份；S29完整60秒180299变更、P95/P99=36/72ms、恢复1.637856秒，候选不能顶替正式。见[正式报告](evidence/2026-11-01-cap10/cloud-like-final-report.md)和[脱敏原摘要](evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)，摘要SHA=`5eb52fb30c1016336737bab98069519a6dc866add4c7dd8eadcfee6722da928b`。单机16vCPU/32GiB，MySQL容器8CPU/8GiB、buffer4GiB/redo2GiB、Kafka2GiB；不写成最大容量或整机8核8G。 独立PTS四引擎通过阿里云上海VPC内网向该单台ECS发压，引擎不运行在被测ECS上；表内P95/P99仅指私网HTTP主窗，未包含公网用户链路。
 
-本批不再新增票据、负载或云机请求。H4后fresh终审和实际success_close精确清理均已完成，cleanup SHA=`114eb9a12bc1b4ef5263818dc3e03aa26fc1698b559e867b0ed94aa933f7fa93`：当前1996会话注销后余0、credential已删除，63个环境登记及8个upload登记对应目标全部不存在、审计JSON索引保留。API/collector端口8281/8381/8481关闭，四原容器停止/无OOM，MySQL与Redis exit0、Kafka与ES exit143；主库、卷、网络及旧FAIL保留；用户原keys保留，未修改或删除。原API stop回执exitCode=null保留，不改为0；后验PID/端口与容器状态另有实际复核。
+本批不再新增票据、负载或云机请求。H4后fresh终审和实际success_close精确清理均已完成，cleanup SHA=`114eb9a12bc1b4ef5263818dc3e03aa26fc1698b559e867b0ed94aa933f7fa93`：当前1996会话注销后余0、credential已删除，63个环境登记及8个upload登记对应目标全部不存在、审计JSON索引保留。API/collector端口8281/8381/8481关闭，四原容器停止/无OOM，MySQL与Redis exit0、Kafka与ES exit143；释放前该次清理未删除主库、卷、网络及旧FAIL；用户原keys保留，未修改或删除。原API stop回执exitCode=null保留，不改为0；后验PID/端口与容器状态另有实际复核。
 
-主395件备份已下载逐395SHA核验，原文件315397060字节，包SHA=`0b56c89dff5753ece53b407e19d5dbc176a3ef3ecfad667fa23522a53e96d9bc`、manifest SHA=`57dc4ae1633e10196f26b0bb62786487c86a9de863d035d1b30d6d01a385d5a1`；收尾22件小包已下载逐22SHA核验，包SHA=`5d088ddad03fc8df1924f3ccaa07bf6a3f0bf29656dbb7fe86a4bece8cb7ed4c`、manifest SHA=`e476e06d8d8f66b52a16d3729f57916ebf2f387c290821af4dfa5f45a4b6ec3b`。选定增量依赖原2736+1259+10份已核原件，不是整机镜像；两正式共1082998条raw经独立重算。仅本次API两活日志允许append-only并保最终SHA，其余原E证据SHA不变。用户已回报控制台节省停机显示已停止；agent无ECS权限未独立查询，root不再SSH。旧S28候选、H2 FAIL/unknown=null、CAP-09未过容量及B1未知保持。
+主395件备份已下载逐395SHA核验，原文件315397060字节，包SHA=`0b56c89dff5753ece53b407e19d5dbc176a3ef3ecfad667fa23522a53e96d9bc`、manifest SHA=`57dc4ae1633e10196f26b0bb62786487c86a9de863d035d1b30d6d01a385d5a1`；收尾22件小包已下载逐22SHA核验，包SHA=`5d088ddad03fc8df1924f3ccaa07bf6a3f0bf29656dbb7fe86a4bece8cb7ed4c`、manifest SHA=`e476e06d8d8f66b52a16d3729f57916ebf2f387c290821af4dfa5f45a4b6ec3b`。选定增量依赖原2736+1259+10份已核原件，不是整机镜像；两正式共1082998条raw经独立重算。仅本次API两活日志允许append-only并保最终SHA，其余原E证据SHA不变。用户现已回报原ECS释放；此前控制台节省停机确认保留为历史时点，agent未通过ECS API独立核验，root不再SSH。旧S28候选、H2 FAIL/unknown=null、CAP-09未过容量及B1未知保持。
 
 本boot资源恢复过程已实际闭合：原四CID/镜像/挂载/卷/网络保留，Kafka2GiB/Swap3GiB；MySQL重启后128MiB buffer/100MiB redo已用两个SET恢复4GiB/2GiB，原UUID/版本、双1、delay0、RR、doublewrite保持，无重复DDL/CREATE。新metadata SHA=`472fa2e997bbc7d72501b4ebb0e63ddc337ab222c32c2485509664fc233c4057`、proof SHA=`d67eb9b4c0c0ba00fab5d850a4aaffd248d520b5c1bd9fcffcde7a60fb7425b1`，不借旧idle。
 
@@ -54,13 +56,13 @@ H2预热250次成功变更后进入主窗，实际supervisor停止由Kafka容器
 
 Kafka资源合同`fd2d312`、生成器endpoint缓存`ac5752d`、整数校验分配优化`9743ad1`及原失败组接续`2b40202`已独审、提交并正常推送，没有把组件观察当成50ms违规消失的证据。本次[跨boot接续](evidence/2026-11-01-cap10/formal-group-supersession-plan.md)13项聚焦与89项原检查及独审通过，公共提交`3bf1f87`已推送；原CRLF报告私有保留，仅LF格式修正`4ab583d`已推送、源码不变，云端工具HEAD已同步`4ab583d`。新私有三源副本经过独审、4项纯检查和实际shape核验，原八助手不改。原私有freeze producer保持；新副本只允许在新candidate完整PASS后创建新freeze，不改旧H2结果或累计slot/预算。
 
-本次新boot资源、API、13样本空载、旧失败组独立闭合、新candidate和新freeze两正式均已完成。已按[收尾顺序](../STATUS.md#下一步)完成归档、下载核验与精确清理，不加压力、不重判旧FAIL。新K2-only cleanup副本只在原S25适配器profile白名单增加mysql8-kafka2-v1，原917447闭合/owner备份/S26桥与原missing terminal门不变；本次执行前已实际满足同b9ad两正式PASS、H4后fresh审计、无owner、新namespace及原API/资源身份，并先核下载备份。旧三cohort只核已完成receipt，不恢复token/重复logout，不删除主库、卷或失败原件。
+本次新boot资源、API、13样本空载、旧失败组独立闭合、新candidate和新freeze两正式均已完成。已按[收尾顺序](../STATUS.md#下一步)完成归档、下载核验与精确清理，不加压力、不重判旧FAIL。新K2-only cleanup副本只在原S25适配器profile白名单增加mysql8-kafka2-v1，原917447闭合/owner备份/S26桥与原missing terminal门不变；本次执行前已实际满足同b9ad两正式PASS、H4后fresh审计、无owner、新namespace及原API/资源身份，并先核下载备份。旧三cohort只核已完成receipt，未恢复token/重复logout，释放前该次清理未删除主库、卷或失败原件。
 
 本批两轮完整180秒已达到稳定至少3000目标，原50ms、零unknown/drop、正式200/500ms、下游及native结束后60秒恢复门槛均保持。候选160/400ms余量通过单列；S26/S27/S28/S29的诊断、fixture、observer和boot差异不能合成纯redo/业务SQL收益倍率。
 
 此前实际已核29295 VUM；本批S29为3703、H3为7799、H4为7596，共19098，累计48393。已购60000相减11607仅为未独立查询账户的计划余量，非余额；warm/准备和平台生命周期计入成本，失败中止也不记为零成本。最终provider原ReportId/EndTime已匹配，分项见[正式原摘要](evidence/2026-11-01-cap10/cloud-like-S29-H3-H4-summary.json)，旧摘要保持原字节/grade。本批目标及收尾已完成，不复制私有配置、Token、IP/PID或云资源ID到公开仓库；不新增负载或开机请求。
 
-旧H1/512、未压4096、前1996已正常logout并删除凭据，主库/卷保留；旧环境/上传的登记JSON保留作审计，核其绑定目标缺失，不要求登记数0。不能复活旧Token。原完整历史、旧指令与核验范围见[交接快照](../archive/docs/agent-handoff-history-20261104.md)、[状态快照](../archive/docs/status-history-20261104.md)和[功能交付快照](../archive/docs/go-delivery-history-20261104.md)，均非当前执行授权。
+旧H1/512、未压4096、前1996已正常logout并删除凭据，该次清理时未删除主库/卷；旧环境/上传的登记JSON保留作审计，核其绑定目标缺失，不要求登记数0。不能复活旧Token。原完整历史、旧指令与核验范围见[交接快照](../archive/docs/agent-handoff-history-20261104.md)、[状态快照](../archive/docs/status-history-20261104.md)和[功能交付快照](../archive/docs/go-delivery-history-20261104.md)，均非当前执行授权。
 
 ## 单任务格式与完成证据
 

@@ -1,6 +1,10 @@
 # 工作流与任务状态
 
-更新：2026-11-05。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
+更新：2026-11-09。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
+
+## 收尾后的项目展示
+
+用户要求参考已打磨的 CRM Pages 制作本项目 GitHub 静态站，随后指定浅紫配色、完整功能介绍，并明确允许公开两张 PTS 概览截图中的报告 ID。按 [展示规格](docs/showcase-plan.md) 交付 `showcase/` 的项目概览、设计详解和压测实录；功能交付与 CAP-10 结果仍已收尾，不重开业务开发或压测。WEB-001 页面与素材已通过三页九组浏览器检查、48处本地链接/锚点、四图SHA及双独审，见[验收](docs/showcase-verification.md)；WEB-002 Pages 发布接续。站点不依赖原 ECS，原图、失败记录和本地简历材料保持原样。
 
 ## 当前目标与操作状态
 

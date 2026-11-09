@@ -55,11 +55,24 @@ function enhanceSwitch(attribute, panelAttribute) {
 }
 enhanceSwitch("data-round", "data-round-panel");
 enhanceSwitch("data-flow", "data-flow-panel");
+enhanceSwitch("data-report", "data-report-panel");
 
 const imageDialog = document.querySelector(".image-dialog");
 if (imageDialog && typeof imageDialog.showModal === "function") {
   const dialogImage = imageDialog.querySelector("img");
   const caption = imageDialog.querySelector("#image-caption");
+  const zoomButton = imageDialog.querySelector("[data-image-zoom]");
+  const imageViewport = imageDialog.querySelector(".dialog-image-wrap");
+  const setZoom = (zoomed) => {
+    imageViewport.classList.toggle("is-zoomed", zoomed);
+    zoomButton.setAttribute("aria-pressed", String(zoomed));
+    zoomButton.textContent = zoomed ? "适应窗口" : "原尺寸查看";
+    imageViewport.scrollTo(0, 0);
+  };
+  const toggleZoom = () =>
+    setZoom(zoomButton.getAttribute("aria-pressed") !== "true");
+  zoomButton.addEventListener("click", toggleZoom);
+  dialogImage.addEventListener("click", toggleZoom);
   let trigger;
   document.querySelectorAll("[data-lightbox]").forEach((link) => {
     link.addEventListener("click", (event) => {
@@ -70,6 +83,7 @@ if (imageDialog && typeof imageDialog.showModal === "function") {
       dialogImage.src = link.href;
       dialogImage.alt = link.querySelector("img").alt;
       caption.textContent = link.dataset.caption;
+      setZoom(false);
       imageDialog.showModal();
       document.body.classList.add("dialog-open");
     });

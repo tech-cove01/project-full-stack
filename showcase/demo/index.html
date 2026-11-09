@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f8f6fc" />
+    <meta
+      name="description"
+      content="亲手体验本地生活交易：发现优惠、抢券与模拟支付、店员核销、探店分享。可重置的静态业务演示。"
+    />
+    <title>互动业务演示 · 本地生活交易平台</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./demo.css" />
+    <script src="./app.js" type="module"></script>
+  </head>
+  <body class="demo-body">
+    <a class="skip-link" href="#main">跳到演示内容</a>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a class="brand" href="../index.html"
+          ><span class="brand-mark" aria-hidden="true">L.</span
+          ><span
+            >生活交易<span class="brand-suffix"> / INTERACTIVE DEMO</span></span
+          ></a
+        >
+        <nav class="demo-site-nav" aria-label="演示页面导航">
+          <a href="../index.html">项目介绍</a
+          ><a href="../performance.html">实测结果</a
+          ><button type="button" id="reset-demo" class="action-secondary">
+            重新体验
+          </button>
+        </nav>
+      </div>
+    </header>
+    <div class="demo-banner">
+      <div class="container">
+        <strong>静态互动演示</strong
+        ><span
+          >虚构门店与示例数据，支付和业务状态均在本页模拟，可随时重置。</span
+        >
+      </div>
+    </div>
+    <main class="container demo-layout" id="main">
+      <div class="demo-main">
+        <nav class="demo-tabs" aria-label="选择业务视角">
+          <button type="button" data-view="customer" aria-pressed="true">
+            顾客逛店</button
+          ><button type="button" data-view="merchant" aria-pressed="false">
+            商家工作台</button
+          ><button type="button" data-view="community" aria-pressed="false">
+            探店社区
+          </button>
+        </nav>
+        <section
+          class="demo-view"
+          data-view-panel="customer"
+          aria-labelledby="customer-title"
+        >
+          <div class="view-heading">
+            <p class="eyebrow">顾客视角 · 小林的周末计划</p>
+            <h1 id="customer-title">一张优惠券，开启周末探店。</h1>
+            <p>
+              挑一家店，买张到店券。支付后，切换到商家工作台看看店员怎样履约。
+            </p>
+          </div>
+          <div class="shop-grid" id="shop-list" aria-label="选择门店"></div>
+          <article
+            class="activity-card"
+            id="activity-panel"
+            aria-label="门店活动"
+          ></article>
+          <section
+            class="order-card"
+            id="customer-order"
+            aria-label="我的订单"
+            aria-live="polite"
+          ></section>
+        </section>
+        <section
+          class="demo-view"
+          data-view-panel="merchant"
+          aria-labelledby="merchant-title"
+          hidden
+        >
+          <div class="view-heading">
+            <p class="eyebrow">商家视角 · 从订单到履约</p>
+            <h1 id="merchant-title">顾客买到了，门店怎样接住？</h1>
+            <p>
+              选择示例身份与门店，查看同一笔订单。核销、退款与操作记录会随业务一起变化。
+            </p>
+          </div>
+          <div class="merchant-toolbar">
+            <label
+              >示例身份<select id="merchant-role">
+                <option value="STAFF">店员 · 陈宁</option>
+                <option value="OWNER">店主 · 许然</option>
+              </select></label
+            ><label
+              >工作门店<select id="merchant-shop">
+                <option value="coffee">街角咖啡 · 梧桐路店</option>
+                <option value="food">青禾食堂 · 花园店</option>
+              </select></label
+            >
+          </div>
+          <div id="merchant-panel" aria-live="polite"></div>
+        </section>
+        <section
+          class="demo-view"
+          data-view-panel="community"
+          aria-labelledby="community-title"
+          hidden
+        >
+          <div class="view-heading">
+            <p class="eyebrow">探店社区 · 把体验分享出去</p>
+            <h1 id="community-title">这家值得去，分享给下一个人。</h1>
+            <p>
+              看看大家的探店笔记，试试搜索和点赞，也可以写下一篇自己的体验。
+            </p>
+          </div>
+          <div class="community-toolbar">
+            <label for="note-search">搜索探店笔记</label
+            ><input
+              id="note-search"
+              type="search"
+              placeholder="试试“咖啡”或“花园”"
+              maxlength="80"
+            /><button type="button" class="action-secondary" id="open-compose">
+              写一篇探店
+            </button>
+          </div>
+          <form id="compose-note" class="compose-form" hidden>
+            <h2>分享一段探店体验</h2>
+            <label
+              >探店门店<select id="note-shop">
+                <option value="coffee">街角咖啡 · 梧桐路店</option>
+                <option value="food">青禾食堂 · 花园店</option>
+              </select></label
+            ><label
+              >笔记标题<input
+                id="note-title"
+                required
+                maxlength="40"
+                value="梧桐路的咖啡香，值得慢下来" /></label
+            ><label
+              >探店体验<textarea
+                id="note-content"
+                required
+                maxlength="500"
+                rows="4"
+              >
+周末来街角咖啡坐了一会儿，点了拿铁和可颂。窗边很安静，下次还想约朋友来。</textarea>
+            </label>
+            <p class="form-note">
+              请只填写虚构体验；示例内容保存在当前标签页。
+            </p>
+            <div class="order-actions">
+              <button class="button button-primary" type="submit">
+                发布示例笔记</button
+              ><button
+                class="action-secondary"
+                type="button"
+                id="close-compose"
+              >
+                暂不发布
+              </button>
+            </div>
+            <p id="compose-error" role="alert"></p>
+          </form>
+          <div id="note-list" class="note-grid" aria-live="polite"></div>
+        </section>
+      </div>
+      <aside class="guide-card" aria-labelledby="guide-title">
+        <p class="guide-eyebrow">第一次来？跟着业务走一遍</p>
+        <h2 id="guide-title"></h2>
+        <p id="guide-text"></p>
+        <ol class="guide-steps" id="guide-steps"></ol>
+        <button
+          type="button"
+          class="button button-primary"
+          id="guide-next"
+        ></button>
+        <p id="guide-progress" class="guide-progress" aria-live="polite"></p>
+        <details class="guide-explanation">
+          <summary>面试官：这一步怎样实现？</summary>
+          <div id="implementation-note"></div>
+          <a href="../details.html">阅读完整设计</a>
+        </details>
+        <p class="guide-footnote">
+          这里体验业务规则；真实后端的事务、权限与性能证据见项目详解和实测页。
+        </p>
+      </aside>
+    </main>
+    <div
+      id="demo-toast"
+      class="demo-toast"
+      role="status"
+      aria-live="polite"
+      hidden
+    ></div>
+    <noscript
+      ><div class="container empty-state">
+        互动演示需要JavaScript。你仍可<a href="../details.html"
+          >阅读完整业务与设计</a
+        >，或<a href="../performance.html">查看实测报告</a>。
+      </div></noscript
+    >
+    <footer class="container site-footer demo-footer">
+      <span>用一笔交易，理解完整业务链路。</span>
+      <div>
+        <a href="../details.html">业务与设计</a
+        ><a href="https://github.com/tech-cove01/project-full-stack"
+          >项目源码</a
+        >
+      </div>
+    </footer>
+  </body>
+</html>

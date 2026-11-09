@@ -4,6 +4,8 @@
 
 ## 收尾后的项目展示
 
+互动业务演示：用户要求给HR/面试官可操作的业务体验，按[WEB-005/006规格](docs/showcase-demo-plan.md)实现 `showcase/demo/`。WEB-005已完成顾客抢券/支付、店员核销、店主管理退款与审计、社区发布搜索点赞、五步业务引导和可重置示例；8项状态测试、三尺寸浏览器完整流程与业务独审通过，见[验收](docs/showcase-demo-verification.md)。当前接续WEB-006首页入口与Pages发布，不启动真实服务或云机。
+
 首版反馈打磨已交付：WEB-003移除链接箭头、调整中文字体与字号层级，三页九组浏览器检查与独审通过，提交 `4f9d73272471cb786ee1bc88a8c278542023e4af`。WEB-004提交 `e0a23d9b495c62a5df364fe92cd5bc64b7c42c7b` 已将四张PTS原图移至实测页开头，以全宽切换展示，增加原尺寸查看；1440/768/390宽首图分别从355/323/437px处开始，首屏可见。新增截图交互、无JS、九组布局和48链接检查通过，独立差量审查PASS；两提交均正常推送，[Pages更新](https://github.com/tech-cove01/project-full-stack/actions/runs/42579024653) success。线上三页与七项资源HTTP200、首屏图宽1198px/顶部355.47px、报告切换与原尺寸查看通过，四图SHA保持。完整业务和全部原始指标不变，后续等待用户打磨反馈。
 
 用户要求参考已打磨的 CRM Pages 制作本项目 GitHub 静态站，随后指定浅紫配色、完整功能介绍，并明确允许公开两张 PTS 概览截图中的报告 ID。按 [展示规格](docs/showcase-plan.md) 交付 `showcase/` 的项目概览、设计详解和压测实录；功能交付与 CAP-10 结果仍已收尾，不重开业务开发或压测。WEB-001 页面与素材已通过三页九组浏览器检查、48处本地链接/锚点、四图SHA及双独审，见[验收](docs/showcase-verification.md)，提交 `6d77fba61c73368c4bd7effbe89cc5b36dedec85`。WEB-002 提交 `b7b3ecc07857251e6166ba1eb745411773253662` 已正常推送，Pages [发布任务](https://github.com/tech-cove01/project-full-stack/actions/runs/42577230603) success；[线上展示站](https://tech-cove01.github.io/project-full-stack/)三页及七项静态资源HTTP200，真实浏览器样式与轮次交互通过，四张线上截图SHA与原件一致。站点仅发布 `showcase/`，不依赖原 ECS，原图、失败记录和本地简历材料保持原样。展示首版交付完成，后续按用户反馈打磨，不自动增加业务或压力轮次。

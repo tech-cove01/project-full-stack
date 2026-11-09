@@ -4,7 +4,7 @@
 
 ## 收尾后的项目展示
 
-用户要求参考已打磨的 CRM Pages 制作本项目 GitHub 静态站，随后指定浅紫配色、完整功能介绍，并明确允许公开两张 PTS 概览截图中的报告 ID。按 [展示规格](docs/showcase-plan.md) 交付 `showcase/` 的项目概览、设计详解和压测实录；功能交付与 CAP-10 结果仍已收尾，不重开业务开发或压测。WEB-001 页面与素材已通过三页九组浏览器检查、48处本地链接/锚点、四图SHA及双独审，见[验收](docs/showcase-verification.md)，提交 `6d77fba61c73368c4bd7effbe89cc5b36dedec85`。WEB-002 已启用本仓 Pages 的 GitHub Actions 来源，加入仅上传 `showcase/` 的发布工作流，待推送后核验实际部署。站点不依赖原 ECS，原图、失败记录和本地简历材料保持原样。
+用户要求参考已打磨的 CRM Pages 制作本项目 GitHub 静态站，随后指定浅紫配色、完整功能介绍，并明确允许公开两张 PTS 概览截图中的报告 ID。按 [展示规格](docs/showcase-plan.md) 交付 `showcase/` 的项目概览、设计详解和压测实录；功能交付与 CAP-10 结果仍已收尾，不重开业务开发或压测。WEB-001 页面与素材已通过三页九组浏览器检查、48处本地链接/锚点、四图SHA及双独审，见[验收](docs/showcase-verification.md)，提交 `6d77fba61c73368c4bd7effbe89cc5b36dedec85`。WEB-002 提交 `b7b3ecc07857251e6166ba1eb745411773253662` 已正常推送，Pages [发布任务](https://github.com/tech-cove01/project-full-stack/actions/runs/42577230603) success；[线上展示站](https://tech-cove01.github.io/project-full-stack/)三页及七项静态资源HTTP200，真实浏览器样式与轮次交互通过，四张线上截图SHA与原件一致。站点仅发布 `showcase/`，不依赖原 ECS，原图、失败记录和本地简历材料保持原样。展示首版交付完成，后续按用户反馈打磨，不自动增加业务或压力轮次。
 
 ## 当前目标与操作状态
 

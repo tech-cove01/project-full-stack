@@ -37,4 +37,8 @@
 
 ## 发布
 
-WEB-002 使用 GitHub Actions 的 Pages artifact，只上传 `showcase/`。实际发布状态与URL以根 STATUS 为准。回退使用追加提交或重新部署已核版本，不改原测试证据。
+WEB-002 使用 GitHub Actions 的 Pages artifact，只上传 `showcase/`。提交 `b7b3ecc07857251e6166ba1eb745411773253662` 的[发布任务](https://github.com/tech-cove01/project-full-stack/actions/runs/42577230603)已实际完成，结论 `success`。
+
+已用真实浏览器访问[线上站点](https://tech-cove01.github.io/project-full-stack/)：三页 HTTP200，标题及浅紫样式正确，线上 H4 切换可用，无脚本异常。CSS、JS、favicon和四张PNG共七项资源均HTTP200；文本与本地内容一致，四张PNG线上SHA与上表一致。原生 GitHub 项目子路径访问通过，非仅本地预览结论。
+
+本轮首版已完成；后续状态与入口统一见根 STATUS。回退使用追加提交或重新部署已核版本，不改原测试证据。

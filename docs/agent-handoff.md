@@ -1,6 +1,10 @@
 # 给实现 agent 的 Go 迁移交接
 
-更新：2026-11-05。接续先读根AGENTS、[协作与授权记录](collaboration-agreements.md)、[当前STATUS](../STATUS.md)和[总方案](implementation-plan.md)。状态仅由根STATUS维护；本页保留执行顺序与交付规则，不另列一套历史状态表。
+更新：2026-11-09。接续先读根AGENTS、[协作与授权记录](collaboration-agreements.md)、[当前STATUS](../STATUS.md)和[总方案](implementation-plan.md)。状态仅由根STATUS维护；本页保留执行顺序与交付规则，不另列一套历史状态表。
+
+## 收尾后的展示维护
+
+用户要求的 GitHub 静态展示站位于 `showcase/`，浅紫风格、完整功能概览、设计详解及点赞压测实录。参考CRM的阅读层次，采用独立HTML/CSS/JS；它不依赖原ECS或运行中的应用。Pages仅发布此目录，根产品README原约定不变。具体发布状态只见STATUS，规格与核验见[展示方案](showcase-plan.md)和[页面验收](showcase-verification.md)。继续打磨时不重开压测、不更改原始截图数值；用户仅明确允许PTS概览报告ID公开，原图、PDF及本地简历材料按既有范围保留。
 
 ## 当前交接：本批稳定3000与归档清理完成，用户确认原ECS已释放
 

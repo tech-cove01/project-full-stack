@@ -56,3 +56,5 @@ WEB-004将四张PTS原图集中放在实测页开头，单张全宽展示、按�
 - 无JS时四张原图、两轮结果及导航均可读。48处本地链接/锚点通过，四PNG SHA仍与原件及上表相同。
 - 已查看实际桌面/手机截图。调整只改变静态展示，不改指标、原图或业务代码，不新增压力窗口。
 - `showcase_polish_review` 独立核对代码差量、桌面/手机实图、统计说明与浏览器结果，WEB-003暂存区与WEB-004最终差量均PASS，无必须修项。
+
+WEB-004 提交 `e0a23d9b495c62a5df364fe92cd5bc64b7c42c7b` 的 [Pages 更新](https://github.com/tech-cove01/project-full-stack/actions/runs/42579024653)已实际 success。线上浏览器复核三页及七项静态资源均HTTP200，主标题不超过44px，首图top=355.47px/width=1198px，H4报告切换、原尺寸查看及关闭通过，零脚本异常；CSS/JS与本地一致、四PNG SHA仍为上表值。

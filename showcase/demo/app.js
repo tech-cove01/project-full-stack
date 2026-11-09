@@ -400,6 +400,64 @@ $("#reset-demo").addEventListener("click", () => {
   render();
   toast("示例已恢复，可以重新体验。点击其他页面仍保留本次进度。");
   $("[data-view=customer]").focus();
+  showIntro();
 });
+
+const introKey = "fullstack-demo-intro-v1";
+const intro = $("#demo-intro");
+const compactLayout = matchMedia("(max-width: 900px)");
+let followGuide = false;
+let highlightTimer;
+function updateIntroPosition() {
+  $("#intro-description").textContent = compactLayout.matches
+    ? "页面上方有一组操作步骤。按顺序跟着做，就能体验一笔完整的到店消费。"
+    : "页面右侧有一组操作步骤。按顺序跟着做，就能体验一笔完整的到店消费。";
+}
+function focusGuide() {
+  const guide = $(".guide-card");
+  clearTimeout(highlightTimer);
+  guide.classList.add("guide-highlight");
+  guide.scrollIntoView({ behavior: "auto", block: "start" });
+  const target = $("#guide-next").disabled ? guide : $("#guide-next");
+  target.focus({ preventScroll: true });
+  highlightTimer = setTimeout(
+    () => guide.classList.remove("guide-highlight"),
+    4000,
+  );
+}
+function showIntro() {
+  updateIntroPosition();
+  followGuide = false;
+  if (typeof intro.showModal !== "function") {
+    focusGuide();
+    return;
+  }
+  if (!intro.open) intro.showModal();
+  document.body.classList.add("demo-intro-open");
+}
+$("#show-demo-intro").addEventListener("click", showIntro);
+$("#intro-start").addEventListener("click", () => {
+  followGuide = true;
+  intro.close();
+});
+$("#intro-explore").addEventListener("click", () => intro.close());
+intro.addEventListener("close", () => {
+  document.body.classList.remove("demo-intro-open");
+  try {
+    sessionStorage.setItem(introKey, "seen");
+  } catch {
+    /* Intro still works without persistence. */
+  }
+  if (followGuide) focusGuide();
+  else $("#show-demo-intro").focus({ preventScroll: true });
+});
+compactLayout.addEventListener("change", updateIntroPosition);
 render();
 scheduleOrders();
+let introSeen = false;
+try {
+  introSeen = sessionStorage.getItem(introKey) === "seen";
+} catch {
+  /* Show instructions for this visit. */
+}
+if (!introSeen) showIntro();

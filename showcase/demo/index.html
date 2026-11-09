@@ -27,6 +27,8 @@
         <nav class="demo-site-nav" aria-label="演示页面导航">
           <a href="../index.html">项目介绍</a
           ><a href="../performance.html">实测结果</a
+          ><button type="button" id="show-demo-intro" class="action-secondary">
+            操作指引</button
           ><button type="button" id="reset-demo" class="action-secondary">
             重新体验
           </button>
@@ -170,7 +172,7 @@
           <div id="note-list" class="note-grid" aria-live="polite"></div>
         </section>
       </div>
-      <aside class="guide-card" aria-labelledby="guide-title">
+      <aside class="guide-card" aria-labelledby="guide-title" tabindex="-1">
         <p class="guide-eyebrow">第一次来？跟着业务走一遍</p>
         <h2 id="guide-title"></h2>
         <p id="guide-text"></p>
@@ -182,7 +184,7 @@
         ></button>
         <p id="guide-progress" class="guide-progress" aria-live="polite"></p>
         <details class="guide-explanation">
-          <summary>面试官：这一步怎样实现？</summary>
+          <summary>这一步如何运作？</summary>
           <div id="implementation-note"></div>
           <a href="../details.html">阅读完整设计</a>
         </details>
@@ -191,6 +193,44 @@
         </p>
       </aside>
     </main>
+    <dialog
+      id="demo-intro"
+      class="demo-intro"
+      aria-labelledby="intro-title"
+      aria-describedby="intro-description"
+    >
+      <p class="eyebrow">欢迎体验生活交易</p>
+      <h2 id="intro-title">跟着步骤，走完一笔交易。</h2>
+      <p id="intro-description"></p>
+      <ol class="intro-steps">
+        <li>
+          <strong>先看操作步骤</strong
+          ><span>从顾客抢券开始，再体验支付、店员核销和探店分享。</span>
+        </li>
+        <li>
+          <strong>点击引导按钮继续</strong
+          ><span>每一步都会告诉你做什么，并带你找到对应的页面或操作。</span>
+        </li>
+        <li>
+          <strong>也可以自由探索</strong
+          ><span>随时切换顾客、商家和社区；想重来时点击“重新体验”。</span>
+        </li>
+      </ol>
+      <div class="intro-actions">
+        <button
+          type="button"
+          class="button button-primary"
+          id="intro-start"
+          autofocus
+        >
+          跟着步骤开始
+        </button>
+        <button type="button" class="action-secondary" id="intro-explore">
+          我先自由体验
+        </button>
+      </div>
+      <p class="intro-footnote">之后可随时点击顶部“操作指引”再次查看。</p>
+    </dialog>
     <div
       id="demo-toast"
       class="demo-toast"

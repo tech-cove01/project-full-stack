@@ -1207,6 +1207,80 @@ details.guide-explanation {
     padding: 11px 14px;
   }
 }
+.demo-intro {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  padding: 30px;
+  border: 1px solid #d4c3e7;
+  border-radius: 14px;
+  color: var(--ink);
+  background: #fcfaff;
+}
+.demo-intro::backdrop {
+  background: #2b1c40a8;
+}
+.demo-intro h2 {
+  margin: 10px 0 14px;
+  font-size: 25px;
+}
+#intro-description {
+  color: var(--muted);
+  font-size: 16px;
+}
+.intro-steps {
+  display: grid;
+  gap: 17px;
+  padding-left: 22px;
+  margin: 23px 0;
+}
+.intro-steps li::marker {
+  color: var(--purple);
+  font-weight: 700;
+}
+.intro-steps strong,
+.intro-steps span {
+  display: block;
+}
+.intro-steps strong {
+  font-size: 16px;
+}
+.intro-steps span {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.intro-actions button {
+  min-height: 44px;
+}
+.intro-footnote {
+  margin-top: 16px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.demo-intro-open {
+  overflow: hidden;
+}
+.guide-card {
+  scroll-margin-top: 130px;
+}
+.guide-card.guide-highlight {
+  outline: 3px solid #b697d7;
+  outline-offset: 5px;
+}
+@media (max-width: 600px) {
+  .demo-intro {
+    padding: 22px;
+  }
+  .demo-intro h2 {
+    font-size: 22px;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .demo-body *,
   .demo-body *::before,

@@ -226,6 +226,11 @@ summary:focus-visible {
   color: var(--muted);
   letter-spacing: 0.01em;
 }
+.hero-demo-note {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--muted);
+}
 .journey-preview {
   padding: 26px 30px;
   background: var(--paper);

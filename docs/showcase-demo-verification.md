@@ -26,3 +26,5 @@
 实现规格见[业务演示方案](showcase-demo-plan.md)，发布与远端状态统一见根STATUS。
 
 WEB-006：首页首屏主入口和三页导航均接入 `./demo/`，明确无需登录、示例数据可重置。三页九组浏览器回归通过，52处本地引用/锚点与四张原图SHA核对通过；原实测图首屏位置保持。独立差量审查确认入口与说明准确、未提前宣称发布完成，PASS。
+
+发布提交 `7fda2547f6e56b688058e41adbd1d9f5bffb1682` 的[Pages任务](https://github.com/tech-cove01/project-full-stack/actions/runs/42612434051)已完成，结论success。[线上演示](https://tech-cove01.github.io/project-full-stack/demo/)使用真实浏览器在1440/768/390宽重走全部主线与取消重买/退款、权限、社区等分支，均PASS；禁用sessionStorage的线上购买也通过，无JS异常、无外部业务请求。不是仅本机预览结论。

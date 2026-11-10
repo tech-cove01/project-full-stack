@@ -1,0 +1,40 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { initialLikes, likesStep } from "../showcase/demo/scenes/likes.js";
+test("like fact commits before delivery, repeated desired state produces no event", () => {
+  let s = likesStep(initialLikes(), { type: "WRITE", liked: true });
+  assert.equal(s.liked, true);
+  assert.equal(s.version, 1);
+  assert.equal(s.events[0].published, false);
+  s = likesStep(s, { type: "WRITE", liked: true });
+  assert.equal(s.version, 1);
+  assert.equal(s.events.length, 1);
+  s = likesStep(s, { type: "WRITE", liked: false });
+  assert.equal(s.liked, false);
+  assert.equal(s.version, 2);
+});
+test("paused consumption leaves backlog, resuming requires explicit draining", () => {
+  let s = likesStep(initialLikes(), { type: "GROUP" });
+  s = likesStep(s, { type: "PAUSE" });
+  s = likesStep(s, { type: "DRAIN" });
+  assert.equal(s.version, 12);
+  assert.equal(s.events.filter((e) => e.receipt).length, 0);
+  assert(s.events.every((e) => e.published));
+  s = likesStep(s, { type: "PAUSE" });
+  assert.equal(s.events.filter((e) => e.receipt).length, 0);
+  s = likesStep(s, { type: "DRAIN" });
+  assert.equal(s.events.filter((e) => e.receipt).length, 12);
+  assert.equal(s.consumeRounds, 3);
+  const rounds = s.consumeRounds;
+  s = likesStep(s, { type: "DRAIN" });
+  assert.equal(s.consumeRounds, rounds);
+});
+test("same operations have equal facts/receipts with bounded batch counts", () => {
+  const s = likesStep(initialLikes(), { type: "COMPARE" });
+  const [a, b] = s.comparison;
+  assert.equal(a.writes, b.writes);
+  assert.equal(a.receipts, b.receipts);
+  assert.equal(a.count, b.count);
+  assert.equal(a.publishRounds, 12);
+  assert.equal(b.publishRounds, 3);
+});

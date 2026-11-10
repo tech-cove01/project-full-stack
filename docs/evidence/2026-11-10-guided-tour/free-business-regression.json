@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "base": "http://127.0.0.1:8767/demo/",
+  "checks": [
+    "1440px: purchase, pay, wrong token, staff scope, redemption idempotency, owner audit, publish/search/like, plain text, reload, cancel/rebuy, refund and reset passed",
+    "768px: purchase, pay, wrong token, staff scope, redemption idempotency, owner audit, publish/search/like, plain text, reload, cancel/rebuy, refund and reset passed",
+    "390px: purchase, pay, wrong token, staff scope, redemption idempotency, owner audit, publish/search/like, plain text, reload, cancel/rebuy, refund and reset passed",
+    "Storage disabled: memory-mode purchase works"
+  ],
+  "errors": [],
+  "external": []
+}

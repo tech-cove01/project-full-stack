@@ -1,0 +1,19 @@
+{
+  "passed": true,
+  "checks": [
+    "index.html 1440px: navigation, assets, layout, interactions passed",
+    "details.html 1440px: navigation, assets, layout, interactions passed",
+    "First report at 1440px: top=355.46875, width=1198",
+    "performance.html 1440px: navigation, assets, layout, interactions passed",
+    "index.html 768px: navigation, assets, layout, interactions passed",
+    "details.html 768px: navigation, assets, layout, interactions passed",
+    "First report at 768px: top=326.28125, width=726",
+    "performance.html 768px: navigation, assets, layout, interactions passed",
+    "index.html 390px: navigation, assets, layout, interactions passed",
+    "details.html 390px: navigation, assets, layout, interactions passed",
+    "First report at 390px: top=440.75, width=348",
+    "performance.html 390px: navigation, assets, layout, interactions passed",
+    "No-JS: both formal results and navigation readable"
+  ],
+  "errors": []
+}

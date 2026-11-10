@@ -485,19 +485,12 @@ const compactLayout = matchMedia("(max-width: 900px)");
 let followGuide = false;
 let highlightTimer;
 function updateIntroPosition() {
-  $("#intro-description").textContent = compactLayout.matches
-    ? "页面上方有一组操作步骤。按顺序跟着做，就能体验一笔完整的到店消费。"
-    : "页面右侧有一组操作步骤。按顺序跟着做，就能体验一笔完整的到店消费。";
-  if (selectedScene !== "free") {
-    const names = {
-      trade: "抢券与故障恢复",
-      feed: "公共内容读取与个人状态",
-      events: "笔记发布与搜索恢复",
-      likes: "点赞写入与下游积压",
-    };
-    $("#intro-description").textContent =
-      `当前体验${names[selectedScene]}。${compactLayout.matches ? "上方" : "右侧"}步骤会告诉你从哪里开始、点击什么和结果看哪里。`;
-  }
+  const names = {
+    trade: "抢券与故障恢复",
+    feed: "公共内容读取与个人状态",
+    events: "笔记发布与搜索恢复",
+    likes: "点赞写入与下游积压",
+  };
   $("#intro-path").textContent =
     selectedScene === "free"
       ? "从顾客抢券开始，再体验支付、店员核销和探店分享。"
@@ -505,7 +498,7 @@ function updateIntroPosition() {
   $("#intro-description").textContent =
     selectedScene === "free"
       ? "建议先从抢券开始。引导会高亮要点击的按钮，做完后带你看结果，再继续下一步。"
-      : "从当前场景开始。跟着高亮按钮操作，做完后看结果；随时可以退出，自由探索。";
+      : `当前场景：${names[selectedScene]}。跟着高亮按钮操作，做完后看结果；随时可以退出，自由探索。`;
 }
 function focusGuide() {
   const guide = $(".guide-card");

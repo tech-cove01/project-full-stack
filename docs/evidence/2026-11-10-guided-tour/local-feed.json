@@ -1,0 +1,145 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-cold-read",
+      "action": "#feed-read",
+      "result": "缓存还没有正文，因此启动了一次回源。页面先等待，正文尚未拿到，不会把加载中当作读取成功。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-first-finish",
+      "action": "#feed-finish",
+      "result": "咖啡笔记已返回，两级缓存同时留下公共正文。访客A的点赞状态单独读取，没有塞进共享正文。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-warm-read",
+      "action": "#feed-read",
+      "result": "本次来自进程内缓存，回源批次没有增加。同一份公共正文可以复用，减少重复查询。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-like-a",
+      "action": "#feed-like",
+      "result": "只有访客A变为已点赞。共享正文缓存没有增加个人字段，接下来换人验证状态不会串用。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-visitor-b",
+      "action": "#feed-visitor-b",
+      "result": "现在是访客B，显示未点赞；访客A的点赞依然保留。两个人的状态各自独立。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-read-b",
+      "action": "#feed-read",
+      "result": "正文仍来自进程内缓存，访客B却显示未点赞。公共内容可共享，个人状态按当前访客读取。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-clear-cache",
+      "action": "#feed-clear",
+      "result": "两级公共缓存已清空，个人点赞仍保留。下一步的三次冷请求会争取复用同一次回源。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-batch-cold",
+      "action": "#feed-batch",
+      "result": "三个等待者共享一批回源，另外两个加入正在加载的批次。相同缺失内容在单进程内合并，避免同时重复查询。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-cancel-first",
+      "action": "#feed-cancel",
+      "result": "这是预期保护：只有一个请求取消，共享回源仍在运行，另外两个人继续等待，不会被一起中断。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-finish-shared",
+      "action": "#feed-finish",
+      "result": "取消者仍是已取消，其余两人正常拿到正文：A已点赞，B未点赞。一次共享回源完成，取消和个人状态都没有串给别人。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-cold-read",
+      "action": "#feed-read",
+      "result": "缓存还没有正文，因此启动了一次回源。页面先等待，正文尚未拿到，不会把加载中当作读取成功。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-first-finish",
+      "action": "#feed-finish",
+      "result": "咖啡笔记已返回，两级缓存同时留下公共正文。访客A的点赞状态单独读取，没有塞进共享正文。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-warm-read",
+      "action": "#feed-read",
+      "result": "本次来自进程内缓存，回源批次没有增加。同一份公共正文可以复用，减少重复查询。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-like-a",
+      "action": "#feed-like",
+      "result": "只有访客A变为已点赞。共享正文缓存没有增加个人字段，接下来换人验证状态不会串用。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-visitor-b",
+      "action": "#feed-visitor-b",
+      "result": "现在是访客B，显示未点赞；访客A的点赞依然保留。两个人的状态各自独立。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-read-b",
+      "action": "#feed-read",
+      "result": "正文仍来自进程内缓存，访客B却显示未点赞。公共内容可共享，个人状态按当前访客读取。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-clear-cache",
+      "action": "#feed-clear",
+      "result": "两级公共缓存已清空，个人点赞仍保留。下一步的三次冷请求会争取复用同一次回源。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-batch-cold",
+      "action": "#feed-batch",
+      "result": "三个等待者共享一批回源，另外两个加入正在加载的批次。相同缺失内容在单进程内合并，避免同时重复查询。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-cancel-first",
+      "action": "#feed-cancel",
+      "result": "这是预期保护：只有一个请求取消，共享回源仍在运行，另外两个人继续等待，不会被一起中断。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-finish-shared",
+      "action": "#feed-finish",
+      "result": "取消者仍是已取消，其余两人正常拿到正文：A已点赞，B未点赞。一次共享回源完成，取消和个人状态都没有串给别人。"
+    }
+  ],
+  "errors": []
+}

@@ -129,7 +129,11 @@ export function createTour({
   function render(scroll = true) {
     if (!active) return;
     const step = current();
-    const missing = step && !panel()?.querySelector(step.target);
+    const missing =
+      step &&
+      !panel()?.querySelector(
+        phase === "result" ? step.result || step.target : step.target,
+      );
     const disabled =
       step &&
       phase === "action" &&
@@ -167,7 +171,15 @@ export function createTour({
     onUpdate?.(view());
   }
   function view() {
-    return active ? { plan, index, phase, step: current(), note } : null;
+    return active
+      ? {
+          plan,
+          index,
+          phase: coach.dataset.phase === "blocked" ? "blocked" : phase,
+          step: current(),
+          note,
+        }
+      : null;
   }
   function start(branch) {
     // Explicitly preserve the visitor's scene data and observed actions.
@@ -214,6 +226,7 @@ export function createTour({
     note = "";
   }
   function advance() {
+    if (coach.dataset.phase === "blocked") return;
     index++;
     while (current()?.done?.(snapshot(), records)) index++;
     phase = "action";
@@ -310,7 +323,15 @@ export function createTour({
   });
   new MutationObserver(() => {
     if (active) {
-      locate(false);
+      const step = current();
+      const missing =
+        step &&
+        !panel()?.querySelector(
+          phase === "result" ? step.result || step.target : step.target,
+        );
+      if (missing || (coach.dataset.phase === "blocked" && !plan.blocked))
+        render(false);
+      else locate(false);
     }
   }).observe(document.querySelector("#scene-workspace"), {
     childList: true,

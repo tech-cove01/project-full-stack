@@ -1,0 +1,27 @@
+{
+  "checks": [
+    "1440: homepage generic start recommends trade",
+    "1440: missing target shows explicit recovery and restoration recovers",
+    "1440: Esc, scene switch, resize, top reopen and free exploration restore controls",
+    "1440: seen-welcome trade deep link and refresh start own first action",
+    "1440: seen-welcome feed deep link and refresh start own first action",
+    "1440: seen-welcome events deep link and refresh start own first action",
+    "1440: seen-welcome likes deep link and refresh start own first action",
+    "1440: fresh-welcome trade starts selected scene",
+    "1440: fresh-welcome feed starts selected scene",
+    "1440: fresh-welcome events starts selected scene",
+    "1440: fresh-welcome likes starts selected scene",
+    "390: homepage generic start recommends trade",
+    "390: missing target shows explicit recovery and restoration recovers",
+    "390: Esc, scene switch, resize, top reopen and free exploration restore controls",
+    "390: seen-welcome trade deep link and refresh start own first action",
+    "390: seen-welcome feed deep link and refresh start own first action",
+    "390: seen-welcome events deep link and refresh start own first action",
+    "390: seen-welcome likes deep link and refresh start own first action",
+    "390: fresh-welcome trade starts selected scene",
+    "390: fresh-welcome feed starts selected scene",
+    "390: fresh-welcome events starts selected scene",
+    "390: fresh-welcome likes starts selected scene"
+  ],
+  "errors": []
+}

@@ -1,0 +1,173 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-title",
+      "action": "#events-title",
+      "result": "标题已经填入。事实、消息和搜索索引都还没有因为输入而改变，下一步由你确认发布。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-publish",
+      "action": "#events-publish",
+      "result": "笔记事实和待投递事件已一起保存。搜索索引还没更新，发布成功和能搜到是两个阶段。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-deliver",
+      "action": "#events-deliver",
+      "result": "搜索索引已经跟上当前事实版本，处理收据也已保存。现在再查公开搜索。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-query",
+      "action": "#events-query",
+      "result": "筛选词已经清空，下一步查询全部公开笔记，避免自定义标题被原来的“咖啡”筛选挡住。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-search",
+      "action": "#events-search",
+      "result": "查到了当前公开版本。搜索候选会再核对当前事实的版本和公开状态，才交给读者。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-offline",
+      "action": "#events-offline",
+      "result": "搜索索引已暂停服务。业务事实仍可保存，接下来观察消息失败后会去哪里。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-edit",
+      "action": "#events-title",
+      "result": "新标题已经填好。索引仍不可用，下一步亲手保存，看看事实能否独立提交。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-save",
+      "action": "#events-publish",
+      "result": "新事实和事件已保存，旧索引没有假装更新成功。下一步投递会留下可恢复的失败记录。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-fail",
+      "action": "#events-deliver",
+      "result": "这是预期故障演示：事件被保存为停车记录，没有错误确认成功。失败事件仍可查看和人工恢复。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-restore",
+      "action": "#events-offline",
+      "result": "连接恢复了，停车记录仍在。恢复服务不等于已经重放失败消息，下一步需要你明确执行。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-replay",
+      "action": "#events-replay",
+      "result": "人工重放已完成，停车事件有了处理收据，索引更新到新版本。下一步重新查询确认读者看到的内容。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-search-recovered",
+      "action": "#events-search",
+      "result": "新标题与当前公开版本一致。故障期间没丢事实，也没把未处理的消息冒称成功，恢复由明确重放完成。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-title",
+      "action": "#events-title",
+      "result": "标题已经填入。事实、消息和搜索索引都还没有因为输入而改变，下一步由你确认发布。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-publish",
+      "action": "#events-publish",
+      "result": "笔记事实和待投递事件已一起保存。搜索索引还没更新，发布成功和能搜到是两个阶段。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-deliver",
+      "action": "#events-deliver",
+      "result": "搜索索引已经跟上当前事实版本，处理收据也已保存。现在再查公开搜索。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-query",
+      "action": "#events-query",
+      "result": "筛选词已经清空，下一步查询全部公开笔记，避免自定义标题被原来的“咖啡”筛选挡住。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-search",
+      "action": "#events-search",
+      "result": "查到了当前公开版本。搜索候选会再核对当前事实的版本和公开状态，才交给读者。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-offline",
+      "action": "#events-offline",
+      "result": "搜索索引已暂停服务。业务事实仍可保存，接下来观察消息失败后会去哪里。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-edit",
+      "action": "#events-title",
+      "result": "新标题已经填好。索引仍不可用，下一步亲手保存，看看事实能否独立提交。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-save",
+      "action": "#events-publish",
+      "result": "新事实和事件已保存，旧索引没有假装更新成功。下一步投递会留下可恢复的失败记录。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-fail",
+      "action": "#events-deliver",
+      "result": "这是预期故障演示：事件被保存为停车记录，没有错误确认成功。失败事件仍可查看和人工恢复。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-restore",
+      "action": "#events-offline",
+      "result": "连接恢复了，停车记录仍在。恢复服务不等于已经重放失败消息，下一步需要你明确执行。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-replay",
+      "action": "#events-replay",
+      "result": "人工重放已完成，停车事件有了处理收据，索引更新到新版本。下一步重新查询确认读者看到的内容。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-search-recovered",
+      "action": "#events-search",
+      "result": "新标题与当前公开版本一致。故障期间没丢事实，也没把未处理的消息冒称成功，恢复由明确重放完成。"
+    }
+  ]
+}

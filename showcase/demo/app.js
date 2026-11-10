@@ -18,6 +18,7 @@ import { mount as mountLikes } from "./scenes/likes.js";
 import { createTour } from "./tour.js";
 import { makeTradeTour, makeTradeRecoveryTour } from "./scenes/trade-tour.js";
 import { makeFeedTour } from "./scenes/feed-tour.js";
+import { makeEventsTour } from "./scenes/events-tour.js";
 
 const sceneControllers = {};
 const tourControllers = {};
@@ -613,6 +614,7 @@ for (const [key, mount] of Object.entries({
 }
 const tourFactories = {
   feed: (s, _branch, records) => makeFeedTour(s, records),
+  events: (s) => makeEventsTour(s),
   trade: (s, branch) => (branch ? makeTradeRecoveryTour(s) : makeTradeTour(s)),
 };
 for (const [key, factory] of Object.entries(tourFactories)) {

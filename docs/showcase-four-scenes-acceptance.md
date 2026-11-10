@@ -31,4 +31,15 @@
 
 操作后截图见本目录下 `evidence/2026-11-10-showcase-four-scenes/`，桌面和手机各四张，展示示例状态而非真实后端测量。过程计数、轮数与队列都明确标为浏览器模拟，不作为QPS或真实SQL计数；没有启动后端、压测或云机，也未修改简历或原实测数据。
 
+| 场景 | 桌面截图 | 手机截图 |
+| --- | --- | --- |
+| 交易 | [待核对恢复后的唯一订单](evidence/2026-11-10-showcase-four-scenes/trade-1440.png) | [手机流程](evidence/2026-11-10-showcase-four-scenes/trade-390.png) |
+| Feed | [版本与可见性复核](evidence/2026-11-10-showcase-four-scenes/feed-1440.png) | [手机流程](evidence/2026-11-10-showcase-four-scenes/feed-390.png) |
+| 事件与搜索 | [人工重放后搜索恢复](evidence/2026-11-10-showcase-four-scenes/events-1440.png) | [手机流程](evidence/2026-11-10-showcase-four-scenes/events-390.png) |
+| 点赞 | [收据核对和同组对照](evidence/2026-11-10-showcase-four-scenes/likes-1440.png) | [手机流程](evidence/2026-11-10-showcase-four-scenes/likes-390.png) |
+
+## 已部署，待用户验收
+
+发布源码提交 `d478fbf1e748b3f7f74d451bc765932cd82258d9` 的[Pages任务](https://github.com/tech-cove01/project-full-stack/actions/runs/42744176100)实际completed/success。从线上展示首页逐一进入四场景，1440/390宽共8条完整路径再次执行正常与关键异常、重置、深链刷新和返回设计，均PASS、无JS异常。原始检查记录见[本地记录](evidence/2026-11-10-showcase-four-scenes/local-browser-result.json)与[线上记录](evidence/2026-11-10-showcase-four-scenes/online-browser-result.json)。当前交付等待用户实际体验，未写作用户验收通过。
+
 本批不覆盖穷举故障、跨实例缓存、真实Kafka/ES现场故障或新的负载测试，这些均非本次静态展示任务。部署回执和最终状态统一见STATUS；满足本批标准后等待用户验收。

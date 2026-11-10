@@ -1,0 +1,397 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-cold-read",
+      "action": "#feed-read",
+      "result": "缓存还没有正文，因此启动了一次回源。页面先等待，正文尚未拿到，不会把加载中当作读取成功。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-first-finish",
+      "action": "#feed-finish",
+      "result": "咖啡笔记已返回，两级缓存同时留下公共正文。访客A的点赞状态单独读取，没有塞进共享正文。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-warm-read",
+      "action": "#feed-read",
+      "result": "本次来自进程内缓存，回源批次没有增加。同一份公共正文可以复用，减少重复查询。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-like-a",
+      "action": "#feed-like",
+      "result": "只有访客A变为已点赞。共享正文缓存没有增加个人字段，接下来换人验证状态不会串用。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-visitor-b",
+      "action": "#feed-visitor-b",
+      "result": "现在是访客B，显示未点赞；访客A的点赞依然保留。两个人的状态各自独立。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-read-b",
+      "action": "#feed-read",
+      "result": "正文仍来自进程内缓存，访客B却显示未点赞。公共内容可共享，个人状态按当前访客读取。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-clear-cache",
+      "action": "#feed-clear",
+      "result": "两级公共缓存已清空，个人点赞仍保留。下一步的三次冷请求会争取复用同一次回源。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-batch-cold",
+      "action": "#feed-batch",
+      "result": "三个等待者共享一批回源，另外两个加入正在加载的批次。相同缺失内容在单进程内合并，避免同时重复查询。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-cancel-first",
+      "action": "#feed-cancel",
+      "result": "这是预期保护：只有一个请求取消，共享回源仍在运行，另外两个人继续等待，不会被一起中断。"
+    },
+    {
+      "width": 1440,
+      "scene": "feed",
+      "step": "feed-finish-shared",
+      "action": "#feed-finish",
+      "result": "取消者仍是已取消，其余两人正常拿到正文：A已点赞，B未点赞。一次共享回源完成，取消和个人状态都没有串给别人。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-title",
+      "action": "#events-title",
+      "result": "标题已经填入。事实、消息和搜索索引都还没有因为输入而改变，下一步由你确认发布。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-publish",
+      "action": "#events-publish",
+      "result": "笔记事实和待投递事件已一起保存。搜索索引还没更新，发布成功和能搜到是两个阶段。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-deliver",
+      "action": "#events-deliver",
+      "result": "搜索索引已经跟上当前事实版本，处理收据也已保存。现在再查公开搜索。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-query",
+      "action": "#events-query",
+      "result": "筛选词已经清空，下一步查询全部公开笔记，避免自定义标题被原来的“咖啡”筛选挡住。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-search",
+      "action": "#events-search",
+      "result": "查到了当前公开版本。搜索候选会再核对当前事实的版本和公开状态，才交给读者。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-offline",
+      "action": "#events-offline",
+      "result": "搜索索引已暂停服务。业务事实仍可保存，接下来观察消息失败后会去哪里。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-edit",
+      "action": "#events-title",
+      "result": "新标题已经填好。索引仍不可用，下一步亲手保存，看看事实能否独立提交。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-save",
+      "action": "#events-publish",
+      "result": "新事实和事件已保存，旧索引没有假装更新成功。下一步投递会留下可恢复的失败记录。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-fail",
+      "action": "#events-deliver",
+      "result": "这是预期故障演示：事件被保存为停车记录，没有错误确认成功。失败事件仍可查看和人工恢复。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-restore",
+      "action": "#events-offline",
+      "result": "连接恢复了，停车记录仍在。恢复服务不等于已经重放失败消息，下一步需要你明确执行。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-replay",
+      "action": "#events-replay",
+      "result": "人工重放已完成，停车事件有了处理收据，索引更新到新版本。下一步重新查询确认读者看到的内容。"
+    },
+    {
+      "width": 1440,
+      "scene": "events",
+      "step": "events-search-recovered",
+      "action": "#events-search",
+      "result": "新标题与当前公开版本一致。故障期间没丢事实，也没把未处理的消息冒称成功，恢复由明确重放完成。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-write",
+      "action": "#likes-write",
+      "result": "点赞事实已经变为1，业务版本增加，同时有一条待发布Outbox。接口写入成功，但下游还没完成。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-pause",
+      "action": "#likes-pause",
+      "result": "消费者已暂停，点赞事实没有回滚。下一步继续发布事件，观察等待收据的积压。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-publish",
+      "action": "#likes-publish",
+      "result": "事件已发布，但消费暂停，待收据数量增加。点赞成功不能代替整条链路已经稳定。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-resume",
+      "action": "#likes-pause",
+      "result": "消费已恢复，积压仍等待处理。这一步只恢复开关，下一步由你明确处理本组消息。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-drain",
+      "action": "#likes-drain",
+      "result": "待发布与待收据都归零，成功变更数和唯一收据数一致，当前点赞事实仍符合最后一次期望。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-compare",
+      "action": "#likes-compare",
+      "result": "两种方式都保留12次变更和12条收据，最终点赞数一致；有界批量用更少轮次完成。这是机制对照，真实QPS请看原始实测报告。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-cold-read",
+      "action": "#feed-read",
+      "result": "缓存还没有正文，因此启动了一次回源。页面先等待，正文尚未拿到，不会把加载中当作读取成功。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-first-finish",
+      "action": "#feed-finish",
+      "result": "咖啡笔记已返回，两级缓存同时留下公共正文。访客A的点赞状态单独读取，没有塞进共享正文。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-warm-read",
+      "action": "#feed-read",
+      "result": "本次来自进程内缓存，回源批次没有增加。同一份公共正文可以复用，减少重复查询。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-like-a",
+      "action": "#feed-like",
+      "result": "只有访客A变为已点赞。共享正文缓存没有增加个人字段，接下来换人验证状态不会串用。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-visitor-b",
+      "action": "#feed-visitor-b",
+      "result": "现在是访客B，显示未点赞；访客A的点赞依然保留。两个人的状态各自独立。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-read-b",
+      "action": "#feed-read",
+      "result": "正文仍来自进程内缓存，访客B却显示未点赞。公共内容可共享，个人状态按当前访客读取。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-clear-cache",
+      "action": "#feed-clear",
+      "result": "两级公共缓存已清空，个人点赞仍保留。下一步的三次冷请求会争取复用同一次回源。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-batch-cold",
+      "action": "#feed-batch",
+      "result": "三个等待者共享一批回源，另外两个加入正在加载的批次。相同缺失内容在单进程内合并，避免同时重复查询。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-cancel-first",
+      "action": "#feed-cancel",
+      "result": "这是预期保护：只有一个请求取消，共享回源仍在运行，另外两个人继续等待，不会被一起中断。"
+    },
+    {
+      "width": 390,
+      "scene": "feed",
+      "step": "feed-finish-shared",
+      "action": "#feed-finish",
+      "result": "取消者仍是已取消，其余两人正常拿到正文：A已点赞，B未点赞。一次共享回源完成，取消和个人状态都没有串给别人。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-title",
+      "action": "#events-title",
+      "result": "标题已经填入。事实、消息和搜索索引都还没有因为输入而改变，下一步由你确认发布。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-publish",
+      "action": "#events-publish",
+      "result": "笔记事实和待投递事件已一起保存。搜索索引还没更新，发布成功和能搜到是两个阶段。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-deliver",
+      "action": "#events-deliver",
+      "result": "搜索索引已经跟上当前事实版本，处理收据也已保存。现在再查公开搜索。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-query",
+      "action": "#events-query",
+      "result": "筛选词已经清空，下一步查询全部公开笔记，避免自定义标题被原来的“咖啡”筛选挡住。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-search",
+      "action": "#events-search",
+      "result": "查到了当前公开版本。搜索候选会再核对当前事实的版本和公开状态，才交给读者。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-offline",
+      "action": "#events-offline",
+      "result": "搜索索引已暂停服务。业务事实仍可保存，接下来观察消息失败后会去哪里。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-edit",
+      "action": "#events-title",
+      "result": "新标题已经填好。索引仍不可用，下一步亲手保存，看看事实能否独立提交。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-save",
+      "action": "#events-publish",
+      "result": "新事实和事件已保存，旧索引没有假装更新成功。下一步投递会留下可恢复的失败记录。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-fail",
+      "action": "#events-deliver",
+      "result": "这是预期故障演示：事件被保存为停车记录，没有错误确认成功。失败事件仍可查看和人工恢复。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-restore",
+      "action": "#events-offline",
+      "result": "连接恢复了，停车记录仍在。恢复服务不等于已经重放失败消息，下一步需要你明确执行。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-replay",
+      "action": "#events-replay",
+      "result": "人工重放已完成，停车事件有了处理收据，索引更新到新版本。下一步重新查询确认读者看到的内容。"
+    },
+    {
+      "width": 390,
+      "scene": "events",
+      "step": "events-search-recovered",
+      "action": "#events-search",
+      "result": "新标题与当前公开版本一致。故障期间没丢事实，也没把未处理的消息冒称成功，恢复由明确重放完成。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-write",
+      "action": "#likes-write",
+      "result": "点赞事实已经变为1，业务版本增加，同时有一条待发布Outbox。接口写入成功，但下游还没完成。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-pause",
+      "action": "#likes-pause",
+      "result": "消费者已暂停，点赞事实没有回滚。下一步继续发布事件，观察等待收据的积压。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-publish",
+      "action": "#likes-publish",
+      "result": "事件已发布，但消费暂停，待收据数量增加。点赞成功不能代替整条链路已经稳定。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-resume",
+      "action": "#likes-pause",
+      "result": "消费已恢复，积压仍等待处理。这一步只恢复开关，下一步由你明确处理本组消息。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-drain",
+      "action": "#likes-drain",
+      "result": "待发布与待收据都归零，成功变更数和唯一收据数一致，当前点赞事实仍符合最后一次期望。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-compare",
+      "action": "#likes-compare",
+      "result": "两种方式都保留12次变更和12条收据，最终点赞数一致；有界批量用更少轮次完成。这是机制对照，真实QPS请看原始实测报告。"
+    }
+  ],
+  "errors": []
+}

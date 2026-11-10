@@ -1,0 +1,75 @@
+{
+  "source": "b6537038ef70bcf67adf2acce7c82712bc80b7e5",
+  "results": [
+    {
+      "file": "index.html",
+      "http": 200,
+      "normalizedTextSha256": "551765d6440379375e8d02c5eda2d6fee58513e52decfefab74aeecade6f8027"
+    },
+    {
+      "file": "details.html",
+      "http": 200,
+      "normalizedTextSha256": "e39ae9db9f0d352fcfd15401c808d13e4f2656d1ccae40c7b979e7af18e00921"
+    },
+    {
+      "file": "demo/index.html",
+      "http": 200,
+      "normalizedTextSha256": "e24cbcf842cfa4168a21bae989bf77b5da0d153b84615d40a2759c77a2a8d7e1"
+    },
+    {
+      "file": "demo/app.js",
+      "http": 200,
+      "normalizedTextSha256": "98bb6a78a3ef6fb4e4b0ae746e1a959ca505013ba629c412b6861d73d824bb57"
+    },
+    {
+      "file": "demo/tour.js",
+      "http": 200,
+      "normalizedTextSha256": "4d91902c723bcafafd9522f120ef61cdf760b4bee05e88ff8ea7320485fb1bef"
+    },
+    {
+      "file": "demo/tour.css",
+      "http": 200,
+      "normalizedTextSha256": "5c92ad9852acf698c0179bab7b3dc4bbd69ce2fde6582eb843f5ebc4746417bb"
+    },
+    {
+      "file": "demo/scenes/trade.js",
+      "http": 200,
+      "normalizedTextSha256": "e543ad87eeba9a529b7b434358a9e42da52e069e9b2e9c729ca753fae33a98af"
+    },
+    {
+      "file": "demo/scenes/trade-tour.js",
+      "http": 200,
+      "normalizedTextSha256": "b278a1d55196e876112fb0ea556227d03a9ea3dbe3934a83448e0fbca5fcf6c8"
+    },
+    {
+      "file": "demo/scenes/feed.js",
+      "http": 200,
+      "normalizedTextSha256": "d3fafec11708cbffdb6fbfc10736bf69eebaa21aa8d21dbb02affa6e47e4fec2"
+    },
+    {
+      "file": "demo/scenes/feed-tour.js",
+      "http": 200,
+      "normalizedTextSha256": "0a3bada3f1e392d7d6376588f59efb194df47cb99c23c58a4b984568177ebcd1"
+    },
+    {
+      "file": "demo/scenes/events.js",
+      "http": 200,
+      "normalizedTextSha256": "d8573d33dd76c95104ffb2ffd13881ba0c3febca6039cee46cd277ef4b0f9d0a"
+    },
+    {
+      "file": "demo/scenes/events-tour.js",
+      "http": 200,
+      "normalizedTextSha256": "3734e963f14bc2a9911132f998932841ce0d55e659860cfc953a46d2a13f55bb"
+    },
+    {
+      "file": "demo/scenes/likes.js",
+      "http": 200,
+      "normalizedTextSha256": "3d3bce55273f520ef3020d068c06072403f25cb0578896dd27cc247817963384"
+    },
+    {
+      "file": "demo/scenes/likes-tour.js",
+      "http": 200,
+      "normalizedTextSha256": "7fc72f57e89185bd2fbfc666f8a8fdf6e51876c48c384ea320c2308dd77ccf43"
+    }
+  ]
+}

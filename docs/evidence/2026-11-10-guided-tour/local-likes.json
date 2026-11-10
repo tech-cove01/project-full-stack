@@ -1,0 +1,89 @@
+{
+  "errors": [],
+  "results": [
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-write",
+      "action": "#likes-write",
+      "result": "点赞事实已经变为1，业务版本增加，同时有一条待发布Outbox。接口写入成功，但下游还没完成。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-pause",
+      "action": "#likes-pause",
+      "result": "消费者已暂停，点赞事实没有回滚。下一步继续发布事件，观察等待收据的积压。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-publish",
+      "action": "#likes-publish",
+      "result": "事件已发布，但消费暂停，待收据数量增加。点赞成功不能代替整条链路已经稳定。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-resume",
+      "action": "#likes-pause",
+      "result": "消费已恢复，积压仍等待处理。这一步只恢复开关，下一步由你明确处理本组消息。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-drain",
+      "action": "#likes-drain",
+      "result": "待发布与待收据都归零，成功变更数和唯一收据数一致，当前点赞事实仍符合最后一次期望。"
+    },
+    {
+      "width": 1440,
+      "scene": "likes",
+      "step": "likes-compare",
+      "action": "#likes-compare",
+      "result": "两种方式都保留12次变更和12条收据，最终点赞数一致；有界批量用更少轮次完成。这是机制对照，真实QPS请看原始实测报告。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-write",
+      "action": "#likes-write",
+      "result": "点赞事实已经变为1，业务版本增加，同时有一条待发布Outbox。接口写入成功，但下游还没完成。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-pause",
+      "action": "#likes-pause",
+      "result": "消费者已暂停，点赞事实没有回滚。下一步继续发布事件，观察等待收据的积压。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-publish",
+      "action": "#likes-publish",
+      "result": "事件已发布，但消费暂停，待收据数量增加。点赞成功不能代替整条链路已经稳定。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-resume",
+      "action": "#likes-pause",
+      "result": "消费已恢复，积压仍等待处理。这一步只恢复开关，下一步由你明确处理本组消息。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-drain",
+      "action": "#likes-drain",
+      "result": "待发布与待收据都归零，成功变更数和唯一收据数一致，当前点赞事实仍符合最后一次期望。"
+    },
+    {
+      "width": 390,
+      "scene": "likes",
+      "step": "likes-compare",
+      "action": "#likes-compare",
+      "result": "两种方式都保留12次变更和12条收据，最终点赞数一致；有界批量用更少轮次完成。这是机制对照，真实QPS请看原始实测报告。"
+    }
+  ]
+}

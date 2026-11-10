@@ -4,6 +4,8 @@
 
 ## 收尾后的展示维护
 
+2026-11-10按STATUS的11月9日交接，将展示站和互动演示同时对齐交易恢复、Feed缓存、事件/ES一致性、点赞优化四条。深链为`demo/?scene=trade|feed|events|likes`，通用`demo/`保留原业务。操作、实际验证和范围见[四场景自验](showcase-four-scenes-acceptance.md)，发布及用户验收状态只看STATUS。完成本批后停止自行扩展，等待用户体验确认，不反向改简历或重开后端/压测。
+
 用户要求的 GitHub 静态展示站位于 `showcase/`，浅紫风格、完整功能概览、设计详解及点赞压测实录。参考CRM的阅读层次，采用独立HTML/CSS/JS；它不依赖原ECS或运行中的应用。Pages仅发布此目录，根产品README原约定不变。具体发布状态只见STATUS，规格与核验见[展示方案](showcase-plan.md)和[页面验收](showcase-verification.md)。继续打磨时不重开压测、不更改原始截图数值；用户仅明确允许PTS概览报告ID公开，原图、PDF及本地简历材料按既有范围保留。
 
 新增访客互动演示位于 `showcase/demo/`，首页首屏及三页导航均可进入。五步业务故事与顾客/商家/社区操作使用当前标签页示例状态，规则与实际业务对照；不调用真实后端。规格和验证见[演示方案](showcase-demo-plan.md)、[演示验收](showcase-demo-verification.md)。后续打磨保留静态标识、重置、角色权限与交易分支，不用模拟结果替代原实测证据。

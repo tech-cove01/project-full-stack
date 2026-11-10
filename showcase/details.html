@@ -202,34 +202,115 @@
           <h2 id="design-title">把可靠性落实到每个边界。</h2>
           <p>重点关注重复请求、权限变化、旧数据回流和异步处理失败。</p>
         </div>
-        <article class="design-row" id="trade">
+        <article class="design-row" id="trade" data-highlight="trade">
           <span class="design-index">01</span>
           <div>
-            <h3>抢券幂等与故障恢复</h3>
+            <h3>异步交易一致性与故障恢复</h3>
             <p>
-              Lua 将活动检查、库存预占和受理映射放在一次原子操作中；MySQL
-              用事务、条件扣减与幂等检查确认最终订单。
+              抢券重试与异步处理相遇时，需要回答：请求有没有受理，订单是否落库，重复消息会不会再次扣库存？
             </p>
-            <ul>
-              <li>同一受理请求有稳定标识，重试可查询既有结果。</li>
-              <li>Stream 消息重复投递时，后台核对持久结果，避免重复成单。</li>
-              <li>
-                取消、超时或拒绝通过补偿恢复对应预占，保留受控核对与重建入口。
-              </li>
-            </ul>
+            <p>
+              Redis
+              Lua原子预占并保存稳定受理ID，Stream异步成单；MySQL事务与唯一约束保存最终事实，结果或待核对任务持久化后才确认消息。补偿检查预占归属，避免旧任务释放新订单的库存。
+            </p>
             <details>
-              <summary>为什么区分“受理”与“成功”？</summary>
+              <summary>流程与取舍</summary>
               <p>
-                Redis
-                准入通过只表示请求已经进入处理链路。订单是否创建、状态怎样变化，以
-                MySQL
-                的持久结果为准；结果未知时保留复核状态，避免把暂时故障当作成功或直接重复业务效果。
+                受理成功只代表进入处理链路，不等于订单已落库。结果未知时先保留待核对记录，明确核对后恢复；取消后的补偿也需核对原订单和预占，重买产生的新归属不能被旧补偿覆盖。
               </p>
             </details>
+            <div class="hero-actions">
+              <a class="button button-primary" href="./demo/?scene=trade"
+                >体验该场景</a
+              ><a
+                class="text-link"
+                href="https://github.com/tech-cove01/project-full-stack/blob/main/docs/transaction-design.md"
+                >查看设计依据</a
+              >
+            </div>
+          </div>
+        </article>
+        <article class="design-row" id="feed" data-highlight="feed">
+          <span class="design-index">02</span>
+          <div>
+            <h3>Feed 分层缓存与并发回源控制</h3>
+            <p>
+              同一篇探店笔记被多人浏览时，正文可以复用，个人点赞和当前可见性却必须按本次身份与事实装配。
+            </p>
+            <p>
+              公共正文按笔记ID与发布版本进入进程内缓存和Redis两级缓存；缺失内容批量加载，相同缺失批次共享有界回源，单个请求取消不终止其他等待者。版本和失效代次约束旧加载回流。
+            </p>
+            <details>
+              <summary>流程与取舍</summary>
+              <p>
+                合并范围是同一进程内相同缺失批次，并非跨实例全局去重。缓存不存完整个人卡片；旧回源完成时仍需检查当前版本和可见性，不能把隐藏内容重新公开。
+              </p>
+            </details>
+            <div class="hero-actions">
+              <a class="button button-primary" href="./demo/?scene=feed"
+                >体验该场景</a
+              ><a
+                class="text-link"
+                href="https://github.com/tech-cove01/project-full-stack/blob/main/docs/backend-highlights-plan.md"
+                >查看设计依据</a
+              >
+            </div>
+          </div>
+        </article>
+        <article class="design-row" id="events" data-highlight="events">
+          <span class="design-index">03</span>
+          <div>
+            <h3>可靠事件与 ES 搜索一致性</h3>
+            <p>
+              笔记已经保存，搜索索引可能仍未更新；重复、乱序和索引故障不能让旧内容覆盖新版本或暴露已隐藏笔记。
+            </p>
+            <p>
+              笔记事实与Outbox同事务保存，经Kafka独立消费组更新ES；事件收据去重、业务版本约束乱序。搜索候选返回前回MySQL复核，失败事件持久停车，由人工明确重放。
+            </p>
+            <details>
+              <summary>流程与取舍</summary>
+              <p>
+                索引恢复可用并不等于失败事件已经处理。保留原事件坐标与停车状态，手动重放后记录效果与收据；隐藏后即使旧索引仍命中，也要按当前事实过滤。
+              </p>
+            </details>
+            <div class="hero-actions">
+              <a class="button button-primary" href="./demo/?scene=events"
+                >体验该场景</a
+              ><a
+                class="text-link"
+                href="https://github.com/tech-cove01/project-full-stack/blob/main/docs/backend-highlights-plan.md"
+                >查看设计依据</a
+              >
+            </div>
+          </div>
+        </article>
+        <article class="design-row" id="likes" data-highlight="likes">
+          <span class="design-index">04</span>
+          <div>
+            <h3>高并发点赞链路优化</h3>
+            <p>
+              点赞接口成功，后续事件仍可能积压；容量需要同时检查成功写入、数据一致性与下游稳态。
+            </p>
+            <p>
+              合并事务SQL、有界发布与消费批处理减少数据库往返和提交开销，保留事务、租约与版本检查。点赞事实和计数同步写入MySQL，Kafka下游不承担异步落点赞计数。
+            </p>
+            <details>
+              <summary>流程与取舍</summary>
+              <p>
+                16核32GB单机，两轮各180秒内网正式验证均达到3000+成功QPS，P95均不超过62ms、P99均不超过102ms，并通过事实和下游校验。互动场景只解释机制；真实成绩保留H3/H4原始报告、独立PTS与1996组关系等条件。
+              </p>
+            </details>
+            <div class="hero-actions">
+              <a class="button button-primary" href="./demo/?scene=likes"
+                >体验该场景</a
+              ><a class="text-link" href="./performance.html"
+                >查看设计依据与真实报告</a
+              >
+            </div>
           </div>
         </article>
         <article class="design-row" id="permissions">
-          <span class="design-index">02</span>
+          <span class="design-index">补充</span>
           <div>
             <h3>逐门店权限与并发履约</h3>
             <p>
@@ -251,62 +332,6 @@
                 两端读取同一套交易事实。商家操作受门店范围和订单状态双重约束；前端负责呈现可用动作，服务端事务负责最终授权与状态判断。
               </p>
             </details>
-          </div>
-        </article>
-        <article class="design-row" id="feed">
-          <span class="design-index">03</span>
-          <div>
-            <h3>Feed 分层缓存与批量回源</h3>
-            <p>
-              公共正文按笔记 ID 和发布版本进入有界 L1 / Redis
-              缓存，缺失项批量查询并装配门店信息。同批次缺失共享加载，减少并发回源。
-            </p>
-            <ul>
-              <li>复合游标读取 Feed 事实目录，按稳定位置继续翻页。</li>
-              <li>
-                正文、公共计数与个人点赞分别装配，避免用户状态混入共享卡片。
-              </li>
-              <li>
-                版本检查与失效代次约束旧回源竞争，缓存失效后仍能从事实重建。
-              </li>
-            </ul>
-            <details>
-              <summary>为什么不缓存完整的个人 Feed 卡片？</summary>
-              <p>
-                正文可供不同用户复用，点赞状态却依赖当前身份。把两者分开，既保留公共内容缓存收益，也保持个人状态的读取边界。
-              </p>
-            </details>
-          </div>
-        </article>
-        <article class="design-row" id="events">
-          <span class="design-index">04</span>
-          <div>
-            <h3>可靠事件与可追溯搜索</h3>
-            <p>
-              笔记、点赞和关注事实与社区 Outbox 同事务保存。Relay 投递 Kafka
-              后，各消费组以事件收据和业务版本处理重复与乱序。
-            </p>
-            <ul>
-              <li>点赞使用期望状态写入，相同状态重试不重复计数。</li>
-              <li>
-                事件失败持久保存，保留定位与精确重放依据；投影与事实职责分离。
-              </li>
-              <li>
-                Elasticsearch 搜索标题与正文，支持门店筛选、PIT / search_after
-                分页；候选经 MySQL 复核公开状态与版本。
-              </li>
-            </ul>
-            <details>
-              <summary>为什么索引命中后还要回查？</summary>
-              <p>
-                搜索索引是异步投影，可能暂时落后于发布状态或正文版本。回查当前事实可以过滤已失效候选，避免把索引存在等同于内容仍可公开返回。
-              </p>
-            </details>
-            <p>
-              <a class="text-link" href="./performance.html"
-                >查看点赞链路优化与实测结果</a
-              >
-            </p>
           </div>
         </article>
       </section>

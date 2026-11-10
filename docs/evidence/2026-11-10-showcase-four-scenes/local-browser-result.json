@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "base": "http://127.0.0.1:8767/",
+  "checks": [
+    "1440px trade: retry/unique order, duplicate, persistent review before ACK, recovery, cancel/rebuy and old-owner compensation pass",
+    "1440px feed: cold/L1/Redis, independent visitor likes, coalescing/cancel/bounded queue, old version rejection and visibility filtering pass",
+    "1440px events: publish/index, duplicate/old events, hidden filtering, parked events and explicit manual replay, actual query pass",
+    "1440px likes: synchronous fact/outbox, identical-state retry, paused backlog, explicit drain and same-workload bounded comparison pass",
+    "390px trade: retry/unique order, duplicate, persistent review before ACK, recovery, cancel/rebuy and old-owner compensation pass",
+    "390px feed: cold/L1/Redis, independent visitor likes, coalescing/cancel/bounded queue, old version rejection and visibility filtering pass",
+    "390px events: publish/index, duplicate/old events, hidden filtering, parked events and explicit manual replay, actual query pass",
+    "390px likes: synchronous fact/outbox, identical-state retry, paused backlog, explicit drain and same-workload bounded comparison pass"
+  ],
+  "errors": []
+}

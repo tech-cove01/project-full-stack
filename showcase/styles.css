@@ -476,6 +476,18 @@ summary:focus-visible {
   gap: 80px;
   align-items: start;
 }
+.supporting-design {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.supporting-design h3 {
+  margin-bottom: 12px;
+}
+.supporting-design p {
+  color: var(--muted);
+  font-size: 16px;
+}
 .closing-section h2 {
   margin-top: 14px;
 }

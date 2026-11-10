@@ -13,6 +13,7 @@
 | 实际模块与前后端调用链 | [源码讲解路线](source-walkthrough.md) |
 | 本地运行、迁移与配置 | [开发说明](development.md)、[Windows补充](windows-development.md) |
 | 用户、商家与业务AI演示 | [录屏指南](demo-recording.md) |
+| 四条亮点的展示与可操作演示 | [四场景操作与自验](showcase-four-scenes-acceptance.md)、[本轮机制规格](showcase-four-scenes-plan.md) |
 | 对外项目概览、设计与实测 | [静态展示站源码](../showcase/README.md)、[展示规格](showcase-plan.md)、[页面验收](showcase-verification.md) |
 
 后端为Go模块化单体，前端保留Vue/TypeScript。交易使用Redis Lua/Stream与MySQL，社区使用独立Outbox/Kafka和可恢复查询投影；支付为模拟流程，AI工具只读。具体功能与边界以当前源码和各项验收为准。

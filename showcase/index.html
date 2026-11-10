@@ -198,79 +198,101 @@
         <div class="container section">
           <div class="section-heading">
             <p class="eyebrow">02 / 工程亮点</p>
-            <h2 id="highlights-title">
-              流量到来时能承接，<br />出现异常时能解释。
-            </h2>
+            <h2 id="highlights-title">把业务问题，连接到可验证的结果。</h2>
             <p>
-              围绕交易结果、事件一致性与访问边界，把关键约束落实到数据和执行流程。
+              从抢券恢复、内容读取，到事件投影与点赞下游，按同一条路径了解设计并亲手体验。
             </p>
           </div>
-          <article class="spotlight">
-            <div>
-              <span class="small-label">本轮实测主线</span>
+          <div class="highlight-grid">
+            <article data-highlight="trade">
+              <span class="eyebrow">01 / 核心设计</span>
+              <h3>异步交易一致性与故障恢复</h3>
+              <p>
+                抢券重试与异步处理相遇时，需要回答：请求有没有受理，订单是否落库，重复消息会不会再次扣库存？
+              </p>
+              <p>
+                Redis
+                Lua原子预占并保存稳定受理ID，Stream异步成单；MySQL事务与唯一约束保存最终事实，结果或待核对任务持久化后才确认消息。补偿检查预占归属，避免旧任务释放新订单的库存。
+              </p>
+              <div class="hero-actions">
+                <a class="button button-primary" href="./demo/?scene=trade"
+                  >体验该场景</a
+                ><a class="text-link" href="./details.html#trade">设计与取舍</a>
+              </div>
+              <p class="note">
+                重试同一请求、重复投递、待核对与旧补偿，观察唯一订单及库存归属。
+              </p>
+            </article>
+            <article data-highlight="feed">
+              <span class="eyebrow">02 / 核心设计</span>
+              <h3>Feed 分层缓存与并发回源控制</h3>
+              <p>
+                同一篇探店笔记被多人浏览时，正文可以复用，个人点赞和当前可见性却必须按本次身份与事实装配。
+              </p>
+              <p>
+                公共正文按笔记ID与发布版本进入进程内缓存和Redis两级缓存；缺失内容批量加载，相同缺失批次共享有界回源，单个请求取消不终止其他等待者。版本和失效代次约束旧加载回流。
+              </p>
+              <div class="hero-actions">
+                <a class="button button-primary" href="./demo/?scene=feed"
+                  >体验该场景</a
+                ><a class="text-link" href="./details.html#feed">设计与取舍</a>
+              </div>
+              <p class="note">
+                切换访客、冷热读取、并发等待与取消，再修改版本或隐藏笔记，观察返回内容。
+              </p>
+            </article>
+            <article data-highlight="events">
+              <span class="eyebrow">03 / 核心设计</span>
+              <h3>可靠事件与 ES 搜索一致性</h3>
+              <p>
+                笔记已经保存，搜索索引可能仍未更新；重复、乱序和索引故障不能让旧内容覆盖新版本或暴露已隐藏笔记。
+              </p>
+              <p>
+                笔记事实与Outbox同事务保存，经Kafka独立消费组更新ES；事件收据去重、业务版本约束乱序。搜索候选返回前回MySQL复核，失败事件持久停车，由人工明确重放。
+              </p>
+              <div class="hero-actions">
+                <a class="button button-primary" href="./demo/?scene=events"
+                  >体验该场景</a
+                ><a class="text-link" href="./details.html#events"
+                  >设计与取舍</a
+                >
+              </div>
+              <p class="note">
+                发布与编辑笔记、投递索引、重复/旧版本消息、故障停车和人工重放，观察搜索结果。
+              </p>
+            </article>
+            <article data-highlight="likes">
+              <span class="eyebrow">04 / 核心设计</span>
               <h3>高并发点赞链路优化</h3>
               <p>
-                通过合并事务 SQL 与有界批处理缓解事件积压，在
-                16核32GB单机环境下，两轮各180秒内网压测均达到
-                <strong>3000+成功QPS</strong>，两轮
-                <strong>P95均不超过62ms、P99均不超过102ms</strong
-                >，并通过数据一致性与下游稳态校验。
+                点赞接口成功，后续事件仍可能积压；容量需要同时检查成功写入、数据一致性与下游稳态。
               </p>
-              <a class="text-link" href="./performance.html"
-                >看瓶颈、改动与正式结果</a
-              >
-            </div>
-            <div
-              class="sql-illustration"
-              aria-label="现有点赞关系业务SQL由6条合并为4条"
-            >
-              <span>点赞事务 / 业务 SQL</span>
-              <p><s>6</s><span aria-hidden="true">→</span><strong>4</strong></p>
-              <small>保留事务、版本检查与 Outbox</small>
-            </div>
-          </article>
-          <div class="highlight-grid">
-            <article>
-              <span class="eyebrow">01 / 可靠交易</span>
-              <h3>抢券幂等与故障恢复</h3>
               <p>
-                Redis Lua 原子预占与稳定受理 ID，Stream 异步成单；MySQL
-                事务与唯一约束兜底，持久结果或复核任务保存后再 ACK。
+                合并事务SQL、有界发布与消费批处理减少数据库往返和提交开销，保留事务、租约与版本检查。点赞事实和计数同步写入MySQL，Kafka下游不承担异步落点赞计数。
               </p>
-              <a class="text-link" href="./details.html#trade">了解交易链路</a>
-            </article>
-            <article>
-              <span class="eyebrow">02 / 高效读取</span>
-              <h3>Feed 内容复用与回源合并</h3>
-              <p>
-                公共正文按笔记和版本进入有界 L1 /
-                Redis，缺失内容批量加载；singleflight
-                合并同批回源，个人点赞按当前身份装配。
+              <div class="hero-actions">
+                <a class="button button-primary" href="./demo/?scene=likes"
+                  >体验该场景</a
+                ><a class="text-link" href="./details.html#likes">设计与取舍</a
+                ><a class="text-link" href="./performance.html">查看真实报告</a>
+              </div>
+              <p class="note">
+                点赞/取消、暂停消费观察积压、恢复处理并核对，再对比同组逐条与批量处理。
               </p>
-              <a class="text-link" href="./details.html#feed">了解缓存边界</a>
-            </article>
-            <article>
-              <span class="eyebrow">03 / 事件驱动</span>
-              <h3>可靠事件与搜索恢复</h3>
-              <p>
-                业务事实与 Outbox 同事务，经 Kafka
-                更新独立投影；收据与版本处理重复乱序，停车事件保留原坐标，支持受控重放。
-              </p>
-              <a class="text-link" href="./details.html#events"
-                >了解事件与投影</a
-              >
-            </article>
-            <article>
-              <span class="eyebrow">04 / 商家协作</span>
-              <h3>逐门店授权与并发履约</h3>
-              <p>
-                依据目标门店解析当前成员权限，在核销退款事务内加锁复核；订单、版本与审计一起提交，处理撤权和并发操作。
-              </p>
-              <a class="text-link" href="./details.html#permissions"
-                >了解授权与履约</a
-              >
             </article>
           </div>
+          <article class="supporting-design">
+            <h3>商家权限与履约，贯穿完整业务</h3>
+            <p>
+              店主、经理与店员按目标门店授权，在核销与退款事务内复核当前权限。订单变化与审计共同提交，用户端和商家端围绕同一事实协作。
+            </p>
+            <div class="hero-actions">
+              <a class="text-link" href="./demo/">自由体验顾客与商家流程</a
+              ><a class="text-link" href="./details.html#permissions"
+                >了解逐门店授权</a
+              >
+            </div>
+          </article>
         </div>
       </section>
 

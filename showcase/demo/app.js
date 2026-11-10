@@ -11,6 +11,22 @@ import {
   transition,
   restoreState,
 } from "./model.js";
+import { mount as mountTrade } from "./scenes/trade.js";
+import { mount as mountFeed } from "./scenes/feed.js";
+import { mount as mountEvents } from "./scenes/events.js";
+import { mount as mountLikes } from "./scenes/likes.js";
+
+const sceneControllers = {};
+let selectedScene = "free";
+const sceneKeys = ["trade", "feed", "events", "likes"];
+const sceneEvidence = {
+  trade:
+    "https://github.com/tech-cove01/project-full-stack/blob/main/docs/transaction-design.md",
+  feed: "https://github.com/tech-cove01/project-full-stack/blob/main/docs/backend-highlights-plan.md",
+  events:
+    "https://github.com/tech-cove01/project-full-stack/blob/main/docs/reviews/2026-10-29/go073-399705a/events/report.md",
+  likes: "../performance.html#screenshots",
+};
 
 const storageKey = "fullstack-business-demo-v1";
 let state;
@@ -190,6 +206,26 @@ function guideStep() {
   return state.notes.some((n) => n.mine && n.shop === "coffee") ? 5 : 4;
 }
 function renderGuide() {
+  if (selectedScene !== "free" && sceneControllers[selectedScene]) {
+    const guide = sceneControllers[selectedScene].getGuide();
+    $("#guide-title").textContent = guide.title;
+    $("#guide-text").textContent = guide.text;
+    $("#guide-steps").innerHTML = guide.steps
+      .map(
+        (text, i) =>
+          `<li class="${i < guide.current ? "is-done" : i === guide.current ? "is-current" : ""}"><span>${i < guide.current ? "✓" : i + 1}</span>${escape(text)}</li>`,
+      )
+      .join("");
+    $("#guide-next").textContent = guide.label;
+    $("#guide-next").disabled = false;
+    $("#guide-progress").textContent =
+      `已完成 ${Math.min(guide.current, guide.steps.length)} / ${guide.steps.length} 步`;
+    $("#implementation-note").textContent =
+      "场景中的状态与计数用于说明业务机制。真实实现与测试条件请从对应设计和证据入口查看。";
+    $(".guide-explanation a").href = `../details.html#${selectedScene}`;
+    return;
+  }
+  $(".guide-explanation a").href = "../details.html";
   const step = guideStep();
   const titles = [
     "先挑一张街角咖啡券",
@@ -291,6 +327,7 @@ function compose() {
 document.addEventListener("click", (event) => {
   const button = event.target.closest("button");
   if (!button || button.disabled) return;
+  if (event.composedPath().includes($("#scene-workspace"))) return;
   if (button.dataset.view) {
     act({ type: "VIEW", view: button.dataset.view });
     return;
@@ -373,6 +410,15 @@ $("#compose-note").addEventListener("submit", (event) => {
   }
 });
 $("#guide-next").addEventListener("click", () => {
+  if (selectedScene !== "free") {
+    const selector = sceneControllers[selectedScene]?.getGuide().nextSelector;
+    const target = selector ? document.querySelector(selector) : null;
+    if (target) {
+      target.scrollIntoView({ block: "center" });
+      target.focus({ preventScroll: true });
+    }
+    return;
+  }
   const step = guideStep();
   if (step < 3) {
     act({ type: "SHOP", shop: "coffee" });
@@ -398,6 +444,7 @@ $("#reset-demo").addEventListener("click", () => {
   $("#compose-note").hidden = true;
   $("#compose-error").textContent = "";
   render();
+  Object.values(sceneControllers).forEach((controller) => controller.reset());
   toast("示例已恢复，可以重新体验。点击其他页面仍保留本次进度。");
   $("[data-view=customer]").focus();
   showIntro();
@@ -412,6 +459,20 @@ function updateIntroPosition() {
   $("#intro-description").textContent = compactLayout.matches
     ? "页面上方有一组操作步骤。按顺序跟着做，就能体验一笔完整的到店消费。"
     : "页面右侧有一组操作步骤。按顺序跟着做，就能体验一笔完整的到店消费。";
+  if (selectedScene !== "free") {
+    const names = {
+      trade: "抢券与故障恢复",
+      feed: "公共内容读取与个人状态",
+      events: "笔记发布与搜索恢复",
+      likes: "点赞写入与下游积压",
+    };
+    $("#intro-description").textContent =
+      `当前体验${names[selectedScene]}。${compactLayout.matches ? "上方" : "右侧"}步骤会告诉你从哪里开始、点击什么和结果看哪里。`;
+  }
+  $("#intro-path").textContent =
+    selectedScene === "free"
+      ? "从顾客抢券开始，再体验支付、店员核销和探店分享。"
+      : "跟随当前场景的操作顺序，也可以随时重置并切换其他场景。";
 }
 function focusGuide() {
   const guide = $(".guide-card");
@@ -452,6 +513,55 @@ intro.addEventListener("close", () => {
   else $("#show-demo-intro").focus({ preventScroll: true });
 });
 compactLayout.addEventListener("change", updateIntroPosition);
+function selectScene(key, push = false) {
+  selectedScene = sceneKeys.includes(key) ? key : "free";
+  $("#scene-workspace").hidden = selectedScene === "free";
+  $("#free-business").hidden = selectedScene !== "free";
+  document
+    .querySelectorAll("[data-scene]")
+    .forEach((b) =>
+      b.setAttribute("aria-pressed", String(b.dataset.scene === selectedScene)),
+    );
+  document.querySelectorAll("[data-scene-panel]").forEach((p) => {
+    p.hidden = p.dataset.scenePanel !== selectedScene;
+  });
+  if (selectedScene !== "free") {
+    $("#scene-design-link").href = `../details.html#${selectedScene}`;
+    $("#scene-evidence-link").href =
+      sceneControllers[selectedScene]?.getGuide().evidence ||
+      sceneEvidence[selectedScene];
+  }
+  if (push) {
+    const url = new URL(location.href);
+    if (selectedScene === "free") url.searchParams.delete("scene");
+    else url.searchParams.set("scene", selectedScene);
+    history.pushState(null, "", url);
+  }
+  renderGuide();
+  updateIntroPosition();
+}
+document
+  .querySelectorAll("[data-scene]")
+  .forEach((b) =>
+    b.addEventListener("click", () => selectScene(b.dataset.scene, true)),
+  );
+$("#reset-scene").addEventListener("click", () =>
+  sceneControllers[selectedScene]?.reset(),
+);
+window.addEventListener("popstate", () =>
+  selectScene(new URL(location.href).searchParams.get("scene")),
+);
+for (const [key, mount] of Object.entries({
+  trade: mountTrade,
+  feed: mountFeed,
+  events: mountEvents,
+  likes: mountLikes,
+})) {
+  sceneControllers[key] = mount(document.querySelector(`#scene-${key}`), {
+    onChange: () => renderGuide(),
+  });
+}
+selectScene(new URL(location.href).searchParams.get("scene"));
 render();
 scheduleOrders();
 let introSeen = false;

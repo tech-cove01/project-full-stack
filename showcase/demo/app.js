@@ -15,8 +15,11 @@ import { mount as mountTrade } from "./scenes/trade.js";
 import { mount as mountFeed } from "./scenes/feed.js";
 import { mount as mountEvents } from "./scenes/events.js";
 import { mount as mountLikes } from "./scenes/likes.js";
+import { createTour } from "./tour.js";
+import { makeTradeTour, makeTradeRecoveryTour } from "./scenes/trade-tour.js";
 
 const sceneControllers = {};
+const tourControllers = {};
 let selectedScene = "free";
 const sceneKeys = ["trade", "feed", "events", "likes"];
 const sceneEvidence = {
@@ -206,6 +209,21 @@ function guideStep() {
   return state.notes.some((n) => n.mine && n.shop === "coffee") ? 5 : 4;
 }
 function renderGuide() {
+  const tour = tourControllers[selectedScene]?.view();
+  if (tour) {
+    $("#guide-title").textContent = tour.plan.title;
+    $("#guide-text").textContent = tour.step
+      ? tour.phase === "result"
+        ? tour.step.feedback
+        : tour.step.purpose
+      : tour.plan.lesson;
+    $("#guide-next").textContent =
+      tour.phase === "result" ? "看懂了，继续" : "定位当前操作";
+    $("#guide-next").disabled = !tour.step;
+    $("#guide-progress").textContent =
+      `已完成 ${tour.index} / ${tour.plan.steps.length} 步`;
+    return;
+  }
   if (selectedScene !== "free" && sceneControllers[selectedScene]) {
     const guide = sceneControllers[selectedScene].getGuide();
     $("#guide-title").textContent = guide.title;
@@ -410,6 +428,10 @@ $("#compose-note").addEventListener("submit", (event) => {
   }
 });
 $("#guide-next").addEventListener("click", () => {
+  if (tourControllers[selectedScene]?.view()) {
+    tourControllers[selectedScene].continue();
+    return;
+  }
   if (selectedScene !== "free") {
     const selector = sceneControllers[selectedScene]?.getGuide().nextSelector;
     const target = selector ? document.querySelector(selector) : null;
@@ -435,6 +457,10 @@ $("#guide-next").addEventListener("click", () => {
   }
 });
 $("#reset-demo").addEventListener("click", () => {
+  Object.values(tourControllers).forEach((t) => {
+    t.stop();
+    t.reset();
+  });
   pending.forEach(clearTimeout);
   pending.clear();
   state = initialState();
@@ -473,6 +499,10 @@ function updateIntroPosition() {
     selectedScene === "free"
       ? "从顾客抢券开始，再体验支付、店员核销和探店分享。"
       : "跟随当前场景的操作顺序，也可以随时重置并切换其他场景。";
+  $("#intro-description").textContent =
+    selectedScene === "free"
+      ? "建议先从抢券开始。引导会高亮要点击的按钮，做完后带你看结果，再继续下一步。"
+      : "从当前场景开始。跟着高亮按钮操作，做完后看结果；随时可以退出，自由探索。";
 }
 function focusGuide() {
   const guide = $(".guide-card");
@@ -487,6 +517,7 @@ function focusGuide() {
   );
 }
 function showIntro() {
+  tourControllers[selectedScene]?.stop();
   updateIntroPosition();
   followGuide = false;
   if (typeof intro.showModal !== "function") {
@@ -501,7 +532,10 @@ $("#intro-start").addEventListener("click", () => {
   followGuide = true;
   intro.close();
 });
-$("#intro-explore").addEventListener("click", () => intro.close());
+$("#intro-explore").addEventListener("click", () => {
+  tourControllers[selectedScene]?.stop();
+  intro.close();
+});
 intro.addEventListener("close", () => {
   document.body.classList.remove("demo-intro-open");
   try {
@@ -509,11 +543,12 @@ intro.addEventListener("close", () => {
   } catch {
     /* Intro still works without persistence. */
   }
-  if (followGuide) focusGuide();
+  if (followGuide) startTour();
   else $("#show-demo-intro").focus({ preventScroll: true });
 });
 compactLayout.addEventListener("change", updateIntroPosition);
 function selectScene(key, push = false) {
+  tourControllers[selectedScene]?.stop();
   selectedScene = sceneKeys.includes(key) ? key : "free";
   $("#scene-workspace").hidden = selectedScene === "free";
   $("#free-business").hidden = selectedScene !== "free";
@@ -545,8 +580,22 @@ document
   .forEach((b) =>
     b.addEventListener("click", () => selectScene(b.dataset.scene, true)),
   );
-$("#reset-scene").addEventListener("click", () =>
-  sceneControllers[selectedScene]?.reset(),
+function resetScene() {
+  const t = tourControllers[selectedScene];
+  const running = Boolean(t?.view());
+  t?.stop();
+  t?.reset();
+  sceneControllers[selectedScene]?.reset();
+  if (running) t.start();
+}
+$("#reset-scene").addEventListener("click", resetScene);
+function startTour() {
+  if (selectedScene === "free") selectScene("trade", true);
+  tourControllers[selectedScene]?.start();
+}
+$("#start-tour").addEventListener("click", startTour);
+$("#explore-tour").addEventListener("click", () =>
+  tourControllers[selectedScene]?.stop(),
 );
 window.addEventListener("popstate", () =>
   selectScene(new URL(location.href).searchParams.get("scene")),
@@ -561,6 +610,28 @@ for (const [key, mount] of Object.entries({
     onChange: () => renderGuide(),
   });
 }
+const tourFactories = {
+  trade: (s, branch) => (branch ? makeTradeRecoveryTour(s) : makeTradeTour(s)),
+};
+for (const [key, factory] of Object.entries(tourFactories)) {
+  tourControllers[key] = createTour({
+    workspace: () => key,
+    panel: () => (selectedScene === key ? $(`#scene-${key}`) : null),
+    snapshot: () => sceneControllers[key].getSnapshot(),
+    factory,
+    onUpdate: renderGuide,
+    onNext: (action) => {
+      if (action === "reset") resetScene();
+      else {
+        selectScene(
+          sceneKeys[(sceneKeys.indexOf(key) + 1) % sceneKeys.length],
+          true,
+        );
+        startTour();
+      }
+    },
+  });
+}
 selectScene(new URL(location.href).searchParams.get("scene"));
 render();
 scheduleOrders();
@@ -571,3 +642,4 @@ try {
   /* Show instructions for this visit. */
 }
 if (!introSeen) showIntro();
+else if (selectedScene !== "free") startTour();

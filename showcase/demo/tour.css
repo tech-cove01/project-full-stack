@@ -1,0 +1,131 @@
+.tour-coach {
+  position: fixed;
+  z-index: 80;
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  padding: 18px;
+  border: 2px solid #ac87cf;
+  border-radius: 12px;
+  background: #fffaff;
+  color: #332642;
+  box-shadow: 0 10px 36px #45315b26;
+  font-size: 16px;
+}
+.tour-coach[hidden] {
+  display: none;
+}
+.tour-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  color: #69418a;
+}
+.tour-heading button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  background: transparent;
+  font-size: 25px;
+  color: #69418a;
+}
+.tour-title {
+  font-size: 14px;
+  color: #77647f;
+  margin: 0 0 8px;
+}
+.tour-message {
+  font-size: 17px;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+.tour-hint {
+  font-size: 14px;
+  margin: 10px 0;
+}
+.tour-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+.tour-buttons button {
+  min-height: 40px;
+  padding: 8px 12px;
+  font-size: 14px;
+}
+.tour-buttons a {
+  font-size: 14px;
+  text-decoration: underline;
+}
+.tour-skip {
+  border: 0;
+  background: transparent;
+  color: #716078;
+  text-decoration: underline;
+}
+.tour-target {
+  outline: 4px solid #9562bd !important;
+  outline-offset: 5px;
+  box-shadow: 0 0 0 10px #be9ddd24;
+  scroll-margin-top: 110px;
+}
+.tour-away {
+  display: none !important;
+}
+.tour-running {
+  padding-bottom: var(--tour-space, 380px);
+}
+.tour-running .guide-steps {
+  display: none;
+}
+.tour-running .guide-card {
+  position: static;
+  align-self: start;
+}
+.tour-running .guide-card .guide-explanation,
+.tour-running .guide-footnote {
+  display: none;
+}
+.tour-entry {
+  grid-column: 1/-1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+.tour-entry p {
+  width: 100%;
+  font-size: 15px;
+  color: var(--muted);
+  margin: 0;
+}
+@media (max-width: 900px) {
+  .tour-running .guide-card {
+    display: none;
+  }
+  .tour-coach {
+    padding: 14px;
+  }
+  .tour-message {
+    font-size: 16px;
+  }
+}
+@media (max-height: 600px) and (max-width: 900px) {
+  .tour-coach {
+    max-height: 40dvh;
+    padding: 10px 14px;
+  }
+  .tour-title {
+    display: none;
+  }
+  .tour-message {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .tour-buttons {
+    gap: 6px;
+  }
+}

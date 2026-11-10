@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="../styles.css" />
     <link rel="stylesheet" href="./demo.css" />
     <link rel="stylesheet" href="./scenes/scenes.css" />
+    <link rel="stylesheet" href="./tour.css" />
     <script src="./app.js" type="module"></script>
   </head>
   <body class="demo-body">
@@ -62,6 +63,17 @@
           自由体验业务
         </button>
       </nav>
+      <div class="tour-entry">
+        <button type="button" id="start-tour" class="button button-primary">
+          跟我操作
+        </button>
+        <button type="button" id="explore-tour" class="action-secondary">
+          自由体验
+        </button>
+        <p>
+          第一次来？跟着高亮按钮做一步，再看一步结果。顶部可随时重开，当前数据不会自动清空。
+        </p>
+      </div>
       <div class="demo-main">
         <section id="scene-workspace" hidden aria-label="亮点场景体验">
           <div class="scene-toolbar">
@@ -249,14 +261,14 @@
       <p id="intro-description"></p>
       <ol class="intro-steps">
         <li>
-          <strong>先看操作步骤</strong
+          <strong>先从一个动作开始</strong
           ><span id="intro-path"
             >从顾客抢券开始，再体验支付、店员核销和探店分享。</span
           >
         </li>
         <li>
-          <strong>点击引导按钮继续</strong
-          ><span>每一步都会告诉你做什么，并带你找到对应的页面或操作。</span>
+          <strong>操作后，带你看结果</strong
+          ><span>先点击高亮的真实控件，再看发生了什么；看懂后点击“继续”。</span>
         </li>
         <li>
           <strong>也可以自由探索</strong
@@ -270,7 +282,7 @@
           id="intro-start"
           autofocus
         >
-          跟着步骤开始
+          跟我操作
         </button>
         <button type="button" class="action-secondary" id="intro-explore">
           我先自由体验

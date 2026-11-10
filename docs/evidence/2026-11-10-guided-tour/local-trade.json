@@ -1,0 +1,117 @@
+{
+  "results": [
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-consume",
+      "action": "#trade-consume",
+      "result": "现在才有一张持久化的待支付订单，它绑定刚才的受理ID。库存仍只扣过一次。"
+    },
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-retry",
+      "action": "#trade-retry",
+      "result": "这是预期保护：系统返回同一个受理ID和订单，库存不再扣减。顾客重试不会多买一张。"
+    },
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-duplicate",
+      "action": "#trade-duplicate",
+      "result": "这是预期保护：重复消息查回原订单，唯一订单总数和库存都不变，不会重复成单。"
+    },
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-ack",
+      "action": "#trade-ack",
+      "result": "有了持久订单结果，才确认这条消息。待确认消息减少，订单和库存不会因为确认而改变。"
+    },
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-cancel",
+      "action": "#trade-cancel",
+      "result": "订单已取消，补偿任务已保存，库存暂时不变。取消订单和真正归还库存是两个步骤。"
+    },
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-compensate",
+      "action": "#trade-compensate",
+      "result": "补偿确认库存属于这次取消的购买，才恢复一份库存并释放旧预占。现在可以再次购买。"
+    },
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-repurchase",
+      "action": "#trade-accept",
+      "result": "新购买拿到新的受理ID，库存重新预占一份。预占归属已经换人，旧购买的补偿不能动它。"
+    },
+    {
+      "width": 1440,
+      "scene": "trade",
+      "step": "trade-old-compensation",
+      "action": "#trade-old-compensation",
+      "result": "这是预期保护：旧补偿与新预占的归属不同，系统拒绝释放。新购买的库存保留，库存不会凭空增加。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-consume",
+      "action": "#trade-consume",
+      "result": "现在才有一张持久化的待支付订单，它绑定刚才的受理ID。库存仍只扣过一次。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-retry",
+      "action": "#trade-retry",
+      "result": "这是预期保护：系统返回同一个受理ID和订单，库存不再扣减。顾客重试不会多买一张。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-duplicate",
+      "action": "#trade-duplicate",
+      "result": "这是预期保护：重复消息查回原订单，唯一订单总数和库存都不变，不会重复成单。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-ack",
+      "action": "#trade-ack",
+      "result": "有了持久订单结果，才确认这条消息。待确认消息减少，订单和库存不会因为确认而改变。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-cancel",
+      "action": "#trade-cancel",
+      "result": "订单已取消，补偿任务已保存，库存暂时不变。取消订单和真正归还库存是两个步骤。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-compensate",
+      "action": "#trade-compensate",
+      "result": "补偿确认库存属于这次取消的购买，才恢复一份库存并释放旧预占。现在可以再次购买。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-repurchase",
+      "action": "#trade-accept",
+      "result": "新购买拿到新的受理ID，库存重新预占一份。预占归属已经换人，旧购买的补偿不能动它。"
+    },
+    {
+      "width": 390,
+      "scene": "trade",
+      "step": "trade-old-compensation",
+      "action": "#trade-old-compensation",
+      "result": "这是预期保护：旧补偿与新预占的归属不同，系统拒绝释放。新购买的库存保留，库存不会凭空增加。"
+    }
+  ],
+  "errors": []
+}

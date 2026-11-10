@@ -235,7 +235,7 @@ export function mount(container, { onChange = () => {} } = {}) {
           "",
         )}<button type="button" id="trade-reset" data-action="reset" class="action-secondary">重置交易场景</button></div>
       <div class="scene-result" role="status" aria-live="polite"><strong>当前结果</strong><p data-trade="result">${escape(state.result)}</p></div>
-      <dl class="scene-facts"><div><dt>当前受理ID</dt><dd data-trade="acceptance">${escape(request?.id || "尚未受理")}</dd></div><div><dt>当前订单</dt><dd>${order ? `${escape(order.id)} · ${order.status === "CANCELLED" ? "已取消" : "待支付"}` : "尚未形成可确认的订单"}</dd></div><div><dt>预占归属</dt><dd data-trade="owner">${escape(state.reservation || "无")}</dd></div><div><dt>待核对任务</dt><dd data-trade="review">${escape(request?.review === "none" || !request ? "无" : request.review)}</dd></div></dl>
+      <dl class="scene-facts"><div><dt>当前受理ID</dt><dd data-trade="acceptance">${escape(request?.id || "尚未受理")}</dd></div><div><dt>当前订单</dt><dd data-trade="order">${order ? `${escape(order.id)} · ${order.status === "CANCELLED" ? "已取消" : "待支付"}` : "尚未形成可确认的订单"}</dd></div><div><dt>预占归属</dt><dd data-trade="owner">${escape(state.reservation || "无")}</dd></div><div><dt>待核对任务</dt><dd data-trade="review">${escape(request?.review === "none" || !request ? "无" : request.review)}</dd></div></dl>
       <div class="scene-actions">${buttons
         .slice(3)
         .map(
@@ -267,6 +267,9 @@ export function mount(container, { onChange = () => {} } = {}) {
   render();
   return {
     reset,
+    getSnapshot() {
+      return structuredClone(state);
+    },
     getGuide() {
       const request = currentRequest(state),
         order = currentOrder(state);

@@ -40,6 +40,10 @@ export function createTour({
     document
       .querySelectorAll(".tour-target,.tour-away")
       .forEach((e) => e.classList.remove("tour-target", "tour-away"));
+    document.querySelectorAll("[data-tour-inert]").forEach((e) => {
+      e.inert = false;
+      delete e.dataset.tourInert;
+    });
   }
   function locate(scroll = false) {
     if (!active || !plan) return;
@@ -52,14 +56,21 @@ export function createTour({
     });
     if (step) {
       const actionTarget = root.querySelector(step.target);
+      const resultTarget = root.querySelector(step.result || step.target);
       root
         .querySelectorAll("button,input,select,textarea")
         .forEach((control) => {
           if (
-            control !== actionTarget &&
+            (phase === "result"
+              ? control !== resultTarget
+              : control !== actionTarget) &&
             !step.visible?.some((s) => control.matches(s))
           ) {
             (control.closest("label") || control).classList.add("tour-away");
+          }
+          if (phase === "result" && !control.classList.contains("tour-away")) {
+            control.inert = true;
+            control.dataset.tourInert = "true";
           }
         });
       target = root.querySelector(
@@ -109,6 +120,11 @@ export function createTour({
     coach.style.left = `${left}px`;
     coach.style.top = `${Math.max(8, top)}px`;
     document.body.style.setProperty("--tour-space", `${h + 140}px`);
+    document.body.style.setProperty("--tour-coach-height", `${h}px`);
+    document.body.style.setProperty(
+      "--tour-header-height",
+      `${document.querySelector(".site-header")?.offsetHeight || 82}px`,
+    );
   }
   function render(scroll = true) {
     if (!active) return;
@@ -133,8 +149,21 @@ export function createTour({
         : plan.lesson);
     coach.dataset.phase = blocked ? "blocked" : step ? phase : "complete";
     coach.dataset.step = step?.id || "complete";
-    coach.innerHTML = `<div class="tour-heading"><strong>${step ? `第 ${index + 1} / ${plan.steps.length} 步` : "这条体验已走完"}</strong><button type="button" data-tour="close" aria-label="关闭引导，进入自由体验">×</button></div><p class="tour-title">${escape(plan.title)}</p><p class="tour-message" role="status">${escape(text)}</p>${disabled && !blocked ? '<p class="tour-hint">这个操作暂时受限。可退出检查当前状态，或重置后重走。</p>' : ""}<div class="tour-buttons">${blocked ? '<button type="button" data-tour="reset" class="button button-primary">重置本场景并开始</button>' : step ? (phase === "result" ? '<button type="button" data-tour="continue" class="button button-primary">看懂了，继续</button>' : `<button type="button" data-tour="locate" class="action-secondary">定位当前操作</button>${step.example ? '<button type="button" data-tour="example" class="action-secondary">填入示例</button>' : ""}`) : `${plan.branch ? `<button type="button" data-tour="branch" class="button button-primary">${escape(plan.branch.label)}</button>` : ""}<button type="button" data-tour="next" class="action-secondary">体验下一项</button><a href="../details.html#${escape(workspace())}">查看设计</a><a href="../performance.html#screenshots">查看实测</a>`}<button type="button" data-tour="close" class="tour-skip">${step ? "跳过引导，自由体验" : "回到自由体验"}</button></div>`;
+    const actionControls = `<button type="button" data-tour="locate" class="action-secondary">定位当前操作</button>${step?.event === "change" ? '<button type="button" data-tour="confirm-input" class="button button-primary">填好了</button>' : ""}${step?.example ? '<button type="button" data-tour="example" class="action-secondary">填入示例</button>' : ""}`;
+    const endControls = `${plan.branch ? `<button type="button" data-tour="branch" class="button button-primary">${escape(plan.branch.label)}</button>` : ""}<button type="button" data-tour="next" class="action-secondary">体验下一项</button><a href="../details.html#${escape(workspace())}">查看设计</a><a href="../performance.html#screenshots">查看实测</a>`;
+    const controls = blocked
+      ? '<button type="button" data-tour="reset" class="button button-primary">重置本场景并开始</button>'
+      : step
+        ? phase === "result"
+          ? '<button type="button" data-tour="continue" class="button button-primary">看懂了，继续</button>'
+          : actionControls
+        : endControls;
+    coach.innerHTML = `<div class="tour-heading"><strong>${step ? `第 ${index + 1} / ${plan.steps.length} 步` : "这条体验已走完"}</strong><button type="button" data-tour="close" aria-label="关闭引导，进入自由体验">×</button></div><p class="tour-title">${escape(plan.title)}</p><p class="tour-message" role="status">${escape(text)}</p>${disabled && !blocked ? '<p class="tour-hint">这个操作暂时受限。可退出检查当前状态，或重置后重走。</p>' : ""}<div class="tour-buttons">${controls}<button type="button" data-tour="close" class="tour-skip">${step ? "跳过引导，自由体验" : "回到自由体验"}</button></div>`;
     locate(scroll);
+    if (phase === "result")
+      coach
+        .querySelector('[data-tour="continue"]')
+        ?.focus({ preventScroll: true });
     onUpdate?.(view());
   }
   function view() {
@@ -260,7 +289,14 @@ export function createTour({
       if (input) {
         input.value = current().example;
         input.dispatchEvent(new Event("input", { bubbles: true }));
+        if (current()?.event === "change")
+          input.dispatchEvent(new Event("change", { bubbles: true }));
       }
+    }
+    if (action === "confirm-input" && phase === "action") {
+      panel()
+        ?.querySelector(current()?.target)
+        ?.dispatchEvent(new Event("change", { bubbles: true }));
     }
   });
   function schedulePosition() {

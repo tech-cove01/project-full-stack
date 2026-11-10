@@ -102,6 +102,27 @@
   margin: 0;
 }
 @media (max-width: 900px) {
+  .tour-target:is(
+    .scene-result,
+    .scene-log,
+    .scene-table-wrap,
+    #likes-comparison
+  ) {
+    max-height: max(
+      90px,
+      calc(
+        100dvh - var(--tour-coach-height, 220px) -
+          var(--tour-header-height, 108px) - 62px
+      )
+    );
+    overflow: auto;
+  }
+  .tour-entry {
+    grid-row: 2;
+  }
+  .demo-layout > .guide-card {
+    grid-row: 3;
+  }
   .tour-running .guide-card {
     display: none;
   }

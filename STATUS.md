@@ -1,8 +1,55 @@
 # 工作流与任务状态
 
-更新：2026-11-10。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
+更新：2026-11-17。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
 
-## 最新反馈：补齐可跟着操作的新手引导（2026-11-10，已发布，待用户体验验收）
+## 本轮交付：GitHub 主页介绍同步（2026-11-17，已发布，待用户验收）
+
+用户要求根据当前已认可的项目亮点更新 GitHub 主页介绍。此次已完成仓库 `README.md`、Pages 首页 `showcase/index.html` 和详情 `showcase/details.html` 的文案同步。四条主线依次为交易、Feed、事件与 ES、点赞。原业务和实测仍可从现有 Pages 入口查看。
+
+### 已核对的落差与具体改法
+
+- `README.md` 当前六项亮点夹有权限、AI、Vue，核心四条不连续，也缺少独立的点赞批处理设计说明。先连续呈现下表四条，权限、只读 AI 与全栈交互保留在完整功能或补充设计中；首屏先交代商家、顾客、店员各自能完成什么，再介绍技术。
+- `showcase/index.html` 和 `showcase/details.html` 已有四项设计及对应体验入口，本轮只改确有表述差异的地方。交易段将“旧任务释放新订单库存”说准确：补偿核对原受理/订单及预占归属，避免误删重买后的新资格或误释放新预占；搜索段明确回查 MySQL 的“当前公开状态与业务版本”。
+- `showcase/performance.html` 已有完整实测条件与结果，沿用原内容和原图。当前 `showcase/demo/tour.js`、四个场景及各自 `*-tour.js` 已有逐步引导，保留“跟我操作”、自由体验、退出/重开、恢复和重置，不另造一套教程。
+
+**建议首页开场表达：** 面向本地生活消费与商家经营的平台，商家发布优惠活动，顾客抢券下单，店员在授权门店核销；配套探店笔记、关注动态和全文搜索。交易请求支持结果查询与故障核对，社区通过缓存和异步事件承接读取及互动。支付、退款使用模拟资金流程，业务 AI 提供带来源的只读查询。
+
+### 四条介绍的固定重点
+
+| 顺序 / 主题 | 先让读者看懂的结果 | 接着解释的设计与边界 | 现有体验 / 详情入口 |
+| --- | --- | --- | --- |
+| 1. 交易受理与可靠成单 | 抢券响应超时后可重试同一请求，已受理请求返回同一受理结果；拿到受理 ID 后可继续查询，重试不多建订单，旧补偿不破坏新购买资格。 | Redis Lua 原子预占、Stream 异步成单、MySQL 唯一约束；订单结果或待核对记录持久化后再 ACK，补偿核验归属。受理成功与成单成功分开显示。 | `showcase/demo/?scene=trade`；`showcase/details.html#trade` |
+| 2. Feed 缓存与并发回源 | 多人读取可复用公共正文，个人点赞状态独立；一个请求取消不拖垮其他等待者。 | 按笔记 ID 与发布版本缓存到进程内和 Redis，个人状态与当前可见性单独读取；同进程、相同缺失批次合并并限制回源并发。正文写“进程内缓存”，首次提 L1 时解释含义。 | `showcase/demo/?scene=feed`；`showcase/details.html#feed` |
+| 3. 事件投递与 ES 搜索 | 笔记修改后异步更新搜索，已失效内容不能因索引滞后继续展示；失败事件有记录并可人工重放。 | 业务变更与 Outbox 同事务，经 Kafka 投影到 ES，以消费收据和版本处理重复、乱序；返回前向 MySQL 复核公开状态与版本。恢复连接不等于已重放。 | `showcase/demo/?scene=events`；`showcase/details.html#events` |
+| 4. 点赞链路与下游处理 | 点赞写入成功后，事件发布和消费也能持续跟上，结果可以对账。 | 合并事务 SQL，对发布/消费做有界批处理，减少数据库往返和提交；点赞事实及计数在 MySQL 同步提交，Kafka 承接后续投影，不能写成 Kafka 异步计数。 | `showcase/demo/?scene=likes`；`showcase/details.html#likes`；现有 `showcase/performance.html` |
+
+**数字与首页层次：** 继续遵守 README 只放项目、功能、设计与运行说明的约定，不向仓库首页加入压测数字、压测入口、任务状态或工作记录。Pages 原有实测入口保留“点赞及取消成功 QPS 3000+”，同时保留 16 核 32GB 单机、两轮各 180 秒内网、P95≤62ms/P99≤102ms、数据一致性与下游稳态的条件。不能写成全站/抢券吞吐、生产用户量或演示页面即时测得的性能，不恢复已否决的“8个请求”宣传数字。
+
+### 本次完成标准与交付
+
+1. README 四条主线连续且顺序一致，每条先说用户得到的结果，再说关键设计；Pages 已准确的部分保留，原浅紫样式、完整功能与运行入口不变。页面不出现私有材料路径、个人信息、简历版本或内部任务号。
+2. 首页/详情的四个体验链接仍直达对应场景，访客能看到第一步和预期结果；保持明确的静态示例说明。既有新手引导已完成自验，但“待用户体验验收”状态不能因本次文案获认可而自动关闭。
+3. 仅 Markdown 修改检查文字、来源及链接；修改展示 HTML 时检查受影响区块的桌面/窄屏布局和四个入口；只有改到演示接线或脚本才补相应交互回归。无需启动后端、模型、云机或重跑压测，原图、原报告和历史失败保留。
+4. 动手 Agent 回填实际文件、介绍到演示的映射、验证范围及提交。若更新 Pages，按既有发布授权完成相关发布后回读线上改动、记录链接与截图；只改 README 时不能声称 Pages 重新发布。完成后交用户查看，停在“已实施/自验、待用户验收”，不自动继续改造。
+
+### 实施与复验
+
+README 首屏先写商家发布活动、顾客抢券查询和授权店员核销。四条亮点逐条先写业务结果、再解释设计。门店权限、只读 AI 和 Vue 各自在完整功能或补充设计中呈现。核对交易预占与补偿、Feed 公共和个人状态读取、ES 候选回查、点赞事务及发布与收据处理的源码。独立审查通过，7 个 README 相对链接及启动锚点有效。README 提交 `9a005983c193dcf89aaaa24b8f98386def4b7194`，GitHub `main` 的 README 文件标识为 `e7bc65b0e587e0bde0ac1ed8fc0e0f0832c3fe42`，和本地一致。
+
+Pages 两页补清原受理重试、旧补偿的归属检查、Feed 同进程合并范围、搜索向 MySQL 复核当前公开状态与业务版本，以及已有点赞关系切换时的 SQL 合并和适用的收据批处理。详情的对应入口与首页相同。
+
+| 介绍 | 设计与演示入口 | 引导首步 |
+| --- | --- | --- |
+| 交易受理与可靠成单 | [设计](https://tech-cove01.github.io/project-full-stack/details.html#trade) · [演示](https://tech-cove01.github.io/project-full-stack/demo/?scene=trade) | 抢券并受理，观察受理凭据 |
+| Feed 缓存与并发回源 | [设计](https://tech-cove01.github.io/project-full-stack/details.html#feed) · [演示](https://tech-cove01.github.io/project-full-stack/demo/?scene=feed) | 读取一篇冷缓存笔记 |
+| 事件投递与 ES 搜索 | [设计](https://tech-cove01.github.io/project-full-stack/details.html#events) · [演示](https://tech-cove01.github.io/project-full-stack/demo/?scene=events) | 填写示例笔记标题，确认后再发布 |
+| 点赞链路与下游处理 | [设计](https://tech-cove01.github.io/project-full-stack/details.html#likes) · [演示](https://tech-cove01.github.io/project-full-stack/demo/?scene=likes) | 点赞，观察业务事实与待发布消息 |
+
+本地和线上均在 Chrome 1440px、390px 宽检查首页及详情。每轮 4 组布局、16 次从两页点击四场景入口，确认正确首步说明和高亮控件可操作，静态示例标识可见，无脚本错误。另核对 63 处站内引用及锚点，四张实测图的 SHA 与留存原件一致。变更范围为项目介绍，本次浏览器检查覆盖入口与引导首步。完整教学路径的上轮核验见下节，其用户体验验收仍待进行。
+
+[Pages 发布](https://github.com/tech-cove01/project-full-stack/actions/runs/44010739913) 成功，发布源 `c59680e0b9d9181f4ea8ec145e88f989c8f33bbd`。两页线上内容 SHA 与发布源一致。见[在线首页](https://tech-cove01.github.io/project-full-stack/)、[设计详解](https://tech-cove01.github.io/project-full-stack/details.html)、[线上检查明细](docs/evidence/2026-11-17-showcase-copy/online.json)与[截图目录](docs/evidence/2026-11-17-showcase-copy/)。本轮待用户验收。
+
+## 上一轮反馈：补齐可跟着操作的新手引导（2026-11-10，已发布，待用户体验验收）
 
 用户体验已发布版本后反馈“看着还是懵，不知道怎么操作”。本轮要补的是**一步步带访客操作的引导**，不是再增加一份功能说明。此前页面、四场景及发布的自验记录保留；用户体验尚未认可，下面“停止自行扩展”不阻止本次明确指定的引导修正。该反馈最初仅登记 STATUS；本轮已由本项目动手 agent 完成展示站与演示修正、发布及线上复验，现待用户体验验收。简历、后端和压测保持原范围。
 

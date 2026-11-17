@@ -1,0 +1,149 @@
+{
+  "base": "https://tech-cove01.github.io/project-full-stack/",
+  "source": "c59680e0b9d9181f4ea8ec145e88f989c8f33bbd",
+  "pages": [
+    {
+      "name": "home",
+      "width": 390,
+      "httpStatus": 200,
+      "normalizedSha256": "96b8412220e5360d3630cedfd9ebeeea2a3055a87ad4c6327d09a23f2bcb5655",
+      "screenshot": "home-390.png"
+    },
+    {
+      "name": "home",
+      "width": 1440,
+      "httpStatus": 200,
+      "normalizedSha256": "96b8412220e5360d3630cedfd9ebeeea2a3055a87ad4c6327d09a23f2bcb5655",
+      "screenshot": "home-1440.png"
+    },
+    {
+      "name": "details",
+      "width": 390,
+      "httpStatus": 200,
+      "normalizedSha256": "b062a5e883e96109d18596a4e5a67040f4a1e8d50e0d73f824bb003a2b4beeef",
+      "screenshot": "details-390.png"
+    },
+    {
+      "name": "details",
+      "width": 1440,
+      "httpStatus": 200,
+      "normalizedSha256": "b062a5e883e96109d18596a4e5a67040f4a1e8d50e0d73f824bb003a2b4beeef",
+      "screenshot": "details-1440.png"
+    }
+  ],
+  "entries": [
+    {
+      "from": "index.html",
+      "width": 390,
+      "scene": "trade",
+      "target": "#trade-accept",
+      "instruction": "点击“抢券并受理”，看看系统先留下什么凭据。"
+    },
+    {
+      "from": "index.html",
+      "width": 390,
+      "scene": "feed",
+      "target": "#feed-read",
+      "instruction": "点击“读取这篇笔记”，从一篇咖啡探店笔记的冷读开始。"
+    },
+    {
+      "from": "index.html",
+      "width": 390,
+      "scene": "events",
+      "target": "#events-title",
+      "instruction": "先填一个示例笔记标题，再点引导里的“填好了”；也可填入示例。这一步不会发布。"
+    },
+    {
+      "from": "index.html",
+      "width": 1440,
+      "scene": "trade",
+      "target": "#trade-accept",
+      "instruction": "点击“抢券并受理”，看看系统先留下什么凭据。"
+    },
+    {
+      "from": "index.html",
+      "width": 390,
+      "scene": "likes",
+      "target": "#likes-write",
+      "instruction": "点击“点赞”，先看业务事实与待发布消息有什么变化。"
+    },
+    {
+      "from": "index.html",
+      "width": 1440,
+      "scene": "feed",
+      "target": "#feed-read",
+      "instruction": "点击“读取这篇笔记”，从一篇咖啡探店笔记的冷读开始。"
+    },
+    {
+      "from": "index.html",
+      "width": 1440,
+      "scene": "events",
+      "target": "#events-title",
+      "instruction": "先填一个示例笔记标题，再点引导里的“填好了”；也可填入示例。这一步不会发布。"
+    },
+    {
+      "from": "details.html",
+      "width": 390,
+      "scene": "trade",
+      "target": "#trade-accept",
+      "instruction": "点击“抢券并受理”，看看系统先留下什么凭据。"
+    },
+    {
+      "from": "details.html",
+      "width": 390,
+      "scene": "feed",
+      "target": "#feed-read",
+      "instruction": "点击“读取这篇笔记”，从一篇咖啡探店笔记的冷读开始。"
+    },
+    {
+      "from": "index.html",
+      "width": 1440,
+      "scene": "likes",
+      "target": "#likes-write",
+      "instruction": "点击“点赞”，先看业务事实与待发布消息有什么变化。"
+    },
+    {
+      "from": "details.html",
+      "width": 390,
+      "scene": "events",
+      "target": "#events-title",
+      "instruction": "先填一个示例笔记标题，再点引导里的“填好了”；也可填入示例。这一步不会发布。"
+    },
+    {
+      "from": "details.html",
+      "width": 390,
+      "scene": "likes",
+      "target": "#likes-write",
+      "instruction": "点击“点赞”，先看业务事实与待发布消息有什么变化。"
+    },
+    {
+      "from": "details.html",
+      "width": 1440,
+      "scene": "trade",
+      "target": "#trade-accept",
+      "instruction": "点击“抢券并受理”，看看系统先留下什么凭据。"
+    },
+    {
+      "from": "details.html",
+      "width": 1440,
+      "scene": "feed",
+      "target": "#feed-read",
+      "instruction": "点击“读取这篇笔记”，从一篇咖啡探店笔记的冷读开始。"
+    },
+    {
+      "from": "details.html",
+      "width": 1440,
+      "scene": "events",
+      "target": "#events-title",
+      "instruction": "先填一个示例笔记标题，再点引导里的“填好了”；也可填入示例。这一步不会发布。"
+    },
+    {
+      "from": "details.html",
+      "width": 1440,
+      "scene": "likes",
+      "target": "#likes-write",
+      "instruction": "点击“点赞”，先看业务事实与待发布消息有什么变化。"
+    }
+  ],
+  "errors": []
+}

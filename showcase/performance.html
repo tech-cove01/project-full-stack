@@ -8,9 +8,10 @@
       name="description"
       content="点赞状态变更链路实测：16vCPU/32GiB单机、独立PTS内网发压，两轮各180秒稳定3008.33成功QPS，P95为62/55ms，P99为102/94ms。"
     />
-    <title>3000+ QPS 点赞实测 · 本地生活交易平台</title>
+    <title>点赞与取消实测 · 本地生活交易平台</title>
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./reading.css" />
     <script src="./script.js" defer></script>
   </head>
   <body>
@@ -32,8 +33,9 @@
         </button>
         <nav id="primary-nav" class="primary-nav" aria-label="主导航">
           <a href="./index.html">项目概览</a
-          ><a href="./details.html">设计详解</a><a href="./demo/">互动演示</a
-          ><a href="./performance.html" aria-current="page">压测实录</a
+          ><a href="./details.html">设计详解</a
+          ><a href="./workspace/">打开演示台</a
+          ><a href="./performance.html" aria-current="page">点赞实测</a
           ><a href="https://github.com/tech-cove01/project-full-stack"
             >GitHub</a
           >
@@ -42,46 +44,35 @@
     </header>
     <main id="main">
       <section
-        class="container report-entry"
+        class="container report-entry evidence-opening"
         aria-labelledby="performance-title"
       >
-        <h1 id="performance-title">3000+ QPS，点赞链路实测</h1>
-        <p class="entry-conditions">
-          16 vCPU / 32 GiB 单机 · 独立 PTS 内网发压 · 两轮各 180 秒 ·
-          <a class="text-link" href="./demo/?scene=likes">体验点赞链路</a>
-        </p>
-        <dl class="entry-metrics" aria-label="两轮正式主窗结果">
+        <div class="evidence-heading">
           <div>
-            <dt>成功吞吐 · 两轮较低值</dt>
-            <dd><strong>3008.33</strong> QPS</dd>
+            <h1 id="performance-title">点赞与取消实测</h1>
+            <p class="entry-conditions">
+              16 vCPU / 32 GiB 单机，独立 PTS 内网发压。
+            </p>
           </div>
-          <div>
-            <dt>两轮 P95 均</dt>
-            <dd><strong>≤ 62</strong> ms</dd>
-          </div>
-          <div>
-            <dt>两轮 P99 均</dt>
-            <dd><strong>≤ 102</strong> ms</dd>
-          </div>
-        </dl>
+          <p class="evidence-rate">
+            <strong>3008.33</strong> 成功 QPS
+            <span>两轮正式主窗各 180 秒，概览含准备阶段</span>
+          </p>
+        </div>
         <div class="report-switch" role="group" aria-label="选择原始报告截图">
           <button type="button" data-report="h3-report" aria-pressed="true">
-            第一轮概览 · H3
+            H3 报告概览
           </button>
           <button type="button" data-report="h4-report" aria-pressed="false">
-            第二轮概览 · H4
+            H4 报告概览
           </button>
           <button type="button" data-report="h3-generator" aria-pressed="false">
-            第一轮监控 · H3
+            H3 发压监控
           </button>
           <button type="button" data-report="h4-generator" aria-pressed="false">
-            第二轮监控 · H4
+            H4 发压监控
           </button>
         </div>
-        <p class="report-scope">
-          概览均值含准备阶段；<strong>3008.33 QPS 取 180 秒正式主窗</strong
-          >。监控来自 PTS 施压端。点击图片可放大至原尺寸。
-        </p>
         <div class="report-gallery" id="screenshots">
           <figure data-report-panel="h3-report">
             <a
@@ -158,13 +149,13 @@
           </figure>
         </div>
         <div class="measurement-note">
-          <h2>截图与正式成绩，统计范围有什么不同？</h2>
+          <h2>报告概览与正式结果的统计范围</h2>
           <p>
             PTS 全报告约 210 秒，汇总均值分别为 2596 / 2608
             TPS，包含准备阶段。两轮各 543,495 次请求中有 1,996
             次准备阶段的无变化请求；正式成绩取
             <strong>541,499 次成功变更 ÷ 180 秒 = 3008.33 QPS</strong
-            >。两轮分位数分别计算，上方延迟取较大值。
+            >。发压监控来自独立 PTS 施压端。
           </p>
         </div>
       </section>
@@ -174,8 +165,7 @@
         aria-labelledby="results-title"
       >
         <div class="section-heading">
-          <p class="eyebrow">01 / 正式结果</p>
-          <h2 id="results-title">同一配置，两次验证。</h2>
+          <h2 id="results-title">两轮正式主窗结果</h2>
           <p>
             以下统计只包含正式主窗的真实点赞 /
             取消变更，预热与准备阶段的无变化请求不计入。
@@ -286,7 +276,6 @@
       <section class="tinted-section">
         <div class="container section" aria-labelledby="optimization-title">
           <div class="section-heading">
-            <p class="eyebrow">02 / 瓶颈与优化</p>
             <h2 id="optimization-title">
               少一些往返，<br />让积压有界地消化。
             </h2>
@@ -352,8 +341,7 @@
 
       <section class="container section" aria-labelledby="journey-title">
         <div class="section-heading">
-          <p class="eyebrow">03 / 调优过程</p>
-          <h2 id="journey-title">从本机探索，到云端复验。</h2>
+          <h2 id="journey-title">从本机排查到云端复验</h2>
         </div>
         <ol class="timeline">
           <li>
@@ -404,8 +392,7 @@
         aria-labelledby="evidence-title"
       >
         <div class="section-heading">
-          <p class="eyebrow">04 / 完整证据</p>
-          <h2 id="evidence-title">继续查看实测报告与优化记录。</h2>
+          <h2 id="evidence-title">实测原始记录与优化过程</h2>
         </div>
         <div class="evidence-links">
           <a
@@ -420,7 +407,7 @@
             class="text-link"
             href="https://github.com/tech-cove01/project-full-stack/blob/main/docs/evidence/2026-11-01-cap10/offline-improvements.md"
             >查看优化记录</a
-          >
+          ><a class="text-link" href="./demo/?scene=likes">体验点赞链路模拟</a>
         </div>
       </section>
     </main>

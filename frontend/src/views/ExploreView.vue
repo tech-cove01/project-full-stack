@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from 'vue'
-import { ElAlert, ElButton, ElEmpty, ElImage, ElInput, ElSkeleton } from 'element-plus'
+import { ElAlert, ElButton, ElEmpty, ElInput, ElSkeleton } from 'element-plus'
 import 'element-plus/es/components/alert/style/css'
 import 'element-plus/es/components/empty/style/css'
-import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/input/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import { api, errorMessage } from '../api'
 import type { Shop, ShopType } from '../types'
+import ShopCover from '../components/ShopCover.vue'
 
 const pageSize = 10
 const query = ref('')
@@ -93,9 +93,6 @@ async function search(reset = true) {
     if (!controller.signal.aborted) loading.value = false
   }
 }
-function cover(shop: Shop) {
-  return shop.images?.split(',')[0]
-}
 onMounted(() => {
   void loadTypes()
   void search()
@@ -176,15 +173,7 @@ onBeforeUnmount(() => {
     >
     <div v-else class="shop-grid">
       <RouterLink v-for="shop in shops" :key="shop.id" :to="`/shops/${shop.id}`" class="shop-card">
-        <el-image
-          v-if="cover(shop)"
-          :src="cover(shop)"
-          fit="cover"
-          class="shop-cover"
-          loading="lazy"
-          ><template #error><div class="image-placeholder">Full Stack</div></template></el-image
-        >
-        <div v-else class="shop-cover image-placeholder">Full Stack</div>
+        <ShopCover :images="shop.images" :alt="shop.name" class="shop-cover" loading="lazy" />
         <div class="shop-card-body">
           <div class="shop-title-row">
             <h3>{{ shop.name }}</h3>

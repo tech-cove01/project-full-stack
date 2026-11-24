@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
-import { ElAlert, ElButton, ElEmpty, ElImage, ElSkeleton, ElTag } from 'element-plus'
+import { ElAlert, ElButton, ElEmpty, ElSkeleton, ElTag } from 'element-plus'
 import 'element-plus/es/components/alert/style/css'
 import 'element-plus/es/components/empty/style/css'
-import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import 'element-plus/es/components/tag/style/css'
 import { useRoute, useRouter } from 'vue-router'
@@ -18,6 +17,7 @@ import {
 } from '../api'
 import { useAuthStore } from '../stores/auth'
 import type { Shop, Voucher } from '../types'
+import ShopCover from '../components/ShopCover.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,7 +36,6 @@ const now = ref(Date.now())
 const clock = setInterval(() => {
   now.value = Date.now()
 }, 1000)
-const images = computed(() => shop.value?.images?.split(',').filter(Boolean) || [])
 let shopController: AbortController | undefined
 let voucherController: AbortController | undefined
 let purchaseController: AbortController | undefined
@@ -216,9 +215,7 @@ onBeforeUnmount(() => {
           }}<span v-if="shop.avgPrice != null"> · 人均 ¥{{ shop.avgPrice }}</span>
         </p>
       </div>
-      <el-image v-if="images[0]" :src="images[0]" fit="cover" class="detail-cover"
-        ><template #error><div class="image-placeholder">Full Stack</div></template></el-image
-      >
+      <ShopCover :images="shop.images" :alt="shop.name" class="detail-cover" />
     </section>
     <section class="section-block">
       <div class="section-heading">

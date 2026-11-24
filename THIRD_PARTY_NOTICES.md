@@ -27,7 +27,7 @@ The Go implementation under `backend-go/` is newly written against the retained 
 
 ## Demo shop photography
 
-The Pages showcase uses `showcase/assets/street-cafe.jpg` and `showcase/assets/qinghe-kitchen.jpg` for fictional demo shops. Its Vue discovery screenshot, `showcase/assets/vue-discovery.png`, includes all three photos below.
+These photos illustrate fictional demo shops in the Vue app. The local JPEGs in `frontend/public/demo/shops/` are cropped to 1200 × 800. The Pages showcase uses `showcase/assets/street-cafe.jpg` and `showcase/assets/qinghe-kitchen.jpg` for fictional demo shops. Its Vue discovery screenshot includes all three photos.
 
 | File | Photographer | Source | License |
 | --- | --- | --- | --- |

@@ -1,0 +1,48 @@
+{
+  "baselineCommit": "14efebe",
+  "engine": "158.0.8127.37",
+  "links": [
+    {
+      "name": "一笔到店交易",
+      "href": "./",
+      "pathname": "/project-full-stack/workspace/",
+      "search": "",
+      "hardNavigation": true
+    },
+    {
+      "name": "顾客、商家与社区",
+      "href": "../demo/",
+      "pathname": "/project-full-stack/demo/",
+      "search": "",
+      "hardNavigation": true
+    },
+    {
+      "name": "抢券重试与恢复",
+      "href": "../demo/?scene=trade",
+      "pathname": "/project-full-stack/demo/",
+      "search": "?scene=trade",
+      "hardNavigation": true
+    },
+    {
+      "name": "关注动态与缓存",
+      "href": "../demo/?scene=feed",
+      "pathname": "/project-full-stack/demo/",
+      "search": "?scene=feed",
+      "hardNavigation": true
+    },
+    {
+      "name": "事件投递与搜索",
+      "href": "../demo/?scene=events",
+      "pathname": "/project-full-stack/demo/",
+      "search": "?scene=events",
+      "hardNavigation": true
+    },
+    {
+      "name": "点赞写入与积压",
+      "href": "../demo/?scene=likes",
+      "pathname": "/project-full-stack/demo/",
+      "search": "?scene=likes",
+      "hardNavigation": true
+    }
+  ]
+}

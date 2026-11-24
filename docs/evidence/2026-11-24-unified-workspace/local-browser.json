@@ -1,0 +1,144 @@
+{
+  "engine": "158.0.8127.37",
+  "mount": "/project-full-stack/",
+  "results": [
+    {
+      "name": "same-document-and-navigation",
+      "passed": true,
+      "durationMs": 6081,
+      "metrics": {
+        "routeHops": 11,
+        "newDocumentRequests": 0,
+        "subframes": 0,
+        "fragmentFetches": 1
+      }
+    },
+    {
+      "name": "deep-link-browser-history-and-reload",
+      "passed": true,
+      "durationMs": 4869,
+      "metrics": {
+        "deepLink": "feed",
+        "browserBackForward": 4,
+        "refresh": "design",
+        "invalidHashFallback": "trade"
+      }
+    },
+    {
+      "name": "business-and-experiments-retain-state",
+      "passed": true,
+      "durationMs": 5972,
+      "metrics": {
+        "accepted": {
+          "acceptance": "AC-0001",
+          "order": "未生成",
+          "state": "已受理",
+          "stock": "4 / 5",
+          "order-count": "0"
+        },
+        "redeemed": {
+          "acceptance": "AC-0001",
+          "order": "10000001",
+          "state": "已核销",
+          "stock": "4 / 5",
+          "order-count": "1"
+        },
+        "replay": true,
+        "sceneProgress": true,
+        "resetIsolated": true
+      }
+    },
+    {
+      "name": "free-roles-internal-routes-and-retention",
+      "passed": true,
+      "durationMs": 5101,
+      "metrics": {
+        "freeOrder": "已核销",
+        "internalTransitionHashes": [
+          "merchant",
+          "community"
+        ],
+        "noteAfterReturn": true,
+        "orderAfterReload": true
+      }
+    },
+    {
+      "name": "phone-390-keyboard-and-navigation",
+      "passed": true,
+      "durationMs": 2943,
+      "metrics": {
+        "width": 390,
+        "routeHops": 4,
+        "keyboard": true,
+        "menuCollapses": true,
+        "accepted": true
+      }
+    },
+    {
+      "name": "phone-320-keyboard-and-navigation",
+      "passed": true,
+      "durationMs": 3050,
+      "metrics": {
+        "width": 320,
+        "routeHops": 4,
+        "keyboard": true,
+        "menuCollapses": true,
+        "accepted": true
+      }
+    },
+    {
+      "name": "legacy-standalone-direct-links",
+      "passed": true,
+      "durationMs": 1703,
+      "metrics": {
+        "legacyEntries": 5
+      }
+    },
+    {
+      "name": "documents-and-reports-in-shell",
+      "passed": true,
+      "durationMs": 2340,
+      "metrics": {
+        "reportSwitch": "H4",
+        "retained": true,
+        "sameDocument": true
+      }
+    },
+    {
+      "name": "scenario-guide-resumes-after-sidebar-switch",
+      "passed": true,
+      "durationMs": 2396,
+      "metrics": {
+        "guideOpened": true,
+        "guideClosedOnRouteChange": true,
+        "scenarioRetained": true,
+        "guideReopenedAtNextStep": true
+      }
+    },
+    {
+      "name": "real-app-theme-desktop-and-photo-access",
+      "passed": true,
+      "durationMs": 1995,
+      "metrics": {
+        "width": 1440,
+        "background": "rgb(247, 248, 245)",
+        "sidebar": "rgb(255, 255, 255)",
+        "buyButton": "rgb(23, 106, 93)",
+        "photoCount": 2
+      }
+    },
+    {
+      "name": "real-app-theme-mobile-and-photo-access",
+      "passed": true,
+      "durationMs": 1170,
+      "metrics": {
+        "width": 390,
+        "background": "rgb(247, 248, 245)",
+        "sidebar": "rgb(255, 255, 255)",
+        "buyButton": "rgb(23, 106, 93)",
+        "photoCount": 2
+      }
+    }
+  ],
+  "passed": true
+}

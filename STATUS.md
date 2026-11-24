@@ -2,6 +2,17 @@
 
 更新：2026-11-24。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
 
+## 已发布、待用户验收 · WEB-017 演示台统一工作区
+
+2026-11-24 用户指出 WEB-015 的左栏跳转到其他网页，与 CRM 工作区在同一外壳内切换内容不同。已核对 [CRM 工作区](https://tech-cove01.github.io/project-crm/workspace/#overview) 和 [实际路由源码](https://github.com/tech-cove01/project-crm/blob/gh-pages/workspace/app.js)。CRM 通过 hash 切换中央模块，外壳常驻，合成业务状态由浏览器维护。Full Stack 借鉴交互方式。用户补充以本机 Go/Vue 应用为视觉和流程参照，演示台采用真实应用的浅底、白色卡片和墨绿主操作，使用同源门店配图。工作区按探索附近、商家工作台、探店社区组织。展示首页沿用浅紫主题。
+
+1. [x] **WEB-017A 外壳与路由。** 左栏的交易、顾客/商家/社区、交易恢复、Feed、事件、点赞、设计与实测都在 `/workspace/` 同一文档切换，只更新 hash。面包屑和选中状态跟随模块，浏览器前进/后退、刷新深链、键盘焦点和手机收起菜单均可用。默认直接进入原到店交易。左栏和顶栏常驻，离开工作区的入口放在内容区和页脚。
+2. [x] **WEB-017B 复用业务和四项实验。** 在同一主内容区加载已有业务、模型和引导，保留顾客/商家/社区操作和原四个机制场景。切换再返回保留当前标签的操作结果，刷新复用原浏览器存储规则。交易重置、自由业务重置和机制重置按当前模块生效，不清除别的视图。旧 `/demo/` 和 `/demo/?scene=...` 仍按原规则可用。
+3. [x] **WEB-017C 工作区内的资料。** 设计和实测在工作区内提供可操作的视图，复用真实报告图片和统计范围。保留完整设计和报告的明确入口。此处仅展示既有证据和浏览器内合成案例。
+4. [x] **WEB-017D 核验。** 用 Chromium 检查左栏所有模块切换不重新请求文档、外壳节点实例恒定、业务及实验状态在路由往返中保持。覆盖深链、后退、移动端、键盘、场景指引/重置、报告切换和旧入口回归。记录桌面和窄屏证据及实际发布状态。
+
+本机 Chromium 11/11、模型规则 50/50。11 次切换均保留外壳，额外文档请求为 0。正式站 11 项核对通过，其中一次 390px 首次载入超过 5 秒测试阈值，延长等待后复验通过。功能提交为 `671398d`、`1be7831`、`b0ffdec`。[在线演示台](https://tech-cove01.github.io/project-full-stack/workspace/#business) · [发布记录](https://github.com/tech-cove01/project-full-stack/actions/runs/45343358196) · [验收证据与截图](docs/evidence/2026-11-24-unified-workspace/README.md)。
+
 ## 已更新 · WEB-016 GitHub README
 
 2026-11-24 用户要求参考 CRM 最新 GitHub README，重排 Full Stack 仓库介绍。开头直达在线演示台，街角咖啡券串起抢券、查单、模拟支付、核销与重试。四项技术亮点各自链接设计小节，后续保留产品功能、架构、配置后的本地运行命令、目录与许可。已独立核对业务技术口径、启动命令及 21 个仓库内和公开链接。[Full Stack README](https://github.com/tech-cove01/project-full-stack#readme) · [CRM 参考](https://github.com/tech-cove01/project-crm#readme)。

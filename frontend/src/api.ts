@@ -22,11 +22,18 @@ import type {
   Voucher,
 } from './types'
 
-export const TOKEN_KEY = 'cityloop.token'
-export const LAST_ORDER_KEY = 'cityloop.last-order'
+export const isShowcase = import.meta.env.MODE === 'showcase'
+export const TOKEN_KEY = isShowcase ? 'cityloop.showcase.token' : 'cityloop.token'
+export const LAST_ORDER_KEY = isShowcase ? 'cityloop.showcase.last-order' : 'cityloop.last-order'
 const baseUrl = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/$/, '')
 
-export const apiBase = baseUrl
+export async function fetchApi(path: string, options: RequestInit): Promise<Response> {
+  if (import.meta.env.MODE === 'showcase') {
+    const { handleDemoFetch } = await import('./showcase/transport')
+    return handleDemoFetch(path, options)
+  }
+  return fetch(baseUrl + path, options)
+}
 
 export class ApiError extends Error {
   constructor(
@@ -68,7 +75,7 @@ async function request<T>(
     )
 
   try {
-    const response = await fetch(`${baseUrl}${path}`, {
+    const response = await fetchApi(path, {
       ...options,
       headers,
       signal: controller.signal,

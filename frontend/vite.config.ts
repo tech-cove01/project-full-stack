@@ -2,6 +2,8 @@ import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
 export default defineConfig(({ mode }) => {
+  if (mode === 'showcase') return { base: './', plugins: [vue()] }
+
   const env = loadEnv(mode, process.cwd(), '')
   const target = env.API_PROXY_TARGET || 'http://127.0.0.1:8082'
   const url = new URL(target)

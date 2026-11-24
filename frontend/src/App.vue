@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { ElButton, ElMessage } from 'element-plus'
 import 'element-plus/es/components/button/style/css'
 import 'element-plus/es/components/message/style/css'
-import { api, errorMessage, LAST_ORDER_KEY, TOKEN_KEY } from './api'
+import { api, errorMessage, isShowcase, LAST_ORDER_KEY, TOKEN_KEY } from './api'
 import { useAuthStore } from './stores/auth'
 
 const auth = useAuthStore()
+const DemoToolbar =
+  import.meta.env.MODE === 'showcase'
+    ? defineAsyncComponent(() => import('./showcase/DemoToolbar.vue'))
+    : null
 const route = useRoute()
 const router = useRouter()
 const lastOrder = ref(localStorage.getItem(LAST_ORDER_KEY) || '')
@@ -15,8 +19,16 @@ const loggingOut = ref(false)
 function updateLastOrder() {
   lastOrder.value = localStorage.getItem(LAST_ORDER_KEY) || ''
 }
+function syncDemoTab(event: StorageEvent) {
+  if (event.key === TOKEN_KEY) void auth.loadProfile().catch(() => {})
+  if (event.key === LAST_ORDER_KEY) updateLastOrder()
+}
 function onExpired() {
   auth.clear()
+  if (isShowcase) {
+    void router.replace('/')
+    return
+  }
   if (route.name !== 'login') {
     ElMessage.warning('登录已失效，请重新登录。')
     void router.replace({ name: 'login', query: { redirect: route.fullPath } })
@@ -48,11 +60,13 @@ async function logout() {
 onMounted(() => {
   window.addEventListener('auth-expired', onExpired)
   window.addEventListener('order-remembered', updateLastOrder)
+  if (isShowcase) window.addEventListener('storage', syncDemoTab)
   void auth.loadProfile().catch(() => {})
 })
 onBeforeUnmount(() => {
   window.removeEventListener('auth-expired', onExpired)
   window.removeEventListener('order-remembered', updateLastOrder)
+  if (isShowcase) window.removeEventListener('storage', syncDemoTab)
 })
 </script>
 
@@ -88,7 +102,9 @@ onBeforeUnmount(() => {
         <div class="account-actions">
           <template v-if="auth.loggedIn"
             ><span class="nickname">{{ auth.user?.nickName || '已登录' }}</span
-            ><el-button text :loading="loggingOut" @click="logout">退出</el-button></template
+            ><el-button v-if="!isShowcase" text :loading="loggingOut" @click="logout"
+              >退出</el-button
+            ></template
           >
           <el-button
             v-else
@@ -99,7 +115,8 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </header>
-    <main class="main-content"><RouterView /></main>
+    <component :is="DemoToolbar" v-if="DemoToolbar" />
+    <main class="main-content"><RouterView :key="isShowcase ? auth.token : undefined" /></main>
     <footer class="site-footer">
       <span>Full Stack · 本地生活服务</span><span>探索 · 到店 · 连接</span>
     </footer>

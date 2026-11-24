@@ -1,8 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
-import { TOKEN_KEY } from './api'
+import { createRouter, createWebHashHistory, createWebHistory } from 'vue-router'
+import { isShowcase, TOKEN_KEY } from './api'
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: isShowcase ? createWebHashHistory() : createWebHistory(),
   scrollBehavior: () => ({ top: 0 }),
   routes: [
     { path: '/', name: 'explore', component: () => import('./views/ExploreView.vue') },
@@ -83,6 +83,11 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
+  if (isShowcase && to.name === 'login') {
+    const next = typeof to.query.redirect === 'string' ? router.resolve(to.query.redirect) : null
+    if (!next?.name || next.name === 'login') return '/'
+    return next.meta.requiresAuth && !localStorage.getItem(TOKEN_KEY) ? '/' : next.fullPath
+  }
   if (to.meta.requiresAuth && !localStorage.getItem(TOKEN_KEY)) {
     return { name: 'login', query: { redirect: to.fullPath } }
   }

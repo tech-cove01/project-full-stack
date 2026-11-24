@@ -444,6 +444,9 @@ $("#guide-next").addEventListener("click", () => {
     }
     return;
   }
+  advanceFreeGuide();
+});
+function advanceFreeGuide() {
   const step = guideStep();
   if (step < 3) {
     act({ type: "SHOP", shop: "coffee" });
@@ -458,7 +461,7 @@ $("#guide-next").addEventListener("click", () => {
     act({ type: "WORKSPACE", role: "OWNER", shop: "coffee" });
     go("merchant", "#merchant-role");
   }
-});
+}
 $("#reset-demo").addEventListener("click", () => {
   Object.values(tourControllers).forEach((t) => {
     t.stop();
@@ -497,7 +500,7 @@ function updateIntroPosition() {
       : "跟随当前场景的操作顺序，也可以随时重置并切换其他场景。";
   $("#intro-description").textContent =
     selectedScene === "free"
-      ? "建议先从抢券开始。引导会高亮要点击的按钮，做完后带你看结果，再继续下一步。"
+      ? "建议先从抢券开始。右侧步骤会随操作更新，点击步骤按钮可定位下一项业务操作。"
       : `当前场景：${names[selectedScene]}。跟着高亮按钮操作，做完后看结果；随时可以退出，自由探索。`;
 }
 function focusGuide() {
@@ -586,7 +589,11 @@ function resetScene() {
 }
 $("#reset-scene").addEventListener("click", resetScene);
 function startTour() {
-  if (selectedScene === "free") selectScene("trade", true);
+  if (selectedScene === "free") {
+    if ($("#guide-next").disabled) focusGuide();
+    else advanceFreeGuide();
+    return;
+  }
   tourControllers[selectedScene]?.start();
 }
 $("#start-tour").addEventListener("click", startTour);

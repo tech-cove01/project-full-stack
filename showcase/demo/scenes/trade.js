@@ -302,8 +302,6 @@ export function mount(container, { onChange = () => {} } = {}) {
         label: "定位下一步操作",
         nextSelector: selector,
         design: "trade",
-        evidence:
-          "https://github.com/tech-cove01/project-full-stack/blob/main/docs/reviews/2026-10-28/batch-3583818/trade-review.md",
       };
     },
   };

@@ -380,8 +380,6 @@ export function mount(container, { onChange = () => {} } = {}) {
         label,
         nextSelector,
         design: "feed",
-        evidence:
-          "https://github.com/tech-cove01/project-full-stack/blob/main/docs/reviews/2026-10-30/cap07-6693539/report.md",
       };
     },
   };

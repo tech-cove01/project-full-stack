@@ -29,14 +29,6 @@ let demoActive = !embeddedRoot;
 let navigateEmbedded;
 let selectedScene = "free";
 const sceneKeys = ["trade", "feed", "events", "likes"];
-const sceneEvidence = {
-  trade:
-    "https://github.com/tech-cove01/project-full-stack/blob/main/docs/transaction-design.md",
-  feed: "https://github.com/tech-cove01/project-full-stack/blob/main/docs/backend-highlights-plan.md",
-  events:
-    "https://github.com/tech-cove01/project-full-stack/blob/main/docs/reviews/2026-10-29/go073-399705a/events/report.md",
-  likes: "../performance.html#screenshots",
-};
 
 const storageKey = "fullstack-business-demo-v1";
 let state;
@@ -256,7 +248,7 @@ function renderGuide() {
     $("#guide-progress").textContent =
       `已完成 ${Math.min(guide.current, guide.steps.length)} / ${guide.steps.length} 步`;
     $("#implementation-note").textContent =
-      "场景中的状态与计数用于说明业务机制。真实实现与测试条件请从对应设计和证据入口查看。";
+      "场景中的状态与计数均为浏览器模拟。项目实现见对应设计。";
     $(".guide-explanation a").href = `../details.html#${selectedScene}`;
     return;
   }
@@ -284,7 +276,7 @@ function renderGuide() {
     "项目资金流程本身为模拟支付；业务服务检查订单状态，支付后才提供核销凭证。",
     "真实核销在事务内锁定并复核当前门店授权和订单，状态变化与审计共同保存，重复核销保持幂等。",
     "真实笔记写入与社区 Outbox 同事务；关注动态和搜索经独立消费组更新，点赞按期望状态写入。",
-    "本演示在浏览器模拟状态变化。真实事务与权限能力请阅读源码，性能成绩以独立实测报告为准。",
+    "订单和核销结果来自浏览器内的示例。对应设计说明了项目中的事务与门店权限。",
   ];
   $("#guide-title").textContent = titles[step];
   $("#guide-text").textContent = texts[step];
@@ -594,9 +586,6 @@ function selectScene(key, push = false) {
   });
   if (selectedScene !== "free") {
     $("#scene-design-link").href = `../details.html#${selectedScene}`;
-    $("#scene-evidence-link").href =
-      sceneControllers[selectedScene]?.getGuide().evidence ||
-      sceneEvidence[selectedScene];
   }
   if (push && !embeddedRoot) {
     const url = new URL(location.href);

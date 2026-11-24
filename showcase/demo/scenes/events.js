@@ -316,8 +316,6 @@ export function mount(container, { onChange = () => {} } = {}) {
           "#events-search",
         ][current],
         design: "events",
-        evidence:
-          "https://github.com/tech-cove01/project-full-stack/blob/main/docs/reviews/2026-10-29/go073-399705a/events/report.md",
       };
     },
     destroy() {

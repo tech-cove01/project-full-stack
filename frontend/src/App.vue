@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
+import { defineAsyncComponent, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { ElButton, ElMessage } from 'element-plus'
 import 'element-plus/es/components/button/style/css'
@@ -16,6 +16,21 @@ const route = useRoute()
 const router = useRouter()
 const lastOrder = ref(localStorage.getItem(LAST_ORDER_KEY) || '')
 const loggingOut = ref(false)
+const menuOpen = ref(false)
+const menuButton = ref<HTMLButtonElement | null>(null)
+watch(
+  () => route.fullPath,
+  () => {
+    menuOpen.value = false
+  },
+)
+
+function closeMenuOnEscape() {
+  if (!menuOpen.value) return
+  menuOpen.value = false
+  menuButton.value?.focus()
+}
+
 function updateLastOrder() {
   lastOrder.value = localStorage.getItem(LAST_ORDER_KEY) || ''
 }
@@ -72,13 +87,19 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="app-shell">
-    <header class="site-header">
+    <header class="site-header" @keydown.esc="closeMenuOnEscape">
       <div class="header-inner">
         <RouterLink class="brand" to="/"
           ><span class="brand-mark">C</span
           ><span>Full Stack<small>本地生活</small></span></RouterLink
         >
-        <nav aria-label="主导航">
+        <nav
+          id="product-nav"
+          class="product-nav"
+          :class="{ 'is-open': menuOpen }"
+          aria-label="主导航"
+          @click="menuOpen = false"
+        >
           <RouterLink to="/" :class="{ active: route.name === 'explore' || route.name === 'shop' }"
             >探索附近</RouterLink
           >
@@ -112,6 +133,16 @@ onBeforeUnmount(() => {
             @click="router.push({ name: 'login', query: { redirect: route.fullPath } })"
             >登录 / 注册</el-button
           >
+          <button
+            ref="menuButton"
+            class="header-nav-toggle"
+            type="button"
+            :aria-expanded="menuOpen"
+            aria-controls="product-nav"
+            @click="menuOpen = !menuOpen"
+          >
+            导航
+          </button>
         </div>
       </div>
     </header>

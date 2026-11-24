@@ -24,3 +24,13 @@ Dependencies declared in Maven and npm retain their respective licenses. Consult
 ## Go migration dependencies
 
 The Go implementation under `backend-go/` is newly written against the retained API/data contracts. Gin (MIT), GORM and its MySQL driver (MIT), go-sql-driver/mysql (MPL-2.0), and go-redis/v9 (BSD-2-Clause) retain their upstream licenses, as do transitive dependencies. Exact versions and checksums are recorded in `backend-go/go.mod` and `go.sum`; inspect the modules' LICENSE files before redistributing them. The Java source and Lua attribution above continues to apply wherever retained source is reused.
+
+## Demo shop photography
+
+The Pages showcase uses a photo of a coffee shop at `showcase/assets/street-cafe.jpg`. Its Vue discovery screenshot, `showcase/assets/vue-discovery.png`, includes all three photos below to illustrate fictional shops.
+
+| File | Photographer | Source | License |
+| --- | --- | --- | --- |
+| `street-cafe.jpg` | The Castlebar | [Empty Seats inside a Coffee Shop](https://www.pexels.com/photo/empty-seats-inside-a-coffee-shop-5914497/) | [Pexels License](https://www.pexels.com/license/) |
+| `qinghe-kitchen.jpg` | Ella Olsson | [Flat Lay Photography of Vegetable Salad on Plate](https://www.pexels.com/photo/flat-lay-photography-of-vegetable-salad-on-plate-1640777/) | [Pexels License](https://www.pexels.com/license/) |
+| `city-reading-room.jpg` | Pixabay | [Stack of Books in Shelf](https://www.pexels.com/photo/stack-of-books-in-shelf-256559/) | [CC0](https://www.pexels.com/creative-commons-images/) |

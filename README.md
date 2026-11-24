@@ -1,32 +1,8 @@
 # project-full-stack · 本地生活交易平台
 
-面向本地生活消费与商家经营的全栈平台。商家发布优惠活动，顾客抢券下单并查询订单结果，店员在授权门店核销。顾客还可以发布探店笔记、查看关注动态和搜索公开笔记。支付与退款采用模拟资金流程，业务 AI 助手提供带来源的只读查询。
+Go + Vue 本地生活平台。商家发券，顾客抢券并查询成单结果，店员在授权门店核销。顾客还可以发布探店笔记、看关注动态和搜索公开内容。支付与退款使用模拟资金，业务 AI 提供带来源的只读查询。
 
-后端采用 **Go、Gin 与 GORM**，前端采用 **Vue 3 与 TypeScript**。以 **MySQL** 保存业务事实，**Redis / Lua / Stream** 承担交易准入、异步成单与缓存，社区事件通过 **Outbox 与 Kafka** 驱动关注、Feed 目录和 **Elasticsearch** 搜索投影。
-
-## 核心功能
-
-| 模块 | 功能 |
-| --- | --- |
-| 用户与商铺 | 登录、身份恢复与退出，商铺搜索、分类、分页、详情及公开优惠 |
-| 活动与订单 | 活动发布与下架、异步抢券成单、模拟支付、取消、超时关闭、核销和退款 |
-| 商家工作台 | OWNER / MANAGER / STAFF 逐门店授权，管理活动与订单，查询核销、退款和操作审计 |
-| 探店社区 | 发布笔记、点赞与取消、关注关系、复合游标分页的关注动态 |
-| 全文搜索 | 公开笔记标题与正文检索、门店筛选、确定排序和分页 |
-| 业务 AI | 查询公开规则与本人订单、活动库存和门店信息，展示可点击来源与只读工具卡片 |
-
-## 技术栈
-
-| 层次 | 技术与用途 |
-| --- | --- |
-| 前端 | Vue 3、TypeScript、Vite、Vue Router、Pinia、Element Plus |
-| 后端 | Go 1.27、Gin、GORM、go-redis/v9 |
-| 数据与缓存 | MySQL 8.4、Redis 7.4、有界进程内缓存（L1）、批量装配与回源合并 |
-| 交易任务 | Redis Lua、Redis Stream、MySQL 事务、订单幂等与补偿 |
-| 事件投影 | 事务 Outbox、Kafka、独立消费组、事件去重与业务版本校验 |
-| 全文搜索 | Elasticsearch、CJK 分词、PIT / search_after、MySQL 事实复核 |
-| 业务 AI | Go net/http 兼容 Chat / Embedding、百炼 Qwen、MySQL 知识持久化与小规模精确向量检索、应用层 SSE |
-| 工程工具 | Docker Compose、版本化 SQL 迁移、go test / httptest、k6、GitHub Actions |
+[项目展示](https://tech-cove01.github.io/project-full-stack/) · [打开演示台](https://tech-cove01.github.io/project-full-stack/workspace/) · [技术详解](https://tech-cove01.github.io/project-full-stack/details.html)
 
 ## 项目亮点
 
@@ -53,6 +29,30 @@ Redis Lua 原子校验活动与资格、预占库存、保存受理 ID，并向 
 顾客点赞或取消后可读取已提交的状态和计数，重试相同状态不会重复计数。后续事件的发布与消费都有记录，可以对账。
 
 MySQL 在同一事务中提交点赞关系、计数和 Outbox。已有点赞关系切换状态时，用合并后的 SQL 更新关系与计数。启用批处理时，发布端按条数和字节数限制批次，消费端批量保存符合条件的点赞事件收据，减少数据库往返和事务提交。Kafka 承接后续投影。
+
+## 核心功能
+
+| 模块 | 功能 |
+| --- | --- |
+| 用户与商铺 | 登录、身份恢复与退出，商铺搜索、分类、分页、详情及公开优惠 |
+| 活动与订单 | 活动发布与下架、异步抢券成单、模拟支付、取消、超时关闭、核销和退款 |
+| 商家工作台 | OWNER / MANAGER / STAFF 逐门店授权，管理活动与订单，查询核销、退款和操作审计 |
+| 探店社区 | 发布笔记、点赞与取消、关注关系、复合游标分页的关注动态 |
+| 全文搜索 | 公开笔记标题与正文检索、门店筛选、确定排序和分页 |
+| 业务 AI | 查询公开规则与本人订单、活动库存和门店信息，展示可点击来源与只读工具卡片 |
+
+## 技术栈
+
+| 层次 | 技术与用途 |
+| --- | --- |
+| 前端 | Vue 3、TypeScript、Vite、Vue Router、Pinia、Element Plus |
+| 后端 | Go 1.27、Gin、GORM、go-redis/v9 |
+| 数据与缓存 | MySQL 8.4、Redis 7.4、有界进程内缓存（L1）、批量装配与回源合并 |
+| 交易任务 | Redis Lua、Redis Stream、MySQL 事务、订单幂等与补偿 |
+| 事件投影 | 事务 Outbox、Kafka、独立消费组、事件去重与业务版本校验 |
+| 全文搜索 | Elasticsearch、CJK 分词、PIT / search_after、MySQL 事实复核 |
+| 业务 AI | Go net/http 兼容 Chat / Embedding、百炼 Qwen、MySQL 知识持久化与小规模精确向量检索、应用层 SSE |
+| 工程工具 | Docker Compose、版本化 SQL 迁移、go test / httptest、k6、GitHub Actions |
 
 ## 补充设计
 

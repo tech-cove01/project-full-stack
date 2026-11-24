@@ -2,21 +2,22 @@
 
 纯 HTML / CSS / JavaScript，GitHub Pages 只发布本目录，不依赖 Go API、数据库或已释放的 ECS。
 
-- `index.html`：完整产品能力与工程亮点。
-- `details.html`：交易流程、三条架构链路、缓存/事件/权限与技术栈。
-- `performance.html`：两轮正式点赞实测、组件优化、四张 PTS 留存截图。
-- `demo/`：面向访客的五步静态业务演示，顾客抢券与模拟支付、店员核销、店主管理和社区分享共用示例状态；提供角色/门店切换、取消/退款、发布/搜索/点赞及重置。
-- `demo/?scene=trade|feed|events|likes`：四条亮点的独立机制场景，支持正常/异常操作、状态观察、右侧步骤和场景重置；无参数入口继续提供完整业务自由体验。模型位于`demo/scenes/`，刷新后恢复机制场景的初始示例。
+- `index.html`：以街角咖啡到店券介绍交易、架构与完整产品能力，主按钮直达同一案例。
+- `workspace/`：交易演示台。沿同一张券观察受理编号、订单、模拟支付、授权店员核销和重试结果。
+- `details.html`：订单状态、异常分支、三条架构链路、四项机制与源码。
+- `performance.html`：页面开头为两轮原始 PTS 报告及发压监控，支持原尺寸查看，后面是正式主窗与组件优化。
+- `demo/`：自由业务体验，可切换顾客、商家和社区，体验取消、退款、发布、搜索与点赞。
+- `demo/?scene=trade|feed|events|likes`：四个原机制场景，支持异常操作、步骤引导和场景重置。刷新后恢复机制场景的初始示例。
 - `styles.css`：用户指定的浅紫主题、响应式布局与减少动效支持。
 - `script.js`：移动导航、架构与轮次切换、原图放大；禁用 JS 后正文和导航仍可读。
 
 维护内容须以仓库的业务实现与正式报告为依据。公开报告ID已由用户明确授权，四张 PNG 保留原字节；其它私有资源ID、密钥、PDF与本地简历材料不得加入。截图仅显示时刻与时间轴，无具体日期。数据截图不可用美化或生成图片替换。
 
-本地可从该目录启动任意静态 HTTP 服务，例如 `python -m http.server 8767 --bind 127.0.0.1`，访问 `http://127.0.0.1:8767/`。站内路径均为相对路径，支持 GitHub 项目子路径。
+从仓库根目录运行 `python -m http.server 8767 --bind 127.0.0.1 --directory showcase`，打开 `http://127.0.0.1:8767/`。站内路径均为相对路径，也支持 GitHub 项目子路径。
 
-发布由 `../.github/workflows/pages.yml` 完成，Pages 使用 GitHub Actions 来源；修改本目录并正常推送 main 后自动部署。维护时检查三个页面、手机导航、架构/轮次切换、截图关闭与焦点返回。回退使用追加 revert 提交，不重写历史。
+发布由 `../.github/workflows/pages.yml` 完成，Pages 使用 GitHub Actions 来源；修改本目录并正常推送 main 后自动部署。维护时检查首页到交易台、旧演示入口、窄屏导航、架构与报告切换、截图关闭与焦点返回。回退使用追加 revert 提交。
 
-互动演示不调用真实后端或模型，使用虚构门店与示例数据，状态只保存在当前标签页sessionStorage（禁用时内存降级）。不要输入真实个人信息；重置仅影响本演示的专用键。页面中的等待用于表达受理与成单区别，不代表真实时延。业务规则测试为 `node --test scripts/showcase-demo.test.mjs`（在仓库根运行），交付与验收见 `docs/showcase-demo-plan.md` 与 `docs/showcase-demo-verification.md`。
+交易台和自由业务使用虚构门店与示例数据，复用 `demo/model.js` 的业务模型。两处各自保存在当前标签页的 `sessionStorage`，重置只清理对应示例。受理、成单、支付与履约都在浏览器内模拟。规则测试从仓库根运行 `node --test scripts/showcase-demo.test.mjs`。
 
 四场景直接验证为 `node --test scripts/showcase-scene-*.test.mjs`，完整操作与验收见仓库 `docs/showcase-four-scenes-acceptance.md`。模拟的回源、收据、积压和处理轮数仅解释机制，真实3000+成功QPS引用原H3/H4及明确条件，禁止把动画或模拟计数冒称压测。
 

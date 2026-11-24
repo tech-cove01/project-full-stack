@@ -93,6 +93,16 @@ function reset() {
             <button type="button" @click="openAs('reader', '/notes/search')">搜索笔记</button>
           </div>
         </section>
+        <section>
+          <h2>店铺助手</h2>
+          <p>试问「街角咖啡停车怎么收费？」或「我的订单」，打开规则出处或订单详情。</p>
+          <div>
+            <button type="button" @click="openAs('customer', '/assistant')">打开店铺助手</button>
+            <button type="button" @click="openAs('owner', '/merchant/knowledge')">
+              管理门店规则
+            </button>
+          </div>
+        </section>
       </div>
     </div>
   </section>

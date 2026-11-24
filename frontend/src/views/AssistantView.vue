@@ -19,7 +19,7 @@ import 'element-plus/es/components/select/style/css'
 import 'element-plus/es/components/skeleton/style/css'
 import 'element-plus/es/components/tag/style/css'
 import { useRoute, useRouter } from 'vue-router'
-import { api, apiBase, errorMessage, money, TOKEN_KEY } from '../api'
+import { api, errorMessage, fetchApi, isShowcase, money, TOKEN_KEY } from '../api'
 import type { AiCapabilities, AiConversation, AiSource, Shop } from '../types'
 
 interface Card {
@@ -138,8 +138,8 @@ async function send() {
   try {
     await scrollToEnd()
     if (!current()) return
-    const response = await fetch(
-      apiBase + '/ai/conversations/' + encodeURIComponent(conversationId) + '/messages',
+    const response = await fetchApi(
+      '/ai/conversations/' + encodeURIComponent(conversationId) + '/messages',
       {
         method: 'POST',
         headers: {
@@ -362,7 +362,7 @@ onBeforeUnmount(() => {
               </RouterLink>
             </div>
             <div v-if="message.tool" class="tool-card">
-              <span class="eyebrow">LIVE DATA</span>
+              <span class="eyebrow">{{ isShowcase ? '浏览器演示记录' : 'LIVE DATA' }}</span>
               <template v-if="message.tool.type === 'orders'">
                 <RouterLink
                   v-for="item in message.tool.items || []"

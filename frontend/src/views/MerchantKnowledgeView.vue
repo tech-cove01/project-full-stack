@@ -27,7 +27,7 @@ import 'element-plus/es/components/skeleton/style/css'
 import 'element-plus/es/components/table/style/css'
 import 'element-plus/es/components/table-column/style/css'
 import 'element-plus/es/components/tag/style/css'
-import { api, errorMessage } from '../api'
+import { api, errorMessage, isShowcase } from '../api'
 import type { AiKnowledgeDoc, MerchantWorkspace } from '../types'
 
 const workspace = ref<MerchantWorkspace | null>(null)
@@ -319,7 +319,11 @@ onBeforeUnmount(() => controller?.abort())
         />
       </el-form-item>
       <el-alert
-        title="发布后会生成不可变版本并生成向量；旧版本继续可用，失败时不会替换旧发布指针。"
+        :title="
+          isShowcase
+            ? '发布会更新浏览器内的示例规则，顾客可在店铺助手中打开出处。'
+            : '发布后会生成不可变版本并生成向量；旧版本继续可用，失败时不会替换旧发布指针。'
+        "
         type="info"
         :closable="false"
         show-icon

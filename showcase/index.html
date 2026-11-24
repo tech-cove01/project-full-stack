@@ -6,9 +6,9 @@
     <meta name="theme-color" content="#f7f5fb" />
     <meta
       name="description"
-      content="Go 和 Vue 构建的本地生活交易平台。跟着街角咖啡的一张到店券，体验抢券受理、异步成单、模拟支付和授权核销。"
+      content="用 Go 和 Vue 构建的本地生活交易平台。浏览门店、抢券、模拟支付、门店核销，也可体验商家工作台、探店社区和店铺助手。"
     />
-    <title>本地生活交易平台 · Go Full Stack</title>
+    <title>本地生活交易平台 · Go + Vue</title>
     <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./home.css" />
@@ -30,11 +30,10 @@
         >
           菜单
         </button>
-        <nav id="primary-nav" class="primary-nav" aria-label="首页章节">
+        <nav id="primary-nav" class="primary-nav" aria-label="主要导航">
           <a href="#transaction">交易流程</a>
-          <a href="#architecture">系统架构</a>
-          <a href="#highlights">设计亮点</a>
-          <a href="#performance">点赞实测</a>
+          <a href="./performance.html">实测报告</a>
+          <a href="./details.html">技术设计</a>
         </nav>
       </div>
     </header>
@@ -42,51 +41,54 @@
     <main id="main">
       <section class="container home-intro" aria-labelledby="home-title">
         <div class="home-intro-copy">
-          <p class="home-kicker">本地生活交易平台</p>
-          <h1 id="home-title">从抢券到核销，<br />追踪同一笔订单</h1>
+          <h1 id="home-title">本地生活交易平台</h1>
           <p class="home-summary">
-            商家发券，顾客抢券后查订单进度，店员在授权门店核销。用一张街角咖啡券，看看三方怎样在同一笔订单上接力。
+            顾客在附近门店买券，到店后由店员核销。商家在工作台发布活动、处理订单。
           </p>
-          <a class="button home-primary" href="./workspace/">打开演示台</a>
-          <p class="home-caption">浏览器内体验 · 合成数据 · 无需登录</p>
+          <a class="button home-primary" href="./product/#/">打开产品演示</a>
+          <p class="home-caption">使用浏览器内示例数据，无需注册。</p>
         </div>
 
-        <article class="home-case" aria-labelledby="case-title">
+        <figure class="home-preview">
           <img
-            class="home-case-photo"
-            src="./assets/street-cafe.jpg"
-            width="1200"
-            height="800"
-            alt="明亮的咖啡店内景"
+            src="./assets/vue-discovery.png"
+            width="1440"
+            height="1126"
+            alt="本机 Vue 应用的探索附近页面，展示门店搜索、分类和街角咖啡等门店"
             fetchpriority="high"
           />
-          <div class="home-case-body">
-            <div class="home-case-head">
-              <div>
-                <p>街角咖啡 · 梧桐路店</p>
-                <h2 id="case-title">30 元到店代金券</h2>
-              </div>
-              <span class="home-case-status">活动已发布</span>
-            </div>
-            <dl class="home-case-facts">
-              <div>
-                <dt>购买价</dt>
-                <dd><strong>¥19</strong></dd>
-              </div>
-              <div>
-                <dt>示例库存</dt>
-                <dd>剩余 5 张</dd>
-              </div>
-              <div>
-                <dt>领券规则</dt>
-                <dd>限购 1 张</dd>
-              </div>
-            </dl>
-            <p class="home-case-question">
-              抢券时网络超时，重试会多建一笔订单吗？
-            </p>
+          <figcaption>本机 Vue 应用 · 探索附近</figcaption>
+        </figure>
+      </section>
+
+      <section
+        id="performance"
+        class="home-performance"
+        aria-labelledby="performance-title"
+      >
+        <div class="container home-performance-inner">
+          <div class="home-performance-head">
+            <h2 id="performance-title">点赞与取消实测</h2>
+            <p>单台 16 vCPU / 32 GiB ECS，PTS 内网发压，两轮各 180 秒。</p>
           </div>
-        </article>
+          <dl class="home-results">
+            <div>
+              <dt>成功状态变更/秒</dt>
+              <dd>3008.33</dd>
+            </div>
+            <div>
+              <dt>较高 P95</dt>
+              <dd>62 <span>ms</span></dd>
+            </div>
+            <div>
+              <dt>较高 P99</dt>
+              <dd>102 <span>ms</span></dd>
+            </div>
+          </dl>
+          <a class="text-link home-report-link" href="./performance.html"
+            >查看两轮报告与原始截图</a
+          >
+        </div>
       </section>
 
       <section
@@ -94,233 +96,58 @@
         class="container home-section"
         aria-labelledby="transaction-title"
       >
-        <div class="home-section-head">
-          <h2 id="transaction-title">这笔交易要核对什么？</h2>
-          <p>从抢券请求到门店履约，每一步都有自己的状态和记录。</p>
-        </div>
-        <div class="home-questions">
-          <article>
-            <h3>抢券受理后，订单在哪里？</h3>
-            <p>先拿到受理编号。后台成单后，顾客才能查到待支付订单。</p>
-          </article>
-          <article>
-            <h3>网络超时，重试会多建单吗？</h3>
-            <p>同一请求回到原受理记录。重复消息也不会多建订单或再次占库存。</p>
-          </article>
-          <article>
-            <h3>支付之后，谁能核销？</h3>
-            <p>
-              授权店员在对应门店核验凭证。核销完成后，顾客和商家看到同一结果。
-            </p>
-          </article>
-        </div>
-
-        <div class="home-state">
-          <div class="home-panel-head">
-            <h3>订单状态</h3>
-            <a class="text-link" href="./details.html#trade">查看交易设计</a>
-          </div>
-          <ol class="home-flow home-order-flow">
-            <li><strong>活动已发布</strong><span>商家开放购买</span></li>
-            <li><strong>请求已受理</strong><span>已预占库存</span></li>
-            <li><strong>待支付</strong><span>后台已生成订单</span></li>
-            <li><strong>待核销</strong><span>模拟支付完成</span></li>
-            <li><strong>已核销</strong><span>门店确认履约</span></li>
-          </ol>
-          <dl class="home-exceptions">
-            <div>
-              <dt>未支付取消</dt>
-              <dd>关闭订单，由补偿任务归还对应库存。</dd>
-            </div>
-            <div>
-              <dt>未核销退款</dt>
-              <dd>由有权限的人员处理，核销和退款互斥。</dd>
-            </div>
-            <div>
-              <dt>成单结果待核对</dt>
-              <dd>持久化待核对记录，再确认消息。</dd>
-            </div>
-          </dl>
-        </div>
-      </section>
-
-      <section
-        id="architecture"
-        class="home-band"
-        aria-labelledby="architecture-title"
-      >
-        <div class="container home-section">
-          <div class="home-section-head">
-            <h2 id="architecture-title">系统架构</h2>
-            <p>
-              Go API 编排业务，MySQL
-              保存业务事实。缓存、异步任务和搜索各有清晰的职责。
-            </p>
-          </div>
-          <div class="home-architecture">
-            <div class="home-architecture-row">
-              <h3>交易</h3>
-              <ol class="home-flow">
-                <li><strong>Vue / Go API</strong><span>提交抢券请求</span></li>
-                <li>
-                  <strong>Redis Lua / Stream</strong
-                  ><span>受理、预占与投递</span>
-                </li>
-                <li>
-                  <strong>Go 消费任务</strong><span>检查幂等并处理成单</span>
-                </li>
-                <li>
-                  <strong>MySQL</strong><span>结果落库后，再确认消息</span>
-                </li>
-              </ol>
-            </div>
-            <div class="home-architecture-row">
-              <h3>社区与搜索</h3>
-              <ol class="home-flow">
-                <li>
-                  <strong>MySQL / Outbox</strong><span>变更与事件同事务</span>
-                </li>
-                <li><strong>Kafka</strong><span>分消费组投影</span></li>
-                <li>
-                  <strong>Feed / Elasticsearch</strong
-                  ><span>动态目录与搜索索引</span>
-                </li>
-                <li><strong>Go 查询层</strong><span>检查可见性与版本</span></li>
-              </ol>
-            </div>
-            <div class="home-architecture-row">
-              <h3>业务助手</h3>
-              <ol class="home-flow">
-                <li>
-                  <strong>Vue / Go API</strong><span>绑定会话与身份</span>
-                </li>
-                <li>
-                  <strong>知识检索 / 只读工具</strong
-                  ><span>查规则或本人业务</span>
-                </li>
-                <li><strong>MySQL</strong><span>核对版本和事实</span></li>
-                <li>
-                  <strong>SSE</strong><span>返回答案、来源或业务卡片</span>
-                </li>
-              </ol>
-            </div>
-          </div>
-          <a
-            class="text-link home-section-link"
-            href="./details.html#architecture"
-            >查看三条链路的设计详解</a
-          >
-        </div>
-      </section>
-
-      <section
-        id="highlights"
-        class="container home-section"
-        aria-labelledby="highlights-title"
-      >
-        <div class="home-section-head">
-          <h2 id="highlights-title">四条设计亮点</h2>
-          <p>每个示例都可以动手操作，观察状态、数据和失败后的结果。</p>
-        </div>
-        <div class="home-highlights">
-          <article data-highlight="trade">
-            <h3>交易受理与可靠成单</h3>
-            <p>
-              重试同一请求或重复投递后，核对原受理编号、唯一订单和库存。还可验证旧的补偿任务不会释放新预占。
-            </p>
-            <a class="text-link" href="./demo/?scene=trade">体验交易恢复</a>
-          </article>
-          <article data-highlight="feed">
-            <h3>Feed 缓存与并发回源</h3>
-            <p>
-              多名访客复用同一篇笔记正文，各自的点赞状态与当前可见性仍独立读取。
-            </p>
-            <a class="text-link" href="./demo/?scene=feed">体验 Feed 缓存</a>
-          </article>
-          <article data-highlight="events">
-            <h3>事件投递与搜索一致性</h3>
-            <p>
-              更新索引可异步进行。搜索返回前向 MySQL
-              核对版本和公开状态，已隐藏笔记不会因索引滞后重新出现。
-            </p>
-            <a class="text-link" href="./demo/?scene=events">体验索引恢复</a>
-          </article>
-          <article data-highlight="likes">
-            <h3>点赞写入与下游处理</h3>
-            <p>
-              关系和计数同事务提交。模拟暂停消费，再恢复处理，观察积压和对账结果。
-            </p>
-            <a class="text-link" href="./demo/?scene=likes">体验点赞链路</a>
-          </article>
-        </div>
+        <h2 id="transaction-title">从抢券到核销</h2>
+        <p class="home-section-note">
+          在「探索附近」打开街角咖啡，体验一张到店券的购买和核销过程。
+        </p>
+        <ol class="home-order-flow">
+          <li><strong>抢券受理</strong><span>预占库存，取得受理编号</span></li>
+          <li><strong>查看订单</strong><span>成单后可在订单页查询</span></li>
+          <li><strong>模拟支付</strong><span>付款后查看核销凭证</span></li>
+          <li><strong>门店核销</strong><span>授权店员核验凭证</span></li>
+        </ol>
+        <p class="home-section-note">
+          抢券请求超时可以重试。同一请求沿用原受理记录，订单只生成一次。
+          <a class="text-link" href="./details.html#trade">查看交易设计</a>
+        </p>
       </section>
 
       <section
         id="product"
-        class="container home-section home-product"
+        class="container home-section home-functions"
         aria-labelledby="product-title"
       >
-        <div class="home-product-copy">
-          <h2 id="product-title">实际应用里的完整业务</h2>
-          <dl>
-            <div>
-              <dt>商铺与商家工作台</dt>
-              <dd>浏览门店和活动。店主发券，授权人员处理核销、退款与审计。</dd>
-            </div>
-            <div>
-              <dt>探店社区</dt>
-              <dd>
-                发布公开笔记、点赞、关注作者，在关注动态或全文搜索中发现内容。
-              </dd>
-            </div>
-            <div>
-              <dt>业务助手</dt>
-              <dd>
-                查询已发布门店规则、本人订单和库存。结果附来源或可回查的业务卡片。
-              </dd>
-            </div>
-          </dl>
-          <a class="text-link" href="./demo/">进入自由业务演示</a>
-        </div>
-        <figure class="home-product-preview">
-          <img
-            src="./assets/vue-discovery.png"
-            width="1440"
-            height="1126"
-            loading="lazy"
-            alt="实际 Vue 应用的门店发现页，展示咖啡店、餐厅和书房"
-          />
-          <figcaption>本机真实 Go / Vue 应用 · 门店发现页</figcaption>
-        </figure>
+        <h2 id="product-title">商家、社区与店铺助手</h2>
+        <dl>
+          <div>
+            <dt>商家工作台</dt>
+            <dd>店主发布优惠券，并在工作台查看活动、核销或退款记录。</dd>
+          </div>
+          <div>
+            <dt>探店社区</dt>
+            <dd>
+              发布笔记、关注作者或点赞。也可从关注动态和关键词搜索找到同一篇笔记。
+            </dd>
+          </div>
+          <div>
+            <dt>店铺助手</dt>
+            <dd>查看门店规则或查询本人订单，答案附上规则来源或订单信息。</dd>
+          </div>
+        </dl>
       </section>
 
       <section
-        id="performance"
-        class="home-band"
-        aria-labelledby="performance-title"
+        id="architecture"
+        class="container home-section home-design"
+        aria-labelledby="highlights"
       >
-        <div class="container home-section">
-          <div class="home-section-head">
-            <h2 id="performance-title">点赞及取消实测</h2>
-            <p>单台 16 vCPU / 32 GiB，独立 PTS 内网发压，两轮各 180 秒。</p>
-          </div>
-          <dl class="home-results">
-            <div>
-              <dt>成功状态变更</dt>
-              <dd>3008.33 <span>QPS</span></dd>
-            </div>
-            <div>
-              <dt>两轮较高 P95</dt>
-              <dd>62 <span>ms</span></dd>
-            </div>
-            <div>
-              <dt>两轮较高 P99</dt>
-              <dd>102 <span>ms</span></dd>
-            </div>
-          </dl>
-          <a class="text-link home-section-link" href="./performance.html"
-            >查看两轮正式报告与优化记录</a
-          >
+        <h2 id="highlights">技术设计</h2>
+        <p class="home-section-note">
+          查看订单补偿、Feed 缓存、搜索索引更新和点赞下游处理。
+        </p>
+        <div class="home-design-links">
+          <a class="text-link" href="./details.html#architecture">系统架构</a>
+          <a class="text-link" href="./details.html#design-title">实现细节</a>
         </div>
       </section>
     </main>
@@ -328,8 +155,7 @@
     <footer class="container site-footer">
       <span>本地生活交易平台 <span class="footer-muted">/ Go + Vue</span></span>
       <div>
-        <a href="./details.html">设计详解</a>
-        <a href="./workspace/">打开演示台</a>
+        <a href="./workspace/">早期交互演示</a>
         <a href="https://github.com/tech-cove01/project-full-stack">GitHub</a>
       </div>
     </footer>

@@ -23,6 +23,10 @@ import { makeLikesTour } from "./scenes/likes-tour.js";
 
 const sceneControllers = {};
 const tourControllers = {};
+const embeddedRoot = document.querySelector("[data-embedded-demo]");
+const root = embeddedRoot || document;
+let demoActive = !embeddedRoot;
+let navigateEmbedded;
 let selectedScene = "free";
 const sceneKeys = ["trade", "feed", "events", "likes"];
 const sceneEvidence = {
@@ -42,7 +46,7 @@ try {
   /* Memory mode remains usable. */
 }
 state ||= initialState();
-const $ = (selector) => document.querySelector(selector);
+const $ = (selector) => root.querySelector(selector);
 const escape = (value) =>
   String(value).replace(
     /[&<>"']/g,
@@ -54,7 +58,7 @@ const escape = (value) =>
 const pending = new Map();
 let toastTimer;
 function toast(message) {
-  if (!message) return;
+  if (!message || !demoActive) return;
   clearTimeout(toastTimer);
   $("#demo-toast").textContent = message;
   $("#demo-toast").hidden = false;
@@ -69,13 +73,16 @@ function save() {
     /* Storage is optional. */
   }
 }
-function act(action) {
+function act(action, syncRoute = true) {
+  const previousView = state.view;
   const result = transition(state, action);
   if (result.changed) {
     state = result.state;
     save();
     render();
     scheduleOrders();
+    if (syncRoute && selectedScene === "free" && state.view !== previousView)
+      navigateEmbedded?.("free", state.view);
   }
   toast(result.message);
   return result;
@@ -93,6 +100,13 @@ function scheduleOrders() {
   }
 }
 function art(shop, small = false) {
+  if (embeddedRoot) {
+    const [file, title] =
+      shop === "coffee"
+        ? ["street-cafe.jpg", "街角咖啡示例门店照片"]
+        : ["qinghe-kitchen.jpg", "青禾食堂示例餐品照片"];
+    return `<div class="shop-art ${shop}${small ? " note-cover" : ""}"><img src="../assets/${file}" width="1200" height="800" loading="lazy" alt="${title}"></div>`;
+  }
   const title = shop === "coffee" ? "咖啡杯与可颂插画" : "轻食餐盘插画";
   return `<div class="shop-art ${shop}${small ? " note-cover" : ""}"><svg viewBox="0 0 360 180" role="img" aria-label="${title}"><circle cx="270" cy="35" r="62" fill="currentColor" opacity=".10"/><path d="M0 150Q100 110 200 147T360 140V180H0Z" fill="currentColor" opacity=".09"/>${shop === "coffee" ? '<ellipse cx="162" cy="151" rx="95" ry="10" fill="currentColor" opacity=".13"/><path d="M100 65h115l-13 61q-4 20-40 20t-48-20Z" fill="#fcf9f2" stroke="currentColor" stroke-width="3"/><path d="M215 75q49-5 26 36l-34 7" fill="none" stroke="currentColor" stroke-width="8"/><ellipse cx="158" cy="65" rx="57" ry="10" fill="#997254"/><path d="M138 48q-16-17 0-30m22 30q-16-17 0-30m22 30q-16-17 0-30" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity=".55"/><path d="m255 117 18-19 22 12 17 24-24 8-30-5-15-12Z" fill="#dbaf70"/><path d="m271 103 7 32m13-24 6 23" stroke="#a87742" stroke-width="3"/>' : '<ellipse cx="180" cy="101" rx="89" ry="57" fill="#fffaf3" stroke="currentColor" stroke-width="3"/><ellipse cx="180" cy="102" rx="66" ry="38" fill="none" stroke="currentColor" opacity=".25"/><path d="M130 82q-18-27 19-21 0-22 23-6 17-20 30 7 28-12 23 15" fill="#91ad77"/><path d="M135 92q18-20 38 1t40-1v32h-80Z" fill="#d9b989"/><circle cx="154" cy="106" r="10" fill="#e3a18c"/><circle cx="190" cy="109" r="12" fill="#b6c48d"/><path d="M72 51v93m-9-93v32h18V51m207 0v93m-9-93v53h9" stroke="currentColor" stroke-width="4" fill="none" stroke-linecap="round"/>'}</svg></div>`;
 }
@@ -294,14 +308,14 @@ function renderGuide() {
 }
 function render() {
   const active = document.activeElement;
-  const focusId = active?.id,
-    focusKey = active?.dataset.focusKey;
-  document
+  const focusId = root.contains(active) ? active.id : null,
+    focusKey = root.contains(active) ? active.dataset.focusKey : null;
+  root
     .querySelectorAll("[data-view]")
     .forEach((b) =>
       b.setAttribute("aria-pressed", String(b.dataset.view === state.view)),
     );
-  document.querySelectorAll("[data-view-panel]").forEach((p) => {
+  root.querySelectorAll("[data-view-panel]").forEach((p) => {
     p.hidden = p.dataset.viewPanel !== state.view;
   });
   renderShop();
@@ -309,10 +323,12 @@ function render() {
   renderNotes();
   renderGuide();
   const restoreFocus = focusId
-    ? document.getElementById(focusId)
-    : [...document.querySelectorAll("[data-focus-key]")].find(
-        (e) => e.dataset.focusKey === focusKey,
-      );
+    ? $(`#${CSS.escape(focusId)}`)
+    : focusKey
+      ? [...root.querySelectorAll("[data-focus-key]")].find(
+          (e) => e.dataset.focusKey === focusKey,
+        )
+      : null;
   if (
     restoreFocus &&
     !restoreFocus.disabled &&
@@ -345,7 +361,7 @@ function compose() {
     $("#note-title").focus();
   });
 }
-document.addEventListener("click", (event) => {
+root.addEventListener("click", (event) => {
   const button = event.target.closest("button");
   if (!button || button.disabled) return;
   if (event.composedPath().includes($("#scene-workspace"))) return;
@@ -437,7 +453,7 @@ $("#guide-next").addEventListener("click", () => {
   }
   if (selectedScene !== "free") {
     const selector = sceneControllers[selectedScene]?.getGuide().nextSelector;
-    const target = selector ? document.querySelector(selector) : null;
+    const target = selector ? $(selector) : null;
     if (target) {
       target.scrollIntoView({ block: "center" });
       target.focus({ preventScroll: true });
@@ -462,20 +478,25 @@ function advanceFreeGuide() {
     go("merchant", "#merchant-role");
   }
 }
-$("#reset-demo").addEventListener("click", () => {
-  Object.values(tourControllers).forEach((t) => {
-    t.stop();
-    t.reset();
-  });
+function resetFreeBusiness(preserveView = false) {
   pending.forEach(clearTimeout);
   pending.clear();
+  const previousView = state.view;
   state = initialState();
+  if (preserveView) state.view = previousView;
   save();
   $("#note-search").value = "";
   $("#compose-note").reset();
   $("#compose-note").hidden = true;
   $("#compose-error").textContent = "";
   render();
+}
+$("#reset-demo")?.addEventListener("click", () => {
+  Object.values(tourControllers).forEach((t) => {
+    t.stop();
+    t.reset();
+  });
+  resetFreeBusiness();
   Object.values(sceneControllers).forEach((controller) => controller.reset());
   toast("示例已恢复，可以重新体验。点击其他页面仍保留本次进度。");
   $("[data-view=customer]").focus();
@@ -486,6 +507,7 @@ const introKey = "fullstack-demo-intro-v1";
 const intro = $("#demo-intro");
 const compactLayout = matchMedia("(max-width: 900px)");
 let followGuide = false;
+let introTrigger;
 let highlightTimer;
 function updateIntroPosition() {
   const names = {
@@ -494,6 +516,10 @@ function updateIntroPosition() {
     events: "笔记发布与搜索恢复",
     likes: "点赞写入与下游积压",
   };
+  if (embeddedRoot) {
+    $("#intro-title").textContent =
+      selectedScene === "free" ? "业务操作指引" : names[selectedScene];
+  }
   $("#intro-path").textContent =
     selectedScene === "free"
       ? "从顾客抢券开始，再体验支付、店员核销和探店分享。"
@@ -516,17 +542,20 @@ function focusGuide() {
   );
 }
 function showIntro() {
-  tourControllers[selectedScene]?.stop();
+  stopCurrentTour();
   updateIntroPosition();
   followGuide = false;
   if (typeof intro.showModal !== "function") {
     focusGuide();
     return;
   }
-  if (!intro.open) intro.showModal();
+  if (!intro.open) {
+    introTrigger = document.activeElement;
+    intro.showModal();
+  }
   document.body.classList.add("demo-intro-open");
 }
-$("#show-demo-intro").addEventListener("click", showIntro);
+$("#show-demo-intro")?.addEventListener("click", showIntro);
 $("#intro-start").addEventListener("click", () => {
   followGuide = true;
   intro.close();
@@ -537,26 +566,30 @@ $("#intro-explore").addEventListener("click", () => {
 });
 intro.addEventListener("close", () => {
   document.body.classList.remove("demo-intro-open");
-  try {
-    sessionStorage.setItem(introKey, "seen");
-  } catch {
-    /* Intro still works without persistence. */
+  if (!embeddedRoot) {
+    try {
+      sessionStorage.setItem(introKey, "seen");
+    } catch {
+      /* Intro still works without persistence. */
+    }
   }
+  if (!demoActive) return;
   if (followGuide) startTour();
-  else $("#show-demo-intro").focus({ preventScroll: true });
+  else if (introTrigger?.isConnected)
+    introTrigger.focus({ preventScroll: true });
 });
 compactLayout.addEventListener("change", updateIntroPosition);
 function selectScene(key, push = false) {
-  tourControllers[selectedScene]?.stop();
+  stopCurrentTour();
   selectedScene = sceneKeys.includes(key) ? key : "free";
   $("#scene-workspace").hidden = selectedScene === "free";
   $("#free-business").hidden = selectedScene !== "free";
-  document
+  root
     .querySelectorAll("[data-scene]")
     .forEach((b) =>
       b.setAttribute("aria-pressed", String(b.dataset.scene === selectedScene)),
     );
-  document.querySelectorAll("[data-scene-panel]").forEach((p) => {
+  root.querySelectorAll("[data-scene-panel]").forEach((p) => {
     p.hidden = p.dataset.scenePanel !== selectedScene;
   });
   if (selectedScene !== "free") {
@@ -565,7 +598,7 @@ function selectScene(key, push = false) {
       sceneControllers[selectedScene]?.getGuide().evidence ||
       sceneEvidence[selectedScene];
   }
-  if (push) {
+  if (push && !embeddedRoot) {
     const url = new URL(location.href);
     if (selectedScene === "free") url.searchParams.delete("scene");
     else url.searchParams.set("scene", selectedScene);
@@ -574,7 +607,7 @@ function selectScene(key, push = false) {
   renderGuide();
   updateIntroPosition();
 }
-document
+root
   .querySelectorAll("[data-scene]")
   .forEach((b) =>
     b.addEventListener("click", () => selectScene(b.dataset.scene, true)),
@@ -600,16 +633,17 @@ $("#start-tour").addEventListener("click", startTour);
 $("#explore-tour").addEventListener("click", () =>
   tourControllers[selectedScene]?.stop(),
 );
-window.addEventListener("popstate", () =>
-  selectScene(new URL(location.href).searchParams.get("scene")),
-);
+if (!embeddedRoot)
+  window.addEventListener("popstate", () =>
+    selectScene(new URL(location.href).searchParams.get("scene")),
+  );
 for (const [key, mount] of Object.entries({
   trade: mountTrade,
   feed: mountFeed,
   events: mountEvents,
   likes: mountLikes,
 })) {
-  sceneControllers[key] = mount(document.querySelector(`#scene-${key}`), {
+  sceneControllers[key] = mount($(`#scene-${key}`), {
     onChange: () => renderGuide(),
   });
 }
@@ -629,23 +663,70 @@ for (const [key, factory] of Object.entries(tourFactories)) {
     onNext: (action) => {
       if (action === "reset") resetScene();
       else {
-        selectScene(
-          sceneKeys[(sceneKeys.indexOf(key) + 1) % sceneKeys.length],
-          true,
-        );
-        startTour();
+        const next = sceneKeys[(sceneKeys.indexOf(key) + 1) % sceneKeys.length];
+        if (embeddedRoot) navigateEmbedded?.(next);
+        else {
+          selectScene(next, true);
+          startTour();
+        }
       }
     },
   });
 }
-selectScene(new URL(location.href).searchParams.get("scene"));
+
+function stopCurrentTour() {
+  const tour = tourControllers[selectedScene];
+  if (tour?.view()) tour.stop();
+}
+function closeEmbeddedOverlays() {
+  stopCurrentTour();
+  followGuide = false;
+  introTrigger = null;
+  if (intro.open) intro.close();
+  document.body.classList.remove("demo-intro-open");
+  clearTimeout(highlightTimer);
+  $(".guide-card").classList.remove("guide-highlight");
+  clearTimeout(toastTimer);
+  $("#demo-toast").hidden = true;
+}
+
+export function connectEmbeddedDemo(navigate) {
+  navigateEmbedded = navigate;
+  return {
+    select(scene, view) {
+      if (scene !== selectedScene) closeEmbeddedOverlays();
+      demoActive = true;
+      selectScene(scene);
+      if (scene === "free" && view && state.view !== view)
+        act({ type: "VIEW", view }, false);
+    },
+    deactivate() {
+      demoActive = false;
+      closeEmbeddedOverlays();
+    },
+    guide: showIntro,
+    reset() {
+      if (selectedScene !== "free") {
+        resetScene();
+        return;
+      }
+      resetFreeBusiness(true);
+      toast("自由业务示例已重置。");
+    },
+  };
+}
+
+if (!embeddedRoot)
+  selectScene(new URL(location.href).searchParams.get("scene"));
 render();
 scheduleOrders();
-let introSeen = false;
-try {
-  introSeen = sessionStorage.getItem(introKey) === "seen";
-} catch {
-  /* Show instructions for this visit. */
+if (!embeddedRoot) {
+  let introSeen = false;
+  try {
+    introSeen = sessionStorage.getItem(introKey) === "seen";
+  } catch {
+    /* Show instructions for this visit. */
+  }
+  if (!introSeen) showIntro();
+  else if (selectedScene !== "free") startTour();
 }
-if (!introSeen) showIntro();
-else if (selectedScene !== "free") startTour();

@@ -36,6 +36,9 @@ export function createTour({
         })[c],
     );
   const current = () => plan?.steps[index];
+  const headerHeight = () =>
+    document.querySelector(".workspace-topbar, .site-header")?.offsetHeight ||
+    82;
   function clearMarks() {
     document
       .querySelectorAll(".tour-target,.tour-away")
@@ -86,9 +89,8 @@ export function createTour({
       target?.classList.add("tour-target");
     } else target = root.querySelector(".scene-heading");
     if (scroll && target) {
-      const header = document.querySelector(".site-header")?.offsetHeight || 82;
       window.scrollTo({
-        top: scrollY + target.getBoundingClientRect().top - header - 20,
+        top: scrollY + target.getBoundingClientRect().top - headerHeight() - 20,
         behavior: "instant",
       });
     }
@@ -123,7 +125,7 @@ export function createTour({
     document.body.style.setProperty("--tour-coach-height", `${h}px`);
     document.body.style.setProperty(
       "--tour-header-height",
-      `${document.querySelector(".site-header")?.offsetHeight || 82}px`,
+      `${headerHeight()}px`,
     );
   }
   function render(scroll = true) {

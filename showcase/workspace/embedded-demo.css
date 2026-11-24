@@ -1,0 +1,145 @@
+@import url("../demo/demo.css");
+@import url("../demo/scenes/scenes.css");
+@import url("../demo/tour.css");
+
+.embedded-demo,
+.workspace .tour-coach {
+  --ink: #193436;
+  --muted: #526761;
+  --line: #dbe6df;
+  --purple: #176a5d;
+  --purple-dark: #115347;
+  --soft: #e8f2ef;
+}
+
+.embedded-demo.demo-body {
+  background: transparent;
+}
+
+.embedded-demo .demo-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(210px, 30%);
+  gap: 16px;
+  margin: 0;
+}
+
+.embedded-demo .tour-entry {
+  grid-row: 1;
+  margin: 0;
+}
+
+.embedded-demo :is(.demo-tabs, #reset-scene, .tour-entry p),
+.embedded-demo:has(#free-business:not([hidden])) .tour-entry {
+  display: none;
+}
+
+.embedded-demo :is(.scene-heading, .view-heading) {
+  margin-block-start: 0;
+}
+
+.embedded-demo :is(.scene-heading, .view-heading) h1 {
+  margin-block: 7px 10px;
+  font-size: clamp(24px, 2.4vw, 34px);
+}
+
+.embedded-demo .shop-art {
+  min-height: 0;
+}
+
+.embedded-demo .shop-art img {
+  width: 100%;
+  height: clamp(112px, 16vw, 175px);
+  object-fit: cover;
+}
+
+.embedded-demo .note-cover img {
+  height: 100%;
+  min-height: 112px;
+}
+
+.embedded-demo :is(.guide-card, .scene-result, .action-secondary),
+.embedded-demo :is(.activity-card, .activity-rules, .empty-state),
+.embedded-demo .guide-steps li::before,
+.embedded-demo :is(input, select, textarea),
+.embedded-demo #scene-workspace :is(input, select, textarea),
+.embedded-demo :is(.demo-toast, .demo-intro),
+.workspace .tour-coach {
+  border-color: var(--line);
+}
+
+.embedded-demo .shop-card:hover {
+  border-color: #7da89d;
+  box-shadow: 0 5px 18px #19343614;
+}
+
+.embedded-demo .shop-card[aria-pressed="true"] {
+  border-color: var(--purple);
+  box-shadow: 0 0 0 2px #d1e3df;
+}
+
+.embedded-demo .activity-card::before,
+.embedded-demo .guide-steps li.is-current::before {
+  border-color: #86b7a8;
+  background: #86b7a8;
+  box-shadow: none;
+}
+
+.embedded-demo :is(.stock-pill, .order-id, .role-restriction),
+.embedded-demo .action-secondary:hover {
+  background: #e8f2ef;
+  color: var(--purple-dark);
+}
+
+.embedded-demo .guide-steps li,
+.embedded-demo .demo-toast,
+.workspace :is(.tour-heading, .tour-title, .tour-skip) {
+  color: #526761;
+}
+
+.embedded-demo .guide-steps li.is-current {
+  color: var(--purple-dark);
+}
+
+.embedded-demo :is(input, select, textarea):focus-visible {
+  outline-color: #83b8a9;
+}
+
+.embedded-demo .guide-card {
+  top: 78px;
+}
+
+.embedded-demo .demo-intro,
+.workspace .tour-coach {
+  background: #fafffd;
+}
+
+.embedded-demo .demo-intro::backdrop {
+  background: #193436a8;
+}
+
+.embedded-demo .guide-card.guide-highlight,
+.embedded-demo .tour-target {
+  outline-color: #71a699 !important;
+}
+
+@media (max-width: 1050px) {
+  .embedded-demo .demo-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .embedded-demo .demo-main {
+    grid-row: 2;
+  }
+
+  .embedded-demo:has(#free-business:not([hidden])) .demo-main {
+    grid-row: 1;
+  }
+
+  .embedded-demo .demo-layout > .guide-card {
+    grid-row: 3;
+    position: static;
+  }
+
+  .embedded-demo:has(#free-business:not([hidden])) .guide-card {
+    grid-row: 2;
+  }
+}

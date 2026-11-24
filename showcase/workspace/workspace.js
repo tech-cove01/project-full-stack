@@ -8,6 +8,7 @@ import {
   shopById,
   transition,
 } from "../demo/model.js";
+import { mountWorkspaceNavigation } from "./navigation.js";
 
 const shop = shopById("coffee");
 const storageKey = "fullstack-transaction-workspace-v1";
@@ -99,8 +100,6 @@ try {
 const actionButton = pick("stage-action");
 const guide = pick("workspace-guide");
 const helpButton = pick("show-workspace-help");
-const resetButton = pick("reset-workspace");
-const navToggle = pick("workspace-nav-toggle");
 const stepRows = [...pick("workspace-steps").children];
 
 function saveWorkspace() {
@@ -226,7 +225,6 @@ actionButton.addEventListener("click", () => {
   actionButton.focus({ preventScroll: true });
 });
 
-helpButton.addEventListener("click", showHelp);
 pick("dismiss-workspace-help").addEventListener("click", () => {
   dismissHelp();
   actionButton.focus();
@@ -237,22 +235,21 @@ guide.addEventListener("keydown", (event) => {
   dismissHelp();
   actionButton.focus();
 });
-resetButton.addEventListener("click", () => {
+function resetTrade() {
   dismissHelp();
   state = initialState();
   saveWorkspace();
   render("演示已重置，可以重新抢券。");
   actionButton.focus();
-});
-
-navToggle.addEventListener("click", () => {
-  const expanded = navToggle.getAttribute("aria-expanded") === "true";
-  navToggle.setAttribute("aria-expanded", String(!expanded));
-});
+}
 
 render();
 actionButton.disabled = false;
-helpButton.disabled = false;
-resetButton.disabled = false;
-navToggle.hidden = false;
-if (!helpSeen) showHelp();
+mountWorkspaceNavigation({
+  enter() {
+    if (!helpSeen) showHelp();
+  },
+  leave: dismissHelp,
+  guide: showHelp,
+  reset: resetTrade,
+});

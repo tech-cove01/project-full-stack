@@ -1,8 +1,15 @@
 .workspace {
-  --workspace-surface: #f5f2f9;
-  --workspace-sidebar: #fbf9fe;
-  --workspace-strong: #472a65;
-  --workspace-active: #ece3f7;
+  --workspace-surface: #f7f8f5;
+  --workspace-sidebar: #fff;
+  --workspace-strong: #176a5d;
+  --workspace-active: #e8f2ef;
+  --paper: #fff;
+  --ink: #193436;
+  --muted: #536a66;
+  --line: #dce6e0;
+  --purple: #176a5d;
+  --purple-dark: #115347;
+  --soft: #e8f2ef;
   background: var(--workspace-surface);
   font-size: 15px;
   line-height: 1.6;
@@ -15,6 +22,12 @@
 }
 
 .workspace-sidebar {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
   background: var(--workspace-sidebar);
   border-inline-end: 1px solid var(--line);
   padding: 20px 14px;
@@ -43,9 +56,7 @@
   height: 37px;
   color: white;
   background: var(--workspace-strong);
-  font:
-    700 24px Georgia,
-    serif;
+  font: 700 23px/1 var(--font);
 }
 
 .workspace-brand-caption {
@@ -89,7 +100,10 @@
 }
 
 .workspace-topbar {
-  min-height: 59px;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 5;
+  min-height: 56px;
   padding: 10px clamp(16px, 2.4vw, 34px);
   display: flex;
   justify-content: space-between;
@@ -107,6 +121,11 @@
 .workspace-location span {
   color: var(--muted);
   padding-inline: 4px;
+}
+
+.workspace-location strong {
+  color: var(--ink);
+  font-weight: 650;
 }
 
 .workspace-tools {
@@ -157,6 +176,11 @@
   color: var(--muted);
 }
 
+.workspace-loading {
+  margin-block-end: 12px;
+  color: var(--muted);
+}
+
 .workspace-guide[open] {
   position: static;
   display: flex;
@@ -167,10 +191,10 @@
   max-width: none;
   margin: 0 0 16px;
   padding: 11px 15px;
-  border: 1px solid #d7c7e7;
+  border: 1px solid #c9e0d7;
   border-radius: 9px;
   color: var(--ink);
-  background: #f0e8f9;
+  background: var(--workspace-active);
 }
 
 .workspace-guide h2 {
@@ -203,7 +227,7 @@
 
 .workspace-receipts {
   position: sticky;
-  top: 16px;
+  top: 72px;
 }
 
 .coupon-card {
@@ -212,9 +236,10 @@
   overflow: hidden;
   position: relative;
   min-height: 181px;
+  border: 1px solid var(--line);
   border-radius: 12px;
-  color: white;
-  background: var(--workspace-strong);
+  color: var(--ink);
+  background: var(--paper);
 }
 
 .coupon-photo {
@@ -235,7 +260,7 @@
 
 .coupon-shop,
 .coupon-detail {
-  color: #ebddf8;
+  color: var(--muted);
   font-size: 13px;
 }
 
@@ -249,10 +274,11 @@
   font-size: 26px;
   font-weight: 720;
   line-height: 1.2;
+  color: var(--workspace-strong);
 }
 
 .coupon-price span {
-  color: #ebddf8;
+  color: var(--muted);
   font-size: 14px;
   font-weight: 550;
 }
@@ -512,6 +538,9 @@
   }
 
   .workspace-sidebar {
+    position: static;
+    height: auto;
+    overflow-y: visible;
     padding: 10px 16px;
     border-inline-end: 0;
     border-block-end: 1px solid var(--line);

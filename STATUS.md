@@ -2,7 +2,11 @@
 
 更新：2026-11-24。本页是唯一任务状态入口；协作授权见 [长期约定](docs/collaboration-agreements.md)，产品与设计文档见 [文档导航](docs/README.md)。旧票据和执行过程见 [状态历史快照](archive/docs/status-history-20261104.md)，不能作为当前指令。
 
-## 已发布、待首页验收 · WEB-019 首页内嵌架构和实测
+## 已更新 · WEB-020 仓库 README
+
+用户要求参考 CRM 仓库 README 的结构。已更新到店交易案例、四项亮点的技术细节，以及架构、技术栈、本地启动、目录和许可。独立核对四项 Go 实现、Compose 配置、迁移脚本、运行命令、相对链接和公开展示入口。[仓库 README](https://github.com/tech-cove01/project-full-stack#readme)。
+
+## 已发布、用户已验收 · WEB-019 首页内嵌架构和实测
 
 用户已验收 WEB-018 的在线产品演示，继续调整展示主页。首页保留产品体验入口，架构与实测在本页直接阅读。公开展示去掉页尾跳转、源码阅读与指向 GitHub 仓库的链接。
 
@@ -10,7 +14,7 @@
 2. **WEB-019B 公开入口清理。** 浏览各独立设计、报告与旧演示深链，移除访客可点击的仓库或源码链接，保留可用的站内入口。Vue 产品演示继续沿用已验收版本。
 3. **WEB-019C 验收。** 已在 1440、768、390 和 320 像素宽度核对本机及公开页面，确认架构图、同页导航、报告原尺寸查看、Escape 关闭并恢复焦点，以及产品入口均可用。独立检查覆盖 17 处旧入口，未发现源码阅读或 GitHub 链接。已有展示站测试 50 项通过。Vue 应用文件和四张报告原图与 WEB-018 一致。
 
-首页整合 `a6d8d28`，仓库链接清理与发布 `0290d1e3bfa7be1b821bdb29f9f911275cf363c1`。[公开首页](https://tech-cove01.github.io/project-full-stack/) · [首页系统架构](https://tech-cove01.github.io/project-full-stack/#architecture) · [部署执行记录](https://github.com/tech-cove01/project-full-stack/actions/runs/45349721084)。线上核对已通过，首页待用户验收。
+首页整合 `a6d8d28`，仓库链接清理与发布 `0290d1e3bfa7be1b821bdb29f9f911275cf363c1`。[公开首页](https://tech-cove01.github.io/project-full-stack/) · [首页系统架构](https://tech-cove01.github.io/project-full-stack/#architecture) · [部署执行记录](https://github.com/tech-cove01/project-full-stack/actions/runs/45349721084)。线上核对已通过，用户确认采用此版。
 
 ## 已发布、产品已获用户验收 · WEB-018 Vue 产品演示
 

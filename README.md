@@ -1,62 +1,50 @@
 # Full Stack · 本地生活交易平台
 
-面向顾客与门店的 Go + Vue 全栈应用。商家发布优惠券，顾客抢券、查单、模拟支付，授权店员完成核销。顾客还可以发布探店笔记、浏览关注动态并搜索公开内容。
+面向顾客和门店的 Go + Vue 全栈应用。店主发布到店优惠，顾客找店、抢券并模拟支付，授权店员凭码核销。探店社区支持发布笔记、关注、点赞与全文搜索，店铺助手可以查询公开规则和本人订单。
 
-**[打开在线产品演示](https://tech-cove01.github.io/project-full-stack/product/#/)** · [项目主页](https://tech-cove01.github.io/project-full-stack/) · [业务与技术详解](https://tech-cove01.github.io/project-full-stack/details.html)
+**[打开在线产品演示](https://tech-cove01.github.io/project-full-stack/product/#/)** · [项目主页](https://tech-cove01.github.io/project-full-stack/)
 
-在线演示使用浏览器内的示例数据，无需登录。真实应用见[本地运行](#本地运行)。
+在线演示使用浏览器内的示例数据。真实应用的运行方式见[本地启动](#本地启动)。
 
 ## 一笔到店交易
 
-从「探索附近」进入街角咖啡，体验一张 ¥19 购 ¥30 的到店券。
+街角咖啡有一张售价 ¥19、面值 ¥30 的到店券。演示里可以切换顾客、店员和店主，查看同一笔订单在三个页面上的状态。
 
-1. **抢券与查单。** 顾客抢券后在订单页查看受理进度，成单后显示待支付。
-2. **模拟支付与到店核销。** 顾客复制核销凭证，切换成店员，在「订单与核销」完成操作。
-3. **回查订单。** 切回顾客，在「我的订单」打开同一笔订单查看已核销状态。
+- **抢券与查单。** 顾客抢券后先在订单页看到受理进度，成单后进入待支付。
+- **支付与核销。** 顾客模拟支付后取得核销凭证。店员在有权限的门店用凭证完成核销。
+- **订单回查。** 顾客在「我的订单」确认同一笔订单已核销，店主可在商家工作台查看订单和操作记录。
 
-也可以从「体验路线」打开活动发布、探店笔记和店铺助手。
+[从街角咖啡开始体验](https://tech-cove01.github.io/project-full-stack/product/#/shops/1)
 
-## 项目亮点
+## 功能亮点
 
-| 能力 | 业务规则与实现 |
+| 能力 | 技术细节 |
 | --- | --- |
-| [抢券重试与可靠成单](https://tech-cove01.github.io/project-full-stack/details.html#trade) | Redis Lua 原子校验资格、预占库存、保存受理编号并投递 Redis Stream。Go 消费任务在 MySQL 事务内幂等成单，订单结果或待核对记录持久化后才确认消息。取消后重买时，延迟补偿只处理原预占。 |
-| [Feed 正文复用与并发回源](https://tech-cove01.github.io/project-full-stack/details.html#feed) | 公共笔记正文按 ID 和发布版本缓存到进程内与 Redis，当前可见性和个人点赞单独核对。缺失时批量回源，同一进程合并相同的缺失批次，并限制并发回源。 |
-| [笔记事件与搜索一致性](https://tech-cove01.github.io/project-full-stack/details.html#events) | 笔记变更与 Outbox 同事务写入，经 Kafka 更新 Elasticsearch。消费收据用于去重，业务版本防止旧事件覆盖新状态。返回搜索结果前以 MySQL 复核公开状态与版本，失败事件可人工重放。 |
-| [点赞写入与下游批处理](https://tech-cove01.github.io/project-full-stack/details.html#likes) | 点赞关系、计数与 Outbox 在同一 MySQL 事务提交。相同状态的重试无需重复计数，已有关系切换时合并 SQL。后续发布采用有界批次，消费端批量处理符合条件的点赞事件收据。 |
-
-## 核心功能
-
-| 模块 | 功能 |
-| --- | --- |
-| 用户与商铺 | 登录、分类与搜索、门店和优惠详情 |
-| 交易与履约 | 活动发布与下架、抢券成单、模拟支付、取消与超时关闭、核销和模拟退款 |
-| 商家工作台 | 店主、经理、店员按门店授权。核销与退款在事务内复核当前权限，订单状态和操作审计一起提交 |
-| 探店社区 | 发布笔记、点赞与取消、关注作者、关注动态及复合游标分页 |
-| 公开笔记搜索 | 检索标题与正文，支持门店筛选、排序和分页 |
-| 业务助手 | 查询已发布门店规则、本人订单、活动库存和门店信息，返回可点击来源或只读业务卡片 |
+| **抢券受理与幂等成单** | Redis Lua 原子校验活动、限购与库存，预占库存并写入 Redis Stream。重试时沿用仍有效的原受理编号。Go 消费者依靠 MySQL 事务与唯一约束幂等成单，结果或待核对记录持久化后才确认消息。库存补偿按事件去重，取消释放购买资格前检查原订单归属。 |
+| **点赞写入与事件批处理** | MySQL 在同一事务内更新点赞关系和计数，并追加 Outbox 事件。重复设置同一状态不会重复计数，已有关系切换时用一条 SQL 更新关系和计数。Outbox 可按条数和字节数分批投递，符合条件的点赞消费收据可批量持久化。 |
+| **关注动态与缓存回源** | 按「发布时间 + 笔记 ID」使用游标分页。公共正文按笔记 ID 和发布版本缓存到进程内和 Redis，查询时用 MySQL 核对关注关系和笔记可见性，并批量读取个人点赞状态。同一进程内相同的缺失批次合并回源，并限制回源并发。 |
+| **笔记发布与全文搜索** | 发布笔记和写入 Outbox 在同一 MySQL 事务内进行。Kafka 消费者按业务版本写入 Elasticsearch，成功后记录消费收据，已留档的失败事件可重放。搜索结果返回前向 MySQL 核对笔记仍公开且版本一致。 |
 
 ## 系统架构
 
 ```mermaid
-flowchart LR
-    UI["Vue 用户端 / 商家工作台"] --> API["Go / Gin API"]
-    API -->|抢券受理| Gate["Redis Lua / Stream"]
-    Gate --> Order["Go 成单消费"]
-    Order --> DB[("MySQL 业务事实")]
-    API -->|查询与交易操作| DB
-    DB -->|社区 Outbox| Kafka["Kafka"]
-    Kafka --> Feed["关注 / Feed 目录投影"]
-    Feed --> DB
+flowchart TB
+    UI["Vue 用户端与商家工作台"] --> API["Go / Gin API"]
+    API -->|抢券| Gate["Redis Lua 与 Stream"]
+    Gate --> Orders["订单消费者"]
+    Orders --> DB[("MySQL 业务数据")]
+    API -->|交易查询和社区写入| DB
+    DB -->|社区 Outbox| Kafka["Relay 与 Kafka"]
+    Kafka --> Feed["关注动态投影"]
     Kafka --> ES["Elasticsearch 搜索索引"]
-    API -->|检索候选| ES
-    API --> AI["业务助手 / 知识检索与只读工具"]
-    AI --> DB
+    API -->|获取搜索候选| ES
+    API --> Helper["店铺助手"]
+    Helper -->|公开规则和本人订单| DB
 ```
 
-Go 后端采用模块化单体。订单由 Redis Stream 异步成单，交易 Outbox 驱动补偿。社区通过独立 Outbox 和 Kafka 更新 Feed 目录和搜索索引。MySQL 保存业务事实，查询结果可以回查当前状态。
+Go 后端采用模块化单体。交易用 Redis Stream 异步成单，交易 Outbox 驱动库存补偿。社区通过独立 Outbox 和 Kafka 更新关注动态与搜索索引。店铺助手通过 SSE 返回回答、规则出处或只读订单卡片。
 
-[查看交互架构](https://tech-cove01.github.io/project-full-stack/details.html#architecture) · [查看订单状态](https://tech-cove01.github.io/project-full-stack/details.html#order-states) · [阅读源码路线](docs/source-walkthrough.md)
+[在项目主页查看交易、社区和店铺助手架构](https://tech-cove01.github.io/project-full-stack/#architecture)
 
 ## 技术栈
 
@@ -64,38 +52,40 @@ Go 后端采用模块化单体。订单由 Redis Stream 异步成单，交易 Ou
 | --- | --- |
 | Web 与交互 | Vue 3、TypeScript、Vite、Vue Router、Pinia、Element Plus |
 | API、数据与交易 | Go 1.27、Gin、GORM、MySQL 8.4、Redis 7.4、Lua、Redis Stream |
-| 社区投影与检索 | 事务 Outbox、Kafka、Elasticsearch、CJK 分词、PIT / search_after |
-| 知识问答 | Chat / Embedding 接口、百炼 Qwen、MySQL 知识检索、SSE |
-| 工程验证 | Docker Compose、版本化 SQL 迁移、go test、httptest、k6、GitHub Actions |
+| 社区与搜索 | 事务 Outbox、Kafka、Elasticsearch、CJK 分词、PIT / search_after |
+| 店铺助手 | Chat / Embedding 接口、百炼 Qwen、MySQL 知识检索、SSE |
+| 开发与验证 | Docker Compose、版本化 SQL 迁移、go test、httptest |
 
-## 本地运行
+## 本地启动
 
-需要 **Go 1.27、Node.js 22.12+、npm、Docker Compose 和 MySQL 客户端**。先按[开发指南](docs/development.md#go-迁移环境与启动)配置数据库和服务环境变量，再在仓库根目录启动基础依赖并应用迁移。
+需要 **Go 1.27、Node.js 22.12+、npm、Docker Compose 和 MySQL 客户端**。先按[开发指南](docs/development.md#go-迁移环境与启动)配置终端中的 MySQL 和 Redis 连接。在同一终端中，从仓库根目录启动基础依赖、应用迁移和运行 API。
 
 ```powershell
 docker compose -f compose.go.yaml up -d --wait mysql redis
 node scripts/migrate.mjs
+go -C backend run ./cmd/api
 ```
 
-在已配置连接环境的终端进入 `backend/`，运行 `go run ./cmd/api`。另开一个终端，从仓库根目录启动前端。
+另开一个终端，在仓库根目录启动前端。
 
 ```powershell
 npm.cmd --prefix frontend ci
 npm.cmd --prefix frontend run dev -- --port 5174 --strictPort
 ```
 
-访问 [本地 Web 应用](http://127.0.0.1:5174/)，前端默认代理到 `127.0.0.1:8082` 的 Go API。社区事件、全文搜索与业务助手的依赖配置见[开发指南](docs/development.md)。演练交易时可按[本机演示手册](docs/demo-recording.md)准备角色和新券。
+访问 [本地 Web 应用](http://127.0.0.1:5174/)。前端默认代理至 `127.0.0.1:8082`。社区投影、全文搜索和店铺助手按需配置，完成角色与券的演示可参考[本机演示手册](docs/demo-recording.md)。
 
-## 目录
+## 仓库结构
 
-| 路径 | 内容 |
-| --- | --- |
-| [backend/](backend/README.md) | Go API、业务模块与后台任务 |
-| [frontend/](frontend/README.md) | Vue 用户端和商家工作台 |
-| [infra/mysql/](infra/mysql/) | 表结构、示例数据与版本迁移 |
-| [showcase/](showcase/README.md) | GitHub Pages 展示站与在线演示 |
-| [docs/](docs/) | 产品设计、源码说明和本地运行 |
+```text
+backend/cmd/       Go API 与后台维护命令
+backend/internal/  交易、商家、社区、搜索与助手模块
+frontend/src/      Vue 用户端与商家工作台
+infra/mysql/       数据库结构、示例数据与版本迁移
+showcase/          项目介绍站与在线演示
+docs/              产品设计与本地运行指南
+```
 
 ## 许可证
 
-项目原创内容采用 [MIT License](LICENSE)。复用素材和第三方代码见[第三方来源说明](THIRD_PARTY_NOTICES.md)。
+[MIT License](LICENSE) · [第三方声明](THIRD_PARTY_NOTICES.md)

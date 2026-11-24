@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f5f1fa" />
+    <meta
+      name="description"
+      content="在街角咖啡演示台亲手完成一笔抢券交易，查看受理、成单、模拟支付与门店核销。"
+    />
+    <title>交易演示台 · 本地生活交易平台</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./workspace.css" />
+    <script type="module" src="./workspace.js"></script>
+  </head>
+  <body class="workspace">
+    <a class="skip-link" href="#trade-workspace">跳到交易操作</a>
+    <div class="workspace-shell">
+      <aside class="workspace-sidebar">
+        <div class="workspace-sidebar-header">
+          <a class="workspace-brand" href="../">
+            <span class="workspace-brand-mark" aria-hidden="true">L.</span>
+            <span
+              >生活交易<span class="workspace-brand-caption"
+                >产品演示台</span
+              ></span
+            >
+          </a>
+          <button
+            class="workspace-nav-toggle"
+            id="workspace-nav-toggle"
+            type="button"
+            hidden
+            aria-expanded="false"
+            aria-controls="workspace-nav"
+          >
+            演示菜单
+          </button>
+        </div>
+        <nav class="workspace-nav" id="workspace-nav" aria-label="演示导航">
+          <p>业务体验</p>
+          <a href="./" aria-current="page">一笔到店交易</a>
+          <a href="../demo/">顾客、商家与社区</a>
+          <p>机制实验</p>
+          <a href="../demo/?scene=trade">抢券重试与恢复</a>
+          <a href="../demo/?scene=feed">关注动态与缓存</a>
+          <a href="../demo/?scene=events">事件投递与搜索</a>
+          <a href="../demo/?scene=likes">点赞写入与积压</a>
+          <p>项目资料</p>
+          <a href="../details.html">设计详解</a>
+          <a href="../performance.html">点赞实测</a>
+        </nav>
+      </aside>
+
+      <div class="workspace-content">
+        <header class="workspace-topbar">
+          <span class="workspace-location"
+            >演示台 <span aria-hidden="true">/</span> 到店交易</span
+          >
+          <div class="workspace-tools">
+            <button
+              class="workspace-quiet-button"
+              id="show-workspace-help"
+              type="button"
+              aria-controls="workspace-guide"
+              aria-expanded="false"
+              disabled
+            >
+              操作指引
+            </button>
+            <button
+              class="workspace-quiet-button"
+              id="reset-workspace"
+              type="button"
+              disabled
+            >
+              重置演示
+            </button>
+          </div>
+        </header>
+
+        <main class="workspace-main" id="trade-workspace">
+          <header class="workspace-heading">
+            <h1>一笔到店交易</h1>
+            <p>用示例数据走一遍抢券、成单、模拟支付和店员核销。</p>
+          </header>
+          <dialog
+            class="workspace-guide"
+            id="workspace-guide"
+            aria-labelledby="workspace-guide-title"
+            aria-describedby="workspace-guide-text"
+          >
+            <div>
+              <h2 id="workspace-guide-title">按步骤体验这张券</h2>
+              <p id="workspace-guide-text">
+                从「抢券并受理」开始。步骤和状态在右侧，手机上在操作区下方。
+              </p>
+            </div>
+            <button
+              class="workspace-quiet-button"
+              id="dismiss-workspace-help"
+              type="button"
+            >
+              知道了
+            </button>
+          </dialog>
+          <noscript>
+            <p class="workspace-notice">
+              启用 JavaScript 即可体验。也可先<a href="../details.html#trade"
+                >阅读交易设计</a
+              >。
+            </p>
+          </noscript>
+
+          <div class="workspace-grid">
+            <section class="workspace-flow" aria-labelledby="coupon-title">
+              <article class="coupon-card">
+                <img
+                  class="coupon-photo"
+                  src="../assets/street-cafe.jpg"
+                  width="1200"
+                  height="800"
+                  alt="作为示意的咖啡店室内照片"
+                />
+                <div class="coupon-copy">
+                  <p class="coupon-shop">街角咖啡 · 梧桐路店</p>
+                  <h2 id="coupon-title">30 元到店代金券</h2>
+                  <p class="coupon-price">¥19 <span>购 ¥30</span></p>
+                  <p class="coupon-detail">活动已发布 · 每人限购一张</p>
+                </div>
+              </article>
+
+              <article class="work-panel workspace-action-panel">
+                <p class="workspace-actor" id="stage-actor">顾客 · 小林</p>
+                <h2 id="stage-title">抢一张到店券</h2>
+                <p class="workspace-stage-copy" id="stage-copy">
+                  提交抢券请求后，系统先预占库存并返回受理编号。
+                </p>
+                <div class="workspace-token" id="workspace-token" hidden>
+                  <span>顾客的示例核销凭证</span>
+                  <strong id="workspace-token-value"></strong>
+                </div>
+                <div class="workspace-action-bar">
+                  <button
+                    class="button button-primary workspace-primary"
+                    id="stage-action"
+                    type="button"
+                    disabled
+                  >
+                    抢券并受理
+                  </button>
+                  <a id="open-trade-lab" hidden href="../demo/?scene=trade"
+                    >查看异常恢复实验</a
+                  >
+                </div>
+                <p
+                  class="workspace-result"
+                  id="workspace-result"
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                  hidden
+                ></p>
+              </article>
+
+              <article
+                class="work-panel workspace-audit"
+                aria-labelledby="workspace-audit-title"
+              >
+                <div class="workspace-panel-heading">
+                  <h2 id="workspace-audit-title">操作记录</h2>
+                  <span id="workspace-audit-count">0 条</span>
+                </div>
+                <p id="workspace-empty-audit">
+                  抢券后，这里会显示这笔交易的记录。
+                </p>
+                <ol id="workspace-audit-log" hidden></ol>
+              </article>
+            </section>
+
+            <aside class="workspace-receipts" aria-label="交易进度与结果">
+              <section
+                class="work-panel workspace-steps-panel"
+                aria-labelledby="workspace-steps-title"
+              >
+                <div class="workspace-panel-heading">
+                  <h2 id="workspace-steps-title">交易步骤</h2>
+                  <span id="workspace-progress">0 / 4</span>
+                </div>
+                <ol class="workspace-steps" id="workspace-steps">
+                  <li aria-current="step">
+                    <span class="workspace-step-number">1</span>
+                    <div>
+                      <strong>抢券并受理</strong
+                      ><small>顾客提交 · 系统预占库存</small>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="workspace-step-number">2</span>
+                    <div>
+                      <strong>查询成单结果</strong
+                      ><small>系统异步生成订单</small>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="workspace-step-number">3</span>
+                    <div>
+                      <strong>模拟支付</strong><small>顾客取得核销凭证</small>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="workspace-step-number">4</span>
+                    <div>
+                      <strong>店员核销</strong><small>门店复核凭证与权限</small>
+                    </div>
+                  </li>
+                </ol>
+              </section>
+
+              <section
+                class="work-panel workspace-receipt"
+                aria-labelledby="workspace-receipt-title"
+              >
+                <div class="workspace-panel-heading">
+                  <h2 id="workspace-receipt-title">交易回执</h2>
+                  <span
+                    class="workspace-state"
+                    id="receipt-state"
+                    data-status="idle"
+                    >待抢券</span
+                  >
+                </div>
+                <dl>
+                  <div>
+                    <dt>受理编号</dt>
+                    <dd id="receipt-acceptance">未受理</dd>
+                  </div>
+                  <div>
+                    <dt>订单编号</dt>
+                    <dd id="receipt-order">未生成</dd>
+                  </div>
+                  <div>
+                    <dt>剩余库存</dt>
+                    <dd id="receipt-stock">5 / 5</dd>
+                  </div>
+                  <div>
+                    <dt>已生成订单数</dt>
+                    <dd id="receipt-order-count">0</dd>
+                  </div>
+                </dl>
+                <p id="receipt-note">系统受理后，订单才能进入成单流程。</p>
+              </section>
+            </aside>
+          </div>
+
+          <footer class="workspace-footer">
+            <span>浏览器内模拟 · 无需登录 · 无真实扣款</span>
+            <a href="../details.html#trade">查看真实交易设计</a>
+          </footer>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

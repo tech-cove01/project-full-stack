@@ -79,6 +79,20 @@ function reset() {
             <button type="button" @click="openAs('staff', '/merchant/orders')">店员核销</button>
           </div>
         </section>
+        <section>
+          <h2>探店社区</h2>
+          <p>给街角咖啡写笔记，门店 ID 填 1。发布后留在笔记页，切换成读者，关注作者并点赞。</p>
+          <div>
+            <button type="button" @click="openAs('customer', '/notes/new')">发布笔记</button>
+            <button
+              type="button"
+              @click="openAs('reader', route.name === 'note' ? route.fullPath : '/notes/1')"
+            >
+              读者体验
+            </button>
+            <button type="button" @click="openAs('reader', '/notes/search')">搜索笔记</button>
+          </div>
+        </section>
       </div>
     </div>
   </section>

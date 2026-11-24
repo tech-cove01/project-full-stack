@@ -7,7 +7,7 @@ import 'element-plus/es/components/input/style/css'
 import 'element-plus/es/components/image/style/css'
 import 'element-plus/es/components/empty/style/css'
 import 'element-plus/es/components/skeleton/style/css'
-import { api, errorMessage } from '../api'
+import { api, errorMessage, isShowcase } from '../api'
 import { useAuthStore } from '../stores/auth'
 import type { LikeState, Note } from '../types'
 
@@ -178,7 +178,13 @@ onBeforeUnmount(() => controller?.abort())
         <span class="eyebrow">NOTE</span>
         <h2>发布探店笔记</h2>
       </div>
-      <span class="muted">正文最多 2000 字，图片仅接受 http(s) 链接</span>
+      <span class="muted">
+        {{
+          isShowcase
+            ? '填写门店 ID 1 可关联街角咖啡，正文最多 2000 字'
+            : '正文最多 2000 字，图片仅接受 http(s) 链接'
+        }}
+      </span>
     </div>
     <el-skeleton v-if="loading" :rows="4" animated />
     <div v-else class="note-form">
@@ -206,7 +212,7 @@ onBeforeUnmount(() => controller?.abort())
           placeholder="写下你的到店体验"
         />
       </label>
-      <label class="field">
+      <label v-if="!isShowcase" class="field">
         <span>图片地址（每行一个）</span>
         <el-input
           v-model="form.images"

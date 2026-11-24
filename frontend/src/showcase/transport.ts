@@ -1,3 +1,4 @@
+import { handleCommunity } from './community'
 import { demoActor, fail, ok, shops, shopTypes, type DemoRequest } from './support'
 import { handleTrade } from './trade'
 
@@ -40,6 +41,7 @@ export function handleDemoFetch(path: string, options: RequestInit): Response {
   return (
     browse(request) ??
     handleTrade(request) ??
+    handleCommunity(request) ??
     fail('这个操作未包含在公开演示中。', 404)
   )
 }

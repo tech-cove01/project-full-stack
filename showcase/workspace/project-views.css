@@ -1,0 +1,253 @@
+.project-controls,
+.project-report-header,
+.project-dialog-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.work-panel.project-controls {
+  margin-block-end: 12px;
+  padding: 9px 12px;
+}
+
+.project-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.project-choices > button {
+  min-height: 36px;
+  padding: 4px 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--workspace-strong);
+  background: var(--paper);
+  font: inherit;
+  font-size: 13px;
+}
+
+.project-choices > button:hover,
+.project-choices > button[aria-pressed="true"] {
+  border-color: var(--workspace-strong);
+  background: var(--workspace-active);
+}
+
+.project-choices > button[aria-pressed="true"] {
+  font-weight: 700;
+}
+
+.project-link {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.project-link:hover {
+  border-color: var(--workspace-strong);
+  background: var(--workspace-active);
+}
+
+.project-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(215px, 270px);
+  align-items: start;
+  gap: 12px;
+}
+
+.project-card {
+  min-width: 0;
+}
+
+.project-card h2,
+.project-dialog-head h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.project-card p {
+  margin: 6px 0 0;
+  color: var(--muted);
+}
+
+.project-flow-track {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  margin: 12px 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-flow-track > li {
+  min-width: 0;
+  padding: 8px 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--workspace-active);
+}
+
+.project-flow-track strong {
+  color: var(--workspace-strong);
+  font-size: 13px;
+}
+
+.project-flow-track span {
+  display: block;
+  margin-block-start: 2px;
+  color: var(--muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.project-checks h3 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.project-checks ul {
+  margin: 5px 0 0;
+  padding-inline-start: 1.35em;
+}
+
+.project-experiment-list {
+  display: grid;
+  gap: 5px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.project-experiment-list a {
+  display: block;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--workspace-strong);
+  background: var(--workspace-active);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.project-experiment-list a:hover {
+  text-decoration: underline;
+}
+
+.project-report-figure {
+  margin: 10px 0 0;
+}
+
+.project-report-figure a,
+.project-report-figure img {
+  display: block;
+  width: 100%;
+  border-radius: 7px;
+}
+
+.project-report-figure a {
+  border: 1px solid var(--line);
+  cursor: zoom-in;
+}
+
+.project-report-figure img {
+  height: auto;
+}
+
+.project-report-figure figcaption {
+  margin-block-start: 5px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.project-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 10px 0;
+}
+
+.project-metrics > div {
+  padding: 7px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--workspace-active);
+}
+
+.project-metrics dt {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.project-metrics dd {
+  margin: 0;
+  color: var(--workspace-strong);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.project-card .project-scope {
+  margin-block-start: 10px;
+  padding-block-start: 8px;
+  border-block-start: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.project-report-dialog {
+  width: min(1100px, calc(100% - 28px));
+  max-height: calc(100% - 28px);
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.project-report-dialog[open] {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.project-report-dialog::backdrop {
+  background: rgb(16 24 21 / 66%);
+}
+
+.project-dialog-image {
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+}
+
+.project-dialog-image > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.project-dialog-image.is-zoomed > img {
+  width: auto;
+  max-width: none;
+}
+
+@media (max-width: 1010px) {
+  .project-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .project-flow-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .project-report-dialog {
+    width: calc(100% - 14px);
+    max-height: calc(100% - 14px);
+    padding: 8px;
+  }
+}

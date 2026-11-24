@@ -1,117 +1,99 @@
-# project-full-stack · 本地生活交易平台
+# Full Stack · 本地生活交易平台
 
-Go + Vue 本地生活平台。商家发券，顾客抢券并查询成单结果，店员在授权门店核销。顾客还可以发布探店笔记、看关注动态和搜索公开内容。支付与退款使用模拟资金，业务 AI 提供带来源的只读查询。
+面向顾客与门店的 Go + Vue 全栈应用。商家发布优惠券，顾客抢券、查单、模拟支付，授权店员完成核销。顾客还可以发布探店笔记、浏览关注动态并搜索公开内容。
 
-[项目展示](https://tech-cove01.github.io/project-full-stack/) · [打开演示台](https://tech-cove01.github.io/project-full-stack/workspace/) · [技术详解](https://tech-cove01.github.io/project-full-stack/details.html)
+**[打开在线演示台](https://tech-cove01.github.io/project-full-stack/workspace/)** · [项目主页与架构](https://tech-cove01.github.io/project-full-stack/) · [业务与技术详解](https://tech-cove01.github.io/project-full-stack/details.html)
+
+在线演示使用浏览器内的示例数据，无需登录。真实应用见[本地运行](#本地运行)。
+
+## 一笔到店交易
+
+街角咖啡梧桐路店已发布一张 ¥19 购 ¥30 的到店券。打开演示台，可以顺着同一笔订单走完下面三步。
+
+1. **抢券与查单。** 提交请求后先看到受理编号和库存预占。查询成单结果后，才出现一笔待支付订单。
+2. **模拟支付与到店核销。** 顾客支付后取得示例凭证，授权店员核销。交易回执显示同一笔订单已核销。
+3. **重复请求核对。** 完成后点击「重试同一请求」，受理编号、订单号和剩余库存保持一致。
 
 ## 项目亮点
 
-### 交易受理与可靠成单
-
-抢券响应超时后，顾客可重试同一请求。已受理的请求会返回原受理 ID，重试不会多建订单。页面分开显示受理和成单状态，顾客可凭受理 ID 继续查询。取消后重新购买，旧补偿只处理原来的预占，新的购买资格和库存预占仍然有效。
-
-Redis Lua 原子校验活动与资格、预占库存、保存受理 ID，并向 Redis Stream 投递成单消息。后台在 MySQL 事务中成单，以唯一约束和幂等检查防止重复写入。订单结果或待核对记录持久化后才确认消息（ACK）。补偿处理时核对原受理、订单和预占归属。
-
-### Feed 缓存与并发回源
-
-多人浏览关注动态时可以复用公共正文，各自的点赞状态独立显示。相同内容正在加载时，一个请求取消等待，其余请求仍可继续。
-
-公共正文按笔记 ID 和发布版本写入进程内缓存与 Redis，个人点赞和当前可见性单独读取。公共正文缺失时批量回源，同一进程合并相同的缺失批次，并限制并发回源数。
-
-### 事件投递与 ES 搜索
-
-搜索索引随笔记变更异步更新。即使索引更新有延迟，搜索也会过滤已隐藏或版本过期的内容。同步失败时会保存记录，连接恢复后可人工重放。
-
-笔记变更与 Outbox 在同一 MySQL 事务内提交，经 Kafka 更新 Elasticsearch 索引。消费收据用于去重，业务版本用于防止旧事件覆盖新状态。返回搜索结果前向 MySQL 核对候选的当前公开状态和业务版本。
-
-### 点赞链路与下游处理
-
-顾客点赞或取消后可读取已提交的状态和计数，重试相同状态不会重复计数。后续事件的发布与消费都有记录，可以对账。
-
-MySQL 在同一事务中提交点赞关系、计数和 Outbox。已有点赞关系切换状态时，用合并后的 SQL 更新关系与计数。启用批处理时，发布端按条数和字节数限制批次，消费端批量保存符合条件的点赞事件收据，减少数据库往返和事务提交。Kafka 承接后续投影。
+| 能力 | 业务规则与实现 |
+| --- | --- |
+| [抢券重试与可靠成单](https://tech-cove01.github.io/project-full-stack/details.html#trade) | Redis Lua 原子校验资格、预占库存、保存受理编号并投递 Redis Stream。Go 消费任务在 MySQL 事务内幂等成单，订单结果或待核对记录持久化后才确认消息。取消后重买时，延迟补偿只处理原预占。 |
+| [Feed 正文复用与并发回源](https://tech-cove01.github.io/project-full-stack/details.html#feed) | 公共笔记正文按 ID 和发布版本缓存到进程内与 Redis，当前可见性和个人点赞单独核对。缺失时批量回源，同一进程合并相同的缺失批次，并限制并发回源。 |
+| [笔记事件与搜索一致性](https://tech-cove01.github.io/project-full-stack/details.html#events) | 笔记变更与 Outbox 同事务写入，经 Kafka 更新 Elasticsearch。消费收据用于去重，业务版本防止旧事件覆盖新状态。返回搜索结果前以 MySQL 复核公开状态与版本，失败事件可人工重放。 |
+| [点赞写入与下游批处理](https://tech-cove01.github.io/project-full-stack/details.html#likes) | 点赞关系、计数与 Outbox 在同一 MySQL 事务提交。相同状态的重试无需重复计数，已有关系切换时合并 SQL。后续发布采用有界批次，消费端批量处理符合条件的点赞事件收据。 |
 
 ## 核心功能
 
 | 模块 | 功能 |
 | --- | --- |
-| 用户与商铺 | 登录、身份恢复与退出，商铺搜索、分类、分页、详情及公开优惠 |
-| 活动与订单 | 活动发布与下架、异步抢券成单、模拟支付、取消、超时关闭、核销和退款 |
-| 商家工作台 | OWNER / MANAGER / STAFF 逐门店授权，管理活动与订单，查询核销、退款和操作审计 |
-| 探店社区 | 发布笔记、点赞与取消、关注关系、复合游标分页的关注动态 |
-| 全文搜索 | 公开笔记标题与正文检索、门店筛选、确定排序和分页 |
-| 业务 AI | 查询公开规则与本人订单、活动库存和门店信息，展示可点击来源与只读工具卡片 |
-
-## 技术栈
-
-| 层次 | 技术与用途 |
-| --- | --- |
-| 前端 | Vue 3、TypeScript、Vite、Vue Router、Pinia、Element Plus |
-| 后端 | Go 1.27、Gin、GORM、go-redis/v9 |
-| 数据与缓存 | MySQL 8.4、Redis 7.4、有界进程内缓存（L1）、批量装配与回源合并 |
-| 交易任务 | Redis Lua、Redis Stream、MySQL 事务、订单幂等与补偿 |
-| 事件投影 | 事务 Outbox、Kafka、独立消费组、事件去重与业务版本校验 |
-| 全文搜索 | Elasticsearch、CJK 分词、PIT / search_after、MySQL 事实复核 |
-| 业务 AI | Go net/http 兼容 Chat / Embedding、百炼 Qwen、MySQL 知识持久化与小规模精确向量检索、应用层 SSE |
-| 工程工具 | Docker Compose、版本化 SQL 迁移、go test / httptest、k6、GitHub Actions |
-
-## 补充设计
-
-### 逐门店权限与交易审计
-
-用户端与商家端共享同一套交易事实。OWNER / MANAGER / STAFF 的操作范围由商家成员关系与门店授权共同决定。核销和退款在业务事务内再次检查并锁定当前授权，订单状态与审计记录共同提交，使撤权、重复操作和并发状态变化都有明确处理边界。
-
-### 带来源的只读业务 AI
-
-知识问答检索已发布 FAQ，保留来源、分块和索引版本；本人订单、活动库存与门店数据由服务端只读工具查询。会话归属、当前身份与知识版本在关键阶段复核，应用通过 SSE 展示进度、来源、工具结果和答案，支持取消与消息去重，衔接到实际业务页面。
-
-### Vue 全栈交互与模块化单体
-
-Vue 3 / TypeScript 工作台承接用户交易、社区搜索和商家核销退款，Pinia 管理身份与页面状态，Element Plus 提供表单和列表交互。Go 后端按交易、商家、社区、搜索和 AI 划分模块，统一组装 HTTP 路由、连接池与后台任务，并随进程生命周期管理消费和关闭。
+| 用户与商铺 | 登录、分类与搜索、门店和优惠详情 |
+| 交易与履约 | 活动发布与下架、抢券成单、模拟支付、取消与超时关闭、核销和模拟退款 |
+| 商家工作台 | 店主、经理、店员按门店授权。核销与退款在事务内复核当前权限，订单状态和操作审计一起提交 |
+| 探店社区 | 发布笔记、点赞与取消、关注作者、关注动态及复合游标分页 |
+| 公开笔记搜索 | 检索标题与正文，支持门店筛选、排序和分页 |
+| 业务助手 | 查询已发布门店规则、本人订单、活动库存和门店信息，返回可点击来源或只读业务卡片 |
 
 ## 系统架构
 
 ```mermaid
 flowchart LR
-    UI[Vue 用户端 / 商家工作台] --> API[Go / Gin API]
-    API --> DB[(MySQL 业务事实)]
-    API --> Redis[Redis / Lua / Stream]
-    Redis --> Orders[订单后台消费]
-    Orders --> DB
-    DB --> Outbox[社区 Outbox]
-    Outbox --> Kafka[Kafka]
-    Kafka --> Projection[关注 / Feed 目录投影]
-    Projection --> DB
-    Kafka --> ES[Elasticsearch 搜索投影]
-    API --> ES
-    API --> AI[只读工具 / 知识检索]
+    UI["Vue 用户端 / 商家工作台"] --> API["Go / Gin API"]
+    API -->|抢券受理| Gate["Redis Lua / Stream"]
+    Gate --> Order["Go 成单消费"]
+    Order --> DB[("MySQL 业务事实")]
+    API -->|查询与交易操作| DB
+    DB -->|社区 Outbox| Kafka["Kafka"]
+    Kafka --> Feed["关注 / Feed 目录投影"]
+    Feed --> DB
+    Kafka --> ES["Elasticsearch 搜索索引"]
+    API -->|检索候选| ES
+    API --> AI["业务助手 / 知识检索与只读工具"]
     AI --> DB
-    AI --> Model[Chat / Embedding 模型]
 ```
 
-后端采用模块化单体。订单使用 Redis Stream 异步成单，交易 Outbox 驱动补偿；社区 Outbox 经 Kafka 更新查询投影。MySQL 保存最终业务事实，Redis 和 ES 承担可恢复的缓存与查询职责。
+Go 后端采用模块化单体。订单由 Redis Stream 异步成单，交易 Outbox 驱动补偿。社区通过独立 Outbox 和 Kafka 更新 Feed 目录和搜索索引。MySQL 保存业务事实，查询结果可以回查当前状态。
+
+[查看交互架构](https://tech-cove01.github.io/project-full-stack/details.html#architecture) · [查看订单状态](https://tech-cove01.github.io/project-full-stack/details.html#order-states) · [阅读源码路线](docs/source-walkthrough.md)
+
+## 技术栈
+
+| 层次 | 技术 |
+| --- | --- |
+| Web 与交互 | Vue 3、TypeScript、Vite、Vue Router、Pinia、Element Plus |
+| API、数据与交易 | Go 1.27、Gin、GORM、MySQL 8.4、Redis 7.4、Lua、Redis Stream |
+| 社区投影与检索 | 事务 Outbox、Kafka、Elasticsearch、CJK 分词、PIT / search_after |
+| 知识问答 | Chat / Embedding 接口、百炼 Qwen、MySQL 知识检索、SSE |
+| 工程验证 | Docker Compose、版本化 SQL 迁移、go test、httptest、k6、GitHub Actions |
 
 ## 本地运行
 
-环境要求：**Go 1.27、Node.js 22.12+、npm、Docker Compose**。基础依赖为 MySQL 与 Redis；Kafka、Elasticsearch 和模型服务按所选功能配置。
+需要 **Go 1.27、Node.js 22.12+、npm、Docker Compose 和 MySQL 客户端**。先按[开发指南](docs/development.md#go-迁移环境与启动)配置数据库和服务环境变量，再在仓库根目录启动基础依赖并应用迁移。
 
-- [本地环境、数据库迁移与 Go 启动](docs/development.md#go-迁移环境与启动)
-- [用户、商家与业务 AI 演示](docs/demo-recording.md)
-- [核心源码与设计取舍](docs/source-walkthrough.md)
+```powershell
+docker compose -f compose.go.yaml up -d --wait mysql redis
+node scripts/migrate.mjs
+```
+
+在已配置连接环境的终端进入 `backend/`，运行 `go run ./cmd/api`。另开一个终端，从仓库根目录启动前端。
+
+```powershell
+npm.cmd --prefix frontend ci
+npm.cmd --prefix frontend run dev -- --port 5174 --strictPort
+```
+
+访问 [本地 Web 应用](http://127.0.0.1:5174/)，前端默认代理到 `127.0.0.1:8082` 的 Go API。社区事件、全文搜索与业务助手的依赖配置见[开发指南](docs/development.md)。演练交易时可按[本机演示手册](docs/demo-recording.md)准备角色和新券。
 
 ## 目录
 
-```text
-backend/          Go API、业务模块与后台任务
-frontend/         Vue 用户端与商家工作台
-infra/mysql/      表结构、演示数据与版本迁移
-scripts/          启动辅助、业务验证与量化工具
-docs/             架构、运行说明与开发记录
-archive/          冻结参考源码、旧构建与历史文档
-compose.go.yaml   本地 MySQL / Redis 及可选 Kafka / ES
-```
-
-阅读源码可从[后端模块导航](backend/README.md)与[前端页面导航](frontend/README.md)开始。
+| 路径 | 内容 |
+| --- | --- |
+| [backend/](backend/README.md) | Go API、业务模块与后台任务 |
+| [frontend/](frontend/README.md) | Vue 用户端和商家工作台 |
+| [infra/mysql/](infra/mysql/) | 表结构、示例数据与版本迁移 |
+| [showcase/](showcase/README.md) | GitHub Pages 展示站与在线演示 |
+| [docs/](docs/) | 产品设计、源码说明和本地运行 |
 
 ## 许可证
 
-项目原创内容采用 [MIT License](LICENSE)。复用来源及适用范围见 [第三方来源说明](THIRD_PARTY_NOTICES.md)。
+项目原创内容采用 [MIT License](LICENSE)。复用素材和第三方代码见[第三方来源说明](THIRD_PARTY_NOTICES.md)。
